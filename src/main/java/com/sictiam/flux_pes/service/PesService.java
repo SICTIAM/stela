@@ -17,14 +17,13 @@ public class PesService {
     @Autowired
     private KafkaTemplate kafkaTemplate;
 
-    @PostConstruct
-    public void sendTestMessage() {
+    public void sendTestMessage(String message) {
         LOGGER.warn("Sending test message to Kafka");
-        kafkaTemplate.send("test-topic", "coucou");
+        kafkaTemplate.send("test-topic", message);
     }
 
     @KafkaListener(topics = "test-topic")
-    public void receiveTestMessage() {
-        LOGGER.warn("Got a message !");
+    public void receiveTestMessage(String message) {
+        LOGGER.warn("Got a message : ", message);
     }
 }
