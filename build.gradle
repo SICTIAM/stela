@@ -34,7 +34,12 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-validation')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
+	compile('org.axonframework:axon-core:3.0.2')
+    compile('org.axonframework:axon-spring-boot-starter:3.0.2')
+
 	runtime('org.springframework.boot:spring-boot-devtools')
 	runtime('org.postgresql:postgresql')
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.axonframework:axon-test:3.0.2')
 }
