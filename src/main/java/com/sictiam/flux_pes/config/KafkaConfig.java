@@ -1,4 +1,4 @@
-package com.sictiam.flux_pes.kafka;
+package com.sictiam.flux_pes.config;
 
 import com.sictiam.flux_pes.model.Pes;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
