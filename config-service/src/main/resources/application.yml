@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://home/benoit/dev/sictiam/stela-config
+
+server:
+  port: 8888

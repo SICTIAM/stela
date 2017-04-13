@@ -1,0 +1,39 @@
+version: '2'
+services:
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    ports:
+     - "5432:5432"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+     - "5672:5672"
+     - "15672:15672"
+    environment:
+     - RABBITMQ_DEFAULT_USER=test
+     - RABBITMQ_DEFAULT_PASS=password
+  config:
+    image: stela-poc/config-service
+    container_name: config
+    ports:
+     - "8888:8888"
+    volumes:
+     - ..:/home/benoit/dev/sictiam/stela-config
+    depends_on:
+     - postgresql
+     - rabbitmq
+  discovery:
+    image: stela-poc/discovery-service
+    container_name: discovery
+    ports:
+     - "8761:8761"
+#  gateway:
+#    image: benwilcock/gateway-service
+#    container_name: gateway
+#    ports:
+#     - "8080:8080"
+#    depends_on:
+#     - config
+#     - discovery

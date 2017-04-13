@@ -1,45 +1,21 @@
-buildscript {
-	ext {
-		springBootVersion = '1.5.2.RELEASE'
-	}
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'idea'
+
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+
 	repositories {
+		mavenLocal()
 		mavenCentral()
-		maven { url "https://repo.spring.io/milestone" }
 	}
+
 	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		compile 'ch.qos.logback:logback-classic:1.1.5'
+		testCompile 'junit:junit:4.12'
 	}
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 1.8
-
-repositories {
-	mavenCentral()
-	maven { url "https://repo.spring.io/milestone" }
-}
-
-
-dependencies {
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile('org.springframework.kafka:spring-kafka')
-	compile('org.springframework.boot:spring-boot-starter-mail')
-	compile('org.springframework.boot:spring-boot-starter-security')
-	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
-	compile('org.springframework.boot:spring-boot-starter-validation')
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.springframework.boot:spring-boot-starter-webflux')
-	compile('org.axonframework:axon-core:3.0.2')
-    compile('org.axonframework:axon-spring-boot-starter:3.0.2')
-
-	runtime('org.springframework.boot:spring-boot-devtools')
-	runtime('org.postgresql:postgresql')
-
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('org.axonframework:axon-test:3.0.2')
+task wrapper(type: Wrapper) {
+	gradleVersion = '3.4.1'
 }

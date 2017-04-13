@@ -1,0 +1,13 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: pes-command
+  cloud:
+    config:
+      uri: http://localhost:8888
+      failFast: true
+      retry:
+        initialInterval: 2000
+        maxAttempts: 30
