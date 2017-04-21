@@ -5,6 +5,9 @@ services:
     container_name: postgresql
     ports:
      - "5432:5432"
+    environment:
+      POSTGRES_USER: stela
+      POSTGRES_PASSWORD: stelapwd
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -20,7 +23,8 @@ services:
     ports:
      - "8888:8888"
     volumes:
-     - ..:/home/benoit/dev/sictiam/stela-config
+     # TODO make it relative, not hard-coded
+     - /home/benoit/dev/sictiam/stela-config:/stela-config
     depends_on:
      - postgresql
      - rabbitmq

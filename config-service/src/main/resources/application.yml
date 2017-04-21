@@ -1,11 +1,15 @@
 spring:
   application:
     name: config-service
+  profiles:
+    active: default
   cloud:
     config:
       server:
         git:
-          uri: file://home/benoit/dev/sictiam/stela-config
+          uri: file://stela-config
+          # Need to have SSH host key locally in RSA format
+          #uri: ssh://git@forge.sictiam.fr:6666/internet/stela-config.git
 
 server:
   port: 8888
