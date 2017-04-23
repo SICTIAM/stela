@@ -1,7 +1,10 @@
 package fr.sictiam.stela.pescommand.command;
 
+import org.axonframework.commandhandling.TargetAggregateIdentifier;
+
 public class CreatePesCommand {
 
+    @TargetAggregateIdentifier
     private String id;
 
     public CreatePesCommand(String id) {

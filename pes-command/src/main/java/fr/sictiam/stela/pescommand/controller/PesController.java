@@ -1,8 +1,8 @@
 package fr.sictiam.stela.pescommand.controller;
 
 import fr.sictiam.stela.pescommand.command.CreatePesCommand;
+import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandExecutionException;
-import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.model.ConcurrencyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,14 +11,20 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
+import static org.axonframework.commandhandling.GenericCommandMessage.asCommandMessage;
+
 @RestController
 @RequestMapping(value = "/api/pes")
 public class PesController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesController.class);
 
+    private CommandBus commandBus;
+
     @Autowired
-    private CommandGateway commandGateway;
+    public PesController(CommandBus commandBus) {
+        this.commandBus = commandBus;
+    }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public void create(@PathVariable String id, HttpServletResponse response) {
@@ -26,7 +32,7 @@ public class PesController {
 
         try {
             CreatePesCommand createPesCommand = new CreatePesCommand(id);
-            commandGateway.sendAndWait(createPesCommand);
+            commandBus.dispatch(asCommandMessage(createPesCommand));
             response.setStatus(HttpServletResponse.SC_CREATED);
         } catch (AssertionError ae) {
             LOGGER.warn("Create PES failed - empty param ? '{}'", id);
