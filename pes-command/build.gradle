@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.2.RELEASE'
+        springBootVersion = '1.5.3.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -32,9 +32,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
-    compile('org.axonframework:axon-spring-boot-starter:3.0.3')
-    compile('org.axonframework:axon-core:3.0.3')
-    //compile('org.axonframework:axon-amqp:3.0.3')
+    compile('org.axonframework:axon-spring-boot-starter:3.0.4')
+    compile('org.axonframework:axon-core:3.0.4')
+    compile('org.axonframework:axon-amqp:3.0.4')
 
     runtime('org.postgresql:postgresql')
 
