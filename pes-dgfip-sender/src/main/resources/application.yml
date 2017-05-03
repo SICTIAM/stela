@@ -1,0 +1,13 @@
+server:
+  port: 9002
+
+spring:
+  application:
+    name: pes-dgfip-sender
+  cloud:
+    config:
+      uri: http://localhost:8888
+      failFast: true
+      retry:
+        initialInterval: 2000
+        maxAttempts: 30
