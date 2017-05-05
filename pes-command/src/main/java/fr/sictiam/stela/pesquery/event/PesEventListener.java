@@ -23,8 +23,8 @@ public class PesEventListener {
 
     @EventHandler
     public void on(PesCreatedEvent event) {
-        LOGGER.debug("Received a PES created event with id {}", event.getId());
+        LOGGER.debug("Received a PES created event with id {} title {} fileContent {} comment {} groupid {} userid {}", event.getId(),event.getTitle(), event.getFileContent(),event.getComment(),event.getGroupId(),event.getUserId());
 
-        pesRepository.save(new PesEntry(event.getId()));
+        pesRepository.save(new PesEntry(event.getId(),event.getTitle(),event.getFileContent(),event.getFileName(),event.getComment(),event.getGroupId(),event.getUserId()));
     }
 }

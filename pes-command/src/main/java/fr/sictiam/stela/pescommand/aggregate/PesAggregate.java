@@ -18,17 +18,29 @@ public class PesAggregate {
 
     @AggregateIdentifier
     private String id;
+    private String title;
+    private String fileContent;
+    private String fileName;
+    private String comment;
+    private Integer groupId;
+    private Integer userId;
 
     private PesAggregate() {}
 
     @CommandHandler
     public PesAggregate(CreatePesCommand createPesCommand) {
-        LOGGER.debug("Received a command to create a PES with id {}", createPesCommand.getId());
-        apply(new PesCreatedEvent(createPesCommand.getId()));
+        LOGGER.debug("Received a command to create a PES with id {}", createPesCommand);
+        apply(new PesCreatedEvent(createPesCommand.getId(),createPesCommand.getTitle(),createPesCommand.getFileContent(),createPesCommand.getFileName(),createPesCommand.getComment(),createPesCommand.getGroupId(),createPesCommand.getUserId()));
     }
 
     @EventSourcingHandler
     public void on(PesCreatedEvent event) {
         this.id = event.getId();
+        this.title = event.getTitle();
+        this.fileContent = event.getFileContent();
+        this.fileName = event.getFileName();
+        this.comment = event.getComment();
+        this.groupId = event.getGroupId();
+        this.userId = event.getUserId();
     }
 }
