@@ -1,1 +1,1 @@
-include "config-service", "discovery-service", "pes-command", "pes-dgfip-sender"
+include "api-gateway", "config-service", "discovery-service", "pes-command", "pes-dgfip-sender"

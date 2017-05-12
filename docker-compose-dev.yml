@@ -33,11 +33,11 @@ services:
     container_name: discovery
     ports:
      - "8761:8761"
-#  gateway:
-#    image: benwilcock/gateway-service
-#    container_name: gateway
+#  api-gateway:
+#    image: stela-poc/api-gateway
+#    container_name: api-gateway
 #    ports:
-#     - "8080:8080"
+#     - "9004:9004"
 #    depends_on:
 #     - config
 #     - discovery
