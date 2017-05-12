@@ -23,6 +23,9 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    springCloudVersion = 'Dalston.RELEASE'
+}
 
 dependencies {
     compile('org.springframework.boot:spring-boot-devtools')
@@ -44,7 +47,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
 
