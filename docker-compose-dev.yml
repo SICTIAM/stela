@@ -33,6 +33,14 @@ services:
     container_name: discovery
     ports:
      - "8761:8761"
+  hystrix-dashboard:
+    image: stela-poc/hystrix-dashboard
+    container_name: hystrix-dashboard
+    ports:
+     - "7979:7979"
+    depends_on:
+     - config
+     - discovery
 #  api-gateway:
 #    image: stela-poc/api-gateway
 #    container_name: api-gateway
