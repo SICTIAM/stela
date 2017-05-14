@@ -1,12 +1,12 @@
 server:
-  port: 7979
+  port: 9411
 
 spring:
   application:
-    name: hystrix-dashboard
+    name: tracing-service
   cloud:
     config:
-      uri: http://localhost:8888
+      uri: http://config:8888
       failFast: true
       retry:
         initialInterval: 2000

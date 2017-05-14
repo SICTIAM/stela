@@ -20,7 +20,6 @@ jar {
 }
 
 dependencies {
-	compile('org.springframework.cloud:spring-cloud-starter-config')
 	compile('org.springframework.cloud:spring-cloud-starter-eureka-server')
 	testCompile('org.springframework.boot:spring-boot-starter-test') 
 }

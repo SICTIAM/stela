@@ -1,0 +1,13 @@
+server:
+  port: 9004
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    config:
+      uri: http://config:8888
+      failFast: true
+      retry:
+        initialInterval: 2000
+        maxAttempts: 30

@@ -33,6 +33,9 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-hystrix-dashboard')
+    compile("org.springframework.retry:spring-retry")
+    compile("org.springframework.boot:spring-boot-starter-aop:${springBootVersion}")
+
     runtime('org.springframework.boot:spring-boot-devtools')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

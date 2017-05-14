@@ -1,12 +1,12 @@
 server:
-  port: 9004
+  port: 7979
 
 spring:
   application:
-    name: api-gateway
+    name: hystrix-dashboard
   cloud:
     config:
-      uri: http://localhost:8888
+      uri: http://config:8888
       failFast: true
       retry:
         initialInterval: 2000

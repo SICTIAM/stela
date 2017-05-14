@@ -1,4 +1,4 @@
-package fr.sictiam.stela.hystrixdashboard;
+package fr.sictiam.stela.tracing;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 //@RunWith(SpringRunner.class)
 //@SpringBootTest
-public class StelaHystrixDashboardApplicationTests {
+public class StelaTracingServiceApplicationTests {
 
 	//@Test
 	public void contextLoads() {

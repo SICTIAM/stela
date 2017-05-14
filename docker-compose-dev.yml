@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   postgresql:
     image: postgres:latest
@@ -41,11 +41,20 @@ services:
     depends_on:
      - config
      - discovery
-#  api-gateway:
-#    image: stela-poc/api-gateway
-#    container_name: api-gateway
-#    ports:
-#     - "9004:9004"
-#    depends_on:
-#     - config
-#     - discovery
+  tracing-service:
+    image: stela-poc/tracing-service
+    container_name: tracing-service
+    ports:
+     - "9411:9411"
+    depends_on:
+     - config
+     - discovery
+     - rabbitmq
+  api-gateway:
+    image: stela-poc/api-gateway
+    container_name: api-gateway
+    ports:
+     - "9004:9004"
+    depends_on:
+     - config
+     - discovery
