@@ -11,12 +11,22 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.moowork.node" version "1.1.1"
+}
+
 apply plugin: 'org.springframework.boot'
 apply plugin: 'docker'
 
 jar {
     baseName = 'api-gateway'
     archiveName = 'api-gateway.jar'
+}
+
+node {
+    version = '6.5.0'
+    npmVersion = '3.10.6'
+    download = true
 }
 
 repositories {
@@ -42,6 +52,32 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
+bootRun {
+    addResources = true
+}
+
+springBoot {
+    // exclude Spring Boot Devtools from the fat jar
+    excludeDevtools = true
+
+    executable = true
+    embeddedLaunchScriptProperties =
+            [initInfoDescription: 'STELA 3 API Gateway',
+             initInfoShortDescription: 'API Gateway',
+             initInfoProvides: 'api-gateway']
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4.1'
+}
+
+configure(tasks.processResources) {
+    // we don't want source JSX in the jar, we only need their transpiled, bundled version in build/
+    exclude 'jsx/'
+    exclude 'build/'
+    exclude 'styles/'
+}
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
@@ -59,3 +95,24 @@ task image(type: Docker, dependsOn: build) {
         }
     }
 }
+
+task frontBundle(type: NpmTask) {
+    args = ['run', 'build']
+    doLast {
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/static"
+            into "${sourceSets.main.output.resourcesDir}/public/static"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/index.html"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/asset-manifest.json"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+    }
+}
+
+jar.dependsOn(frontBundle)
+frontBundle.dependsOn(npmInstall)
