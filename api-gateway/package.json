@@ -2,6 +2,7 @@
   "name": "api-gateway",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:9004",
   "dependencies": {
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
