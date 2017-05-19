@@ -6,8 +6,8 @@ i18n
     .use(XHR) 
     .use(LanguageDetector) 
     .init({ 
-        whitelist: ['fr', 'en'], 
-        fallbackLng: 'en', 
+        whitelist: ['fr'], 
+        fallbackLng: 'fr', 
  
         // have a common namespace used around the full app 
         ns: ['api-gateway'], 
