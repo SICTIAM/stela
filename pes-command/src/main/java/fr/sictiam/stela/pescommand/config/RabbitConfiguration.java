@@ -1,14 +1,12 @@
 package fr.sictiam.stela.pescommand.config;
 
 import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.rabbit.transaction.RabbitTransactionManager;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,13 +36,13 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    FanoutExchange eventBusExchange() {
-        return new FanoutExchange(exchangeName, true, false);
+    TopicExchange eventBusExchange() {
+        return new TopicExchange(exchangeName, true, false);
     }
 
     @Bean
     Binding binding() {
-        return new Binding(queueName, Binding.DestinationType.QUEUE, exchangeName, "*.*", null);
+        return new Binding(queueName, Binding.DestinationType.QUEUE, exchangeName, "#", null);
     }
 
     @Bean
