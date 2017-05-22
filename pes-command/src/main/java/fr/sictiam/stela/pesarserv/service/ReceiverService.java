@@ -1,12 +1,8 @@
-package fr.sictiam.stela.pesarserv.services;
+package fr.sictiam.stela.pesarserv.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +23,8 @@ public class ReceiverService {
         LOGGER.debug("\twith body : {}", new String(message.getBody()));
     }
     */
-    @RabbitListener(containerFactory = "rabbitListenerContainerFactory")
-    public void processIncomingPes(Message message) {
+    @RabbitListener(queues = "pesAr.queue")
+    public void processPesAr(Message message) {
         LOGGER.debug("Received a message PES AR: {}", message.toString());
         LOGGER.debug("\twith body : {}", new String(message.getBody()));
     }

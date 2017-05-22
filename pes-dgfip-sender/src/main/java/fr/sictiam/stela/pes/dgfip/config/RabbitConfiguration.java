@@ -27,18 +27,18 @@ public class RabbitConfiguration {
     private String queueName;
 
     @Bean
-    Queue defaultStream() {
-        return new Queue(queueName, true);
+    Queue queue() {
+        return new Queue("pesAr.queue", true);
     }
 
     @Bean
-    TopicExchange eventBusExchange() {
-        return new TopicExchange(exchangeName, true, false);
+    TopicExchange topicExchange() {
+        return new TopicExchange("pesAr.exchange", true, false);
     }
 
     @Bean
     Binding binding() {
-        return new Binding(queueName, Binding.DestinationType.QUEUE, exchangeName, "*.*", null);
+        return new Binding("pesAr.queue", Binding.DestinationType.QUEUE, "pesAr.exchange", "#", null);
     }
 
     @Bean
@@ -63,8 +63,9 @@ public class RabbitConfiguration {
     RabbitAdmin rabbitAdmin() {
         RabbitAdmin admin = new RabbitAdmin(connectionFactory());
         admin.setAutoStartup(true);
-        admin.declareExchange(eventBusExchange());
-        admin.declareQueue(defaultStream());
+        admin.declareExchange(topicExchange());
+        admin.declareQueue(queue());
+        admin.declareQueue(new Queue("pes.queue"));
         admin.declareBinding(binding());
         return admin;
     }
