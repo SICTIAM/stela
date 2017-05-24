@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pescommand.controller;
 
 import fr.sictiam.stela.pescommand.command.CreatePesCommand;
+import fr.sictiam.stela.pescommand.command.SendPesCommand;
 import fr.sictiam.stela.pescommand.validator.PescommandValidator;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandExecutionException;
@@ -62,6 +63,34 @@ public class PesController {
             LOGGER.warn("il y a eu un problème à la validation de l'objet");
             response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
         }
+
+    }
+
+    @RequestMapping( value ="/pessend",method = RequestMethod.POST)
+    public void pessend(@RequestBody SendPesCommand sendPesCommand, HttpServletResponse response) {
+        LOGGER.debug("Got a PES send {} {} {}", sendPesCommand.getId(), sendPesCommand.getPesId(), sendPesCommand.getDateSend());
+
+
+        try {
+            //CreatePesCommand createPesCommand = new CreatePesCommand(id);
+            commandBus.dispatch(asCommandMessage(sendPesCommand));
+            response.setStatus(HttpServletResponse.SC_CREATED);
+        } catch (AssertionError ae) {
+            LOGGER.warn("Create PES failed - empty param ? '{}'", sendPesCommand.getId());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (CommandExecutionException cex) {
+            LOGGER.warn("Add Command FAILED with message: {}", cex.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            if (null != cex.getCause()) {
+                LOGGER.warn("Caused by: {} {}", cex.getCause().getClass().getName(), cex.getCause().getMessage());
+                if (cex.getCause() instanceof ConcurrencyException) {
+                    LOGGER.warn("A duplicate PES flow with the same ID [{}] already exists.", sendPesCommand.getId());
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                }
+            }
+        }
+
 
     }
 }

@@ -2,9 +2,6 @@ package fr.sictiam.stela.pes.dgfip.event;
 
 import java.util.UUID;
 
-/**
- * Created by s.vergon on 16/05/2017.
- */
 public class CreateEventPesAr {
 
     private String id;

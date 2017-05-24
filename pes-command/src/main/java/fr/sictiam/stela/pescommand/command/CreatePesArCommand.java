@@ -1,26 +1,28 @@
-package fr.sictiam.stela.pesarserv.event;
+package fr.sictiam.stela.pescommand.command;
+
+import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 import java.util.UUID;
 
-/**
- * Created by s.vergon on 18/05/2017.
- */
-public class ReceivePesArEvent {
+public class CreatePesArCommand {
 
+    @TargetAggregateIdentifier
     private String id;
+
     private String fileContent;
     private String fileName;
 
 
-    public ReceivePesArEvent() {
+    public CreatePesArCommand() {
         this.id = UUID.randomUUID().toString();
     }
 
-    public ReceivePesArEvent(String id,String fileContent, String fileName) {
-
+    public CreatePesArCommand(String id,  String fileContent, String fileName) {
         this.id = id;
+
         this.fileContent = fileContent;
         this.fileName = fileName;
+
     }
 
     public String getId() {

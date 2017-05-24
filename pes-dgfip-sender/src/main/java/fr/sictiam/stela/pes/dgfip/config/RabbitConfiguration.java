@@ -23,22 +23,50 @@ public class RabbitConfiguration {
     private String password;
     @Value("${spring.application.exchange}")
     private String exchangeName;
-    @Value("${spring.application.queue}")
-    private String queueName;
+    @Value("${spring.application.queuePes}")
+    private String queuePes;
+    @Value("${spring.application.queuePesSend}")
+    private String queuePesSend;
+    @Value("${spring.application.queuePesAr}")
+    private String queuePesAr;
 
     @Bean
-    Queue queue() {
-        return new Queue("pesAr.queue", true);
+    Queue queuePesAr() {
+        return new Queue(queuePesAr, true);
+    }
+    @Bean
+    Queue queuePes() {
+        return new Queue(queuePes, true);
+    }
+    @Bean
+    Queue queuePesSend() {
+        return new Queue(queuePesSend, true);
     }
 
     @Bean
     TopicExchange topicExchange() {
         return new TopicExchange("pesAr.exchange", true, false);
     }
+    @Bean
+    TopicExchange topicExchangeSend() {
+        return new TopicExchange("pesSend.exchange", true, false);
+    }
+    @Bean
+    TopicExchange topicExchangePes() {
+        return new TopicExchange("pes.exchange", true, false);
+    }
 
+    @Bean
+    Binding bindingPes() {
+        return new Binding("pes.queue", Binding.DestinationType.QUEUE, "pes.exchange", "pes.created", null);
+    }
     @Bean
     Binding binding() {
         return new Binding("pesAr.queue", Binding.DestinationType.QUEUE, "pesAr.exchange", "#", null);
+    }
+    @Bean
+    Binding bindingSend() {
+        return new Binding("pesSend.queue", Binding.DestinationType.QUEUE, "pesSend.exchange", "#", null);
     }
 
     @Bean
@@ -64,9 +92,14 @@ public class RabbitConfiguration {
         RabbitAdmin admin = new RabbitAdmin(connectionFactory());
         admin.setAutoStartup(true);
         admin.declareExchange(topicExchange());
-        admin.declareQueue(queue());
-        admin.declareQueue(new Queue("pes.queue"));
+        admin.declareExchange(topicExchangeSend());
+        admin.declareExchange(topicExchangePes());
+        admin.declareQueue(queuePes());
+        admin.declareQueue(queuePesSend());
+        admin.declareQueue(queuePesAr());
         admin.declareBinding(binding());
+        admin.declareBinding(bindingPes());
+        admin.declareBinding(bindingSend());
         return admin;
     }
 }

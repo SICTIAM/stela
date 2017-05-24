@@ -3,6 +3,7 @@ package fr.sictiam.stela.pesquery.model;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Date;
 
 @Entity
 public class PesEntry {
@@ -17,7 +18,7 @@ public class PesEntry {
     private String comment;
     private Integer groupId;
     private Integer userId;
-
+    private String dateEnvoi;
     public PesEntry() {
     }
 
@@ -56,5 +57,44 @@ public class PesEntry {
     }
     public Integer getUserId() {
         return userId;
+    }
+    public String getDateEnvoi() {
+        return dateEnvoi;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setPesId(String pesId) {
+        this.pesId = pesId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setFileContent(String fileContent) {
+        this.fileContent = fileContent;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public void setGroupId(Integer groupId) {
+        this.groupId = groupId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public void setDateEnvoi(String dateEnvoi) {
+        this.dateEnvoi = dateEnvoi;
     }
 }

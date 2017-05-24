@@ -27,12 +27,27 @@ public class RabbitConfiguration {
     @Value("${spring.application.exchange}")
     private String exchangeName;
 
-    @Value("${spring.application.queue}")
-    private String queueName;
+    @Value("${spring.application.queuePes}")
+    private String queuePes;
+
+    @Value("${spring.application.queuePesSend}")
+    private String queuePesSend;
+
+    @Value("${spring.application.queuePesAr}")
+    private String queuePesAr;
 
     @Bean
-    Queue queue() {
-        return new Queue(queueName, true);
+    Queue queuePes() {
+        return new Queue(queuePes, true);
+    }
+
+    @Bean
+    Queue queuePesSend() {
+        return new Queue(queuePesSend, true);
+    }
+    @Bean
+    Queue queuePesAr() {
+        return new Queue(queuePesAr, true);
     }
 
     @Bean
@@ -42,7 +57,7 @@ public class RabbitConfiguration {
 
     @Bean
     Binding binding() {
-        return new Binding(queueName, Binding.DestinationType.QUEUE, exchangeName, "pes.created", null);
+        return new Binding(queuePes, Binding.DestinationType.QUEUE, exchangeName, "pes.created", null);
     }
 
     @Bean
@@ -68,8 +83,9 @@ public class RabbitConfiguration {
         RabbitAdmin admin = new RabbitAdmin(connectionFactory());
         admin.setAutoStartup(true);
         admin.declareExchange(topicExchange());
-        admin.declareQueue(queue());
-        admin.declareQueue(new Queue("pesAr.queue"));
+        admin.declareQueue(queuePes());
+        admin.declareQueue(queuePesSend());
+        admin.declareQueue(queuePesAr());
         admin.declareBinding(binding());
         return admin;
     }

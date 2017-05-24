@@ -24,6 +24,9 @@ public class Pes {
         this.userId = userId;
     }
 
+    public String getId() {
+        return id;
+    }
     public String getPesId() {
         return pesId;
     }
