@@ -1,18 +1,16 @@
 package fr.sictiam.stela.pescommand.event;
 
-import java.util.UUID;
-
-public class PesSendedEvent {
+public class PesSentEvent {
 
     private String id;
     private String pesId;
     private String dateSend;
 
-    public PesSendedEvent() {
+    public PesSentEvent() {
 
     }
 
-    public PesSendedEvent(String id, String pesId, String dateSend) {
+    public PesSentEvent(String id, String pesId, String dateSend) {
 
         this.id = id;
         this.pesId = pesId;

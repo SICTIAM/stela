@@ -1,7 +1,5 @@
 package fr.sictiam.stela.pescommand.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -24,40 +22,12 @@ public class RabbitConfiguration {
     @Value("${spring.rabbitmq.password}")
     private String password;
 
-    @Value("${spring.application.exchange}")
+    @Value("${application.amqp.pes.exchange}")
     private String exchangeName;
-
-    @Value("${spring.application.queuePes}")
-    private String queuePes;
-
-    @Value("${spring.application.queuePesSend}")
-    private String queuePesSend;
-
-    @Value("${spring.application.queuePesAr}")
-    private String queuePesAr;
-
-    @Bean
-    Queue queuePes() {
-        return new Queue(queuePes, true);
-    }
-
-    @Bean
-    Queue queuePesSend() {
-        return new Queue(queuePesSend, true);
-    }
-    @Bean
-    Queue queuePesAr() {
-        return new Queue(queuePesAr, true);
-    }
 
     @Bean
     TopicExchange topicExchange() {
         return new TopicExchange(exchangeName, true, false);
-    }
-
-    @Bean
-    Binding binding() {
-        return new Binding(queuePes, Binding.DestinationType.QUEUE, exchangeName, "pes.created", null);
     }
 
     @Bean
@@ -83,10 +53,6 @@ public class RabbitConfiguration {
         RabbitAdmin admin = new RabbitAdmin(connectionFactory());
         admin.setAutoStartup(true);
         admin.declareExchange(topicExchange());
-        admin.declareQueue(queuePes());
-        admin.declareQueue(queuePesSend());
-        admin.declareQueue(queuePesAr());
-        admin.declareBinding(binding());
         return admin;
     }
 }

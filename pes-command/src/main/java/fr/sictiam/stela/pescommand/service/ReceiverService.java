@@ -6,7 +6,11 @@ import fr.sictiam.stela.pescommand.command.SendPesCommand;
 import org.axonframework.commandhandling.CommandBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,20 +23,19 @@ import static org.axonframework.commandhandling.GenericCommandMessage.asCommandM
 public class ReceiverService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
-    private CommandBus commandBus;
+
+    private final CommandBus commandBus;
+
     @Autowired
     public ReceiverService(CommandBus commandBus) {
         this.commandBus = commandBus;
     }
-    /* @RabbitListener(bindings = @QueueBinding(
+
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue,
-            exchange = @Exchange(value = "${spring.application.exchange2}", type = ExchangeTypes.FANOUT,durable="true")))
-    public void processIncomingPes(Message message) {
-        LOGGER.debug("Received a message PES AR: {}", message.toString());
-        LOGGER.debug("\twith body : {}", new String(message.getBody()));
-    }
-    */
-    @RabbitListener(queues = "pesAr.queue")
+            exchange = @Exchange(value = "#{'${application.amqp.pes.exchange}'}", type = ExchangeTypes.TOPIC, durable = "true"),
+            key = "#{'${application.amqp.pes.receivedArKey}'}")
+    )
     public void processPesAr(Message message) {
         LOGGER.debug("Received a message PES AR: {}", message.toString());
         LOGGER.debug("\twith body : {}", new String(message.getBody()));
@@ -46,16 +49,18 @@ public class ReceiverService {
         }
     }
 
-    @RabbitListener(queues = "pesSend.queue")
-    public void processPesSend(Message message) {
-        LOGGER.debug("Received a message PES Send: {}", message.toString());
-        LOGGER.debug("Received a body message PES Send: {}", message.getBody());
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue,
+            exchange = @Exchange(value = "#{'${application.amqp.pes.exchange}'}", type = ExchangeTypes.TOPIC, durable = "true"),
+            key = "#{'${application.amqp.pes.sentDgfipKey}'}")
+    )
+    public void processPesSent(Message message) {
+        LOGGER.debug("Received a PES Sent message : {}", message.toString());
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            SendPesCommand pessendcommand = objectMapper.readValue(message.getBody(), SendPesCommand.class);
-            LOGGER.debug("Received a new PES Send command: {}", pessendcommand.getId(),pessendcommand.getPesId(),pessendcommand.getDateSend());
-            commandBus.dispatch(asCommandMessage(pessendcommand));
-
+            SendPesCommand sendPesCommand = objectMapper.readValue(message.getBody(), SendPesCommand.class);
+            LOGGER.debug("Received a new PES Send command: {}", sendPesCommand.getId(),sendPesCommand.getPesId(),sendPesCommand.getDateSend());
+            commandBus.dispatch(asCommandMessage(sendPesCommand));
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES Send", e);
         }

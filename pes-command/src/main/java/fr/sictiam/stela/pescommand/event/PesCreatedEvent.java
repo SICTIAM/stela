@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pescommand.event;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.UUID;
 
 public class PesCreatedEvent {

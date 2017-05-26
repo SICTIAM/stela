@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesquery.event;
 
 import fr.sictiam.stela.pescommand.event.PesArCreatedEvent;
-import fr.sictiam.stela.pescommand.event.PesSendedEvent;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

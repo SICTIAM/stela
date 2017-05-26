@@ -9,6 +9,8 @@ import org.axonframework.commandhandling.model.ConcurrencyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -30,43 +32,37 @@ public class PesController {
         this.commandBus = commandBus;
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public void create(@PathVariable String id, @RequestBody CreatePesCommand createPesCommand, HttpServletResponse response) {
-        LOGGER.debug("Got a PES flow to create {} {} {}", id,createPesCommand.getId(),createPesCommand.getTitle());
+    @PostMapping(value = "/new")
+    public ResponseEntity<String> create(@RequestBody CreatePesCommand createPesCommand) {
+        LOGGER.debug("Got a PES flow to create {} {}", createPesCommand.getId(), createPesCommand.getTitle());
         DataBinder binder = new DataBinder(createPesCommand);
         binder.setValidator(new PescommandValidator());
         binder.validate();
         BindingResult results = binder.getBindingResult();
-        LOGGER.debug("resultat validate {}", results.getErrorCount());
+        LOGGER.debug("Validation returned {} error(s)", results.getErrorCount());
         if (results.getErrorCount() == 0) {
             try {
-                //CreatePesCommand createPesCommand = new CreatePesCommand(id);
                 commandBus.dispatch(asCommandMessage(createPesCommand));
-                response.setStatus(HttpServletResponse.SC_CREATED);
-            } catch (AssertionError ae) {
-                LOGGER.warn("Create PES failed - empty param ? '{}'", id);
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return new ResponseEntity<>(HttpStatus.CREATED);
             } catch (CommandExecutionException cex) {
                 LOGGER.warn("Add Command FAILED with message: {}", cex.getMessage());
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
                 if (null != cex.getCause()) {
                     LOGGER.warn("Caused by: {} {}", cex.getCause().getClass().getName(), cex.getCause().getMessage());
                     if (cex.getCause() instanceof ConcurrencyException) {
-                        LOGGER.warn("A duplicate PES flow with the same ID [{}] already exists.", id);
-                        response.setStatus(HttpServletResponse.SC_CONFLICT);
+                        LOGGER.warn("A duplicate PES flow with the same ID [{}] already exists.", createPesCommand.getId());
+                        return new ResponseEntity<>(HttpStatus.CONFLICT);
                     }
                 }
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+        } else {
+            LOGGER.warn("Received PES is not valid");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        else {
-            LOGGER.warn("il y a eu un problème à la validation de l'objet");
-            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-        }
-
     }
 
-    @RequestMapping( value ="/pessend",method = RequestMethod.POST)
+    @PostMapping(value ="/pessend")
     public void pessend(@RequestBody SendPesCommand sendPesCommand, HttpServletResponse response) {
         LOGGER.debug("Got a PES send {} {} {}", sendPesCommand.getId(), sendPesCommand.getPesId(), sendPesCommand.getDateSend());
 
