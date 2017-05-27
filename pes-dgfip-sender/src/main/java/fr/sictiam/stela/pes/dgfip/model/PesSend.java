@@ -1,28 +1,31 @@
 package fr.sictiam.stela.pes.dgfip.model;
 
+import java.util.Date;
+
 public class PesSend {
 
     private String pesId;
-    private String dateSend;
+    private Date sentDate;
 
     public PesSend() {
-
     }
-    public PesSend(String pesId, String dateSend) {
 
+    public PesSend(String pesId, Date sentDate) {
         this.pesId = pesId;
-        this.dateSend = dateSend;
+        this.sentDate = sentDate;
     }
+
     public String getPesId() {
         return pesId;
     }
-    public String getDateSend() {
-        return dateSend;
+    public Date getSentDate() {
+        return sentDate;
     }
+
     @Override
     public String toString() {
         return "{\"pesId\":\"" + pesId + '\"' + "," +
-                "\"dateSend\":\"" + dateSend + '\"'  +
+                "\"sentDate\":\"" + sentDate + '\"'  +
                 '}';
     }
 }

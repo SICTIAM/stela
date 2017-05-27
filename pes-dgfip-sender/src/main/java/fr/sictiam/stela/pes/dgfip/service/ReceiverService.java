@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
@@ -42,20 +41,15 @@ public class ReceiverService {
             key = "#{'${application.amqp.pes.createdKey}'}")
     )
     public void processIncomingPes(Message message) {
-        LOGGER.debug("*************  message body {}",message);
+        LOGGER.debug("Received a PES message {}", message);
         // TODO : Find a way to have automatic parsing from method arguments
         // Problem comes from AMQP message having contentType set to null
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             Pes pes = objectMapper.readValue(message.getBody(), Pes.class);
-            LOGGER.debug("Received a new PES : {}", pes.toString());
-        /* PesAr pesar = new PesAr(pes.getId());
-        LOGGER.debug("Création Ar à envoyé: {}", pesar.toString()); */
-            Date datej = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat ("yyyy.MM.dd" );
-            String datej2 = formatter.format(datej);
-            PesSend pesSend = new PesSend(pes.getId(),datej2);
-            amqpTemplate.convertAndSend(exchange, sentDgfipKey, pesSend.toString());
+            LOGGER.debug("Parsed the new PES : {}", pes.toString());
+            PesSend pesSend = new PesSend(pes.getId(), new Date());
+            amqpTemplate.convertAndSend(exchange, sentDgfipKey, pesSend);
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES", e);
         }

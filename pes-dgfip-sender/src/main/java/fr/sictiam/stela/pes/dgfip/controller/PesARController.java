@@ -31,7 +31,7 @@ public class PesARController {
 
     @RequestMapping( value ="/pessend",method = RequestMethod.POST)
     public void pessend(@RequestBody PesSend pesSend, HttpServletResponse response) {
-        LOGGER.debug("Got a PES Send {} {}", pesSend.getPesId(),pesSend.getDateSend());
+        LOGGER.debug("Got a PES Send {} {}", pesSend.getPesId(),pesSend.getSentDate());
         //envoi d'un message suite à envoi du message
         amqpTemplate.convertAndSend("pesSend.exchange","#", pesSend.toString());
         response.setStatus(HttpServletResponse.SC_CREATED);

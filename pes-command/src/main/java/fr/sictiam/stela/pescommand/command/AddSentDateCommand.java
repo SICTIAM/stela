@@ -1,16 +1,19 @@
-package fr.sictiam.stela.pescommand.event;
+package fr.sictiam.stela.pescommand.command;
+
+import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 import java.util.Date;
 
-public class PesSentEvent {
+public class AddSentDateCommand {
 
+    @TargetAggregateIdentifier
     private String pesId;
     private Date sentDate;
 
-    public PesSentEvent() {
+    public AddSentDateCommand() {
     }
 
-    public PesSentEvent(String pesId, Date sentDate) {
+    public AddSentDateCommand(String pesId, Date sentDate) {
         this.pesId = pesId;
         this.sentDate = sentDate;
     }

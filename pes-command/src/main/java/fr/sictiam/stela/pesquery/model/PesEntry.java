@@ -18,7 +18,8 @@ public class PesEntry {
     private String comment;
     private Integer groupId;
     private Integer userId;
-    private String dateEnvoi;
+    private Date dateEnvoi;
+
     public PesEntry() {
     }
 
@@ -58,7 +59,7 @@ public class PesEntry {
     public Integer getUserId() {
         return userId;
     }
-    public String getDateEnvoi() {
+    public Date getDateEnvoi() {
         return dateEnvoi;
     }
 
@@ -94,7 +95,7 @@ public class PesEntry {
         this.userId = userId;
     }
 
-    public void setDateEnvoi(String dateEnvoi) {
+    public void setDateEnvoi(Date dateEnvoi) {
         this.dateEnvoi = dateEnvoi;
     }
 }

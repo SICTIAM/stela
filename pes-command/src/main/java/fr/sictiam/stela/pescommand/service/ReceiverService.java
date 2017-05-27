@@ -2,7 +2,7 @@ package fr.sictiam.stela.pescommand.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pescommand.command.CreatePesArCommand;
-import fr.sictiam.stela.pescommand.command.SendPesCommand;
+import fr.sictiam.stela.pescommand.command.AddSentDateCommand;
 import org.axonframework.commandhandling.CommandBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +55,11 @@ public class ReceiverService {
             key = "#{'${application.amqp.pes.sentDgfipKey}'}")
     )
     public void processPesSent(Message message) {
-        LOGGER.debug("Received a PES Sent message : {}", message.toString());
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            SendPesCommand sendPesCommand = objectMapper.readValue(message.getBody(), SendPesCommand.class);
-            LOGGER.debug("Received a new PES Send command: {}", sendPesCommand.getId(),sendPesCommand.getPesId(),sendPesCommand.getDateSend());
-            commandBus.dispatch(asCommandMessage(sendPesCommand));
+            AddSentDateCommand addSentDateCommand = objectMapper.readValue(message.getBody(), AddSentDateCommand.class);
+            LOGGER.debug("Received a new PES Send command: {} ({})", addSentDateCommand.getPesId(), addSentDateCommand.getSentDate());
+            commandBus.dispatch(asCommandMessage(addSentDateCommand));
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES Send", e);
         }
