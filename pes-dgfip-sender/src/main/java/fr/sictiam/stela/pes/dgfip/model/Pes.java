@@ -1,16 +1,7 @@
-package fr.sictiam.stela.pesquery.model;
+package fr.sictiam.stela.pes.dgfip.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.util.Date;
-
-@Entity
-public class PesEntry {
-
-    @Id
-    @GeneratedValue
-    private long id;
+public class Pes {
+    private String id;
     private String pesId;
     private String title;
     private String fileContent;
@@ -18,12 +9,11 @@ public class PesEntry {
     private String comment;
     private Integer groupId;
     private Integer userId;
-    private Date dateEnvoi;
 
-    public PesEntry() {
+    public Pes() {
     }
 
-    public PesEntry(String pesId, String title, String fileContent, String fileName, String comment, Integer groupId, Integer userId) {
+    public Pes(String pesId, String title, String fileContent, String fileName, String comment, Integer groupId, Integer userId) {
 
         this.pesId = pesId;
         this.title = title;
@@ -34,10 +24,9 @@ public class PesEntry {
         this.userId = userId;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
-
     public String getPesId() {
         return pesId;
     }
@@ -59,11 +48,8 @@ public class PesEntry {
     public Integer getUserId() {
         return userId;
     }
-    public Date getDateEnvoi() {
-        return dateEnvoi;
-    }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -95,7 +81,17 @@ public class PesEntry {
         this.userId = userId;
     }
 
-    public void setDateEnvoi(Date dateEnvoi) {
-        this.dateEnvoi = dateEnvoi;
+    @Override
+    public String toString() {
+        return "Pes{" +
+                "id='" + id + '\'' +
+                ", pesId='" + pesId + '\'' +
+                ", title='" + title + '\'' +
+                ", fileContent='" + fileContent + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", comment='" + comment + '\'' +
+                ", groupId=" + groupId +
+                ", userId=" + userId +
+                '}';
     }
 }

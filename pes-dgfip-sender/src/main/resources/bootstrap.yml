@@ -6,7 +6,7 @@ spring:
     name: pes-dgfip-sender
   cloud:
     config:
-      uri: http://config:8888
+      uri: http://localhost:8888
       failFast: true
       retry:
         initialInterval: 2000
