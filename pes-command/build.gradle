@@ -52,6 +52,12 @@ dependencyManagement {
     }
 }
 
+bootRun {
+    addResources = true
+
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "dev"
+}
+
 task image(type: Docker, dependsOn: build) {
     push = false
     applicationName = jar.baseName
