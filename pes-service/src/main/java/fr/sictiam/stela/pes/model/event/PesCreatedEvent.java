@@ -1,13 +1,14 @@
-package fr.sictiam.stela.pes.dgfip.model;
+package fr.sictiam.stela.pes.model.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class Pes {
+import javax.persistence.Entity;
 
-    private long id;
-    private String pesId;
+@Entity
+public class PesCreatedEvent extends PesEvent {
+
     private String title;
     private String fileContent;
     private String fileName;
@@ -15,12 +16,12 @@ public class Pes {
     private Integer groupId;
     private Integer userId;
 
-    public Pes() {
+    public PesCreatedEvent() {
     }
 
-    public Pes(String pesId, String title, String fileContent, String fileName, String comment, Integer groupId, Integer userId) {
+    public PesCreatedEvent(String pesId, String title, String fileContent, String fileName, String comment, Integer groupId, Integer userId) {
+        super(pesId, EventType.CREATED);
 
-        this.pesId = pesId;
         this.title = title;
         this.fileContent = fileContent;
         this.fileName = fileName;
@@ -29,50 +30,48 @@ public class Pes {
         this.userId = userId;
     }
 
-    public String getPesId() {
-        return pesId;
-    }
     public String getTitle() {
         return title;
-    }
-    public String getFileContent() {
-        return fileContent;
-    }
-    public String getFileName() {
-        return fileName;
-    }
-    public String getComment() {
-        return comment;
-    }
-    public Integer getGroupId() {
-        return groupId;
-    }
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setPesId(String pesId) {
-        this.pesId = pesId;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
+    public String getFileContent() {
+        return fileContent;
+    }
+
     public void setFileContent(String fileContent) {
         this.fileContent = fileContent;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
     public void setComment(String comment) {
         this.comment = comment;
     }
 
+    public Integer getGroupId() {
+        return groupId;
+    }
+
     public void setGroupId(Integer groupId) {
         this.groupId = groupId;
+    }
+
+    public Integer getUserId() {
+        return userId;
     }
 
     public void setUserId(Integer userId) {

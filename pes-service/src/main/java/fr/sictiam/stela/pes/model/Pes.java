@@ -1,11 +1,19 @@
-package fr.sictiam.stela.pes.dgfip.model;
+package fr.sictiam.stela.pes.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.util.Date;
+
+@Entity
 public class Pes {
 
+    @Id
+    @GeneratedValue
     private long id;
     private String pesId;
     private String title;

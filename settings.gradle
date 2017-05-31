@@ -1,1 +1,1 @@
-include "api-gateway", "config-service", "discovery-service", "hystrix-dashboard", "pes-command", "pes-dgfip-sender", "tracing-service"
+include "api-gateway", "config-service", "discovery-service", "hystrix-dashboard", "pes-service", "pes-dgfip-sender", "tracing-service"
