@@ -37,12 +37,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	runtime('org.springframework.boot:spring-boot-devtools')
-	compile('org.axonframework:axon-spring-boot-starter:3.0.4')
-	compile('org.axonframework:axon-core:3.0.4')
-	compile('org.axonframework:axon-amqp:3.0.4')
 	runtime('org.postgresql:postgresql')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-	testCompile("org.axonframework:axon-test:3.0.3")
 }
 
 dependencyManagement {
