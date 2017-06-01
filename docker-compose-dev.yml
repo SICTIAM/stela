@@ -41,6 +41,8 @@ services:
     depends_on:
      - config
      - discovery
+    environment:
+     - "SPRING_PROFILES_ACTIVE=prod"
   tracing-service:
     image: stela-poc/tracing-service
     container_name: tracing-service
@@ -50,6 +52,8 @@ services:
      - config
      - discovery
      - rabbitmq
+    environment:
+     - "SPRING_PROFILES_ACTIVE=prod"
   api-gateway:
     image: stela-poc/api-gateway
     container_name: api-gateway
@@ -58,3 +62,5 @@ services:
     depends_on:
      - config
      - discovery
+    environment:
+     - "SPRING_PROFILES_ACTIVE=prod"
