@@ -1,6 +1,8 @@
 package fr.sictiam.stela.apigateway.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import fr.sictiam.stela.apigateway.client.PesClient;
 import fr.sictiam.stela.apigateway.dto.PesDto;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/pes")
+// not the optimal setup but it seems sharing Spring security context in OAuth2 config is not quite fully functional
+@DefaultProperties(commandProperties = {
+    @HystrixProperty(name="execution.isolation.strategy", value="SEMAPHORE")
+})
 public class PesGatewayController {
 
     private final PesClient pesClient;
