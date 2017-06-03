@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
-@FeignClient("pes-command")
+@FeignClient("pes-service")
 public interface PesClient {
 
     @RequestMapping(value = "/pes-query", method = RequestMethod.GET)
