@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pes.dgfip.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pes.dgfip.model.Pes;
 import fr.sictiam.stela.pes.dgfip.model.event.PesCreatedEvent;
 import fr.sictiam.stela.pes.dgfip.model.event.PesSentEvent;
 import org.slf4j.Logger;
@@ -48,7 +47,7 @@ public class ReceiverService {
         try {
             PesCreatedEvent pesCreatedEvent = objectMapper.readValue(message.getBody(), PesCreatedEvent.class);
             LOGGER.debug("Parsed the new PES : {}", pesCreatedEvent.toString());
-            PesSentEvent pesSentEvent = new PesSentEvent(pesCreatedEvent.getPesId());
+            PesSentEvent pesSentEvent = new PesSentEvent(pesCreatedEvent.getPesUuid(), "pes-dgfip-sender", pesCreatedEvent.getEventDate());
             amqpTemplate.convertAndSend(exchange, sentDgfipKey, pesSentEvent);
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES", e);

@@ -1,29 +1,66 @@
 package fr.sictiam.stela.pes.dgfip.model.event;
 
-import javax.persistence.Entity;
+import fr.sictiam.stela.pes.dgfip.model.Pes;
 
-@Entity
-public class PesCreatedEvent extends PesEvent {
+import java.util.Date;
 
+public class PesCreatedEvent {
+
+    private String pesUuid;
+    private String origin;
+    private Date eventDate;
+
+    private String pesId;
     private String title;
     private String fileContent;
     private String fileName;
     private String comment;
-    private Integer groupId;
-    private Integer userId;
 
     public PesCreatedEvent() {
     }
 
-    public PesCreatedEvent(String pesId, String title, String fileContent, String fileName, String comment, Integer groupId, Integer userId) {
-        super(pesId, EventType.CREATED);
+    public PesCreatedEvent(Pes pes, String origin, Date eventDate) {
+        this.pesUuid = pes.getUuid();
+        this.origin = origin;
+        this.eventDate = eventDate;
 
-        this.title = title;
-        this.fileContent = fileContent;
-        this.fileName = fileName;
-        this.comment = comment;
-        this.groupId = groupId;
-        this.userId = userId;
+        this.pesId = pes.getPesId();
+        this.title = pes.getTitle();
+        this.fileContent = pes.getFileContent();
+        this.fileName = pes.getFileName();
+        this.comment = pes.getComment();
+    }
+
+    public String getPesUuid() {
+        return pesUuid;
+    }
+
+    public void setPesUuid(String pesUuid) {
+        this.pesUuid = pesUuid;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public Date getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(Date eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public String getPesId() {
+        return pesId;
+    }
+
+    public void setPesId(String pesId) {
+        this.pesId = pesId;
     }
 
     public String getTitle() {
@@ -56,21 +93,5 @@ public class PesCreatedEvent extends PesEvent {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public Integer getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Integer groupId) {
-        this.groupId = groupId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 }

@@ -10,6 +10,6 @@ import java.util.List;
 @FeignClient("pes-service")
 public interface PesClient {
 
-    @RequestMapping(value = "/pes-query", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/pes", method = RequestMethod.GET)
     List<PesDto> getAll();
 }

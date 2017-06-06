@@ -54,6 +54,8 @@ bootRun {
 	environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "dev"
 }
 
+check.dependsOn.remove(test)
+
 task image(type: Docker, dependsOn: build) {
     push = false
     applicationName = jar.baseName

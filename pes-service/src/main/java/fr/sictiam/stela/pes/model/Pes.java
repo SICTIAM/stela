@@ -1,89 +1,81 @@
 package fr.sictiam.stela.pes.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.Date;
 
 @Entity
 public class Pes {
 
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String uuid;
     private String pesId;
     private String title;
     private String fileContent;
     private String fileName;
     private String comment;
-    private Integer groupId;
-    private Integer userId;
 
     public Pes() {
     }
 
-    public Pes(String pesId, String title, String fileContent, String fileName, String comment, Integer groupId, Integer userId) {
+    public Pes(String pesId, String title, String fileContent, String fileName, String comment) {
 
         this.pesId = pesId;
         this.title = title;
+        this.comment = comment;
         this.fileContent = fileContent;
         this.fileName = fileName;
-        this.comment = comment;
-        this.groupId = groupId;
-        this.userId = userId;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getPesId() {
         return pesId;
-    }
-    public String getTitle() {
-        return title;
-    }
-    public String getFileContent() {
-        return fileContent;
-    }
-    public String getFileName() {
-        return fileName;
-    }
-    public String getComment() {
-        return comment;
-    }
-    public Integer getGroupId() {
-        return groupId;
-    }
-    public Integer getUserId() {
-        return userId;
     }
 
     public void setPesId(String pesId) {
         this.pesId = pesId;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getFileContent() {
+        return fileContent;
     }
 
     public void setFileContent(String fileContent) {
         this.fileContent = fileContent;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public void setGroupId(Integer groupId) {
-        this.groupId = groupId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 }

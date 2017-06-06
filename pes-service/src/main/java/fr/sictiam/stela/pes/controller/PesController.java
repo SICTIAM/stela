@@ -30,5 +30,12 @@ public class PesController {
         LOGGER.debug("Got a PES flow to create {} {}", pes.getPesId(), pes.getTitle());
         pesService.create(pes);
         return new ResponseEntity<>(HttpStatus.CREATED);
-}
+    }
+
+    @PostMapping(value = "/{pesId}")
+    public ResponseEntity<String> simpleCreate(@PathVariable String pesId) {
+        LOGGER.debug("Got a PES flow to create {}", pesId);
+        pesService.create(new Pes(pesId, pesId, pesId, pesId, pesId));
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 }
