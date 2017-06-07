@@ -1,7 +1,17 @@
-package fr.sictiam.stela.pes.dgfip.model;
+package fr.sictiam.stela.pes.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Entity
 public class Pes {
 
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     private String pesId;
     private String title;

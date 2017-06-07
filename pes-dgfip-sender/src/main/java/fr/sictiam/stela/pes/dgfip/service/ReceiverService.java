@@ -1,8 +1,8 @@
 package fr.sictiam.stela.pes.dgfip.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pes.dgfip.model.Pes;
-import fr.sictiam.stela.pes.dgfip.model.PesSend;
+import fr.sictiam.stela.pes.dgfip.model.event.PesCreatedEvent;
+import fr.sictiam.stela.pes.dgfip.model.event.PesSentEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Date;
 
 @Service
 public class ReceiverService {
@@ -46,10 +45,10 @@ public class ReceiverService {
         // Problem comes from AMQP message having contentType set to null
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            Pes pes = objectMapper.readValue(message.getBody(), Pes.class);
-            LOGGER.debug("Parsed the new PES : {}", pes.toString());
-            PesSend pesSend = new PesSend(pes.getId(), new Date());
-            amqpTemplate.convertAndSend(exchange, sentDgfipKey, pesSend);
+            PesCreatedEvent pesCreatedEvent = objectMapper.readValue(message.getBody(), PesCreatedEvent.class);
+            LOGGER.debug("Parsed the new PES : {}", pesCreatedEvent.toString());
+            PesSentEvent pesSentEvent = new PesSentEvent(pesCreatedEvent.getPesUuid(), "pes-dgfip-sender", pesCreatedEvent.getEventDate());
+            amqpTemplate.convertAndSend(exchange, sentDgfipKey, pesSentEvent);
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES", e);
         }
