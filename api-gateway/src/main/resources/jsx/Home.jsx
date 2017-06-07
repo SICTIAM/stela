@@ -8,6 +8,7 @@ class Home extends Component {
     }
     render() {
         const { t } = this.props
+
         return (
             <div>
                 <h1>Stela</h1>
