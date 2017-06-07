@@ -13,22 +13,18 @@ public class Pes {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    private String pesId;
     private String title;
-    private String fileContent;
-    private String fileName;
+    private String file;
     private String comment;
 
     public Pes() {
     }
 
-    public Pes(String pesId, String title, String fileContent, String fileName, String comment) {
+    public Pes(String title, String file, String comment) {
 
-        this.pesId = pesId;
         this.title = title;
         this.comment = comment;
-        this.fileContent = fileContent;
-        this.fileName = fileName;
+        this.file = file;
     }
 
     public String getUuid() {
@@ -39,14 +35,6 @@ public class Pes {
         this.uuid = uuid;
     }
 
-    public String getPesId() {
-        return pesId;
-    }
-
-    public void setPesId(String pesId) {
-        this.pesId = pesId;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -55,20 +43,12 @@ public class Pes {
         this.title = title;
     }
 
-    public String getFileContent() {
-        return fileContent;
+    public String getFile() {
+        return file;
     }
 
-    public void setFileContent(String fileContent) {
-        this.fileContent = fileContent;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setFile(String file) {
+        this.file = file;
     }
 
     public String getComment() {
@@ -83,10 +63,8 @@ public class Pes {
     public String toString() {
         return "Pes{" +
                 "uuid='" + uuid + '\'' +
-                ", pesId='" + pesId + '\'' +
                 ", title='" + title + '\'' +
-                ", fileContent='" + fileContent + '\'' +
-                ", fileName='" + fileName + '\'' +
+                ", file='" + file + '\'' +
                 ", comment='" + comment + '\'' +
                 '}';
     }
