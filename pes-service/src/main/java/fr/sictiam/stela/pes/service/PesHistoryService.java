@@ -13,7 +13,7 @@ public class PesHistoryService {
         this.pesHistoryRepository = pesHistoryRepository;
     }
 
-    public PesHistory newPesHistory(PesHistory pesHistory) {
+    public PesHistory create(PesHistory pesHistory) {
         return pesHistoryRepository.save(pesHistory);
     }
 }

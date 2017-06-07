@@ -78,4 +78,16 @@ public class Pes {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    @Override
+    public String toString() {
+        return "Pes{" +
+                "uuid='" + uuid + '\'' +
+                ", pesId='" + pesId + '\'' +
+                ", title='" + title + '\'' +
+                ", fileContent='" + fileContent + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
 }

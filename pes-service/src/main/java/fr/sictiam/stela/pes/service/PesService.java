@@ -35,7 +35,7 @@ public class PesService {
         // TODO: Controls/validation before creation, return either pes or an error string
         pes = pesRepository.save(pes);
         PesCreatedEvent pesCreatedEvent = new PesCreatedEvent(pes, "pes-service", new Date());
-        pesHistoryService.newPesHistory(new PesHistory(pes.getUuid(), StatusType.CREATED, "pes-service", new Date()));
+        pesHistoryService.create(new PesHistory(pes.getUuid(), StatusType.CREATED, "pes-service", new Date()));
         amqpTemplate.convertAndSend(exchange, createdKey, pesCreatedEvent);
     }
 

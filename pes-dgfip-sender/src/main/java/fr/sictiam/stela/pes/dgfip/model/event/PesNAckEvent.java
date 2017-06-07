@@ -2,7 +2,7 @@ package fr.sictiam.stela.pes.dgfip.model.event;
 
 import java.util.Date;
 
-public class PesNACKEvent {
+public class PesNAckEvent {
 
     private String pesUuid;
     private String origin;
@@ -10,10 +10,10 @@ public class PesNACKEvent {
 
     private String fileContent;
 
-    public PesNACKEvent() {
+    public PesNAckEvent() {
     }
 
-    public PesNACKEvent(String pesUuid, String origin, Date eventDate, String fileContent) {
+    public PesNAckEvent(String pesUuid, String origin, Date eventDate, String fileContent) {
         this.pesUuid = pesUuid;
         this.origin = origin;
         this.eventDate = eventDate;

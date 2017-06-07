@@ -69,4 +69,16 @@ public class PesHistory {
     public void setContent(String content) {
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return "PesHistory{" +
+                "uuid='" + uuid + '\'' +
+                ", pesUuid='" + pesUuid + '\'' +
+                ", status=" + status +
+                ", origin='" + origin + '\'' +
+                ", date=" + date +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

@@ -1,17 +1,17 @@
-package fr.sictiam.stela.pes.dgfip.model.event;
+package fr.sictiam.stela.pes.model.event;
 
 import java.util.Date;
 
-public class PesACKEvent {
+public class PesAckEvent {
 
     private String pesUuid;
     private String origin;
     private Date eventDate;
 
-    public PesACKEvent() {
+    public PesAckEvent() {
     }
 
-    public PesACKEvent(String pesUuid, String origin, Date eventDate) {
+    public PesAckEvent(String pesUuid, String origin, Date eventDate) {
         this.pesUuid = pesUuid;
         this.origin = origin;
         this.eventDate = eventDate;

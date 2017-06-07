@@ -2,19 +2,22 @@ package fr.sictiam.stela.pes.model.event;
 
 import java.util.Date;
 
-public class PesACKEvent {
+public class PesNAckEvent {
 
     private String pesUuid;
     private String origin;
     private Date eventDate;
 
-    public PesACKEvent() {
+    private String fileContent;
+
+    public PesNAckEvent() {
     }
 
-    public PesACKEvent(String pesUuid, String origin, Date eventDate) {
+    public PesNAckEvent(String pesUuid, String origin, Date eventDate, String fileContent) {
         this.pesUuid = pesUuid;
         this.origin = origin;
         this.eventDate = eventDate;
+        this.fileContent = fileContent;
     }
 
     public String getPesUuid() {
@@ -39,5 +42,13 @@ public class PesACKEvent {
 
     public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
+    }
+
+    public String getFileContent() {
+        return fileContent;
+    }
+
+    public void setFileContent(String fileContent) {
+        this.fileContent = fileContent;
     }
 }

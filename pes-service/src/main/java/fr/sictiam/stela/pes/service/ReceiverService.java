@@ -3,7 +3,7 @@ package fr.sictiam.stela.pes.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pes.model.PesHistory;
 import fr.sictiam.stela.pes.model.StatusType;
-import fr.sictiam.stela.pes.model.event.PesACKEvent;
+import fr.sictiam.stela.pes.model.event.PesAckEvent;
 import fr.sictiam.stela.pes.model.event.PesSentEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,16 +29,16 @@ public class ReceiverService {
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue,
             exchange = @Exchange(value = "#{'${application.amqp.pes.exchange}'}", type = ExchangeTypes.TOPIC, durable = "true"),
-            key = "#{'${application.amqp.pes.receivedACKKey}'}")
+            key = "#{'${application.amqp.pes.receivedAckKey}'}")
     )
     public void processPesAr(Message message) {
         LOGGER.debug("Received a message PES ACK: {}", message.toString());
         LOGGER.debug("\twith body: {}", new String(message.getBody()));
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            PesACKEvent pesACKEvent = objectMapper.readValue(message.getBody(), PesACKEvent.class);
-            LOGGER.debug("Received a new PES ACK: {} {} {}", pesACKEvent.getPesUuid(), pesACKEvent.getOrigin(), pesACKEvent.getEventDate());
-            pesHistoryService.newPesHistory(new PesHistory(pesACKEvent.getPesUuid(), StatusType.ACK_RECEIVED, pesACKEvent.getOrigin(), pesACKEvent.getEventDate()));
+            PesAckEvent pesAckEvent = objectMapper.readValue(message.getBody(), PesAckEvent.class);
+            LOGGER.debug("Received a new PES ACK: {} {} {}", pesAckEvent.getPesUuid(), pesAckEvent.getOrigin(), pesAckEvent.getEventDate());
+            pesHistoryService.create(new PesHistory(pesAckEvent.getPesUuid(), StatusType.ACK_RECEIVED, pesAckEvent.getOrigin(), pesAckEvent.getEventDate()));
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES ACK", e);
         }
@@ -54,7 +54,7 @@ public class ReceiverService {
         try {
             PesSentEvent pesSentEvent = objectMapper.readValue(message.getBody(), PesSentEvent.class);
             LOGGER.debug("Received a new PES Sent event: {} ({})", pesSentEvent.getPesUuid(), pesSentEvent.getEventDate());
-            pesHistoryService.newPesHistory(new PesHistory(pesSentEvent.getPesUuid(), StatusType.SENT, pesSentEvent.getOrigin(), pesSentEvent.getEventDate()));
+            pesHistoryService.create(new PesHistory(pesSentEvent.getPesUuid(), StatusType.SENT, pesSentEvent.getOrigin(), pesSentEvent.getEventDate()));
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES Send", e);
         }
