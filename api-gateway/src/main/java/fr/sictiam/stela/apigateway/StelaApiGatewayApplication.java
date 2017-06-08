@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @EnableZuulProxy
 @EnableDiscoveryClient
-@EnableFeignClients
 @EnableCircuitBreaker
 public class StelaApiGatewayApplication {
 
