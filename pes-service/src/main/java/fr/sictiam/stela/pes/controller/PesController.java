@@ -27,15 +27,15 @@ public class PesController {
 
     @PostMapping(value = "/new")
     public ResponseEntity<String> create(@RequestBody Pes pes) {
-        LOGGER.debug("Got a PES flow to create {} {}", pes.getPesId(), pes.getTitle());
+        LOGGER.debug("Got a PES flow to create {} {}", pes.getUuid(), pes.getTitle());
         pesService.create(pes);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/{pesId}")
-    public ResponseEntity<String> simpleCreate(@PathVariable String pesId) {
-        LOGGER.debug("Got a PES flow to create {}", pesId);
-        pesService.create(new Pes(pesId, pesId, pesId, pesId, pesId));
+    @PostMapping(value = "/{title}")
+    public ResponseEntity<String> simpleCreate(@PathVariable String title) {
+        LOGGER.debug("Got a PES flow to create {}", title);
+        pesService.create(new Pes(title, "file", "comment"));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

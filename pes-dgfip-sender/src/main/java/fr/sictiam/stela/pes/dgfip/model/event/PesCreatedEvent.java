@@ -10,10 +10,8 @@ public class PesCreatedEvent {
     private String origin;
     private Date eventDate;
 
-    private String pesId;
     private String title;
-    private String fileContent;
-    private String fileName;
+    private String file;
     private String comment;
 
     public PesCreatedEvent() {
@@ -24,10 +22,8 @@ public class PesCreatedEvent {
         this.origin = origin;
         this.eventDate = eventDate;
 
-        this.pesId = pes.getPesId();
         this.title = pes.getTitle();
-        this.fileContent = pes.getFileContent();
-        this.fileName = pes.getFileName();
+        this.file = pes.getFile();
         this.comment = pes.getComment();
     }
 
@@ -55,14 +51,6 @@ public class PesCreatedEvent {
         this.eventDate = eventDate;
     }
 
-    public String getPesId() {
-        return pesId;
-    }
-
-    public void setPesId(String pesId) {
-        this.pesId = pesId;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -71,20 +59,12 @@ public class PesCreatedEvent {
         this.title = title;
     }
 
-    public String getFileContent() {
-        return fileContent;
+    public String getFile() {
+        return file;
     }
 
-    public void setFileContent(String fileContent) {
-        this.fileContent = fileContent;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setFile(String file) {
+        this.file = file;
     }
 
     public String getComment() {
