@@ -7,7 +7,7 @@ import renderIf from 'render-if'
 export default class StelaTable extends Component {
     static propTypes = {
         className: PropTypes.string,
-        data: PropTypes.array.isRequired,
+        data: PropTypes.array,
         header: PropTypes.bool,
         headerTitle: PropTypes.string,
         keyProperty: PropTypes.string.isRequired,
@@ -21,6 +21,7 @@ export default class StelaTable extends Component {
         header: false,
         headerTitle: '',
         link: '',
+        linkProperty: '',
         metaData: []
     }
     state = {
@@ -67,7 +68,7 @@ export default class StelaTable extends Component {
         })
     }
     render() {
-        const { column, data, originalData, direction } = this.state
+        const { column, data, direction } = this.state
 
         const title = renderIf(this.props.headerTitle !== '')
         const header = renderIf(this.props.header)
@@ -75,7 +76,7 @@ export default class StelaTable extends Component {
         const isFilled = renderIf(data.length > 0)
 
         const undisplayedColumns = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
-        const displayedComlumnsNbr = Object.keys(originalData[0]).length - undisplayedColumns.length
+        const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed).map(metaData => metaData.property)
 
         const Styles = {
             selectableRow: {
@@ -83,51 +84,58 @@ export default class StelaTable extends Component {
             },
             floatRight: {
                 float: 'right',
-                marginBottom: '1em'
+                marginBottom: 1 + 'em'
+            },
+            noData: {
+                fontStyle: 'italic',
+                textAlign: 'center'
             }
         }
 
         return (
             <div className={this.props.className}>
                 <Input style={Styles.floatRight} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
-                {isEmpty(
-                    <p>{this.props.noDataMessage}</p>
-                )}
-                {isFilled(
-                    <Table sortable={this.props.header} celled fixed>
-                        {title(
-                            <Table.Header>
-                                <Table.Row>
-                                    <Table.HeaderCell colSpan={displayedComlumnsNbr}>{this.props.headerTitle}</Table.HeaderCell>
-                                </Table.Row>
-                            </Table.Header>
+
+                <Table sortable={this.props.header} celled fixed>
+                    {title(
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell colSpan={displayedColumns.length}>{this.props.headerTitle}</Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                    )}
+                    {header(
+                        <Table.Header>
+                            <Table.Row>
+                                {this.props.metaData.map(metaData =>
+                                    renderIf(!undisplayedColumns.includes(metaData.property))(
+                                        <Table.HeaderCell key={metaData.displayName} sorted={column === metaData.property ? direction : null} onClick={this.handleSort(metaData.property)}>
+                                            {metaData.displayName}
+                                        </Table.HeaderCell>
+                                    )
+                                )}
+                            </Table.Row>
+                        </Table.Header>
+                    )}
+                    <Table.Body>
+                        {isEmpty(
+                            <Table.Row>
+                                <Table.Cell colSpan={displayedColumns.length}>
+                                    <p style={Styles.noData}>{this.props.noDataMessage}</p>
+                                </Table.Cell>
+                            </Table.Row>
                         )}
-                        {header(
-                            <Table.Header>
-                                <Table.Row>
-                                    {this.props.metaData.map(metaData =>
-                                        renderIf(!undisplayedColumns.includes(metaData.property))(
-                                            <Table.HeaderCell key={metaData.displayName} sorted={column === metaData.property ? direction : null} onClick={this.handleSort(metaData.property)}>
-                                                {metaData.displayName}
-                                            </Table.HeaderCell>
-                                        )
+                        {isFilled(
+                            data.map(row =>
+                                <Table.Row style={this.props.link !== '' ? Styles.selectableRow : null} key={row[this.props.keyProperty]} onClick={() => this.handleLink(row[this.props.linkProperty])}>
+                                    {displayedColumns.map(displayedColumn =>
+                                        <Table.Cell key={row[displayedColumn]}>{row[displayedColumn]}</Table.Cell>
                                     )}
                                 </Table.Row>
-                            </Table.Header>
+                            )
                         )}
-                        <Table.Body>
-                            {data.map(row =>
-                                <Table.Row style={this.props.link !== '' && Styles.selectableRow} key={row[this.props.keyProperty]} onClick={() => this.handleLink(row[this.props.linkProperty])}>
-                                    {Object.entries(row).map(column =>
-                                        renderIf(!undisplayedColumns.includes(column[0]))(
-                                            <Table.Cell key={column[1]}>{column[1]}</Table.Cell>
-                                        )
-                                    )}
-                                </Table.Row>
-                            )}
-                        </Table.Body>
-                    </Table>
-                )}
+                    </Table.Body>
+                </Table>
             </div>
         )
     }

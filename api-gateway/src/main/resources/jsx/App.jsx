@@ -14,7 +14,7 @@ import MenuBar from './MenuBar'
 import Home from './Home'
 import Footer from './Footer'
 import Miat from './Miat'
-import Helios from './Helios'
+import Pess from './Pess'
 
 class App extends Component {
     static propTypes = {
@@ -45,7 +45,7 @@ const AppRoute = () =>
     <Switch>
         <Route exact path='/' component={Home} />
         <Route path='/miat' component={Miat} />
-        <Route path='/helios' component={Helios} />
+        <Route path='/pes' component={Pess} />
     </Switch>
 
 render((

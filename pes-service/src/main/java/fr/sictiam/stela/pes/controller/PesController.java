@@ -27,7 +27,7 @@ public class PesController {
 
     @PostMapping(value = "/new")
     public ResponseEntity<String> create(@RequestBody Pes pes) {
-        LOGGER.debug("Got a PES flow to create {} {}", pes.getUuid(), pes.getTitle());
+        LOGGER.debug("Got a PES flow to create {}", pes.getTitle());
         pesService.create(pes);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

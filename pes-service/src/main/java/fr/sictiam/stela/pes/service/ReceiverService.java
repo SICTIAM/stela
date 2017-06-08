@@ -1,6 +1,8 @@
 package fr.sictiam.stela.pes.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.pes.dao.PesRepository;
+import fr.sictiam.stela.pes.model.Pes;
 import fr.sictiam.stela.pes.model.PesHistory;
 import fr.sictiam.stela.pes.model.StatusType;
 import fr.sictiam.stela.pes.model.event.PesAckEvent;
@@ -26,6 +28,9 @@ public class ReceiverService {
     @Autowired
     private PesHistoryService pesHistoryService;
 
+    @Autowired
+    private PesRepository pesRepository;
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue,
             exchange = @Exchange(value = "#{'${application.amqp.pes.exchange}'}", type = ExchangeTypes.TOPIC, durable = "true"),
@@ -38,7 +43,10 @@ public class ReceiverService {
         try {
             PesAckEvent pesAckEvent = objectMapper.readValue(message.getBody(), PesAckEvent.class);
             LOGGER.debug("Received a new PES ACK: {} {} {}", pesAckEvent.getPesUuid(), pesAckEvent.getOrigin(), pesAckEvent.getEventDate());
-            pesHistoryService.create(new PesHistory(pesAckEvent.getPesUuid(), StatusType.ACK_RECEIVED, pesAckEvent.getOrigin(), pesAckEvent.getEventDate()));
+            PesHistory pesHistory = pesHistoryService.create(new PesHistory(pesAckEvent.getPesUuid(), StatusType.ACK_RECEIVED, pesAckEvent.getOrigin(), pesAckEvent.getEventDate()));
+            Pes pes = pesRepository.findByUuid(pesHistory.getPesUuid());
+            pes.setStatus(pesHistory.getStatus());
+            pesRepository.save(pes);
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES ACK", e);
         }
@@ -54,7 +62,10 @@ public class ReceiverService {
         try {
             PesSentEvent pesSentEvent = objectMapper.readValue(message.getBody(), PesSentEvent.class);
             LOGGER.debug("Received a new PES Sent event: {} ({})", pesSentEvent.getPesUuid(), pesSentEvent.getEventDate());
-            pesHistoryService.create(new PesHistory(pesSentEvent.getPesUuid(), StatusType.SENT, pesSentEvent.getOrigin(), pesSentEvent.getEventDate()));
+            PesHistory pesHistory = pesHistoryService.create(new PesHistory(pesSentEvent.getPesUuid(), StatusType.SENT, pesSentEvent.getOrigin(), pesSentEvent.getEventDate()));
+            Pes pes = pesRepository.findByUuid(pesHistory.getPesUuid());
+            pes.setStatus(pesHistory.getStatus());
+            pesRepository.save(pes);
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES Send", e);
         }
