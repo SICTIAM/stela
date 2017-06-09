@@ -46,16 +46,17 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-zuul')
     compile('org.springframework.cloud:spring-cloud-starter-hystrix')
-    compile('org.springframework.security.oauth:spring-security-oauth2')
     compile('org.springframework.cloud:spring-cloud-starter-security')
     compile("org.springframework.retry:spring-retry")
     compile("org.springframework.boot:spring-boot-starter-aop")
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.ozwillo:ozwillo-java-spring-integration:1.25')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 bootRun {
     addResources = true
+
     environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "dev"
 }
 

@@ -1,8 +1,12 @@
 package fr.sictiam.stela.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,18 +16,28 @@ public class Agent {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    private String lastName;
-    private String firstName;
+    @JsonProperty(value = "family_name")
+    private String familyName;
+    @JsonProperty(value = "given_name")
+    private String givenName;
+    // the sub in OpenId Connect parliance
+    @NotNull
+    @NotEmpty
+    private String sub;
+    @NotNull
+    @NotEmpty
     private String email;
-    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AgentModule> modules;
+    @NotNull
+    private Boolean admin;
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<AgentModule> modules = new ArrayList<>();
 
     protected Agent() {
     }
 
-    public Agent(String lastName, String firstName, String email) {
-        this.lastName = lastName;
-        this.firstName = firstName;
+    public Agent(String familyName, String givenName, String email) {
+        this.familyName = familyName;
+        this.givenName = givenName;
         this.email = email;
     }
 
@@ -31,20 +45,20 @@ public class Agent {
         return uuid;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getFamilyName() {
+        return familyName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getGivenName() {
+        return givenName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
     }
 
     public String getEmail() {
@@ -59,16 +73,31 @@ public class Agent {
         return modules;
     }
 
+    public String getSub() {
+        return sub;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
     public void setModules(List<AgentModule> modules) {
         this.modules = modules;
+    }
+
+    public void addModule(AgentModule agentModule) {
+        this.modules.add(agentModule);
     }
 
     @Override
     public String toString() {
         return "Agent{" +
-                "lastName='" + lastName + '\'' +
-                ", firstName='" + firstName + '\'' +
+                "uuid='" + uuid + '\'' +
+                ", familyName='" + familyName + '\'' +
+                ", givenName='" + givenName + '\'' +
+                ", sub='" + sub + '\'' +
                 ", email='" + email + '\'' +
+                ", admin=" + admin +
                 '}';
     }
 }

@@ -15,10 +15,14 @@ import java.util.List;
 @RequestMapping("/api/pes")
 public class PesController {
 
-    @Autowired
-    private PesService pesService;
+    private final PesService pesService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesController.class);
+
+    @Autowired
+    public PesController(PesService pesService) {
+        this.pesService = pesService;
+    }
 
     @GetMapping("")
     public List<Pes> getAll() {

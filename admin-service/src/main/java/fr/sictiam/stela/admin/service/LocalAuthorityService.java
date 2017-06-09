@@ -5,6 +5,8 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class LocalAuthorityService {
 
@@ -19,14 +21,18 @@ public class LocalAuthorityService {
     }
 
     public void addModule(String uuid, Module module) {
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+        LocalAuthority localAuthority = localAuthorityRepository.findOne(uuid);
         localAuthority.addModule(module);
         localAuthorityRepository.save(localAuthority);
     }
 
     public void removeModule(String uuid, Module module) {
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+        LocalAuthority localAuthority = localAuthorityRepository.findOne(uuid);
         localAuthority.removeModule(module);
         localAuthorityRepository.save(localAuthority);
+    }
+
+    public Optional<LocalAuthority> findByName(String name) {
+        return localAuthorityRepository.findByName(name);
     }
 }
