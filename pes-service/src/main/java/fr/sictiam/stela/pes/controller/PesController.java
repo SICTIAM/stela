@@ -31,11 +31,4 @@ public class PesController {
         pesService.create(pes);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
-    @PostMapping(value = "/{title}")
-    public ResponseEntity<String> simpleCreate(@PathVariable String title) {
-        LOGGER.debug("Got a PES flow to create {}", title);
-        pesService.create(new Pes(title, "file", "comment"));
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
 }
