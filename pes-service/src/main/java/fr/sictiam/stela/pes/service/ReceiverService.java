@@ -29,7 +29,7 @@ public class ReceiverService {
     private PesHistoryService pesHistoryService;
 
     @Autowired
-    private PesRepository pesRepository;
+    private PesService pesService;
 
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue,
@@ -44,9 +44,7 @@ public class ReceiverService {
             PesAckEvent pesAckEvent = objectMapper.readValue(message.getBody(), PesAckEvent.class);
             LOGGER.debug("Received a new PES ACK: {} {} {}", pesAckEvent.getPesUuid(), pesAckEvent.getOrigin(), pesAckEvent.getEventDate());
             PesHistory pesHistory = pesHistoryService.create(new PesHistory(pesAckEvent.getPesUuid(), StatusType.ACK_RECEIVED, pesAckEvent.getOrigin(), pesAckEvent.getEventDate()));
-            Pes pes = pesRepository.findByUuid(pesHistory.getPesUuid());
-            pes.setStatus(pesHistory.getStatus());
-            pesRepository.save(pes);
+            pesService.updatePesLastHistory(pesService.getByUuid(pesHistory.getPesUuid()), pesHistory.getDate(), pesHistory.getStatus());
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES ACK", e);
         }
@@ -63,9 +61,7 @@ public class ReceiverService {
             PesSentEvent pesSentEvent = objectMapper.readValue(message.getBody(), PesSentEvent.class);
             LOGGER.debug("Received a new PES Sent event: {} ({})", pesSentEvent.getPesUuid(), pesSentEvent.getEventDate());
             PesHistory pesHistory = pesHistoryService.create(new PesHistory(pesSentEvent.getPesUuid(), StatusType.SENT, pesSentEvent.getOrigin(), pesSentEvent.getEventDate()));
-            Pes pes = pesRepository.findByUuid(pesHistory.getPesUuid());
-            pes.setStatus(pesHistory.getStatus());
-            pesRepository.save(pes);
+            pesService.updatePesLastHistory(pesService.getByUuid(pesHistory.getPesUuid()), pesHistory.getDate(), pesHistory.getStatus());
         } catch (IOException e) {
             LOGGER.error("Unable to parse incoming PES Send", e);
         }

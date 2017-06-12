@@ -5,7 +5,7 @@ import renderIf from 'render-if'
 
 import StelaTable from './components/StelaTable'
 
-class Pess extends Component {
+class PesList extends Component {
     static contextTypes = {
         t: PropTypes.func
     }
@@ -32,7 +32,8 @@ class Pess extends Component {
                             { property: 'title', displayed: true, displayName: t('pes.pes_list_column_title'), searchable: true },
                             { property: 'file', displayed: false, searchable: false },
                             { property: 'comment', displayed: true, displayName: t('pes.pes_list_column_comment'), searchable: true },
-                            { property: 'status', displayed: true, displayName: t('pes.pes_list_column_status'), searchable: false }
+                            { property: 'status', displayed: true, displayName: t('pes.pes_list_column_status'), searchable: false },
+                            { property: 'lastUpdateTime', displayed: true, displayName: t('pes.pes_list_column_lastUpdateTime'), searchable: true }
                         ]}
                         header={true}
                         noDataMessage={t('pes.pes_list_empty')}
@@ -43,4 +44,4 @@ class Pess extends Component {
     }
 }
 
-export default translate(['api-gateway'])(Pess)
+export default translate(['api-gateway'])(PesList)

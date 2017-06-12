@@ -107,9 +107,9 @@ export default class StelaTable extends Component {
                     {header(
                         <Table.Header>
                             <Table.Row>
-                                {this.props.metaData.map(metaData =>
+                                {this.props.metaData.map((metaData, index) =>
                                     renderIf(!undisplayedColumns.includes(metaData.property))(
-                                        <Table.HeaderCell key={metaData.displayName} sorted={column === metaData.property ? direction : null} onClick={this.handleSort(metaData.property)}>
+                                        <Table.HeaderCell key={index + '-' + metaData.displayName} sorted={column === metaData.property ? direction : null} onClick={this.handleSort(metaData.property)}>
                                             {metaData.displayName}
                                         </Table.HeaderCell>
                                     )
@@ -128,8 +128,8 @@ export default class StelaTable extends Component {
                         {isFilled(
                             data.map(row =>
                                 <Table.Row style={this.props.link !== '' ? Styles.selectableRow : null} key={row[this.props.keyProperty]} onClick={() => this.handleLink(row[this.props.linkProperty])}>
-                                    {displayedColumns.map(displayedColumn =>
-                                        <Table.Cell key={row[displayedColumn]}>{row[displayedColumn]}</Table.Cell>
+                                    {displayedColumns.map((displayedColumn, index) =>
+                                        <Table.Cell key={index + '-' + row[displayedColumn]}>{row[displayedColumn]}</Table.Cell>
                                     )}
                                 </Table.Row>
                             )

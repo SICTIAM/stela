@@ -37,13 +37,22 @@ public class PesService {
         PesCreatedEvent pesCreatedEvent = new PesCreatedEvent(pes, "pes-service", new Date());
         PesHistory pesHistory = pesHistoryService.create(new PesHistory(pes.getUuid(), StatusType.CREATED, "pes-service", new Date()));
         pes.setCreationDate(pesHistory.getDate());
-        pes.setStatus(pesHistory.getStatus());
-        pesRepository.save(pes);
+        updatePesLastHistory(pes, pesHistory.getDate(), pesHistory.getStatus());
         amqpTemplate.convertAndSend(exchange, createdKey, pesCreatedEvent);
     }
 
     public List<Pes> getAll() {
         return pesRepository.findAll();
+    }
+
+    public Pes getByUuid(String uuid) {
+        return pesRepository.findByUuid(uuid);
+    }
+
+    public void updatePesLastHistory(Pes pes, Date date, StatusType status) {
+        pes.setStatus(status);
+        pes.setLastUpdateTime(date);
+        pesRepository.save(pes);
     }
 
 }

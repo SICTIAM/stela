@@ -19,6 +19,7 @@ public class Pes {
     private String comment;
     private Date creationDate;
     private StatusType status;
+    private Date lastUpdateTime;
 
     public Pes() {
     }
@@ -78,6 +79,14 @@ public class Pes {
         this.status = status;
     }
 
+    public Date getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(Date lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
     @Override
     public String toString() {
         return "Pes{" +
@@ -87,6 +96,7 @@ public class Pes {
                 ", comment='" + comment + '\'' +
                 ", creationDate=" + creationDate +
                 ", status=" + status +
+                ", lastUpdateTime=" + lastUpdateTime +
                 '}';
     }
 }
