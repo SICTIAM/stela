@@ -10,7 +10,7 @@ class MenuBar extends Component {
                     <Menu.Item as={Link} to="/" header>stela</Menu.Item>
                     <Menu.Item name='Dashboard' />
                     <Menu.Item name='Acte' as={Link} to="/miat" />
-                    <Menu.Item name='Helios' as={Link} to="/helios"/>
+                    <Menu.Item name='PES' as={Link} to="/pes" />
                     <Menu.Menu position='right'>
                         <Menu.Item>
                             <Button primary>Sign in</Button>

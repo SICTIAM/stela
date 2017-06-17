@@ -1,3 +1,12 @@
 {
-    "heavy_development": "en cours de fort développement"
+    "heavy_development": "en cours de fort développement",
+    "pes": {
+        "pes_list_title": "Liste des PES",
+        "pes_list_empty": "Aucun PES",
+        "pes_list_column_title": "Titre",
+        "pes_list_column_comment": "Commentaire",
+        "pes_list_column_creationDate": "Date de création",
+        "pes_list_column_status": "Status",
+        "pes_list_column_lastUpdateTime": "Dernière mise à jour"
+    }
 }
