@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("dev")
+@Profile("bootstrap-data")
 public class DataBootstrapper implements CommandLineRunner {
 
     private final LocalAuthorityService localAuthorityService;
@@ -22,14 +22,12 @@ public class DataBootstrapper implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (!localAuthorityService.findByName("Mouans Sartoux").isPresent()) {
-            LocalAuthority localAuthority = new LocalAuthority("Mouans Sartoux", "123456789");
-            localAuthority = localAuthorityService.create(localAuthority);
-            localAuthorityService.addModule(localAuthority.getUuid(), Module.PES);
+        LocalAuthority localAuthority = new LocalAuthority("Mouans Sartoux", "123456789");
+        localAuthority = localAuthorityService.create(localAuthority);
+        localAuthorityService.addModule(localAuthority.getUuid(), Module.PES);
 
-            Agent agent = new Agent("Dupont", "Jean", "b.orihuela@sictiam.fr");
-            agent = agentService.create(agent);
-            agentService.addModule(agent.getUuid(), localAuthority.getUuid(), Module.PES);
-        }
+        Agent agent = new Agent("Dupont", "Jean", "dev+stela3@sictiam.fr");
+        agent = agentService.create(agent);
+        agentService.addModule(agent.getUuid(), localAuthority.getUuid(), Module.PES);
     }
 }
