@@ -30,3 +30,4 @@ nbdist/
 ## YPR ##
 .env
 *.PS1
+bin/
