@@ -36,30 +36,22 @@ public class ActeRestController {
 
     @GetMapping("/id/{id}")
     public ResponseEntity<Acte> getById(@PathVariable Long id) {
-        ResponseEntity<Acte> response;
-
-        Acte acte = this.repository.findById(id);
-        if (acte != null) {
-            response = new ResponseEntity<Acte>(acte, HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Acte acte = this.repository.findOne(id);
+        if (acte == null) {
+            throw new ActeNotFoundException();
         }
 
-        return response;
+        return new ResponseEntity<Acte>(acte, HttpStatus.OK);
     }
 
     @GetMapping("/numero/{numero}")
     public ResponseEntity<Acte> getByNumero(@PathVariable String numero) {
-        ResponseEntity<Acte> response;
-
         Acte acte = this.repository.findByNumero(numero);
-        if (acte != null){
-            response = new ResponseEntity<Acte>(acte, HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<Acte>(HttpStatus.NOT_FOUND);
+        if (acte == null) {
+            throw new ActeNotFoundException();
         }
 
-        return response;
+        return new ResponseEntity<Acte>(acte, HttpStatus.OK);
     }
 
     @PostMapping
