@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.4.RELEASE'
+		springBootVersion = '1.5.3.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -22,6 +22,9 @@ repositories {
 	mavenCentral()
 }
 
+task wrapper(type: Wrapper) {
+	gradleVersion = '3.4.1'
+}
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')

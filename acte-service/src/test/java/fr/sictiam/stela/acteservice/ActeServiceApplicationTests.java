@@ -29,58 +29,57 @@ import java.util.Map;
 public class ActeServiceApplicationTests {
 
 
-	private MockMvc mockMvc;
+    private MockMvc mockMvc;
 	
-	@Autowired
-	private WebApplicationContext webApplicationContext;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 	
-	@Autowired
-	private ActeRepository repository;
+    @Autowired
+    private ActeRepository repository;
 	
-	private String[] numeros = new String[] { "numero1", "numero2" };
-	private Hashtable<String, Long> ids = new Hashtable<String, Long>();
+    private String[] numeros = new String[] { "numero1", "numero2" };   
+    private Hashtable<String, Long> ids = new Hashtable<String, Long>();
 
-	@Before
+    @Before
     public void setup() throws Exception {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
         this.repository.deleteAllInBatch();
 
-		for(String numero: this.numeros){
-			Acte inserted = this.repository.save(new Acte(numero));
-			ids.put(inserted.getNumero(), inserted.getId());
-		}
+        for(String numero: this.numeros){
+            Acte inserted = this.repository.save(new Acte(numero));
+            ids.put(inserted.getNumero(), inserted.getUuid());
+        }
     }
 
-	@Test
-	public void acteNotFoundById() throws Exception {
+    @Test
+    public void acteNotFoundById() throws Exception {
         mockMvc.perform(get("/acte/id/56")).andExpect(status().isNotFound());
     }
 
-	@Test
-	public void acteNotFoundByNumero() throws Exception {
+    @Test
+    public void acteNotFoundByNumero() throws Exception {
         mockMvc.perform(get("/acte/numero/numero3")).andExpect(status().isNotFound());
     }
 
 	// TODO : remove code duplication
-	@Test
-	public void acteFoundById() throws Exception {
-		for (Map.Entry<String, Long> entry : this.ids.entrySet()) {
-			mockMvc.perform(get("/acte/id/" + entry.getValue()))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.numero", is(entry.getKey())))
-				.andExpect(jsonPath("$.id", is(entry.getValue().intValue())));
-		};
-		
-	}
-	@Test
-	public void acteFoundByNumero() throws Exception {
-		for (Map.Entry<String, Long> entry : this.ids.entrySet()) {
-			mockMvc.perform(get("/acte/numero/" + entry.getKey()))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.numero", is(entry.getKey())))
-				.andExpect(jsonPath("$.id", is(entry.getValue().intValue())));
-		};
-		
-	}
+    @Test
+    public void acteFoundById() throws Exception {
+        for (Map.Entry<String, Long> entry : this.ids.entrySet()) {
+            mockMvc.perform(get("/acte/id/" + entry.getValue()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.numero", is(entry.getKey())))
+                .andExpect(jsonPath("$.uuid", is(entry.getValue().intValue())));
+        };
+    }
+
+    @Test
+    public void acteFoundByNumero() throws Exception {
+	    for (Map.Entry<String, Long> entry : this.ids.entrySet()) {
+            mockMvc.perform(get("/acte/numero/" + entry.getKey()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.numero", is(entry.getKey())))
+                .andExpect(jsonPath("$.uuid", is(entry.getValue().intValue())));
+        };
+    }
 }
