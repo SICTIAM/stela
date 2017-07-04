@@ -7,6 +7,12 @@
         "pes_list_column_comment": "Commentaire",
         "pes_list_column_creationDate": "Date de création",
         "pes_list_column_status": "Status",
-        "pes_list_column_lastUpdateTime": "Dernière mise à jour"
+        "pes_list_column_lastUpdateTime": "Dernière mise à jour",
+        "status": {
+            "CREATED": "Créé",
+            "SENT": "Envoyé",
+            "ACK_RECEIVED": "AR Ministère",
+            "NACK_RECEIVED": "Anomalie Ministère"
+        }
     }
 }

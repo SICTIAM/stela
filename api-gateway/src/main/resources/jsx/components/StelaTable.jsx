@@ -75,8 +75,8 @@ export default class StelaTable extends Component {
         const isEmpty = renderIf(data.length === 0)
         const isFilled = renderIf(data.length > 0)
 
-        const undisplayedColumns = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
-        const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed).map(metaData => metaData.property)
+        const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
+        const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
 
         const Styles = {
             selectableRow: {
@@ -108,7 +108,7 @@ export default class StelaTable extends Component {
                         <Table.Header>
                             <Table.Row>
                                 {this.props.metaData.map((metaData, index) =>
-                                    renderIf(!undisplayedColumns.includes(metaData.property))(
+                                    renderIf(!undisplayedColumnsProperties.includes(metaData.property))(
                                         <Table.HeaderCell key={index + '-' + metaData.displayName} sorted={column === metaData.property ? direction : null} onClick={this.handleSort(metaData.property)}>
                                             {metaData.displayName}
                                         </Table.HeaderCell>
@@ -129,7 +129,9 @@ export default class StelaTable extends Component {
                             data.map(row =>
                                 <Table.Row style={this.props.link !== '' ? Styles.selectableRow : null} key={row[this.props.keyProperty]} onClick={() => this.handleLink(row[this.props.linkProperty])}>
                                     {displayedColumns.map((displayedColumn, index) =>
-                                        <Table.Cell key={index + '-' + row[displayedColumn]}>{row[displayedColumn]}</Table.Cell>
+                                        <Table.Cell key={index + '-' + row[displayedColumn.property]}>
+                                            {displayedColumn.displayComponent ? displayedColumn.displayComponent(row[displayedColumn.property]) : row[displayedColumn.property]}
+                                        </Table.Cell>
                                     )}
                                 </Table.Row>
                             )
