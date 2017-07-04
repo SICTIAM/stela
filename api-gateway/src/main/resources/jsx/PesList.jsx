@@ -19,6 +19,7 @@ class PesList extends Component {
     }
     render() {
         const { t } = this.context
+        const statusDisplay = (status) => t(`pes.status.${status}`)
         return (
             <div>
                 <h1>{t('pes.pes_list_title')}</h1>
@@ -32,7 +33,7 @@ class PesList extends Component {
                             { property: 'title', displayed: true, displayName: t('pes.pes_list_column_title'), searchable: true },
                             { property: 'file', displayed: false, searchable: false },
                             { property: 'comment', displayed: true, displayName: t('pes.pes_list_column_comment'), searchable: true },
-                            { property: 'status', displayed: true, displayName: t('pes.pes_list_column_status'), searchable: false },
+                            { property: 'status', displayed: true, displayName: t('pes.pes_list_column_status'), searchable: false, displayComponent: statusDisplay },
                             { property: 'lastUpdateTime', displayed: true, displayName: t('pes.pes_list_column_lastUpdateTime'), searchable: true }
                         ]}
                         header={true}
