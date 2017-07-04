@@ -1,5 +1,7 @@
 package fr.sictiam.stela.acteservice.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,20 +13,20 @@ public class Acte {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long uuid;
 
     @Column(unique=true)
     private String numero;
 
-    protected Acte() {
+    public Acte() {
     }
 
     public Acte(String numero) {
         this.numero = numero;
     }
 
-    public Long getId() {
-        return this.id;
+    public Long getUuid() {
+        return this.uuid;
     }
 
     public String getNumero() {

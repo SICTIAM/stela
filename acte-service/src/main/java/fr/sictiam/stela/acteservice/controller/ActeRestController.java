@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.controller;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,21 +37,13 @@ public class ActeRestController {
 
     @GetMapping("/id/{id}")
     public ResponseEntity<Acte> getById(@PathVariable Long id) {
-        Acte acte = this.repository.findOne(id);
-        if (acte == null) {
-            throw new ActeNotFoundException();
-        }
-
+        Acte acte = this.repository.findByUuid(id).orElseThrow(ActeNotFoundException::new);
         return new ResponseEntity<Acte>(acte, HttpStatus.OK);
     }
 
     @GetMapping("/numero/{numero}")
     public ResponseEntity<Acte> getByNumero(@PathVariable String numero) {
-        Acte acte = this.repository.findByNumero(numero);
-        if (acte == null) {
-            throw new ActeNotFoundException();
-        }
-
+        Acte acte = this.repository.findByNumero(numero).orElseThrow(ActeNotFoundException::new);
         return new ResponseEntity<Acte>(acte, HttpStatus.OK);
     }
 
@@ -60,7 +53,7 @@ public class ActeRestController {
         URI location = ServletUriComponentsBuilder
                         .fromCurrentRequest()
                         .path("/id/{id}")
-                        .buildAndExpand(result.getId())
+                        .buildAndExpand(result.getUuid())
                         .toUri();
 
         return ResponseEntity.created(location).build();
