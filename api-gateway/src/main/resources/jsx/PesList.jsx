@@ -3,11 +3,13 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 
+import { pesSentSuccess, pesSentVirus, pesSentMissingData } from './components/Notifications'
 import StelaTable from './components/StelaTable'
 
 class PesList extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        t: PropTypes.func,
+        _addNotification: PropTypes.func
     }
     state = {
         pess: []
@@ -18,11 +20,15 @@ class PesList extends Component {
             .then(json => this.setState({ pess: json }))
     }
     render() {
-        const { t } = this.context
+        const { t, _addNotification } = this.context
         const statusDisplay = (status) => t(`pes.status.${status}`)
         return (
             <div>
                 <h1>{t('pes.pes_list_title')}</h1>
+
+                <button onClick={() => _addNotification(pesSentSuccess(t))}>pesSentSuccess</button>
+                <button onClick={() => _addNotification(pesSentVirus(t))}>pesSentVirus</button>
+                <button onClick={() => _addNotification(pesSentMissingData(t))}>pesSentMissingData</button>
 
                 {renderIf(this.state.pess && this.state.pess.length > 0)(
                     <StelaTable
