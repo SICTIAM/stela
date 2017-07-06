@@ -14,5 +14,15 @@
             "ACK_RECEIVED": "AR Ministère",
             "NACK_RECEIVED": "Anomalie Ministère"
         }
+    },
+    "notifications": {
+        "pes": {
+            "title": "Module PES",
+            "sent": {
+                "success": "Le dépot PES a bien été effectué",
+                "virus": "Le dépot PES a échoué car il contenait un virus",
+                "missing_data": "Merci de remplir tous les champs obligatoires"
+            }
+        }
     }
 }
