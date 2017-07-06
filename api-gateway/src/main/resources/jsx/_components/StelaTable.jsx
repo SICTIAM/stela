@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import history from '../util/history'
-import { Table, Input } from 'semantic-ui-react'
 import renderIf from 'render-if'
+import { Table, Input } from 'semantic-ui-react'
+
+import history from '../_util/history'
 
 export default class StelaTable extends Component {
     static propTypes = {
