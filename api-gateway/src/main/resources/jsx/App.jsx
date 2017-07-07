@@ -15,6 +15,7 @@ import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
 import Footer from './_components/Footer'
 import Home from './Home'
+import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
 import NewActe from './acte/NewActe'
 import PesList from './pes/PesList'
@@ -67,6 +68,7 @@ const AppRoute = () =>
         </Route>
         <Route path='/acte/list' component={ActeList} />
         <Route path='/acte/new' component={NewActe} />
+        <Route path='/acte/:uuid' component={Acte} />
 
         <Route exact path='/pes'>
             <Redirect to="/pes/list" />

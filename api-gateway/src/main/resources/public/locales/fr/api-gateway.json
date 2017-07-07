@@ -1,6 +1,23 @@
 {
     "heavy_development": "en cours de fort développement",
     "acte": {
+        "status": {
+            "CREATED": "Créé",
+            "SENT_INITIATED": "Analyse",
+            "ANTIVIRUS_OK": "Antivirus OK",
+            "ANTIVIRUS_KO": "Antivirus KO",
+            "SENT": "Envoyé",
+            "ACK_RECEIVED": "AR Ministère",
+            "NACK_RECEIVED": "Anomalie Ministère"
+        },
+        "nature": {
+            "DELIBERATION": "Délibération",
+            "REGULATORY_ORDER": "Actes réglementaires",
+            "INDIVIDUAL_ORDER": "Actes individuels",
+            "CONTRACTS_AND_AGREEMENTS": "Contrats, conventions et avenants",
+            "BUDGET_AND_FINANCIAL_DOCUMENTS": "Documents budgétaires et financiers",
+            "OTHERS": "Autres"
+        },
         "list": {
             "title": "Liste des Actes",
             "table": {
@@ -9,24 +26,16 @@
                 "nature": "Nature",
                 "title": "Titre",
                 "status": "Status"
-            },
-            "status": {
-                "CREATED": "Créé",
-                "SENT": "Envoyé",
-                "ACK_RECEIVED": "AR Ministère",
-                "NACK_RECEIVED": "Anomalie Ministère"
-            },
-            "nature": {
-                "DELIBERATION": "Délibération",
-                "REGULATORY_ORDER": "Actes réglementaires",
-                "INDIVIDUAL_ORDER": "Actes individuels",
-                "CONTRACTS_AND_AGREEMENTS": "Contrats, conventions et avenants",
-                "BUDGET_AND_FINANCIAL_DOCUMENTS": "Documents budgétaires et financiers",
-                "OTHERS": "Autres"
             }
         },
         "new": {
             "title": "Déposer un acte"
+        },
+        "page": {
+            "number": "Numéro de l'acte",
+            "decisionDate": "Date de la décision",
+            "nature": "Nature de l'acte",
+            "code": "Matière de l'acte"
         }
     },
     "pes": {

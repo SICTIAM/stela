@@ -16,8 +16,8 @@ class ActeList extends Component {
     }
     render() {
         const { t } = this.context
-        const statusDisplay = (status) => t(`acte.list.status.${status}`)
-        const natureDisplay = (nature) => t(`acte.list.nature.${nature}`)
+        const statusDisplay = (status) => t(`acte.status.${status}`)
+        const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         return (
             <div>
                 <h1>{t('acte.list.title')}</h1>
@@ -73,6 +73,8 @@ class ActeList extends Component {
                         { property: 'public', displayed: false, searchable: false },
                     ]}
                     header={true}
+                    link='/acte/'
+                    linkProperty='uuid'
                     noDataMessage='Aucun acte'
                     keyProperty='uuid' />
             </div>

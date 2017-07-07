@@ -2,3 +2,9 @@
     padding-top: 5em;
     padding-bottom: 3em;
 }
+fieldset {
+    border: 0;
+}
+.menu.secondary.topBar {
+    background-color: white;
+}

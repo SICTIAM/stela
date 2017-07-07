@@ -4,7 +4,7 @@ import { Menu, Dropdown, Container, Label } from 'semantic-ui-react'
 class TopBar extends Component {
     render() {
         return (
-            <Menu fixed='top' secondary>
+            <Menu className='topBar' fixed='top' secondary>
                 <Container>
                     <Menu.Menu position='right'>
                         <Menu.Item>
