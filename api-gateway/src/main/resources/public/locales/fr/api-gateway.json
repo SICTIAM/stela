@@ -1,5 +1,26 @@
 {
+    "app_title": "stela",
     "heavy_development": "en cours de fort développement",
+    "menu": {
+        "acte": {
+            "legality_control": "Contrôle de légalité",
+            "submit_an_act": "Déposet un acte",
+            "acts_list": "Liste des actes",
+            "deliberation_register": "Registre des délibarations"
+        },
+        "pes": {
+            "accounting_flow": "Flux comptable",
+            "submit_a_PES_Aller": "Déposet un PES Aller",
+            "PES_Aller_list": "Liste des PES Aller",
+            "PES_Retour_list": "Liste des PES Retour"
+        },
+        "convocation": {
+            "convocation": "Convocation",
+            "send_a_convocation": "Déposer une convocation",
+            "reveived_convocations": "Convocations reçues",
+            "sent_convocations": "Convocations envoyées"
+        }
+    },
     "acte": {
         "status": {
             "CREATED": "Créé",

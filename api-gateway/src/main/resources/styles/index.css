@@ -2,6 +2,9 @@
     padding-top: 5em;
     padding-bottom: 3em;
 }
+.secondContent {
+    margin-top: 3em;
+}
 fieldset {
     border: 0;
 }

@@ -30,7 +30,7 @@ class ActeHistory extends Component {
             <Step key={status.status} completed title={t(`acte.status.${status.status}`)} description={status.date} />
         )
         return (
-            <div>
+            <div className='secondContent'>
                 <h2>Historique</h2>
                 <Step.Group ordered>
                     {acteHistory}

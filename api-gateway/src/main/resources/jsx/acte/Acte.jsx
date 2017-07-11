@@ -47,8 +47,6 @@ class Acte extends Component {
                     <Grid.Column width={13}><span id="code">{acte.code}</span></Grid.Column>
                 </Grid>
 
-                <br />
-
                 <ActeHistory />
 
             </div>
