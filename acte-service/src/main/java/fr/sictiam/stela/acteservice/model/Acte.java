@@ -12,7 +12,7 @@ public class Acte {
 
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name= "uuid", strategy = "org.hibernate.id.UUIDGenerator") 
+    @GenericGenerator(name= "UUID", strategy = "org.hibernate.id.UUIDGenerator") 
     private Long uuid;
 
     @Column(unique=true)

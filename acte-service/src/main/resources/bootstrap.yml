@@ -1,3 +1,13 @@
 spring:
-  application:
-    name: acte-service
+  aplication:
+    name: acte-servicep
+
+server:
+  port: 8080
+
+cloud:
+  config:
+    failFast: true
+      retry:
+        initialInterval: 2000
+        maxAttempts: 30
