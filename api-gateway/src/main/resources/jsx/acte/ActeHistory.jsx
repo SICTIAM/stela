@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Step } from 'semantic-ui-react'
+import { Feed } from 'semantic-ui-react'
 
 class ActeHistory extends Component {
     static contextTypes = {
@@ -27,14 +27,14 @@ class ActeHistory extends Component {
             }
         ]
         const acteHistory = history.map(status =>
-            <Step key={status.status} completed title={t(`acte.status.${status.status}`)} description={status.date} />
+            <Feed.Event key={status.status} icon='check' date={status.date} summary={t(`acte.status.${status.status}`)} />
         )
         return (
             <div className='secondContent'>
                 <h2>Historique</h2>
-                <Step.Group ordered>
+                <Feed>
                     {acteHistory}
-                </Step.Group>
+                </Feed>
             </div>
         )
     }
