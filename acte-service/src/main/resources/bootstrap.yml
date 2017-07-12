@@ -1,13 +1,13 @@
 spring:
-  aplication:
-    name: acte-servicep
+  application:
+    name: acte-service
+  datasource:
+    url: jdbc:postgresql://192.168.99.100:5432/stela-acte
+    username: stela
+    password: stelapwd
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 
 server:
-  port: 8080
-
-cloud:
-  config:
-    failFast: true
-      retry:
-        initialInterval: 2000
-        maxAttempts: 30
+  port: 7979
