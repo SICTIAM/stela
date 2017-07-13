@@ -35,7 +35,7 @@ public class ActeRestController {
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<Acte> getById(@PathVariable Long id) {
+    public ResponseEntity<Acte> getById(@PathVariable String id) {
         Acte acte = this.repository.findByUuid(id).orElseThrow(ActeNotFoundException::new);
         return new ResponseEntity<Acte>(acte, HttpStatus.OK);
     }
