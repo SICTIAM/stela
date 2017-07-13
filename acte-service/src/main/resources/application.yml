@@ -3,7 +3,16 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://192.168.99.100:5432/stela-acte
+    # Database "stela-acte" must be created inside postgresql container.
+    # Modify <host-ip> to match local configuration.
+    # If postgresql container is launched from docker-compose,
+    # <host-ip> can be set to "postgresql" and the command
+    # "docker run -p 7979:7979 --network="stelapoc_default" acte-service"
+    # will connect the acte service container to the postgresql container
+    # through the stelapoc_default network.
+    # Remember to run gradlew image -x test to avoid failure while building
+    # image.
+    url: jdbc:postgresql://<host-ip>:5432/stela-acte
     username: stela
     password: stelapwd
   jpa:

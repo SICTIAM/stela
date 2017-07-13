@@ -1,5 +1,3 @@
 spring:
   application:
     name: acte-service
-  profiles:
-    active: dev
