@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import history from '../util/history'
-import { Table, Input } from 'semantic-ui-react'
 import renderIf from 'render-if'
+import { Table, Input } from 'semantic-ui-react'
+
+import history from '../_util/history'
 
 export default class StelaTable extends Component {
     static propTypes = {
@@ -23,6 +24,19 @@ export default class StelaTable extends Component {
         link: '',
         linkProperty: '',
         metaData: []
+    }
+    styles = {
+        selectableRow: {
+            cursor: 'pointer'
+        },
+        floatRight: {
+            float: 'right',
+            marginBottom: 1 + 'em'
+        },
+        noData: {
+            fontStyle: 'italic',
+            textAlign: 'center'
+        }
     }
     state = {
         column: null,
@@ -78,23 +92,9 @@ export default class StelaTable extends Component {
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
         const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
 
-        const Styles = {
-            selectableRow: {
-                cursor: 'pointer'
-            },
-            floatRight: {
-                float: 'right',
-                marginBottom: 1 + 'em'
-            },
-            noData: {
-                fontStyle: 'italic',
-                textAlign: 'center'
-            }
-        }
-
         return (
             <div className={this.props.className}>
-                <Input style={Styles.floatRight} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
+                <Input style={this.styles.floatRight} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
 
                 <Table sortable={this.props.header} celled fixed>
                     {title(
@@ -121,13 +121,13 @@ export default class StelaTable extends Component {
                         {isEmpty(
                             <Table.Row>
                                 <Table.Cell colSpan={displayedColumns.length}>
-                                    <p style={Styles.noData}>{this.props.noDataMessage}</p>
+                                    <p style={this.styles.noData}>{this.props.noDataMessage}</p>
                                 </Table.Cell>
                             </Table.Row>
                         )}
                         {isFilled(
                             data.map(row =>
-                                <Table.Row style={this.props.link !== '' ? Styles.selectableRow : null} key={row[this.props.keyProperty]} onClick={() => this.handleLink(row[this.props.linkProperty])}>
+                                <Table.Row style={this.props.link !== '' ? this.styles.selectableRow : null} key={row[this.props.keyProperty]} onClick={() => this.handleLink(row[this.props.linkProperty])}>
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell key={index + '-' + row[displayedColumn.property]}>
                                             {displayedColumn.displayComponent ? displayedColumn.displayComponent(row[displayedColumn.property]) : row[displayedColumn.property]}

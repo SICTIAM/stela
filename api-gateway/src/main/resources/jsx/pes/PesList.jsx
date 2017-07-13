@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 
-import { pesSentSuccess, pesSentVirus, pesSentMissingData } from './components/Notifications'
-import StelaTable from './components/StelaTable'
+import { pesSentSuccess, pesSentVirus, pesSentMissingData } from '../_components/Notifications'
+import StelaTable from '../_components/StelaTable'
 
 class PesList extends Component {
     static contextTypes = {
@@ -21,10 +21,10 @@ class PesList extends Component {
     }
     render() {
         const { t, _addNotification } = this.context
-        const statusDisplay = (status) => t(`pes.status.${status}`)
+        const statusDisplay = (status) => t(`pes.list.status.${status}`)
         return (
             <div>
-                <h1>{t('pes.pes_list_title')}</h1>
+                <h1>{t('pes.list.title')}</h1>
 
                 <button onClick={() => _addNotification(pesSentSuccess(t))}>pesSentSuccess</button>
                 <button onClick={() => _addNotification(pesSentVirus(t))}>pesSentVirus</button>
@@ -35,15 +35,15 @@ class PesList extends Component {
                         data={this.state.pess}
                         metaData={[
                             { property: 'uuid', displayed: false, searchable: false },
-                            { property: 'creationDate', displayed: true, displayName: t('pes.pes_list_column_creationDate'), searchable: true },
-                            { property: 'title', displayed: true, displayName: t('pes.pes_list_column_title'), searchable: true },
+                            { property: 'creationDate', displayed: true, displayName: t('pes.list.table.creationDate'), searchable: true },
+                            { property: 'title', displayed: true, displayName: t('pes.list.table.title'), searchable: true },
                             { property: 'file', displayed: false, searchable: false },
-                            { property: 'comment', displayed: true, displayName: t('pes.pes_list_column_comment'), searchable: true },
-                            { property: 'status', displayed: true, displayName: t('pes.pes_list_column_status'), searchable: false, displayComponent: statusDisplay },
-                            { property: 'lastUpdateTime', displayed: true, displayName: t('pes.pes_list_column_lastUpdateTime'), searchable: true }
+                            { property: 'comment', displayed: true, displayName: t('pes.list.table.comment'), searchable: true },
+                            { property: 'status', displayed: true, displayName: t('pes.list.table.status'), searchable: false, displayComponent: statusDisplay },
+                            { property: 'lastUpdateTime', displayed: true, displayName: t('pes.list.table.lastUpdateTime'), searchable: true }
                         ]}
                         header={true}
-                        noDataMessage={t('pes.pes_list_empty')}
+                        noDataMessage={t('pes.list.empty')}
                         keyProperty='uuid' />
                 )}
             </div>

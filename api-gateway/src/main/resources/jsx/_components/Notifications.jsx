@@ -1,6 +1,3 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-
 const pesSentSuccess = (t) => {
     return {
         title: t('notifications.pes.title'),
@@ -12,10 +9,7 @@ const pesSentSuccess = (t) => {
 
 const pesSentVirus = (t) => {
     return {
-        title: t('notifications.pes.title'),
-        message: t('notifications.pes.sent.virus'),
-        level: 'error',
-        position: 'tc'
+        title: t('notifications.pes.title'), message: t('notifications.pes.sent.virus'), level: 'error', position: 'tc'
     }
 }
 

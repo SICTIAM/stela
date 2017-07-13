@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom';
 import { I18nextProvider } from 'react-i18next'
-import { Router, Route, Switch } from 'react-router-dom'
+import { Router, Route, Switch, Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Container } from 'semantic-ui-react'
 import NotificationSystem from 'react-notification-system'
@@ -9,13 +9,17 @@ import NotificationSystem from 'react-notification-system'
 import 'semantic-ui-css/semantic.min.css';
 import '../styles/index.css';
 
-import history from './util/history'
-import i18n from './util/i18n'
-import MenuBar from './MenuBar'
+import history from './_util/history'
+import i18n from './_util/i18n'
+import MenuBar from './_components/MenuBar'
+import TopBar from './_components/TopBar'
+import Footer from './_components/Footer'
 import Home from './Home'
-import Footer from './Footer'
-import Miat from './Miat'
-import PesList from './PesList'
+import Acte from './acte/Acte'
+import ActeList from './acte/ActeList'
+import NewActe from './acte/NewActe'
+import PesList from './pes/PesList'
+import NewPes from './pes/NewPes'
 
 class App extends Component {
     constructor() {
@@ -43,6 +47,7 @@ class App extends Component {
     render() {
         return (
             <div>
+                <TopBar />
                 <MenuBar />
                 <NotificationSystem ref={n => this._notificationSystem = n} />
                 <Container className='mainContainer'>
@@ -57,8 +62,19 @@ class App extends Component {
 const AppRoute = () =>
     <Switch>
         <Route exact path='/' component={Home} />
-        <Route path='/miat' component={Miat} />
-        <Route path='/pes' component={PesList} />
+
+        <Route exact path='/acte'>
+            <Redirect to="/acte/list" />
+        </Route>
+        <Route path='/acte/list' component={ActeList} />
+        <Route path='/acte/new' component={NewActe} />
+        <Route path='/acte/:uuid' component={Acte} />
+
+        <Route exact path='/pes'>
+            <Redirect to="/pes/list" />
+        </Route>
+        <Route path='/pes/list' component={PesList} />
+        <Route path='/pes/new' component={NewPes} />
     </Switch>
 
 render((
