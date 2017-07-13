@@ -12,10 +12,10 @@ public class Acte {
 
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name= "UUID", strategy = "org.hibernate.id.UUIDGenerator") 
-    private Long uuid;
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String uuid;
 
-    @Column(unique=true)
+    @Column(unique = true)
     private String numero;
 
     public Acte() {
@@ -25,7 +25,7 @@ public class Acte {
         this.numero = numero;
     }
 
-    public Long getUuid() {
+    public String getUuid() {
         return this.uuid;
     }
 
