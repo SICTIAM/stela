@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: acte-service
+  profiles:
+    active: dev
   cloud:
     config:
       failFast: true
