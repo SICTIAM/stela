@@ -2,7 +2,6 @@ package fr.sictiam.stela.acteservice.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +35,7 @@ public class ActeRestController {
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<Acte> getById(@PathVariable Long id) {
+    public ResponseEntity<Acte> getById(@PathVariable String id) {
         Acte acte = this.repository.findByUuid(id).orElseThrow(ActeNotFoundException::new);
         return new ResponseEntity<Acte>(acte, HttpStatus.OK);
     }

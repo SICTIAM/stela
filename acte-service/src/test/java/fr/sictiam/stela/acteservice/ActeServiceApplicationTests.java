@@ -18,8 +18,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -38,7 +36,7 @@ public class ActeServiceApplicationTests {
     private ActeRepository repository;
 	
     private String[] numeros = new String[] { "numero1", "numero2" };   
-    private Hashtable<String, Long> ids = new Hashtable<String, Long>();
+    private Hashtable<String, String> ids = new Hashtable<String, String>();
 
     @Before
     public void setup() throws Exception {
@@ -62,24 +60,23 @@ public class ActeServiceApplicationTests {
         mockMvc.perform(get("/acte/numero/numero3")).andExpect(status().isNotFound());
     }
 
-	// TODO : remove code duplication
     @Test
     public void acteFoundById() throws Exception {
-        for (Map.Entry<String, Long> entry : this.ids.entrySet()) {
+        for (Map.Entry<String, String> entry : this.ids.entrySet()) {
             mockMvc.perform(get("/acte/id/" + entry.getValue()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.numero", is(entry.getKey())))
-                .andExpect(jsonPath("$.uuid", is(entry.getValue().intValue())));
+                .andExpect(jsonPath("$.uuid", is(entry.getValue())));
         };
     }
 
     @Test
     public void acteFoundByNumero() throws Exception {
-	    for (Map.Entry<String, Long> entry : this.ids.entrySet()) {
+	    for (Map.Entry<String, String> entry : this.ids.entrySet()) {
             mockMvc.perform(get("/acte/numero/" + entry.getKey()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.numero", is(entry.getKey())))
-                .andExpect(jsonPath("$.uuid", is(entry.getValue().intValue())));
+                .andExpect(jsonPath("$.uuid", is(entry.getValue())));
         };
     }
 }

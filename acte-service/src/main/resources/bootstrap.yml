@@ -1,3 +1,30 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: acte-service
+  profiles:
+    active: dev
+  cloud:
+    config:
+      failFast: true
+      retry:
+        initialInterval: 2000
+        maxAttempts: 30
+
+---
+
+spring:
+  profiles: dev
+  cloud:
+    config:
+      uri: http://localhost:8888
+
+---
+
+spring:
+  profiles: prod
+  cloud:
+    config:
+      uri: http://config:8888
