@@ -20,6 +20,8 @@ import ActeList from './acte/ActeList'
 import NewActe from './acte/NewActe'
 import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
+import AdminMenuBar from './admin/AdminMenuBar'
+import AdminDashboard from './admin/AdminDashboard'
 
 class App extends Component {
     constructor() {
@@ -48,33 +50,51 @@ class App extends Component {
         return (
             <div>
                 <TopBar />
-                <MenuBar />
                 <NotificationSystem ref={n => this._notificationSystem = n} />
-                <Container className='mainContainer'>
-                    {this.props.children}
-                </Container>
+                {this.props.children}
                 <Footer />
             </div>
         )
     }
 }
 
+const FrontApp = ({ children }) =>
+    <div>
+        <MenuBar />
+        <Container className='mainContainer'>
+            {children}
+        </Container>
+    </div>
+
+const AdminApp = ({ children }) =>
+    <div>
+        <AdminMenuBar />
+        <Container className='mainContainer'>
+            {children}
+        </Container>
+    </div>
+
 const AppRoute = () =>
     <Switch>
-        <Route exact path='/' component={Home} />
+        <Route exact path='/' render={() => <FrontApp><Home /></FrontApp>} />
 
         <Route exact path='/acte'>
             <Redirect to="/acte/list" />
         </Route>
-        <Route path='/acte/list' component={ActeList} />
-        <Route path='/acte/new' component={NewActe} />
-        <Route path='/acte/:uuid' component={Acte} />
+        <Route path='/acte/list' render={() => <FrontApp><ActeList /></FrontApp>} />
+        <Route path='/acte/new' render={() => <FrontApp><NewActe /></FrontApp>} />
+        <Route path='/acte/:uuid' render={() => <FrontApp><Acte /></FrontApp>} />
 
         <Route exact path='/pes'>
             <Redirect to="/pes/list" />
         </Route>
-        <Route path='/pes/list' component={PesList} />
-        <Route path='/pes/new' component={NewPes} />
+        <Route path='/pes/list' render={() => <FrontApp><PesList /></FrontApp>} />
+        <Route path='/pes/new' render={() => <FrontApp><NewPes /></FrontApp>} />
+
+        <Route exact path='/admin'>
+            <Redirect to="/admin/dashboard" />
+        </Route>
+        <Route path='/admin/dashboard' render={() => <AdminApp><AdminDashboard /></AdminApp>} />
     </Switch>
 
 render((

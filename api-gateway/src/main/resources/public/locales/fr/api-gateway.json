@@ -90,5 +90,17 @@
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             }
         }
+    },
+    "admin": {
+        "dashboard": "Tableau de bord",
+        "users": "Utilisateurs",
+        "collectivities": "Collectivités",
+        "modules": {
+            "title": "Modules",
+            "acte": "Acte",
+            "pes": "Pes",
+            "convocation": "Convocation"
+        },
+        "back_to_stela": "Retourner sur STELA"
     }
 }

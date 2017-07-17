@@ -53,6 +53,10 @@ class MenuBar extends Component {
                     </Menu.Menu>
                 </Menu.Item>
 
+                <Menu.Item as={Link} to="/admin" header>
+                    Admin
+                </Menu.Item>
+
                 <Menu.Item>
                     <img style={this.styles.logo} src={process.env.PUBLIC_URL + '/img/logo_sictiam.jpg'} alt="SICTIAM" width="100%" />
                 </Menu.Item>
