@@ -5,6 +5,10 @@ html {
 body, html {
     height: auto;
 }
+.wrapperContainer { 
+    margin-left: 15em; 
+    padding: 0 1em 0 1em; 
+} 
 .mainContainer {
     padding-top: 5em;
     padding-bottom: 3em;
