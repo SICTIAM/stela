@@ -51,7 +51,9 @@ class App extends Component {
             <div>
                 <TopBar />
                 <NotificationSystem ref={n => this._notificationSystem = n} />
-                {this.props.children}
+                <div className='wrapperContainer'>
+                    {this.props.children}
+                </div>
                 <Footer />
             </div>
         )
