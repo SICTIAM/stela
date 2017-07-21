@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import renderIf from 'render-if'
 import { translate } from 'react-i18next'
 
 import StelaTable from '../_components/StelaTable'
@@ -12,7 +13,10 @@ class ActeList extends Component {
         actes: []
     }
     componentDidMount() {
-        // TODO : fetch real actes
+        fetch('/api/acte/', { credentials: 'same-origin' })
+            .then(this.checkStatus)
+            .then(response => response.json())
+            .then(json => this.setState({ actes: json }))
     }
     render() {
         const { t } = this.context
@@ -22,44 +26,7 @@ class ActeList extends Component {
             <div>
                 <h1>{t('acte.list.title')}</h1>
                 <StelaTable
-                    data={[
-                        {
-                            uuid: "041334b4-36df-4de0-9796-978306dc093f",
-                            number: "001",
-                            decision: 1499288997571,
-                            nature: "DELIBERATION",
-                            code: "1-0-0-1-0",
-                            title: "STELA 3 sera fini en Décembre",
-                            creation: 1499288997614,
-                            status: "CREATED",
-                            lastUpdateTime: 1499288997614,
-                            public: true
-                        },
-                        {
-                            uuid: "a2fc06bc-911a-481b-97ce-d1ccd13951a7",
-                            number: "002",
-                            decision: 1499288997630,
-                            nature: "DELIBERATION",
-                            code: "1-0-0-1-0",
-                            title: "SESILE 4 sera fini quand il sera fini",
-                            creation: 1499288997632,
-                            status: "CREATED",
-                            lastUpdateTime: 1499288997632,
-                            public: true
-                        },
-                        {
-                            uuid: "e3eb961b-7979-4808-b75c-04b59bb7531e",
-                            number: "003",
-                            decision: 1499288997635,
-                            nature: "DELIBERATION",
-                            code: "1-0-0-1-0",
-                            title: "Le DC Exporter sera mis aux oubliettes",
-                            creation: 1499288997638,
-                            status: "CREATED",
-                            lastUpdateTime: 1499288997638,
-                            public: true
-                        }
-                    ]}
+                    data={this.state.actes}
                     metaData={[
                         { property: 'uuid', displayed: false, searchable: false },
                         { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },

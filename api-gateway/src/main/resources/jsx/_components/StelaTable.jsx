@@ -40,9 +40,14 @@ export default class StelaTable extends Component {
     }
     state = {
         column: null,
-        data: this.props.data,
+        data: [],
         direction: null,
-        originalData: this.props.data
+        originalData: []
+    }
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps.data && !this.state.dataReceived) {
+            this.setState({ data: nextProps.data, originalData: nextProps.data })
+        }
     }
     dynamicSort = (property, direction) => {
         const sortOrder = direction === 'ascending' ? 1 : -1

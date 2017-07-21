@@ -91,7 +91,7 @@ public class ActeService {
     }
 
     public List<Acte> getAll() {
-        return acteRepository.findAll();
+        return acteRepository.findAllByOrderByCreationDesc();
     }
 
     public Acte getByUuid(String uuid) {
