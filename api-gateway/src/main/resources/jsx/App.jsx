@@ -85,7 +85,7 @@ const AppRoute = () =>
         </Route>
         <Route path='/acte/list' render={() => <FrontApp><ActeList /></FrontApp>} />
         <Route path='/acte/new' render={() => <FrontApp><NewActe /></FrontApp>} />
-        <Route path='/acte/:uuid' render={() => <FrontApp><Acte /></FrontApp>} />
+        <Route path='/acte/:uuid' render={({ match }) => <FrontApp><Acte uuid={match.params.uuid} /></FrontApp>} />
 
         <Route exact path='/pes'>
             <Redirect to="/pes/list" />

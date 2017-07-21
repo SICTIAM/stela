@@ -98,10 +98,6 @@ public class ActeService {
         return acteRepository.findByUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
-    public Acte getByNumber(String number) {
-        return acteRepository.findByNumber(number).orElseThrow(ActeNotFoundException::new);
-    }
-
     /**
      * Initialize a new history.
      * 
@@ -135,6 +131,10 @@ public class ActeService {
         acte.setStatus(status);
         acte.setLastUpdateTime(date);
         acteRepository.save(acte);
+    }
+
+    public List<ActeHistory> getActHistory(String uuid) {
+        return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
     /**

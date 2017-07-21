@@ -1,54 +1,86 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Grid } from 'semantic-ui-react'
+import renderIf from 'render-if'
+import { Grid, Segment } from 'semantic-ui-react'
 
+import { errorNotification } from '../_components/Notifications'
 import ActeHistory from './ActeHistory'
+import history from '../_util/history'
 
 class Acte extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        t: PropTypes.func,
+        _addNotification: PropTypes.func
+    }
+    state = {
+        acte: {},
+        acteFetched: false
+    }
+    checkStatus = (response) => {
+        if (response.status >= 200 && response.status < 300) {
+            return response
+        } else {
+            throw response
+        }
+    }
+    componentDidMount() {
+        const uuid = this.props.uuid
+        if (uuid !== '') {
+            fetch('/api/acte/' + uuid, { credentials: 'same-origin' })
+                .then(this.checkStatus)
+                .then(response => response.json())
+                .then(json => this.setState({ acte: json, acteFetched: true }))
+                .catch(response => {
+                    response.json().then(json => {
+                        console.log(json)
+                        this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    })
+                    history.push('/acte')
+                })
+        }
     }
     render() {
         const { t } = this.context
-        const acte = {
-            uuid: "041334b4-36df-4de0-9796-978306dc093f",
-            number: "001",
-            decision: 1499288997571,
-            nature: "DELIBERATION",
-            code: "1-0-0-1-0",
-            title: "STELA 3 sera fini en Décembre",
-            creation: 1499288997614,
-            status: "CREATED",
-            lastUpdateTime: 1499288997614,
-            public: true
-        }
+        const acteFetched = renderIf(this.state.acteFetched)
+        const acteNotFetched = renderIf(!this.state.acteFetched)
         return (
             <div>
-                <h1>{acte.title}</h1>
+                {acteFetched(
+                    <div>
+                        <Segment>
+                            <h1>{this.state.acte.title}</h1>
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="number">{t('acte.fields.number')}</label></Grid.Column>
+                                <Grid.Column width={13}><span id="number">{this.state.acte.number}</span></Grid.Column>
+                            </Grid>
 
-                <Grid>
-                    <Grid.Column width={3}><label htmlFor="number">{t('acte.fields.number')}</label></Grid.Column>
-                    <Grid.Column width={13}><span id="number">{acte.number}</span></Grid.Column>
-                </Grid>
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
+                                <Grid.Column width={13}><span id="decision">{this.state.acte.decision}</span></Grid.Column>
+                            </Grid>
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
+                                <Grid.Column width={13}><span id="nature">{t(`acte.nature.${this.state.acte.nature}`)}</span></Grid.Column>
+                            </Grid>
 
-                <Grid>
-                    <Grid.Column width={3}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
-                    <Grid.Column width={13}><span id="decision">{acte.decision}</span></Grid.Column>
-                </Grid>
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="code">{t('acte.fields.code')}</label></Grid.Column>
+                                <Grid.Column width={13}><span id="code">{this.state.acte.code}</span></Grid.Column>
+                            </Grid>
 
-                <Grid>
-                    <Grid.Column width={3}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
-                    <Grid.Column width={13}><span id="nature">{acte.nature}</span></Grid.Column>
-                </Grid>
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
+                                <Grid.Column width={13}><span id="file">{this.state.acte.file}</span></Grid.Column>
+                            </Grid>
 
-                <Grid>
-                    <Grid.Column width={3}><label htmlFor="code">{t('acte.fields.code')}</label></Grid.Column>
-                    <Grid.Column width={13}><span id="code">{acte.code}</span></Grid.Column>
-                </Grid>
-
-                <ActeHistory />
-
+                            <ActeHistory uuid={this.props.uuid} />
+                        </Segment>
+                    </div>
+                )}
+                {acteNotFetched(
+                    <p>{t('acte.page.non_existent_act')}</p>
+                )}
             </div>
         )
     }

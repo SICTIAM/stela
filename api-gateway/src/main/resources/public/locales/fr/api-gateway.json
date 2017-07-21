@@ -53,6 +53,11 @@
         "list": {
             "title": "Liste des Actes"
         },
+        "page": {
+            "non_existing_act": "Acte non existant",
+            "historic": "Historique",
+            "no_history": "Aucun historique pour cet acte"
+        },
         "new": {
             "title": "Déposer un acte",
             "choose": "Choisir...",
@@ -90,7 +95,8 @@
                     "empty_acte": "L'acte envoyé est vide",
                     "non_extrayable_act": "Impossible de récupérer les données de l'acte"
                 }
-            }
+            },
+            "not_found": "Acte inexistant"
         },
         "pes": {
             "title": "Module PES",

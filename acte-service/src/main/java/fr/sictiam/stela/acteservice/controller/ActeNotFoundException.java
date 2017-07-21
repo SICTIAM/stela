@@ -9,7 +9,7 @@ public class ActeNotFoundException extends RuntimeException {
     static final long serialVersionUID = 42L;
 
     public ActeNotFoundException() {
-        super();
+        super("notifications.acte.not_found");
     }
     public ActeNotFoundException(String message, Throwable cause){
         super(message, cause);

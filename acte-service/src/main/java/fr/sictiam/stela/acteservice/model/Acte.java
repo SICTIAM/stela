@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -19,12 +20,15 @@ public class Acte {
     @Column(unique=true)
     private String number;
 
+    @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
     private Date creation;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date decision;
 
     private ActeNature nature;
 
+    @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
     private Date lastUpdateTime;
 
     private String code;

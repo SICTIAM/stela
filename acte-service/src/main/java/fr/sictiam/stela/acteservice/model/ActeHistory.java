@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -16,6 +17,7 @@ public class ActeHistory {
     private String uuid;
     private String acteUuid;
     private StatusType status;
+    @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
     private Date date;
 
     public ActeHistory() {
