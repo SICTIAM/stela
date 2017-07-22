@@ -23,8 +23,7 @@ services:
     ports:
      - "8888:8888"
     volumes:
-     # TODO make it relative, not hard-coded
-     - /home/benoit/dev/sictiam/stela-config:/stela-config
+     - ../stela-config:/stela-config
     depends_on:
      - postgresql
      - rabbitmq
