@@ -72,6 +72,7 @@ public class OzwilloProvisioningFilter extends OncePerRequestFilter {
         if (!receivedHmac.equals(computedHmac)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "Provided HMAC does not conform to what was expected : " + receivedHmac);
+            return;
         }
 
         filterChain.doFilter(request, response);
