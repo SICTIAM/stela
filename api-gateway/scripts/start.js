@@ -181,11 +181,11 @@ function addMiddleware(devServer) {
 
     // Otherwise, if proxy is specified, we will let it handle any request.
     // There are a few exceptions which we won't send to the proxy:
-    // - /index.html (served as HTML5 history API fallback)
     // - /*.hot-update.json (WebpackDevServer uses this too for hot reloading)
     // - /sockjs-node/* (WebpackDevServer uses this for hot reloading)
     // Tip: use https://jex.im/regulex/ to visualize the regex
-    var mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/;
+    // Let /index.html go through the backend to handle user login / logout flows
+    var mayProxy = /^(?!\/(.*\.hot-update\.json$|sockjs-node\/)).*$/;
 
     // Pass the scope regex both to Express and to the middleware for proxying
     // of both HTTP and WebSockets to work without false positives.

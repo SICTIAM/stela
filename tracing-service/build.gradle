@@ -1,31 +1,6 @@
-buildscript {
-	ext {
-		springBootVersion = '1.5.3.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath('se.transmode.gradle:gradle-docker:1.2')
-	}
-}
-
-apply plugin: 'org.springframework.boot'
-apply plugin: 'docker'
-
 jar {
 	baseName = 'tracing-service'
 	archiveName = 'tracing-service.jar'
-}
-
-repositories {
-	mavenCentral()
-}
-
-
-ext {
-	springCloudVersion = 'Dalston.RELEASE'
 }
 
 dependencies {
@@ -40,22 +15,4 @@ dependencies {
 
     runtime('org.springframework.boot:spring-boot-devtools')
 	runtime('io.zipkin.java:zipkin-autoconfigure-ui')
-}
-
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
-}
-
-task image(type: Docker, dependsOn: build) {
-    push = false
-    applicationName = jar.baseName
-    dockerfile = file('src/main/docker/Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into stageDir
-        }
-    }
 }

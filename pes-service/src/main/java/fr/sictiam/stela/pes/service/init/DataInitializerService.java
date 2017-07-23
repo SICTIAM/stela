@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("clean-db")
+@Profile("bootstrap-data")
 public class DataInitializerService implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializerService.class);

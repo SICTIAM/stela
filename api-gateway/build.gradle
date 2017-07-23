@@ -1,22 +1,6 @@
-buildscript {
-    ext {
-        springBootVersion = '1.5.3.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath('se.transmode.gradle:gradle-docker:1.2')
-    }
-}
-
 plugins {
     id "com.moowork.node" version "1.1.1"
 }
-
-apply plugin: 'org.springframework.boot'
-apply plugin: 'docker'
 
 jar {
     baseName = 'api-gateway'
@@ -29,15 +13,6 @@ node {
     download = true
 }
 
-repositories {
-    mavenCentral()
-}
-
-
-ext {
-    springCloudVersion = 'Dalston.RELEASE'
-}
-
 dependencies {
     compile('org.springframework.boot:spring-boot-devtools')
     compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -45,19 +20,13 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-zuul')
-    compile('org.springframework.cloud:spring-cloud-starter-feign')
     compile('org.springframework.cloud:spring-cloud-starter-hystrix')
-    compile('org.springframework.security.oauth:spring-security-oauth2')
     compile('org.springframework.cloud:spring-cloud-starter-security')
     compile("org.springframework.retry:spring-retry")
     compile("org.springframework.boot:spring-boot-starter-aop")
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.ozwillo:ozwillo-java-spring-integration:1.25')
     testCompile('org.springframework.boot:spring-boot-starter-test')
-}
-
-bootRun {
-    addResources = true
-    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "dev"
 }
 
 springBoot {
@@ -71,33 +40,11 @@ springBoot {
              initInfoProvides: 'api-gateway']
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
-}
-
 configure(tasks.processResources) {
     // we don't want source JSX in the jar, we only need their transpiled, bundled version in build/
     exclude 'jsx/'
     exclude 'build/'
     exclude 'styles/'
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
-
-task image(type: Docker, dependsOn: build) {
-    push = false
-    applicationName = jar.baseName
-    dockerfile = file('src/main/docker/Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into stageDir
-        }
-    }
 }
 
 task frontBundle(type: NpmTask) {

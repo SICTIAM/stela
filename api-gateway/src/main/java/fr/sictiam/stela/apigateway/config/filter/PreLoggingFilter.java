@@ -1,4 +1,4 @@
-package fr.sictiam.stela.apigateway.filter;
+package fr.sictiam.stela.apigateway.config.filter;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;

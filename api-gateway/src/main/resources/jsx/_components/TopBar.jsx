@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Menu, Dropdown, Container } from 'semantic-ui-react'
+import { Button, Menu, Dropdown, Container } from 'semantic-ui-react'
 
 class TopBar extends Component {
     render() {
@@ -13,6 +13,9 @@ class TopBar extends Component {
                                 <Dropdown.Item>Déconnexion</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
+                        <Menu.Item>
+                            <Button primary onClick={() => window.location.href='/login'}>Connexion</Button>
+                        </Menu.Item>
                     </Menu.Menu>
                 </Container>
             </Menu>

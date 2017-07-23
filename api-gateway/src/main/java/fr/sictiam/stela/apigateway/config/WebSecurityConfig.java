@@ -1,20 +1,51 @@
 package fr.sictiam.stela.apigateway.config;
 
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
+import org.oasis_eu.spring.config.OasisSecurityConfiguration;
+import org.oasis_eu.spring.kernel.security.OasisAuthenticationFilter;
+import org.oasis_eu.spring.kernel.security.OpenIdCConfiguration;
+import org.oasis_eu.spring.kernel.security.StaticOpenIdCConfiguration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-@EnableOAuth2Sso
+import java.util.Arrays;
+
 @Configuration
-class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends OasisSecurityConfiguration {
+
+    @Value("${application.url}")
+    String applicationUrl;
+
+    @Bean
+    @Primary
+    public OpenIdCConfiguration openIdCConfiguration() {
+        StaticOpenIdCConfiguration configuration = new OpenIdConnectConfiguration();
+        configuration.addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/", "/build/"));
+        return configuration;
+    }
+
+    @Override
+    public OasisAuthenticationFilter oasisAuthenticationFilter() throws Exception {
+        OasisAuthenticationFilter filter = super.oasisAuthenticationFilter();
+        filter.setSuccessHandler(new StelaAuthenticationSuccessHandler(applicationUrl));
+        return filter;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.antMatcher("/**")
+        http
+                .addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
-                .antMatchers("/", "/login**").permitAll()
-                .anyRequest().authenticated()
-                .and().logout().logoutSuccessUrl("/").permitAll();
+                    .anyRequest().authenticated().and()
+                .logout()
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
+                .exceptionHandling()
+                    .authenticationEntryPoint(authenticationEntryPoint()).and()
+                .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class);
     }
 }
