@@ -1,31 +1,6 @@
-buildscript {
-	ext {
-		springBootVersion = '1.5.3.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath('se.transmode.gradle:gradle-docker:1.2')
-	}
-}
-
-apply plugin: 'org.springframework.boot'
-apply plugin: 'docker'
-
 jar {
 	baseName = 'stela-pes-service'
 	archiveName = 'stela-pes-service.jar'
-}
-
-repositories {
-	mavenCentral()
-}
-
-
-ext {
-	springCloudVersion = 'Dalston.RELEASE'
 }
 
 dependencies {
@@ -44,28 +19,4 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
-}
-
-bootRun {
-	addResources = true
-
-	environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "dev"
-}
-
 check.dependsOn.remove(test)
-
-task image(type: Docker, dependsOn: build) {
-    push = false
-    applicationName = jar.baseName
-    dockerfile = file('src/main/docker/Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into stageDir
-        }
-    }
-}
