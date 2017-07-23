@@ -56,6 +56,8 @@ public class OzwilloProvisioningFilter extends OncePerRequestFilter {
             String requestBody = IOUtils.toString(request.getReader());
             LOGGER.debug("Received request body is {}", requestBody);
             computedHmac = Hex.encodeHexString(mac.doFinal(requestBody.getBytes()));
+            // set the body in a request attribute as it can't be read twice from the request
+            request.setAttribute("provisioningRequest", requestBody);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("Err, sha1 is not available ?!");
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "sha1 algo is not available");
@@ -71,5 +73,7 @@ public class OzwilloProvisioningFilter extends OncePerRequestFilter {
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "Provided HMAC does not conform to what was expected : " + receivedHmac);
         }
+
+        filterChain.doFilter(request, response);
     }
 }

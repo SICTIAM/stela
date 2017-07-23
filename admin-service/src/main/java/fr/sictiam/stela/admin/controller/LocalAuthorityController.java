@@ -1,8 +1,10 @@
 package fr.sictiam.stela.admin.controller;
 
-import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.ProvisioningRequest;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -11,6 +13,8 @@ import javax.validation.Valid;
 @RequestMapping("/api/admin/local-authority")
 public class LocalAuthorityController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityController.class);
+
     private final LocalAuthorityService localAuthorityService;
 
     public LocalAuthorityController(LocalAuthorityService localAuthorityService) {
@@ -18,8 +22,9 @@ public class LocalAuthorityController {
     }
 
     @PostMapping
-    public void create(@RequestBody @Valid LocalAuthority localAuthority) {
-        localAuthorityService.create(localAuthority);
+    public void create(@RequestBody @Valid ProvisioningRequest provisioningRequest) {
+        LOGGER.debug("Got a provisioning request : {}", provisioningRequest);
+        // localAuthorityService.create(localAuthority);
     }
 
     @PostMapping("/{uuid}/{module}")
