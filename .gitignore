@@ -32,3 +32,4 @@ nbdist/
 *.PS1
 bin/
 .vscode/
+\.gradletasknamecache
