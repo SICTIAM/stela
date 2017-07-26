@@ -6,8 +6,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class Agent {
@@ -23,14 +21,13 @@ public class Agent {
     // the sub in OpenId Connect parliance
     @NotNull
     @NotEmpty
+    @Column(unique = true)
     private String sub;
     @NotNull
     @NotEmpty
     private String email;
     @NotNull
     private Boolean admin;
-    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<AgentModule> modules = new ArrayList<>();
 
     protected Agent() {
     }
@@ -69,24 +66,20 @@ public class Agent {
         this.email = email;
     }
 
-    public List<AgentModule> getModules() {
-        return modules;
-    }
-
     public String getSub() {
         return sub;
+    }
+
+    public void setSub(String sub) {
+        this.sub = sub;
     }
 
     public boolean isAdmin() {
         return admin;
     }
 
-    public void setModules(List<AgentModule> modules) {
-        this.modules = modules;
-    }
-
-    public void addModule(AgentModule agentModule) {
-        this.modules.add(agentModule);
+    public void setAdmin(Boolean admin) {
+        this.admin = admin;
     }
 
     @Override

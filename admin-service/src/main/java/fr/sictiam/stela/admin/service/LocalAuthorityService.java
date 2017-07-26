@@ -35,4 +35,8 @@ public class LocalAuthorityService {
     public Optional<LocalAuthority> findByName(String name) {
         return localAuthorityRepository.findByName(name);
     }
+
+    public Optional<LocalAuthority> findBySiren(String siren) {
+        return localAuthorityRepository.findBySiren(siren);
+    }
 }
