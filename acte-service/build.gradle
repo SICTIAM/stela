@@ -12,6 +12,7 @@ dependencies {
     compile('org.apache.commons:commons-compress:1.4')
     compile('org.codehaus.groovy:groovy:2.4.12')
     compile('org.codehaus.groovy:groovy-templates:2.4.7')
+    compile('com.sun.mail:javax.mail:1.6.0')
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
