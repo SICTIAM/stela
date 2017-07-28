@@ -17,6 +17,14 @@ public class LocalAuthorityService {
     }
 
     public LocalAuthority create(LocalAuthority localAuthority) {
+        localAuthority = localAuthorityRepository.save(localAuthority);
+
+        // TODO : send a message to the bus
+
+        return localAuthority;
+    }
+
+    public LocalAuthority modify(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
     }
 

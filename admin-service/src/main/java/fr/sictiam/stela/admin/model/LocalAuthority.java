@@ -19,6 +19,7 @@ public class LocalAuthority {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Module> activatedModules;
+    private OzwilloInstanceInfo ozwilloInstanceInfo;
 
     protected LocalAuthority() {
         this.activatedModules = new HashSet<>();
@@ -64,6 +65,14 @@ public class LocalAuthority {
 
     public void removeModule(Module module) {
         this.activatedModules.remove(module);
+    }
+
+    public OzwilloInstanceInfo getOzwilloInstanceInfo() {
+        return ozwilloInstanceInfo;
+    }
+
+    public void setOzwilloInstanceInfo(OzwilloInstanceInfo ozwilloInstanceInfo) {
+        this.ozwilloInstanceInfo = ozwilloInstanceInfo;
     }
 
     @Override
