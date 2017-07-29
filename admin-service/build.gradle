@@ -1,3 +1,10 @@
+repositories {
+    maven {
+        // docker-compose-rule is published on bintray
+        url 'https://dl.bintray.com/palantir/releases'
+    }
+}
+
 jar {
     baseName = 'stela-admin-service'
     archiveName = 'stela-admin-service.jar'
@@ -13,4 +20,19 @@ dependencies {
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
+}
+
+test {
+    useJUnit {
+        excludeCategories 'fr.sictiam.stela.adminservice.IntegrationTest'
+    }
+}
+
+task integrationTest(type: Test) {
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
+
+    useJUnit {
+        includeCategories 'fr.sictiam.stela.adminservice.IntegrationTest'
+    }
 }
