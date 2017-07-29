@@ -1,6 +1,8 @@
 package fr.sictiam.stela.admin.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.ProvisioningRequest;
@@ -11,11 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityExistsException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Collections;
@@ -70,15 +73,15 @@ public class OzwilloProvisioningService {
     private String hostSuffix;
 
     private final LocalAuthorityService localAuthorityService;
-    private final AgentService agentService;
     private final OzwilloServiceProperties ozwilloServiceProperties;
+    private final RestTemplate restTemplate;
 
     @Autowired
     public OzwilloProvisioningService(LocalAuthorityService localAuthorityService,
-                                      AgentService agentService, OzwilloServiceProperties ozwilloServiceProperties) {
+                                      OzwilloServiceProperties ozwilloServiceProperties, RestTemplate restTemplate) {
         this.localAuthorityService = localAuthorityService;
-        this.agentService = agentService;
         this.ozwilloServiceProperties = ozwilloServiceProperties;
+        this.restTemplate = restTemplate;
     }
 
     public void createNewInstance(ProvisioningRequest provisioningRequest) {
@@ -95,19 +98,9 @@ public class OzwilloProvisioningService {
                 provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getId(),
                 provisioningRequest.getOrganization().getDcId());
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
-        localAuthority = localAuthorityService.create(localAuthority);
-
-        // TODO : would be better to have family and given names but it costs two requests ...
-        //        (one to get the token and one to get the user infos)
-//        Agent agent = new Agent(provisioningRequest.getUser().getName(), "", provisioningRequest.getUser().getEmailAddress());
-//        agent.setSub(provisioningRequest.getUser().getId());
-//        agent.setAdmin(true);
-//        agentService.createIfNotExists(agent);
+        localAuthorityService.create(localAuthority);
 
         notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo);
-
-        localAuthority.getOzwilloInstanceInfo().setNotifiedToKernel(true);
-        localAuthorityService.modify(localAuthority);
     }
 
     private void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo) {
@@ -121,12 +114,36 @@ public class OzwilloProvisioningService {
 
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
-        KernelRegistrationResponse kernelRegistrationResponse =
-                new KernelRegistrationResponse(provisioningRequest, ozwilloInstanceInfo, ozwilloServiceProperties);
-        LOGGER.debug("Generated kernel response {}", kernelRegistrationResponse);
+        KernelInstanceRegistrationRequest kernelInstanceRegistrationRequest =
+                new KernelInstanceRegistrationRequest(provisioningRequest, ozwilloInstanceInfo, ozwilloServiceProperties);
+        LOGGER.debug("Generated kernel response {}", kernelInstanceRegistrationRequest);
+
+        HttpEntity<KernelInstanceRegistrationRequest> request = new HttpEntity<>(kernelInstanceRegistrationRequest, httpHeaders);
+        ResponseEntity<String> response =
+                restTemplate.exchange(provisioningRequest.getInstanceRegistrationUri(), HttpMethod.POST, request, String.class);
+
+        if (response.getStatusCode().is4xxClientError()) {
+            LOGGER.error("Error while acknowledging instanciation response : {}", response.getBody());
+        } else if (response.getStatusCode().is2xxSuccessful()) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                JsonNode node = mapper.readTree(response.getBody());
+                String serviceId = node.get(ozwilloServiceProperties.localId).asText();
+                LOGGER.debug("Got service id : {}", serviceId);
+                LocalAuthority localAuthority =
+                        localAuthorityService.findByName(provisioningRequest.getOrganization().getName()).get();
+                localAuthority.getOzwilloInstanceInfo().setServiceId(serviceId);
+                localAuthority.getOzwilloInstanceInfo().setNotifiedToKernel(true);
+                localAuthorityService.modify(localAuthority);
+            } catch (IOException e) {
+                LOGGER.error("Error while reading kernel response", e);
+            }
+        } else {
+            LOGGER.warn("Unknown status code returned from the kernel : {} ({})", response.getBody(), response.getStatusCodeValue());
+        }
     }
 
-    private class KernelRegistrationResponse {
+    private class KernelInstanceRegistrationRequest {
         @JsonProperty("instance_id")
         private String instanceId;
         @JsonProperty("destruction_uri")
@@ -139,8 +156,8 @@ public class OzwilloProvisioningService {
         private String statusChangedSecret;
         private Service service;
 
-        public KernelRegistrationResponse(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
-                                          OzwilloServiceProperties ozwilloServiceProperties) {
+        public KernelInstanceRegistrationRequest(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
+                                                 OzwilloServiceProperties ozwilloServiceProperties) {
             this.instanceId = ozwilloInstanceInfo.getInstanceId();
             this.destructionUri = getInstanceUri(provisioningRequest.getOrganization().getName(), "ozwillo/delete");
             this.destructionSecret = ozwilloInstanceInfo.getDestructionSecret();
@@ -151,7 +168,7 @@ public class OzwilloProvisioningService {
 
         @Override
         public String toString() {
-            return "KernelRegistrationResponse{" +
+            return "KernelInstanceRegistrationRequest{" +
                     "instanceId='" + instanceId + '\'' +
                     ", destructionUri='" + destructionUri + '\'' +
                     ", destructionSecret='" + destructionSecret + '\'' +

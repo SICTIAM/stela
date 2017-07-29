@@ -22,6 +22,17 @@ public class ProvisioningRequest {
     public ProvisioningRequest() {
     }
 
+    public ProvisioningRequest(String instanceId, String clientId, String clientSecret, User user,
+                               Organization organization, String instanceRegistrationUri, AuthorizationGrant authorizationGrant) {
+        this.instanceId = instanceId;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.user = user;
+        this.organization = organization;
+        this.instanceRegistrationUri = instanceRegistrationUri;
+        this.authorizationGrant = authorizationGrant;
+    }
+
     public String getInstanceId() {
         return instanceId;
     }
@@ -63,14 +74,17 @@ public class ProvisioningRequest {
                 '}';
     }
 
-    public class User {
+    public static class User {
 
         private String id;
         private String name;
-        @JsonProperty(value = "email_address")
-        private String emailAddress;
 
         public User() {
+        }
+
+        public User(String id, String name) {
+            this.id = id;
+            this.name = name;
         }
 
         public String getId() {
@@ -81,21 +95,16 @@ public class ProvisioningRequest {
             return name;
         }
 
-        public String getEmailAddress() {
-            return emailAddress;
-        }
-
         @Override
         public String toString() {
             return "User{" +
                     "id='" + id + '\'' +
                     ", name='" + name + '\'' +
-                    ", emailAddress='" + emailAddress + '\'' +
                     '}';
         }
     }
 
-    public class Organization {
+    public static class Organization {
 
         private String id;
         private String name;
@@ -104,6 +113,13 @@ public class ProvisioningRequest {
         private String dcId;
 
         public Organization() {
+        }
+
+        public Organization(String id, String name, String type, String dcId) {
+            this.id = id;
+            this.name = name;
+            this.type = type;
+            this.dcId = dcId;
         }
 
         public String getId() {

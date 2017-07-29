@@ -18,6 +18,7 @@ public class OzwilloInstanceInfo {
     private String kernelId;
     private String dcId;
     private boolean notifiedToKernel = false;
+    private String serviceId;
 
     public OzwilloInstanceInfo() {
     }
@@ -74,6 +75,14 @@ public class OzwilloInstanceInfo {
 
     public String getDcId() {
         return dcId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     public boolean isNotifiedToKernel() {
