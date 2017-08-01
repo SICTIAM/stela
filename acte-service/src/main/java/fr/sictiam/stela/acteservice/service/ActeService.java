@@ -47,8 +47,8 @@ public class ActeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeService.class);
     
-    private ActeRepository acteRepository;
-    private ActeHistoryRepository acteHistoryRepository;
+    private final ActeRepository acteRepository;
+    private final ActeHistoryRepository acteHistoryRepository;
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository){
@@ -98,42 +98,21 @@ public class ActeService {
         return acteRepository.findByUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
-    /**
-     * Initialize a new history.
-     * 
-     * @param acte The acte which gonna have a glorious history.
-     * 
-     * @return An ActeHistory object, representing the current state of the acte's history.
-     */
-    protected ActeHistory initHistory(Acte acte) {
-        return acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.CREATED, new Date()));
+    private ActeHistory initHistory(Acte acte) {
+        return acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.CREATED, acte.getCreation()));
     }
 
-    /**
-     * Update an acte's history.
-     * 
-     * @param acte Acte which history gonna be updated.
-     * @param statusType The new state of history for the Acte.
-     * 
-     * @return An ActeHistory object, representing the current state of the acte's acteHistoryRepository.
-     */
-    protected ActeHistory updateHistory(Acte acte, StatusType statusType) {
+    private ActeHistory updateHistory(Acte acte, StatusType statusType) {
         return acteHistoryRepository.save(new ActeHistory(acte.getUuid(), statusType, new Date()));
     }
 
-    /**
-     * Update an acte's status.
-     * 
-     * @param acte Acte which status gonna be updated.
-     * @param statusType The new status of the Acte.
-     */
-    protected void updateActeStatus(Acte acte, Date date, StatusType status) {
+    private Acte updateActeStatus(Acte acte, Date date, StatusType status) {
         acte.setStatus(status);
         acte.setLastUpdateTime(date);
-        acteRepository.save(acte);
+        return acteRepository.save(acte);
     }
 
-    public List<ActeHistory> getActHistory(String uuid) {
+    public List<ActeHistory> getActeHistory(String uuid) {
         return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
@@ -166,8 +145,8 @@ public class ActeService {
                                     Flux.TRANSMISSION_ACTE.getTransactionNumber(),
                                     Flux.TRANSMISSION_ACTE.getFluxNumber());
 
-        Map<Path, String> filesToArchive = new HashMap<Path, String>();
-        List<String> filenamesToReference = new ArrayList<String>();
+        Map<Path, String> filesToArchive = new HashMap<>();
+        List<String> filenamesToReference = new ArrayList<>();
 
         String acteFilename = String.format("CO_DE-%s_%d.%s", baseFilename, sequence, StringUtils.getFilenameExtension(file.getOriginalFilename()));
         Path acteTempFile = createTempFile(file.getBytes());

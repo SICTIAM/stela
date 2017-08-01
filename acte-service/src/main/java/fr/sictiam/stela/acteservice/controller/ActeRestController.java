@@ -23,7 +23,7 @@ public class ActeRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeRestController.class);
 
-    private ActeService acteService;
+    private final ActeService acteService;
 
     @Autowired
     public ActeRestController(ActeService acteService){
@@ -31,33 +31,34 @@ public class ActeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Acte>> readActes() {
+    public ResponseEntity<List<Acte>> getAll() {
         List<Acte> actes = acteService.getAll();
-        return new ResponseEntity<List<Acte>>(actes, HttpStatus.OK);
+        return new ResponseEntity<>(actes, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<Acte> getById(@PathVariable String uuid) {
+    public ResponseEntity<Acte> getByUuid(@PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        return new ResponseEntity<Acte>(acte, HttpStatus.OK);
+        return new ResponseEntity<>(acte, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history")
     public ResponseEntity<List<ActeHistory>> getHistory(@PathVariable String uuid) {
-        List<ActeHistory> acteHistoryList = acteService.getActHistory(uuid);
+        List<ActeHistory> acteHistoryList = acteService.getActeHistory(uuid);
         return new ResponseEntity<>(acteHistoryList, HttpStatus.OK);
     }
 
     @PostMapping
-    ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file, @RequestParam("annexes") MultipartFile... annexes) {
-        
+    ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
+                                  @RequestParam("annexes") MultipartFile... annexes) {
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             Acte acte = mapper.readValue(acteJson, Acte.class);
             
-            LOGGER.info("Received acte : {}", acte.getTitle());
-            LOGGER.info("Received main file : {}", file.getOriginalFilename());
-            LOGGER.info("Received {} annexes : ", annexes.length);
+            LOGGER.debug("Received acte : {}", acte.getTitle());
+            LOGGER.debug("Received main file : {}", file.getOriginalFilename());
+            LOGGER.debug("Received {} annexes : ", annexes.length);
 
             Acte result = acteService.createAndSend(acte, file, annexes);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.OK);
