@@ -42,6 +42,8 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                 .addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                     .anyRequest().authenticated().and()
+                .csrf()
+                    .disable()
                 .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
                 .exceptionHandling()
