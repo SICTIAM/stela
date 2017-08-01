@@ -25,7 +25,7 @@ dependencies {
     compile("org.springframework.retry:spring-retry")
     compile("org.springframework.boot:spring-boot-starter-aop")
     compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.ozwillo:ozwillo-java-spring-integration:1.25')
+    compile('com.ozwillo:ozwillo-java-spring-integration:1.25.3')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

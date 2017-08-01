@@ -32,31 +32,31 @@
             "NACK_RECEIVED": "Anomalie Ministère"
         },
         "nature": {
-            "DELIBERATION": "Délibération",
-            "REGULATORY_ORDER": "Actes réglementaires",
-            "INDIVIDUAL_ORDER": "Actes individuels",
-            "CONTRACTS_AND_AGREEMENTS": "Contrats, conventions et avenants",
-            "BUDGET_AND_FINANCIAL_DOCUMENTS": "Documents budgétaires et financiers",
-            "OTHERS": "Autres"
+            "DELIBERATIONS": "Délibérations",
+            "ARRETES_REGLEMENTAIRES": "Actes réglementaires",
+            "ARRETES_INDIVIDUELS": "Actes individuels",
+            "CONTRATS_ET_CONVENTIONS": "Contrats, conventions et avenants",
+            "DOCUMENTS_BUDGETAIRES_ET_FINANCIERS": "Documents budgétaires et financiers",
+            "AUTRES": "Autres"
+        },
+        "fields": {
+            "number": "Numéro d'acte",
+            "decision": "Date de décision",
+            "nature": "Nature",
+            "code": "Code matière",
+            "file": "Fichier acte",
+            "annexes": "Fichiers annexes",
+            "public": "Affichage dans le registre des délibération",
+            "title": "Titre",
+            "status": "Status"
         },
         "list": {
-            "title": "Liste des Actes",
-            "table": {
-                "number": "Numéro d'acte",
-                "decisionDate": "Date de décision",
-                "nature": "Nature",
-                "title": "Titre",
-                "status": "Status"
-            }
+            "title": "Liste des Actes"
         },
         "new": {
-            "title": "Déposer un acte"
-        },
-        "page": {
-            "number": "Numéro de l'acte",
-            "decisionDate": "Date de la décision",
-            "nature": "Nature de l'acte",
-            "code": "Matière de l'acte"
+            "title": "Déposer un acte",
+            "choose": "Choisir...",
+            "submit": "Envoyer"
         }
     },
     "pes": {
@@ -66,7 +66,7 @@
                 "empty": "Aucun PES",
                 "title": "Titre",
                 "comment": "Commentaire",
-                "creationDate": "Date de création",
+                "creation": "Date de création",
                 "status": "Status",
                 "lastUpdateTime": "Dernière mise à jour"
             },
@@ -82,6 +82,16 @@
         }
     },
     "notifications": {
+        "acte": {
+            "title": "Module Acte",
+            "sent": {
+                "success": "Le dépot Acte a bien été effectué",
+                "error": {
+                    "empty_acte": "L'acte envoyé est vide",
+                    "non_extrayable_act": "Impossible de récupérer les données de l'acte"
+                }
+            }
+        },
         "pes": {
             "title": "Module PES",
             "sent": {

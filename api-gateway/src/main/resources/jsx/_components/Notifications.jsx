@@ -1,3 +1,21 @@
+const errorNotification = (title, message) => {
+    return {
+        title: title,
+        message: message,
+        level: 'error',
+        position: 'tc'
+    }
+}
+
+const acteSentSuccess = (t) => {
+    return {
+        title: t('notifications.acte.title'),
+        message: t('notifications.acte.sent.success'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
 const pesSentSuccess = (t) => {
     return {
         title: t('notifications.pes.title'),
@@ -22,4 +40,4 @@ const pesSentMissingData = (t) => {
     }
 }
 
-module.exports = { pesSentSuccess, pesSentVirus, pesSentMissingData }
+module.exports = { errorNotification, acteSentSuccess, pesSentSuccess, pesSentVirus, pesSentMissingData }

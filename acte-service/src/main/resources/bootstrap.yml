@@ -1,11 +1,9 @@
 server:
-  port: 8080
+  port: 9008
 
 spring:
   application:
     name: acte-service
-  profiles:
-    active: dev
   cloud:
     config:
       failFast: true

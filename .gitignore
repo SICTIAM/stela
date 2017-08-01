@@ -31,3 +31,4 @@ nbdist/
 .env
 *.PS1
 bin/
+.vscode/
