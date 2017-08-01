@@ -17,6 +17,14 @@ public class LocalAuthorityService {
     }
 
     public LocalAuthority create(LocalAuthority localAuthority) {
+        localAuthority = localAuthorityRepository.save(localAuthority);
+
+        // TODO : send a message to the bus
+
+        return localAuthority;
+    }
+
+    public LocalAuthority modify(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
     }
 
@@ -34,5 +42,9 @@ public class LocalAuthorityService {
 
     public Optional<LocalAuthority> findByName(String name) {
         return localAuthorityRepository.findByName(name);
+    }
+
+    public Optional<LocalAuthority> findBySiren(String siren) {
+        return localAuthorityRepository.findBySiren(siren);
     }
 }

@@ -4,7 +4,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,12 +14,12 @@ public class LocalAuthority {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     private String name;
+    @Column(unique = true)
     private String siren;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Module> activatedModules;
-    @OneToMany(mappedBy = "localAuthority", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<AgentModule> agents;
+    private OzwilloInstanceInfo ozwilloInstanceInfo;
 
     protected LocalAuthority() {
         this.activatedModules = new HashSet<>();
@@ -68,16 +67,12 @@ public class LocalAuthority {
         this.activatedModules.remove(module);
     }
 
-    public List<AgentModule> getAgents() {
-        return agents;
+    public OzwilloInstanceInfo getOzwilloInstanceInfo() {
+        return ozwilloInstanceInfo;
     }
 
-    public void setAgents(List<AgentModule> agents) {
-        this.agents = agents;
-    }
-
-    public void addAgent(AgentModule agentModule) {
-        this.agents.add(agentModule);
+    public void setOzwilloInstanceInfo(OzwilloInstanceInfo ozwilloInstanceInfo) {
+        this.ozwilloInstanceInfo = ozwilloInstanceInfo;
     }
 
     @Override

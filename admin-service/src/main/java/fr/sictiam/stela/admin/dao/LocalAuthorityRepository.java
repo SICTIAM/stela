@@ -10,4 +10,5 @@ public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, 
 
     List<LocalAuthority> findAll();
     Optional<LocalAuthority> findByName(String name);
+    Optional<LocalAuthority> findBySiren(String siren);
 }

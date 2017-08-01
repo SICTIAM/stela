@@ -28,6 +28,5 @@ public class DataBootstrapper implements CommandLineRunner {
 
         Agent agent = new Agent("Dupont", "Jean", "dev+stela3@sictiam.fr");
         agent = agentService.create(agent);
-        agentService.addModule(agent.getUuid(), localAuthority.getUuid(), Module.PES);
     }
 }

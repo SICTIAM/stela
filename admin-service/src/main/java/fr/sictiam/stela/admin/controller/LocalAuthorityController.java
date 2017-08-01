@@ -1,8 +1,11 @@
 package fr.sictiam.stela.admin.controller;
 
-import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.ProvisioningRequest;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
+import fr.sictiam.stela.admin.service.OzwilloProvisioningService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -11,15 +14,21 @@ import javax.validation.Valid;
 @RequestMapping("/api/admin/local-authority")
 public class LocalAuthorityController {
 
-    private final LocalAuthorityService localAuthorityService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityController.class);
 
-    public LocalAuthorityController(LocalAuthorityService localAuthorityService) {
+    private final LocalAuthorityService localAuthorityService;
+    private final OzwilloProvisioningService ozwilloProvisioningService;
+
+    public LocalAuthorityController(LocalAuthorityService localAuthorityService,
+                                    OzwilloProvisioningService ozwilloProvisioningService) {
         this.localAuthorityService = localAuthorityService;
+        this.ozwilloProvisioningService = ozwilloProvisioningService;
     }
 
     @PostMapping
-    public void create(@RequestBody @Valid LocalAuthority localAuthority) {
-        localAuthorityService.create(localAuthority);
+    public void create(@RequestBody @Valid ProvisioningRequest provisioningRequest) {
+        LOGGER.debug("Got a provisioning request : {}", provisioningRequest);
+        ozwilloProvisioningService.createNewInstance(provisioningRequest);
     }
 
     @PostMapping("/{uuid}/{module}")
