@@ -1,8 +1,6 @@
 package fr.sictiam.stela.acteservice.service.init;
 
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import org.slf4j.Logger;
@@ -24,9 +22,6 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
     @Autowired
     private ActeService acteService;
 
-    @Autowired
-    private ActeRepository acteRepository;
-
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
         LOGGER.info("Bootstrap data asked");
@@ -46,15 +41,8 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
         LOGGER.info("Bootstrapped some Actes");
     }
 
-    private Acte createDummyActe(Acte acte) {
+    private void createDummyActe(Acte acte) {
         acte.setFile("No file");
-
-        Acte createdActe = acteRepository.save(acte);
-        ActeHistory event = acteService.initHistory(acte);
-
-        createdActe.setCreation(event.getDate());
-        acteService.updateActeStatus(createdActe, event.getDate(), event.getStatus());
-
-        return createdActe;
+        acteService.createAndSend(acte, null, null);
     }
 }
