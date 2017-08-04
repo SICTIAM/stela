@@ -1,0 +1,18 @@
+version: '3'
+services:
+  postgresql:
+    image: postgres:latest
+    ports:
+     - "5432:5432"
+    environment:
+      POSTGRES_USER: stela
+      POSTGRES_PASSWORD: stelapwd
+      POSTGRES_DB: stela-acte-test
+  config:
+    image: stela-poc/config-service
+    ports:
+     - "8888:8888"
+    volumes:
+     - ../../../../../stela-config:/stela-config
+    depends_on:
+     - postgresql

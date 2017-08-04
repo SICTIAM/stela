@@ -17,3 +17,18 @@ dependencies {
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
+
+test {
+    useJUnit {
+        excludeCategories 'fr.sictiam.stela.acteservice.IntegrationTests'
+    }
+}
+
+task integrationTest(type: Test) {
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
+
+    useJUnit {
+        includeCategories 'fr.sictiam.stela.acteservice.IntegrationTests'
+    }
+}
+

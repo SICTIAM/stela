@@ -9,4 +9,5 @@ public enum StatusType {
     NOT_SENT,
     ACK_RECEIVED,
     NACK_RECEIVED,
+    FILE_ERROR
 }

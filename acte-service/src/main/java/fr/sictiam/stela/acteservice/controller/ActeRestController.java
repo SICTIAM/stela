@@ -57,11 +57,10 @@ public class ActeRestController {
             Acte acte = mapper.readValue(acteJson, Acte.class);
             
             LOGGER.debug("Received acte : {}", acte.getTitle());
-            LOGGER.debug("Received main file : {}", file.getOriginalFilename());
-            LOGGER.debug("Received {} annexes : ", annexes.length);
+            LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
 
-            Acte result = acteService.createAndSend(acte, file, annexes);
-            return new ResponseEntity<>(result.getUuid(), HttpStatus.OK);
+            Acte result = acteService.create(acte, file, annexes);
+            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
 
         } catch (IOException e) {
             LOGGER.error("IOException: Could not convert JSON to Acte: {}", e);

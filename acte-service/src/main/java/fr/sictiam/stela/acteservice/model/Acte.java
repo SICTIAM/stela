@@ -3,11 +3,9 @@ package fr.sictiam.stela.acteservice.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Acte {
@@ -36,10 +34,14 @@ public class Acte {
     private String title;
 
     private boolean isPublic;
-    
+
     private StatusType status;
 
-    String file;
+    private byte[] file;
+    private String filename;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Attachment> annexes;
 
     public Acte() {
     }
@@ -129,13 +131,30 @@ public class Acte {
         this.lastUpdateTime = lastUpdateTime;
     }
 
-    public String getFile(){
+    public byte[] getFile(){
         return this.file;
     }
-    
-    public void setFile(String file){
+
+    public void setFile(byte[] file){
         this.file = file;
     }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public List<Attachment> getAnnexes() {
+        return annexes;
+    }
+
+    public void setAnnexes(List<Attachment> annexes) {
+        this.annexes = annexes;
+    }
+
     @Override
     public String toString() {
         return "Acte{" +
@@ -149,7 +168,7 @@ public class Acte {
                 ", creation:" + creation +
                 ", status:" + status +
                 ", lastUpdateTime:" + lastUpdateTime +
-                ", file name:" + file +
+                ", file name:" + filename +
                 '}';
     }
 }

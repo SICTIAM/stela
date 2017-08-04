@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 
 @Component
@@ -19,8 +20,12 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializerService.class);
 
+    private final ActeService acteService;
+
     @Autowired
-    private ActeService acteService;
+    public DataInitializerService(ActeService acteService) {
+        this.acteService = acteService;
+    }
 
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
@@ -42,7 +47,10 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
     }
 
     private void createDummyActe(Acte acte) {
-        acte.setFile("No file");
-        acteService.createAndSend(acte, null, null);
+        try {
+            acteService.create(acte, null, null);
+        } catch (IOException e) {
+            LOGGER.error("Unable to bootstrap acte {}", acte.getNumber());
+        }
     }
 }

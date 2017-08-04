@@ -25,12 +25,18 @@ subprojects {
 	repositories {
 		mavenLocal()
 		mavenCentral()
+		maven {
+			// docker-compose-rule is published on bintray
+			url 'https://dl.bintray.com/palantir/releases'
+		}
 	}
 
 	dependencies {
-		compile 'ch.qos.logback:logback-classic:1.1.5'
-		testCompile 'junit:junit:4.12'
-	}
+        compile('ch.qos.logback:logback-classic:1.1.5')
+        testCompile('junit:junit:4.12')
+        testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
+
+    }
 
     ext {
         springCloudVersion = 'Dalston.RELEASE'
