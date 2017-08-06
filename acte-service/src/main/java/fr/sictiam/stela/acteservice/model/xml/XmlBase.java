@@ -1,4 +1,4 @@
-package fr.sictiam.stela.acteservice.model;
+package fr.sictiam.stela.acteservice.model.xml;
 
 import java.io.IOException;
 import java.util.Map;

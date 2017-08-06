@@ -2,7 +2,7 @@ package fr.sictiam.stela.acteservice.model;
 
 public enum StatusType {
     CREATED,
-    SENT_INITIATED,
+    ARCHIVE_CREATED,
     ANTIVIRUS_OK,
     ANTIVIRUS_KO,
     SENT,

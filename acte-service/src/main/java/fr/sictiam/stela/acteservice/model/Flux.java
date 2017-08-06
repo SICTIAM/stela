@@ -12,7 +12,7 @@ public enum Flux {
     private String transactionNumber;
     private String fluxNumber;
 
-    private Flux(String  transactionNumber, String fluxNumber){
+    Flux(String transactionNumber, String fluxNumber) {
         this.transactionNumber = transactionNumber;
         this.fluxNumber = fluxNumber;
     }

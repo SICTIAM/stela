@@ -1,4 +1,4 @@
-package fr.sictiam.stela.acteservice.model;
+package fr.sictiam.stela.acteservice.model.xml;
 
 import java.util.HashMap;
 import java.util.List;
@@ -122,11 +122,12 @@ public class Message extends XmlBase {
     public void setAnnexesFilenames(List<String> annexesFilenames){
         this.annexesFilenames = annexesFilenames;
     }
+
     protected Map<String, Object> createContext(){
         Map<String, Object> result = new HashMap<>();
 
         result.put("natureCode", this.natureCode);
-        result.put("decisionDate", this.decisionDate );
+        result.put("decisionDate", this.decisionDate);
         result.put("number", this.number);
         result.put("acteTitle", this.acteTitle);
         result.put("codeMatiere1", this.codeMatiere1);

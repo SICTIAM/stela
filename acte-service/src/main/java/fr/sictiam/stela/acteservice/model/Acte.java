@@ -43,6 +43,9 @@ public class Acte {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
 
+    private byte[] archive;
+    private String archiveName;
+
     public Acte() {
     }
 
@@ -63,40 +66,20 @@ public class Acte {
         return this.number;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
     public Date getDecision() {
         return decision;
-    }
-
-    public void setDecision(Date decision) {
-        this.decision = decision;
     }
 
     public ActeNature getNature() {
         return nature;
     }
 
-    public void setNature(ActeNature nature) {
-        this.nature = nature;
-    }
-
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public boolean isPublic() {
@@ -153,6 +136,22 @@ public class Acte {
 
     public void setAnnexes(List<Attachment> annexes) {
         this.annexes = annexes;
+    }
+
+    public byte[] getArchive() {
+        return archive;
+    }
+
+    public void setArchive(byte[] archive) {
+        this.archive = archive;
+    }
+
+    public String getArchiveName() {
+        return archiveName;
+    }
+
+    public void setArchiveName(String archiveName) {
+        this.archiveName = archiveName;
     }
 
     @Override

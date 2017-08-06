@@ -11,7 +11,7 @@ public enum ActeNature {
     private String code;
     private String abbreviation;
 
-    private ActeNature(String code, String abbreviation){
+    ActeNature(String code, String abbreviation){
         this.code = code;
         this.abbreviation = abbreviation;
     }
