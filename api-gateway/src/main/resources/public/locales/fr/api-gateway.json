@@ -1,16 +1,16 @@
 {
-    "app_title": "stela",
+    "app_title": "STELA",
     "heavy_development": "en cours de fort développement",
     "menu": {
         "acte": {
             "legality_control": "Contrôle de légalité",
-            "submit_an_act": "Déposet un acte",
+            "submit_an_act": "Déposer un acte",
             "acts_list": "Liste des actes",
-            "deliberation_register": "Registre des délibarations"
+            "deliberation_register": "Registre des délibérations"
         },
         "pes": {
             "accounting_flow": "Flux comptable",
-            "submit_a_PES_Aller": "Déposet un PES Aller",
+            "submit_a_PES_Aller": "Déposer un PES Aller",
             "PES_Aller_list": "Liste des PES Aller",
             "PES_Retour_list": "Liste des PES Retour"
         },
@@ -24,6 +24,7 @@
     "acte": {
         "status": {
             "CREATED": "Créé",
+            "ARCHIVE_CREATED": "Archive préparée",
             "SENT_INITIATED": "Analyse",
             "ANTIVIRUS_OK": "Antivirus OK",
             "ANTIVIRUS_KO": "Antivirus KO",
@@ -90,7 +91,7 @@
         "acte": {
             "title": "Module Acte",
             "sent": {
-                "success": "Le dépot Acte a bien été effectué",
+                "success": "Le dépot de l'acte a bien été effectué",
                 "error": {
                     "empty_acte": "L'acte envoyé est vide",
                     "non_extrayable_act": "Impossible de récupérer les données de l'acte"
