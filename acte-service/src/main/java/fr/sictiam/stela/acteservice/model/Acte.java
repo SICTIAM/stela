@@ -1,9 +1,12 @@
 package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -21,8 +24,8 @@ public class Acte {
     @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
     private Date creation;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private Date decision;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate decision;
 
     private ActeNature nature;
 
@@ -49,7 +52,7 @@ public class Acte {
     public Acte() {
     }
 
-    public Acte(String number, Date decision, ActeNature nature, String code, String title, boolean isPublic) {
+    public Acte(String number, LocalDate decision, ActeNature nature, String code, String title, boolean isPublic) {
         this.number = number;
         this.decision = decision;
         this.nature = nature;
@@ -66,7 +69,7 @@ public class Acte {
         return this.number;
     }
 
-    public Date getDecision() {
+    public LocalDate getDecision() {
         return decision;
     }
 

@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Component
@@ -34,13 +35,13 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
     }
 
     private void importData() {
-        Acte acte001 = new Acte("001", new Date(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "STELA 3 sera fini en Décembre", true);
+        Acte acte001 = new Acte("001", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "STELA 3 sera fini en Décembre", true);
         createDummyActe(acte001);
 
-        Acte acte002 = new Acte("002", new Date(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "SESILE 4 sera fini quand il sera fini", true);
+        Acte acte002 = new Acte("002", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "SESILE 4 sera fini quand il sera fini", true);
         createDummyActe(acte002);
 
-        Acte acte003 = new Acte("003", new Date(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "Le DC Exporter sera mis en attente", true);
+        Acte acte003 = new Acte("003", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "Le DC Exporter sera mis en attente", true);
         createDummyActe(acte003);
 
         LOGGER.info("Bootstrapped some Actes");

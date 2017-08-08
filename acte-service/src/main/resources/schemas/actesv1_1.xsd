@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsd:schema targetNamespace="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" xmlns:insee="http://xml.insee.fr/schema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" elementFormDefault="qualified" attributeFormDefault="qualified">
+	<xsd:import namespace="http://xml.insee.fr/schema" schemaLocation="siret.xsd"/>
+	<xsd:attribute name="Arrondissement">
+		<xsd:annotation>
+			<xsd:documentation>Numéro à 1 chiffre </xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:nonNegativeInteger">
+				<xsd:pattern value="[0-9]{1}"/>
+			</xsd:restriction>
+		</xsd:simpleType>
+	</xsd:attribute>
+	<xsd:attribute name="Departement">
+		<xsd:annotation>
+			<xsd:documentation>Departement (3 chiffres ou 2 chiffres + A ou B)</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:annotation>
+				<xsd:documentation>Departement (3 caractères)</xsd:documentation>
+			</xsd:annotation>
+			<xsd:restriction base="xsd:string">
+				<xsd:pattern value="[0|9]{1}[0-9]{1}[A|B|0-9]{1}"/>
+			</xsd:restriction>
+		</xsd:simpleType>
+	</xsd:attribute>
+	<xsd:attribute name="CodeNatureActe">
+		<xsd:annotation>
+			<xsd:documentation>Code nature d'acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:integer"/>
+		</xsd:simpleType>
+	</xsd:attribute>
+	<xsd:attribute name="CodeMatiere">
+		<xsd:annotation>
+			<xsd:documentation>Code d'une sous-matière</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:integer"/>
+		</xsd:simpleType>
+	</xsd:attribute>
+	<xsd:attribute name="IDActe">
+		<xsd:annotation>
+			<xsd:documentation>Identifiant unique d'un acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string">
+				<xsd:pattern value="[0|9]{1}[0-9]{1}[A|B|0-9]{1}-[0-9]{9}-[0-9]{8}-[a-zA-Z0-9_]{1,15}-[\p{Lu}]{2}"/>
+			</xsd:restriction>
+		</xsd:simpleType>
+	</xsd:attribute>
+	<xsd:element name="IDSGAR">
+		<xsd:annotation>
+			<xsd:documentation>Identifiant d'un SGAR</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute ref="actes:Departement" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="IDPref">
+		<xsd:annotation>
+			<xsd:documentation>Identifiant d'une préfecture</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute ref="actes:Departement" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="IDSousPref">
+		<xsd:annotation>
+			<xsd:documentation>Identifiant d'une sous-préfecture</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute ref="actes:Departement" use="required"/>
+			<xsd:attribute ref="actes:Arrondissement" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="IDCL">
+		<xsd:annotation>
+			<xsd:documentation>Identifiant d'une collectivité</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute ref="insee:SIREN" use="required"/>
+			<xsd:attribute ref="actes:Departement" use="required"/>
+			<xsd:attribute ref="actes:Arrondissement" use="required"/>
+			<xsd:attribute name="Nature" use="required">
+				<xsd:annotation>
+					<xsd:documentation>Code nature de la collectivité</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:nonNegativeInteger">
+						<xsd:pattern value="[0-9]{2}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:simpleType name="Email">
+		<xsd:annotation>
+			<xsd:documentation>Adresse e-mail</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[_a-zA-Z0-9\-]+(\.[_a-zA-Z0-9\-]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="Matiere">
+		<xsd:annotation>
+			<xsd:documentation>Matiere d'un acte (Code et libellé)</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute ref="actes:CodeMatiere" use="required"/>
+		<xsd:attribute name="Libelle" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="TypePieceJointe">
+		<xsd:annotation>
+			<xsd:documentation>Type de pièce jointe (Code et libellé)</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="CodeTypePJ" type="xsd:string" use="required"/>
+		<xsd:attribute name="Libelle" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="DonneesEnveloppeCLMISILL">
+		<xsd:annotation>
+			<xsd:documentation>Donnees contenues dans une enveloppe de transmission collectivité vers MISILL</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Emetteur">
+				<xsd:annotation>
+					<xsd:documentation>Renseignements concernant l'émetteur</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="actes:IDCL"/>
+						<xsd:element ref="actes:Referent" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="AdressesRetour">
+				<xsd:annotation>
+					<xsd:documentation>Groupe d'adresses</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence maxOccurs="unbounded">
+						<xsd:element name="Email" type="actes:Email">
+							<xsd:annotation>
+								<xsd:documentation>adresse email  à utiliser pour les envois de la préfecture vers la collectivité</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element ref="actes:FormulairesEnvoyes">
+				<xsd:annotation>
+					<xsd:documentation>Liste des fichiers XML envoyés</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DonneesActe">
+		<xsd:annotation>
+			<xsd:documentation>Donnees associees a un acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="CodeMatiere1">
+				<xsd:annotation>
+					<xsd:documentation>Code matière 1</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute ref="actes:CodeMatiere" use="required"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CodeMatiere2">
+				<xsd:annotation>
+					<xsd:documentation>Code matière 2</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute ref="actes:CodeMatiere" use="required"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CodeMatiere3" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Code matière 3</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute ref="actes:CodeMatiere" use="required"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CodeMatiere4" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Code matière 4</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute ref="actes:CodeMatiere" use="required"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CodeMatiere5" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Code matière 5</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute ref="actes:CodeMatiere" use="required"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="Objet">
+				<xsd:annotation>
+					<xsd:documentation>texte max 500 caractères</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="500"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="PrecedentIdentifiantActe" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Identifiant acte déjà transmis</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute ref="actes:IDActe" use="required"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ClassificationDateVersion" type="xsd:date">
+				<xsd:annotation>
+					<xsd:documentation>date de la classification utilisée </xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Document" type="actes:FichierSigne">
+				<xsd:annotation>
+					<xsd:documentation>Document acte</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Annexes">
+				<xsd:annotation>
+					<xsd:documentation>Pièces jointes</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+						<xsd:element name="Annexe" type="actes:FichierSigne"/>
+					</xsd:sequence>
+					<xsd:attribute name="Nombre" type="xsd:nonNegativeInteger" use="required">
+						<xsd:annotation>
+							<xsd:documentation>Nombre total d'annexes à l'acte</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="DocumentPapier" type="xsd:string" nillable="true">
+				<xsd:annotation>
+					<xsd:documentation>L'envoie de la pièce jointe (papier) par courrier</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="Date" type="xsd:date" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Date de la décision</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="NumeroInterne" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Numero interne collectivité, 15 caractères maximum</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="15"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute ref="actes:CodeNatureActe" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="DonneesCourrierPref">
+		<xsd:annotation>
+			<xsd:documentation>Données relatives à un courrier de la préfecture (courrier simple, lettre d'observations, demande de pieces complementaires): identifiant de l'acte + date du courrier</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute ref="actes:IDActe" use="required"/>
+		<xsd:attribute name="DateCourrierPref" type="xsd:date" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="ARReponseCL">
+		<xsd:annotation>
+			<xsd:documentation>Données d'un AR d'une réponse d'une collectivité au courrier d'une préfecture (envoi ou refus d'envoyer des pièces complémentaires, réponse ou rejet pour une lettre d'observations)</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="InfosCourrierPref" type="actes:DonneesCourrierPref"/>
+		</xsd:sequence>
+		<xsd:attribute name="DateReception" type="xsd:date" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="FichierSigne">
+		<xsd:annotation>
+			<xsd:documentation>Nom du fichier et éventuellement la signature du fichier</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="NomFichier" type="xsd:string"/>
+			<xsd:element name="Signature" type="xsd:anyType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="FichiersSignes">
+		<xsd:annotation>
+			<xsd:documentation>Ensemble de fichiers signés</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence maxOccurs="unbounded">
+			<xsd:element name="Document" type="actes:FichierSigne"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:element name="Referent">
+		<xsd:annotation>
+			<xsd:documentation>Nom et coordonées d'un référent</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Nom" type="xsd:string" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation>Nom du référent</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Telephone" type="xsd:string" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation>Téléphone</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Email" type="actes:Email" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation>Adresse e-mail</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="FormulairesEnvoyes">
+		<xsd:annotation>
+			<xsd:documentation>Liste des fichiers XML envoyés</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:element name="Formulaire" type="actes:FichierSigne"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="EnveloppeCLMISILL" type="actes:DonneesEnveloppeCLMISILL">
+		<xsd:annotation>
+			<xsd:documentation>Enveloppe de transmission collectivité vers MISILL</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="EnveloppeMISILLCL">
+		<xsd:annotation>
+			<xsd:documentation>Enveloppe de transmission MISILL vers collectivité</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Emetteur">
+					<xsd:annotation>
+						<xsd:documentation>Renseignements concernant l'émetteur</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:choice>
+								<xsd:element ref="actes:IDSGAR"/>
+								<xsd:element ref="actes:IDPref"/>
+								<xsd:element ref="actes:IDSousPref"/>
+							</xsd:choice>
+							<xsd:element ref="actes:Referent" minOccurs="0"/>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element ref="actes:FormulairesEnvoyes">
+					<xsd:annotation>
+						<xsd:documentation>Liste des fichiers XML envoyés</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Destinataire">
+					<xsd:annotation>
+						<xsd:documentation>Identification de la collectivité destinataire du contenu de l'enveloppe</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute ref="insee:SIREN" use="required"/>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AnomalieEnveloppe">
+		<xsd:annotation>
+			<xsd:documentation>Anomalie dans une enveloppe</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Date" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>Date d'envoi de l'anomalie</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Nature">
+					<xsd:annotation>
+						<xsd:documentation>Nature de l'anomalie</xsd:documentation>
+					</xsd:annotation>
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:integer">
+							<xsd:enumeration value="001"/>
+							<xsd:enumeration value="002"/>
+							<xsd:enumeration value="003"/>
+							<xsd:enumeration value="004"/>
+							<xsd:enumeration value="005"/>
+							<xsd:enumeration value="100"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="Detail" type="xsd:string" minOccurs="0"/>
+				<xsd:element name="EnveloppeRecue" type="actes:DonneesEnveloppeCLMISILL"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="Acte" type="actes:DonneesActe">
+		<xsd:annotation>
+			<xsd:documentation>Transmission d'un acte</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="ARActe">
+		<xsd:annotation>
+			<xsd:documentation>Accusé de réception de la transmission d'un acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="ActeRecu" type="actes:DonneesActe"/>
+				<xsd:element name="ClassificationDateVersionEnCours" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>date de la version de la classification 
+en sous-matières acceptée par la préfecture</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute ref="actes:IDActe" use="required"/>
+			<xsd:attribute name="DateReception" type="xsd:date" use="required">
+				<xsd:annotation>
+					<xsd:documentation>Date de réception de l'acte</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AnomalieActe">
+		<xsd:annotation>
+			<xsd:documentation>Anomalie dans la transmission d'un acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Date" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>Date de notification anomalie</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Nature">
+					<xsd:annotation>
+						<xsd:documentation>Nature de l'anomalie (code sur 3 chiffres)</xsd:documentation>
+					</xsd:annotation>
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:nonNegativeInteger">
+							<xsd:pattern value="[0-9]{3}"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="Detail" type="xsd:string" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation>texte libre facultatif</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="ActeRecu" type="actes:DonneesActe"/>
+				<xsd:element name="ClassificationDateVersionEnCours" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>date de la version de la classification 
+en sous-matières acceptée par la préfecture</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="CourrierSimple">
+		<xsd:annotation>
+			<xsd:documentation>Transmission d'un courrier simple</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ReponseCourrierSimple">
+		<xsd:annotation>
+			<xsd:documentation>Réponse à un courrier simple</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="DemandePieceComplementaire">
+		<xsd:annotation>
+			<xsd:documentation>Demande de pièces complémentaires</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="DescriptionPieces" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation>Texte libre</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ARDemandePieceComplementaire" type="actes:DonneesCourrierPref">
+		<xsd:annotation>
+			<xsd:documentation>Accusé de réception de demande de pièces complémentaires</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="RefusPieceComplementaire">
+		<xsd:annotation>
+			<xsd:documentation>Refus explicite d'envoi de pièces complémentaires</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="PieceComplementaire">
+		<xsd:annotation>
+			<xsd:documentation>Transmission de pièces complémentaires</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Documents" type="actes:FichiersSignes"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ARPieceComplementaire" type="actes:ARReponseCL">
+		<xsd:annotation>
+			<xsd:documentation>Accusé de réception d'envoi (ou de refus explicite d'envoi) de pièces complémentaires</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="LettreObservations">
+		<xsd:annotation>
+			<xsd:documentation>Lettre d'observations</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Motif" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation>Texte libre</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ARLettreObservations" type="actes:DonneesCourrierPref">
+		<xsd:annotation>
+			<xsd:documentation>Accusé de réception de lettre d'observations</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="RejetLettreObservations">
+		<xsd:annotation>
+			<xsd:documentation>Refus explicite de répondre à une lettre d'observations</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ReponseLettreObservations">
+		<xsd:annotation>
+			<xsd:documentation>Réponse à une lettre d'observations</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="actes:DonneesCourrierPref">
+					<xsd:sequence>
+						<xsd:element name="Document" type="actes:FichierSigne"/>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ARReponseRejetLettreObservations" type="actes:ARReponseCL">
+		<xsd:annotation>
+			<xsd:documentation>Accusé de réception d'une réponse (ou d'un refus explicite de répondre) à une lettre d'observations</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="DefereTA">
+		<xsd:annotation>
+			<xsd:documentation>Information de déféré au tribunal administratif</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="DateDepot" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>Date dépôt déféré TA</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="NatureIllegalite" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation>Nature de l'illégalité, motif du déféré au TA (texte libre)</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="PiecesJointes">
+					<xsd:annotation>
+						<xsd:documentation>Document(s) du déféré au TA</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+							<xsd:element name="PieceJointe" type="actes:FichierSigne"/>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute ref="actes:IDActe" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="Annulation">
+		<xsd:annotation>
+			<xsd:documentation>Annulation de la transmission d'un acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute ref="actes:IDActe" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ARAnnulation">
+		<xsd:annotation>
+			<xsd:documentation>Accusé de réception de l'annulation de la transmission d'un acte</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute ref="actes:IDActe" use="required"/>
+			<xsd:attribute name="DateReception" type="xsd:date" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="DemandeClassification">
+		<xsd:annotation>
+			<xsd:documentation>Demande de classification</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence minOccurs="0">
+				<xsd:element name="DateClassification" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>Date de la classification utilisée dans la collectivité</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ReponseClassificationSansChangement">
+		<xsd:annotation>
+			<xsd:documentation>Information: classification utilisée à jour</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="DateClassification" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>date de la classification</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="RetourClassification">
+		<xsd:annotation>
+			<xsd:documentation>Transmission de la classification</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="DateClassification" type="xsd:date">
+					<xsd:annotation>
+						<xsd:documentation>date de la classification</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="NaturesActes">
+					<xsd:complexType>
+						<xsd:sequence maxOccurs="unbounded">
+							<xsd:element name="NatureActe">
+								<xsd:complexType>
+									<xsd:sequence maxOccurs="unbounded">
+										<xsd:element name="TypePJNatureActe" type="actes:TypePieceJointe"/>
+									</xsd:sequence>
+									<xsd:attribute ref="actes:CodeNatureActe"/>
+									<xsd:attribute name="Libelle" type="xsd:string" use="required"/>
+									<xsd:attribute name="TypeAbrege" use="required">
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:length value="2"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Matieres">
+					<xsd:complexType>
+						<xsd:sequence maxOccurs="unbounded">
+							<xsd:element name="Matiere1">
+								<xsd:complexType>
+									<xsd:complexContent>
+										<xsd:extension base="actes:Matiere">
+											<xsd:sequence maxOccurs="unbounded">
+												<xsd:element name="Matiere2">
+													<xsd:complexType>
+														<xsd:complexContent>
+															<xsd:extension base="actes:Matiere">
+																<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+																	<xsd:element name="Matiere3">
+																		<xsd:complexType>
+																			<xsd:complexContent>
+																				<xsd:extension base="actes:Matiere">
+																					<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+																						<xsd:element name="Matiere4">
+																							<xsd:complexType>
+																								<xsd:complexContent>
+																									<xsd:extension base="actes:Matiere">
+																										<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+																											<xsd:element name="Matiere5" type="actes:Matiere"/>
+																										</xsd:sequence>
+																									</xsd:extension>
+																								</xsd:complexContent>
+																							</xsd:complexType>
+																						</xsd:element>
+																					</xsd:sequence>
+																				</xsd:extension>
+																			</xsd:complexContent>
+																		</xsd:complexType>
+																	</xsd:element>
+																</xsd:sequence>
+															</xsd:extension>
+														</xsd:complexContent>
+													</xsd:complexType>
+												</xsd:element>
+											</xsd:sequence>
+										</xsd:extension>
+									</xsd:complexContent>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

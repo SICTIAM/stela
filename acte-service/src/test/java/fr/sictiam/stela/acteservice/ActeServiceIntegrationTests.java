@@ -6,6 +6,7 @@ import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.ArchiveService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.UUID;
+import java.time.LocalDate;
 
 import static org.junit.Assert.*;
 
@@ -60,6 +60,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals("Delib.pdf", acte.getFilename());
         assertEquals("COD001", acte.getCode());
         assertEquals("Title", acte.getTitle());
+        assertEquals(LocalDate.now(), acte.getDecision());
         assertTrue(acte.isPublic());
         assertEquals(2, acteService.getAnnexes(acteUuid).size());
         assertEquals(StatusType.CREATED, acte.getStatus());
@@ -104,7 +105,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     private Acte acte() {
-        return new Acte(UUID.randomUUID().toString(), new Date(), ActeNature.ARRETES_INDIVIDUELS, "COD001",
+        return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "COD001",
                 "Title", true);
     }
 }

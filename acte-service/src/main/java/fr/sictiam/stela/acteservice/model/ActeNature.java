@@ -1,12 +1,12 @@
 package fr.sictiam.stela.acteservice.model;
 
 public enum ActeNature {
-    DELIBERATIONS ("1", "DE"),
-    ARRETES_REGLEMENTAIRES ("2", "AR"),
-    ARRETES_INDIVIDUELS ("3", "AI"),
-    CONTRATS_ET_CONVENTIONS("4", "CC"),
-    DOCUMENTS_BUDGETAIRES_ET_FINANCIERS("5", "BF"),
-    AUTRES("6", "AU");
+    DELIBERATIONS ("01", "DE"),
+    ARRETES_REGLEMENTAIRES ("02", "AR"),
+    ARRETES_INDIVIDUELS ("03", "AI"),
+    CONTRATS_ET_CONVENTIONS("04", "CC"),
+    DOCUMENTS_BUDGETAIRES_ET_FINANCIERS("05", "BF"),
+    AUTRES("06", "AU");
 
     private String code;
     private String abbreviation;
