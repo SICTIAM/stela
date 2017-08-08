@@ -50,12 +50,12 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .antMatchers("/api/**").authenticated().and()
                 .csrf()
                     .disable()
+//                .csrf()
+//                    .ignoringAntMatchers("/ozwillo/**").and()
                 .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
                 .exceptionHandling()
                     .authenticationEntryPoint(authenticationEntryPoint()).and()
-                .csrf()
-                    .ignoringAntMatchers("/ozwillo/**").and()
                 .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class);
     }
 }
