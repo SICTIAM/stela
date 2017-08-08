@@ -1,12 +1,11 @@
 package fr.sictiam.stela.acteservice.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 public class ActeHistory {
@@ -17,14 +16,13 @@ public class ActeHistory {
     private String uuid;
     private String acteUuid;
     private StatusType status;
-    @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
-    private Date date;
+    private LocalDateTime date;
     private String message;
 
     public ActeHistory() {
     }
 
-    public ActeHistory(String acteUuid, StatusType status, Date date, String message) {
+    public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, String message) {
         this.acteUuid = acteUuid;
         this.status = status;
         this.date = date;
@@ -35,7 +33,7 @@ public class ActeHistory {
         return acteUuid;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 

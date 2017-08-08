@@ -113,12 +113,12 @@ public class ArchiveService {
                 acte.setArchiveName(archiveName);
                 acteRepository.save(acte);
 
-                acteService.updateStatus(acte, new Date(), StatusType.ARCHIVE_CREATED, null);
+                acteService.updateStatus(acte, LocalDateTime.now(), StatusType.ARCHIVE_CREATED, null);
 
                 LOGGER.info("Archive created : {}", archiveName);
             } catch (Exception e) {
                 LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-                acteService.updateStatus(acte, new Date(), StatusType.FILE_ERROR, e.getMessage());
+                acteService.updateStatus(acte, LocalDateTime.now(), StatusType.FILE_ERROR, e.getMessage());
             }
         });
     }

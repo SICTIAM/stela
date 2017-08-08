@@ -1,12 +1,12 @@
 package fr.sictiam.stela.acteservice.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -21,16 +21,14 @@ public class Acte {
     @Column(unique=true)
     private String number;
 
-    @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
-    private Date creation;
+    private LocalDateTime creation;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate decision;
 
     private ActeNature nature;
 
-    @JsonFormat(pattern="dd/MM/yyyy - HH:mm")
-    private Date lastUpdateTime;
+    private LocalDateTime lastUpdateTime;
 
     private String code;
 
@@ -93,11 +91,11 @@ public class Acte {
         this.isPublic = isPublic;
     }
 
-    public Date getCreation() {
+    public LocalDateTime getCreation() {
         return creation;
     }
 
-    public void setCreation(Date creation) {
+    public void setCreation(LocalDateTime creation) {
         this.creation = creation;
     }
 
@@ -109,11 +107,11 @@ public class Acte {
         this.status = status;
     }
 
-    public Date getLastUpdateTime() {
+    public LocalDateTime getLastUpdateTime() {
         return lastUpdateTime;
     }
 
-    public void setLastUpdateTime(Date lastUpdateTime) {
+    public void setLastUpdateTime(LocalDateTime lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
 

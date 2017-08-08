@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -50,7 +50,7 @@ public class ActeService {
             transformedAnnexes.add(new Attachment(annexe.getBytes(), annexe.getOriginalFilename()));
         }
         acte.setAnnexes(transformedAnnexes);
-        acte.setCreation(new Date());
+        acte.setCreation(LocalDateTime.now());
         acte.setStatus(StatusType.CREATED);
 
         Acte created = acteRepository.save(acte);
@@ -73,8 +73,8 @@ public class ActeService {
         return getByUuid(acteUuid).getAnnexes();
     }
 
-    void updateStatus(Acte acte, Date date, StatusType status, String message) {
-        acteHistoryRepository.save(new ActeHistory(acte.getUuid(), status, new Date(), message));
+    void updateStatus(Acte acte, LocalDateTime date, StatusType status, String message) {
+        acteHistoryRepository.save(new ActeHistory(acte.getUuid(), status, date, message));
         acte.setStatus(status);
         acte.setLastUpdateTime(date);
         acteRepository.save(acte);
