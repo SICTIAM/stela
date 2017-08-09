@@ -5,10 +5,7 @@ repositories {
     }
 }
 
-jar {
-    baseName = 'stela-admin-service'
-    archiveName = 'stela-admin-service.jar'
-}
+archivesBaseName = 'stela-admin-service'
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -17,7 +14,6 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.apache.commons:commons-lang3:3.6')
-    runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')

@@ -1,7 +1,4 @@
-jar {
-	baseName = 'discovery-service'
-	archiveName = 'discovery-service.jar'
-}
+archivesBaseName = 'stela-discovery-service'
 
 dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-eureka-server')

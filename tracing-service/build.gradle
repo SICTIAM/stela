@@ -1,7 +1,4 @@
-jar {
-	baseName = 'tracing-service'
-	archiveName = 'tracing-service.jar'
-}
+archivesBaseName = 'stela-tracing-service'
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -10,9 +7,6 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-sleuth-zipkin-stream')
     compile('org.springframework.cloud:spring-cloud-starter-sleuth')
     compile('org.springframework.cloud:spring-cloud-stream-binder-rabbit')
-
     testCompile('org.springframework.boot:spring-boot-starter-test')
-
-    runtime('org.springframework.boot:spring-boot-devtools')
 	runtime('io.zipkin.java:zipkin-autoconfigure-ui')
 }

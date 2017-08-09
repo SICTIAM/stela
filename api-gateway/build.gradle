@@ -2,10 +2,7 @@ plugins {
     id "com.moowork.node" version "1.1.1"
 }
 
-jar {
-    baseName = 'api-gateway'
-    archiveName = 'api-gateway.jar'
-}
+archivesBaseName = 'stela-api-gateway'
 
 node {
     version = '6.5.0'
@@ -14,7 +11,6 @@ node {
 }
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-devtools')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile('org.springframework.cloud:spring-cloud-starter-config')
@@ -27,17 +23,6 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('com.ozwillo:ozwillo-java-spring-integration:1.25.3')
     testCompile('org.springframework.boot:spring-boot-starter-test')
-}
-
-springBoot {
-    // exclude Spring Boot Devtools from the fat jar
-    excludeDevtools = true
-
-    executable = true
-    embeddedLaunchScriptProperties =
-            [initInfoDescription: 'STELA 3 API Gateway',
-             initInfoShortDescription: 'API Gateway',
-             initInfoProvides: 'api-gateway']
 }
 
 configure(tasks.processResources) {
@@ -65,5 +50,5 @@ task frontBundle(type: NpmTask) {
     }
 }
 
-jar.dependsOn(frontBundle)
+bootJar.dependsOn(frontBundle)
 frontBundle.dependsOn(npmInstall)

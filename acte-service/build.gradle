@@ -1,7 +1,4 @@
-jar {
-    baseName = 'acte-service'
-    archiveName = 'acte-service.jar'
-}
+archivesBaseName = 'stela-acte-service'
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -9,13 +6,12 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-json')
     compile('org.apache.commons:commons-compress:1.14')
     compile('org.codehaus.groovy:groovy:2.4.12')
     compile('org.codehaus.groovy:groovy-templates:2.4.7')
     compile('com.sun.mail:javax.mail:1.6.0')
     compile('org.springframework:spring-oxm')
-    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-    runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

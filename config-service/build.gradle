@@ -1,7 +1,4 @@
-jar {
-	baseName = 'config-service'
-	archiveName = 'config-service.jar'
-}
+archivesBaseName = 'stela-config-service'
 
 dependencies {
 	compile('org.springframework.cloud:spring-cloud-config-server')

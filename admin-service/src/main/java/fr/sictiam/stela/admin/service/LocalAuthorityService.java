@@ -29,13 +29,13 @@ public class LocalAuthorityService {
     }
 
     public void addModule(String uuid, Module module) {
-        LocalAuthority localAuthority = localAuthorityRepository.findOne(uuid);
+        LocalAuthority localAuthority = localAuthorityRepository.getOne(uuid);
         localAuthority.addModule(module);
         localAuthorityRepository.save(localAuthority);
     }
 
     public void removeModule(String uuid, Module module) {
-        LocalAuthority localAuthority = localAuthorityRepository.findOne(uuid);
+        LocalAuthority localAuthority = localAuthorityRepository.getOne(uuid);
         localAuthority.removeModule(module);
         localAuthorityRepository.save(localAuthority);
     }
