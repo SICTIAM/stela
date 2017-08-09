@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.controller;
 import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.service.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import org.slf4j.Logger;
@@ -44,8 +45,14 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/history")
     public ResponseEntity<List<ActeHistory>> getHistory(@PathVariable String uuid) {
-        List<ActeHistory> acteHistoryList = acteService.getActeHistory(uuid);
+        List<ActeHistory> acteHistoryList = acteService.getHistory(uuid);
         return new ResponseEntity<>(acteHistoryList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{uuid}/annexes")
+    public ResponseEntity<List<Attachment>> getAnnexes(@PathVariable String uuid) {
+        List<Attachment> attachments = acteService.getAnnexes(uuid);
+        return new ResponseEntity<>(attachments, HttpStatus.OK);
     }
 
     @PostMapping

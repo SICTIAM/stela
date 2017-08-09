@@ -80,7 +80,7 @@ public class ActeService {
         acteRepository.save(acte);
     }
 
-    public List<ActeHistory> getActeHistory(String uuid) {
+    public List<ActeHistory> getHistory(String uuid) {
         return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
