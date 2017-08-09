@@ -55,6 +55,11 @@ public class ActeRestController {
         return new ResponseEntity<>(attachments, HttpStatus.OK);
     }
 
+    @PostMapping("/{uuid}/status/cancel")
+    public void cancel(@PathVariable String uuid) {
+        acteService.cancel(uuid);
+    }
+
     @PostMapping
     ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
                                   @RequestParam("annexes") MultipartFile... annexes) {

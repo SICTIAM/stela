@@ -108,6 +108,7 @@ public class ArchiveService {
 
                 ByteArrayOutputStream baos2 = compress(baos);
 
+                // TODO better store the archive with the history trace
                 byte[] archiveData = baos2.toByteArray();
                 acte.setArchive(archiveData);
                 acte.setArchiveName(archiveName);
@@ -120,6 +121,13 @@ public class ArchiveService {
                 LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
                 acteService.updateStatus(acte, LocalDateTime.now(), StatusType.FILE_ERROR, e.getMessage());
             }
+        });
+    }
+
+    public void createCancellationMessage() {
+        acteRepository.findByStatus(StatusType.TO_CANCEL).forEach(acte -> {
+            Annulation annulation = new Annulation();
+            annulation.setIDActe(acte.getNumber());
         });
     }
 

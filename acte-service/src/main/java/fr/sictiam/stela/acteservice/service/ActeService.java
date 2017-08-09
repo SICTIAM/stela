@@ -84,4 +84,7 @@ public class ActeService {
         return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
+    public void cancel(String uuid) {
+        updateStatus(getByUuid(uuid), LocalDateTime.now(), StatusType.TO_CANCEL, null);
+    }
 }
