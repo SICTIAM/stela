@@ -1,9 +1,9 @@
 package fr.sictiam.stela.acteservice.service;
 
+import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.Flux;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.event.ActeEvent;
 import fr.sictiam.stela.acteservice.model.xml.*;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -12,21 +12,26 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 @Service
-public class ArchiveService {
+public class ArchiveService implements ApplicationListener<ActeEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveService.class);
 
@@ -36,99 +41,104 @@ public class ArchiveService {
     private String trigraph = "SIC";
 
     private final ActeRepository acteRepository;
-    private final ActeService acteService;
+    private final ActeHistoryRepository acteHistoryRepository;
     private final Jaxb2Marshaller jaxb2Marshaller;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public ArchiveService(ActeRepository acteRepository, ActeService acteService, Jaxb2Marshaller jaxb2Marshaller) {
+    public ArchiveService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
+                          Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher) {
         this.acteRepository = acteRepository;
-        this.acteService = acteService;
+        this.acteHistoryRepository = acteHistoryRepository;
         this.jaxb2Marshaller = jaxb2Marshaller;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
-     * Compress file and annexes into a tar.gz archive and delivers it to minister.
+     * Compress file and annexes into a tar.gz archive.
      */
-    @Scheduled(fixedRate = 1000)
-    public void createArchive() throws Exception {
-        acteRepository.findByStatus(StatusType.CREATED).forEach(acte -> {
-            try {
-                int deliveryNumber = new Random().nextInt(10000);
+    public void createArchive(Acte acte) {
+        try {
+            int deliveryNumber = new Random().nextInt(10000);
 
-                String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
+            String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
 
-                // this is the base filename for the message and attachments
-                String baseFilename = String.format("%s-%s-%s-%s-%s-%s-%s",
-                        departement,
-                        siren,
-                        today,
-                        acte.getNumber(),
-                        acte.getNature().getAbbreviation(),
-                        Flux.TRANSMISSION_ACTE.getTransactionNumber(),
-                        Flux.TRANSMISSION_ACTE.getFluxNumber());
+            // this is the base filename for the message and attachments
+            String baseFilename = String.format("%s-%s-%s-%s-%s-%s-%s",
+                    departement,
+                    siren,
+                    today,
+                    acte.getNumber(),
+                    acte.getNature().getAbbreviation(),
+                    Flux.TRANSMISSION_ACTE.getTransactionNumber(),
+                    Flux.TRANSMISSION_ACTE.getFluxNumber());
 
-                Map<String, byte[]> annexes = new HashMap<>();
+            Map<String, byte[]> annexes = new HashMap<>();
 
-                String acteFilename =
-                        String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getFilename()));
+            String acteFilename =
+                    String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getFilename()));
 
-                acte.getAnnexes().forEach(attachment -> {
-                    // sequence 1 is taken by the Acte file, so we start at two
-                    int sequence = annexes.size() + 2;
-                    String tempFilename =
-                            String.format("CO_DE-%s_%d.%s", baseFilename, sequence,
-                                    StringUtils.getFilenameExtension(attachment.getFilename()));
-                    annexes.put(tempFilename, attachment.getFile());
-                });
+            acte.getAnnexes().forEach(attachment -> {
+                // sequence 1 is taken by the Acte file, so we start at two
+                int sequence = annexes.size() + 2;
+                String tempFilename =
+                        String.format("CO_DE-%s_%d.%s", baseFilename, sequence,
+                                StringUtils.getFilenameExtension(attachment.getFilename()));
+                annexes.put(tempFilename, attachment.getFile());
+            });
 
-                String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
-                JAXBElement<DonneesActe> donneesActe = generateDonneesActe(acte, acteFilename, annexes.keySet());
-                String messageContent = marshalToString(donneesActe);
+            String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
+            JAXBElement<DonneesActe> donneesActe = generateDonneesActe(acte, acteFilename, annexes.keySet());
+            String messageContent = marshalToString(donneesActe);
 
-                String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, today, deliveryNumber);
-                JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
-                String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, today, deliveryNumber);
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
+            String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
 
-                String archiveName = String.format("%s-%s.%s",
-                        trigraph,
-                        StringUtils.stripFilenameExtension(enveloppeName),
-                        "tar.gz");
+            String archiveName = String.format("%s-%s.%s",
+                    trigraph,
+                    StringUtils.stripFilenameExtension(enveloppeName),
+                    "tar.gz");
 
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
 
-                addEntry(enveloppeName, enveloppeContent.getBytes(), taos);
-                addEntry(messageFilename, messageContent.getBytes(), taos);
-                addEntry(acteFilename, acte.getFile(), taos);
-                for (String annexeName: annexes.keySet()) {
-                    addEntry(annexeName, annexes.get(annexeName), taos);
-                }
-
-                taos.close();
-                baos.close();
-
-                ByteArrayOutputStream baos2 = compress(baos);
-
-                // TODO better store the archive with the history trace
-                byte[] archiveData = baos2.toByteArray();
-                acte.setArchive(archiveData);
-                acte.setArchiveName(archiveName);
-                acteRepository.save(acte);
-
-                acteService.updateStatus(acte, LocalDateTime.now(), StatusType.ARCHIVE_CREATED, null);
-
-                LOGGER.info("Archive created : {}", archiveName);
-            } catch (Exception e) {
-                LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-                acteService.updateStatus(acte, LocalDateTime.now(), StatusType.FILE_ERROR, e.getMessage());
+            addEntry(enveloppeName, enveloppeContent.getBytes(), taos);
+            addEntry(messageFilename, messageContent.getBytes(), taos);
+            addEntry(acteFilename, acte.getFile(), taos);
+            for (String annexeName : annexes.keySet()) {
+                addEntry(annexeName, annexes.get(annexeName), taos);
             }
-        });
+
+            taos.close();
+            baos.close();
+
+            ByteArrayOutputStream baos2 = compress(baos);
+
+            // TODO better store the archive with the history trace
+            LocalDateTime now = LocalDateTime.now();
+            byte[] archiveData = baos2.toByteArray();
+            acte.setArchive(archiveData);
+            acte.setArchiveName(archiveName);
+            acte.setLastUpdateTime(now);
+            acte.setStatus(StatusType.ARCHIVE_CREATED);
+            acteRepository.save(acte);
+
+            acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, now, null));
+
+            applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.ARCHIVE_CREATED));
+
+            LOGGER.info("Archive created : {}", archiveName);
+        } catch (Exception e) {
+            LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
+            acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(), e.getMessage()));
+        }
     }
 
-    public void createCancellationMessage() {
-        acteRepository.findByStatus(StatusType.TO_CANCEL).forEach(acte -> {
-            Annulation annulation = new Annulation();
-            annulation.setIDActe(acte.getNumber());
-        });
+    public void createCancellationMessage(Acte acte) {
+        Annulation annulation = new Annulation();
+        annulation.setIDActe(acte.getNumber());
+
+        // TODO : finish XML data generation, update status and publish event
     }
 
     private JAXBElement<DonneesEnveloppeCLMISILL> generateEnveloppe(Acte acte, String messageFilename) {
@@ -233,5 +243,13 @@ public class ArchiveService {
         gcos.close();
         bais.close();
         return baos2;
+    }
+
+    @Override
+    public void onApplicationEvent(@NotNull ActeEvent event) {
+        switch (event.getStatus()) {
+            case CREATED: createArchive(event.getActe());
+            case TO_CANCEL: createCancellationMessage(event.getActe());
+        }
     }
 }

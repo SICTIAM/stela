@@ -5,7 +5,6 @@ import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.ArchiveService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,9 +36,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ActeService acteService;
-
-    @Autowired
-    private ArchiveService archiveService;
 
     @Test
     public void testCreateActe() {
@@ -77,7 +73,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         String acteUuid = response.getBody();
 
         try {
-            archiveService.createArchive();
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }

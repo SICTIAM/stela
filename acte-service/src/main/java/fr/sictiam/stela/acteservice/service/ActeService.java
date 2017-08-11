@@ -3,13 +3,12 @@ package fr.sictiam.stela.acteservice.service;
 import fr.sictiam.stela.acteservice.controller.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.event.ActeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,11 +24,13 @@ public class ActeService {
     
     private final ActeRepository acteRepository;
     private final ActeHistoryRepository acteHistoryRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository){
+    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -55,6 +56,8 @@ public class ActeService {
 
         Acte created = acteRepository.save(acte);
         acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.CREATED, acte.getCreation(), null));
+
+        applicationEventPublisher.publishEvent(new ActeEvent(this, created, StatusType.CREATED));
 
         LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
 
@@ -85,6 +88,8 @@ public class ActeService {
     }
 
     public void cancel(String uuid) {
-        updateStatus(getByUuid(uuid), LocalDateTime.now(), StatusType.TO_CANCEL, null);
+        Acte acte = getByUuid(uuid);
+        updateStatus(acte, LocalDateTime.now(), StatusType.TO_CANCEL, null);
+        applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.TO_CANCEL));
     }
 }
