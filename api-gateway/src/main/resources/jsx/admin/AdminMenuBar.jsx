@@ -41,9 +41,9 @@ class AdminMenuBar extends Component {
                 <Menu.Item>
                     <Menu.Header>{t('admin.modules.title')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item name={t('admin.modules.acte')} as={Link} to="/admin/dashboard" />
-                        <Menu.Item name={t('admin.modules.pes')} as={Link} to="/admin/dashboard" />
-                        <Menu.Item name={t('admin.modules.convocation')} as={Link} to="/admin/dashboard" />
+                        <Menu.Item as={Link} to="/admin/dashboard">{t('admin.modules.acte')}</Menu.Item>
+                        <Menu.Item as={Link} to="/admin/dashboard">{t('admin.modules.pes')}</Menu.Item>
+                        <Menu.Item as={Link} to="/admin/dashboard">{t('admin.modules.convocation')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
