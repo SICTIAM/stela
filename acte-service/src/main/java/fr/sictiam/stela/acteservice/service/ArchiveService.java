@@ -114,16 +114,12 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
 
             ByteArrayOutputStream baos2 = compress(baos);
 
-            // TODO better store the archive with the history trace
             LocalDateTime now = LocalDateTime.now();
-            byte[] archiveData = baos2.toByteArray();
-            acte.setArchive(archiveData);
-            acte.setArchiveName(archiveName);
             acte.setLastUpdateTime(now);
             acte.setStatus(StatusType.ARCHIVE_CREATED);
             acteRepository.save(acte);
 
-            acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, now, null));
+            acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, now, baos2.toByteArray(), archiveName));
 
             applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.ARCHIVE_CREATED));
 

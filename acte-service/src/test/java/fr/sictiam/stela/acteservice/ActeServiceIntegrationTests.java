@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice;
 
 
 import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.service.ActeService;
@@ -24,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -81,12 +83,18 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         Acte acte = acteService.getByUuid(acteUuid);
         assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
-        assertNotNull(acte.getArchiveName());
-        assertNotNull(acte.getArchive());
+
+        Optional<ActeHistory> acteHistory =
+                acteService.getHistory(acteUuid).stream()
+                        .filter(ah -> ah.getStatus().equals(StatusType.ARCHIVE_CREATED))
+                        .findFirst();
+        assertTrue(acteHistory.isPresent());
+        assertNotNull(acteHistory.get().getFile());
+        assertNotNull(acteHistory.get().getFileName());
 
         // TODO temp
         try {
-            FileCopyUtils.copy(acte.getArchive(), new File(acte.getArchiveName()));
+            FileCopyUtils.copy(acteHistory.get().getFile(), new File(acteHistory.get().getFileName()));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -18,6 +18,8 @@ public class ActeHistory {
     private StatusType status;
     private LocalDateTime date;
     private String message;
+    private byte[] file;
+    private String fileName;
 
     public ActeHistory() {
     }
@@ -27,6 +29,14 @@ public class ActeHistory {
         this.status = status;
         this.date = date;
         this.message = message;
+    }
+
+    public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = date;
+        this.file = file;
+        this.fileName = fileName;
     }
 
     public String getActeUuid() {
@@ -45,6 +55,14 @@ public class ActeHistory {
         return message;
     }
 
+    public byte[] getFile() {
+        return file;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
     @Override
     public String toString() {
         return "ActeHistory{" +
@@ -53,6 +71,7 @@ public class ActeHistory {
                 ", status=" + status +
                 ", date=" + date +
                 ", message='" + message + '\'' +
+                ", fileName='" + fileName + '\'' +
                 '}';
     }
 }

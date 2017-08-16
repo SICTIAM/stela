@@ -44,9 +44,6 @@ public class Acte {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
 
-    private byte[] archive;
-    private String archiveName;
-
     public Acte() {
     }
 
@@ -137,22 +134,6 @@ public class Acte {
 
     public void setAnnexes(List<Attachment> annexes) {
         this.annexes = annexes;
-    }
-
-    public byte[] getArchive() {
-        return archive;
-    }
-
-    public void setArchive(byte[] archive) {
-        this.archive = archive;
-    }
-
-    public String getArchiveName() {
-        return archiveName;
-    }
-
-    public void setArchiveName(String archiveName) {
-        this.archiveName = archiveName;
     }
 
     @Override
