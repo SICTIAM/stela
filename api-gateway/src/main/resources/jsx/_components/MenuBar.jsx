@@ -29,27 +29,27 @@ class MenuBar extends Component {
                 <Menu.Item>
                     <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item name={t('menu.acte.submit_an_act')} as={Link} to="/acte/new" />
-                        <Menu.Item name={t('menu.acte.acts_list')} as={Link} to="/acte/list" />
-                        <Menu.Item name={t('menu.acte.deliberation_register')} />
+                        <Menu.Item as={Link} to="/acte/new">{t('menu.acte.submit_an_act')}</Menu.Item>
+                        <Menu.Item as={Link} to="/acte/list">{t('menu.acte.acts_list')}</Menu.Item>
+                        <Menu.Item>{t('menu.acte.deliberation_register')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
                 <Menu.Item>
                     <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item name={t('menu.pes.submit_a_PES_Aller')} as={Link} to="/pes/new" />
-                        <Menu.Item name={t('menu.pes.PES_Aller_list')} as={Link} to="/pes/list" />
-                        <Menu.Item name={t('menu.pes.PES_Retour_list')} />
+                        <Menu.Item as={Link} to="/pes/new">{t('menu.pes.submit_a_PES_Aller')}</Menu.Item>
+                        <Menu.Item as={Link} to="/pes/list">{t('menu.pes.PES_Aller_list')}</Menu.Item>
+                        <Menu.Item>{t('menu.pes.PES_Retour_list')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
                 <Menu.Item>
                     <Menu.Header>{t('menu.convocation.convocation')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item name={t('menu.convocation.send_a_convocation')} />
-                        <Menu.Item name={t('menu.convocation.reveived_convocations')} />
-                        <Menu.Item name={t('menu.convocation.sent_convocations')} />
+                        <Menu.Item>{t('menu.convocation.send_a_convocation')}</Menu.Item>
+                        <Menu.Item>{t('menu.convocation.reveived_convocations')}</Menu.Item>
+                        <Menu.Item>{t('menu.convocation.sent_convocations')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
@@ -61,7 +61,7 @@ class MenuBar extends Component {
                     <img style={this.styles.logo} src={process.env.PUBLIC_URL + '/img/logo_sictiam.jpg'} alt="SICTIAM" width="100%" />
                 </Menu.Item>
 
-            </Menu>
+            </Menu >
         )
     }
 }
