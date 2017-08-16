@@ -42,7 +42,7 @@ public class ActeService {
      * 
      * @return The newly created Acte entity.
      */
-    public Acte create(Acte acte, MultipartFile file, MultipartFile[] annexes)
+    public Acte create(Acte acte, MultipartFile file, MultipartFile... annexes)
             throws ActeNotSentException, IOException {
         acte.setFilename(file.getOriginalFilename());
         acte.setFile(file.getBytes());
