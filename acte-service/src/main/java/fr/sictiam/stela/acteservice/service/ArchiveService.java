@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -180,20 +181,16 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
         ObjectFactory objectFactory = new ObjectFactory();
 
         DonneesActe donneesActe = new DonneesActe();
-        // TODO set the correct values for code matieres data
+        // TODO set the correct values for code matieres data (#1680)
         DonneesActe.CodeMatiere1 codeMatiere1 = new DonneesActe.CodeMatiere1();
         codeMatiere1.setCodeMatiere(1);
         donneesActe.setCodeMatiere1(codeMatiere1);
-        DonneesActe.CodeMatiere2 codeMatiere2 = new DonneesActe.CodeMatiere2();
-        codeMatiere2.setCodeMatiere(2);
-        donneesActe.setCodeMatiere2(codeMatiere2);
         donneesActe.setCodeNatureActe(Integer.valueOf(acte.getNature().getCode()));
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
-        // TODO what is it ?
-        donneesActe.setClassificationDateVersion(acte.getDecision());
-        // TODO what is it ?
-        donneesActe.setObjet("");
+        // TODO replace with date from last classification (#1680)
+        donneesActe.setClassificationDateVersion(LocalDate.now());
+        donneesActe.setObjet(acte.getTitle());
 
         FichierSigne fichierSigne = new FichierSigne();
         fichierSigne.setNomFichier(acteFilename);
