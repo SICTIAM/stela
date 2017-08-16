@@ -116,7 +116,7 @@ class NewActe extends Component {
                     </Form.Field>
                     <Form.Field>
                         <label htmlFor='annexes'>{t('acte.fields.annexes')}</label>
-                        <input type="file" id='annexes' onChange={e => this.handleFileChange('annexes', e.target.files)} multiple required />
+                        <input type="file" id='annexes' onChange={e => this.handleFileChange('annexes', e.target.files)} multiple />
                     </Form.Field>
                     <Form.Field>
                         <label htmlFor='public'>{t('acte.fields.public')}</label>
