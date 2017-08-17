@@ -8,6 +8,8 @@ import history from '../_util/history'
 
 class NewActe extends Component {
     static contextTypes = {
+        csrfToken: PropTypes.string,
+        csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
         _addNotification: PropTypes.func
     }
@@ -57,6 +59,9 @@ class NewActe extends Component {
 
         fetch('/api/acte', {
             credentials: 'same-origin',
+            headers: {
+                [this.context.csrfTokenHeaderName]: this.context.csrfToken
+            },
             method: 'POST',
             body: data
         })
