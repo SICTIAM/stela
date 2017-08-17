@@ -26,24 +26,24 @@ class AdminMenuBar extends Component {
                     <h1 style={this.styles.appTitle}>{t('app_title')}</h1>
                 </Menu.Item>
 
-                <Menu.Item as={Link} to="/admin/dashboard">
+                <Menu.Item as={Link} to="/admin/tableau-de-bord">
                     {t('admin.dashboard')}
                 </Menu.Item>
 
-                <Menu.Item as={Link} to="/admin/dashboard">
+                <Menu.Item>
                     {t('admin.users')}
                 </Menu.Item>
 
-                <Menu.Item as={Link} to="/admin/dashboard">
+                <Menu.Item>
                     {t('admin.collectivities')}
                 </Menu.Item>
 
                 <Menu.Item>
                     <Menu.Header>{t('admin.modules.title')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item as={Link} to="/admin/dashboard">{t('admin.modules.acte')}</Menu.Item>
-                        <Menu.Item as={Link} to="/admin/dashboard">{t('admin.modules.pes')}</Menu.Item>
-                        <Menu.Item as={Link} to="/admin/dashboard">{t('admin.modules.convocation')}</Menu.Item>
+                        <Menu.Item>{t('admin.modules.acte')}</Menu.Item>
+                        <Menu.Item>{t('admin.modules.pes')}</Menu.Item>
+                        <Menu.Item>{t('admin.modules.convocation')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
