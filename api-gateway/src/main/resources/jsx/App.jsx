@@ -32,11 +32,19 @@ class App extends Component {
         children: PropTypes.element.isRequired
     }
     static childContextTypes = {
+        csrfToken: PropTypes.string,
+        csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
         _addNotification: PropTypes.func
     }
+    state = {
+        csrfToken: '',
+        csrfTokenHeaderName: ''
+    }
     getChildContext() {
         return {
+            csrfToken: this.state.csrfToken,
+            csrfTokenHeaderName: this.state.csrfTokenHeaderName,
             t: this.t,
             _addNotification: this._addNotification
         }
@@ -45,6 +53,12 @@ class App extends Component {
         if (this._notificationSystem) {
             this._notificationSystem.addNotification(notification)
         }
+    }
+    componentDidMount() {
+        fetch('/api/csrf-token', { credentials: 'same-origin' })
+            .then(response => response.headers)
+            .then(headers =>
+                this.setState({ csrfToken: headers.get('X-CSRF-TOKEN'), csrfTokenHeaderName: headers.get('X-CSRF-HEADER') }))
     }
     render() {
         return (

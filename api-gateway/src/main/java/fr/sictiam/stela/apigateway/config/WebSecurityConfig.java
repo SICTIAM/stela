@@ -1,5 +1,6 @@
 package fr.sictiam.stela.apigateway.config;
 
+import fr.sictiam.stela.apigateway.config.filter.CsrfTokenGeneratorFilter;
 import fr.sictiam.stela.apigateway.config.filter.OzwilloProvisioningFilter;
 import org.oasis_eu.spring.config.OasisSecurityConfiguration;
 import org.oasis_eu.spring.kernel.security.OasisAuthenticationFilter;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Arrays;
@@ -49,13 +51,12 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .antMatchers("/ozwillo/**").permitAll()
                     .antMatchers("/api/**").authenticated().and()
                 .csrf()
-                    .disable()
-//                .csrf()
-//                    .ignoringAntMatchers("/ozwillo/**").and()
+                    .ignoringAntMatchers("/ozwillo/**").and()
                 .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
                 .exceptionHandling()
                     .authenticationEntryPoint(authenticationEntryPoint()).and()
-                .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class);
+                .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class)
+                .addFilterAfter(new CsrfTokenGeneratorFilter(), CsrfFilter.class);
     }
 }
