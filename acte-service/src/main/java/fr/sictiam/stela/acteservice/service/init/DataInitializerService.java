@@ -49,7 +49,7 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
 
     private void createDummyActe(Acte acte) {
         try {
-            acteService.create(acte, null, null);
+            acteService.create(acte, null);
         } catch (IOException e) {
             LOGGER.error("Unable to bootstrap acte {}", acte.getNumber());
         }

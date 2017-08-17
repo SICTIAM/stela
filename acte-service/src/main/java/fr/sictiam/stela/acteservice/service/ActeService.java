@@ -5,20 +5,23 @@ import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeEvent;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ActeService {
+public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeService.class);
     
@@ -76,7 +79,7 @@ public class ActeService {
         return getByUuid(acteUuid).getAnnexes();
     }
 
-    void updateStatus(Acte acte, LocalDateTime date, StatusType status, String message) {
+    private void updateStatus(Acte acte, LocalDateTime date, StatusType status, String message) {
         acteHistoryRepository.save(new ActeHistory(acte.getUuid(), status, date, message));
         acte.setStatus(status);
         acte.setLastUpdateTime(date);
@@ -89,7 +92,16 @@ public class ActeService {
 
     public void cancel(String uuid) {
         Acte acte = getByUuid(uuid);
-        updateStatus(acte, LocalDateTime.now(), StatusType.TO_CANCEL, null);
-        applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.TO_CANCEL));
+        updateStatus(acte, LocalDateTime.now(), StatusType.CANCELLATION_ASKED, null);
+        applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.CANCELLATION_ASKED));
+    }
+
+    @Override
+    public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
+        acteHistoryRepository.save(event.getActeHistory());
+        Acte acte = getByUuid(event.getActeHistory().getActeUuid());
+        acte.setStatus(event.getActeHistory().getStatus());
+        acte.setLastUpdateTime(event.getActeHistory().getDate());
+        acteRepository.save(acte);
     }
 }

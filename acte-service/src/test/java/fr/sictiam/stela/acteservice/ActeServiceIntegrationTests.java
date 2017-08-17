@@ -9,6 +9,8 @@ import fr.sictiam.stela.acteservice.service.ActeService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -32,6 +34,8 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ActeServiceIntegrationTests extends BaseIntegrationTests {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActeServiceIntegrationTests.class);
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -81,23 +85,51 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             fail("Should not have thrown an exception");
         }
 
-        Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
-
-        Optional<ActeHistory> acteHistory =
-                acteService.getHistory(acteUuid).stream()
-                        .filter(ah -> ah.getStatus().equals(StatusType.ARCHIVE_CREATED))
-                        .findFirst();
+        Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.ARCHIVE_CREATED);
         assertTrue(acteHistory.isPresent());
         assertNotNull(acteHistory.get().getFile());
         assertNotNull(acteHistory.get().getFileName());
 
-        // TODO temp
+        Acte acte = acteService.getByUuid(acteUuid);
+        assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
+
+        // uncomment to see the generated archive
+        // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+    }
+
+    @Test
+    public void testCancellation() {
+        MultiValueMap<String, Object> params = acteWithAttachments();
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
+
+        ResponseEntity<String> response =
+                this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+        String acteUuid = response.getBody();
+
+        this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
+
+        Acte acte = acteService.getByUuid(acteUuid);
+        assertEquals(StatusType.CANCELLATION_ASKED, acte.getStatus());
+
         try {
-            FileCopyUtils.copy(acteHistory.get().getFile(), new File(acteHistory.get().getFileName()));
-        } catch (IOException e) {
-            e.printStackTrace();
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
         }
+
+        acteService.getHistory(acteUuid).forEach(acteHistory -> LOGGER.debug(acteHistory.toString()));
+
+        acte = acteService.getByUuid(acteUuid);
+        assertEquals(StatusType.CANCELLATION_ARCHIVE_CREATED, acte.getStatus());
+
+        Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
+        assertTrue(acteHistory.isPresent());
+        assertNotNull(acteHistory.get().getFile());
+        assertNotNull(acteHistory.get().getFileName());
+
+        // uncomment to see the generated archive
+        // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
@@ -112,5 +144,19 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private Acte acte() {
         return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "COD001",
                 "Title", true);
+    }
+
+    private void printXmlMessage(byte[] file, String filename) {
+        try {
+            FileCopyUtils.copy(file, new File(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Optional<ActeHistory> getActeHistoryForStatus(String acteUuid, StatusType status) {
+        return acteService.getHistory(acteUuid).stream()
+                .filter(ah -> ah.getStatus().equals(status))
+                .findFirst();
     }
 }
