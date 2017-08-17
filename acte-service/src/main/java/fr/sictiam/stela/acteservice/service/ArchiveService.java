@@ -185,6 +185,9 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
         DonneesActe.CodeMatiere1 codeMatiere1 = new DonneesActe.CodeMatiere1();
         codeMatiere1.setCodeMatiere(1);
         donneesActe.setCodeMatiere1(codeMatiere1);
+        DonneesActe.CodeMatiere2 codeMatiere2 = new DonneesActe.CodeMatiere2();
+        codeMatiere2.setCodeMatiere(2);
+        donneesActe.setCodeMatiere2(codeMatiere2);
         donneesActe.setCodeNatureActe(Integer.valueOf(acte.getNature().getCode()));
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
