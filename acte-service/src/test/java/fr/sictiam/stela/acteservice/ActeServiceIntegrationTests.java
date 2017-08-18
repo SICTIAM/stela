@@ -105,6 +105,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();
+        
+        try {
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
 
         this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
 
