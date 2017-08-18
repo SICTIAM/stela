@@ -1,9 +1,11 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.Flux;
+import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeEvent;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.xml.*;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -41,15 +43,10 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
     private String siren = "210600730";
     private String trigraph = "SIC";
 
-    private final ActeRepository acteRepository;
-    private final ActeHistoryRepository acteHistoryRepository;
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public ArchiveService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
-                          Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher) {
-        this.acteRepository = acteRepository;
-        this.acteHistoryRepository = acteHistoryRepository;
+    public ArchiveService(Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher) {
         this.jaxb2Marshaller = jaxb2Marshaller;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -57,27 +54,18 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
     /**
      * Compress file and annexes into a tar.gz archive.
      */
-    public void createArchive(Acte acte) {
+    private void createArchive(Acte acte) {
         try {
+            // FIXME this has to be a daily counter starting at 0 each day
             int deliveryNumber = new Random().nextInt(10000);
 
-            String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
-
             // this is the base filename for the message and attachments
-            String baseFilename = String.format("%s-%s-%s-%s-%s-%s-%s",
-                    departement,
-                    siren,
-                    today,
-                    acte.getNumber(),
-                    acte.getNature().getAbbreviation(),
-                    Flux.TRANSMISSION_ACTE.getTransactionNumber(),
-                    Flux.TRANSMISSION_ACTE.getFluxNumber());
-
-            Map<String, byte[]> annexes = new HashMap<>();
+            String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
 
             String acteFilename =
                     String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getFilename()));
 
+            Map<String, byte[]> annexes = new HashMap<>();
             acte.getAnnexes().forEach(attachment -> {
                 // sequence 1 is taken by the Acte file, so we start at two
                 int sequence = annexes.size() + 2;
@@ -91,51 +79,95 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
             JAXBElement<DonneesActe> donneesActe = generateDonneesActe(acte, acteFilename, annexes.keySet());
             String messageContent = marshalToString(donneesActe);
 
-            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, today, deliveryNumber);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()), deliveryNumber);
             JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
             String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
 
-            String archiveName = String.format("%s-%s.%s",
-                    trigraph,
-                    StringUtils.stripFilenameExtension(enveloppeName),
-                    "tar.gz");
+            String archiveName = getArchiveName(enveloppeName);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
+            ByteArrayOutputStream baos =
+                    createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, messageContent,
+                            acte.getFile(), acteFilename, annexes);
 
-            addEntry(enveloppeName, enveloppeContent.getBytes(), taos);
-            addEntry(messageFilename, messageContent.getBytes(), taos);
-            addEntry(acteFilename, acte.getFile(), taos);
-            for (String annexeName : annexes.keySet()) {
-                addEntry(annexeName, annexes.get(annexeName), taos);
-            }
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
+                    baos.toByteArray(), archiveName);
 
-            taos.close();
-            baos.close();
-
-            ByteArrayOutputStream baos2 = compress(baos);
-
-            LocalDateTime now = LocalDateTime.now();
-            acte.setLastUpdateTime(now);
-            acte.setStatus(StatusType.ARCHIVE_CREATED);
-            acteRepository.save(acte);
-
-            acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, now, baos2.toByteArray(), archiveName));
-
-            applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.ARCHIVE_CREATED));
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
             LOGGER.info("Archive created : {}", archiveName);
         } catch (Exception e) {
             LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-            acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(), e.getMessage()));
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(),
+                    e.getMessage());
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
     }
 
-    public void createCancellationMessage(Acte acte) {
-        Annulation annulation = new Annulation();
-        annulation.setIDActe(acte.getNumber());
+    private void createCancellationMessage(Acte acte) {
 
-        // TODO : finish XML data generation, update status and publish event
+        try {
+            LOGGER.debug("Creating cancellation message for acte {}", acte.getNumber());
+
+            // FIXME this has to be a daily counter starting at 0 each day
+            int deliveryNumber = new Random().nextInt(10000);
+
+            String baseFilename = getBaseFilename(acte, Flux.ANNULATION_TRANSMISSION);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()), deliveryNumber);
+            String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
+
+            ObjectFactory objectFactory = new ObjectFactory();
+            Annulation annulation = objectFactory.createAnnulation();
+            String idActe = String.format("%s-%s-%s-%s-%s",
+                    departement,
+                    siren,
+                    acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")),
+                    acte.getNumber(),
+                    acte.getNature().getAbbreviation());
+            annulation.setIDActe(idActe);
+
+            StringWriter sw = new StringWriter();
+            jaxb2Marshaller.marshal(annulation, new StreamResult(sw));
+
+            String archiveName = getArchiveName(enveloppeName);
+
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
+            String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
+
+            ByteArrayOutputStream baos =
+                    createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, sw.toString(),
+                            null, null, null);
+
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CANCELLATION_ARCHIVE_CREATED,
+                    LocalDateTime.now(), baos.toByteArray(), archiveName);
+
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+
+            LOGGER.info("Cancellation archive created : {}", archiveName);
+        } catch (IOException e) {
+            LOGGER.error("Error while generating archive for cancellation of acte {} : {}", acte.getNumber(), e.getMessage());
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(), e.getMessage());
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        }
+    }
+
+    private String getArchiveName(String enveloppeName) {
+        return String.format("%s-%s.%s",
+                trigraph,
+                StringUtils.stripFilenameExtension(enveloppeName),
+                "tar.gz");
+    }
+
+    private String getBaseFilename(Acte acte, Flux flux) {
+        String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
+
+        return String.format("%s-%s-%s-%s-%s-%s-%s",
+                departement,
+                siren,
+                today,
+                acte.getNumber(),
+                acte.getNature().getAbbreviation(),
+                flux.getTransactionNumber(),
+                flux.getFluxNumber());
     }
 
     private JAXBElement<DonneesEnveloppeCLMISILL> generateEnveloppe(Acte acte, String messageFilename) {
@@ -217,6 +249,29 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
         return sw.toString();
     }
 
+    private ByteArrayOutputStream createArchiveAndCompress(String enveloppeName, String enveloppeContent,
+                                                           String messageFilename, String messageContent,
+                                                           byte[] acteFile, String acteFilename,
+                                                           Map<String, byte[]> annexes) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
+
+        addEntry(enveloppeName, enveloppeContent.getBytes(), taos);
+        addEntry(messageFilename, messageContent.getBytes(), taos);
+        if (acteFile != null)
+            addEntry(acteFilename, acteFile, taos);
+        if (annexes != null) {
+            for (String annexeName : annexes.keySet()) {
+                addEntry(annexeName, annexes.get(annexeName), taos);
+            }
+        }
+
+        taos.close();
+        baos.close();
+
+        return compress(baos);
+    }
+
     private void addEntry(String entryName, byte[] content, TarArchiveOutputStream taos) throws IOException {
         File file = new File(entryName);
         FileCopyUtils.copy(content, file);
@@ -241,11 +296,15 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
         return baos2;
     }
 
+    private String getFormattedDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("YYYYMMdd"));
+    }
+
     @Override
     public void onApplicationEvent(@NotNull ActeEvent event) {
         switch (event.getStatus()) {
-            case CREATED: createArchive(event.getActe());
-            case TO_CANCEL: createCancellationMessage(event.getActe());
+            case CREATED: createArchive(event.getActe()); break;
+            case CANCELLATION_ASKED: createCancellationMessage(event.getActe()); break;
         }
     }
 }
