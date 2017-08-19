@@ -69,7 +69,7 @@ class NewActe extends Component {
             .then(response => response.text())
             .then(acteUuid => {
                 this.context._addNotification(acteSentSuccess(this.context.t))
-                history.push('/acte/' + acteUuid)
+                history.push('/actes/' + acteUuid)
             })
             .catch(response => {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))

@@ -40,7 +40,7 @@ class ActeList extends Component {
                         { property: 'public', displayed: false, searchable: false },
                     ]}
                     header={true}
-                    link='/acte/'
+                    link='/actes/'
                     linkProperty='uuid'
                     noDataMessage='Aucun acte'
                     keyProperty='uuid' />

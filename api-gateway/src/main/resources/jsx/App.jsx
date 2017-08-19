@@ -94,23 +94,23 @@ const AppRoute = () =>
     <Switch>
         <Route exact path='/' render={() => <FrontApp><Home /></FrontApp>} />
 
-        <Route exact path='/acte'>
-            <Redirect to="/acte/list" />
+        <Route exact path='/actes'>
+            <Redirect to="/actes/liste" />
         </Route>
-        <Route path='/acte/list' render={() => <FrontApp><ActeList /></FrontApp>} />
-        <Route path='/acte/new' render={() => <FrontApp><NewActe /></FrontApp>} />
-        <Route path='/acte/:uuid' render={({ match }) => <FrontApp><Acte uuid={match.params.uuid} /></FrontApp>} />
+        <Route path='/actes/liste' render={() => <FrontApp><ActeList /></FrontApp>} />
+        <Route path='/actes/nouveau' render={() => <FrontApp><NewActe /></FrontApp>} />
+        <Route path='/actes/:uuid' render={({ match }) => <FrontApp><Acte uuid={match.params.uuid} /></FrontApp>} />
 
         <Route exact path='/pes'>
-            <Redirect to="/pes/list" />
+            <Redirect to="/pes/liste" />
         </Route>
-        <Route path='/pes/list' render={() => <FrontApp><PesList /></FrontApp>} />
-        <Route path='/pes/new' render={() => <FrontApp><NewPes /></FrontApp>} />
+        <Route path='/pes/liste' render={() => <FrontApp><PesList /></FrontApp>} />
+        <Route path='/pes/nouveau' render={() => <FrontApp><NewPes /></FrontApp>} />
 
         <Route exact path='/admin'>
-            <Redirect to="/admin/dashboard" />
+            <Redirect to="/admin/tableau-de-bord" />
         </Route>
-        <Route path='/admin/dashboard' render={() => <AdminApp><AdminDashboard /></AdminApp>} />
+        <Route path='/admin/tableau-de-bord' render={() => <AdminApp><AdminDashboard /></AdminApp>} />
     </Switch>
 
 render((

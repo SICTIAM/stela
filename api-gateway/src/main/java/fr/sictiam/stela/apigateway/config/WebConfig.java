@@ -24,7 +24,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/index.html");
         registry.addViewController("/pes/**").setViewName("forward:/index.html");
-        registry.addViewController("/miat/**").setViewName("forward:/index.html");
+        registry.addViewController("/actes/**").setViewName("forward:/index.html");
+        registry.addViewController("/admin/**").setViewName("forward:/index.html");
         registry.addViewController("/callback").setViewName("forward:/index.html");
     }
 }
