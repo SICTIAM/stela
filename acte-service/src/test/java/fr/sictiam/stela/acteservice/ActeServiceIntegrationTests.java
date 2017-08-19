@@ -27,6 +27,7 @@ import org.springframework.util.MultiValueMap;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -93,6 +94,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         Acte acte = acteService.getByUuid(acteUuid);
         assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
 
+        List<ActeHistory> acteHistories = acteService.getHistory(acteUuid);
+        assertEquals(2, acteHistories.size());
+        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.CREATED)));
+        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_CREATED)));
+
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
     }
@@ -105,7 +111,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();
-        
+
         try {
             // sleep some seconds to let async creation of the archive happens
             Thread.sleep(2000);
@@ -114,9 +120,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
-
-        Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.CANCELLATION_ASKED, acte.getStatus());
 
         try {
             // sleep some seconds to let async creation of the archive happens
@@ -127,7 +130,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         acteService.getHistory(acteUuid).forEach(acteHistory -> LOGGER.debug(acteHistory.toString()));
 
-        acte = acteService.getByUuid(acteUuid);
+        Acte acte = acteService.getByUuid(acteUuid);
         assertEquals(StatusType.CANCELLATION_ARCHIVE_CREATED, acte.getStatus());
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
