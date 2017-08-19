@@ -13,6 +13,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -36,6 +37,9 @@ import java.util.Set;
 public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveService.class);
+
+    @Value("${application.archive.maxSize}")
+    private Integer archiveMaxSize;
 
     private String departement = "006";
     private String arrondissement = "2";
@@ -153,6 +157,18 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             LOGGER.error("Error while generating archive for cancellation of acte {} : {}", acte.getNumber(), e.getMessage());
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(), e.getMessage());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        }
+    }
+
+    private void checkArchiveSize(ActeHistory acteHistory) {
+        LOGGER.debug("Archive size is {} (max allowed : {})", acteHistory.getFile().length, archiveMaxSize);
+        if (acteHistory.getFile().length > archiveMaxSize) {
+            // TODO need a specific message or is it enough with the status type ?
+            ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_TOO_LARGE);
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, newActeHistory));
+        } else {
+            ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_SIZE_CHECKED);
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, newActeHistory));
         }
     }
 
@@ -327,7 +343,9 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
             case CREATED: createArchive(event.getActeHistory().getActeUuid()); break;
+            case ARCHIVE_CREATED: checkArchiveSize(event.getActeHistory()); break;
             case CANCELLATION_ASKED: createCancellationMessage(event.getActeHistory().getActeUuid()); break;
+            case CANCELLATION_ARCHIVE_CREATED: checkArchiveSize(event.getActeHistory()); break;
         }
     }
 }
