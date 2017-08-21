@@ -3,8 +3,10 @@ package fr.sictiam.stela.acteservice.service;
 import fr.sictiam.stela.acteservice.controller.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.event.ActeEvent;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +60,9 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         acte.setStatus(StatusType.CREATED);
 
         Acte created = acteRepository.save(acte);
-        acteHistoryRepository.save(new ActeHistory(acte.getUuid(), StatusType.CREATED, acte.getCreation(), null));
 
-        applicationEventPublisher.publishEvent(new ActeEvent(this, created, StatusType.CREATED));
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
         LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
 
@@ -79,21 +81,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return getByUuid(acteUuid).getAnnexes();
     }
 
-    private void updateStatus(Acte acte, LocalDateTime date, StatusType status, String message) {
-        acteHistoryRepository.save(new ActeHistory(acte.getUuid(), status, date, message));
-        acte.setStatus(status);
-        acte.setLastUpdateTime(date);
-        acteRepository.save(acte);
-    }
-
     public List<ActeHistory> getHistory(String uuid) {
         return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
     public void cancel(String uuid) {
-        Acte acte = getByUuid(uuid);
-        updateStatus(acte, LocalDateTime.now(), StatusType.CANCELLATION_ASKED, null);
-        applicationEventPublisher.publishEvent(new ActeEvent(this, acte, StatusType.CANCELLATION_ASKED));
+        ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
     }
 
     @Override

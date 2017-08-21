@@ -1,8 +1,9 @@
 package fr.sictiam.stela.acteservice.service;
 
+import fr.sictiam.stela.acteservice.controller.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
 import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.event.ActeEvent;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.xml.*;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -32,7 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class ArchiveService implements ApplicationListener<ActeEvent> {
+public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveService.class);
 
@@ -41,12 +42,14 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
     private String siren = "210600730";
     private String trigraph = "SIC";
 
+    private final ActeRepository acteRepository;
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final EnveloppeCounterRepository enveloppeCounterRepository;
 
-    public ArchiveService(Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher,
+    public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher,
                           EnveloppeCounterRepository enveloppeCounterRepository) {
+        this.acteRepository = acteRepository;
         this.jaxb2Marshaller = jaxb2Marshaller;
         this.applicationEventPublisher = applicationEventPublisher;
         this.enveloppeCounterRepository = enveloppeCounterRepository;
@@ -55,7 +58,9 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
     /**
      * Compress file and annexes into a tar.gz archive.
      */
-    private void createArchive(Acte acte) {
+    private void createArchive(String acteUuid) {
+        Acte acte = acteRepository.findByUuid(acteUuid).orElseThrow(ActeNotFoundException::new);
+
         try {
             int deliveryNumber = getNextIncrement();
 
@@ -103,10 +108,12 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
         }
     }
 
-    private void createCancellationMessage(Acte acte) {
+    private void createCancellationMessage(String acteUuid) {
+
+        Acte acte = acteRepository.findByUuid(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
-            LOGGER.debug("Creating cancellation message for acte {}", acte.getNumber());
+            LOGGER.debug("Creating cancellation message for acte {}", acteUuid);
 
             int deliveryNumber = getNextIncrement();
 
@@ -317,10 +324,10 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
     }
 
     @Override
-    public void onApplicationEvent(@NotNull ActeEvent event) {
-        switch (event.getStatus()) {
-            case CREATED: createArchive(event.getActe()); break;
-            case CANCELLATION_ASKED: createCancellationMessage(event.getActe()); break;
+    public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
+        switch (event.getActeHistory().getStatus()) {
+            case CREATED: createArchive(event.getActeHistory().getActeUuid()); break;
+            case CANCELLATION_ASKED: createCancellationMessage(event.getActeHistory().getActeUuid()); break;
         }
     }
 }
