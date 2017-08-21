@@ -1,9 +1,7 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.Flux;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeEvent;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.xml.*;
@@ -30,7 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -45,10 +43,13 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
 
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final EnveloppeCounterRepository enveloppeCounterRepository;
 
-    public ArchiveService(Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher) {
+    public ArchiveService(Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher,
+                          EnveloppeCounterRepository enveloppeCounterRepository) {
         this.jaxb2Marshaller = jaxb2Marshaller;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.enveloppeCounterRepository = enveloppeCounterRepository;
     }
 
     /**
@@ -56,8 +57,7 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
      */
     private void createArchive(Acte acte) {
         try {
-            // FIXME this has to be a daily counter starting at 0 each day
-            int deliveryNumber = new Random().nextInt(10000);
+            int deliveryNumber = getNextIncrement();
 
             // this is the base filename for the message and attachments
             String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
@@ -108,8 +108,7 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
         try {
             LOGGER.debug("Creating cancellation message for acte {}", acte.getNumber());
 
-            // FIXME this has to be a daily counter starting at 0 each day
-            int deliveryNumber = new Random().nextInt(10000);
+            int deliveryNumber = getNextIncrement();
 
             String baseFilename = getBaseFilename(acte, Flux.ANNULATION_TRANSMISSION);
             String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()), deliveryNumber);
@@ -298,6 +297,23 @@ public class ArchiveService implements ApplicationListener<ActeEvent> {
 
     private String getFormattedDate(LocalDate date) {
         return date.format(DateTimeFormatter.ofPattern("YYYYMMdd"));
+    }
+
+    private synchronized Integer getNextIncrement() {
+        Optional<EnveloppeCounter> optEnveloppeCounter = enveloppeCounterRepository.findByDate(LocalDate.now());
+        if (optEnveloppeCounter.isPresent()) {
+            EnveloppeCounter enveloppeCounter = optEnveloppeCounter.get();
+            LOGGER.debug("Reusing counter for {} ({})", enveloppeCounter.getDate(), enveloppeCounter.getCounter());
+            Integer current = enveloppeCounter.getCounter();
+            enveloppeCounter.setCounter(current + 1);
+            enveloppeCounterRepository.save(enveloppeCounter);
+            return current + 1;
+        } else {
+            LOGGER.debug("Creating new counter for {}", LocalDate.now());
+            EnveloppeCounter enveloppeCounter = new EnveloppeCounter(LocalDate.now(), 1);
+            enveloppeCounterRepository.save(enveloppeCounter);
+            return 1;
+        }
     }
 
     @Override
