@@ -1,5 +1,7 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -16,6 +18,7 @@ public class ActeHistory {
     private String uuid;
     private String acteUuid;
     private StatusType status;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
     private String message;
     private byte[] file;

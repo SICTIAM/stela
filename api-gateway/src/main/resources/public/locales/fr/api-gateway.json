@@ -33,6 +33,8 @@
             "NACK_RECEIVED": "Anomalie Ministère",
             "CANCELLATION_ASKED": "Annulation demandée",
             "CANCELLATION_ARCHIVE_CREATED": "Archive d'annulation préparée",
+            "ARCHIVE_TOO_LARGE": "Archive trop large",
+            "ARCHIVE_SIZE_CHECKED": "Taille d'archive vérifiée",
             "FILE_ERROR": "Erreur sur les fichiers de l'acte"
         },
         "nature": {
