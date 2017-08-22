@@ -4,7 +4,7 @@ import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.UI.ActeUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.service.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import org.slf4j.Logger;

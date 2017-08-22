@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.fail;
-
 @Component
 @Profile("bootstrap-data")
 public class DataInitializerService implements ApplicationListener<ApplicationReadyEvent> {
@@ -64,7 +62,7 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
             // sleep some seconds to let async creation of the archive happens
             Thread.sleep(2000);
         } catch (Exception e) {
-            fail("Should not have thrown an exception");
+            LOGGER.error("Should not have thrown an exception");
         }
         addARStatus(acte003.getUuid());
 
