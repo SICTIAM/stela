@@ -4,6 +4,7 @@ import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.service.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import org.slf4j.Logger;
@@ -38,9 +39,11 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<Acte> getByUuid(@PathVariable String uuid) {
+    public ResponseEntity<ActeUI> getByUuid(@PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        return new ResponseEntity<>(acte, HttpStatus.OK);
+        List<ActeHistory> acteHistory = acteService.getHistory(uuid);
+        boolean isCancellable = acteService.isCancellable(uuid);
+        return new ResponseEntity<>(new ActeUI(acte, acteHistory, isCancellable), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history")

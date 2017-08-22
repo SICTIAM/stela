@@ -16,6 +16,24 @@ const acteSentSuccess = (t) => {
     }
 }
 
+const acteCancelledSuccess = (t) => {
+    return {
+        title: t('notifications.acte.title'),
+        message: t('notifications.acte.cancelled.success'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
+const acteCancelledError = (t) => {
+    return {
+        title: t('notifications.acte.title'),
+        message: t('notifications.acte.cancelled.error'),
+        level: 'error',
+        position: 'tc'
+    }
+}
+
 const pesSentSuccess = (t) => {
     return {
         title: t('notifications.pes.title'),
@@ -40,4 +58,4 @@ const pesSentMissingData = (t) => {
     }
 }
 
-module.exports = { errorNotification, acteSentSuccess, pesSentSuccess, pesSentVirus, pesSentMissingData }
+module.exports = { errorNotification, acteSentSuccess, acteCancelledSuccess, acteCancelledError, pesSentSuccess, pesSentVirus, pesSentMissingData }

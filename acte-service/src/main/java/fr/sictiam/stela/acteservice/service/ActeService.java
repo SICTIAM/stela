@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -88,6 +89,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public void cancel(String uuid) {
         ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+    }
+
+    public boolean isCancellable(String uuid) {
+        // TODO: Improve later when phases will be supported
+        Acte acte = getByUuid(uuid);
+        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED);
+        List<ActeHistory> acteHistoryList = getHistory(uuid);
+        return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
+                && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))
+                && !cancelPendingStatus.contains(acte.getStatus());
     }
 
     @Override
