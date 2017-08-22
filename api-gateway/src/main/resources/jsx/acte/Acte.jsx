@@ -6,6 +6,7 @@ import { Grid, Segment } from 'semantic-ui-react'
 
 import { errorNotification } from '../_components/Notifications'
 import ActeHistory from './ActeHistory'
+import ActeCancelButton from './ActeCancelButton'
 import history from '../_util/history'
 
 class Acte extends Component {
@@ -14,7 +15,11 @@ class Acte extends Component {
         _addNotification: PropTypes.func
     }
     state = {
-        acte: {},
+        acteUI: {
+            acte: {},
+            history: {},
+            cancellable: false
+        },
         acteFetched: false
     }
     checkStatus = (response) => {
@@ -30,7 +35,7 @@ class Acte extends Component {
             fetch('/api/acte/' + uuid, { credentials: 'same-origin' })
                 .then(this.checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acte: json, acteFetched: true }))
+                .then(json => this.setState({ acteUI: json, acteFetched: true }))
                 .catch(response => {
                     response.json().then(json => {
                         console.log(json)
@@ -44,37 +49,44 @@ class Acte extends Component {
         const { t } = this.context
         const acteFetched = renderIf(this.state.acteFetched)
         const acteNotFetched = renderIf(!this.state.acteFetched)
+        const acte = this.state.acteUI.acte
         return (
             <div>
                 {acteFetched(
                     <div>
                         <Segment>
-                            <h1>{this.state.acte.title}</h1>
+                            <Grid>
+                                <Grid.Column width={13}><h1>{acte.title}</h1></Grid.Column>
+                                <Grid.Column width={3}>
+                                    <ActeCancelButton isCancellable={this.state.acteUI.cancellable} uuid={this.state.acteUI.acte.uuid} />
+                                </Grid.Column>
+                            </Grid>
+
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="number">{t('acte.fields.number')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="number">{this.state.acte.number}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="number">{acte.number}</span></Grid.Column>
                             </Grid>
 
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="decision">{this.state.acte.decision}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="decision">{acte.decision}</span></Grid.Column>
                             </Grid>
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="nature">{t(`acte.nature.${this.state.acte.nature}`)}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="nature">{t(`acte.nature.${acte.nature}`)}</span></Grid.Column>
                             </Grid>
 
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="code">{t('acte.fields.code')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="code">{this.state.acte.code}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="code">{acte.code}</span></Grid.Column>
                             </Grid>
 
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="file">{this.state.acte.file}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="file">{acte.filename}</span></Grid.Column>
                             </Grid>
 
-                            <ActeHistory uuid={this.props.uuid} />
+                            <ActeHistory history={this.state.acteUI.history} />
                         </Segment>
                     </div>
                 )}

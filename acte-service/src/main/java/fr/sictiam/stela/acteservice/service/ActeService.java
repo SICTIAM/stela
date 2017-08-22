@@ -90,6 +90,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
     }
 
+    public boolean isCancellable(String uuid) {
+        Acte acte = getByUuid(uuid);
+        return acte.getStatus().equals(StatusType.ACK_RECEIVED);
+    }
+
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         acteHistoryRepository.save(event.getActeHistory());

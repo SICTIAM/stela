@@ -10,6 +10,7 @@ dependencies {
     compile('org.apache.commons:commons-compress:1.14')
     compile('com.sun.mail:javax.mail:1.6.0')
     compile('org.springframework:spring-oxm')
+    compile('org.springframework:spring-mock:2.0.8')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
