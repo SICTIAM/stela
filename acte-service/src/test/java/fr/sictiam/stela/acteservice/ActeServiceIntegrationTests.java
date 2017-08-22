@@ -95,12 +95,37 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
 
         List<ActeHistory> acteHistories = acteService.getHistory(acteUuid);
-        assertEquals(2, acteHistories.size());
+        assertEquals(3, acteHistories.size());
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.CREATED)));
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_CREATED)));
+        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_SIZE_CHECKED)));
 
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+    }
+
+    @Test
+    public void testArchiveTooLarge() {
+
+        MultiValueMap<String, Object> params = acteWithAttachments();
+        // add another annexe to go above the 1MB limit set for the unit tests
+        params.add("annexes", new ClassPathResource("data/Annexe_delib.pdf"));
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
+
+        ResponseEntity<String> response =
+                this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+        String acteUuid = response.getBody();
+
+        try {
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+
+        Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.ARCHIVE_TOO_LARGE);
+        assertTrue(acteHistory.isPresent());
     }
 
     @Test
@@ -128,10 +153,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             fail("Should not have thrown an exception");
         }
 
-        acteService.getHistory(acteUuid).forEach(acteHistory -> LOGGER.debug(acteHistory.toString()));
-
         Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.CANCELLATION_ARCHIVE_CREATED, acte.getStatus());
+        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getStatus());
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
         assertTrue(acteHistory.isPresent());
