@@ -16,4 +16,16 @@ public class ActeUI {
         this.history = history;
         this.isCancellable = isCancellable;
     }
+
+    public Acte getActe() {
+        return acte;
+    }
+
+    public List<ActeHistory> getHistory() {
+        return history;
+    }
+
+    public boolean isCancellable() {
+        return isCancellable;
+    }
 }
