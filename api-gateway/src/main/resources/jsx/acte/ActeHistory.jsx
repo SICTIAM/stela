@@ -25,7 +25,7 @@ class ActeHistory extends Component {
                         <Feed.Extra>{status.message}</Feed.Extra>
                     )}
                     {renderIf(status.fileName && status.file)(
-                        <Feed.Extra>Fichier joint: {status.fileName}</Feed.Extra>
+                        <Feed.Extra>{t('acte.page.linked_file')}: {status.fileName}</Feed.Extra>
                     )}
                 </Feed.Content>
             </Feed.Event>

@@ -63,6 +63,7 @@
             "non_existing_act": "Acte non existant",
             "historic": "Historique",
             "no_history": "Aucun historique pour cet acte",
+            "linked_file": "Fichier joint",
             "cancel_deposit": "Annuler le dépôt"
         },
         "new": {

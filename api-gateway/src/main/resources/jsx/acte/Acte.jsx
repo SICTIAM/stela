@@ -54,7 +54,7 @@ class Acte extends Component {
         const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
-            <List.Item key={annexe.filename}>{annexe.filename}</List.Item>
+            <List.Item key={annexe.uuid}>{annexe.filename}</List.Item>
         )
         return (
             <div>
