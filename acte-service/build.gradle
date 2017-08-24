@@ -11,6 +11,7 @@ dependencies {
     compile('com.sun.mail:javax.mail:1.6.0')
     compile('org.springframework:spring-oxm')
     compile('org.springframework:spring-mock:2.0.8')
+    compile('commons-beanutils:commons-beanutils:1.8.3')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

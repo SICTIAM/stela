@@ -8,8 +8,6 @@ class AdminDashboard extends Component {
         t: PropTypes.func.isRequired
     }
     render() {
-        const { t } = this.props
-
         return (
             <div>
                 <h1>Tableau de bord</h1>

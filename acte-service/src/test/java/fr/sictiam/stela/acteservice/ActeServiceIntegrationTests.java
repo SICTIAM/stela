@@ -1,11 +1,9 @@
 package fr.sictiam.stela.acteservice;
 
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +25,10 @@ import org.springframework.util.MultiValueMap;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -43,6 +44,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ActeService acteService;
+
+    @Autowired
+    private LocalAuthorityService localAuthorityService;
 
     @Test
     public void testCreateActe() {
@@ -191,5 +195,29 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         return acteService.getHistory(acteUuid).stream()
                 .filter(ah -> ah.getStatus().equals(status))
                 .findFirst();
+    }
+
+    @Test
+    public void createAndRetrieveLocalAuthority() {
+        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthority = localAuthorityService.create(localAuthority);
+        assertEquals("SICTIAM-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
+        assertEquals(localAuthority.getUuid(), localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid());
+    }
+
+    @Test
+    public void partialLocalAuthorityUpdate() {
+        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthority = localAuthorityService.create(localAuthority);
+
+        LocalAuthority updatedLocalAuthority = new LocalAuthority();
+        updatedLocalAuthority.setCanPublishRegistre(true);
+
+
+        localAuthorityService.partialUpdate(updatedLocalAuthority, localAuthority.getUuid());
+
+        assertEquals(true, localAuthorityService.getByUuid(localAuthority.getUuid()).getCanPublishRegistre());
+        assertEquals(true, localAuthorityService.getByUuid(localAuthority.getUuid()).getMiatConnectionStatus());
+        assertEquals(false, localAuthorityService.getByUuid(localAuthority.getUuid()).getCanPublishWebSite());
     }
 }
