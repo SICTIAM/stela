@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Grid, Segment } from 'semantic-ui-react'
+import moment from 'moment'
+import { Grid, Segment, List, Checkbox } from 'semantic-ui-react'
 
 import { errorNotification } from '../_components/Notifications'
 import ActeHistory from './ActeHistory'
@@ -16,7 +17,9 @@ class Acte extends Component {
     }
     state = {
         acteUI: {
-            acte: {},
+            acte: {
+                annexes: []
+            },
             history: {},
             cancellable: false
         },
@@ -50,6 +53,9 @@ class Acte extends Component {
         const acteFetched = renderIf(this.state.acteFetched)
         const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
+        const annexes = this.state.acteUI.acte.annexes.map(annexe =>
+            <List.Item key={annexe.uuid}>{annexe.filename}</List.Item>
+        )
         return (
             <div>
                 {acteFetched(
@@ -69,7 +75,7 @@ class Acte extends Component {
 
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="decision">{acte.decision}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span></Grid.Column>
                             </Grid>
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
@@ -84,6 +90,22 @@ class Acte extends Component {
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
                                 <Grid.Column width={13}><span id="file">{acte.filename}</span></Grid.Column>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.annexes')}</label></Grid.Column>
+                                <Grid.Column width={13}>
+                                    {renderIf(annexes.length > 0)(
+                                        <List>
+                                            {annexes}
+                                        </List>
+                                    )}
+                                </Grid.Column>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.public')}</label></Grid.Column>
+                                <Grid.Column width={13}><Checkbox checked={acte.public} disabled /></Grid.Column>
                             </Grid>
 
                             <ActeHistory history={this.state.acteUI.history} />

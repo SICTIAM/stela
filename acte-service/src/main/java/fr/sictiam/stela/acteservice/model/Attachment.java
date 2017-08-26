@@ -25,6 +25,10 @@ public class Attachment {
         this.filename = filename;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
     public byte[] getFile() {
         return file;
     }

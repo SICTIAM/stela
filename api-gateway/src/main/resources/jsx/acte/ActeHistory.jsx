@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
+import moment from 'moment'
 import { Feed } from 'semantic-ui-react'
 
 class ActeHistory extends Component {
@@ -15,7 +16,19 @@ class ActeHistory extends Component {
         const historyNotEmpty = renderIf(this.props.history.length > 0)
 
         const acteHistory = this.props.history.map(status =>
-            <Feed.Event key={status.status} icon='check' date={status.date} summary={t(`acte.status.${status.status}`)} />
+            <Feed.Event key={status.status}>
+                <Feed.Label icon='check' />
+                <Feed.Content>
+                    <Feed.Date>{moment(status.date).format('DD/MM/YYYY hh:mm')}</Feed.Date>
+                    <Feed.Summary>{t(`acte.status.${status.status}`)}</Feed.Summary>
+                    {renderIf(status.message)(
+                        <Feed.Extra>{status.message}</Feed.Extra>
+                    )}
+                    {renderIf(status.fileName && status.file)(
+                        <Feed.Extra>{t('acte.page.linked_file')}: {status.fileName}</Feed.Extra>
+                    )}
+                </Feed.Content>
+            </Feed.Event>
         )
         return (
             <div className='secondContent'>
