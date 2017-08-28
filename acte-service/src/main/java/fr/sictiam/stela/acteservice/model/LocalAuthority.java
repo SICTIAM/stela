@@ -55,6 +55,10 @@ public class LocalAuthority {
         return siren;
     }
 
+    public void setSiren(String siren) {
+        this.siren = siren;
+    }
+
     public String getDepartment() {
         return department;
     }

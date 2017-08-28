@@ -24,7 +24,7 @@ public class LocalAuthorityService {
         this.localAuthorityRepository = localAuthorityRepository;
     }
 
-    public LocalAuthority create(LocalAuthority localAuthority) {
+    public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
     }
 

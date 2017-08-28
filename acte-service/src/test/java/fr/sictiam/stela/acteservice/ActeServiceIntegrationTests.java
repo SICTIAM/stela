@@ -26,9 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -96,7 +94,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acteHistory.get().getFileName());
 
         Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
+        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getStatus());
 
         List<ActeHistory> acteHistories = acteService.getHistory(acteUuid);
         assertEquals(3, acteHistories.size());
@@ -200,7 +198,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void createAndRetrieveLocalAuthority() {
         LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
-        localAuthority = localAuthorityService.create(localAuthority);
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
         assertEquals("SICTIAM-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
         assertEquals(localAuthority.getUuid(), localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid());
     }
@@ -208,16 +206,20 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void partialLocalAuthorityUpdate() {
         LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
-        localAuthority = localAuthorityService.create(localAuthority);
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
 
-        LocalAuthority updatedLocalAuthority = new LocalAuthority();
-        updatedLocalAuthority.setCanPublishRegistre(true);
+        String newNomenclatureDate = LocalDateTime.now().toString();
+        String input = "{\"canPublishRegistre\":\"true\", \"siren\":\"888777666\", \"nomenclatureDate\":\"" + newNomenclatureDate + "\"}";
+        HttpEntity<String> patchData = new HttpEntity<>(input);
 
+        this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class, localAuthority.getUuid());
 
-        localAuthorityService.partialUpdate(updatedLocalAuthority, localAuthority.getUuid());
+        localAuthority = localAuthorityService.getByUuid(localAuthority.getUuid());
 
-        assertEquals(true, localAuthorityService.getByUuid(localAuthority.getUuid()).getCanPublishRegistre());
-        assertEquals(true, localAuthorityService.getByUuid(localAuthority.getUuid()).getMiatConnectionStatus());
-        assertEquals(false, localAuthorityService.getByUuid(localAuthority.getUuid()).getCanPublishWebSite());
+        assertEquals(true, localAuthority.getCanPublishRegistre());
+        assertEquals(true, localAuthority.getMiatConnectionStatus());
+        assertEquals(false, localAuthority.getCanPublishWebSite());
+        assertEquals("888777666", localAuthority.getSiren());
+        assertEquals(newNomenclatureDate, localAuthority.getNomenclatureDate().toString());
     }
 }

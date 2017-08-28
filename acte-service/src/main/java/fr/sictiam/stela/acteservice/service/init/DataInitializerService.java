@@ -53,13 +53,13 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
         // --- Local Authorities ---
 
         LocalAuthority localAuthority001 = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
-        localAuthorityService.create(localAuthority001);
+        localAuthorityService.createOrUpdate(localAuthority001);
 
         LocalAuthority localAuthority002 = new LocalAuthority("Vallauris", "666555444", "666", "1", "31");
-        localAuthorityService.create(localAuthority002);
+        localAuthorityService.createOrUpdate(localAuthority002);
 
         LocalAuthority localAuthority003 = new LocalAuthority("Valbonne", "333222111", "333", "1", "31");
-        localAuthorityService.create(localAuthority003);
+        localAuthorityService.createOrUpdate(localAuthority003);
 
         LOGGER.info("Bootstrapped some local authorities");
 
