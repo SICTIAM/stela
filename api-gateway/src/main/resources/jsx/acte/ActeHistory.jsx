@@ -25,7 +25,9 @@ class ActeHistory extends Component {
                         <Feed.Extra>{status.message}</Feed.Extra>
                     )}
                     {renderIf(status.fileName && status.file)(
-                        <Feed.Extra>{t('acte.page.linked_file')}: {status.fileName}</Feed.Extra>
+                        <Feed.Extra>
+                            {t('acte.page.linked_file')}: <a target='_blank' href={`/api/acte/${status.acteUuid}/history/${status.uuid}/file/${status.fileName}`}>{status.fileName}</a>
+                        </Feed.Extra>
                     )}
                 </Feed.Content>
             </Feed.Event>

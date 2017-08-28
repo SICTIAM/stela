@@ -1,6 +1,7 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.controller.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.controller.exceptions.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.controller.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
@@ -84,6 +85,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public List<ActeHistory> getHistory(String uuid) {
         return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
+    }
+
+    public ActeHistory getHistoryByUuid(String uuid) {
+        return acteHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
     }
 
     public void cancel(String uuid) {
