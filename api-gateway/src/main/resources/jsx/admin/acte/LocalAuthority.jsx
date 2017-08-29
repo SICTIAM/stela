@@ -8,6 +8,7 @@ import moment from 'moment'
 import 'react-datetime/css/react-datetime.css';
 
 import { errorNotification } from '../../_components/Notifications'
+import InputButton from '../../_components/InputButton'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -59,11 +60,6 @@ class LocalAuthority extends Component {
     }
     updateChange = (field, newValue) => {
         const uuid = this.state.localAuthority.uuid
-        const partialLocalAuthority = Object.assign({}, this.state.localAuthority)
-        for (var key in partialLocalAuthority) {
-            partialLocalAuthority[key] = null;
-        }
-        partialLocalAuthority[field] = newValue
         fetch('/api/acte/localAuthority/' + uuid, {
             credentials: 'same-origin',
             headers: {
@@ -72,7 +68,7 @@ class LocalAuthority extends Component {
                 [this.context.csrfTokenHeaderName]: this.context.csrfToken
             },
             method: 'PATCH',
-            body: JSON.stringify(partialLocalAuthority)
+            body: JSON.stringify({ [field]: newValue })
         })
             .then(this.checkStatus)
             .then(response => response.json())
@@ -98,25 +94,43 @@ class LocalAuthority extends Component {
 
                         <h2>{t('admin.modules.acte.local_authority_settings.general_informations')}</h2>
                         <Grid>
+                            <Grid.Column width={4}><label htmlFor="uuid">{t('local_authority.uuid')}</label></Grid.Column>
+                            <Grid.Column width={12}><span id="uuid">{this.state.localAuthority.uuid}</span></Grid.Column>
+                        </Grid>
+                        <Grid>
                             <Grid.Column width={4}><label htmlFor="siren">{t('local_authority.siren')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="siren">{this.state.localAuthority.name}</span></Grid.Column>
+                            <Grid.Column width={12}><span id="siren">{this.state.localAuthority.siren}</span></Grid.Column>
                         </Grid>
                         <Grid>
                             <Grid.Column width={4}><label htmlFor="department">{t('local_authority.department')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="department">{this.state.localAuthority.department}</span></Grid.Column>
+                            <Grid.Column width={12}>
+                                <InputButton id="department"
+                                    value={this.state.localAuthority.department}
+                                    handleChange={this.handleInputChange}
+                                    validateInput={this.updateChange} />
+                            </Grid.Column>
                         </Grid>
                         <Grid>
                             <Grid.Column width={4}><label htmlFor="district">{t('local_authority.district')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="district">{this.state.localAuthority.district}</span></Grid.Column>
+                            <Grid.Column width={12}>
+                                <InputButton id="district"
+                                    value={this.state.localAuthority.district}
+                                    handleChange={this.handleInputChange}
+                                    validateInput={this.updateChange} />
+                            </Grid.Column>
                         </Grid>
                         <Grid>
                             <Grid.Column width={4}><label htmlFor="nature">{t('local_authority.nature')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="nature">{this.state.localAuthority.nature}</span></Grid.Column>
+                            <Grid.Column width={12}>
+                                <InputButton id="nature"
+                                    value={this.state.localAuthority.nature}
+                                    handleChange={this.handleInputChange}
+                                    validateInput={this.updateChange} />
+                            </Grid.Column>
                         </Grid>
                         <Grid>
                             <Grid.Column width={4}><label htmlFor="nomenclatureDate">{t('local_authority.nomenclatureDate')}</label></Grid.Column>
-                            <Grid.Column width={4}><span id="nomenclatureDate">{this.state.localAuthority.nomenclatureDate}</span></Grid.Column>
-                            <Grid.Column width={8}><button>Mettre à jour</button></Grid.Column>
+                            <Grid.Column width={12}><span id="nomenclatureDate">{this.state.localAuthority.nomenclatureDate}</span></Grid.Column>
                         </Grid>
                         <Grid>
                             <Grid.Column width={4}><label htmlFor="canPublishRegistre">{t('local_authority.canPublishRegistre')}</label></Grid.Column>

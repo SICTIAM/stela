@@ -63,12 +63,24 @@ public class LocalAuthority {
         return department;
     }
 
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
     public String getDistrict() {
         return district;
     }
 
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
     public String getNature() {
         return nature;
+    }
+
+    public void setNature(String nature) {
+        this.nature = nature;
     }
 
     public LocalDateTime getNomenclatureDate() {

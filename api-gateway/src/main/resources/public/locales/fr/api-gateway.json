@@ -123,6 +123,7 @@
         }
     },
     "local_authority": {
+        "uuid": "UUID",
         "name": "Nom de la collectivité",
         "siren": "SIREN",
         "department": "Département",
