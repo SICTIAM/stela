@@ -3,9 +3,6 @@ import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
 import { Grid, Checkbox, Segment } from 'semantic-ui-react'
-import Datetime from 'react-datetime'
-import moment from 'moment'
-import 'react-datetime/css/react-datetime.css';
 
 import { errorNotification } from '../../_components/Notifications'
 import InputButton from '../../_components/InputButton'
@@ -28,8 +25,6 @@ class LocalAuthority extends Component {
                 .then(this.checkStatus)
                 .then(response => response.json())
                 .then(json => {
-                    json.miatConnectionStartDate = new moment.utc(json.miatConnectionStartDate)
-                    json.miatConnectionEndDate = new moment.utc(json.miatConnectionEndDate)
                     this.setState({ localAuthority: json, localAuthorityFetched: true })
                 })
                 .catch(response => {
@@ -55,9 +50,6 @@ class LocalAuthority extends Component {
         const { id, value } = e.target
         this.updateChange(id, value)
     }
-    handleDateChange = (field, date) => {
-        this.updateChange(field, date)
-    }
     updateChange = (field, newValue) => {
         const uuid = this.state.localAuthority.uuid
         fetch('/api/acte/localAuthority/' + uuid, {
@@ -75,7 +67,6 @@ class LocalAuthority extends Component {
             .then(value => {
                 const localAuthority = this.state.localAuthority
                 let newFieldValue = value[field]
-                if (field === 'miatConnectionStartDate' || field === 'miatConnectionEndDate') newFieldValue = new moment.utc(newFieldValue)
                 localAuthority[field] = newFieldValue
                 this.setState({ localAuthority: localAuthority })
             })
@@ -140,21 +131,6 @@ class LocalAuthority extends Component {
                             <Grid.Column width={4}><label htmlFor="canPublishWebSite">{t('local_authority.canPublishWebSite')}</label></Grid.Column>
                             <Grid.Column width={12}><Checkbox id="canPublishWebSite" toggle checked={this.state.localAuthority.canPublishWebSite} onChange={e => this.handleCheckboxChange('canPublishWebSite')} /></Grid.Column>
                         </Grid>
-
-                        <h2>{t('admin.modules.acte.local_authority_settings.MIAT_transmission')}</h2>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="miatConnectionStatus">{t('local_authority.miatConnectionStatus')}</label></Grid.Column>
-                            <Grid.Column width={12}><Checkbox id="miatConnectionStatus" toggle checked={this.state.localAuthority.miatConnectionStatus} onChange={e => this.handleCheckboxChange('miatConnectionStatus')} /></Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="miatConnectionStartDate">{t('local_authority.miatConnectionStartDate')}</label></Grid.Column>
-                            <Grid.Column width={12}><Datetime id='miatConnectionStartDate' utc={true} locale="fr-fr" value={this.state.localAuthority.miatConnectionStartDate} onChange={date => this.handleDateChange('miatConnectionStartDate', date)} /></Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="miatConnectionEndDate">{t('local_authority.miatConnectionEndDate')}</label></Grid.Column>
-                            <Grid.Column width={12}><Datetime id='miatConnectionEndDate' utc={true} locale="fr-fr" value={this.state.localAuthority.miatConnectionEndDate} onChange={date => this.handleDateChange('miatConnectionEndDate', date)} /></Grid.Column>
-                        </Grid>
-
                     </Segment>
                 )}
             </div>

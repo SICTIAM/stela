@@ -2,11 +2,9 @@ package fr.sictiam.stela.acteservice.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.acteservice.config.LocalDateTimeConverter;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +45,6 @@ public class LocalAuthorityRestController {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            ConvertUtils.register(new LocalDateTimeConverter(), LocalDateTime.class);
             Map<String, Object> dataMap =
                     objectMapper.readValue(requestData, new TypeReference<Map<String, Object>>(){});
             for (String key : dataMap.keySet()) {

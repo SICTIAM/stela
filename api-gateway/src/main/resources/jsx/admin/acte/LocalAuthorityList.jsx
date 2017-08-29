@@ -31,10 +31,7 @@ class LocalAuthorityList extends Component {
                         { property: 'department', displayed: true, displayName: t('local_authority.department'), searchable: false },
                         { property: 'district', displayed: true, displayName: t('local_authority.district'), searchable: false },
                         { property: 'nature', displayed: true, displayName: t('local_authority.nature'), searchable: false },
-                        { property: 'nomenclatureDate', displayed: true, displayName: t('local_authority.nomenclatureDate'), searchable: false },
-                        { property: 'miatConnectionStatus', displayed: false, searchable: false },
-                        { property: 'miatConnectionStartDate', displayed: false, searchable: false },
-                        { property: 'miatConnectionEndDate', displayed: false, searchable: false },
+                        { property: 'nomenclatureDate', displayed: true, displayName: t('local_authority.nomenclatureDate'), searchable: false }
                     ]}
                     header={true}
                     link='/admin/actes/parametrage-collectivite/'

@@ -22,9 +22,6 @@ public class LocalAuthority {
     private LocalDateTime nomenclatureDate;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
-    private Boolean miatConnectionStatus;
-    private LocalDateTime miatConnectionStartDate;
-    private LocalDateTime miatConnectionEndDate;
 
     public LocalAuthority() {
     }
@@ -38,9 +35,6 @@ public class LocalAuthority {
         this.nomenclatureDate = null;
         this.canPublishRegistre = false;
         this.canPublishWebSite = false;
-        this.miatConnectionStatus = true;
-        this.miatConnectionStartDate = LocalDateTime.now();
-        this.miatConnectionEndDate = LocalDateTime.now();
     }
 
     public String getUuid() {
@@ -107,30 +101,6 @@ public class LocalAuthority {
         this.canPublishWebSite = canPublishWebSite;
     }
 
-    public Boolean getMiatConnectionStatus() {
-        return miatConnectionStatus;
-    }
-
-    public void setMiatConnectionStatus(Boolean miatConnectionStatus) {
-        this.miatConnectionStatus = miatConnectionStatus;
-    }
-
-    public LocalDateTime getMiatConnectionStartDate() {
-        return miatConnectionStartDate;
-    }
-
-    public void setMiatConnectionStartDate(LocalDateTime miatConnectionStartDate) {
-        this.miatConnectionStartDate = miatConnectionStartDate;
-    }
-
-    public LocalDateTime getMiatConnectionEndDate() {
-        return miatConnectionEndDate;
-    }
-
-    public void setMiatConnectionEndDate(LocalDateTime miatConnectionEndDate) {
-        this.miatConnectionEndDate = miatConnectionEndDate;
-    }
-
     @Override
     public String toString() {
         return "LocalAuthority{" +
@@ -143,9 +113,6 @@ public class LocalAuthority {
                 ", nomenclatureDate=" + nomenclatureDate +
                 ", canPublishRegistre=" + canPublishRegistre +
                 ", canPublishWebSite=" + canPublishWebSite +
-                ", miatConnectionStatus=" + miatConnectionStatus +
-                ", miatConnectionStartDate=" + miatConnectionStartDate +
-                ", miatConnectionEndDate=" + miatConnectionEndDate +
                 '}';
     }
 }

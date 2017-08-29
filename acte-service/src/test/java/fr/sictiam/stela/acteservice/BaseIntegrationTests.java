@@ -8,7 +8,6 @@ import com.palantir.docker.compose.connection.waiting.SuccessOrFailure;
 import org.junit.ClassRule;
 import org.junit.experimental.categories.Category;
 
-@Category(IntegrationTests.class)
 public class BaseIntegrationTests {
 
     private static HealthCheck<DockerPort> toBeOpen() {
