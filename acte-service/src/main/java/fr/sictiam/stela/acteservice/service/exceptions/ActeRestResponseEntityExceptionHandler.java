@@ -1,9 +1,5 @@
-package fr.sictiam.stela.acteservice.controller;
+package fr.sictiam.stela.acteservice.service.exceptions;
 
-import fr.sictiam.stela.acteservice.controller.exceptions.ActeNotFoundException;
-import fr.sictiam.stela.acteservice.controller.exceptions.AnnexeNotFoundException;
-import fr.sictiam.stela.acteservice.controller.exceptions.HistoryNotFoundException;
-import fr.sictiam.stela.acteservice.controller.exceptions.NoHistoryFileException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +21,7 @@ public class ActeRestResponseEntityExceptionHandler extends ResponseEntityExcept
         return handleExceptionInternal(ex, "Acte not sent.", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-    @ExceptionHandler({AnnexeNotFoundException.class})
+    @ExceptionHandler({FileNotFoundException.class})
     protected ResponseEntity<Object> AnnexeNotFound(Exception ex, WebRequest request){
         return handleExceptionInternal(ex, "Annexe not found.", new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
@@ -35,7 +31,7 @@ public class ActeRestResponseEntityExceptionHandler extends ResponseEntityExcept
         return handleExceptionInternal(ex, "History not found.", new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler({NoHistoryFileException.class})
+    @ExceptionHandler({FileNotFoundException.class})
     protected ResponseEntity<Object> NoHistoryFile(Exception ex, WebRequest request){
         return handleExceptionInternal(ex, "No history file.", new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }

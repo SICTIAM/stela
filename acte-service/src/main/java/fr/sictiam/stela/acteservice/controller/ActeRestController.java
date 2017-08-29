@@ -5,8 +5,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.List;
 
-import fr.sictiam.stela.acteservice.controller.exceptions.AnnexeNotFoundException;
-import fr.sictiam.stela.acteservice.controller.exceptions.NoHistoryFileException;
+import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
@@ -54,7 +53,7 @@ public class ActeRestController {
         return new ResponseEntity<>(new ActeUI(acte, acteHistory, isCancellable), HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/file/{filename}")
+    @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         outputFile(response, acte.getFile(), acte.getFilename());
@@ -66,13 +65,13 @@ public class ActeRestController {
         return new ResponseEntity<>(acteHistoryList, HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/history/{historyUuid}/file/{filename}")
-    public void getFileHistory(HttpServletResponse response, @PathVariable String uuid, @PathVariable String historyUuid) {
+    @GetMapping("/{uuid}/history/{historyUuid}/file")
+    public void getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
         ActeHistory acteHistory = acteService.getHistoryByUuid(historyUuid);
         if(acteHistory.getFile() != null) {
             outputFile(response, acteHistory.getFile(), acteHistory.getFileName());
         }
-        else throw new NoHistoryFileException();
+        else throw new FileNotFoundException();
     }
 
     @GetMapping("/{uuid}/annexes")
@@ -81,13 +80,9 @@ public class ActeRestController {
         return new ResponseEntity<>(attachments, HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/annexe/{annexeUuid}/{filename}")
-    public void getAnnexe(HttpServletResponse response, @PathVariable String uuid, @PathVariable String annexeUuid) {
-        List<Attachment> annexes = acteService.getByUuid(uuid).getAnnexes();
-        Attachment annexe = annexes.stream()
-                .filter( attachment -> attachment.getUuid().equals(annexeUuid))
-                .findFirst()
-                .orElseThrow(AnnexeNotFoundException::new);
+    @GetMapping("/{uuid}/annexe/{annexeUuid}")
+    public void getAnnexe(HttpServletResponse response, @PathVariable String annexeUuid) {
+        Attachment annexe = acteService.getAnnexeByUuid(annexeUuid);
         outputFile(response, annexe.getFile(), annexe.getFilename());
     }
 
@@ -129,8 +124,7 @@ public class ActeRestController {
                 mimeType = "application/octet-stream";
             }
             response.setContentType(mimeType);
-            String contentDisposition = mimeType.equals("application/pdf") ? "inline" : "attachment";
-            response.setHeader("Content-Disposition", String.format(contentDisposition + "; filename=" + filename));
+            response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
 
             IOUtils.copy(fileInputStream, response.getOutputStream());
             response.flushBuffer();

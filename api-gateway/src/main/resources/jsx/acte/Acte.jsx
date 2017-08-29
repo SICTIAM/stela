@@ -55,7 +55,7 @@ class Acte extends Component {
         const acte = this.state.acteUI.acte
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
-                <a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}/${annexe.filename}`}>{annexe.filename}</a>
+                <a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a>
             </List.Item>
         )
         return (
@@ -91,7 +91,7 @@ class Acte extends Component {
 
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file/${acte.filename}`}>{acte.filename}</a></span></Grid.Column>
+                                <Grid.Column width={13}><span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span></Grid.Column>
                             </Grid>
 
                             <Grid>
