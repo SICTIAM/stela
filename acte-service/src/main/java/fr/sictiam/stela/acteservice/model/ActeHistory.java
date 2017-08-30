@@ -48,6 +48,10 @@ public class ActeHistory {
         this.fileName = fileName;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
     public String getActeUuid() {
         return acteUuid;
     }

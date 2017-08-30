@@ -1,6 +1,9 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.controller.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
@@ -30,12 +33,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     
     private final ActeRepository acteRepository;
     private final ActeHistoryRepository acteHistoryRepository;
+    private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository, AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
+        this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -82,8 +87,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return getByUuid(acteUuid).getAnnexes();
     }
 
+    public Attachment getAnnexeByUuid(String uuid) {
+        return attachmentRepository.findByUuid(uuid).orElseThrow(FileNotFoundException::new);
+    }
+
     public List<ActeHistory> getHistory(String uuid) {
         return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
+    }
+
+    public ActeHistory getHistoryByUuid(String uuid) {
+        return acteHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
     }
 
     public void cancel(String uuid) {

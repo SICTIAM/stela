@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface ActeHistoryRepository extends JpaRepository<ActeHistory, String> {
     Optional<List<ActeHistory>> findByActeUuid(String acteUuid);
+    Optional<ActeHistory> findByUuid(String uuid);
 }

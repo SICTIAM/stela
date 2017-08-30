@@ -1,6 +1,6 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.controller.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
 import fr.sictiam.stela.acteservice.model.*;

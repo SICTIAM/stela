@@ -54,7 +54,9 @@ class Acte extends Component {
         const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
-            <List.Item key={annexe.uuid}>{annexe.filename}</List.Item>
+            <List.Item key={annexe.uuid}>
+                <a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a>
+            </List.Item>
         )
         return (
             <div>
@@ -89,7 +91,7 @@ class Acte extends Component {
 
                             <Grid>
                                 <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="file">{acte.filename}</span></Grid.Column>
+                                <Grid.Column width={13}><span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span></Grid.Column>
                             </Grid>
 
                             <Grid>
