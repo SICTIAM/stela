@@ -3,8 +3,6 @@ package fr.sictiam.stela.admin.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,11 +19,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.ProvisioningRequest;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
-import fr.sictiam.stela.admin.service.OzwilloProvisioningService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
 
@@ -38,23 +34,14 @@ public class LocalAuthorityController {
     private final LocalAuthorityService localAuthorityService;
     private final ProfileService profileService;
     private final WorkGroupService workGroupService;
-    private final OzwilloProvisioningService ozwilloProvisioningService;
 
     public LocalAuthorityController(LocalAuthorityService localAuthorityService,
-                                    ProfileService profileService, WorkGroupService workGroupService, OzwilloProvisioningService ozwilloProvisioningService) {
+                                    ProfileService profileService, WorkGroupService workGroupService) {
         this.localAuthorityService = localAuthorityService;
         this.profileService = profileService;
         this.workGroupService = workGroupService;
-        this.ozwilloProvisioningService = ozwilloProvisioningService;
     }
     
-    
-    @PostMapping
-    public void create(@RequestBody @Valid ProvisioningRequest provisioningRequest) {
-        LOGGER.debug("Got a provisioning request : {}", provisioningRequest);
-        ozwilloProvisioningService.createNewInstance(provisioningRequest);
-    }
-
     @GetMapping("/current")
     @JsonView(Views.LocalAuthorityView.class)
     public LocalAuthority getCurrentLocalAuthority(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
