@@ -24,10 +24,10 @@ i18n
             // returning a path: 
             // function(lngs, namespaces) { return customPath; } 
             // the returned path will interpolate lng, ns if provided like giving a static path 
-            loadPath: '../locales/{{lng}}/{{ns}}.json',
+            loadPath: '/locales/{{lng}}/{{ns}}.json',
 
             // path to post missing resources 
-            addPath: '../locales/add/{{lng}}/{{ns}}.missing.json',
+            addPath: '/locales/add/{{lng}}/{{ns}}.missing.json',
 
             // your backend server supports multiloading 
             // /locales/resources.json?lng=de+en&ns=ns1+ns2 
