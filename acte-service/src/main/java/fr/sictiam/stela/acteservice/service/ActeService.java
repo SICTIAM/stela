@@ -99,9 +99,12 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
     }
 
-    public void cancel(String uuid) {
-        ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+    public boolean cancel(String uuid) {
+        if(isCancellable(uuid)) {
+            ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+            return true;
+        } else return false;
     }
 
     public boolean isCancellable(String uuid) {

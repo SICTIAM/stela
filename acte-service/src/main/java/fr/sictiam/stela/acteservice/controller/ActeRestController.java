@@ -87,8 +87,9 @@ public class ActeRestController {
     }
 
     @PostMapping("/{uuid}/status/cancel")
-    public void cancel(@PathVariable String uuid) {
-        acteService.cancel(uuid);
+    public ResponseEntity<String> cancel(@PathVariable String uuid) {
+        if(acteService.cancel(uuid)) return new ResponseEntity<>("", HttpStatus.OK);
+        else return new ResponseEntity<>("notifications.acte.cancelled.forbidden", HttpStatus.FORBIDDEN);
     }
 
     @PostMapping

@@ -161,6 +161,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acteHistory.get().getFile());
         assertNotNull(acteHistory.get().getFileName());
 
+        ResponseEntity<String> newResponse = this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
+        String newResponseBody = newResponse.getBody();
+
+        assertEquals("notifications.acte.cancelled.forbidden", newResponseBody);
+
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
     }
