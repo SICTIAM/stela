@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import { Button } from 'semantic-ui-react'
 
-import { acteCancelledSuccess, acteCancelledError } from '../_components/Notifications'
+import { acteCancelledSuccess, acteCancelledForbidden } from '../_components/Notifications'
 
 class ActeCancelButton extends Component {
     static contextTypes = {
@@ -39,7 +39,7 @@ class ActeCancelButton extends Component {
                     this.setState({ requestSent: true })
                 })
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(acteCancelledError(this.context.t)))
+                    response.text().then(text => this.context._addNotification(acteCancelledForbidden(this.context.t)))
                 })
         }
     }

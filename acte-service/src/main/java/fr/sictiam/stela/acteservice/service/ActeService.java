@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
@@ -100,8 +101,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public void cancel(String uuid) {
-        ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        if(isCancellable(uuid)) {
+            ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        } else throw new CancelForbiddenException();
     }
 
     public boolean isCancellable(String uuid) {

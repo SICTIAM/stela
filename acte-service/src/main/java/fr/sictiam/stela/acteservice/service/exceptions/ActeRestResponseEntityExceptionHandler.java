@@ -35,4 +35,9 @@ public class ActeRestResponseEntityExceptionHandler extends ResponseEntityExcept
     protected ResponseEntity<Object> NoHistoryFile(Exception ex, WebRequest request){
         return handleExceptionInternal(ex, "No history file.", new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
+
+    @ExceptionHandler({CancelForbiddenException.class})
+    protected ResponseEntity<Object> CancelForbidden(Exception ex, WebRequest request){
+        return handleExceptionInternal(ex, "This acte cannot be cancelled", new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
 }

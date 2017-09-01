@@ -106,7 +106,7 @@
             },
             "cancelled": {
                 "success": "La demande d'annulation du dépot a bien été prise en compte",
-                "error": "La demande d'annulation n'a pas pu s'effectuer"
+                "forbidden": "Cet acte ne peut pas être annulé"
             },
             "annexe_not_found": "Fichier annexe inexistant",
             "history_not_found": "Historique d'acte inexistant",

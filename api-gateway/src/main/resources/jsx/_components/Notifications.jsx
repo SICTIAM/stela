@@ -25,10 +25,10 @@ const acteCancelledSuccess = (t) => {
     }
 }
 
-const acteCancelledError = (t) => {
+const acteCancelledForbidden = (t) => {
     return {
         title: t('notifications.acte.title'),
-        message: t('notifications.acte.cancelled.error'),
+        message: t('notifications.acte.cancelled.forbidden'),
         level: 'error',
         position: 'tc'
     }
@@ -58,4 +58,4 @@ const pesSentMissingData = (t) => {
     }
 }
 
-module.exports = { errorNotification, acteSentSuccess, acteCancelledSuccess, acteCancelledError, pesSentSuccess, pesSentVirus, pesSentMissingData }
+module.exports = { errorNotification, acteSentSuccess, acteCancelledSuccess, acteCancelledForbidden, pesSentSuccess, pesSentVirus, pesSentMissingData }
