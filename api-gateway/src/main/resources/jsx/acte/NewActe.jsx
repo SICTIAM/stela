@@ -26,6 +26,7 @@ class NewActe extends Component {
             code: '',
             title: '',
             public: true,
+            publicWebsite: true,
             status: null,
         },
         file: null,
@@ -106,6 +107,9 @@ class NewActe extends Component {
                     </FormField>
                     <FormField htmlFor='public' label={t('acte.fields.public')}>
                         <Checkbox id='public' checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
+                    </FormField>
+                    <FormField htmlFor='publicWebsite' label={t('acte.fields.publicWebsite')}>
+                        <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => this.handleCheckboxChange('publicWebsite')} toggle />
                     </FormField>
                     <Button type='submit'>{t('acte.new.submit')}</Button>
                 </Form>

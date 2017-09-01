@@ -228,7 +228,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     private Acte acte() {
         return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "COD001",
-                "Title", true);
+                "Title", true, true);
     }
 
     private void printXmlMessage(byte[] file, String filename) {

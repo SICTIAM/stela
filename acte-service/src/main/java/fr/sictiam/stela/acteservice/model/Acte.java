@@ -16,43 +16,34 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-
     @Column(unique=true)
     private String number;
-
     private LocalDateTime creation;
-
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate decision;
-
     private ActeNature nature;
-
     private LocalDateTime lastUpdateTime;
-
     private String code;
-
     private String title;
-
     private boolean isPublic;
-
+    private boolean isPublicWebsite;
     private StatusType status;
-
     private byte[] file;
     private String filename;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
 
     public Acte() {
     }
 
-    public Acte(String number, LocalDate decision, ActeNature nature, String code, String title, boolean isPublic) {
+    public Acte(String number, LocalDate decision, ActeNature nature, String code, String title, boolean isPublic, boolean isPublicWebsite) {
         this.number = number;
         this.decision = decision;
         this.nature = nature;
         this.code = code;
         this.title = title;
         this.isPublic = isPublic;
+        this.isPublicWebsite = isPublicWebsite;
     }
 
     public String getUuid() {
@@ -85,6 +76,14 @@ public class Acte {
 
     public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public boolean isPublicWebsite() {
+        return isPublicWebsite;
+    }
+
+    public void setPublicWebsite(boolean publicWebsite) {
+        isPublicWebsite = publicWebsite;
     }
 
     public LocalDateTime getCreation() {
