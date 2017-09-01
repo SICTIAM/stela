@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
+import renderIf from 'render-if'
 import { Button, Form, Checkbox } from 'semantic-ui-react'
 
 import { FormField } from '../_components/UI'
@@ -25,12 +26,30 @@ class NewActe extends Component {
             lastUpdateTime: null,
             code: '',
             title: '',
-            public: true,
-            publicWebsite: true,
+            public: false,
+            publicWebsite: false,
             status: null,
+        },
+        depositFields: {
+            publicField: false,
+            publicWebsiteField: false
         },
         file: null,
         annexes: []
+    }
+    componentDidMount() {
+        const uuid = this.props.uuid
+        if (uuid !== '') {
+            fetch('/api/acte/depositFields', { credentials: 'same-origin' })
+                .then(this.checkStatus)
+                .then(response => response.json())
+                .then(json => this.setState({ depositFields: json }))
+                .catch(response => {
+                    response.json().then(json => {
+                        this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    })
+                })
+        }
     }
     handleFileChange = (field, file) => {
         this.setState({ [field]: file })
@@ -74,6 +93,7 @@ class NewActe extends Component {
             "DOCUMENTS_BUDGETAIRES_ET_FINANCIERS",
             "AUTRES"
         ]
+        const isPublicFieldDisabled = !this.state.depositFields.publicField
         const natureOptions = natures.map(nature =>
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
         )
@@ -106,11 +126,13 @@ class NewActe extends Component {
                         <input type="file" id='annexes' onChange={e => this.handleFileChange('annexes', e.target.files)} multiple />
                     </FormField>
                     <FormField htmlFor='public' label={t('acte.fields.public')}>
-                        <Checkbox id='public' checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
+                        <Checkbox id='public' disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
                     </FormField>
-                    <FormField htmlFor='publicWebsite' label={t('acte.fields.publicWebsite')}>
-                        <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => this.handleCheckboxChange('publicWebsite')} toggle />
-                    </FormField>
+                    {renderIf(this.state.depositFields.publicWebsiteField)(
+                        <FormField htmlFor='publicWebsite' label={t('acte.fields.publicWebsite')}>
+                            <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => this.handleCheckboxChange('publicWebsite')} toggle />
+                        </FormField>
+                    )}
                     <Button type='submit'>{t('acte.new.submit')}</Button>
                 </Form>
             </div>

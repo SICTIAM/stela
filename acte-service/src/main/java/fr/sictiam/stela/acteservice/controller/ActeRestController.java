@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.List;
 
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Attachment;
@@ -33,10 +36,12 @@ public class ActeRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeRestController.class);
 
     private final ActeService acteService;
+    private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public ActeRestController(ActeService acteService){
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService){
         this.acteService = acteService;
+        this.localAuthorityService = localAuthorityService;
     }
 
     @GetMapping
@@ -95,6 +100,8 @@ public class ActeRestController {
     ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
                                   @RequestParam("annexes") MultipartFile... annexes) {
 
+        // TODO: Retrieve current LocalAuthority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
         ObjectMapper mapper = new ObjectMapper();
         try {
             Acte acte = mapper.readValue(acteJson, Acte.class);
@@ -102,7 +109,7 @@ public class ActeRestController {
             LOGGER.debug("Received acte : {}", acte.getTitle());
             LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
 
-            Acte result = acteService.create(acte, file, annexes);
+            Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
 
         } catch (IOException e) {
@@ -112,6 +119,15 @@ public class ActeRestController {
             LOGGER.error("ActeNotSentException: {}", ns);
             return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/depositFields")
+    public ResponseEntity<ActeDepositFieldsUI> getActeDepositFields() {
+        // TODO: Retrieve current LocalAuthority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
+        LOGGER.info("currentLocalAuthority: {}", currentLocalAuthority.getName());
+        return new ResponseEntity<>(new ActeDepositFieldsUI(currentLocalAuthority.getCanPublishRegistre(),
+                currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {

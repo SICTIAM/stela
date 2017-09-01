@@ -1,16 +1,13 @@
 package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +52,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
      * 
      * @return The newly created Acte entity.
      */
-    public Acte create(Acte acte, MultipartFile file, MultipartFile... annexes)
+    public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
             throws ActeNotSentException, IOException {
         acte.setFilename(file.getOriginalFilename());
         acte.setFile(file.getBytes());
@@ -66,6 +63,9 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         acte.setAnnexes(transformedAnnexes);
         acte.setCreation(LocalDateTime.now());
         acte.setStatus(StatusType.CREATED);
+
+        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
+        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
 
         Acte created = acteRepository.save(acte);
 

@@ -92,7 +92,9 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
             MultipartFile annexe1 = getMultipartResourceFile("examples/annexe1.xml", "text/xml");
             MultipartFile annexe2 = getMultipartResourceFile("examples/annexe2.xml", "text/xml");
 
-            acteService.create(acte, actePDF, annexe1, annexe2);
+            LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
+
+            acteService.create(currentLocalAuthority, acte, actePDF, annexe1, annexe2);
         } catch (IOException e) {
             LOGGER.error("Unable to bootstrap acte {} : {}", acte.getNumber(), e.toString());
         }
