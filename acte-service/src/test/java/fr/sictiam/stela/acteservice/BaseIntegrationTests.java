@@ -8,7 +8,8 @@ import com.palantir.docker.compose.connection.waiting.SuccessOrFailure;
 import org.junit.ClassRule;
 import org.junit.experimental.categories.Category;
 
-public class BaseIntegrationTests {
+@Category(IntegrationTests.class)
+public abstract class BaseIntegrationTests {
 
     private static HealthCheck<DockerPort> toBeOpen() {
         return port -> SuccessOrFailure.fromBoolean(port.isListeningNow(), "" + port + "was not listening");

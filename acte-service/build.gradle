@@ -23,10 +23,9 @@ test {
 }
 task integrationTest(type: Test) {
     environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
-    def testClass = project.hasProperty('testClass') ? project.property('testClass') : 'ActeService'
 
     useJUnit {
-        includeCategories "fr.sictiam.stela.acteservice.${testClass}IntegrationTests"
+        includeCategories "fr.sictiam.stela.acteservice.IntegrationTests"
     }
 }
 

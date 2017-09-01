@@ -6,7 +6,6 @@ import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-@Category(ActeServiceIntegrationTests.class)
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ActeServiceIntegrationTests extends BaseIntegrationTests {
@@ -167,6 +165,32 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+    }
+
+    @Test
+    public void createAndRetrieveLocalAuthority() {
+        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
+        assertEquals("SICTIAM-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
+        assertEquals(localAuthority.getUuid(), localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid());
+    }
+
+    @Test
+    public void partialLocalAuthorityUpdate() {
+        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
+
+        String newNomenclatureDate = LocalDateTime.now().toString();
+        String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\"}";
+        HttpEntity<String> patchData = new HttpEntity<>(input);
+
+        this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class, localAuthority.getUuid());
+
+        localAuthority = localAuthorityService.getByUuid(localAuthority.getUuid());
+
+        assertEquals(true, localAuthority.getCanPublishRegistre());
+        assertEquals(false, localAuthority.getCanPublishWebSite());
+        assertEquals("006", localAuthority.getDepartment());
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
