@@ -2,11 +2,9 @@ package fr.sictiam.stela.acteservice.service.init;
 
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +32,14 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
     private final ActeService acteService;
     private final ActeRepository acteRepository;
     private final ActeHistoryRepository acteHistoryRepository;
+    private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public DataInitializerService(ActeService acteService, ActeRepository acteRepository,  ActeHistoryRepository acteHistoryRepository) {
+    public DataInitializerService(ActeService acteService, ActeRepository acteRepository,  ActeHistoryRepository acteHistoryRepository, LocalAuthorityService localAuthorityService) {
         this.acteService = acteService;
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
+        this.localAuthorityService = localAuthorityService;
     }
 
     @Override
@@ -49,6 +49,23 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
     }
 
     private void importData() {
+
+        // --- Local Authorities ---
+
+        LocalAuthority localAuthority001 = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthorityService.createOrUpdate(localAuthority001);
+
+        LocalAuthority localAuthority002 = new LocalAuthority("Vallauris", "666555444", "666", "1", "31");
+        localAuthorityService.createOrUpdate(localAuthority002);
+
+        LocalAuthority localAuthority003 = new LocalAuthority("Valbonne", "333222111", "333", "1", "31");
+        localAuthorityService.createOrUpdate(localAuthority003);
+
+        LOGGER.info("Bootstrapped some local authorities");
+
+
+        // --- Actes ---
+
         Acte acte001 = new Acte("001", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "STELA 3 sera fini en Décembre", true);
         createDummyActe(acte001);
 

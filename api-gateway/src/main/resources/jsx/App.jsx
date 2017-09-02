@@ -22,6 +22,8 @@ import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminDashboard from './admin/AdminDashboard'
+import LocalAuthorityList from './admin/acte/LocalAuthorityList'
+import LocalAuthority from './admin/acte/LocalAuthority'
 
 class App extends Component {
     constructor() {
@@ -111,6 +113,8 @@ const AppRoute = () =>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
         <Route path='/admin/tableau-de-bord' render={() => <AdminApp><AdminDashboard /></AdminApp>} />
+        <Route path='/admin/actes/parametrage-collectivite/:uuid' render={({ match }) => <AdminApp><LocalAuthority uuid={match.params.uuid} /></AdminApp>} />
+        <Route path='/admin/actes/parametrage-collectivite' render={() => <AdminApp><LocalAuthorityList /></AdminApp>} />
     </Switch>
 
 render((

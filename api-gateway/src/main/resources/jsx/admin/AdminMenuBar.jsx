@@ -39,12 +39,19 @@ class AdminMenuBar extends Component {
                 </Menu.Item>
 
                 <Menu.Item>
-                    <Menu.Header>{t('admin.modules.title')}</Menu.Header>
+                    <Menu.Header>{t('admin.modules.acte.title')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item>{t('admin.modules.acte')}</Menu.Item>
-                        <Menu.Item>{t('admin.modules.pes')}</Menu.Item>
-                        <Menu.Item>{t('admin.modules.convocation')}</Menu.Item>
+                        <Menu.Item>{t('admin.modules.configuration')}</Menu.Item>
+                        <Menu.Item as={Link} to='/admin/actes/parametrage-collectivite'>{t('admin.modules.local_authority_settings')}</Menu.Item>
                     </Menu.Menu>
+                </Menu.Item>
+
+                <Menu.Item>
+                    {t('admin.modules.pes')}
+                </Menu.Item>
+
+                <Menu.Item>
+                    {t('admin.modules.convocation')}
                 </Menu.Item>
 
                 <Menu.Item as={Link} to="/" header>

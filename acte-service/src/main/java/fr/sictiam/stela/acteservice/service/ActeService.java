@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -77,11 +78,22 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public List<Acte> getAll() {
-        return acteRepository.findAllByOrderByCreationDesc();
+        return acteRepository.findAllByOrderByCreationDesc().stream()
+                .map(this::enrichWithStatus)
+                .collect(Collectors.toList());
     }
 
     public Acte getByUuid(String uuid) {
-        return acteRepository.findByUuid(uuid).orElseThrow(ActeNotFoundException::new);
+        return acteRepository.findByUuid(uuid)
+                .map(this::enrichWithStatus)
+                .orElseThrow(ActeNotFoundException::new);
+    }
+
+    private Acte enrichWithStatus(Acte acte) {
+        ActeHistory acteHistory = acteHistoryRepository.findFirstByActeUuidOrderByDateDesc(acte.getUuid());
+        acte.setLastUpdateTime(acteHistory.getDate());
+        acte.setStatus(acteHistory.getStatus());
+        return acte;
     }
 
     public List<Attachment> getAnnexes(String acteUuid) {
@@ -120,9 +132,5 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         acteHistoryRepository.save(event.getActeHistory());
-        Acte acte = getByUuid(event.getActeHistory().getActeUuid());
-        acte.setStatus(event.getActeHistory().getStatus());
-        acte.setLastUpdateTime(event.getActeHistory().getDate());
-        acteRepository.save(acte);
     }
 }

@@ -1,11 +1,9 @@
 package fr.sictiam.stela.acteservice;
 
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +42,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ActeService acteService;
+
+    @Autowired
+    private LocalAuthorityService localAuthorityService;
 
     @Test
     public void testCreateActe() {
@@ -70,6 +72,26 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
+    public void testGetAll() {
+        MultiValueMap<String, Object> params = acteWithAttachments();
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
+
+        this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+
+        try {
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+
+        Acte[] actes = this.restTemplate.getForObject("/api/acte", Acte[].class);
+        assertTrue(actes.length > 0);
+        assertNotNull(actes[0].getStatus());
+        assertNotNull(actes[0].getLastUpdateTime());
+    }
+
+    @Test
     public void testArchiveCreation() {
 
         MultiValueMap<String, Object> params = acteWithAttachments();
@@ -92,7 +114,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acteHistory.get().getFileName());
 
         Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_CREATED, acte.getStatus());
+        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getStatus());
 
         List<ActeHistory> acteHistories = acteService.getHistory(acteUuid);
         assertEquals(3, acteHistories.size());
@@ -168,6 +190,31 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+    }
+
+    @Test
+    public void createAndRetrieveLocalAuthority() {
+        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
+        assertEquals("SICTIAM-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
+        assertEquals(localAuthority.getUuid(), localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid());
+    }
+
+    @Test
+    public void partialLocalAuthorityUpdate() {
+        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
+
+        String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\"}";
+        HttpEntity<String> patchData = new HttpEntity<>(input);
+
+        this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class, localAuthority.getUuid());
+
+        localAuthority = localAuthorityService.getByUuid(localAuthority.getUuid());
+
+        assertEquals(true, localAuthority.getCanPublishRegistre());
+        assertEquals(false, localAuthority.getCanPublishWebSite());
+        assertEquals("006", localAuthority.getDepartment());
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {

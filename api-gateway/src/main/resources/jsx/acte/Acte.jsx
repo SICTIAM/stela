@@ -71,34 +71,34 @@ class Acte extends Component {
                             </Grid>
 
                             <Grid>
-                                <Grid.Column width={3}><label htmlFor="number">{t('acte.fields.number')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="number">{acte.number}</span></Grid.Column>
+                                <Grid.Column width={4}><label htmlFor="number">{t('acte.fields.number')}</label></Grid.Column>
+                                <Grid.Column width={12}><span id="number">{acte.number}</span></Grid.Column>
                             </Grid>
 
                             <Grid>
-                                <Grid.Column width={3}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span></Grid.Column>
+                                <Grid.Column width={4}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
+                                <Grid.Column width={12}><span id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span></Grid.Column>
                             </Grid>
                             <Grid>
-                                <Grid.Column width={3}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="nature">{t(`acte.nature.${acte.nature}`)}</span></Grid.Column>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.Column width={3}><label htmlFor="code">{t('acte.fields.code')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="code">{acte.code}</span></Grid.Column>
+                                <Grid.Column width={4}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
+                                <Grid.Column width={12}><span id="nature">{t(`acte.nature.${acte.nature}`)}</span></Grid.Column>
                             </Grid>
 
                             <Grid>
-                                <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
-                                <Grid.Column width={13}><span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span></Grid.Column>
+                                <Grid.Column width={4}><label htmlFor="code">{t('acte.fields.code')}</label></Grid.Column>
+                                <Grid.Column width={12}><span id="code">{acte.code}</span></Grid.Column>
                             </Grid>
 
                             <Grid>
-                                <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.annexes')}</label></Grid.Column>
-                                <Grid.Column width={13}>
+                                <Grid.Column width={4}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
+                                <Grid.Column width={12}><span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span></Grid.Column>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.Column width={4}><label htmlFor="annexes">{t('acte.fields.annexes')}</label></Grid.Column>
+                                <Grid.Column width={12}>
                                     {renderIf(annexes.length > 0)(
-                                        <List>
+                                        <List id="annexes">
                                             {annexes}
                                         </List>
                                     )}
@@ -106,8 +106,8 @@ class Acte extends Component {
                             </Grid>
 
                             <Grid>
-                                <Grid.Column width={3}><label htmlFor="file">{t('acte.fields.public')}</label></Grid.Column>
-                                <Grid.Column width={13}><Checkbox checked={acte.public} disabled /></Grid.Column>
+                                <Grid.Column width={4}><label htmlFor="public">{t('acte.fields.public')}</label></Grid.Column>
+                                <Grid.Column width={12}><Checkbox id="public" checked={acte.public} disabled /></Grid.Column>
                             </Grid>
 
                             <ActeHistory history={this.state.acteUI.history} />

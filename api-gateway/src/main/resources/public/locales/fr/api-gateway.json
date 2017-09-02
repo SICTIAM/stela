@@ -122,15 +122,36 @@
             }
         }
     },
+    "local_authority": {
+        "uuid": "UUID",
+        "name": "Nom de la collectivité",
+        "siren": "SIREN",
+        "department": "Département",
+        "district": "Arrondissement",
+        "nature": "Nature",
+        "nomenclatureDate": "Date de nomenclature",
+        "canPublishRegistre": "Affichage sur le registre des délibérations",
+        "canPublishWebSite": "Affichage sur site internet",
+        "miatConnectionStatus": "Accessibilité du serveur MIAT",
+        "miatConnectionStartDate": "Début d'inaccessibilité du serveur MIAT",
+        "miatConnectionEndDate": "Fin d'inaccessibilité du serveur MIAT"
+    },
     "admin": {
         "dashboard": "Tableau de bord",
         "users": "Utilisateurs",
         "collectivities": "Collectivités",
         "modules": {
-            "title": "Modules",
-            "acte": "Acte",
-            "pes": "Pes",
-            "convocation": "Convocation"
+            "acte": {
+                "title": "Module Acte",
+                "local_authority_settings": {
+                    "general_informations": "Information générales",
+                    "MIAT_transmission": "Transmission MIAT"
+                }
+            },
+            "pes": "Module PES",
+            "convocation": "Module Convocation",
+            "configuration": "Configuration",
+            "local_authority_settings": "Paramétrage des collectivités"
         },
         "back_to_stela": "Retourner sur STELA"
     }

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import renderIf from 'render-if'
 import moment from 'moment'
 import { translate } from 'react-i18next'
 
