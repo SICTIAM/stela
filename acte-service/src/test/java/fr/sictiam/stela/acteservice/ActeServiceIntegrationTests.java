@@ -200,7 +200,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
 
-        String newNomenclatureDate = LocalDateTime.now().toString();
         String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\"}";
         HttpEntity<String> patchData = new HttpEntity<>(input);
 
