@@ -72,6 +72,26 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
+    public void testGetAll() {
+        MultiValueMap<String, Object> params = acteWithAttachments();
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
+
+        this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+
+        try {
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+
+        Acte[] actes = this.restTemplate.getForObject("/api/acte", Acte[].class);
+        assertTrue(actes.length > 0);
+        assertNotNull(actes[0].getStatus());
+        assertNotNull(actes[0].getLastUpdateTime());
+    }
+
+    @Test
     public void testArchiveCreation() {
 
         MultiValueMap<String, Object> params = acteWithAttachments();
