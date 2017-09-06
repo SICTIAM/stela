@@ -4,6 +4,7 @@ import moment from 'moment'
 import { translate } from 'react-i18next'
 
 import StelaTable from '../_components/StelaTable'
+import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class ActeList extends Component {
     static contextTypes = {
@@ -13,8 +14,8 @@ class ActeList extends Component {
         actes: []
     }
     componentDidMount() {
-        fetch('/api/acte/', { credentials: 'same-origin' })
-            .then(this.checkStatus)
+        fetchWithAuthzHandling({ url: '/api/acte/' })
+            .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ actes: json }))
     }

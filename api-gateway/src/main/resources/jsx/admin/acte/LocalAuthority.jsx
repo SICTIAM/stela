@@ -2,10 +2,12 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
-import { Grid, Checkbox, Segment } from 'semantic-ui-react'
+import { Checkbox, Segment } from 'semantic-ui-react'
 
 import { errorNotification } from '../../_components/Notifications'
 import InputButton from '../../_components/InputButton'
+import { Field } from '../../_components/UI'
+import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -21,8 +23,8 @@ class LocalAuthority extends Component {
     componentDidMount() {
         const uuid = this.props.uuid
         if (uuid !== '') {
-            fetch('/api/acte/localAuthority/' + uuid, { credentials: 'same-origin' })
-                .then(this.checkStatus)
+            fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + uuid })
+                .then(checkStatus)
                 .then(response => response.json())
                 .then(json => {
                     this.setState({ localAuthority: json, localAuthorityFetched: true })
@@ -35,13 +37,6 @@ class LocalAuthority extends Component {
                 })
         }
     }
-    checkStatus = (response) => {
-        if (response.status >= 200 && response.status < 300) {
-            return response
-        } else {
-            throw response
-        }
-    }
     handleCheckboxChange = (field) => {
         const newValue = !this.state.localAuthority[field]
         this.updateChange(field, newValue)
@@ -52,17 +47,13 @@ class LocalAuthority extends Component {
     }
     updateChange = (field, newValue) => {
         const uuid = this.state.localAuthority.uuid
-        fetch('/api/acte/localAuthority/' + uuid, {
-            credentials: 'same-origin',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                [this.context.csrfTokenHeaderName]: this.context.csrfToken
-            },
-            method: 'PATCH',
-            body: JSON.stringify({ [field]: newValue })
-        })
-            .then(this.checkStatus)
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+
+        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + uuid, body: JSON.stringify({ [field]: newValue }), method: 'PATCH', headers: headers, context: this.context })
+            .then(checkStatus)
             .then(response => response.json())
             .then(value => {
                 const localAuthority = this.state.localAuthority
@@ -84,53 +75,40 @@ class LocalAuthority extends Component {
                         <h1>{this.state.localAuthority.name}</h1>
 
                         <h2>{t('admin.modules.acte.local_authority_settings.general_informations')}</h2>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="uuid">{t('local_authority.uuid')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="uuid">{this.state.localAuthority.uuid}</span></Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="siren">{t('local_authority.siren')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="siren">{this.state.localAuthority.siren}</span></Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="department">{t('local_authority.department')}</label></Grid.Column>
-                            <Grid.Column width={12}>
-                                <InputButton id="department"
-                                    value={this.state.localAuthority.department}
-                                    handleChange={this.handleInputChange}
-                                    validateInput={this.updateChange} />
-                            </Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="district">{t('local_authority.district')}</label></Grid.Column>
-                            <Grid.Column width={12}>
-                                <InputButton id="district"
-                                    value={this.state.localAuthority.district}
-                                    handleChange={this.handleInputChange}
-                                    validateInput={this.updateChange} />
-                            </Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="nature">{t('local_authority.nature')}</label></Grid.Column>
-                            <Grid.Column width={12}>
-                                <InputButton id="nature"
-                                    value={this.state.localAuthority.nature}
-                                    handleChange={this.handleInputChange}
-                                    validateInput={this.updateChange} />
-                            </Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="nomenclatureDate">{t('local_authority.nomenclatureDate')}</label></Grid.Column>
-                            <Grid.Column width={12}><span id="nomenclatureDate">{this.state.localAuthority.nomenclatureDate}</span></Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="canPublishRegistre">{t('local_authority.canPublishRegistre')}</label></Grid.Column>
-                            <Grid.Column width={12}><Checkbox id="canPublishRegistre" toggle checked={this.state.localAuthority.canPublishRegistre} onChange={e => this.handleCheckboxChange('canPublishRegistre')} /></Grid.Column>
-                        </Grid>
-                        <Grid>
-                            <Grid.Column width={4}><label htmlFor="canPublishWebSite">{t('local_authority.canPublishWebSite')}</label></Grid.Column>
-                            <Grid.Column width={12}><Checkbox id="canPublishWebSite" toggle checked={this.state.localAuthority.canPublishWebSite} onChange={e => this.handleCheckboxChange('canPublishWebSite')} /></Grid.Column>
-                        </Grid>
+
+                        <Field htmlFor="uuid" label={t('local_authority.uuid')}>
+                            <span id="uuid">{this.state.localAuthority.uuid}</span>
+                        </Field>
+                        <Field htmlFor="siren" label={t('local_authority.siren')}>
+                            <span id="siren">{this.state.localAuthority.siren}</span>
+                        </Field>
+                        <Field htmlFor="department" label={t('local_authority.department')}>
+                            <InputButton id="department"
+                                value={this.state.localAuthority.department}
+                                handleChange={this.handleInputChange}
+                                validateInput={this.updateChange} />
+                        </Field>
+                        <Field htmlFor="district" label={t('local_authority.district')}>
+                            <InputButton id="district"
+                                value={this.state.localAuthority.district}
+                                handleChange={this.handleInputChange}
+                                validateInput={this.updateChange} />
+                        </Field>
+                        <Field htmlFor="nature" label={t('local_authority.nature')}>
+                            <InputButton id="nature"
+                                value={this.state.localAuthority.nature}
+                                handleChange={this.handleInputChange}
+                                validateInput={this.updateChange} />
+                        </Field>
+                        <Field htmlFor="nomenclatureDate" label={t('local_authority.nomenclatureDate')}>
+                            <span id="nomenclatureDate">{this.state.localAuthority.nomenclatureDate}</span>
+                        </Field>
+                        <Field htmlFor="canPublishRegistre" label={t('local_authority.canPublishRegistre')}>
+                            <Checkbox id="canPublishRegistre" toggle checked={this.state.localAuthority.canPublishRegistre} onChange={e => this.handleCheckboxChange('canPublishRegistre')} />
+                        </Field>
+                        <Field htmlFor="canPublishWebSite" label={t('local_authority.canPublishWebSite')}>
+                            <Checkbox id="canPublishWebSite" toggle checked={this.state.localAuthority.canPublishWebSite} onChange={e => this.handleCheckboxChange('canPublishWebSite')} />
+                        </Field>
                     </Segment>
                 )}
             </div>

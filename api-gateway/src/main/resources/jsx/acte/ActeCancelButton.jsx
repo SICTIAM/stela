@@ -5,6 +5,7 @@ import renderIf from 'render-if'
 import { Button } from 'semantic-ui-react'
 
 import { acteCancelledSuccess, acteCancelledForbidden } from '../_components/Notifications'
+import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class ActeCancelButton extends Component {
     static contextTypes = {
@@ -16,24 +17,11 @@ class ActeCancelButton extends Component {
     state = {
         requestSent: false
     }
-    checkStatus = (response) => {
-        if (response.status >= 200 && response.status < 300) {
-            return response
-        } else {
-            throw response
-        }
-    }
     cancelDeposit = () => {
         const uuid = this.props.uuid
         if (this.props.isCancellable && uuid !== '') {
-            fetch('/api/acte/' + uuid + '/status/cancel', {
-                credentials: 'same-origin',
-                headers: {
-                    [this.context.csrfTokenHeaderName]: this.context.csrfToken
-                },
-                method: 'POST'
-            })
-                .then(this.checkStatus)
+            fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/status/cancel', method: 'POST', context: this.context })
+                .then(checkStatus)
                 .then(() => {
                     this.context._addNotification(acteCancelledSuccess(this.context.t))
                     this.setState({ requestSent: true })

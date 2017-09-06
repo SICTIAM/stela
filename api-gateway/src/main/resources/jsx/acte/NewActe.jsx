@@ -2,9 +2,11 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Form, Checkbox } from 'semantic-ui-react'
-import { errorNotification, acteSentSuccess } from '../_components/Notifications'
 
+import { FormField } from '../_components/UI'
+import { errorNotification, acteSentSuccess } from '../_components/Notifications'
 import history from '../_util/history'
+import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class NewActe extends Component {
     static contextTypes = {
@@ -42,13 +44,6 @@ class NewActe extends Component {
         fields[field] = !fields[field]
         this.setState({ fields: fields })
     }
-    checkStatus = (response) => {
-        if (response.status >= 200 && response.status < 300) {
-            return response
-        } else {
-            throw response
-        }
-    }
     submitForm = (event) => {
         event.preventDefault()
         const data = new FormData()
@@ -57,15 +52,8 @@ class NewActe extends Component {
         const annexesList = [...this.state.annexes]
         annexesList.map(annexe => data.append('annexes', annexe))
 
-        fetch('/api/acte', {
-            credentials: 'same-origin',
-            headers: {
-                [this.context.csrfTokenHeaderName]: this.context.csrfToken
-            },
-            method: 'POST',
-            body: data
-        })
-            .then(this.checkStatus)
+        fetchWithAuthzHandling({ url: '/api/acte', method: 'POST', body: data, context: this.context })
+            .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.context._addNotification(acteSentSuccess(this.context.t))
@@ -92,41 +80,33 @@ class NewActe extends Component {
             <div>
                 <h1>{t('acte.new.title')}</h1>
                 <Form onSubmit={this.submitForm}>
-                    <Form.Field>
-                        <label htmlFor='number'>{t('acte.fields.number')}</label>
+                    <FormField htmlFor='number' label={t('acte.fields.number')}>
                         <input id='number' placeholder='Numéro...' value={this.state.fields.number} onChange={e => this.handleFieldChange('number', e.target.value)} required />
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='title'>{t('acte.fields.title')}</label>
+                    </FormField>
+                    <FormField htmlFor='title' label={t('acte.fields.title')}>
                         <input id='title' placeholder='Titre...' value={this.state.fields.title} onChange={e => this.handleFieldChange('title', e.target.value)} required />
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='decision'>{t('acte.fields.decision')}</label>
+                    </FormField>
+                    <FormField htmlFor='decision' label={t('acte.fields.decision')}>
                         <input id='decision' type='date' placeholder='aaaa-mm-jj' value={this.state.fields.decision} onChange={e => this.handleFieldChange('decision', e.target.value)} required />
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='nature'>{t('acte.fields.nature')}</label>
+                    </FormField>
+                    <FormField htmlFor='nature' label={t('acte.fields.nature')}>
                         <select id='nature' value={this.state.fields.nature} onChange={e => this.handleFieldChange('nature', e.target.value)} required>
                             <option value='' disabled>{t('acte.new.choose')}</option>
                             {natureOptions}
                         </select>
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='code'>{t('acte.fields.code')}</label>
+                    </FormField>
+                    <FormField htmlFor='code' label={t('acte.fields.code')}>
                         <input id='code' placeholder='Code matière...' value={this.state.fields.code} onChange={e => this.handleFieldChange('code', e.target.value)} required />
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='file'>{t('acte.fields.file')}</label>
+                    </FormField>
+                    <FormField htmlFor='file' label={t('acte.fields.file')}>
                         <input type="file" id='file' onChange={e => this.handleFileChange('file', e.target.files[0])} required />
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='annexes'>{t('acte.fields.annexes')}</label>
+                    </FormField>
+                    <FormField htmlFor='annexes' label={t('acte.fields.annexes')}>
                         <input type="file" id='annexes' onChange={e => this.handleFileChange('annexes', e.target.files)} multiple />
-                    </Form.Field>
-                    <Form.Field>
-                        <label htmlFor='public'>{t('acte.fields.public')}</label>
+                    </FormField>
+                    <FormField htmlFor='public' label={t('acte.fields.public')}>
                         <Checkbox id='public' checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
-                    </Form.Field>
+                    </FormField>
                     <Button type='submit'>{t('acte.new.submit')}</Button>
                 </Form>
             </div>

@@ -6,9 +6,11 @@ import moment from 'moment'
 import { Grid, Segment, List, Checkbox } from 'semantic-ui-react'
 
 import { errorNotification } from '../_components/Notifications'
+import { Field } from '../_components/UI'
+import history from '../_util/history'
+import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import ActeHistory from './ActeHistory'
 import ActeCancelButton from './ActeCancelButton'
-import history from '../_util/history'
 
 class Acte extends Component {
     static contextTypes = {
@@ -25,18 +27,11 @@ class Acte extends Component {
         },
         acteFetched: false
     }
-    checkStatus = (response) => {
-        if (response.status >= 200 && response.status < 300) {
-            return response
-        } else {
-            throw response
-        }
-    }
     componentDidMount() {
         const uuid = this.props.uuid
         if (uuid !== '') {
-            fetch('/api/acte/' + uuid, { credentials: 'same-origin' })
-                .then(this.checkStatus)
+            fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
+                .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ acteUI: json, acteFetched: true }))
                 .catch(response => {
@@ -70,45 +65,31 @@ class Acte extends Component {
                                 </Grid.Column>
                             </Grid>
 
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="number">{t('acte.fields.number')}</label></Grid.Column>
-                                <Grid.Column width={12}><span id="number">{acte.number}</span></Grid.Column>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="decision">{t('acte.fields.decision')}</label></Grid.Column>
-                                <Grid.Column width={12}><span id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span></Grid.Column>
-                            </Grid>
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="nature">{t('acte.fields.nature')}</label></Grid.Column>
-                                <Grid.Column width={12}><span id="nature">{t(`acte.nature.${acte.nature}`)}</span></Grid.Column>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="code">{t('acte.fields.code')}</label></Grid.Column>
-                                <Grid.Column width={12}><span id="code">{acte.code}</span></Grid.Column>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="file">{t('acte.fields.file')}</label></Grid.Column>
-                                <Grid.Column width={12}><span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span></Grid.Column>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="annexes">{t('acte.fields.annexes')}</label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    {renderIf(annexes.length > 0)(
-                                        <List id="annexes">
-                                            {annexes}
-                                        </List>
-                                    )}
-                                </Grid.Column>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="public">{t('acte.fields.public')}</label></Grid.Column>
-                                <Grid.Column width={12}><Checkbox id="public" checked={acte.public} disabled /></Grid.Column>
-                            </Grid>
+                            <Field htmlFor="number" label={t('acte.fields.number')}>
+                                <span id="number">{acte.number}</span>
+                            </Field>
+                            <Field htmlFor="decision" label={t('acte.fields.decision')}>
+                                <span id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span>
+                            </Field>
+                            <Field htmlFor="nature" label={t('acte.fields.nature')}>
+                                <span id="nature">{t(`acte.nature.${acte.nature}`)}</span>
+                            </Field>
+                            <Field htmlFor="code" label={t('acte.fields.code')}>
+                                <span id="code">{acte.code}</span>
+                            </Field>
+                            <Field htmlFor="file" label={t('acte.fields.file')}>
+                                <span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span>
+                            </Field>
+                            <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
+                                {renderIf(annexes.length > 0)(
+                                    <List id="annexes">
+                                        {annexes}
+                                    </List>
+                                )}
+                            </Field>
+                            <Field htmlFor="public" label={t('acte.fields.public')}>
+                                <Checkbox id="public" checked={acte.public} disabled />
+                            </Field>
 
                             <ActeHistory history={this.state.acteUI.history} />
                         </Segment>
