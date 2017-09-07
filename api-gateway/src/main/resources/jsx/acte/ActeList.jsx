@@ -40,6 +40,7 @@ class ActeList extends Component {
                         { property: 'status', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
                         { property: 'lastUpdateTime', displayed: false, searchable: false },
                         { property: 'public', displayed: false, searchable: false },
+                        { property: 'publicWebsite', displayed: false, searchable: false },
                     ]}
                     header={true}
                     link='/actes/'
