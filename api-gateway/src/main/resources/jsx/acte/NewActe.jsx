@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Button, Form, Checkbox } from 'semantic-ui-react'
+import { Button, Form, Checkbox, Menu } from 'semantic-ui-react'
 
 import { FormField } from '../_components/UI'
 import { errorNotification, acteSentSuccess } from '../_components/Notifications'
@@ -17,6 +17,7 @@ class NewActe extends Component {
         _addNotification: PropTypes.func
     }
     state = {
+        mode: 'newActe',
         fields: {
             uuid: null,
             number: '',
@@ -57,12 +58,26 @@ class NewActe extends Component {
     handleFieldChange = (field, value) => {
         const fields = this.state.fields
         fields[field] = value
+        if (field === 'nature' && value === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') {
+            fields['public'] = false
+            fields['publicWebsite'] = false
+        }
         this.setState({ fields: fields })
     }
     handleCheckboxChange = (field) => {
         const fields = this.state.fields
         fields[field] = !fields[field]
         this.setState({ fields: fields })
+    }
+    handleModeChange = (e, { id }) => {
+        const fields = this.state.fields
+        if (id === 'newActeBud') {
+            fields['nature'] = 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
+            fields['public'] = false
+            fields['publicWebsite'] = false
+        }
+        else fields['nature'] = ''
+        this.setState({ mode: id, fields: fields })
     }
     submitForm = (event) => {
         event.preventDefault()
@@ -97,9 +112,19 @@ class NewActe extends Component {
         const natureOptions = natures.map(nature =>
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
         )
+        const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".xml" : ".pdf, .jpg, .png"
+        const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".pdf, .jpg, .png" : ".pdf, .xml, .jpg, .png"
         return (
             <div>
                 <h1>{t('acte.new.title')}</h1>
+                <Menu tabular>
+                    <Menu.Item id='newActe' active={this.state.mode === 'newActe'} onClick={this.handleModeChange}>
+                        {t('acte.new.acte')}
+                    </Menu.Item>
+                    <Menu.Item id='newActeBud' active={this.state.mode === 'newActeBud'} onClick={this.handleModeChange}>
+                        {t('acte.new.acte_bud')}
+                    </Menu.Item>
+                </Menu>
                 <Form onSubmit={this.submitForm}>
                     <FormField htmlFor='number' label={t('acte.fields.number')}>
                         <input id='number' placeholder='Numéro...' value={this.state.fields.number} onChange={e => this.handleFieldChange('number', e.target.value)} required />
@@ -110,25 +135,29 @@ class NewActe extends Component {
                     <FormField htmlFor='decision' label={t('acte.fields.decision')}>
                         <input id='decision' type='date' placeholder='aaaa-mm-jj' value={this.state.fields.decision} onChange={e => this.handleFieldChange('decision', e.target.value)} required />
                     </FormField>
-                    <FormField htmlFor='nature' label={t('acte.fields.nature')}>
-                        <select id='nature' value={this.state.fields.nature} onChange={e => this.handleFieldChange('nature', e.target.value)} required>
-                            <option value='' disabled>{t('acte.new.choose')}</option>
-                            {natureOptions}
-                        </select>
-                    </FormField>
+                    {renderIf(this.state.mode === 'newActe')(
+                        <FormField htmlFor='nature' label={t('acte.fields.nature')}>
+                            <select id='nature' value={this.state.fields.nature} onChange={e => this.handleFieldChange('nature', e.target.value)} required>
+                                <option value='' disabled>{t('acte.new.choose')}</option>
+                                {natureOptions}
+                            </select>
+                        </FormField>
+                    )}
                     <FormField htmlFor='code' label={t('acte.fields.code')}>
                         <input id='code' placeholder='Code matière...' value={this.state.fields.code} onChange={e => this.handleFieldChange('code', e.target.value)} required />
                     </FormField>
                     <FormField htmlFor='file' label={t('acte.fields.file')}>
-                        <input type="file" id='file' onChange={e => this.handleFileChange('file', e.target.files[0])} required />
+                        <input type="file" id='file' accept={acceptFile} onChange={e => this.handleFileChange('file', e.target.files[0])} required />
                     </FormField>
                     <FormField htmlFor='annexes' label={t('acte.fields.annexes')}>
-                        <input type="file" id='annexes' onChange={e => this.handleFileChange('annexes', e.target.files)} multiple />
+                        <input type="file" id='annexes' accept={acceptAnnexes} onChange={e => this.handleFileChange('annexes', e.target.files)} multiple />
                     </FormField>
-                    <FormField htmlFor='public' label={t('acte.fields.public')}>
-                        <Checkbox id='public' disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
-                    </FormField>
-                    {renderIf(this.state.depositFields.publicWebsiteField)(
+                    {renderIf(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
+                        <FormField htmlFor='public' label={t('acte.fields.public')}>
+                            <Checkbox id='public' disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
+                        </FormField>
+                    )}
+                    {renderIf(this.state.depositFields.publicWebsiteField && this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
                         <FormField htmlFor='publicWebsite' label={t('acte.fields.publicWebsite')}>
                             <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => this.handleCheckboxChange('publicWebsite')} toggle />
                         </FormField>
