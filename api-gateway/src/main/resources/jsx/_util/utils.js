@@ -13,7 +13,7 @@ const fetchWithAuthzHandling = ({ url, method, body, context, headers }) => {
     const data = body || {}
     const additionalHeaders = headers || {}
     let httpHeaders = {}
-    if (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PACH' || httpMethod === 'DELETE')
+    if (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH' || httpMethod === 'DELETE')
         httpHeaders = { [context.csrfTokenHeaderName]: context.csrfToken }
     httpHeaders = Object.assign({}, httpHeaders, additionalHeaders)
 
