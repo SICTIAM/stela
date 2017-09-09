@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -26,7 +27,9 @@ public class LocalAuthorityService {
     }
 
     public List<LocalAuthority> getAll() {
-        return localAuthorityRepository.findAll();
+        List<LocalAuthority> localAuthorities = localAuthorityRepository.findAll();
+        localAuthorities.sort(Comparator.comparing(LocalAuthority::getName, String.CASE_INSENSITIVE_ORDER));
+        return localAuthorities;
     }
 
     public LocalAuthority getByUuid(String uuid) {

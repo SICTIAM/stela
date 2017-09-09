@@ -91,6 +91,11 @@ class Acte extends Component {
                                 <Checkbox id="public" checked={acte.public} disabled />
                             </Field>
 
+                            <Grid>
+                                <Grid.Column width={4}><label htmlFor="publicWebsite">{t('acte.fields.publicWebsite')}</label></Grid.Column>
+                                <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
+                            </Grid>
+
                             <ActeHistory history={this.state.acteUI.history} />
                         </Segment>
                     </div>

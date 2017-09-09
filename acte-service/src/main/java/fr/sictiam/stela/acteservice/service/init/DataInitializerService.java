@@ -66,13 +66,13 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
 
         // --- Actes ---
 
-        Acte acte001 = new Acte("001", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "STELA 3 sera fini en Décembre", true);
+        Acte acte001 = new Acte("001", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "STELA 3 sera fini en Décembre", true, true);
         createDummyActe(acte001);
 
-        Acte acte002 = new Acte("002", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "SESILE 4 sera fini quand il sera fini", true);
+        Acte acte002 = new Acte("002", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "SESILE 4 sera fini quand il sera fini", true, true);
         createDummyActe(acte002);
 
-        Acte acte003 = new Acte("003", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "Le DC Exporter sera mis en attente", true);
+        Acte acte003 = new Acte("003", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "Le DC Exporter sera mis en attente", true, true);
         createDummyActe(acte003);
 
         try {
@@ -92,7 +92,9 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
             MultipartFile annexe1 = getMultipartResourceFile("examples/annexe1.xml", "text/xml");
             MultipartFile annexe2 = getMultipartResourceFile("examples/annexe2.xml", "text/xml");
 
-            acteService.create(acte, actePDF, annexe1, annexe2);
+            LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
+
+            acteService.create(currentLocalAuthority, acte, actePDF, annexe1, annexe2);
         } catch (IOException e) {
             LOGGER.error("Unable to bootstrap acte {} : {}", acte.getNumber(), e.toString());
         }
