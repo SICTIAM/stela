@@ -7,6 +7,7 @@ import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeSearchUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
@@ -47,6 +48,12 @@ public class ActeRestController {
     @GetMapping
     public ResponseEntity<List<Acte>> getAll() {
         List<Acte> actes = acteService.getAll();
+        return new ResponseEntity<>(actes, HttpStatus.OK);
+    }
+
+    @PostMapping("/query")
+    public ResponseEntity<List<Acte>> getAllWithQuery(@RequestBody ActeSearchUI acteSearchUI) {
+        List<Acte> actes = acteService.getAllWithQuery(acteSearchUI);
         return new ResponseEntity<>(actes, HttpStatus.OK);
     }
 

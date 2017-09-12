@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.ui.ActeSearchUI;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
@@ -9,6 +10,7 @@ import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,13 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,6 +38,9 @@ import java.util.stream.Collectors;
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeService.class);
+
+    @PersistenceContext
+    private EntityManager entityManager;
     
     private final ActeRepository acteRepository;
     private final ActeHistoryRepository acteHistoryRepository;
@@ -81,6 +93,25 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteRepository.findAllByOrderByCreationDesc().stream()
                 .map(this::enrichWithStatus)
                 .collect(Collectors.toList());
+    }
+
+    public List<Acte> getAllWithQuery(ActeSearchUI acteSearchUI) {
+
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
+        Root<Acte> root = query.from(Acte.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        if(StringUtils.isNotBlank(acteSearchUI.getActe().getNumber())) predicates.add(builder.and(builder.like(root.get("number"), "%"+acteSearchUI.getActe().getNumber()+"%")));
+        if(StringUtils.isNotBlank(acteSearchUI.getActe().getTitle())) predicates.add(builder.and(builder.like(root.get("title"), "%"+acteSearchUI.getActe().getTitle()+"%")));
+        if(acteSearchUI.getActe().getNature() != null) predicates.add(builder.and(builder.equal(root.get("nature"), acteSearchUI.getActe().getNature())));
+        if(acteSearchUI.getActe().getStatus() != null) predicates.add(builder.and(builder.equal(root.get("status"), acteSearchUI.getActe().getStatus())));
+        if(acteSearchUI.getDecisionFrom() != null && acteSearchUI.getDecisionTo() != null) predicates.add(builder.and(builder.between(root.get("decision"), acteSearchUI.getDecisionFrom(), acteSearchUI.getDecisionTo())));
+
+        query.where(predicates.toArray(new Predicate[predicates.size()]));
+        TypedQuery<Acte> typedQuery = entityManager.createQuery(query);
+        List<Acte> actes = typedQuery.getResultList();
+        return actes;
     }
 
     public Acte getByUuid(String uuid) {

@@ -8,6 +8,7 @@ import { FormField } from '../_components/UI'
 import { errorNotification, acteSentSuccess } from '../_components/Notifications'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { natures } from '../_util/constants'
 
 class NewActe extends Component {
     static contextTypes = {
@@ -85,14 +86,6 @@ class NewActe extends Component {
     }
     render() {
         const { t } = this.context
-        const natures = [
-            "DELIBERATIONS",
-            "ARRETES_REGLEMENTAIRES",
-            "ARRETES_INDIVIDUELS",
-            "CONTRATS_ET_CONVENTIONS",
-            "DOCUMENTS_BUDGETAIRES_ET_FINANCIERS",
-            "AUTRES"
-        ]
         const isPublicFieldDisabled = !this.state.depositFields.publicField
         const natureOptions = natures.map(nature =>
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
