@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.SortedSet;
 
 import fr.sictiam.stela.acteservice.model.Acte;
 
@@ -60,21 +61,14 @@ public class ActeRestController {
     @GetMapping("/{uuid}")
     public ResponseEntity<ActeUI> getByUuid(@PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        List<ActeHistory> acteHistory = acteService.getHistory(uuid);
         boolean isCancellable = acteService.isCancellable(uuid);
-        return new ResponseEntity<>(new ActeUI(acte, acteHistory, isCancellable), HttpStatus.OK);
+        return new ResponseEntity<>(new ActeUI(acte, isCancellable), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         outputFile(response, acte.getFile(), acte.getFilename());
-    }
-
-    @GetMapping("/{uuid}/history")
-    public ResponseEntity<List<ActeHistory>> getHistory(@PathVariable String uuid) {
-        List<ActeHistory> acteHistoryList = acteService.getHistory(uuid);
-        return new ResponseEntity<>(acteHistoryList, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")

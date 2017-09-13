@@ -22,17 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -74,7 +68,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
         acte.setAnnexes(transformedAnnexes);
         acte.setCreation(LocalDateTime.now());
-        acte.setStatus(StatusType.CREATED);
 
         if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
         if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
@@ -90,41 +83,40 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public List<Acte> getAll() {
-        return acteRepository.findAllByOrderByCreationDesc().stream()
-                .map(this::enrichWithStatus)
-                .collect(Collectors.toList());
+        return acteRepository.findAllByOrderByCreationDesc();
     }
 
     public List<Acte> getAllWithQuery(ActeSearchUI acteSearchUI) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
-        Root<Acte> root = query.from(Acte.class);
+        Root<Acte> acteRoot = query.from(Acte.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        if(StringUtils.isNotBlank(acteSearchUI.getActe().getNumber())) predicates.add(builder.and(builder.like(root.get("number"), "%"+acteSearchUI.getActe().getNumber()+"%")));
-        if(StringUtils.isNotBlank(acteSearchUI.getActe().getTitle())) predicates.add(builder.and(builder.like(root.get("title"), "%"+acteSearchUI.getActe().getTitle()+"%")));
-        if(acteSearchUI.getActe().getNature() != null) predicates.add(builder.and(builder.equal(root.get("nature"), acteSearchUI.getActe().getNature())));
-        if(acteSearchUI.getActe().getStatus() != null) predicates.add(builder.and(builder.equal(root.get("status"), acteSearchUI.getActe().getStatus())));
-        if(acteSearchUI.getDecisionFrom() != null && acteSearchUI.getDecisionTo() != null) predicates.add(builder.and(builder.between(root.get("decision"), acteSearchUI.getDecisionFrom(), acteSearchUI.getDecisionTo())));
+        if(StringUtils.isNotBlank(acteSearchUI.getActe().getNumber())) predicates.add(builder.and(builder.like(acteRoot.get("number"), "%"+acteSearchUI.getActe().getNumber()+"%")));
+        if(StringUtils.isNotBlank(acteSearchUI.getActe().getTitle())) predicates.add(builder.and(builder.like(acteRoot.get("title"), "%"+acteSearchUI.getActe().getTitle()+"%")));
+        if(acteSearchUI.getActe().getNature() != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), acteSearchUI.getActe().getNature())));
+        if(acteSearchUI.getDecisionFrom() != null && acteSearchUI.getDecisionTo() != null) predicates.add(builder.and(builder.between(acteRoot.get("decision"), acteSearchUI.getDecisionFrom(), acteSearchUI.getDecisionTo())));
 
         query.where(predicates.toArray(new Predicate[predicates.size()]));
+
+        if(acteSearchUI.getStatus() != null) {
+            Subquery<ActeHistory> subquery = query.subquery(ActeHistory.class);
+            Root<ActeHistory> acteHistoryRoot = subquery.from(ActeHistory.class);
+            //Join<Acte, ActeHistory> join = acteRoot.join("acteHistories");
+
+            subquery.select(builder.greatest(acteHistoryRoot.<ActeHistory>get("date")))
+                    .where(builder.equal(acteHistoryRoot.get("status"), acteSearchUI.getStatus()))
+                    .where(acteRoot.get("acteHistories").in(subquery));
+        }
+
         TypedQuery<Acte> typedQuery = entityManager.createQuery(query);
         List<Acte> actes = typedQuery.getResultList();
         return actes;
     }
 
     public Acte getByUuid(String uuid) {
-        return acteRepository.findByUuid(uuid)
-                .map(this::enrichWithStatus)
-                .orElseThrow(ActeNotFoundException::new);
-    }
-
-    private Acte enrichWithStatus(Acte acte) {
-        ActeHistory acteHistory = acteHistoryRepository.findFirstByActeUuidOrderByDateDesc(acte.getUuid());
-        acte.setLastUpdateTime(acteHistory.getDate());
-        acte.setStatus(acteHistory.getStatus());
-        return acte;
+        return acteRepository.findByUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
     public List<Attachment> getAnnexes(String acteUuid) {
@@ -133,10 +125,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public Attachment getAnnexeByUuid(String uuid) {
         return attachmentRepository.findByUuid(uuid).orElseThrow(FileNotFoundException::new);
-    }
-
-    public List<ActeHistory> getHistory(String uuid) {
-        return acteHistoryRepository.findByActeUuid(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
     public ActeHistory getHistoryByUuid(String uuid) {
@@ -154,14 +142,18 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         // TODO: Improve later when phases will be supported
         Acte acte = getByUuid(uuid);
         List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED);
-        List<ActeHistory> acteHistoryList = getHistory(uuid);
+        SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))
-                && !cancelPendingStatus.contains(acte.getStatus());
+                && !cancelPendingStatus.contains(acte.getActeHistories().last().getStatus());
     }
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        acteHistoryRepository.save(event.getActeHistory());
+        Acte acte = getByUuid(event.getActeHistory().getActeUuid());
+        SortedSet<ActeHistory> acteHistories = acte.getActeHistories();
+        acteHistories.add(event.getActeHistory());
+        acte.setActeHistories(acteHistories);
+        acteRepository.save(acte);
     }
 }

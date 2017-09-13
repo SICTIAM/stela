@@ -20,7 +20,8 @@ class Acte extends Component {
     state = {
         acteUI: {
             acte: {
-                annexes: []
+                annexes: [],
+                acteHistories: []
             },
             history: {},
             cancellable: false
@@ -96,7 +97,7 @@ class Acte extends Component {
                                 <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
                             </Grid>
 
-                            <ActeHistory history={this.state.acteUI.history} />
+                            <ActeHistory history={this.state.acteUI.acte.acteHistories} />
                         </Segment>
                     </div>
                 )}

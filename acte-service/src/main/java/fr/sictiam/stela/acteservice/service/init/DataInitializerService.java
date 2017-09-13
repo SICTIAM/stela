@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.*;
 
 @Component
 @Profile("bootstrap-data")
@@ -31,14 +32,12 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
 
     private final ActeService acteService;
     private final ActeRepository acteRepository;
-    private final ActeHistoryRepository acteHistoryRepository;
     private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public DataInitializerService(ActeService acteService, ActeRepository acteRepository,  ActeHistoryRepository acteHistoryRepository, LocalAuthorityService localAuthorityService) {
+    public DataInitializerService(ActeService acteService, ActeRepository acteRepository, LocalAuthorityService localAuthorityService) {
         this.acteService = acteService;
         this.acteRepository = acteRepository;
-        this.acteHistoryRepository = acteHistoryRepository;
         this.localAuthorityService = localAuthorityService;
     }
 
@@ -73,7 +72,7 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
         createDummyActe(acte002);
 
         Acte acte003 = new Acte("003", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "Le DC Exporter sera mis en attente", true, true);
-        createDummyActe(acte003);
+        acte003 = createDummyActe(acte003);
 
         try {
             // sleep some seconds to let async creation of the archive happens
@@ -86,7 +85,7 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
         LOGGER.info("Bootstrapped some Actes");
     }
 
-    private void createDummyActe(Acte acte) {
+    private Acte createDummyActe(Acte acte) {
         try {
             MultipartFile actePDF = getMultipartResourceFile("examples/acte.pdf", "application/pdf");
             MultipartFile annexe1 = getMultipartResourceFile("examples/annexe1.xml", "text/xml");
@@ -94,19 +93,19 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
 
             LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
 
-            acteService.create(currentLocalAuthority, acte, actePDF, annexe1, annexe2);
+            return acteService.create(currentLocalAuthority, acte, actePDF, annexe1, annexe2);
         } catch (IOException e) {
             LOGGER.error("Unable to bootstrap acte {} : {}", acte.getNumber(), e.toString());
+            return acte;
         }
     }
 
     private void addARStatus(String uuid) {
         ActeHistory acteHistory = new ActeHistory(uuid, StatusType.ACK_RECEIVED, LocalDateTime.now(), null, null);
-        acteHistoryRepository.save(acteHistory);
-
         Acte acte = acteService.getByUuid(uuid);
-        acte.setStatus(acteHistory.getStatus());
-        acte.setLastUpdateTime(acteHistory.getDate());
+        SortedSet<ActeHistory> acteHistories = acte.getActeHistories();
+        acteHistories.add(acteHistory);
+        acte.setActeHistories(acteHistories);
         acteRepository.save(acte);
     }
 

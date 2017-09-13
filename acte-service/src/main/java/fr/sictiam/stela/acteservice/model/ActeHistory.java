@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 @Entity
-public class ActeHistory {
+public class ActeHistory implements Comparable<ActeHistory> {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -74,6 +74,12 @@ public class ActeHistory {
 
     public String getFileName() {
         return fileName;
+    }
+
+    @Override
+    public int compareTo(ActeHistory acteHistory) {
+        int last = this.date.compareTo(acteHistory.getDate());
+        return last == 0 ? this.date.compareTo(acteHistory.getDate()) : last;
     }
 
     @Override

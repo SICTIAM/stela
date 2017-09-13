@@ -22,9 +22,9 @@ class ActeList extends Component {
         search: {
             number: '',
             title: '',
-            nature: '',
-            status: '',
+            nature: ''
         },
+        searchStatus: '',
         searchDecisionFrom: '',
         searchDecisionTo: ''
     }
@@ -50,10 +50,10 @@ class ActeList extends Component {
         event.preventDefault()
         let acteData = Object.assign({}, this.state.search)
         if (acteData.nature === '') delete acteData.nature
-        if (acteData.status === '') delete acteData.status
         const data = { acte: acteData }
         if (this.state.searchDecisionFrom !== '') data['decisionFrom'] = this.state.searchDecisionFrom
         if (this.state.searchDecisionTo !== '') data['decisionTo'] = this.state.searchDecisionTo
+        if (this.state.searchStatus !== '') data['status'] = this.state.searchStatus
         const jsonData = JSON.stringify(data)
         const headers = {
             'Accept': 'application/json',
@@ -69,7 +69,7 @@ class ActeList extends Component {
     }
     render() {
         const { t } = this.context
-        const statusDisplay = (status) => t(`acte.status.${status}`)
+        const statusDisplay = (history) => t(`acte.status.${history[history.length - 1].status}`)
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
         const natureOptions = natures.map(nature =>
@@ -107,8 +107,8 @@ class ActeList extends Component {
                                     {natureOptions}
                                 </select>
                             </FormFieldInline>
-                            <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                                <select id='status' value={this.state.search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                            <FormFieldInline htmlFor='searchStatus' label={t('acte.fields.status')}>
+                                <select id='searchStatus' value={this.state.searchStatus} onChange={this.handleChange}>
                                     <option value=''>Tous</option>
                                     {statusOptions}
                                 </select>
@@ -127,8 +127,7 @@ class ActeList extends Component {
                         { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
                         { property: 'code', displayed: false, searchable: false },
                         { property: 'creation', displayed: false, searchable: false },
-                        { property: 'status', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
-                        { property: 'lastUpdateTime', displayed: false, searchable: false },
+                        { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
                         { property: 'public', displayed: false, searchable: false },
                         { property: 'publicWebsite', displayed: false, searchable: false },
                     ]}
