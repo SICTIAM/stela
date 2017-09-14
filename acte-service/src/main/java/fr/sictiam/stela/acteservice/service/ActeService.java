@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
@@ -98,17 +99,34 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         if(acteSearchUI.getActe().getNature() != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), acteSearchUI.getActe().getNature())));
         if(acteSearchUI.getDecisionFrom() != null && acteSearchUI.getDecisionTo() != null) predicates.add(builder.and(builder.between(acteRoot.get("decision"), acteSearchUI.getDecisionFrom(), acteSearchUI.getDecisionTo())));
 
-        query.where(predicates.toArray(new Predicate[predicates.size()]));
-
         if(acteSearchUI.getStatus() != null) {
-            Subquery<ActeHistory> subquery = query.subquery(ActeHistory.class);
-            Root<ActeHistory> acteHistoryRoot = subquery.from(ActeHistory.class);
-            //Join<Acte, ActeHistory> join = acteRoot.join("acteHistories");
-
-            subquery.select(builder.greatest(acteHistoryRoot.<ActeHistory>get("date")))
-                    .where(builder.equal(acteHistoryRoot.get("status"), acteSearchUI.getStatus()))
-                    .where(acteRoot.get("acteHistories").in(subquery));
+/*
+            CriteriaQuery<String> acteHistoryQuery = builder.createQuery(String.class);
+            Root<ActeHistory> acteHistoryRoot1 = acteHistoryQuery.from(ActeHistory.class);
+            Join<ActeHistory, ActeHistory> acteHistoryRoot2 = acteHistoryRoot1.join("uuid", JoinType.LEFT);
+            //Root<ActeHistory> acteHistoryRoot2 = acteHistoryQuery.from(ActeHistory.class);
+            acteHistoryRoot2.on(
+                    builder.and(
+                            builder.equal(acteHistoryRoot1.get("uuid"), acteHistoryRoot2.get("uuid")),
+                            builder.lessThan(acteHistoryRoot1.get("date"), acteHistoryRoot2.get("date"))
+                    )
+            );
+            acteHistoryQuery.select(acteHistoryRoot1.get("uuid"))
+                    .where(
+                            builder.and(
+                                    builder.isNull(acteHistoryRoot2.get("date")),
+                                    builder.equal(acteHistoryRoot1.get("status"), acteSearchUI.getStatus())
+                            )
+                    );
+            TypedQuery<String> typedActeHistoryQuery = entityManager.createQuery(acteHistoryQuery);
+*/
+            Query q = entityManager.createNativeQuery("select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '" + acteSearchUI.getStatus() + "'");
+            List<String> acteHistoriesActeUuids = q.getResultList();
+            // TODO: Use a CriteriaQuery instead of a native one
+            predicates.add(builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids)));
         }
+
+        query.where(predicates.toArray(new Predicate[predicates.size()]));
 
         TypedQuery<Acte> typedQuery = entityManager.createQuery(query);
         List<Acte> actes = typedQuery.getResultList();
