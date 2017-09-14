@@ -70,7 +70,7 @@
         "new": {
             "title": "Télétransmission d'acte",
             "acte": "Déposer un acte",
-            "acte_bud": "Déposer un acte budgétaire",
+            "acte_budgetaire": "Déposer un acte budgétaire",
             "choose": "Choisir...",
             "submit": "Envoyer"
         }

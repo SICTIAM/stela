@@ -71,7 +71,7 @@ class NewActe extends Component {
     }
     handleModeChange = (e, { id }) => {
         const fields = this.state.fields
-        if (id === 'newActeBud') {
+        if (id === 'newActeBudgetaire') {
             fields['nature'] = 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
             fields['public'] = false
             fields['publicWebsite'] = false
@@ -121,8 +121,8 @@ class NewActe extends Component {
                     <Menu.Item id='newActe' active={this.state.mode === 'newActe'} onClick={this.handleModeChange}>
                         {t('acte.new.acte')}
                     </Menu.Item>
-                    <Menu.Item id='newActeBud' active={this.state.mode === 'newActeBud'} onClick={this.handleModeChange}>
-                        {t('acte.new.acte_bud')}
+                    <Menu.Item id='newActeBudgetaire' active={this.state.mode === 'newActeBudgetaire'} onClick={this.handleModeChange}>
+                        {t('acte.new.acte_budgetaire')}
                     </Menu.Item>
                 </Menu>
                 <Form onSubmit={this.submitForm}>
