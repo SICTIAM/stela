@@ -68,7 +68,9 @@
             "cancel_deposit": "Annuler le dépôt"
         },
         "new": {
-            "title": "Déposer un acte",
+            "title": "Télétransmission d'acte",
+            "acte": "Déposer un acte",
+            "acte_budgetaire": "Déposer un acte budgétaire",
             "choose": "Choisir...",
             "submit": "Envoyer"
         }
