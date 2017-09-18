@@ -82,7 +82,7 @@ class ActeList extends Component {
             <div>
                 <h1>{t('acte.list.title')}</h1>
                 <Accordion style={this.styles} styled>
-                    <Accordion.Title>Recherche avancée</Accordion.Title>
+                    <Accordion.Title>{t('acte.list.advanced_search')}</Accordion.Title>
                     <Accordion.Content>
                         <Form onSubmit={this.submitForm}>
                             <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
@@ -93,27 +93,27 @@ class ActeList extends Component {
                             </FormFieldInline>
                             <FormFieldInline htmlFor='searchDecisionFrom' label={t('acte.fields.decision')}>
                                 <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                    <FormField htmlFor='searchDecisionFrom' label='from'>
+                                    <FormField htmlFor='searchDecisionFrom' label={t('form.from')}>
                                         <input type='date' id='searchDecisionFrom' value={this.state.searchDecisionFrom} onChange={this.handleChange} />
                                     </FormField>
-                                    <FormField htmlFor='searchDecisionTo' label='to'>
+                                    <FormField htmlFor='searchDecisionTo' label={t('form.to')}>
                                         <input type='date' id='searchDecisionTo' value={this.state.searchDecisionTo} onChange={this.handleChange} />
                                     </FormField>
                                 </Form.Group>
                             </FormFieldInline>
                             <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
                                 <select id='nature' value={this.state.search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
-                                    <option value=''>Toutes</option>
+                                    <option value=''>{t('form.all_feminine')}</option>
                                     {natureOptions}
                                 </select>
                             </FormFieldInline>
                             <FormFieldInline htmlFor='searchStatus' label={t('acte.fields.status')}>
                                 <select id='searchStatus' value={this.state.searchStatus} onChange={this.handleChange}>
-                                    <option value=''>Tous</option>
+                                    <option value=''>{t('form.all')}</option>
                                     {statusOptions}
                                 </select>
                             </FormFieldInline>
-                            <Button type='submit'>Rechercher</Button>
+                            <Button type='submit'>{t('form.search')}</Button>
                         </Form>
                     </Accordion.Content>
                 </Accordion>
