@@ -4,19 +4,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class ActeHistory {
+public class ActeHistory implements Comparable<ActeHistory> {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     private String acteUuid;
+    @Enumerated(EnumType.STRING)
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
@@ -74,6 +73,11 @@ public class ActeHistory {
 
     public String getFileName() {
         return fileName;
+    }
+
+    @Override
+    public int compareTo(ActeHistory acteHistory) {
+        return this.date.compareTo(acteHistory.getDate());
     }
 
     @Override

@@ -1,6 +1,13 @@
 {
     "app_title": "STELA",
     "heavy_development": "en cours de fort développement",
+    "form": {
+        "search": "Rechercher",
+        "all": "Tous",
+        "all_feminine": "Toutes",
+        "from": "de",
+        "to": "à"
+    },
     "menu": {
         "acte": {
             "legality_control": "Contrôle de légalité",
@@ -58,7 +65,8 @@
             "status": "Status"
         },
         "list": {
-            "title": "Liste des Actes"
+            "title": "Liste des Actes",
+            "advanced_search": "Recherche avancée"
         },
         "page": {
             "non_existing_act": "Acte non existant",

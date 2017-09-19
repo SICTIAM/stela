@@ -8,6 +8,8 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
 @Entity
 public class Acte {
@@ -22,16 +24,17 @@ public class Acte {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate decision;
     private ActeNature nature;
-    private LocalDateTime lastUpdateTime;
     private String code;
     private String title;
     private boolean isPublic;
     private boolean isPublicWebsite;
-    private StatusType status;
     private byte[] file;
     private String filename;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OrderBy("date ASC")
+    private SortedSet<ActeHistory> acteHistories;
 
     public Acte() {
     }
@@ -94,22 +97,6 @@ public class Acte {
         this.creation = creation;
     }
 
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getLastUpdateTime() {
-        return lastUpdateTime;
-    }
-
-    public void setLastUpdateTime(LocalDateTime lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
-    }
-
     public byte[] getFile(){
         return this.file;
     }
@@ -134,6 +121,14 @@ public class Acte {
         this.annexes = annexes;
     }
 
+    public SortedSet<ActeHistory> getActeHistories() {
+        return acteHistories;
+    }
+
+    public void setActeHistories(SortedSet<ActeHistory> acteHistories) {
+        this.acteHistories = acteHistories;
+    }
+
     @Override
     public String toString() {
         return "Acte{" +
@@ -145,8 +140,6 @@ public class Acte {
                 ", title:'" + title + '\'' +
                 ", isPublic:" + isPublic +
                 ", creation:" + creation +
-                ", status:" + status +
-                ", lastUpdateTime:" + lastUpdateTime +
                 ", file name:" + filename +
                 '}';
     }

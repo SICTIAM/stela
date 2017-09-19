@@ -36,3 +36,7 @@ footer {
 .ui.disabled.input.partialUpdateInput>input {
     opacity: 1;
 }
+.ui.grid .column.inline-grid {
+    padding-top: 0;
+    padding-bottom: 0;
+}

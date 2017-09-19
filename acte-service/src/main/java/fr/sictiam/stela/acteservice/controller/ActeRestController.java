@@ -3,14 +3,14 @@ package fr.sictiam.stela.acteservice.controller;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.time.LocalDate;
 import java.util.List;
 
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeSearchUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.service.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.ActeService;
@@ -18,14 +18,14 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-
-import fr.sictiam.stela.acteservice.model.Acte;
+import java.util.SortedSet;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,24 +50,29 @@ public class ActeRestController {
         return new ResponseEntity<>(actes, HttpStatus.OK);
     }
 
+    @GetMapping("/query")
+    public ResponseEntity<List<Acte>> getAllWithQuery(
+            @RequestParam(value= "number", required = false) String number,
+            @RequestParam(value= "title", required = false) String title,
+            @RequestParam(value= "nature", required = false) ActeNature nature,
+            @RequestParam(value= "decisionFrom", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionFrom,
+            @RequestParam(value= "decisionTo", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionTo,
+            @RequestParam(value= "status", required = false) StatusType status) {
+        List<Acte> actes = acteService.getAllWithQuery(number, title, nature, decisionFrom, decisionTo, status);
+        return new ResponseEntity<>(actes, HttpStatus.OK);
+    }
+
     @GetMapping("/{uuid}")
     public ResponseEntity<ActeUI> getByUuid(@PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        List<ActeHistory> acteHistory = acteService.getHistory(uuid);
         boolean isCancellable = acteService.isCancellable(uuid);
-        return new ResponseEntity<>(new ActeUI(acte, acteHistory, isCancellable), HttpStatus.OK);
+        return new ResponseEntity<>(new ActeUI(acte, isCancellable), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         outputFile(response, acte.getFile(), acte.getFilename());
-    }
-
-    @GetMapping("/{uuid}/history")
-    public ResponseEntity<List<ActeHistory>> getHistory(@PathVariable String uuid) {
-        List<ActeHistory> acteHistoryList = acteService.getHistory(uuid);
-        return new ResponseEntity<>(acteHistoryList, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")

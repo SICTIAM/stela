@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedSet;
 
 import static org.junit.Assert.*;
 
@@ -68,7 +69,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(LocalDate.now(), acte.getDecision());
         assertTrue(acte.isPublic());
         assertEquals(2, acteService.getAnnexes(acteUuid).size());
-        assertEquals(StatusType.CREATED, acte.getStatus());
+        assertEquals(StatusType.CREATED, acte.getActeHistories().last().getStatus());
     }
 
     @Test
@@ -87,8 +88,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         Acte[] actes = this.restTemplate.getForObject("/api/acte", Acte[].class);
         assertTrue(actes.length > 0);
-        assertNotNull(actes[0].getStatus());
-        assertNotNull(actes[0].getLastUpdateTime());
+        assertNotNull(actes[0].getActeHistories().last().getStatus());
+        assertNotNull(actes[0].getActeHistories().last().getDate());
     }
 
     @Test
@@ -114,9 +115,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acteHistory.get().getFileName());
 
         Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getStatus());
+        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getActeHistories().last().getStatus());
 
-        List<ActeHistory> acteHistories = acteService.getHistory(acteUuid);
+        SortedSet<ActeHistory> acteHistories = acte.getActeHistories();
         assertEquals(3, acteHistories.size());
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.CREATED)));
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_CREATED)));
@@ -176,7 +177,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getStatus());
+        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getActeHistories().last().getStatus());
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
         assertTrue(acteHistory.isPresent());
@@ -240,7 +241,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     private Optional<ActeHistory> getActeHistoryForStatus(String acteUuid, StatusType status) {
-        return acteService.getHistory(acteUuid).stream()
+        Acte acte = acteService.getByUuid(acteUuid);
+        return acte.getActeHistories().stream()
                 .filter(ah -> ah.getStatus().equals(status))
                 .findFirst();
     }
