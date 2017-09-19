@@ -25,12 +25,10 @@ class NewActe extends Component {
             creation: null,
             decision: '',
             nature: '',
-            lastUpdateTime: null,
             code: '',
             title: '',
             public: false,
-            publicWebsite: false,
-            status: null,
+            publicWebsite: false
         },
         depositFields: {
             publicField: false,

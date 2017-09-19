@@ -104,10 +104,12 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             // TODO: Find a way to do a self left join using a CriteriaQuery instead of a native one
             Query q = entityManager.createNativeQuery("select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '" + status + "'");
             List<String> acteHistoriesActeUuids = q.getResultList();
-            predicates.add(builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids)));
+            if(acteHistoriesActeUuids.size() > 0) predicates.add(builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids)));
+            else predicates.add(builder.and(acteRoot.get("uuid").isNull()));
         }
 
-        query.where(predicates.toArray(new Predicate[predicates.size()]));
+        query.where(predicates.toArray(new Predicate[predicates.size()]))
+            .orderBy(builder.desc(acteRoot.get("creation")));
 
         TypedQuery<Acte> typedQuery = entityManager.createQuery(query);
         List<Acte> actes = typedQuery.getResultList();
