@@ -26,6 +26,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -87,42 +88,22 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteRepository.findAllByOrderByCreationDesc();
     }
 
-    public List<Acte> getAllWithQuery(ActeSearchUI acteSearchUI) {
+    public List<Acte> getAllWithQuery(String number, String title, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        if(StringUtils.isNotBlank(acteSearchUI.getActe().getNumber())) predicates.add(builder.and(builder.like(acteRoot.get("number"), "%"+acteSearchUI.getActe().getNumber()+"%")));
-        if(StringUtils.isNotBlank(acteSearchUI.getActe().getTitle())) predicates.add(builder.and(builder.like(acteRoot.get("title"), "%"+acteSearchUI.getActe().getTitle()+"%")));
-        if(acteSearchUI.getActe().getNature() != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), acteSearchUI.getActe().getNature())));
-        if(acteSearchUI.getDecisionFrom() != null && acteSearchUI.getDecisionTo() != null) predicates.add(builder.and(builder.between(acteRoot.get("decision"), acteSearchUI.getDecisionFrom(), acteSearchUI.getDecisionTo())));
+        if(StringUtils.isNotBlank(number)) predicates.add(builder.and(builder.like(acteRoot.get("number"), "%"+number+"%")));
+        if(StringUtils.isNotBlank(title)) predicates.add(builder.and(builder.like(acteRoot.get("title"), "%"+title+"%")));
+        if(nature != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
+        if(decisionFrom != null && decisionTo != null) predicates.add(builder.and(builder.between(acteRoot.get("decision"), decisionFrom, decisionTo)));
 
-        if(acteSearchUI.getStatus() != null) {
-/*
-            CriteriaQuery<String> acteHistoryQuery = builder.createQuery(String.class);
-            Root<ActeHistory> acteHistoryRoot1 = acteHistoryQuery.from(ActeHistory.class);
-            Join<ActeHistory, ActeHistory> acteHistoryRoot2 = acteHistoryRoot1.join("uuid", JoinType.LEFT);
-            //Root<ActeHistory> acteHistoryRoot2 = acteHistoryQuery.from(ActeHistory.class);
-            acteHistoryRoot2.on(
-                    builder.and(
-                            builder.equal(acteHistoryRoot1.get("uuid"), acteHistoryRoot2.get("uuid")),
-                            builder.lessThan(acteHistoryRoot1.get("date"), acteHistoryRoot2.get("date"))
-                    )
-            );
-            acteHistoryQuery.select(acteHistoryRoot1.get("uuid"))
-                    .where(
-                            builder.and(
-                                    builder.isNull(acteHistoryRoot2.get("date")),
-                                    builder.equal(acteHistoryRoot1.get("status"), acteSearchUI.getStatus())
-                            )
-                    );
-            TypedQuery<String> typedActeHistoryQuery = entityManager.createQuery(acteHistoryQuery);
-*/
-            Query q = entityManager.createNativeQuery("select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '" + acteSearchUI.getStatus() + "'");
+        if(status != null) {
+            // TODO: Find a way to do a self left join using a CriteriaQuery instead of a native one
+            Query q = entityManager.createNativeQuery("select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '" + status + "'");
             List<String> acteHistoriesActeUuids = q.getResultList();
-            // TODO: Use a CriteriaQuery instead of a native one
             predicates.add(builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids)));
         }
 

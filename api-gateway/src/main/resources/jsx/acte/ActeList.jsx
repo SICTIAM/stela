@@ -22,11 +22,11 @@ class ActeList extends Component {
         search: {
             number: '',
             title: '',
-            nature: ''
-        },
-        searchStatus: '',
-        searchDecisionFrom: '',
-        searchDecisionTo: ''
+            nature: '',
+            status: '',
+            decisionFrom: '',
+            decisionTo: ''
+        }
     }
     styles = {
         marginBottom: 1 + 'em'
@@ -42,24 +42,17 @@ class ActeList extends Component {
         search[field] = value
         this.setState({ search: search })
     }
-    handleChange = (e) => {
-        const { id, value } = e.target
-        this.setState({ [id]: value })
-    }
     submitForm = (event) => {
         event.preventDefault()
-        let acteData = Object.assign({}, this.state.search)
-        if (acteData.nature === '') delete acteData.nature
-        const data = { acte: acteData }
-        if (this.state.searchDecisionFrom !== '') data['decisionFrom'] = this.state.searchDecisionFrom
-        if (this.state.searchDecisionTo !== '') data['decisionTo'] = this.state.searchDecisionTo
-        if (this.state.searchStatus !== '') data['status'] = this.state.searchStatus
-        const jsonData = JSON.stringify(data)
+        const data = {}
+        Object.keys(this.state.search)
+            .filter(k => this.state.search[k] !== '')
+            .map(k => data[k] = this.state.search[k])
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        fetchWithAuthzHandling({ url: '/api/acte/query', method: 'POST', body: jsonData, headers: headers, context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte/query', method: 'GET', query: data, headers: headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ actes: json }))
@@ -91,13 +84,13 @@ class ActeList extends Component {
                             <FormFieldInline htmlFor='title' label={t('acte.fields.title')} >
                                 <input id='title' value={this.state.search.title} onChange={e => this.handleFieldChange('title', e.target.value)} />
                             </FormFieldInline>
-                            <FormFieldInline htmlFor='searchDecisionFrom' label={t('acte.fields.decision')}>
+                            <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                                 <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                    <FormField htmlFor='searchDecisionFrom' label={t('form.from')}>
-                                        <input type='date' id='searchDecisionFrom' value={this.state.searchDecisionFrom} onChange={this.handleChange} />
+                                    <FormField htmlFor='decisionFrom' label={t('form.from')}>
+                                        <input type='date' id='decisionFrom' value={this.state.search.decisionFrom} onChange={e => this.handleFieldChange('decisionFrom', e.target.value)} />
                                     </FormField>
-                                    <FormField htmlFor='searchDecisionTo' label={t('form.to')}>
-                                        <input type='date' id='searchDecisionTo' value={this.state.searchDecisionTo} onChange={this.handleChange} />
+                                    <FormField htmlFor='decisionTo' label={t('form.to')}>
+                                        <input type='date' id='decisionTo' value={this.state.search.decisionTo} onChange={e => this.handleFieldChange('decisionTo', e.target.value)} />
                                     </FormField>
                                 </Form.Group>
                             </FormFieldInline>
@@ -107,8 +100,8 @@ class ActeList extends Component {
                                     {natureOptions}
                                 </select>
                             </FormFieldInline>
-                            <FormFieldInline htmlFor='searchStatus' label={t('acte.fields.status')}>
-                                <select id='searchStatus' value={this.state.searchStatus} onChange={this.handleChange}>
+                            <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
+                                <select id='status' value={this.state.search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
                                     <option value=''>{t('form.all')}</option>
                                     {statusOptions}
                                 </select>

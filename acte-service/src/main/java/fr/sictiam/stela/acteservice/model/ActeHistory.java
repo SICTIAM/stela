@@ -77,8 +77,7 @@ public class ActeHistory implements Comparable<ActeHistory> {
 
     @Override
     public int compareTo(ActeHistory acteHistory) {
-        int last = this.date.compareTo(acteHistory.getDate());
-        return last == 0 ? this.date.compareTo(acteHistory.getDate()) : last;
+        return this.date.compareTo(acteHistory.getDate());
     }
 
     @Override
