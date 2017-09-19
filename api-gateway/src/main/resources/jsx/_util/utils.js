@@ -29,6 +29,14 @@ const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) 
     })
 }
 
+const setStatePromise = (that, newState) => {
+    return new Promise((resolve) => {
+        that.setState(newState, () => {
+            resolve()
+        })
+    })
+}
+
 const handleFieldCheckboxChange = (that, field) => {
     const fields = that.state.fields
     fields[field] = !fields[field]
@@ -42,4 +50,4 @@ const handleFieldChange = (that, e) => {
     that.setState({ fields: fields })
 }
 
-module.exports = { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange }
+module.exports = { checkStatus, fetchWithAuthzHandling, setStatePromise, handleFieldCheckboxChange, handleFieldChange }

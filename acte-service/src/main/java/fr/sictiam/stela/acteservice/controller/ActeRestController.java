@@ -8,7 +8,6 @@ import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
-import fr.sictiam.stela.acteservice.model.ui.ActeSearchUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.SortedSet;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -53,12 +51,12 @@ public class ActeRestController {
     @GetMapping("/query")
     public ResponseEntity<List<Acte>> getAllWithQuery(
             @RequestParam(value= "number", required = false) String number,
-            @RequestParam(value= "title", required = false) String title,
+            @RequestParam(value= "objet", required = false) String objet,
             @RequestParam(value= "nature", required = false) ActeNature nature,
             @RequestParam(value= "decisionFrom", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionFrom,
             @RequestParam(value= "decisionTo", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionTo,
             @RequestParam(value= "status", required = false) StatusType status) {
-        List<Acte> actes = acteService.getAllWithQuery(number, title, nature, decisionFrom, decisionTo, status);
+        List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status);
         return new ResponseEntity<>(actes, HttpStatus.OK);
     }
 
@@ -111,7 +109,7 @@ public class ActeRestController {
         try {
             Acte acte = mapper.readValue(acteJson, Acte.class);
             
-            LOGGER.debug("Received acte : {}", acte.getTitle());
+            LOGGER.debug("Received acte : {}", acte.getObjet());
             LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
 
             Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);

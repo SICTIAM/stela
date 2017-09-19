@@ -247,7 +247,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         donneesActe.setNumeroInterne(acte.getNumber());
         // TODO replace with date from last classification (#1680)
         donneesActe.setClassificationDateVersion(LocalDate.now());
-        donneesActe.setObjet(acte.getTitle());
+        donneesActe.setObjet(acte.getObjet());
 
         FichierSigne fichierSigne = new FichierSigne();
         fichierSigne.setNomFichier(acteFilename);

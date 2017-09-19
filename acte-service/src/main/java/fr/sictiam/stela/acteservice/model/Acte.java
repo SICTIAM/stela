@@ -8,7 +8,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 
 @Entity
@@ -25,7 +24,7 @@ public class Acte {
     private LocalDate decision;
     private ActeNature nature;
     private String code;
-    private String title;
+    private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
     private byte[] file;
@@ -39,12 +38,12 @@ public class Acte {
     public Acte() {
     }
 
-    public Acte(String number, LocalDate decision, ActeNature nature, String code, String title, boolean isPublic, boolean isPublicWebsite) {
+    public Acte(String number, LocalDate decision, ActeNature nature, String code, String objet, boolean isPublic, boolean isPublicWebsite) {
         this.number = number;
         this.decision = decision;
         this.nature = nature;
         this.code = code;
-        this.title = title;
+        this.objet = objet;
         this.isPublic = isPublic;
         this.isPublicWebsite = isPublicWebsite;
     }
@@ -69,8 +68,8 @@ public class Acte {
         return code;
     }
 
-    public String getTitle() {
-        return title;
+    public String getObjet() {
+        return objet;
     }
 
     public boolean isPublic() {
@@ -137,7 +136,7 @@ public class Acte {
                 ", decision:" + decision +
                 ", nature:" + nature +
                 ", code:'" + code + '\'' +
-                ", title:'" + title + '\'' +
+                ", objet:'" + objet + '\'' +
                 ", isPublic:" + isPublic +
                 ", creation:" + creation +
                 ", file name:" + filename +

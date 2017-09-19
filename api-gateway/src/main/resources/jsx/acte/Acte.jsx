@@ -60,7 +60,7 @@ class Acte extends Component {
                     <div>
                         <Segment>
                             <Grid>
-                                <Grid.Column width={13}><h1>{acte.title}</h1></Grid.Column>
+                                <Grid.Column width={13}><h1>{acte.objet}</h1></Grid.Column>
                                 <Grid.Column width={3}>
                                     <ActeCancelButton isCancellable={this.state.acteUI.cancellable} uuid={this.state.acteUI.acte.uuid} />
                                 </Grid.Column>
