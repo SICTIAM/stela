@@ -40,3 +40,6 @@ footer {
     padding-top: 0;
     padding-bottom: 0;
 }
+.ui.form .field.simpleInput {
+    margin-bottom: 0;
+}

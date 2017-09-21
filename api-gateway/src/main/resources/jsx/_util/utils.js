@@ -43,11 +43,12 @@ const handleFieldCheckboxChange = (that, field) => {
     that.setState({ fields: fields })
 }
 
-const handleFieldChange = (that, e) => {
+const handleFieldChange = (that, e, callback) => {
+    callback  = callback || null
     const { id, value } = e.target
     const fields = that.state.fields
     fields[id] = value
-    that.setState({ fields: fields })
+    that.setState({ fields: fields }, callback)
 }
 
 module.exports = { checkStatus, fetchWithAuthzHandling, setStatePromise, handleFieldCheckboxChange, handleFieldChange }
