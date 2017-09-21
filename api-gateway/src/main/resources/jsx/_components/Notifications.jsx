@@ -7,6 +7,15 @@ const errorNotification = (title, message) => {
     }
 }
 
+const localAuthorityUpdateSuccess = (t) => {
+    return {
+        title: t('notifications.admin.acte.title'),
+        message: t('notifications.admin.acte.localAuthority.update.success'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
 const acteSentSuccess = (t) => {
     return {
         title: t('notifications.acte.title'),
@@ -58,4 +67,13 @@ const pesSentMissingData = (t) => {
     }
 }
 
-module.exports = { errorNotification, acteSentSuccess, acteCancelledSuccess, acteCancelledForbidden, pesSentSuccess, pesSentVirus, pesSentMissingData }
+module.exports = {
+    errorNotification,
+    acteSentSuccess,
+    acteCancelledSuccess,
+    acteCancelledForbidden,
+    pesSentSuccess,
+    pesSentVirus,
+    pesSentMissingData,
+    localAuthorityUpdateSuccess
+}

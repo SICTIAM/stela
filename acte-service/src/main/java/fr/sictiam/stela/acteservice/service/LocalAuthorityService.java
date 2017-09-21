@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,17 @@ public class LocalAuthorityService {
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
+    }
+
+    public LocalAuthority update(String uuid, LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+        LocalAuthority localAuthority = getByUuid(uuid);
+        localAuthority.setDepartment(localAuthorityUpdateUI.getDepartment());
+        localAuthority.setDistrict(localAuthorityUpdateUI.getDistrict());
+        localAuthority.setNature(localAuthorityUpdateUI.getNature());
+        localAuthority.setCanPublishRegistre(localAuthorityUpdateUI.getCanPublishRegistre());
+        localAuthority.setCanPublishWebSite(localAuthorityUpdateUI.getCanPublishWebSite());
+
+        return createOrUpdate(localAuthority);
     }
 
     public List<LocalAuthority> getAll() {

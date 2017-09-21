@@ -7,7 +7,7 @@ import { Button, Form, Checkbox, Menu } from 'semantic-ui-react'
 import { FormField } from '../_components/UI'
 import { errorNotification, acteSentSuccess } from '../_components/Notifications'
 import history from '../_util/history'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
 import { natures } from '../_util/constants'
 
 class NewActe extends Component {
@@ -61,11 +61,6 @@ class NewActe extends Component {
             fields['public'] = false
             fields['publicWebsite'] = false
         }
-        this.setState({ fields: fields })
-    }
-    handleCheckboxChange = (field) => {
-        const fields = this.state.fields
-        fields[field] = !fields[field]
         this.setState({ fields: fields })
     }
     handleModeChange = (e, { id }) => {
@@ -145,15 +140,15 @@ class NewActe extends Component {
                     </FormField>
                     {renderIf(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
                         <FormField htmlFor='public' label={t('acte.fields.public')}>
-                            <Checkbox id='public' disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => this.handleCheckboxChange('public')} toggle />
+                            <Checkbox id='public' disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public')} toggle />
                         </FormField>
                     )}
                     {renderIf(this.state.depositFields.publicWebsiteField && this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
                         <FormField htmlFor='publicWebsite' label={t('acte.fields.publicWebsite')}>
-                            <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => this.handleCheckboxChange('publicWebsite')} toggle />
+                            <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite')} toggle />
                         </FormField>
                     )}
-                    <Button type='submit'>{t('acte.new.submit')}</Button>
+                    <Button type='submit'>{t('form.submit')}</Button>
                 </Form>
             </div>
         )

@@ -6,7 +6,9 @@
         "all": "Tous",
         "all_feminine": "Toutes",
         "from": "de",
-        "to": "à"
+        "to": "à",
+        "submit": "Envoyer",
+        "update": "Mettre à jour"
     },
     "menu": {
         "acte": {
@@ -79,8 +81,7 @@
             "title": "Télétransmission d'acte",
             "acte": "Déposer un acte",
             "acte_budgetaire": "Déposer un acte budgétaire",
-            "choose": "Choisir...",
-            "submit": "Envoyer"
+            "choose": "Choisir..."
         }
     },
     "pes": {
@@ -130,6 +131,16 @@
                 "success": "Le dépot PES a bien été effectué",
                 "virus": "Le dépot PES a échoué car il contenait un virus",
                 "missing_data": "Merci de remplir tous les champs obligatoires"
+            }
+        },
+        "admin": {
+            "acte": {
+                "title": "Admin module Acte",
+                "localAuthority": {
+                    "update": {
+                        "success": "La mise à jour de la collectivité a bien été prise en compte"
+                    }
+                }
             }
         }
     },
