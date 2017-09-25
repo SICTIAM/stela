@@ -95,8 +95,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         Root<Acte> acteRoot = query.from(Acte.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        if(StringUtils.isNotBlank(number)) predicates.add(builder.and(builder.like(acteRoot.get("number"), "%"+number+"%")));
-        if(StringUtils.isNotBlank(title)) predicates.add(builder.and(builder.like(acteRoot.get("title"), "%"+title+"%")));
+        if(StringUtils.isNotBlank(number)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("number")), "%"+number.toLowerCase()+"%")));
+        if(StringUtils.isNotBlank(title)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("title")), "%"+title.toLowerCase()+"%")));
         if(nature != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
         if(decisionFrom != null && decisionTo != null) predicates.add(builder.and(builder.between(acteRoot.get("decision"), decisionFrom, decisionTo)));
 
