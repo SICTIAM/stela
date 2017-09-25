@@ -1,8 +1,7 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/acte/localAuthority")
@@ -41,20 +39,14 @@ public class LocalAuthorityRestController {
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity<LocalAuthority> updateProperty(@PathVariable String uuid, @RequestBody String requestData) {
+    public ResponseEntity<LocalAuthority> update(@PathVariable String uuid, @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            Map<String, Object> dataMap =
-                    objectMapper.readValue(requestData, new TypeReference<Map<String, Object>>(){});
-            for (String key : dataMap.keySet()) {
-                BeanUtils.copyProperty(localAuthority, key, dataMap.get(key));
-            }
+            BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
         } catch (Exception e) {
-            LOGGER.error("Error while mapping received JSON data", e);
-            return new ResponseEntity<>(localAuthority, HttpStatus.BAD_REQUEST);
+            LOGGER.error("Error while updating properties: {}", e);
+            return new ResponseEntity<>(localAuthority, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        LOGGER.debug("Local authority is now {}", localAuthority.toString());
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
         return new ResponseEntity<>(localAuthority, HttpStatus.OK);
     }
