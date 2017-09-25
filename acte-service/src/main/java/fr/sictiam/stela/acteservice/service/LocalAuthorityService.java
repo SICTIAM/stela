@@ -27,17 +27,6 @@ public class LocalAuthorityService {
         return localAuthorityRepository.save(localAuthority);
     }
 
-    public LocalAuthority update(String uuid, LocalAuthorityUpdateUI localAuthorityUpdateUI) {
-        LocalAuthority localAuthority = getByUuid(uuid);
-        localAuthority.setDepartment(localAuthorityUpdateUI.getDepartment());
-        localAuthority.setDistrict(localAuthorityUpdateUI.getDistrict());
-        localAuthority.setNature(localAuthorityUpdateUI.getNature());
-        localAuthority.setCanPublishRegistre(localAuthorityUpdateUI.getCanPublishRegistre());
-        localAuthority.setCanPublishWebSite(localAuthorityUpdateUI.getCanPublishWebSite());
-
-        return createOrUpdate(localAuthority);
-    }
-
     public List<LocalAuthority> getAll() {
         List<LocalAuthority> localAuthorities = localAuthorityRepository.findAll();
         localAuthorities.sort(Comparator.comparing(LocalAuthority::getName, String.CASE_INSENSITIVE_ORDER));

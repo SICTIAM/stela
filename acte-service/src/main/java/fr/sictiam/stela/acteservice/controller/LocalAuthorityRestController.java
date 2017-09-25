@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.controller;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +38,16 @@ public class LocalAuthorityRestController {
         return new ResponseEntity<>(localAuthority, HttpStatus.OK);
     }
 
-    @PutMapping("/{uuid}")
+    @PatchMapping("/{uuid}")
     public ResponseEntity<LocalAuthority> update(@PathVariable String uuid, @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
-        LocalAuthority localAuthority = localAuthorityService.update(uuid, localAuthorityUpdateUI);
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
+        try {
+            BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
+        } catch (Exception e) {
+            LOGGER.error("Error while updating properties: {}", e);
+            return new ResponseEntity<>(localAuthority, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
         return new ResponseEntity<>(localAuthority, HttpStatus.OK);
     }
 

@@ -49,10 +49,9 @@ class LocalAuthority extends Component {
                 })
         }
     }
-    updateState = (json) => {
-        const { uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite } = json
-        const constantFields = Object.assign({}, { uuid, name, siren, nomenclatureDate })
-        const fields = Object.assign({}, { department, district, nature, canPublishRegistre, canPublishWebSite })
+    updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite }) => {
+        const constantFields = { uuid, name, siren, nomenclatureDate }
+        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite }
         this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true })
     }
     submitForm = (event) => {
@@ -62,7 +61,7 @@ class LocalAuthority extends Component {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + this.state.constantFields.uuid, method: 'PUT', body: data, headers: headers, context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + this.state.constantFields.uuid, method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
