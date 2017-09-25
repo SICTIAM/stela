@@ -8,7 +8,7 @@ import Validator from 'validatorjs'
 import { FormField, ValidationWarning } from '../_components/UI'
 import { errorNotification, acteSentSuccess } from '../_components/Notifications'
 import history from '../_util/history'
-import { checkStatus, fetchWithAuthzHandling, setStatePromise, handleFieldCheckboxChange } from '../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
 import { natures } from '../_util/constants'
 import moment from 'moment'
 
@@ -66,20 +66,16 @@ class NewActe extends Component {
         }
     }
     handleFileChange = (field, file) => {
-        const state = this.state
-        state[field] = file
-        setStatePromise(this, state)
-            .then(this.validateForm())
+        this.setState({ [field]: file }, this.validateForm)
     }
     handleFieldChange = (field, value) => {
-        const state = this.state
-        state.fields[field] = value
+        const fields = this.state.fields
+        fields[field] = value
         if (field === 'nature' && value === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') {
-            state.fields['public'] = false
-            state.fields['publicWebsite'] = false
+            fields['public'] = false
+            fields['publicWebsite'] = false
         }
-        setStatePromise(this, state)
-            .then(this.validateForm())
+        this.setState({ fields: fields }, this.validateForm)
     }
     handleModeChange = (e, { id }) => {
         const fields = this.state.fields

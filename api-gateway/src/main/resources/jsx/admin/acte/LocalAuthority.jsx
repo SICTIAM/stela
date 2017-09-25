@@ -7,7 +7,7 @@ import Validator from 'validatorjs'
 
 import { errorNotification, localAuthorityUpdateSuccess } from '../../_components/Notifications'
 import { Field, ValidationWarning } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange, setStatePromise } from '../../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange } from '../../_util/utils'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -57,12 +57,9 @@ class LocalAuthority extends Component {
         }
     }
     updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite }) => {
-        const state = this.state
-        state.constantFields = { uuid, name, siren, nomenclatureDate }
-        state.fields = { department, district, nature, canPublishRegistre, canPublishWebSite }
-        state.localAuthorityFetched = true
-        setStatePromise(this, state)
-            .then(this.validateForm())
+        const constantFields = { uuid, name, siren, nomenclatureDate }
+        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite }
+        this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true }, this.validateForm)
     }
     validateForm = () => {
         const data = {
