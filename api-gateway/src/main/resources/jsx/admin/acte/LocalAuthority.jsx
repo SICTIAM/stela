@@ -5,9 +5,10 @@ import { translate } from 'react-i18next'
 import { Checkbox, Form, Button } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
+import InputValidation from '../../_components/InputValidation'
 import { errorNotification, localAuthorityUpdateSuccess } from '../../_components/Notifications'
-import { Field, ValidationWarning } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange } from '../../_util/utils'
+import { Field } from '../../_components/UI'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../../_util/utils'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -61,6 +62,11 @@ class LocalAuthority extends Component {
         const fields = { department, district, nature, canPublishRegistre, canPublishWebSite }
         this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true }, this.validateForm)
     }
+    handleFieldChange = (field, value) => {
+        const fields = this.state.fields
+        fields[field] = value
+        this.setState({ fields: fields }, this.validateForm)
+    }
     validateForm = () => {
         const data = {
             department: this.state.fields.department,
@@ -106,16 +112,28 @@ class LocalAuthority extends Component {
                             <span id="siren">{this.state.constantFields.siren}</span>
                         </Field>
                         <Field htmlFor="department" label={t('local_authority.department')}>
-                            <Form.Input id='department' className='simpleInput' value={this.state.fields.department} onChange={e => handleFieldChange(this, e, this.validateForm)} width={5} />
-                            <ValidationWarning value={this.state.fields.department} validationRule={this.validationRules.department} fieldName={t('local_authority.department')} />
+                            <InputValidation id='department'
+                                value={this.state.fields.department}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.department}
+                                fieldName={t('local_authority.department')}
+                                className='simpleInput' />
                         </Field>
                         <Field htmlFor="district" label={t('local_authority.district')}>
-                            <Form.Input id='district' className='simpleInput' value={this.state.fields.district} onChange={e => handleFieldChange(this, e, this.validateForm)} width={5} />
-                            <ValidationWarning value={this.state.fields.district} validationRule={this.validationRules.district} fieldName={t('local_authority.district')} />
+                            <InputValidation id='district'
+                                value={this.state.fields.district}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.district}
+                                fieldName={t('local_authority.district')}
+                                className='simpleInput' />
                         </Field>
                         <Field htmlFor="nature" label={t('local_authority.nature')}>
-                            <Form.Input id='nature' className='simpleInput' value={this.state.fields.nature} onChange={e => handleFieldChange(this, e, this.validateForm)} width={5} />
-                            <ValidationWarning value={this.state.fields.nature} validationRule={this.validationRules.nature} fieldName={t('local_authority.nature')} />
+                            <InputValidation id='nature'
+                                value={this.state.fields.nature}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.nature}
+                                fieldName={t('local_authority.nature')}
+                                className='simpleInput' />
                         </Field>
                         <Field htmlFor="nomenclatureDate" label={t('local_authority.nomenclatureDate')}>
                             <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
