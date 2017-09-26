@@ -3,10 +3,12 @@ import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
 import { Checkbox, Form, Button } from 'semantic-ui-react'
+import Validator from 'validatorjs'
 
+import InputValidation from '../../_components/InputValidation'
 import { errorNotification, localAuthorityUpdateSuccess } from '../../_components/Notifications'
 import { Field } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange } from '../../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../../_util/utils'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -29,7 +31,13 @@ class LocalAuthority extends Component {
             canPublishRegistre: false,
             canPublishWebSite: false
         },
-        localAuthorityFetched: false
+        localAuthorityFetched: false,
+        isFormValid: false
+    }
+    validationRules = {
+        department: 'required|digits:3',
+        district: 'required|digits:1',
+        nature: 'required|digits:2'
     }
     style = {
         marginTop: 1 + 'em'
@@ -52,7 +60,21 @@ class LocalAuthority extends Component {
     updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite }) => {
         const constantFields = { uuid, name, siren, nomenclatureDate }
         const fields = { department, district, nature, canPublishRegistre, canPublishWebSite }
-        this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true })
+        this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true }, this.validateForm)
+    }
+    handleFieldChange = (field, value) => {
+        const fields = this.state.fields
+        fields[field] = value
+        this.setState({ fields: fields }, this.validateForm)
+    }
+    validateForm = () => {
+        const data = {
+            department: this.state.fields.department,
+            district: this.state.fields.district,
+            nature: this.state.fields.nature
+        }
+        const validation = new Validator(data, this.validationRules)
+        this.setState({ isFormValid: validation.passes() })
     }
     submitForm = (event) => {
         event.preventDefault()
@@ -89,17 +111,29 @@ class LocalAuthority extends Component {
                         <Field htmlFor="siren" label={t('local_authority.siren')}>
                             <span id="siren">{this.state.constantFields.siren}</span>
                         </Field>
-
                         <Field htmlFor="department" label={t('local_authority.department')}>
-                            <Form.Input id='department' value={this.state.fields.department} onChange={e => handleFieldChange(this, e)} width={5} />
+                            <InputValidation id='department'
+                                value={this.state.fields.department}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.department}
+                                fieldName={t('local_authority.department')}
+                                className='simpleInput' />
                         </Field>
-
                         <Field htmlFor="district" label={t('local_authority.district')}>
-                            <Form.Input id='district' value={this.state.fields.district} onChange={e => handleFieldChange(this, e)} width={5} />
+                            <InputValidation id='district'
+                                value={this.state.fields.district}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.district}
+                                fieldName={t('local_authority.district')}
+                                className='simpleInput' />
                         </Field>
-
                         <Field htmlFor="nature" label={t('local_authority.nature')}>
-                            <Form.Input id='nature' value={this.state.fields.nature} onChange={e => handleFieldChange(this, e)} width={5} />
+                            <InputValidation id='nature'
+                                value={this.state.fields.nature}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.nature}
+                                fieldName={t('local_authority.nature')}
+                                className='simpleInput' />
                         </Field>
                         <Field htmlFor="nomenclatureDate" label={t('local_authority.nomenclatureDate')}>
                             <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
@@ -110,7 +144,7 @@ class LocalAuthority extends Component {
                         <Field htmlFor='canPublishWebSite' label={t('local_authority.canPublishWebSite')}>
                             <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                         </Field>
-                        <Button style={this.style} type='submit'>{t('form.update')}</Button>
+                        <Button style={this.style} disabled={!this.state.isFormValid} type='submit'>{t('form.update')}</Button>
                     </Form>
                 </div>
             )

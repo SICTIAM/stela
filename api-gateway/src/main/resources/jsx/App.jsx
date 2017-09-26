@@ -25,6 +25,9 @@ import AdminDashboard from './admin/AdminDashboard'
 import LocalAuthorityList from './admin/acte/LocalAuthorityList'
 import LocalAuthority from './admin/acte/LocalAuthority'
 
+import Validator from 'validatorjs'
+Validator.useLang(window.localStorage.i18nextLng);
+
 class App extends Component {
     constructor() {
         super()

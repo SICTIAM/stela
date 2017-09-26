@@ -25,8 +25,6 @@ import org.springframework.util.MultiValueMap;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 
@@ -65,7 +63,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acte.getNumber());
         assertEquals("Delib.pdf", acte.getFilename());
         assertEquals("COD001", acte.getCode());
-        assertEquals("Title", acte.getTitle());
+        assertEquals("Objet", acte.getObjet());
         assertEquals(LocalDate.now(), acte.getDecision());
         assertTrue(acte.isPublic());
         assertEquals(2, acteService.getAnnexes(acteUuid).size());
@@ -229,7 +227,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     private Acte acte() {
         return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "COD001",
-                "Title", true, true);
+                "Objet", true, true);
     }
 
     private void printXmlMessage(byte[] file, String filename) {

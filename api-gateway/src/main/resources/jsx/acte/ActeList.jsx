@@ -21,7 +21,7 @@ class ActeList extends Component {
         actes: [],
         search: {
             number: '',
-            title: '',
+            objet: '',
             nature: '',
             status: '',
             decisionFrom: '',
@@ -81,8 +81,8 @@ class ActeList extends Component {
                             <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
                                 <input id='number' value={this.state.search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
                             </FormFieldInline>
-                            <FormFieldInline htmlFor='title' label={t('acte.fields.title')} >
-                                <input id='title' value={this.state.search.title} onChange={e => this.handleFieldChange('title', e.target.value)} />
+                            <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
+                                <input id='objet' value={this.state.search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
                             </FormFieldInline>
                             <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                                 <Form.Group style={{ marginBottom: 0 }} widths='equal'>
@@ -115,7 +115,7 @@ class ActeList extends Component {
                     metaData={[
                         { property: 'uuid', displayed: false, searchable: false },
                         { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },
-                        { property: 'title', displayed: true, displayName: t('acte.fields.title'), searchable: true },
+                        { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true },
                         { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay },
                         { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
                         { property: 'code', displayed: false, searchable: false },

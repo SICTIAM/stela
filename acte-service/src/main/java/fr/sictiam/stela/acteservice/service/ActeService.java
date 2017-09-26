@@ -88,7 +88,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteRepository.findAllByOrderByCreationDesc();
     }
 
-    public List<Acte> getAllWithQuery(String number, String title, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status) {
+    public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
@@ -96,7 +96,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
         List<Predicate> predicates = new ArrayList<>();
         if(StringUtils.isNotBlank(number)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("number")), "%"+number.toLowerCase()+"%")));
-        if(StringUtils.isNotBlank(title)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("title")), "%"+title.toLowerCase()+"%")));
+        if(StringUtils.isNotBlank(objet)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("objet")), "%"+objet.toLowerCase()+"%")));
         if(nature != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
         if(decisionFrom != null && decisionTo != null) predicates.add(builder.and(builder.between(acteRoot.get("decision"), decisionFrom, decisionTo)));
 

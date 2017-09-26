@@ -8,7 +8,10 @@
         "from": "de",
         "to": "à",
         "submit": "Envoyer",
-        "update": "Mettre à jour"
+        "update": "Mettre à jour",
+        "validation": {
+            "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des underscores."
+        }
     },
     "menu": {
         "acte": {
@@ -63,7 +66,7 @@
             "annexes": "Fichiers annexes",
             "public": "Affichage dans le registre",
             "publicWebsite": "Affichage sur site internet",
-            "title": "Titre",
+            "objet": "Objet",
             "status": "Status"
         },
         "list": {
@@ -89,7 +92,7 @@
             "title": "Liste des PES",
             "table": {
                 "empty": "Aucun PES",
-                "title": "Titre",
+                "objet": "Objet",
                 "comment": "Commentaire",
                 "creation": "Date de création",
                 "status": "Status",
