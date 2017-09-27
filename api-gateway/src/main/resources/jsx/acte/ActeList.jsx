@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import { translate } from 'react-i18next'
-import { Accordion, Form, Button } from 'semantic-ui-react'
+import { Accordion, Form, Button, Segment } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -72,7 +72,7 @@ class ActeList extends Component {
             <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
         )
         return (
-            <div>
+            <Segment>
                 <h1>{t('acte.list.title')}</h1>
                 <Accordion style={this.styles} styled>
                     <Accordion.Title>{t('acte.list.advanced_search')}</Accordion.Title>
@@ -129,7 +129,7 @@ class ActeList extends Component {
                     linkProperty='uuid'
                     noDataMessage='Aucun acte'
                     keyProperty='uuid' />
-            </div >
+            </Segment>
         )
     }
 }

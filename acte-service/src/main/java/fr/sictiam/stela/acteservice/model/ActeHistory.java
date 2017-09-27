@@ -77,6 +77,10 @@ public class ActeHistory implements Comparable<ActeHistory> {
         return fileName;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     @Override
     public int compareTo(ActeHistory acteHistory) {
         return this.date.compareTo(acteHistory.getDate());

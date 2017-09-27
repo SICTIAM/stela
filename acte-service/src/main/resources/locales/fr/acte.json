@@ -35,6 +35,9 @@
       "objet": "Objet",
       "status": "Status"
     },
+    "history": {
+      "message": "Anomalie envoyée par le MIAT"
+    },
     "list": {
       "title": "Liste des Actes",
       "advanced_search": "Recherche avancée",
@@ -43,6 +46,7 @@
     "page": {
       "non_existing_act": "Acte non existant",
       "historic": "Historique",
+      "detail_anomaly": "Détail de l'anomalie",
       "no_history": "Aucun historique pour cet acte",
       "linked_file": "Fichier joint",
       "cancel_deposit": "Annuler le dépôt"

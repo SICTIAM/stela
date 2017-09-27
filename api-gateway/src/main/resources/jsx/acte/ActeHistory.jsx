@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import moment from 'moment'
-import { Feed } from 'semantic-ui-react'
+import { Feed, Segment } from 'semantic-ui-react'
 
 class ActeHistory extends Component {
     static contextTypes = {
@@ -33,7 +33,7 @@ class ActeHistory extends Component {
             </Feed.Event>
         )
         return (
-            <div className='secondContent'>
+            <Segment>
                 <h2>{t('acte.page.historic')}</h2>
                 {historyNotEmpty(
                     <Feed >
@@ -43,7 +43,7 @@ class ActeHistory extends Component {
                 {historyEmpty(
                     <p>{t('acte.page.no_history')}</p>
                 )}
-            </div>
+            </Segment>
         )
     }
 }

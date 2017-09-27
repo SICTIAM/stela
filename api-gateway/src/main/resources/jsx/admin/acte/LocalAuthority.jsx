@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
-import { Checkbox, Form, Button } from 'semantic-ui-react'
+import { Checkbox, Form, Button, Segment } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import InputValidation from '../../_components/InputValidation'
@@ -99,7 +99,7 @@ class LocalAuthority extends Component {
         const localAuthorityFetched = renderIf(this.state.localAuthorityFetched)
         return (
             localAuthorityFetched(
-                <div>
+                <Segment>
                     <h1>{this.state.constantFields.name}</h1>
 
                     <h2>{t('admin.modules.acte.local_authority_settings.general_informations')}</h2>
@@ -146,7 +146,7 @@ class LocalAuthority extends Component {
                         </Field>
                         <Button style={this.style} disabled={!this.state.isFormValid} type='submit'>{t('form.update')}</Button>
                     </Form>
-                </div>
+                </Segment>
             )
         )
     }

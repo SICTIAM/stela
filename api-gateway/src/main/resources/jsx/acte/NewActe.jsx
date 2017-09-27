@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Button, Form, Checkbox, Menu } from 'semantic-ui-react'
+import { Button, Form, Checkbox, Menu, Segment } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import { FormField } from '../_components/UI'
@@ -140,7 +140,7 @@ class NewActe extends Component {
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".xml" : ".pdf, .jpg, .png"
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".pdf, .jpg, .png" : ".pdf, .xml, .jpg, .png"
         return (
-            <div>
+            <Segment>
                 <h1>{t('acte.new.title')}</h1>
                 <Menu tabular>
                     <Menu.Item id='newActe' active={this.state.mode === 'newActe'} onClick={this.handleModeChange}>
@@ -223,7 +223,7 @@ class NewActe extends Component {
                     )}
                     <Button type='submit' disabled={!this.state.isFormValid}>{t('form.submit')}</Button>
                 </Form>
-            </div>
+            </Segment>
         )
     }
 }

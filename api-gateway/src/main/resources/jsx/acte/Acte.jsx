@@ -3,13 +3,14 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import moment from 'moment'
-import { Grid, Segment, List, Checkbox } from 'semantic-ui-react'
+import { Grid, Segment, List, Checkbox, Label } from 'semantic-ui-react'
 
 import { errorNotification } from '../_components/Notifications'
 import { Field } from '../_components/UI'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import ActeHistory from './ActeHistory'
+import ActeAnomaly from './ActeAnomaly'
 import ActeCancelButton from './ActeCancelButton'
 
 class Acte extends Component {
@@ -44,11 +45,17 @@ class Acte extends Component {
                 })
         }
     }
+    getStatusColor = (status) => {
+        if (['ACK_RECEIVED'].includes(status)) return 'green'
+        else if (['ANTIVIRUS_KO', 'NACK_RECEIVED', 'ARCHIVE_TOO_LARGE', 'FILE_ERROR'].includes(status)) return 'red'
+        else return 'blue'
+    }
     render() {
         const { t } = this.context
         const acteFetched = renderIf(this.state.acteFetched)
         const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
+        const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
                 <a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a>
@@ -59,6 +66,7 @@ class Acte extends Component {
                 {acteFetched(
                     <div>
                         <Segment>
+                            <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
                             <Grid>
                                 <Grid.Column width={13}><h1>{acte.objet}</h1></Grid.Column>
                                 <Grid.Column width={3}>
@@ -96,9 +104,9 @@ class Acte extends Component {
                                 <Grid.Column width={4}><label htmlFor="publicWebsite">{t('acte.fields.publicWebsite')}</label></Grid.Column>
                                 <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
                             </Grid>
-
-                            <ActeHistory history={this.state.acteUI.acte.acteHistories} />
                         </Segment>
+                        <ActeAnomaly lastHistory={lastHistory} />
+                        <ActeHistory history={this.state.acteUI.acte.acteHistories} />
                     </div>
                 )}
                 {acteNotFetched(

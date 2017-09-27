@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
+import { Segment } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
@@ -21,7 +22,7 @@ class LocalAuthorityList extends Component {
     render() {
         const { t } = this.context
         return (
-            <div>
+            <Segment>
                 <h1>{t('admin.modules.local_authority_settings')}</h1>
                 <StelaTable
                     data={this.state.localAuthorities}
@@ -39,7 +40,7 @@ class LocalAuthorityList extends Component {
                     linkProperty='uuid'
                     noDataMessage='Aucune collectivité'
                     keyProperty='uuid' />
-            </div>
+            </Segment>
         )
     }
 }
