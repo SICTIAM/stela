@@ -19,6 +19,8 @@ public class ActeHistory implements Comparable<ActeHistory> {
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
+    // Error messages can be quite lengthy
+    @Column(length = 1024)
     private String message;
     private byte[] file;
     private String fileName;

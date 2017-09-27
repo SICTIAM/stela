@@ -1,6 +1,5 @@
 package fr.sictiam.stela.acteservice.service.init;
 
-import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
@@ -13,16 +12,16 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.SortedSet;
 
 @Component
 @Profile("bootstrap-data")
@@ -52,13 +51,14 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
         // --- Local Authorities ---
 
         LocalAuthority localAuthority001 = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        try {
+            MultipartFile codesMatieresFile = getMultipartResourceFile("examples/exemple_codes_matieres.xml", "application/xml");
+            localAuthority001.setNomenclatureFile(codesMatieresFile.getBytes());
+            localAuthority001.setNomenclatureDate(LocalDate.now());
+        } catch (IOException e) {
+            LOGGER.error("Unable to add codes matieres file for {} : {}", localAuthority001.getName(), e.toString());
+        }
         localAuthorityService.createOrUpdate(localAuthority001);
-
-        LocalAuthority localAuthority002 = new LocalAuthority("Vallauris", "666555444", "666", "1", "31");
-        localAuthorityService.createOrUpdate(localAuthority002);
-
-        LocalAuthority localAuthority003 = new LocalAuthority("Valbonne", "333222111", "333", "1", "31");
-        localAuthorityService.createOrUpdate(localAuthority003);
 
         LOGGER.info("Bootstrapped some local authorities");
 
@@ -66,12 +66,15 @@ public class DataInitializerService implements ApplicationListener<ApplicationRe
         // --- Actes ---
 
         Acte acte001 = new Acte("001", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "STELA 3 sera fini en Décembre", true, true);
+        acte001.setLocalAuthority(localAuthority001);
         createDummyActe(acte001);
 
         Acte acte002 = new Acte("002", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "SESILE 4 sera fini quand il sera fini", true, true);
+        acte002.setLocalAuthority(localAuthority001);
         createDummyActe(acte002);
 
         Acte acte003 = new Acte("003", LocalDate.now(), ActeNature.DELIBERATIONS, "1-0-0-1-0", "Le DC Exporter sera mis en attente", true, true);
+        acte003.setLocalAuthority(localAuthority001);
         acte003 = createDummyActe(acte003);
 
         try {

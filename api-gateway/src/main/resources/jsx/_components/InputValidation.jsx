@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Label } from 'semantic-ui-react'
+import { Label, Dropdown } from 'semantic-ui-react'
 import renderIf from 'render-if'
 import Validator from 'validatorjs'
 import moment from 'moment'
@@ -54,6 +54,16 @@ export default class InputValidation extends Component {
                         onBlur={this.validateValue}>
                         {this.props.children}
                     </select>}
+
+                {this.props.type === 'dropdown'
+                    && <Dropdown id={this.props.id}
+                       className={this.props.className}
+                       value={this.props.value}
+                       onChange={(event,data) => this.props.onChange(this.props.id, data.value)}
+                       onBlur={this.validateValue}
+                       options={this.props.options}
+                       fluid search selection />}
+
                 <div>
                     {renderIf(!this.state.isValid)(
                         <Label basic color='red' pointing>{this.state.errorMessage}</Label>

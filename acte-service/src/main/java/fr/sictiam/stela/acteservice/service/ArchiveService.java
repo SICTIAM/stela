@@ -235,18 +235,18 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         ObjectFactory objectFactory = new ObjectFactory();
 
         DonneesActe donneesActe = new DonneesActe();
-        // TODO set the correct values for code matieres data (#1680)
+        // currently just hardcoding the first two as they are the only used
+        String[] codes = acte.getCode().split("-");
         DonneesActe.CodeMatiere1 codeMatiere1 = new DonneesActe.CodeMatiere1();
-        codeMatiere1.setCodeMatiere(1);
+        codeMatiere1.setCodeMatiere(Integer.valueOf(codes[0]));
         donneesActe.setCodeMatiere1(codeMatiere1);
         DonneesActe.CodeMatiere2 codeMatiere2 = new DonneesActe.CodeMatiere2();
-        codeMatiere2.setCodeMatiere(2);
+        codeMatiere2.setCodeMatiere(Integer.valueOf(codes[1]));
         donneesActe.setCodeMatiere2(codeMatiere2);
         donneesActe.setCodeNatureActe(Integer.valueOf(acte.getNature().getCode()));
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
-        // TODO replace with date from last classification (#1680)
-        donneesActe.setClassificationDateVersion(LocalDate.now());
+        donneesActe.setClassificationDateVersion(acte.getLocalAuthority().getNomenclatureDate());
         donneesActe.setObjet(acte.getObjet());
 
         FichierSigne fichierSigne = new FichierSigne();

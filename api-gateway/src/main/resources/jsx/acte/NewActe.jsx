@@ -37,6 +37,7 @@ class NewActe extends Component {
             publicField: false,
             publicWebsiteField: false
         },
+        codesMatieres: [],
         file: null,
         annexes: [],
         isFormValid: false
@@ -53,18 +54,26 @@ class NewActe extends Component {
         regex: this.context.t('form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
     }
     componentDidMount() {
-        const uuid = this.props.uuid
-        if (uuid !== '') {
-            fetch('/api/acte/depositFields', { credentials: 'same-origin' })
-                .then(this.checkStatus)
-                .then(response => response.json())
-                .then(json => this.setState({ depositFields: json }))
-                .catch(response => {
-                    response.json().then(json => {
-                        this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
-                    })
+        fetch('/api/acte/localAuthority/depositFields', { credentials: 'same-origin' })
+            .then(this.checkStatus)
+            .then(response => response.json())
+            .then(json => this.setState({ depositFields: json }))
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                 })
-        }
+            })
+
+        fetch('/api/acte/localAuthority/codes-matieres', { credentials: 'same-origin' })
+            .then(this.checkStatus)
+            .then(response => response.json())
+            .then(json => this.setState({ codesMatieres: json }))
+            .catch(response => {
+                debugger;
+                response.json().then(json => {
+                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                })
+            })
     }
     handleFileChange = (field, file) => {
         this.setState({ [field]: file }, this.validateForm)
@@ -125,6 +134,10 @@ class NewActe extends Component {
         const natureOptions = natures.map(nature =>
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
         )
+        const codeOptions = Object.entries(this.state.codesMatieres).map(([key, value]) => {
+            const object = {key: key, value: key, text: key + " - " + value}
+            return object
+        })
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".xml" : ".pdf, .jpg, .png"
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".pdf, .jpg, .png" : ".pdf, .xml, .jpg, .png"
         return (
@@ -180,11 +193,12 @@ class NewActe extends Component {
                     )}
                     <FormField htmlFor='code' label={t('acte.fields.code')}>
                         <InputValidation id='code'
-                            placeholder={t('acte.fields.code') + '...'}
+                            type='dropdown'
                             value={this.state.fields.code}
                             onChange={this.handleFieldChange}
                             validationRule={this.validationRules.code}
-                            fieldName={t('acte.fields.code')} />
+                            fieldName={t('acte.fields.code')}
+                            options={codeOptions} />
                     </FormField>
                     <FormField htmlFor='file' label={t('acte.fields.file')}>
                         <InputValidation id='file'

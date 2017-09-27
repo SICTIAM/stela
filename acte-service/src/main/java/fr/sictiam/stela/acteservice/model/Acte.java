@@ -34,6 +34,8 @@ public class Acte {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("date ASC")
     private SortedSet<ActeHistory> acteHistories;
+    @ManyToOne
+    private LocalAuthority localAuthority;
 
     public Acte() {
     }
@@ -126,6 +128,14 @@ public class Acte {
 
     public void setActeHistories(SortedSet<ActeHistory> acteHistories) {
         this.acteHistories = acteHistories;
+    }
+
+    public LocalAuthority getLocalAuthority() {
+        return localAuthority;
+    }
+
+    public void setLocalAuthority(LocalAuthority localAuthority) {
+        this.localAuthority = localAuthority;
     }
 
     @Override

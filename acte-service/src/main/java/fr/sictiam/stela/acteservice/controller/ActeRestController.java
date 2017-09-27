@@ -103,8 +103,8 @@ public class ActeRestController {
     ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
                                   @RequestParam("annexes") MultipartFile... annexes) {
 
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         ObjectMapper mapper = new ObjectMapper();
         try {
             Acte acte = mapper.readValue(acteJson, Acte.class);
@@ -122,15 +122,6 @@ public class ActeRestController {
             LOGGER.error("ActeNotSentException: {}", ns);
             return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @GetMapping("/depositFields")
-    public ResponseEntity<ActeDepositFieldsUI> getActeDepositFields() {
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getAll().get(0);
-        LOGGER.info("currentLocalAuthority: {}", currentLocalAuthority.getName());
-        return new ResponseEntity<>(new ActeDepositFieldsUI(currentLocalAuthority.getCanPublishRegistre(),
-                currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {
