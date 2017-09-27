@@ -54,7 +54,7 @@ public class MailService {
     
     @Scheduled(fixedDelay = 5000, initialDelay = 5000)
     public void checkMail() {
-        LOGGER.info("Started mail checking at {}", LocalDateTime.now());
+        //LOGGER.info("Started mail checking at {}", LocalDateTime.now());
 
         Properties props = new Properties();
 
@@ -127,7 +127,7 @@ public class MailService {
             inbox.close();
             store.close();
 
-            LOGGER.info("Mails checked at {}", LocalDateTime.now());
+            //LOGGER.info("Mails checked at {}", LocalDateTime.now());
         } catch (MessagingException e) {
             LOGGER.error("Messaging exception" + e.getMessage());
         } catch (IOException io) {
@@ -148,7 +148,6 @@ public class MailService {
             Node recu = document.getElementsByTagName("actes:ActeRecu").item(0);
             NamedNodeMap attr = recu.getAttributes();
             Node n = attr.getNamedItem("actes:NumeroInterne");
-            System.out.println(n.getNodeName() + ":" + n.getNodeValue());
         }
     }
 
