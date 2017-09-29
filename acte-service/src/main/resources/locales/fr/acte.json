@@ -1,0 +1,57 @@
+{
+  "acte": {
+    "status": {
+      "CREATED": "Créé",
+      "ARCHIVE_CREATED": "Archive préparée",
+      "ANTIVIRUS_OK": "Antivirus OK",
+      "ANTIVIRUS_KO": "Antivirus KO",
+      "SENT": "Envoyé",
+      "NOT_SENT": "Non envoyé",
+      "ACK_RECEIVED": "AR Ministère",
+      "NACK_RECEIVED": "Anomalie Ministère",
+      "CANCELLATION_ASKED": "Annulation demandée",
+      "CANCELLATION_ARCHIVE_CREATED": "Archive d'annulation préparée",
+      "ARCHIVE_TOO_LARGE": "Archive trop large",
+      "ARCHIVE_SIZE_CHECKED": "Taille d'archive vérifiée",
+      "FILE_ERROR": "Erreur sur les fichiers de l'acte"
+    },
+    "nature": {
+      "DELIBERATIONS": "Délibérations",
+      "ARRETES_REGLEMENTAIRES": "Actes réglementaires",
+      "ARRETES_INDIVIDUELS": "Actes individuels",
+      "CONTRATS_ET_CONVENTIONS": "Contrats, conventions et avenants",
+      "DOCUMENTS_BUDGETAIRES_ET_FINANCIERS": "Documents budgétaires et financiers",
+      "AUTRES": "Autres"
+    },
+    "fields": {
+      "number": "Numéro d'acte",
+      "decision": "Date de décision",
+      "nature": "Nature",
+      "code": "Code matière",
+      "file": "Fichier acte",
+      "annexes": "Fichiers annexes",
+      "public": "Affichage dans le registre",
+      "publicWebsite": "Affichage sur site internet",
+      "objet": "Objet",
+      "status": "Status"
+    },
+    "list": {
+      "title": "Liste des Actes",
+      "advanced_search": "Recherche avancée",
+      "download_csv": "Télécharger au format CSV"
+    },
+    "page": {
+      "non_existing_act": "Acte non existant",
+      "historic": "Historique",
+      "no_history": "Aucun historique pour cet acte",
+      "linked_file": "Fichier joint",
+      "cancel_deposit": "Annuler le dépôt"
+    },
+    "new": {
+      "title": "Télétransmission d'acte",
+      "acte": "Déposer un acte",
+      "acte_budgetaire": "Déposer un acte budgétaire",
+      "choose": "Choisir..."
+    }
+  }
+}

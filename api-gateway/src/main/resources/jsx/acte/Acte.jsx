@@ -109,4 +109,4 @@ class Acte extends Component {
     }
 }
 
-export default translate(['api-gateway'])(Acte)
+export default translate(['acte'])(Acte)

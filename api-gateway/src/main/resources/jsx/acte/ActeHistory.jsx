@@ -48,4 +48,4 @@ class ActeHistory extends Component {
     }
 }
 
-export default translate(['api-gateway'])(ActeHistory)
+export default translate(['acte'])(ActeHistory)

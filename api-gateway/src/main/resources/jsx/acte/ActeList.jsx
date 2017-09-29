@@ -134,4 +134,4 @@ class ActeList extends Component {
     }
 }
 
-export default translate(['api-gateway'])(ActeList)
+export default translate(['acte'])(ActeList)
