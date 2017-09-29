@@ -24,4 +24,12 @@ const status = [
     "FILE_ERROR"
 ]
 
-module.exports = { natures, status }
+const anomalies = [
+    "ANTIVIRUS_KO",
+    "NOT_SENT",
+    "NACK_RECEIVED",
+    "ARCHIVE_TOO_LARGE",
+    "FILE_ERROR"
+]
+
+module.exports = { natures, status, anomalies }

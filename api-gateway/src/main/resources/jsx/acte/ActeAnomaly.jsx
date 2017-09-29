@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Segment } from 'semantic-ui-react'
+import { Message } from 'semantic-ui-react'
 
-import { Field } from '../_components/UI'
+import { anomalies } from '../_util/constants'
 
 class ActeAnomaly extends Component {
     static contextTypes = {
@@ -20,16 +20,14 @@ class ActeAnomaly extends Component {
         const { t } = this.context
         const { lastHistory } = this.props
         return (
-            renderIf(lastHistory.status === 'NACK_RECEIVED')(
-                <Segment color='red'>
-                    <h2>{t('acte.page.detail_anomaly')}</h2>
-                    <Field htmlFor="message" label={t('acte.history.message')}>
-                        <span id="message">{lastHistory.message}</span>
-                    </Field>
-                </Segment >
+            renderIf(anomalies.includes(lastHistory.status) && lastHistory.message)(
+                <Message negative>
+                    <Message.Header>{t('acte.history.message')}</Message.Header>
+                    <p>{lastHistory.message}</p>
+                </Message>
             )
         )
     }
 }
 
-export default translate(['api-gateway'])(ActeAnomaly)
+export default translate(['acte'])(ActeAnomaly)

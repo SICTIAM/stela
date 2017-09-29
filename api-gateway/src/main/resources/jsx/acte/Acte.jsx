@@ -9,6 +9,7 @@ import { errorNotification } from '../_components/Notifications'
 import { Field } from '../_components/UI'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { anomalies } from '../_util/constants'
 import ActeHistory from './ActeHistory'
 import ActeAnomaly from './ActeAnomaly'
 import ActeCancelButton from './ActeCancelButton'
@@ -47,7 +48,7 @@ class Acte extends Component {
     }
     getStatusColor = (status) => {
         if (['ACK_RECEIVED'].includes(status)) return 'green'
-        else if (['ANTIVIRUS_KO', 'NACK_RECEIVED', 'ARCHIVE_TOO_LARGE', 'FILE_ERROR'].includes(status)) return 'red'
+        else if (anomalies.includes(status)) return 'red'
         else return 'blue'
     }
     render() {
@@ -65,6 +66,7 @@ class Acte extends Component {
             <div>
                 {acteFetched(
                     <div>
+                        <ActeAnomaly lastHistory={lastHistory} />
                         <Segment>
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
                             <Grid>
@@ -105,7 +107,6 @@ class Acte extends Component {
                                 <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
                             </Grid>
                         </Segment>
-                        <ActeAnomaly lastHistory={lastHistory} />
                         <ActeHistory history={this.state.acteUI.acte.acteHistories} />
                     </div>
                 )}
