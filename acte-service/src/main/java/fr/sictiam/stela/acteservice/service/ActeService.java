@@ -47,13 +47,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final ActeHistoryRepository acteHistoryRepository;
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository, AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
+                       AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
+                       LocalAuthorityService localAuthorityService) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.localAuthorityService = localAuthorityService;
     }
 
     /**
@@ -76,6 +80,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         acte.setAnnexes(transformedAnnexes);
         acte.setCreation(LocalDateTime.now());
         acte.setLocalAuthority(currentLocalAuthority);
+        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
 
         if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
         if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);

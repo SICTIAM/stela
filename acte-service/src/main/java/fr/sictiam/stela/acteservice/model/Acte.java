@@ -24,6 +24,7 @@ public class Acte {
     private LocalDate decision;
     private ActeNature nature;
     private String code;
+    private String codeLabel;
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
@@ -68,6 +69,14 @@ public class Acte {
 
     public String getCode() {
         return code;
+    }
+
+    public String getCodeLabel() {
+        return codeLabel;
+    }
+
+    public void setCodeLabel(String codeLabel) {
+        this.codeLabel = codeLabel;
     }
 
     public String getObjet() {

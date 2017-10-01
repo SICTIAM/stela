@@ -21,6 +21,8 @@ public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
 
+    private Map<String, Map<String, String>> codesMatieresByLocalAuthority = new HashMap<>();
+
     @Autowired
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
         this.localAuthorityRepository = localAuthorityRepository;
@@ -49,9 +51,11 @@ public class LocalAuthorityService {
         return localAuthorityRepository.findByName(name);
     }
 
-    // This is a first raw version, parsing the (small) file for each call
-    // TODO as it is a rarely updated resource, add some caching
+    // This is a first raw version, just caching the data in memory
     public Map<String, String> getCodesMatieres(String uuid) {
+        if (codesMatieresByLocalAuthority.get(uuid) != null)
+            return codesMatieresByLocalAuthority.get(uuid);
+
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
         Map<String, String> codesMatieres = new LinkedHashMap<>();
         try {
@@ -71,6 +75,14 @@ public class LocalAuthorityService {
             LOGGER.error("Unable to parse classification data !", e);
         }
 
+        codesMatieresByLocalAuthority.put(uuid, codesMatieres);
         return codesMatieres;
+    }
+
+    public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {
+        if (codesMatieresByLocalAuthority.get(localAuthorityUuid) == null)
+            getCodesMatieres(localAuthorityUuid);
+
+        return codesMatieresByLocalAuthority.get(localAuthorityUuid).get(codeMatiereKey);
     }
 }

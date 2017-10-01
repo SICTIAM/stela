@@ -76,7 +76,7 @@ class Acte extends Component {
                                 <span id="nature">{t(`acte.nature.${acte.nature}`)}</span>
                             </Field>
                             <Field htmlFor="code" label={t('acte.fields.code')}>
-                                <span id="code">{acte.code}</span>
+                                <span id="code">{acte.codeLabel} ({acte.code})</span>
                             </Field>
                             <Field htmlFor="file" label={t('acte.fields.file')}>
                                 <span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span>
