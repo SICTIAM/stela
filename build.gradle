@@ -38,6 +38,7 @@ subprojects {
 	dependencies {
         compile('org.springframework.boot:spring-boot-devtools')
         compile('ch.qos.logback:logback-classic:1.1.5')
+        runtime('org.flywaydb:flyway-core')
         testCompile('junit:junit:4.12')
         testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
 
