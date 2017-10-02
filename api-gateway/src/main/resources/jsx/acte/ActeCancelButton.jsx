@@ -41,4 +41,4 @@ class ActeCancelButton extends Component {
     }
 }
 
-export default translate(['api-gateway'])(ActeCancelButton)
+export default translate(['acte'])(ActeCancelButton)

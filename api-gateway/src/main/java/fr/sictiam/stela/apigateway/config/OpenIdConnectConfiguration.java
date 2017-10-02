@@ -6,6 +6,6 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
 
     @Override
     public boolean requireAuthenticationForPath(String path) {
-        return path.contains("/api/") || path.contains("/index.html");
+        return (path.contains("/api/") && !path.contains("/locales/")) || path.contains("/index.html");
     }
 }
