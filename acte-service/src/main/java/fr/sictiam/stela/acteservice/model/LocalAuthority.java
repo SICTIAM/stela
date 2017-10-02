@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 public class LocalAuthority {
@@ -19,7 +19,8 @@ public class LocalAuthority {
     private String department;
     private String district;
     private String nature;
-    private LocalDateTime nomenclatureDate;
+    private LocalDate nomenclatureDate;
+    private byte[] nomenclatureFile;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
 
@@ -32,9 +33,19 @@ public class LocalAuthority {
         this.department = department;
         this.district = district;
         this.nature = nature;
-        this.nomenclatureDate = null;
         this.canPublishRegistre = false;
         this.canPublishWebSite = false;
+    }
+
+    public LocalAuthority(String name, String siren, String department, String district, String nature,
+                          Boolean canPublishRegistre, Boolean canPublishWebSite) {
+        this.name = name;
+        this.siren = siren;
+        this.department = department;
+        this.district = district;
+        this.nature = nature;
+        this.canPublishRegistre = canPublishRegistre;
+        this.canPublishWebSite = canPublishWebSite;
     }
 
     public String getUuid() {
@@ -77,12 +88,20 @@ public class LocalAuthority {
         this.nature = nature;
     }
 
-    public LocalDateTime getNomenclatureDate() {
+    public LocalDate getNomenclatureDate() {
         return nomenclatureDate;
     }
 
-    public void setNomenclatureDate(LocalDateTime nomenclatureDate) {
+    public void setNomenclatureDate(LocalDate nomenclatureDate) {
         this.nomenclatureDate = nomenclatureDate;
+    }
+
+    public byte[] getNomenclatureFile() {
+        return nomenclatureFile;
+    }
+
+    public void setNomenclatureFile(byte[] nomenclatureFile) {
+        this.nomenclatureFile = nomenclatureFile;
     }
 
     public Boolean getCanPublishRegistre() {

@@ -1,15 +1,14 @@
 package fr.sictiam.stela.acteservice.service;
 
+import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.ui.ActeSearchUI;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
-import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +22,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -42,13 +47,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final ActeHistoryRepository acteHistoryRepository;
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository, AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
+                       AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
+                       LocalAuthorityService localAuthorityService) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.localAuthorityService = localAuthorityService;
     }
 
     /**
@@ -70,6 +79,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
         acte.setAnnexes(transformedAnnexes);
         acte.setCreation(LocalDateTime.now());
+        acte.setLocalAuthority(currentLocalAuthority);
+        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
 
         if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
         if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);

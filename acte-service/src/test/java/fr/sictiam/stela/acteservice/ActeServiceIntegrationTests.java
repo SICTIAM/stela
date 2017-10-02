@@ -1,10 +1,13 @@
 package fr.sictiam.stela.acteservice;
 
 
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -13,18 +16,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 
@@ -45,6 +49,25 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
+    @Autowired
+    private ActeRepository acteRepository;
+
+    @Before
+    public void createLocalAuthority() {
+        if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
+            LocalAuthority localAuthority =
+                    new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31", true, true);
+            try {
+                MultipartFile codesMatieresFile = getMultipartResourceFile("data/exemple_codes_matieres.xml", "application/xml");
+                localAuthority.setNomenclatureDate(LocalDate.now());
+                localAuthority.setNomenclatureFile(codesMatieresFile.getBytes());
+            } catch (IOException e) {
+                LOGGER.error("Unable to add codes matieres file for {} : {}", localAuthority.getName(), e.toString());
+            }
+            localAuthorityService.createOrUpdate(localAuthority);
+        }
+    }
+
     @Test
     public void testCreateActe() {
         MultiValueMap<String, Object> params = acteWithAttachments();
@@ -62,12 +85,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acte.getFile());
         assertNotNull(acte.getNumber());
         assertEquals("Delib.pdf", acte.getFilename());
-        assertEquals("COD001", acte.getCode());
+        assertEquals("1-1-0-0-0", acte.getCode());
         assertEquals("Objet", acte.getObjet());
         assertEquals(LocalDate.now(), acte.getDecision());
         assertTrue(acte.isPublic());
         assertEquals(2, acteService.getAnnexes(acteUuid).size());
-        assertEquals(StatusType.CREATED, acte.getActeHistories().last().getStatus());
     }
 
     @Test
@@ -165,6 +187,12 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             fail("Should not have thrown an exception");
         }
 
+        // manually add a ACK_RECEIVED history trace to allow for cancellation
+        ActeHistory cancelAskedHistory = new ActeHistory(acteUuid, StatusType.ACK_RECEIVED);
+        Acte acte = acteService.getByUuid(acteUuid);
+        acte.getActeHistories().add(cancelAskedHistory);
+        acteRepository.save(acte);
+
         this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
 
         try {
@@ -174,7 +202,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             fail("Should not have thrown an exception");
         }
 
-        Acte acte = acteService.getByUuid(acteUuid);
+        acte = acteService.getByUuid(acteUuid);
         assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getActeHistories().last().getStatus());
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
@@ -183,9 +211,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acteHistory.get().getFileName());
 
         ResponseEntity<String> newResponse = this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
-        String newResponseBody = newResponse.getBody();
 
-        assertEquals("notifications.acte.cancelled.forbidden", newResponseBody);
+        assertEquals(HttpStatus.FORBIDDEN, newResponse.getStatusCode());
 
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
@@ -193,19 +220,24 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void createAndRetrieveLocalAuthority() {
-        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        LocalAuthority localAuthority = new LocalAuthority("New-Test", "999888777", "999", "1", "31");
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
-        assertEquals("SICTIAM-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
+        assertEquals("New-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
         assertEquals(localAuthority.getUuid(), localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid());
+
+        // cleanup our local production
+        localAuthorityService.delete(localAuthority);
     }
 
     @Test
     public void partialLocalAuthorityUpdate() {
-        LocalAuthority localAuthority = new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31");
+        LocalAuthority localAuthority = new LocalAuthority("Patch-Test", "999888777", "999", "1", "31");
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
         String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\"}";
-        HttpEntity<String> patchData = new HttpEntity<>(input);
+        HttpEntity<String> patchData = new HttpEntity<>(input, headers);
 
         this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class, localAuthority.getUuid());
 
@@ -214,6 +246,20 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(true, localAuthority.getCanPublishRegistre());
         assertEquals(false, localAuthority.getCanPublishWebSite());
         assertEquals("006", localAuthority.getDepartment());
+
+        // cleanup our local production
+        localAuthorityService.delete(localAuthority);
+    }
+
+    @Test
+    public void parseCodesMatieres() {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        Map<String, String> codesMatieres = localAuthorityService.getCodesMatieres(localAuthority.getUuid());
+
+        assertEquals(5, codesMatieres.size());
+        assertTrue(codesMatieres.containsKey("1-1-0-0-0"));
+        assertEquals("Marchés publics", codesMatieres.get("1-1-0-0-0"));
+        assertEquals("1-1-0-0-0", codesMatieres.keySet().iterator().next());
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
@@ -225,8 +271,15 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         return params;
     }
 
+    private MultipartFile getMultipartResourceFile(String filename, String contentType) throws IOException {
+        File file = new ClassPathResource(filename).getFile();
+
+        FileInputStream input = new FileInputStream(file);
+        return new MockMultipartFile(file.getName(), file.getName(), contentType, IOUtils.toByteArray(input));
+    }
+
     private Acte acte() {
-        return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "COD001",
+        return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "1-1-0-0-0",
                 "Objet", true, true);
     }
 

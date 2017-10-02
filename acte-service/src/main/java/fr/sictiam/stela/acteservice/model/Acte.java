@@ -24,6 +24,7 @@ public class Acte {
     private LocalDate decision;
     private ActeNature nature;
     private String code;
+    private String codeLabel;
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
@@ -34,6 +35,8 @@ public class Acte {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("date ASC")
     private SortedSet<ActeHistory> acteHistories;
+    @ManyToOne
+    private LocalAuthority localAuthority;
 
     public Acte() {
     }
@@ -66,6 +69,14 @@ public class Acte {
 
     public String getCode() {
         return code;
+    }
+
+    public String getCodeLabel() {
+        return codeLabel;
+    }
+
+    public void setCodeLabel(String codeLabel) {
+        this.codeLabel = codeLabel;
     }
 
     public String getObjet() {
@@ -126,6 +137,14 @@ public class Acte {
 
     public void setActeHistories(SortedSet<ActeHistory> acteHistories) {
         this.acteHistories = acteHistories;
+    }
+
+    public LocalAuthority getLocalAuthority() {
+        return localAuthority;
+    }
+
+    public void setLocalAuthority(LocalAuthority localAuthority) {
+        this.localAuthority = localAuthority;
     }
 
     @Override

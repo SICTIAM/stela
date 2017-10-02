@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<actes:RetourClassification xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" xmlns:insee="http://xml.insee.fr/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.interieur.gouv.fr/ACTES#v1.1-20040216 actesv1_1.xsd">
+  <actes:DateClassification>2017-04-19</actes:DateClassification>
+  <actes:NaturesActes>
+    <actes:NatureActe actes:CodeNatureActe="6" actes:Libelle="Autres" actes:TypeAbrege="AU"/>
+    <actes:NatureActe actes:CodeNatureActe="2" actes:Libelle="Actes réglementaires" actes:TypeAbrege="AR"/>
+    <actes:NatureActe actes:CodeNatureActe="3" actes:Libelle="Actes individuels" actes:TypeAbrege="AI"/>
+    <actes:NatureActe actes:CodeNatureActe="4" actes:Libelle="Contrats, conventions et avenants" actes:TypeAbrege="CC"/>
+    <actes:NatureActe actes:CodeNatureActe="5" actes:Libelle="Documents budgétaires et financiers" actes:TypeAbrege="BF"/>
+    <actes:NatureActe actes:CodeNatureActe="1" actes:Libelle="Délibérations" actes:TypeAbrege="DE"/>
+  </actes:NaturesActes>
+  <actes:Matieres>
+    <actes:Matiere1 actes:CodeMatiere="1" actes:Libelle="Commande Publique">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Marchés publics"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Délégation de service public"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="2" actes:Libelle="Urbanisme">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Documents d urbanisme "/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Actes relatifs au droit d occupation ou d utilisation des sols"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Droit de preemption urbain "/>
+    </actes:Matiere1>
+  </actes:Matieres>
+</actes:RetourClassification>
