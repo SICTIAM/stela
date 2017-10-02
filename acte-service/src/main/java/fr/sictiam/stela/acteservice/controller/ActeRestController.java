@@ -154,16 +154,4 @@ public class ActeRestController {
             LOGGER.error("Error writing file to output stream. Filename was '{}'", filename, e);
         }
     }
-
-    @GetMapping(value="/locales/{lng}/{ns}.json", produces = "application/json")
-    public String getJsonTranslation(HttpServletResponse response, @PathVariable String lng, @PathVariable String ns) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            ClassPathResource resource = new ClassPathResource("/locales/" + lng + "/" + ns + ".json");
-            FileCopyUtils.copy(resource.getInputStream(), bos);
-        } catch (Exception e) {
-            LOGGER.error("Unable to load json translation file: {}", e);
-        }
-        return bos.toString();
-    }
 }

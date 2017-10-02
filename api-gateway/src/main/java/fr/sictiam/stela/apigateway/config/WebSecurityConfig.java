@@ -49,6 +49,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                 .addFilterBefore(new OzwilloProvisioningFilter(instanciationSecret), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                     .antMatchers("/ozwillo/**").permitAll()
+                    .antMatchers("/api/*/locales/**").permitAll()
                     .antMatchers("/api/**").authenticated().and()
                 .csrf()
                     .ignoringAntMatchers("/ozwillo/**").and()

@@ -13,14 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 
 @RestController
-@RequestMapping("/api/api-gateway/")
-public class ApiGatewayController {
+@RequestMapping("/api/api-gateway/locales/")
+public class LocalesController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiGatewayController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalesController.class);
 
-    @GetMapping(value="/locales/{lng}/{ns}.json", produces = "application/json")
+    @GetMapping(value="/{lng}/{ns}.json", produces = "application/json")
     public String getJsonTranslation(HttpServletResponse response, @PathVariable String lng, @PathVariable String ns) {
-        LOGGER.error("hello");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             ClassPathResource resource = new ClassPathResource("/public/locales/" + lng + "/" + ns + ".json");
