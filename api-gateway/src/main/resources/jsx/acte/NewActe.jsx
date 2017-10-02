@@ -69,7 +69,6 @@ class NewActe extends Component {
             .then(response => response.json())
             .then(json => this.setState({ codesMatieres: json }))
             .catch(response => {
-                debugger;
                 response.json().then(json => {
                     this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                 })
