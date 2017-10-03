@@ -28,6 +28,7 @@ INSERT INTO acte_history VALUES ('91e080c0-9f6b-4a7c-afd4-956515b32d57', '6789fa
 INSERT INTO acte_history VALUES ('9b46468e-87da-4fc8-909a-34225a99fc99', '6789fa11-8294-40a1-9c09-7ee2f53c18df', '2017-09-30 08:45:56.492', NULL, NULL, NULL, 'ARCHIVE_SIZE_CHECKED');
 INSERT INTO acte_history VALUES ('ca73b6e8-de8d-4da4-8f19-92c63ef8075b', 'e2180eac-36a0-4474-ae35-17a874dc763a', '2017-09-30 08:45:56.508', NULL, NULL, NULL, 'ARCHIVE_SIZE_CHECKED');
 INSERT INTO acte_history VALUES ('65c9aaff-f8ef-4742-82c3-ea7f404f6263', '6789fa11-8294-40a1-9c09-7ee2f53c18df', '2017-09-30 08:45:58.265', NULL, NULL, NULL, 'ACK_RECEIVED');
+INSERT INTO acte_history VALUES ('6547ca31-fb70-49fb-99fb-b62f0b8c9c9a', '6ae3369d-e5b1-4e79-a4a4-64a41ccafb21', '2017-09-30 08:45:58.265', NULL, NULL, 'Cet acte a déjà été transmis, un acte avec le même id existe dans le système"', 'NACK_RECEIVED');
 
 
 --
@@ -44,6 +45,7 @@ INSERT INTO acte_acte_histories VALUES ('6789fa11-8294-40a1-9c09-7ee2f53c18df', 
 INSERT INTO acte_acte_histories VALUES ('6789fa11-8294-40a1-9c09-7ee2f53c18df', '9b46468e-87da-4fc8-909a-34225a99fc99');
 INSERT INTO acte_acte_histories VALUES ('e2180eac-36a0-4474-ae35-17a874dc763a', 'ca73b6e8-de8d-4da4-8f19-92c63ef8075b');
 INSERT INTO acte_acte_histories VALUES ('6789fa11-8294-40a1-9c09-7ee2f53c18df', '65c9aaff-f8ef-4742-82c3-ea7f404f6263');
+INSERT INTO acte_acte_histories VALUES ('6ae3369d-e5b1-4e79-a4a4-64a41ccafb21', '6547ca31-fb70-49fb-99fb-b62f0b8c9c9a');
 
 
 --

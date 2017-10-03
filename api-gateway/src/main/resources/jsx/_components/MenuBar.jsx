@@ -20,9 +20,9 @@ class MenuBar extends Component {
     render() {
         const { t } = this.context
         return (
-            <Menu fixed='left' vertical>
+            <Menu className='mainMenu' fixed='left' vertical>
 
-                <Menu.Item as={Link} to="/" header>
+                <Menu.Item className='appTitle' as={Link} to="/" header>
                     <h1 style={this.styles.appTitle}>{t('app_title')}</h1>
                 </Menu.Item>
 

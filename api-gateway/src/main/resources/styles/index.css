@@ -4,24 +4,33 @@ html {
 }
 body, html {
     height: auto;
+    background-color: #f7f7f7;
+}
+.mainMenu .header.item.appTitle {
+    height: 4.5em;
 }
 .wrapperContainer { 
     margin-left: 15em; 
-    padding: 0 1em 0 1em; 
+    padding: 0 1em 0 1em;
 } 
 .mainContainer {
-    padding-top: 5em;
+    padding-top: 6em;
     padding-bottom: 3em;
     margin-bottom: 5em;
 }
-.secondContent {
-    margin-top: 3em;
+.ui.segment {
+    padding-bottom: 2em;
+}
+.ui.segment .ui.label.labelStatus {
+    font-size: 1rem;
 }
 fieldset {
     border: 0;
 }
 .menu.secondary.topBar {
     background-color: white;
+    height: 4.5em;
+    box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
 }
 footer {
     position: absolute;
