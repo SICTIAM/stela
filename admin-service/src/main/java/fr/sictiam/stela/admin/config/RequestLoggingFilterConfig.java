@@ -16,7 +16,7 @@ public class RequestLoggingFilterConfig {
         filter.setMaxPayloadLength(10000);
         filter.setIncludeHeaders(true);
         filter.setIncludeClientInfo(true);
-        filter.setAfterMessagePrefix("Requets data : ");
+        filter.setAfterMessagePrefix("Request data : ");
         return filter;
     }
 }
