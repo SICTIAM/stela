@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import moment from 'moment'
-import { Grid, Segment, List, Checkbox, Label } from 'semantic-ui-react'
+import { Grid, Segment, List, Checkbox, Label, Icon } from 'semantic-ui-react'
 
 import { errorNotification } from '../_components/Notifications'
 import { Field } from '../_components/UI'
@@ -29,6 +29,11 @@ class Acte extends Component {
             cancellable: false
         },
         acteFetched: false
+    }
+    styles = {
+        alignRight: {
+            textAlign: 'right'
+        }
     }
     componentDidMount() {
         const uuid = this.props.uuid
@@ -70,8 +75,11 @@ class Acte extends Component {
                         <Segment>
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
                             <Grid>
-                                <Grid.Column width={13}><h1>{acte.objet}</h1></Grid.Column>
-                                <Grid.Column width={3}>
+                                <Grid.Column width={12}><h1>{acte.objet}</h1></Grid.Column>
+                                <Grid.Column width={4} style={this.styles.alignRight}>
+                                    {renderIf(lastHistory && lastHistory.status === 'ACK_RECEIVED')(
+                                        <a className='ui blue basic icon button' href={`/api/acte/${acte.uuid}/AR.pdf`} target='_blank' title='Télécharger le justificatif'><Icon name='download' /></a>
+                                    )}
                                     <ActeCancelButton isCancellable={this.state.acteUI.cancellable} uuid={this.state.acteUI.acte.uuid} />
                                 </Grid.Column>
                             </Grid>
@@ -88,8 +96,8 @@ class Acte extends Component {
                             <Field htmlFor="code" label={t('acte.fields.code')}>
                                 <span id="code">{acte.codeLabel} ({acte.code})</span>
                             </Field>
-                            <Field htmlFor="file" label={t('acte.fields.file')}>
-                                <span id="file"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span>
+                            <Field htmlFor="filename" label={t('acte.fields.filename')}>
+                                <span id="filename"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span>
                             </Field>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 {renderIf(annexes.length > 0)(

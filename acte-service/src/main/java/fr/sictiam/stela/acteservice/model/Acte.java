@@ -157,8 +157,10 @@ public class Acte {
                 ", code:'" + code + '\'' +
                 ", objet:'" + objet + '\'' +
                 ", isPublic:" + isPublic +
+                ", isPublicWebsite:" + isPublicWebsite +
                 ", creation:" + creation +
-                ", file name:" + filename +
+                ", filename:" + filename +
+                ", localAuthority:" + localAuthority +
                 '}';
     }
 }

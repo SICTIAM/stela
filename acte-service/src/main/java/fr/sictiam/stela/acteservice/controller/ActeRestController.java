@@ -1,14 +1,12 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
@@ -18,11 +16,9 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,6 +64,16 @@ public class ActeRestController {
         Acte acte = acteService.getByUuid(uuid);
         boolean isCancellable = acteService.isCancellable(uuid);
         return new ResponseEntity<>(new ActeUI(acte, isCancellable), HttpStatus.OK);
+    }
+
+    @GetMapping("/{uuid}/AR.pdf")
+    public void downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(value= "lng", required = false) String lng) {
+        try {
+            byte[] pdf = acteService.getACKPdf(uuid, lng);
+            outputFile(response, pdf, "AR.pdf");
+        } catch (Exception e) {
+            LOGGER.error("Error while generating the ACK PDF: {}", e);
+        }
     }
 
     @GetMapping("/{uuid}/file")

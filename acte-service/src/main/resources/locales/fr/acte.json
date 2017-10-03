@@ -28,7 +28,7 @@
       "decision": "Date de décision",
       "nature": "Nature",
       "code": "Code matière",
-      "file": "Fichier acte",
+      "filename": "Fichier acte",
       "annexes": "Fichiers annexes",
       "public": "Affichage dans le registre",
       "publicWebsite": "Affichage sur site internet",
