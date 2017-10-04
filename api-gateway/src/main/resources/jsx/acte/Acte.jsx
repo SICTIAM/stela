@@ -78,7 +78,7 @@ class Acte extends Component {
                                 <Grid.Column width={12}><h1>{acte.objet}</h1></Grid.Column>
                                 <Grid.Column width={4} style={this.styles.alignRight}>
                                     {renderIf(lastHistory && lastHistory.status === 'ACK_RECEIVED')(
-                                        <a className='ui blue basic icon button' href={`/api/acte/${acte.uuid}/AR.pdf`} target='_blank' title='Télécharger le justificatif'><Icon name='download' /></a>
+                                        <a className='ui blue basic icon button' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank' title='Télécharger le justificatif'><Icon name='download' /></a>
                                     )}
                                     <ActeCancelButton isCancellable={this.state.acteUI.cancellable} uuid={this.state.acteUI.acte.uuid} />
                                 </Grid.Column>

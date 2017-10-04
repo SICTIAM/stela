@@ -66,11 +66,11 @@ public class ActeRestController {
         return new ResponseEntity<>(new ActeUI(acte, isCancellable), HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/AR.pdf")
-    public void downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(value= "lng", required = false) String lng) {
+    @GetMapping("/{uuid}/AR_{uuid}.pdf")
+    public void downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
         try {
             byte[] pdf = acteService.getACKPdf(uuid, lng);
-            outputFile(response, pdf, "AR.pdf");
+            outputFile(response, pdf, "AR_" + uuid + ".pdf");
         } catch (Exception e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
         }
