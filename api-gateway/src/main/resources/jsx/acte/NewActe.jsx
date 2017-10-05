@@ -51,7 +51,7 @@ class NewActe extends Component {
         file: 'required'
     }
     customErrorMessages = {
-        regex: this.context.t('form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
+        regex: this.context.t('api-gateway:form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
     }
     componentDidMount() {
         fetch('/api/acte/localAuthority/depositFields', { credentials: 'same-origin' })
@@ -221,11 +221,11 @@ class NewActe extends Component {
                             <Checkbox id='publicWebsite' checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite')} toggle />
                         </FormField>
                     )}
-                    <Button type='submit' disabled={!this.state.isFormValid}>{t('form.submit')}</Button>
+                    <Button type='submit' disabled={!this.state.isFormValid}>{t('api-gateway:form.submit')}</Button>
                 </Form>
             </Segment>
         )
     }
 }
 
-export default translate(['acte'])(NewActe)
+export default translate(['acte', 'api-gateway'])(NewActe)

@@ -56,24 +56,6 @@
         }
     },
     "notifications": {
-        "acte": {
-            "title": "Module Acte",
-            "sent": {
-                "success": "Le dépot de l'acte a bien été effectué",
-                "error": {
-                    "empty_acte": "L'acte envoyé est vide",
-                    "non_extrayable_act": "Impossible de récupérer les données de l'acte"
-                }
-            },
-            "cancelled": {
-                "success": "La demande d'annulation du dépot a bien été prise en compte",
-                "forbidden": "Cet acte ne peut pas être annulé"
-            },
-            "annexe_not_found": "Fichier annexe inexistant",
-            "history_not_found": "Historique d'acte inexistant",
-            "no_history_file": "Aucun fichier pour cet historique",
-            "not_found": "Acte inexistant"
-        },
         "pes": {
             "title": "Module PES",
             "sent": {

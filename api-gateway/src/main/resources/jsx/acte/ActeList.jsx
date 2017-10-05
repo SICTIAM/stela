@@ -86,27 +86,27 @@ class ActeList extends Component {
                             </FormFieldInline>
                             <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                                 <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                    <FormField htmlFor='decisionFrom' label={t('form.from')}>
+                                    <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
                                         <input type='date' id='decisionFrom' value={this.state.search.decisionFrom} onChange={e => this.handleFieldChange('decisionFrom', e.target.value)} />
                                     </FormField>
-                                    <FormField htmlFor='decisionTo' label={t('form.to')}>
+                                    <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
                                         <input type='date' id='decisionTo' value={this.state.search.decisionTo} onChange={e => this.handleFieldChange('decisionTo', e.target.value)} />
                                     </FormField>
                                 </Form.Group>
                             </FormFieldInline>
                             <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
                                 <select id='nature' value={this.state.search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
-                                    <option value=''>{t('form.all_feminine')}</option>
+                                    <option value=''>{t('api-gateway:form.all_feminine')}</option>
                                     {natureOptions}
                                 </select>
                             </FormFieldInline>
                             <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
                                 <select id='status' value={this.state.search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
-                                    <option value=''>{t('form.all')}</option>
+                                    <option value=''>{t('api-gateway:form.all')}</option>
                                     {statusOptions}
                                 </select>
                             </FormFieldInline>
-                            <Button type='submit'>{t('form.search')}</Button>
+                            <Button type='submit'>{t('api-gateway:form.search')}</Button>
                         </Form>
                     </Accordion.Content>
                 </Accordion>
@@ -134,4 +134,4 @@ class ActeList extends Component {
     }
 }
 
-export default translate(['acte'])(ActeList)
+export default translate(['acte', 'api-gateway'])(ActeList)
