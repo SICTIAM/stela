@@ -5,6 +5,7 @@ import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -161,6 +163,52 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))
                 && !cancelPendingStatus.contains(acte.getActeHistories().last().getStatus());
+    }
+
+    public List<ActeCSVUI> getActesCSV(List<String> uuids, String language) {
+        if(StringUtils.isBlank(language)) language = "fr";
+        ClassPathResource classPathResource = new ClassPathResource("/locales/" + language + "/acte.json");
+        try {
+            JSONObject jsonObject = new JSONObject(new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
+            List<ActeCSVUI> acteCSVUIs = new ArrayList<>();
+            for(String uuid : uuids) {
+                Acte acte = getByUuid(uuid);
+                acteCSVUIs.add(new ActeCSVUI(
+                        acte.getNumber(),
+                        acte.getObjet(),
+                        acte.getDecision().toString(),
+                        jsonObject.getJSONObject("acte").getJSONObject("nature").getString(acte.getNature().toString()),
+                        jsonObject.getJSONObject("acte").getJSONObject("status").getString(acte.getActeHistories().last().getStatus().toString())));
+            }
+            return acteCSVUIs;
+        } catch (Exception e) {
+            LOGGER.error("Error while trying to translate Acte values, will take untranslated values: {}", e);
+            return uuids.stream()
+                    .map(uuid -> {
+                        Acte acte = getByUuid(uuid);
+                        return new ActeCSVUI(
+                                acte.getNumber(),
+                                acte.getObjet(),
+                                acte.getDecision().toString(),
+                                acte.getNature().toString(),
+                                acte.getActeHistories().last().getStatus().toString());
+                    }).collect(Collectors.toList());
+        }
+
+    }
+
+    public List<String> getTranslatedCSVFields(List<String> fields, String language) {
+        if(StringUtils.isBlank(language)) language = "fr";
+        ClassPathResource classPathResource = new ClassPathResource("/locales/" + language + "/acte.json");
+        try {
+            JSONObject jsonObject = new JSONObject(new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
+            List<String> translatedList = new ArrayList<>();
+            for(String field: fields) translatedList.add(jsonObject.getJSONObject("acte").getJSONObject("fields").getString(field));
+            return translatedList;
+        } catch (Exception e) {
+            LOGGER.error("Error while trying to translate CSV fields, will take untranslated fields: {}", e);
+            return fields;
+        }
     }
 
     public byte[] getACKPdfs(List<String> uuids, String language) throws Exception {
