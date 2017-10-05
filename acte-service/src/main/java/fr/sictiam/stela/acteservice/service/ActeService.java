@@ -182,16 +182,19 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return pdfGenaratorUtil.createPdf("acte", data);
     }
 
+    // Doubles up a map into a new map with for each entry: ("entry_value", value) and ("entry_fieldName", translate(entry_fieldName))
     private Map<String, String> getTranslatedFieldsAndValues(Map<String, String> map, String language) {
         if(StringUtils.isBlank(language)) language = "fr";
         ClassPathResource classPathResource = new ClassPathResource("/locales/" + language + "/acte.json");
 
+        // First part of the map with mandatory ("entry_value", value)
         Map<String,String> data = new HashMap<String, String>() {{
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 put(entry.getKey()+"_value", entry.getValue());
             }
         }};
         try {
+            // If we can translate we add ("entry_fieldName", translate(entry_fieldName))
             JSONObject jsonObject = new JSONObject(new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
             for (Map.Entry<String, String> entry : map.entrySet()){
                 // TODO: Hack, fix me !
@@ -199,6 +202,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 else data.put(entry.getKey()+"_fieldName", jsonObject.getJSONObject("acte").getJSONObject("fields").getString(entry.getKey()));
             }
         } catch (Exception e) {
+            // else no translation
             LOGGER.error("Error while parsing json translations: {}", e);
             for (Map.Entry<String, String> entry : map.entrySet())
                 data.put(entry.getKey()+"_fieldName", entry.getKey());
