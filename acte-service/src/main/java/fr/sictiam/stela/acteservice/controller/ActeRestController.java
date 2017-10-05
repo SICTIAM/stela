@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.*;
@@ -69,10 +70,20 @@ public class ActeRestController {
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
     public void downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
         try {
-            byte[] pdf = acteService.getACKPdf(uuid, lng);
+            byte[] pdf = acteService.getACKPdfs(Collections.singletonList(uuid), lng);
             outputFile(response, pdf, "AR_" + uuid + ".pdf");
         } catch (Exception e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
+        }
+    }
+
+    @PostMapping("/ARs.pdf")
+    public void downloadACKsPdf(HttpServletResponse response, @RequestBody List<String> uuids, @RequestParam(required = false) String lng) {
+        try {
+            byte[] pdf = acteService.getACKPdfs(uuids, lng);
+            outputFile(response, pdf, "ARs.pdf");
+        } catch (Exception e) {
+            LOGGER.error("Error while generating the ACKs PDF: {}", e);
         }
     }
 

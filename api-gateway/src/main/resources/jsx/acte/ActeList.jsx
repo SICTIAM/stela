@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 import { translate } from 'react-i18next'
 import { Accordion, Form, Button, Segment } from 'semantic-ui-react'
+import FileSaver from 'file-saver'
 
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -60,6 +61,20 @@ class ActeList extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }
+    downloadACKs = (selectedUuids) => {
+        if (selectedUuids.length > 0) {
+            const headers = {
+                'Content-Type': 'application/json'
+            }
+            fetchWithAuthzHandling({ url: '/api/acte/ARs.pdf', body: JSON.stringify(selectedUuids), headers: headers, method: 'POST', context: this.context })
+                .then(checkStatus)
+                .then(response => response.blob())
+                .then(blob => FileSaver.saveAs(blob, 'ARs.pdf'))
+                .catch(response => {
+                    response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                })
+        }
+    }
     render() {
         const { t } = this.context
         const statusDisplay = (history) => t(`acte.status.${history[history.length - 1].status}`)
@@ -71,6 +86,7 @@ class ActeList extends Component {
         const statusOptions = status.map(statusItem =>
             <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
         )
+        const downloadACKsSelectOption = { title: t('acte.list.download_ACKs'), action: this.downloadACKs }
         return (
             <Segment>
                 <h1>{t('acte.list.title')}</h1>
@@ -125,11 +141,13 @@ class ActeList extends Component {
                         { property: 'publicWebsite', displayed: false, searchable: false },
                     ]}
                     header={true}
+                    select={true}
+                    selectOptions={[downloadACKsSelectOption]}
                     link='/actes/'
                     linkProperty='uuid'
                     noDataMessage='Aucun acte'
                     keyProperty='uuid' />
-            </Segment>
+            </Segment >
         )
     }
 }

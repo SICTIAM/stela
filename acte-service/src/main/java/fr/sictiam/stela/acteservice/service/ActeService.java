@@ -167,19 +167,25 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 && !cancelPendingStatus.contains(acte.getActeHistories().last().getStatus());
     }
 
-    public byte[] getACKPdf(String uuid, String language) throws Exception {
-        Acte acte = getByUuid(uuid);
-        Map<String,String> mapString = new HashMap<String, String>() {{
-            put("status", acte.getActeHistories().last().getStatus().toString());
-            put("number", acte.getNumber());
-            put("decision", acte.getDecision().toString());
-            put("nature", acte.getNature().toString());
-            put("code", acte.getCode() + " (" + acte.getCodeLabel() +")");
-            put("objet", acte.getObjet());
-            put("filename", acte.getFilename());
-        }};
-        Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
-        return pdfGenaratorUtil.createPdf("acte", data);
+    public byte[] getACKPdfs(List<String> uuids, String language) throws Exception {
+        List<String> pages = new ArrayList<>();
+        for (String uuid: uuids) {
+            Acte acte = getByUuid(uuid);
+            if(acte.getActeHistories().last().getStatus().equals(StatusType.ACK_RECEIVED)) {
+                Map<String,String> mapString = new HashMap<String, String>() {{
+                    put("status", acte.getActeHistories().last().getStatus().toString());
+                    put("number", acte.getNumber());
+                    put("decision", acte.getDecision().toString());
+                    put("nature", acte.getNature().toString());
+                    put("code", acte.getCode() + " (" + acte.getCodeLabel() +")");
+                    put("objet", acte.getObjet());
+                    put("filename", acte.getFilename());
+                }};
+                Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
+                pages.add(pdfGenaratorUtil.getContentPage("acte", data));
+            }
+        }
+        return pdfGenaratorUtil.createPdf(pages);
     }
 
     // Doubles up a map into a new map with for each entry: ("entry_value", value) and ("entry_fieldName", translate(entry_fieldName))

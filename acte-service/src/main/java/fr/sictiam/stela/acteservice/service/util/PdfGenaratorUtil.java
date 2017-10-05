@@ -12,6 +12,7 @@ import org.thymeleaf.context.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -20,7 +21,23 @@ public class PdfGenaratorUtil {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public byte[] createPdf(String templateName, Map map) throws Exception {
+    public byte[] createPdf(List<String> pages) throws Exception {
+        Document document = new Document();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter.getInstance(document, baos);
+
+        document.open();
+        HTMLWorker htmlWorker = new HTMLWorker(document);
+        for (String page : pages) {
+            htmlWorker.parse(new StringReader(page));
+            document.newPage();
+        }
+        document.close();
+
+        return baos.toByteArray();
+    }
+
+    public String getContentPage(String templateName, Map map) {
         if (StringUtils.isEmpty(templateName)) throw new IllegalArgumentException("The templateName can not be empty/null");
         Context ctx = new Context();
         if (map != null) {
@@ -30,16 +47,6 @@ public class PdfGenaratorUtil {
                 ctx.setVariable(pair.getKey().toString(), pair.getValue());
             }
         }
-
-        String processedHtml = templateEngine.process(templateName, ctx);
-        Document document = new Document();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter.getInstance(document, baos);
-        document.open();
-        HTMLWorker htmlWorker = new HTMLWorker(document);
-        htmlWorker.parse(new StringReader(processedHtml));
-        document.close();
-
-        return baos.toByteArray();
+        return templateEngine.process(templateName, ctx);
     }
 }
