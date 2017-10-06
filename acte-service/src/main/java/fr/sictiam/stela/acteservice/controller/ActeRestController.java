@@ -93,7 +93,8 @@ public class ActeRestController {
         }
     }
 
-    @PostMapping("/tableau-actes.csv")
+    // Hack: Not possible to have an infinite UUID list in a GET request with params 
+    @PostMapping("/actes.csv")
     public void getCSVFromList(HttpServletResponse response, @RequestBody List<String> uuids, @RequestParam(required = false) String lng) {
         List<String> fields = ActeCSVUI.getFields();
         List<String> translatedFields = acteService.getTranslatedCSVFields(fields, lng);

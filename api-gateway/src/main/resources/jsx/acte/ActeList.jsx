@@ -67,7 +67,7 @@ class ActeList extends Component {
             })
     }
     downloadACKs = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
-    downloadCSV = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/tableau-actes.csv', 'tableau-actes.csv')
+    downloadCSV = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
     downloadFromSelection = (selectedUuids, url, filename) => {
         if (selectedUuids.length > 0) {
             const headers = {

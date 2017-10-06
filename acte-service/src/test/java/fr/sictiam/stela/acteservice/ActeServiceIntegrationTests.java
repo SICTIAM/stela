@@ -88,7 +88,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals("1-1-0-0-0", acte.getCode());
         assertEquals("Objet", acte.getObjet());
         assertEquals(LocalDate.now(), acte.getDecision());
-        assertTrue(acte.getIsPublic());
+        assertTrue(acte.isPublic());
         assertEquals(2, acteService.getAnnexes(acteUuid).size());
     }
 

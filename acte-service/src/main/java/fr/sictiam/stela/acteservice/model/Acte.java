@@ -83,7 +83,7 @@ public class Acte {
         return objet;
     }
 
-    public boolean getIsPublic() {
+    public boolean isPublic() {
         return isPublic;
     }
 
