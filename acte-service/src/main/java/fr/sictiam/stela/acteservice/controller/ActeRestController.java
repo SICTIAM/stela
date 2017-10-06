@@ -77,6 +77,7 @@ public class ActeRestController {
         }
     }
 
+    // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/ARs.pdf")
     public void downloadACKsPdf(HttpServletResponse response, @RequestBody List<String> uuids, @RequestParam(required = false) String lng) {
         try {

@@ -9,10 +9,8 @@ import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
-import fr.sictiam.stela.acteservice.service.util.PdfGenaratorUtil;
+import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +31,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -53,18 +49,18 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
-    private final PdfGenaratorUtil pdfGenaratorUtil;
+    private final PdfGeneratorUtil pdfGeneratorUtil;
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
                        AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-                       LocalAuthorityService localAuthorityService, PdfGenaratorUtil pdfGenaratorUtil) {
+                       LocalAuthorityService localAuthorityService, PdfGeneratorUtil pdfGeneratorUtil) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
-        this.pdfGenaratorUtil = pdfGenaratorUtil;
+        this.pdfGeneratorUtil = pdfGeneratorUtil;
     }
 
     /**
@@ -182,10 +178,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                     put("filename", acte.getFilename());
                 }};
                 Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
-                pages.add(pdfGenaratorUtil.getContentPage("acte", data));
+                pages.add(pdfGeneratorUtil.getContentPage("acte", data));
             }
         }
-        return pdfGenaratorUtil.createPdf(pages);
+        return pdfGeneratorUtil.createPdf(pages);
     }
 
     // Doubles up a map into a new map with for each entry: ("entry_value", value) and ("entry_fieldName", translate(entry_fieldName))

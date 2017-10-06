@@ -27,7 +27,8 @@ class ActeList extends Component {
             status: '',
             decisionFrom: '',
             decisionTo: ''
-        }
+        },
+        isAccordionOpen: false
     }
     styles = {
         marginBottom: 1 + 'em'
@@ -42,6 +43,10 @@ class ActeList extends Component {
         const search = this.state.search
         search[field] = value
         this.setState({ search: search })
+    }
+    handleAccordion = () => {
+        const isAccordionOpen = this.state.isAccordionOpen
+        this.setState({ isAccordionOpen: !isAccordionOpen })
     }
     submitForm = (event) => {
         event.preventDefault()
@@ -91,8 +96,8 @@ class ActeList extends Component {
             <Segment>
                 <h1>{t('acte.list.title')}</h1>
                 <Accordion style={this.styles} styled>
-                    <Accordion.Title>{t('acte.list.advanced_search')}</Accordion.Title>
-                    <Accordion.Content>
+                    <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('acte.list.advanced_search')}</Accordion.Title>
+                    <Accordion.Content active={this.state.isAccordionOpen}>
                         <Form onSubmit={this.submitForm}>
                             <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
                                 <input id='number' value={this.state.search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />

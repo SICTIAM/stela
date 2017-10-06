@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class PdfGenaratorUtil {
+public class PdfGeneratorUtil {
 
     @Autowired
     private TemplateEngine templateEngine;
