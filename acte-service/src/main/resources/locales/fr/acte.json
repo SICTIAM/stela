@@ -28,7 +28,7 @@
       "decision": "Date de décision",
       "nature": "Nature",
       "code": "Code matière",
-      "file": "Fichier acte",
+      "filename": "Fichier acte",
       "annexes": "Fichiers annexes",
       "public": "Affichage dans le registre",
       "publicWebsite": "Affichage sur site internet",
@@ -41,6 +41,7 @@
     "list": {
       "title": "Liste des Actes",
       "advanced_search": "Recherche avancée",
+      "download_ACKs": "Télécharger les justificatifs d'AR",
       "download_csv": "Télécharger au format CSV"
     },
     "page": {

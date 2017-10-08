@@ -9,13 +9,17 @@ import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
+import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
@@ -30,10 +34,7 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -48,16 +49,18 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
+    private final PdfGeneratorUtil pdfGeneratorUtil;
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
                        AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-                       LocalAuthorityService localAuthorityService) {
+                       LocalAuthorityService localAuthorityService, PdfGeneratorUtil pdfGeneratorUtil) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
+        this.pdfGeneratorUtil = pdfGeneratorUtil;
     }
 
     /**
@@ -158,6 +161,55 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))
                 && !cancelPendingStatus.contains(acte.getActeHistories().last().getStatus());
+    }
+
+    public byte[] getACKPdfs(List<String> uuids, String language) throws Exception {
+        List<String> pages = new ArrayList<>();
+        for (String uuid: uuids) {
+            Acte acte = getByUuid(uuid);
+            if(acte.getActeHistories().last().getStatus().equals(StatusType.ACK_RECEIVED)) {
+                Map<String,String> mapString = new HashMap<String, String>() {{
+                    put("status", acte.getActeHistories().last().getStatus().toString());
+                    put("number", acte.getNumber());
+                    put("decision", acte.getDecision().toString());
+                    put("nature", acte.getNature().toString());
+                    put("code", acte.getCode() + " (" + acte.getCodeLabel() +")");
+                    put("objet", acte.getObjet());
+                    put("filename", acte.getFilename());
+                }};
+                Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
+                pages.add(pdfGeneratorUtil.getContentPage("acte", data));
+            }
+        }
+        return pdfGeneratorUtil.createPdf(pages);
+    }
+
+    // Doubles up a map into a new map with for each entry: ("entry_value", value) and ("entry_fieldName", translate(entry_fieldName))
+    private Map<String, String> getTranslatedFieldsAndValues(Map<String, String> map, String language) {
+        if(StringUtils.isBlank(language)) language = "fr";
+        ClassPathResource classPathResource = new ClassPathResource("/locales/" + language + "/acte.json");
+
+        // First part of the map with mandatory ("entry_value", value)
+        Map<String,String> data = new HashMap<String, String>() {{
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                put(entry.getKey()+"_value", entry.getValue());
+            }
+        }};
+        try {
+            // If we can translate we add ("entry_fieldName", translate(entry_fieldName))
+            JSONObject jsonObject = new JSONObject(new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
+            for (Map.Entry<String, String> entry : map.entrySet()){
+                // TODO: Hack, fix me !
+                if(entry.getKey().equals("status")) data.put(entry.getKey()+"_value", jsonObject.getJSONObject("acte").getJSONObject("status").getString(entry.getValue()));
+                else data.put(entry.getKey()+"_fieldName", jsonObject.getJSONObject("acte").getJSONObject("fields").getString(entry.getKey()));
+            }
+        } catch (Exception e) {
+            // else no translation
+            LOGGER.error("Error while parsing json translations: {}", e);
+            for (Map.Entry<String, String> entry : map.entrySet())
+                data.put(entry.getKey()+"_fieldName", entry.getKey());
+        }
+        return data;
     }
 
     @Override
