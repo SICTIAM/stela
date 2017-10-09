@@ -66,15 +66,17 @@ class ActeList extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }
-    downloadACKs = (selectedUuids) => {
+    downloadACKs = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
+    downloadCSV = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
+    downloadFromSelection = (selectedUuids, url, filename) => {
         if (selectedUuids.length > 0) {
             const headers = {
                 'Content-Type': 'application/json'
             }
-            fetchWithAuthzHandling({ url: '/api/acte/ARs.pdf', body: JSON.stringify(selectedUuids), headers: headers, method: 'POST', context: this.context })
+            fetchWithAuthzHandling({ url: url, body: JSON.stringify(selectedUuids), headers: headers, method: 'POST', context: this.context })
                 .then(checkStatus)
                 .then(response => response.blob())
-                .then(blob => FileSaver.saveAs(blob, 'ARs.pdf'))
+                .then(blob => FileSaver.saveAs(blob, filename))
                 .catch(response => {
                     response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
                 })
@@ -92,6 +94,7 @@ class ActeList extends Component {
             <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
         )
         const downloadACKsSelectOption = { title: t('acte.list.download_ACKs'), action: this.downloadACKs }
+        const downloadCSVSelectOption = { title: t('acte.list.download_CSV'), action: this.downloadCSV }
         return (
             <Segment>
                 <h1>{t('acte.list.title')}</h1>
@@ -147,7 +150,7 @@ class ActeList extends Component {
                     ]}
                     header={true}
                     select={true}
-                    selectOptions={[downloadACKsSelectOption]}
+                    selectOptions={[downloadACKsSelectOption, downloadCSVSelectOption]}
                     link='/actes/'
                     linkProperty='uuid'
                     noDataMessage='Aucun acte'

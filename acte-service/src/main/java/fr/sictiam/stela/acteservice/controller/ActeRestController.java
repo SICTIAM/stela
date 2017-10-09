@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
@@ -23,6 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
+
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -88,6 +93,14 @@ public class ActeRestController {
         }
     }
 
+    // Hack: Not possible to have an infinite UUID list in a GET request with params 
+    @PostMapping("/actes.csv")
+    public void getCSVFromList(HttpServletResponse response, @RequestBody List<String> uuids, @RequestParam(required = false) String lng) {
+        List<String> fields = ActeCSVUI.getFields();
+        List<String> translatedFields = acteService.getTranslatedCSVFields(fields, lng);
+        outputCSV(response, acteService.getActesCSV(uuids, lng).toArray(), fields, translatedFields, "actes.csv");
+    }
+
     @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
@@ -145,22 +158,46 @@ public class ActeRestController {
         }
     }
 
+    private void outputCSV(HttpServletResponse response, Object[] beans, List<String> header, List<String> translatedHeader, String filename) {
+        response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
+        response.addHeader("Content-Type", getContentType(filename) + "; charset=UTF-8");
+        ICsvBeanWriter csvWriter = null;
+        try {
+            csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+
+            String[] arrayTranslatedHeader = new String[translatedHeader.size()];
+            translatedHeader.toArray(arrayTranslatedHeader);
+            String[] arrayHeader = new String[header.size()];
+            header.toArray(arrayHeader);
+
+            csvWriter.writeHeader(arrayTranslatedHeader);
+            for (Object bean : beans) csvWriter.write(bean, arrayHeader);
+            csvWriter.close();
+        } catch (Exception e) {
+            LOGGER.error("Error while trying to output CSV: {}", e);
+        }
+    }
+
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {
         try {
             InputStream fileInputStream = new ByteArrayInputStream(file);
 
-            String mimeType= URLConnection.guessContentTypeFromName(filename);
-            if(mimeType==null){
-                LOGGER.info("mimetype is not detectable, will take default");
-                mimeType = "application/octet-stream";
-            }
-            response.setContentType(mimeType);
             response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
+            response.addHeader("Content-Type", getContentType(filename) + "; charset=UTF-8");
 
             IOUtils.copy(fileInputStream, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
             LOGGER.error("Error writing file to output stream. Filename was '{}'", filename, e);
         }
+    }
+
+    private String getContentType(String filename) {
+        String mimeType= URLConnection.guessContentTypeFromName(filename);
+        if(mimeType==null){
+            LOGGER.info("Mimetype is not detectable, will take default");
+            mimeType = "application/octet-stream";
+        }
+        return mimeType;
     }
 }

@@ -91,12 +91,12 @@ public class Acte {
         this.isPublic = isPublic;
     }
 
-    public boolean isPublicWebsite() {
+    public boolean getIsPublicWebsite() {
         return isPublicWebsite;
     }
 
-    public void setPublicWebsite(boolean publicWebsite) {
-        isPublicWebsite = publicWebsite;
+    public void setPublicWebsite(boolean isPublicWebsite) {
+        this.isPublicWebsite = isPublicWebsite;
     }
 
     public LocalDateTime getCreation() {

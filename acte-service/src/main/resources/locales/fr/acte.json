@@ -42,7 +42,7 @@
       "title": "Liste des Actes",
       "advanced_search": "Recherche avancée",
       "download_ACKs": "Télécharger les justificatifs d'AR",
-      "download_csv": "Télécharger au format CSV"
+      "download_CSV": "Télécharger au format CSV"
     },
     "page": {
       "non_existing_act": "Acte non existant",

@@ -14,6 +14,7 @@ dependencies {
     compile('commons-beanutils:commons-beanutils:1.8.3')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile('org.xhtmlrenderer:flying-saucer-pdf:9.1.4')
+    compile('net.sf.supercsv:super-csv:2.4.0')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
