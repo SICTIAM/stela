@@ -5,6 +5,9 @@ import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,13 +21,19 @@ public class Acte {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     @Column(unique=true)
+    @NotNull @Max(15) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/")
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
+    @NotNull
     private LocalDate decision;
+    @NotNull
     private ActeNature nature;
+    @NotNull
     private String code;
     private String codeLabel;
+    @Column(length = 512)
+    @NotNull @Max(500)
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;

@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class LocalAuthorityRestController {
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity<LocalAuthority> update(@PathVariable String uuid, @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+    public ResponseEntity<LocalAuthority> update(@PathVariable String uuid, @Valid @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
