@@ -28,7 +28,7 @@
       "decision": "Date de décision",
       "nature": "Nature",
       "code": "Code matière",
-      "filename": "Fichier acte",
+      "file": "Fichier acte",
       "annexes": "Fichiers annexes",
       "public": "Affichage dans le registre",
       "publicWebsite": "Affichage sur site internet",
@@ -46,6 +46,12 @@
       "download_all_CSV": "Télécharger toute la liste des actes",
       "download_selected_CSV": "Télécharger la liste des actes selectionnés"
     },
+    "drafts": {
+      "title": "Brouillons",
+      "no_drafts": "Aucun brouillon",
+      "delete_selected_drafts": "Supprimer les brouillons selectionnés",
+      "delete_all_drafts": "Supprimer tous les brouillons"
+    },
     "page": {
       "non_existing_act": "Acte non existant",
       "historic": "Historique",
@@ -56,6 +62,11 @@
     },
     "new": {
       "title": "Télétransmission d'acte",
+      "formStatus": {
+        "saving": "Enregistrement...",
+        "saved": "Enregistré",
+        "sending": "Envoi en cours..."
+      },
       "acte": "Déposer un acte",
       "acte_budgetaire": "Déposer un acte budgétaire",
       "choose": "Choisir..."

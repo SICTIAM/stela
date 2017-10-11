@@ -63,7 +63,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
      * Compress file and annexes into a tar.gz archive.
      */
     private void createArchive(String acteUuid) {
-        Acte acte = acteRepository.findByUuid(acteUuid).orElseThrow(ActeNotFoundException::new);
+        Acte acte = acteRepository.findByUuidAndDraftFalse(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
             int deliveryNumber = getNextIncrement();
@@ -72,7 +72,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
 
             String acteFilename =
-                    String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getFilename()));
+                    String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getFile().getFilename()));
 
             Map<String, byte[]> annexes = new HashMap<>();
             acte.getAnnexes().forEach(attachment -> {
@@ -96,7 +96,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             ByteArrayOutputStream baos =
                     createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, messageContent,
-                            acte.getFile(), acteFilename, annexes);
+                            acte.getFile().getFile(), acteFilename, annexes);
 
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
                     baos.toByteArray(), archiveName);
@@ -114,7 +114,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private void createCancellationMessage(String acteUuid) {
 
-        Acte acte = acteRepository.findByUuid(acteUuid).orElseThrow(ActeNotFoundException::new);
+        Acte acte = acteRepository.findByUuidAndDraftFalse(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
             LOGGER.debug("Creating cancellation message for acte {}", acteUuid);

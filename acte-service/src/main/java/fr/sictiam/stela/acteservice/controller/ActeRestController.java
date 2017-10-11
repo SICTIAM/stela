@@ -50,13 +50,7 @@ public class ActeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Acte>> getAll() {
-        List<Acte> actes = acteService.getAll();
-        return new ResponseEntity<>(actes, HttpStatus.OK);
-    }
-
-    @GetMapping("/query")
-    public ResponseEntity<List<Acte>> getAllWithQuery(
+    public ResponseEntity<List<Acte>> getAll(
             @RequestParam(value= "number", required = false) String number,
             @RequestParam(value= "objet", required = false) String objet,
             @RequestParam(value= "nature", required = false) ActeNature nature,
@@ -110,7 +104,7 @@ public class ActeRestController {
     @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        outputFile(response, acte.getFile(), acte.getFilename());
+        outputFile(response, acte.getFile().getFile(), acte.getFile().getFilename());
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
@@ -140,29 +134,100 @@ public class ActeRestController {
     }
 
     @PostMapping
-    ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
-                                  @RequestParam("annexes") MultipartFile... annexes) {
+    ResponseEntity<String> create(@RequestBody String uuid) {
+        Acte result = acteService.create(uuid);
+        return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+    }
 
+
+    /* --------------------------- */
+    /* ---------- DRAFTS --------- */
+    /* --------------------------- */
+
+    @GetMapping("/drafts")
+    public ResponseEntity<List<Acte>> getDrafts() {
+        List<Acte> actes = acteService.getDrafts();
+        return new ResponseEntity<>(actes, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/drafts")
+    public ResponseEntity<?> deleteDrafts(@RequestBody List<String> uuids) {
+        acteService.deleteDrafts(uuids);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/saveDraft")
+    ResponseEntity<String> saveDraft(@RequestBody Acte acte) {
         // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        ObjectMapper mapper = new ObjectMapper();
+        Acte result = acteService.saveDraft(acte, currentLocalAuthority);
+        return new ResponseEntity<>(result.getUuid(), HttpStatus.OK);
+    }
+
+    @PostMapping("/closeDraft")
+    public ResponseEntity<?> closeDraft(@RequestBody Acte acte) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        acteService.closeDraft(acte, currentLocalAuthority);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/draft")
+    public ResponseEntity<Acte> newDraft() {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        Acte acte = acteService.saveDraft(new Acte(), currentLocalAuthority);
+        return new ResponseEntity<>(acte, HttpStatus.OK);
+    }
+
+    @GetMapping("/draft/{uuid}")
+    public ResponseEntity<Acte> getDraftByUuid(@PathVariable String uuid) {
+        Acte acte = acteService.getDraftByUuid(uuid);
+        return new ResponseEntity<>(acte, HttpStatus.OK);
+    }
+
+    @PostMapping("/draft/{uuid}/file")
+    public ResponseEntity<Acte> saveDraftFile(@PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         try {
-            Acte acte = mapper.readValue(acteJson, Acte.class);
-            
-            LOGGER.debug("Received acte : {}", acte.getObjet());
-            LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
-
-            Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);
-            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-
+            Acte acte = acteService.saveDraftFile(uuid, file, currentLocalAuthority);
+            return new ResponseEntity<>(acte, HttpStatus.OK);
         } catch (IOException e) {
-            LOGGER.error("IOException: Could not convert JSON to Acte: {}", e);
-            return new ResponseEntity<>("notifications.acte.sent.error.non_extractable_acte", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ActeNotSentException ns){
-            LOGGER.error("ActeNotSentException: {}", ns);
-            return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent", HttpStatus.INTERNAL_SERVER_ERROR);
+            LOGGER.error("Error while trying to save file: {}", e);
+            return new ResponseEntity<>(acteService.getDraftByUuid(uuid), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/draft/{uuid}/annexe")
+    public ResponseEntity<Acte> saveDraftAnnexe(@PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        try {
+            Acte acte = acteService.saveDraftAnnexe(uuid, file, currentLocalAuthority);
+            return new ResponseEntity<>(acte, HttpStatus.OK);
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to save annexe: {}", e);
+            return new ResponseEntity<>(acteService.getDraftByUuid(uuid), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/draft/{uuid}/file")
+    public ResponseEntity<?> deleteDraftFile(@PathVariable String uuid) {
+        acteService.deleteDraftFile(uuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/draft/{acteUuid}/annexe/{uuid}")
+    public ResponseEntity<?> deleteDraftAnnexe(@PathVariable String acteUuid, @PathVariable String uuid) {
+        acteService.deleteDraftAnnexe(acteUuid, uuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /* --------------------------- */
+    /* ----- FILE OPERATIONS ----- */
+    /* --------------------------- */
 
     private void outputCSV(HttpServletResponse response, Object[] beans, List<String> header, List<String> translatedHeader, String filename) {
         response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));

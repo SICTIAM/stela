@@ -30,7 +30,8 @@ class MenuBar extends Component {
                     <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
                     <Menu.Menu>
                         <Menu.Item as={Link} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
-                        <Menu.Item as={Link} to="/actes/liste">{t('menu.acte.acts_list')}</Menu.Item>
+                        <Menu.Item as={Link} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
+                        <Menu.Item as={Link} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
                         <Menu.Item>{t('menu.acte.deliberation_register')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>

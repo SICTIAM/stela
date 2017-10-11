@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -16,29 +17,33 @@ import java.util.SortedSet;
 @Entity
 public class Acte {
 
+    interface RestValidation {
+        // validation group marker interface
+    }
+
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     @Column(unique=true)
-    @NotNull @Max(15) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/")
+    @NotNull(groups = {RestValidation.class}) @Max(value=15, groups = {RestValidation.class}) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/", groups = {RestValidation.class})
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    @NotNull
+    @NotNull(groups = {RestValidation.class})
     private LocalDate decision;
-    @NotNull
+    @NotNull(groups = {RestValidation.class})
     private ActeNature nature;
-    @NotNull
+    @NotNull(groups = {RestValidation.class})
     private String code;
     private String codeLabel;
     @Column(length = 512)
-    @NotNull @Max(500)
+    @NotNull(groups = {RestValidation.class}) @Max(value=500, groups = {RestValidation.class})
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
-    private byte[] file;
-    private String filename;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Attachment file;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -46,6 +51,7 @@ public class Acte {
     private SortedSet<ActeHistory> acteHistories;
     @ManyToOne
     private LocalAuthority localAuthority;
+    private boolean draft;
 
     public Acte() {
     }
@@ -116,20 +122,12 @@ public class Acte {
         this.creation = creation;
     }
 
-    public byte[] getFile(){
+    public Attachment getFile(){
         return this.file;
     }
 
-    public void setFile(byte[] file){
+    public void setFile(Attachment file){
         this.file = file;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
     }
 
     public List<Attachment> getAnnexes() {
@@ -156,6 +154,27 @@ public class Acte {
         this.localAuthority = localAuthority;
     }
 
+    public boolean isDraft() {
+        return draft;
+    }
+
+    public void setDraft(boolean draft) {
+        this.draft = draft;
+    }
+
+    public boolean isEmpty() {
+        return StringUtils.isEmpty(number)
+                && decision == null
+                && nature == null
+                && StringUtils.isEmpty(code)
+                && StringUtils.isEmpty(codeLabel)
+                && StringUtils.isEmpty(objet)
+                && file == null
+                && (annexes == null || annexes.size() == 0)
+                && (acteHistories == null || acteHistories.size() == 0);
+
+    }
+
     @Override
     public String toString() {
         return "Acte{" +
@@ -168,7 +187,6 @@ public class Acte {
                 ", isPublic:" + isPublic +
                 ", isPublicWebsite:" + isPublicWebsite +
                 ", creation:" + creation +
-                ", filename:" + filename +
                 ", localAuthority:" + localAuthority +
                 '}';
     }

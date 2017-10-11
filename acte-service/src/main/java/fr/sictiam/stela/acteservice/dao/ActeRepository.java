@@ -7,6 +7,7 @@ import fr.sictiam.stela.acteservice.model.Acte;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ActeRepository extends JpaRepository<Acte, String> {
-    List<Acte> findAllByOrderByCreationDesc();
-    Optional<Acte> findByUuid(String uuid);
+    List<Acte> findAllByDraftTrueOrderByCreationDesc();
+    Optional<Acte> findByUuidAndDraftFalse(String uuid);
+    Optional<Acte> findByUuidAndDraftTrue(String uuid);
 }

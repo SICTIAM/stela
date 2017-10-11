@@ -4,6 +4,8 @@ import renderIf from 'render-if'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
+import { InputFile } from './UI'
+
 export default class InputValidation extends Component {
     state = { isValid: true, errorMessage: '' }
     static defaultProps = { value: '', type: '', accept: '', className: '' }
@@ -32,19 +34,21 @@ export default class InputValidation extends Component {
                         className={this.props.className}
                         placeholder={this.props.placeholder}
                         max={this.props.max}
-                        value={this.props.decision}
+                        value={this.props.value}
                         onChange={e => this.props.onChange(this.props.id, e.target.value)}
                         onBlur={this.validateValue} />}
 
-                {this.props.type === 'file'
-                    && <input id={this.props.id}
-                        type='file'
-                        className={this.props.className}
-                        accept={this.props.accept}
-                        multiple={this.props.multiple}
-                        placeholder={this.props.placeholder}
-                        onChange={e => this.props.onChange(this.props.id, e.target.files[0])}
-                        onBlur={this.validateValue} />}
+                {this.props.type === 'file' &&
+                    <InputFile htmlFor={this.props.id} label={this.props.label}>
+                        <input id={this.props.id}
+                            type='file'
+                            style={{ display: 'none' }}
+                            accept={this.props.accept}
+                            multiple={this.props.multiple}
+                            placeholder={this.props.placeholder}
+                            onChange={e => this.props.onChange(e.target.files[0])}
+                            onBlur={this.validateValue} />
+                    </InputFile>}
 
                 {this.props.type === 'select'
                     && <select id={this.props.id}
@@ -57,12 +61,12 @@ export default class InputValidation extends Component {
 
                 {this.props.type === 'dropdown'
                     && <Dropdown id={this.props.id}
-                       className={this.props.className}
-                       value={this.props.value}
-                       onChange={(event,data) => this.props.onChange(this.props.id, data.value)}
-                       onBlur={this.validateValue}
-                       options={this.props.options}
-                       fluid search selection />}
+                        className={this.props.className}
+                        value={this.props.value}
+                        onChange={(event, data) => this.props.onChange(this.props.id, data.value)}
+                        onBlur={this.validateValue}
+                        options={this.props.options}
+                        fluid search selection />}
 
                 <div>
                     {renderIf(!this.state.isValid)(

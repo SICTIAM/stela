@@ -66,40 +66,76 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     /**
      * Create new Acte entity in databaseFilename, compress the files to a tar.gz archive and delivers it to minister.
      * 
-     * @param acte Acte's data used to create Acte entity.
-     * @param file Acte's file.
-     * @param annexes Acte's annexes.
+     * @param uuid Acte's uuid.
      * 
      * @return The newly created Acte entity.
      */
-    public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
-            throws ActeNotSentException, IOException {
-        acte.setFilename(file.getOriginalFilename());
-        acte.setFile(file.getBytes());
-        List<Attachment> transformedAnnexes = new ArrayList<>();
-        for (MultipartFile annexe: annexes) {
-            transformedAnnexes.add(new Attachment(annexe.getBytes(), annexe.getOriginalFilename()));
-        }
-        acte.setAnnexes(transformedAnnexes);
+    public Acte create(String uuid) {
+        Acte acte = getDraftByUuid(uuid);
+        // TODO: Do some backend validations on the acte
+
+        acte.setDraft(false);
         acte.setCreation(LocalDateTime.now());
-        acte.setLocalAuthority(currentLocalAuthority);
-        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-
-        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
-        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
-
         Acte created = acteRepository.save(acte);
 
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-
         LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
 
         return created;
     }
 
-    public List<Acte> getAll() {
-        return acteRepository.findAllByOrderByCreationDesc();
+    public Acte saveDraft(Acte acte, LocalAuthority currentLocalAuthority) {
+        acte.setCreation(LocalDateTime.now()); // Hack: Used as 'lastUpdated'
+        acte.setLocalAuthority(currentLocalAuthority);
+        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
+        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
+        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
+        acte.setDraft(true);
+        return acteRepository.save(acte);
+    }
+
+    public void closeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
+        if(acte.isEmpty()) acteRepository.delete(acte);
+        else saveDraft(acte, currentLocalAuthority);
+    }
+
+    public Acte saveDraftFile(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
+        Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getDraftByUuid(uuid);
+        acte.setFile(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
+        return saveDraft(acte, currentLocalAuthority);
+    }
+
+    public Acte saveDraftAnnexe(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
+        Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getDraftByUuid(uuid);
+        List<Attachment> annexes = acte.getAnnexes();
+        annexes.add(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
+        acte.setAnnexes(annexes);
+        return saveDraft(acte, currentLocalAuthority);
+    }
+
+    public void deleteDraftAnnexe(String acteUuid, String uuid) {
+        Acte acte = getDraftByUuid(acteUuid);
+        if(acte.isDraft() && acte.getAnnexes().stream().anyMatch( attachment -> attachment.getUuid().equals(uuid))) {
+            List<Attachment> annexes = acte.getAnnexes().stream().filter(attachment -> !attachment.getUuid().equals(uuid)).collect(Collectors.toList());
+            acte.setAnnexes(annexes);
+            acteRepository.save(acte);
+            attachmentRepository.delete(attachmentRepository.findByUuid(uuid).get());
+        } else {
+            throw new FileNotFoundException();
+        }
+    }
+
+    public void deleteDraftFile(String uuid) {
+        Acte acte = getDraftByUuid(uuid);
+        Attachment file = acte.getFile();
+        if(file != null) {
+            acte.setFile(null);
+            acteRepository.save(acte);
+            attachmentRepository.delete(file);
+        } else {
+            throw new FileNotFoundException();
+        }
     }
 
     public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status) {
@@ -109,6 +145,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         Root<Acte> acteRoot = query.from(Acte.class);
 
         List<Predicate> predicates = new ArrayList<>();
+        predicates.add(builder.and(builder.equal(acteRoot.get("draft"), false)));
         if(StringUtils.isNotBlank(number)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("number")), "%"+number.toLowerCase()+"%")));
         if(StringUtils.isNotBlank(objet)) predicates.add(builder.and(builder.like(builder.lower(acteRoot.get("objet")), "%"+objet.toLowerCase()+"%")));
         if(nature != null) predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
@@ -130,8 +167,21 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return actes;
     }
 
+    public List<Acte> getDrafts() {
+        return acteRepository.findAllByDraftTrueOrderByCreationDesc();
+    }
+
+    public void deleteDrafts(List<String> uuids) {
+        List<Acte> drafts = getDraftsFromUuids(uuids);
+        drafts.forEach(acteRepository::delete);
+    }
+
+    public Acte getDraftByUuid(String uuid) {
+        return acteRepository.findByUuidAndDraftTrue(uuid).orElseThrow(ActeNotFoundException::new);
+    }
+
     public Acte getByUuid(String uuid) {
-        return acteRepository.findByUuid(uuid).orElseThrow(ActeNotFoundException::new);
+        return acteRepository.findByUuidAndDraftFalse(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
     public List<Attachment> getAnnexes(String acteUuid) {
@@ -209,8 +259,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ?
-                ui.getUuids().stream().map(uuid -> getByUuid(uuid)).collect(Collectors.toList()) :
+                ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList()) :
                 getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus());
+    }
+
+    private List<Acte> getDraftsFromUuids(List<String> uuids) {
+        return uuids.size() > 0 ?
+                uuids.stream().map(this::getDraftByUuid).collect(Collectors.toList()) :
+                acteRepository.findAllByDraftTrueOrderByCreationDesc();
     }
 
     public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {
@@ -225,7 +281,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                     put("nature", acte.getNature().toString());
                     put("code", acte.getCode() + " (" + acte.getCodeLabel() +")");
                     put("objet", acte.getObjet());
-                    put("filename", acte.getFilename());
+                    put("filename", acte.getFile().getFilename());
                 }};
                 Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
                 pages.add(pdfGeneratorUtil.getContentPage("acte", data));

@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
-import { Form, Grid, Label } from 'semantic-ui-react'
+import { Form, Grid, Label, Card, Icon } from 'semantic-ui-react'
 import renderIf from 'render-if'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
+
+import { bytesToSize } from '../_util/utils'
 
 const FormField = ({ htmlFor, label, children, inline }) =>
     <Form.Field inline={inline ? true : false}>
@@ -18,11 +20,29 @@ const FormFieldInline = ({ htmlFor, label, children }) =>
         </Grid>
     </Form.Field>
 
-const Field = ({ htmlFor, label, children, }) =>
+const Field = ({ htmlFor, label, children }) =>
     <Grid>
         <Grid.Column width={4}><label htmlFor={htmlFor}>{label}</label></Grid.Column>
         <Grid.Column width={12}><strong>{children}</strong></Grid.Column>
     </Grid>
+
+const File = ({ attachment, onDelete }) =>
+    <Card>
+        <Card.Content>
+            <Icon style={{ float: 'left' }} name='file outline' size='big' />
+            <Icon style={{ float: 'right', cursor: 'pointer' }} name='remove' onClick={() => onDelete(attachment.uuid)} />
+            <Card.Header style={{ fontSize: 1 + 'em' }}>{attachment.filename}</Card.Header>
+            <Card.Meta>{bytesToSize(attachment.size)}</Card.Meta>
+        </Card.Content>
+    </Card>
+
+const InputFile = ({ htmlFor, label, children }) =>
+    <div>
+        <label htmlFor={htmlFor} className="ui icon button">
+            <Icon name='file' /> {label}
+        </label>
+        {children}
+    </div>
 
 class ValidationWarning extends Component {
     state = { isValid: true, errorMessage: '', propsReceived: false, initialValue: this.props.value }
@@ -46,4 +66,4 @@ class ValidationWarning extends Component {
     }
 }
 
-module.exports = { FormField, FormFieldInline, Field, ValidationWarning }
+module.exports = { FormField, FormFieldInline, Field, ValidationWarning, File, InputFile }

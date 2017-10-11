@@ -22,6 +22,7 @@ class Acte extends Component {
     state = {
         acteUI: {
             acte: {
+                file: {},
                 annexes: [],
                 acteHistories: []
             },
@@ -96,8 +97,8 @@ class Acte extends Component {
                             <Field htmlFor="code" label={t('acte.fields.code')}>
                                 <span id="code">{acte.codeLabel} ({acte.code})</span>
                             </Field>
-                            <Field htmlFor="filename" label={t('acte.fields.filename')}>
-                                <span id="filename"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.filename}</a></span>
+                            <Field htmlFor="filename" label={t('acte.fields.file')}>
+                                <span id="filename"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.file.filename}</a></span>
                             </Field>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 {renderIf(annexes.length > 0)(
