@@ -16,6 +16,15 @@ const localAuthorityUpdateSuccess = (t) => {
     }
 }
 
+const acteNoContent = (t) => {
+    return {
+        title: t('notifications.acte.title'),
+        message: t('notifications.acte.no_content'),
+        level: 'warning',
+        position: 'tc'
+    }
+}
+
 const acteSentSuccess = (t) => {
     return {
         title: t('notifications.acte.title'),
@@ -72,6 +81,7 @@ module.exports = {
     acteSentSuccess,
     acteCancelledSuccess,
     acteCancelledForbidden,
+    acteNoContent,
     pesSentSuccess,
     pesSentVirus,
     pesSentMissingData,

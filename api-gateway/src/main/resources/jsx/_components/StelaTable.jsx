@@ -125,22 +125,30 @@ export default class StelaTable extends Component {
         const isEmpty = renderIf(data.length === 0)
         const isFilled = renderIf(data.length > 0)
         const select = renderIf(this.props.select)
+        const options = renderIf(this.props.selectOptions.length > 0)
 
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
         const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
 
         const selectOptions = this.props.selectOptions.map(selectOption =>
-            <Dropdown.Item key={selectOption.title} onClick={() => this.handleSelectAction(selectOption.action)}>{selectOption.title}</Dropdown.Item>
+            <Dropdown.Item key={selectOption.title} onClick={() => this.handleSelectAction(selectOption.action)}>
+                {Object.entries(this.state.checkboxes).filter(checkbox => checkbox[1]).length > 0 ?
+                    selectOption.title :
+                    (selectOption.titleNoSelection ? selectOption.titleNoSelection : selectOption.title)}
+            </Dropdown.Item>
         )
 
         return (
             <div className={this.props.className}>
                 <Input style={this.styles.floatRight} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
-                <Dropdown style={this.styles.floatRight} text='Selection' button>
-                    <Dropdown.Menu>
-                        {selectOptions}
-                    </Dropdown.Menu>
-                </Dropdown>
+
+                {options(
+                    <Dropdown style={this.styles.floatRight} text='Actions' button>
+                        <Dropdown.Menu>
+                            {selectOptions}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                )}
 
                 <Table sortable={this.props.header} celled fixed>
                     {title(

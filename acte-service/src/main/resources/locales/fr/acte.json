@@ -41,8 +41,10 @@
     "list": {
       "title": "Liste des Actes",
       "advanced_search": "Recherche avancée",
-      "download_ACKs": "Télécharger les justificatifs d'AR",
-      "download_CSV": "Télécharger au format CSV"
+      "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
+      "download_selected_ACKs": "Télécharger les justificatifs d'AR de la selection",
+      "download_all_CSV": "Télécharger toute la liste des actes",
+      "download_selected_CSV": "Télécharger la liste des actes selectionnés"
     },
     "page": {
       "non_existing_act": "Acte non existant",
@@ -76,7 +78,8 @@
       "annexe_not_found": "Fichier annexe inexistant",
       "history_not_found": "Historique d'acte inexistant",
       "no_history_file": "Aucun fichier pour cet historique",
-      "not_found": "Acte inexistant"
+      "not_found": "Acte inexistant",
+      "no_content": "Le résultat de cette requette ne contient aucun contenu"
     }
   }
 }

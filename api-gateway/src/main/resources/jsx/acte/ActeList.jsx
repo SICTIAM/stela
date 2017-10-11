@@ -7,7 +7,7 @@ import FileSaver from 'file-saver'
 
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
-import { errorNotification } from '../_components/Notifications'
+import { errorNotification, acteNoContent } from '../_components/Notifications'
 import { FormFieldInline, FormField } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
@@ -48,12 +48,16 @@ class ActeList extends Component {
         const isAccordionOpen = this.state.isAccordionOpen
         this.setState({ isAccordionOpen: !isAccordionOpen })
     }
-    submitForm = (event) => {
-        event.preventDefault()
+    getSearchData = () => {
         const data = {}
         Object.keys(this.state.search)
             .filter(k => this.state.search[k] !== '')
             .map(k => data[k] = this.state.search[k])
+        return data
+    }
+    submitForm = (event) => {
+        event.preventDefault()
+        const data = this.getSearchData()
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -66,21 +70,26 @@ class ActeList extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }
-    downloadACKs = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
-    downloadCSV = (selectedUuids) => this.downloadFromSelection(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
-    downloadFromSelection = (selectedUuids, url, filename) => {
-        if (selectedUuids.length > 0) {
-            const headers = {
-                'Content-Type': 'application/json'
-            }
-            fetchWithAuthzHandling({ url: url, body: JSON.stringify(selectedUuids), headers: headers, method: 'POST', context: this.context })
-                .then(checkStatus)
-                .then(response => response.blob())
-                .then(blob => FileSaver.saveAs(blob, filename))
-                .catch(response => {
-                    response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
-                })
+    downloadACKs = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
+    downloadCSV = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
+    downloadFromSelectionOrSearch = (selectedUuids, url, filename) => {
+        const ActeUuidsAndSearchUI = Object.assign({ uuids: selectedUuids }, this.getSearchData())
+        const headers = {
+            'Content-Type': 'application/json'
         }
+        fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
+            .then(checkStatus)
+            .then(response => {
+                console.log(response)
+                if (response.status === 204) throw response
+                else return response
+            })
+            .then(response => response.blob())
+            .then(blob => FileSaver.saveAs(blob, filename))
+            .catch(response => {
+                if (response.status === 204) this.context._addNotification(acteNoContent(this.context.t))
+                else response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+            })
     }
     render() {
         const { t } = this.context
@@ -93,8 +102,8 @@ class ActeList extends Component {
         const statusOptions = status.map(statusItem =>
             <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
         )
-        const downloadACKsSelectOption = { title: t('acte.list.download_ACKs'), action: this.downloadACKs }
-        const downloadCSVSelectOption = { title: t('acte.list.download_CSV'), action: this.downloadCSV }
+        const downloadACKsSelectOption = { title: t('acte.list.download_selected_ACKs'), titleNoSelection: t('acte.list.download_all_ACKs'), action: this.downloadACKs }
+        const downloadCSVSelectOption = { title: t('acte.list.download_selected_CSV'), titleNoSelection: t('acte.list.download_all_CSV'), action: this.downloadCSV }
         return (
             <Segment>
                 <h1>{t('acte.list.title')}</h1>

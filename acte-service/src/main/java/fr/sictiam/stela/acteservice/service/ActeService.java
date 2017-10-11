@@ -6,10 +6,8 @@ import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
-import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
+import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
+import fr.sictiam.stela.acteservice.service.exceptions.*;
 import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -165,14 +163,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 && !cancelPendingStatus.contains(acte.getActeHistories().last().getStatus());
     }
 
-    public List<ActeCSVUI> getActesCSV(List<String> uuids, String language) {
+    public List<ActeCSVUI> getActesCSV(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) {
         if(StringUtils.isBlank(language)) language = "fr";
         ClassPathResource classPathResource = new ClassPathResource("/locales/" + language + "/acte.json");
+        List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
+        List<ActeCSVUI> acteCSVUIs = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
-            List<ActeCSVUI> acteCSVUIs = new ArrayList<>();
-            for(String uuid : uuids) {
-                Acte acte = getByUuid(uuid);
+            for(Acte acte : actes) {
                 acteCSVUIs.add(new ActeCSVUI(
                         acte.getNumber(),
                         acte.getObjet(),
@@ -180,21 +178,19 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         jsonObject.getJSONObject("acte").getJSONObject("nature").getString(acte.getNature().toString()),
                         jsonObject.getJSONObject("acte").getJSONObject("status").getString(acte.getActeHistories().last().getStatus().toString())));
             }
-            return acteCSVUIs;
         } catch (Exception e) {
             LOGGER.error("Error while trying to translate Acte values, will take untranslated values: {}", e);
-            return uuids.stream()
-                    .map(uuid -> {
-                        Acte acte = getByUuid(uuid);
-                        return new ActeCSVUI(
-                                acte.getNumber(),
-                                acte.getObjet(),
-                                acte.getDecision().toString(),
-                                acte.getNature().toString(),
-                                acte.getActeHistories().last().getStatus().toString());
-                    }).collect(Collectors.toList());
+            for(Acte acte : actes) {
+                acteCSVUIs.add(new ActeCSVUI(
+                        acte.getNumber(),
+                        acte.getObjet(),
+                        acte.getDecision().toString(),
+                        acte.getNature().toString(),
+                        acte.getActeHistories().last().getStatus().toString()));
+            }
         }
-
+        if(acteCSVUIs.size() == 0) throw new NoContentException();
+        return acteCSVUIs;
     }
 
     public List<String> getTranslatedCSVFields(List<String> fields, String language) {
@@ -211,10 +207,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
     }
 
-    public byte[] getACKPdfs(List<String> uuids, String language) throws Exception {
+    private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
+        return ui.getUuids().size() > 0 ?
+                ui.getUuids().stream().map(uuid -> getByUuid(uuid)).collect(Collectors.toList()) :
+                getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus());
+    }
+
+    public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {
         List<String> pages = new ArrayList<>();
-        for (String uuid: uuids) {
-            Acte acte = getByUuid(uuid);
+        List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
+        for (Acte acte: actes) {
             if(acte.getActeHistories().last().getStatus().equals(StatusType.ACK_RECEIVED)) {
                 Map<String,String> mapString = new HashMap<String, String>() {{
                     put("status", acte.getActeHistories().last().getStatus().toString());
@@ -229,6 +231,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 pages.add(pdfGeneratorUtil.getContentPage("acte", data));
             }
         }
+        if(pages.size() == 0) throw new NoContentException();
         return pdfGeneratorUtil.createPdf(pages);
     }
 
