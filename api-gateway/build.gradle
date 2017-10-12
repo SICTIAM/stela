@@ -1,13 +1,13 @@
 plugins {
-    id "com.moowork.node" version "1.1.1"
+    id "com.moowork.node" version "1.2.0"
 }
 
 archivesBaseName = 'stela-api-gateway'
 
 node {
-    version = '6.5.0'
-    npmVersion = '3.10.6'
-    download = true
+    version = '8.9.4'
+    //yarnVersion = '0.16.1'
+    download = false
 }
 
 dependencies {
@@ -31,7 +31,7 @@ configure(tasks.processResources) {
     exclude 'styles/'
 }
 
-task frontBundle(type: NpmTask) {
+task frontBundle(type: YarnTask) {
     args = ['run', 'build']
     doLast {
         copy {
