@@ -1,4 +1,4 @@
-package fr.sictiam.stela.acteservice.service;
+package fr.sictiam.stela.acteservice.service.exceptions;
 
 public class ActeNotSentException extends RuntimeException {
 

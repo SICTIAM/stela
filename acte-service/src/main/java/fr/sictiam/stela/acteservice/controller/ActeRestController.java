@@ -9,11 +9,13 @@ import java.util.List;
 
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
-import fr.sictiam.stela.acteservice.service.ActeNotSentException;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +77,10 @@ public class ActeRestController {
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
     public void downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
         try {
-            byte[] pdf = acteService.getACKPdfs(Collections.singletonList(uuid), lng);
+            byte[] pdf = acteService.getACKPdfs(new ActeUuidsAndSearchUI(Collections.singletonList(uuid)), lng);
             outputFile(response, pdf, "AR_" + uuid + ".pdf");
+        } catch (NoContentException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
         }
@@ -84,10 +88,12 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/ARs.pdf")
-    public void downloadACKsPdf(HttpServletResponse response, @RequestBody List<String> uuids, @RequestParam(required = false) String lng) {
+    public void downloadACKsPdf(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         try {
-            byte[] pdf = acteService.getACKPdfs(uuids, lng);
+            byte[] pdf = acteService.getACKPdfs(acteUuidsAndSearchUI, lng);
             outputFile(response, pdf, "ARs.pdf");
+        } catch (NoContentException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Error while generating the ACKs PDF: {}", e);
         }
@@ -95,10 +101,10 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params 
     @PostMapping("/actes.csv")
-    public void getCSVFromList(HttpServletResponse response, @RequestBody List<String> uuids, @RequestParam(required = false) String lng) {
+    public void getCSVFromList(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         List<String> fields = ActeCSVUI.getFields();
         List<String> translatedFields = acteService.getTranslatedCSVFields(fields, lng);
-        outputCSV(response, acteService.getActesCSV(uuids, lng).toArray(), fields, translatedFields, "actes.csv");
+        outputCSV(response, acteService.getActesCSV(acteUuidsAndSearchUI, lng).toArray(), fields, translatedFields, "actes.csv");
     }
 
     @GetMapping("/{uuid}/file")

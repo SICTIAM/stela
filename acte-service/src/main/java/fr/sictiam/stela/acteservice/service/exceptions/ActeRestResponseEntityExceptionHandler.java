@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import fr.sictiam.stela.acteservice.service.ActeNotSentException;
-
 public class ActeRestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler{
 
     @ExceptionHandler({ActeNotFoundException.class})
@@ -39,5 +37,10 @@ public class ActeRestResponseEntityExceptionHandler extends ResponseEntityExcept
     @ExceptionHandler({CancelForbiddenException.class})
     protected ResponseEntity<Object> CancelForbidden(Exception ex, WebRequest request){
         return handleExceptionInternal(ex, "This acte cannot be cancelled", new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler({NoContentException.class})
+    protected ResponseEntity<Object> NoContent(Exception ex, WebRequest request){
+        return handleExceptionInternal(ex, "There is no additional content to send in the response payload body", new HttpHeaders(), HttpStatus.NO_CONTENT, request);
     }
 }
