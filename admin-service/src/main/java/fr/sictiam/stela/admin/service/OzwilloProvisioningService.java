@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @EnableConfigurationProperties(OzwilloProvisioningService.OzwilloServiceProperties.class)
@@ -100,9 +101,15 @@ public class OzwilloProvisioningService {
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
         localAuthorityService.createOrUpdate(localAuthority);
 
-        notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo);
+        CompletableFuture.runAsync(() -> notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo));
     }
 
+    /**
+     * Provider acknoledgement sent to Ozwillo's kernel.
+     *
+     * A sample response is like this :
+     * {"instance_id":"bce53130-af7d-44a0-8a87-291a37f22e4c","destruction_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/delete","destruction_secret":"secret","status_changed_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/status","status_changed_secret":"secret","services":[{"local_id":"back-office","name":"STELA - SICTIAM","description":"Tiers de télétransmission","tos_uri":"https://stela.fr/tos","policy_uri":"https://stela.fr/policy","icon":"https://stela.fr/icon.png","contacts":["admin@stela.fr","demat@sictiam.fr"],"payment_option":"PAID","target_audience":"PUBLIC_BODY","visibility":"VISIBLE","access_control":"RESTRICTED","service_uri":"https://sictiam.stela3-dev.sictiam.fr/login","redirect_uris":["https://sictiam.stela3-dev.sictiam.fr/login"]}]}
+     */
     private void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo) {
         HttpHeaders httpHeaders = new HttpHeaders();
         String clientInfo = provisioningRequest.getClientId() + ":" + provisioningRequest.getClientSecret();
@@ -120,7 +127,7 @@ public class OzwilloProvisioningService {
 
         HttpEntity<KernelInstanceRegistrationRequest> request = new HttpEntity<>(kernelInstanceRegistrationRequest, httpHeaders);
         ResponseEntity<String> response =
-                restTemplate.exchange(provisioningRequest.getInstanceRegistrationUri(), HttpMethod.POST, request, String.class);
+                restTemplate.postForEntity(provisioningRequest.getInstanceRegistrationUri(), request, String.class);
 
         if (response.getStatusCode().is4xxClientError()) {
             LOGGER.error("Error while acknowledging instanciation response : {}", response.getBody());
@@ -154,16 +161,19 @@ public class OzwilloProvisioningService {
         private String statusChangedUri;
         @JsonProperty("status_changed_secret")
         private String statusChangedSecret;
-        private Service service;
+        @JsonProperty("services")
+        private List<Service> services;
 
         public KernelInstanceRegistrationRequest(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
                                                  OzwilloServiceProperties ozwilloServiceProperties) {
             this.instanceId = ozwilloInstanceInfo.getInstanceId();
-            this.destructionUri = getInstanceUri(provisioningRequest.getOrganization().getName(), "ozwillo/delete");
+            this.destructionUri = getInstanceUri(provisioningRequest.getOrganization().getName(),
+                    "api/admin/ozwillo/delete");
             this.destructionSecret = ozwilloInstanceInfo.getDestructionSecret();
-            this.statusChangedUri = getInstanceUri(provisioningRequest.getOrganization().getName(), "ozwillo/status");
+            this.statusChangedUri = getInstanceUri(provisioningRequest.getOrganization().getName(),
+                    "api/admin/ozwillo/status");
             this.statusChangedSecret = ozwilloInstanceInfo.getStatusChangedSecret();
-            this.service = new Service(ozwilloServiceProperties, provisioningRequest.getOrganization());
+            this.services = Collections.singletonList(new Service(ozwilloServiceProperties, provisioningRequest.getOrganization()));
         }
 
         @Override
@@ -174,25 +184,30 @@ public class OzwilloProvisioningService {
                     ", destructionSecret='" + destructionSecret + '\'' +
                     ", statusChangedUri='" + statusChangedUri + '\'' +
                     ", statusChangedSecret='" + statusChangedSecret + '\'' +
-                    ", service=" + service +
+                    ", services=" + services +
                     '}';
         }
 
         private class Service {
             @JsonProperty("local_id")
             private String localId;
+            @JsonProperty("name")
             private String name;
+            @JsonProperty("description")
             private String description;
             @JsonProperty("tos_uri")
             private String tosUri;
             @JsonProperty("policy_uri")
             private String policyUri;
+            @JsonProperty("icon")
             private String icon;
+            @JsonProperty("contacts")
             private List<String> contacts;
             @JsonProperty("payment_option")
             private String paymentOption;
             @JsonProperty("target_audience")
-            private String targetAudience;
+            private List<String> targetAudience;
+            @JsonProperty("visibility")
             private String visibility;
             @JsonProperty("access_control")
             private String accessControl;
@@ -210,7 +225,7 @@ public class OzwilloProvisioningService {
                 this.icon = ozwilloServiceProperties.icon;
                 this.contacts = ozwilloServiceProperties.contacts;
                 this.paymentOption = "PAID";
-                this.targetAudience = "PUBLIC_BODY";
+                this.targetAudience = Collections.singletonList("PUBLIC_BODIES");
                 this.visibility = "VISIBLE";
                 this.accessControl = "RESTRICTED";
                 this.serviceUri = getInstanceUri(organization.getName(), "login");
