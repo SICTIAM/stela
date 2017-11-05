@@ -1,8 +1,5 @@
-import React, { Component } from 'react'
-import { Form, Grid, Label, Card, Icon } from 'semantic-ui-react'
-import renderIf from 'render-if'
-import Validator from 'validatorjs'
-import debounce from 'debounce'
+import React from 'react'
+import { Form, Grid, Card, Icon } from 'semantic-ui-react'
 
 import { bytesToSize } from '../_util/utils'
 
@@ -44,26 +41,5 @@ const InputFile = ({ htmlFor, label, children }) =>
         {children}
     </div>
 
-class ValidationWarning extends Component {
-    state = { isValid: true, errorMessage: '', propsReceived: false, initialValue: this.props.value }
-    componentWillReceiveProps(nextProps) {
-        const customErrorMessages = this.props.customErrorMessages || {}
-        if (this.state.initialValue !== nextProps.value || this.state.propsReceived) this.validateValue(nextProps.value, nextProps.validationRule, customErrorMessages)
-    }
-    validateValue = debounce((data, rule, customErrorMessages) => {
-        const validation = new Validator({ field: data }, { field: rule }, customErrorMessages)
-        validation.setAttributeNames({ field: this.props.fieldName });
-        const isValid = validation.passes()
-        const errorMessage = validation.errors.first('field') || ''
-        this.setState({ isValid: isValid, errorMessage: errorMessage, propsReceived: true })
-    }, 1000)
-    render() {
-        return (
-            renderIf(!this.state.isValid)(
-                <Label basic color='red' pointing>{this.state.errorMessage}</Label>
-            )
-        )
-    }
-}
 
-module.exports = { FormField, FormFieldInline, Field, ValidationWarning, File, InputFile }
+module.exports = { FormField, FormFieldInline, Field, File, InputFile }

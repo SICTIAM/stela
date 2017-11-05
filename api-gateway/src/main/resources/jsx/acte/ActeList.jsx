@@ -19,42 +19,12 @@ class ActeList extends Component {
         _addNotification: PropTypes.func
     }
     state = {
-        actes: [],
-        search: {
-            number: '',
-            objet: '',
-            nature: '',
-            status: '',
-            decisionFrom: '',
-            decisionTo: ''
-        },
-        isAccordionOpen: false
-    }
-    styles = {
-        marginBottom: 1 + 'em'
+        actes: []
     }
     componentDidMount() {
-        this.submitForm()
+        this.submitForm({})
     }
-    handleFieldChange = (field, value) => {
-        const search = this.state.search
-        search[field] = value
-        this.setState({ search: search })
-    }
-    handleAccordion = () => {
-        const isAccordionOpen = this.state.isAccordionOpen
-        this.setState({ isAccordionOpen: !isAccordionOpen })
-    }
-    getSearchData = () => {
-        const data = {}
-        Object.keys(this.state.search)
-            .filter(k => this.state.search[k] !== '')
-            .map(k => data[k] = this.state.search[k])
-        return data
-    }
-    submitForm = (event) => {
-        if (event) event.preventDefault()
-        const data = this.getSearchData()
+    submitForm = (data) => {
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -93,53 +63,13 @@ class ActeList extends Component {
         const statusDisplay = (history) => t(`acte.status.${history[history.length - 1].status}`)
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
-        const natureOptions = natures.map(nature =>
-            <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
-        )
-        const statusOptions = status.map(statusItem =>
-            <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
-        )
         const downloadACKsSelectOption = { title: t('acte.list.download_selected_ACKs'), titleNoSelection: t('acte.list.download_all_ACKs'), action: this.downloadACKs }
         const downloadCSVSelectOption = { title: t('acte.list.download_selected_CSV'), titleNoSelection: t('acte.list.download_all_CSV'), action: this.downloadCSV }
         return (
             <Segment>
                 <h1>{t('acte.list.title')}</h1>
-                <Accordion style={this.styles} styled>
-                    <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('acte.list.advanced_search')}</Accordion.Title>
-                    <Accordion.Content active={this.state.isAccordionOpen}>
-                        <Form onSubmit={this.submitForm}>
-                            <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
-                                <input id='number' value={this.state.search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                                <input id='objet' value={this.state.search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
-                                <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                    <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
-                                        <input type='date' id='decisionFrom' value={this.state.search.decisionFrom} onChange={e => this.handleFieldChange('decisionFrom', e.target.value)} />
-                                    </FormField>
-                                    <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
-                                        <input type='date' id='decisionTo' value={this.state.search.decisionTo} onChange={e => this.handleFieldChange('decisionTo', e.target.value)} />
-                                    </FormField>
-                                </Form.Group>
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
-                                <select id='nature' value={this.state.search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
-                                    <option value=''>{t('api-gateway:form.all_feminine')}</option>
-                                    {natureOptions}
-                                </select>
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                                <select id='status' value={this.state.search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
-                                    <option value=''>{t('api-gateway:form.all')}</option>
-                                    {statusOptions}
-                                </select>
-                            </FormFieldInline>
-                            <Button type='submit'>{t('api-gateway:form.search')}</Button>
-                        </Form>
-                    </Accordion.Content>
-                </Accordion>
+                <ActeListForm
+                    submitForm={this.submitForm} />
                 <StelaTable
                     data={this.state.actes}
                     metaData={[
@@ -162,6 +92,90 @@ class ActeList extends Component {
                     noDataMessage='Aucun acte'
                     keyProperty='uuid' />
             </Segment >
+        )
+    }
+}
+
+class ActeListForm extends Component {
+    static contextTypes = {
+        t: PropTypes.func
+    }
+    state = {
+        search: {
+            number: '',
+            objet: '',
+            nature: '',
+            status: '',
+            decisionFrom: '',
+            decisionTo: ''
+        },
+        isAccordionOpen: false
+    }
+    handleFieldChange = (field, value) => {
+        const search = this.state.search
+        search[field] = value
+        this.setState({ search: search })
+    }
+    handleAccordion = () => {
+        const isAccordionOpen = this.state.isAccordionOpen
+        this.setState({ isAccordionOpen: !isAccordionOpen })
+    }
+    getSearchData = () => {
+        const data = {}
+        Object.keys(this.state.search)
+            .filter(k => this.state.search[k] !== '')
+            .map(k => data[k] = this.state.search[k])
+        return data
+    }
+    submitForm = (event) => {
+        if (event) event.preventDefault()
+        this.props.submitForm(this.getSearchData())
+    }
+    render() {
+        const { t } = this.context
+        const natureOptions = natures.map(nature =>
+            <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
+        )
+        const statusOptions = status.map(statusItem =>
+            <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
+        )
+        return (
+            <Accordion style={{ marginBottom: '1em' }} styled>
+                <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('acte.list.advanced_search')}</Accordion.Title>
+                <Accordion.Content active={this.state.isAccordionOpen}>
+                    <Form onSubmit={this.submitForm}>
+                        <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
+                            <input id='number' value={this.state.search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
+                        </FormFieldInline>
+                        <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
+                            <input id='objet' value={this.state.search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                        </FormFieldInline>
+                        <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
+                            <Form.Group style={{ marginBottom: 0 }} widths='equal'>
+                                <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
+                                    <input type='date' id='decisionFrom' value={this.state.search.decisionFrom} onChange={e => this.handleFieldChange('decisionFrom', e.target.value)} />
+                                </FormField>
+                                <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
+                                    <input type='date' id='decisionTo' value={this.state.search.decisionTo} onChange={e => this.handleFieldChange('decisionTo', e.target.value)} />
+                                </FormField>
+                            </Form.Group>
+                        </FormFieldInline>
+                        <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
+                            <select id='nature' value={this.state.search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
+                                <option value=''>{t('api-gateway:form.all_feminine')}</option>
+                                {natureOptions}
+                            </select>
+                        </FormFieldInline>
+                        <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
+                            <select id='status' value={this.state.search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                <option value=''>{t('api-gateway:form.all')}</option>
+                                {statusOptions}
+                            </select>
+                        </FormFieldInline>
+                        <Button type='submit'>{t('api-gateway:form.search')}</Button>
+                    </Form>
+                </Accordion.Content>
+            </Accordion>
         )
     }
 }

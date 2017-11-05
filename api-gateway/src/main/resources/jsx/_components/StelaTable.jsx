@@ -37,22 +37,10 @@ export default class StelaTable extends Component {
         checkboxes: {},
         checkAll: false
     }
-    styles = {
-        selectableRow: {
-            cursor: 'pointer'
-        },
-        floatRight: {
-            float: 'right',
-            marginBottom: 1 + 'em',
-            marginLeft: 1 + 'em'
-        },
-        checkboxTable: {
-            width: '40px'
-        },
-        noData: {
-            fontStyle: 'italic',
-            textAlign: 'center'
-        }
+    floatRightStyle = {
+        float: 'right',
+        marginBottom: '1em',
+        marginLeft: '1em'
     }
     componentWillReceiveProps = (nextProps) => {
         if (nextProps.data && !this.state.dataReceived) {
@@ -125,7 +113,7 @@ export default class StelaTable extends Component {
         const isEmpty = renderIf(data.length === 0)
         const isFilled = renderIf(data.length > 0)
         const select = renderIf(this.props.select)
-        const options = renderIf(this.props.selectOptions.length > 0)
+        const options = renderIf(this.props.selectOptions.length > 0 && this.state.originalData.length > 0)
 
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
         const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
@@ -140,10 +128,10 @@ export default class StelaTable extends Component {
 
         return (
             <div className={this.props.className}>
-                <Input style={this.styles.floatRight} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
+                <Input style={this.floatRightStyle} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
 
                 {options(
-                    <Dropdown style={this.styles.floatRight} text='Actions' button>
+                    <Dropdown style={this.floatRightStyle} text='Actions' button>
                         <Dropdown.Menu>
                             {selectOptions}
                         </Dropdown.Menu>
@@ -162,7 +150,7 @@ export default class StelaTable extends Component {
                         <Table.Header>
                             <Table.Row>
                                 {select(
-                                    <Table.HeaderCell style={this.styles.checkboxTable} onClick={this.handleChekAll}>
+                                    <Table.HeaderCell style={{ width: '40px' }} onClick={this.handleChekAll}>
                                         <Checkbox checked={this.state.checkAll} onClick={this.handleChekAll} />
                                     </Table.HeaderCell>
                                 )}
@@ -182,7 +170,7 @@ export default class StelaTable extends Component {
                         {isEmpty(
                             <Table.Row>
                                 <Table.Cell colSpan={displayedColumns.length}>
-                                    <p style={this.styles.noData}>{this.props.noDataMessage}</p>
+                                    <p style={{ fontStyle: 'italic', textAlign: 'center' }}>{this.props.noDataMessage}</p>
                                 </Table.Cell>
                             </Table.Row>
                         )}
@@ -197,7 +185,7 @@ export default class StelaTable extends Component {
                                     )}
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell onClick={() => this.handleLink(row[this.props.linkProperty])}
-                                            style={this.props.link !== '' ? this.styles.selectableRow : null}
+                                            style={this.props.link !== '' ? { cursor: 'pointer' } : null}
                                             key={index + '-' + row[displayedColumn.property]}>
                                             {displayedColumn.displayComponent ?
                                                 displayedColumn.displayComponent(row[displayedColumn.property]) : row[displayedColumn.property]}
