@@ -65,12 +65,39 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     /**
      * Create new Acte entity in databaseFilename, compress the files to a tar.gz archive and delivers it to minister.
-     * 
-     * @param uuid Acte's uuid.
+     *
+     * @param acte Acte's data used to create Acte entity.
+     * @param file Acte's file.
+     * @param annexes Acte's annexes.
      * 
      * @return The newly created Acte entity.
      */
-    public Acte create(String uuid) {
+    public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
+            throws ActeNotSentException, IOException {
+        acte.setFile(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
+        List<Attachment> transformedAnnexes = new ArrayList<>();
+        for (MultipartFile annexe: annexes) {
+            transformedAnnexes.add(new Attachment(annexe.getBytes(), annexe.getOriginalFilename(), annexe.getSize()));
+        }
+        acte.setAnnexes(transformedAnnexes);
+        acte.setCreation(LocalDateTime.now());
+        acte.setLocalAuthority(currentLocalAuthority);
+        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
+
+        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
+        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
+
+        Acte created = acteRepository.save(acte);
+
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+
+        LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
+
+        return created;
+    }
+
+    public Acte sendDraft(String uuid) {
         Acte acte = getDraftByUuid(uuid);
         // TODO: Do some backend validations on the acte
 
@@ -96,7 +123,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public void closeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
-        if(acte.isEmpty()) acteRepository.delete(acte);
+        if(acte.empty()) acteRepository.delete(acte);
         else saveDraft(acte, currentLocalAuthority);
     }
 

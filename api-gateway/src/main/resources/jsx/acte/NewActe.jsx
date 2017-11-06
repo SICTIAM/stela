@@ -222,7 +222,7 @@ class NewActe extends Component {
         const fields = this.state.fields
         fields['draft'] = false
         this.setState({ fields })
-        fetchWithAuthzHandling({ url: '/api/acte', method: 'POST', body: this.state.fields.uuid, context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte/sendDraft', method: 'POST', body: this.state.fields.uuid, context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {

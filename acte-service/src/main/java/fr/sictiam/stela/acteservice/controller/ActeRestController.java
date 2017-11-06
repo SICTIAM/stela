@@ -134,15 +134,39 @@ public class ActeRestController {
     }
 
     @PostMapping
-    ResponseEntity<String> create(@RequestBody String uuid) {
-        Acte result = acteService.create(uuid);
-        return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-    }
+    ResponseEntity<String> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
+                                  @RequestParam("annexes") MultipartFile... annexes) {
 
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Acte acte = mapper.readValue(acteJson, Acte.class);
+
+            LOGGER.debug("Received acte : {}", acte.getObjet());
+            LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
+
+            Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);
+            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+
+        } catch (IOException e) {
+            LOGGER.error("IOException: Could not convert JSON to Acte: {}", e);
+            return new ResponseEntity<>("notifications.acte.sent.error.non_extractable_acte", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ActeNotSentException ns){
+            LOGGER.error("ActeNotSentException: {}", ns);
+            return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     /* --------------------------- */
     /* ---------- DRAFTS --------- */
     /* --------------------------- */
+
+    @PostMapping("/sendDraft")
+    ResponseEntity<String> sendDraft(@RequestBody String uuid) {
+        Acte result = acteService.sendDraft(uuid);
+        return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+    }
 
     @GetMapping("/drafts")
     public ResponseEntity<List<Acte>> getDrafts() {

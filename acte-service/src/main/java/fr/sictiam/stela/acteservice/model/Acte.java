@@ -98,6 +98,10 @@ public class Acte {
         return objet;
     }
 
+    public void setObjet(String objet) {
+        this.objet = objet;
+    }
+
     public boolean isPublic() {
         return isPublic;
     }
@@ -162,7 +166,7 @@ public class Acte {
         this.draft = draft;
     }
 
-    public boolean isEmpty() {
+    public boolean empty() {
         return StringUtils.isEmpty(number)
                 && decision == null
                 && nature == null
