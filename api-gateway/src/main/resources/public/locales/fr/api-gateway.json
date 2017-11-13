@@ -9,10 +9,14 @@
         "to": "à",
         "submit": "Envoyer",
         "update": "Mettre à jour",
+        "delete_draft": "Supprimer le brouillon",
         "add_a_file": "Ajouter un fichier",
         "validation": {
             "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des underscores."
         }
+    },
+    "list": {
+        "last_modified": "Dernière modification"
     },
     "menu": {
         "acte": {

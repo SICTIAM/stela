@@ -72,7 +72,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
 
             String acteFilename =
-                    String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getFile().getFilename()));
+                    String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getActeAttachment().getFilename()));
 
             Map<String, byte[]> annexes = new HashMap<>();
             acte.getAnnexes().forEach(attachment -> {
@@ -96,7 +96,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             ByteArrayOutputStream baos =
                     createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, messageContent,
-                            acte.getFile().getFile(), acteFilename, annexes);
+                            acte.getActeAttachment().getFile(), acteFilename, annexes);
 
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
                     baos.toByteArray(), archiveName);

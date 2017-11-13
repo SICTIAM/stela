@@ -74,7 +74,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
      */
     public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
             throws ActeNotSentException, IOException {
-        acte.setFile(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
+        acte.setActeAttachment(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
         List<Attachment> transformedAnnexes = new ArrayList<>();
         for (MultipartFile annexe: annexes) {
             transformedAnnexes.add(new Attachment(annexe.getBytes(), annexe.getOriginalFilename(), annexe.getSize()));
@@ -129,7 +129,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public Acte saveDraftFile(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
         Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getDraftByUuid(uuid);
-        acte.setFile(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
+        acte.setActeAttachment(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
         return saveDraft(acte, currentLocalAuthority);
     }
 
@@ -143,25 +143,21 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public void deleteDraftAnnexe(String acteUuid, String uuid) {
         Acte acte = getDraftByUuid(acteUuid);
-        if(acte.isDraft() && acte.getAnnexes().stream().anyMatch( attachment -> attachment.getUuid().equals(uuid))) {
+        if(acte.getAnnexes().stream().anyMatch( attachment -> attachment.getUuid().equals(uuid))) {
             List<Attachment> annexes = acte.getAnnexes().stream().filter(attachment -> !attachment.getUuid().equals(uuid)).collect(Collectors.toList());
             acte.setAnnexes(annexes);
             acteRepository.save(acte);
             attachmentRepository.delete(attachmentRepository.findByUuid(uuid).get());
-        } else {
-            throw new FileNotFoundException();
         }
     }
 
     public void deleteDraftFile(String uuid) {
         Acte acte = getDraftByUuid(uuid);
-        Attachment file = acte.getFile();
+        Attachment file = acte.getActeAttachment();
         if(file != null) {
-            acte.setFile(null);
+            acte.setActeAttachment(null);
             acteRepository.save(acte);
             attachmentRepository.delete(file);
-        } else {
-            throw new FileNotFoundException();
         }
     }
 
@@ -308,7 +304,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                     put("nature", acte.getNature().toString());
                     put("code", acte.getCode() + " (" + acte.getCodeLabel() +")");
                     put("objet", acte.getObjet());
-                    put("filename", acte.getFile().getFilename());
+                    put("filename", acte.getActeAttachment().getFilename());
                 }};
                 Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
                 pages.add(pdfGeneratorUtil.getContentPage("acte", data));

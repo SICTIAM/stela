@@ -6,7 +6,7 @@ import { Segment } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
-import { errorNotification } from '../_components/Notifications'
+import { errorNotification, draftsDeletedSuccess } from '../_components/Notifications'
 
 class DraftList extends Component {
     static contextTypes = {
@@ -31,6 +31,7 @@ class DraftList extends Component {
         fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify(selectedUuids), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
+                this.context._addNotification(draftsDeletedSuccess(this.context.t))
                 const actes = selectedUuids.length > 0 ? this.state.actes.filter(acte => !selectedUuids.includes(acte.uuid)) : []
                 this.setState({ actes })
             })
@@ -41,7 +42,7 @@ class DraftList extends Component {
     render() {
         const { t } = this.context
         const natureDisplay = (nature) => nature ? t(`acte.nature.${nature}`) : ''
-        const decisionDisplay = (decision) => decision ? moment(decision).format('DD/MM/YYYY') : ''
+        const dateDisplay = (decision) => decision ? moment(decision).format('DD/MM/YYYY - HH:MM') : ''
         const deleteSelection = { title: t('acte.drafts.delete_selected_drafts'), titleNoSelection: t('acte.drafts.delete_all_drafts'), action: this.deleteDrafts }
         return (
             <Segment>
@@ -52,10 +53,10 @@ class DraftList extends Component {
                         { property: 'uuid', displayed: false, searchable: false },
                         { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },
                         { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true },
-                        { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay },
+                        { property: 'decision', displayed: false, searchable: false },
                         { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
                         { property: 'code', displayed: false, searchable: false },
-                        { property: 'creation', displayed: false, searchable: false },
+                        { property: 'creation', displayed: true, displayName: t('api-gateway:list.last_modified'), searchable: true, displayComponent: dateDisplay },
                         { property: 'acteHistories', displayed: false, displayName: t('acte.fields.status'), searchable: true },
                         { property: 'public', displayed: false, searchable: false },
                         { property: 'publicWebsite', displayed: false, searchable: false },
@@ -65,7 +66,7 @@ class DraftList extends Component {
                     selectOptions={[deleteSelection]}
                     link='/actes/brouillons/'
                     linkProperty='uuid'
-                    noDataMessage='Aucun brouilons'
+                    noDataMessage={t('acte.drafts.no_draft')}
                     keyProperty='uuid' />
             </Segment >
         )

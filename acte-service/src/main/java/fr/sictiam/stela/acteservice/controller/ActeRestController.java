@@ -104,7 +104,7 @@ public class ActeRestController {
     @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        outputFile(response, acte.getFile().getFile(), acte.getFile().getFilename());
+        outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
@@ -162,8 +162,8 @@ public class ActeRestController {
     /* ---------- DRAFTS --------- */
     /* --------------------------- */
 
-    @PostMapping("/sendDraft")
-    ResponseEntity<String> sendDraft(@RequestBody String uuid) {
+    @PostMapping("/submitDraft")
+    ResponseEntity<String> submitDraft(@RequestBody String uuid) {
         Acte result = acteService.sendDraft(uuid);
         return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
     }
@@ -188,8 +188,8 @@ public class ActeRestController {
         return new ResponseEntity<>(result.getUuid(), HttpStatus.OK);
     }
 
-    @PostMapping("/closeDraft")
-    public ResponseEntity<?> closeDraft(@RequestBody Acte acte) {
+    @PostMapping("/deleteOrSaveDraft")
+    public ResponseEntity<?> deleteOrSaveDraft(@RequestBody Acte acte) {
         // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         acteService.closeDraft(acte, currentLocalAuthority);

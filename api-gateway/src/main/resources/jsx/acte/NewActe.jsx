@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Grid, Button, Form, Checkbox, Menu, Segment, Card, Label } from 'semantic-ui-react'
+import { Grid, Button, Form, Checkbox, Menu, Segment, Card } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 
 import { FormField, File, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import { errorNotification, acteSentSuccess } from '../_components/Notifications'
+import { errorNotification, acteSentSuccess, draftDeletedSuccess } from '../_components/Notifications'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
 import { natures } from '../_util/constants'
@@ -30,7 +30,7 @@ class NewActe extends Component {
             nature: '',
             code: '',
             objet: '',
-            file: null,
+            acteAttachment: null,
             annexes: [],
             public: false,
             publicWebsite: false,
@@ -50,7 +50,7 @@ class NewActe extends Component {
         nature: 'required',
         code: 'required',
         decision: ['required', 'date'],
-        file: 'required'
+        acteAttachment: 'required'
     }
     customErrorMessages = {
         regex: this.context.t('api-gateway:form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
@@ -94,7 +94,7 @@ class NewActe extends Component {
         if (this.state.fields.draft) {
             const acteData = this.getActeData()
             const headers = { 'Content-Type': 'application/json' }
-            fetchWithAuthzHandling({ url: '/api/acte/closeDraft', body: JSON.stringify(acteData), headers: headers, method: 'POST', context: this.context })
+            fetchWithAuthzHandling({ url: '/api/acte/deleteOrSaveDraft', body: JSON.stringify(acteData), headers: headers, method: 'POST', context: this.context })
                 .then(checkStatus)
                 .catch(response => {
                     response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
@@ -149,7 +149,7 @@ class NewActe extends Component {
             objet: this.state.fields.objet,
             nature: this.state.fields.nature,
             decision: this.state.fields.decision,
-            file: this.state.fields.file,
+            acteAttachment: this.state.fields.acteAttachment,
             code: this.state.fields.code
         }
         const validation = new Validator(data, this.validationRules)
@@ -213,6 +213,21 @@ class NewActe extends Component {
                 this.setState({ formStatus: '' })
             })
     }
+    deteleDraft = () => {
+        const fields = this.state.fields
+        fields['draft'] = false
+        this.setState({ fields })
+        const headers = { 'Content-Type': 'application/json' }
+        fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify([this.state.fields.uuid]), headers: headers, method: 'DELETE', context: this.context })
+            .then(checkStatus)
+            .then(() => {
+                this.context._addNotification(draftDeletedSuccess(this.context.t))
+                history.push('/actes/liste')
+            })
+            .catch(response => {
+                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+            })
+    }
     saveAndSubmitForm = (event) => {
         event.preventDefault()
         if (this.state.formStatus !== 'saved') this.saveDraft(this.submitForm)
@@ -222,7 +237,7 @@ class NewActe extends Component {
         const fields = this.state.fields
         fields['draft'] = false
         this.setState({ fields })
-        fetchWithAuthzHandling({ url: '/api/acte/sendDraft', method: 'POST', body: this.state.fields.uuid, context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte/submitDraft', method: 'POST', body: this.state.fields.uuid, context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
@@ -255,7 +270,12 @@ class NewActe extends Component {
                     <Grid.Column width={12}><h1>{t('acte.new.title')}</h1></Grid.Column>
                     <Grid.Column width={4} style={{ textAlign: 'right' }}>
                         {renderIf(this.state.formStatus)(
-                            <Label basic>{t(`acte.new.formStatus.${this.state.formStatus}`)}</Label>
+                            <span style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.formStatus}`)}</span>
+                        )}
+                        {renderIf(this.state.fields.uuid)(
+                            <Button style={{ marginLeft: '1em' }} onClick={this.deteleDraft} compact basic color='red' disabled={isFormSending} loading={isFormSending}>
+                                {t('api-gateway:form.delete_draft')}
+                            </Button>
                         )}
                     </Grid.Column>
                 </Grid>
@@ -316,18 +336,18 @@ class NewActe extends Component {
                             fieldName={t('acte.fields.code')}
                             options={codeOptions} />
                     </FormField>
-                    <FormField htmlFor='file' label={t('acte.fields.file')}>
-                        <InputValidation id='file'
+                    <FormField htmlFor='acteAttachment' label={t('acte.fields.acteAttachment')}>
+                        <InputValidation id='acteAttachment'
                             type='file'
                             accept={acceptFile}
                             onChange={this.saveDraftFile}
-                            value={this.state.fields.file}
-                            validationRule={this.validationRules.file}
+                            value={this.state.fields.acteAttachment}
+                            validationRule={this.validationRules.acteAttachment}
                             label={t('api-gateway:form.add_a_file')}
-                            fieldName={t('acte.fields.file')} />
+                            fieldName={t('acte.fields.acteAttachment')} />
                     </FormField>
-                    {renderIf(this.state.fields.file)(
-                        <File attachment={this.state.fields.file} onDelete={this.deleteDraftFile} />
+                    {renderIf(this.state.fields.acteAttachment)(
+                        <File attachment={this.state.fields.acteAttachment} onDelete={this.deleteDraftFile} />
                     )}
                     <FormField htmlFor='annexes' label={t('acte.fields.annexes')}>
                         <InputFile htmlFor='annexes' label={t('api-gateway:form.add_a_file')}>

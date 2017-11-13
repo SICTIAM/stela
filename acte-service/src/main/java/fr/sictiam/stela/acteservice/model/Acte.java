@@ -25,7 +25,6 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @Column(unique=true)
     @NotNull(groups = {RestValidation.class}) @Max(value=15, groups = {RestValidation.class}) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/", groups = {RestValidation.class})
     private String number;
     private LocalDateTime creation;
@@ -43,7 +42,7 @@ public class Acte {
     private boolean isPublic;
     private boolean isPublicWebsite;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Attachment file;
+    private Attachment acteAttachment;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -126,12 +125,12 @@ public class Acte {
         this.creation = creation;
     }
 
-    public Attachment getFile(){
-        return this.file;
+    public Attachment getActeAttachment(){
+        return this.acteAttachment;
     }
 
-    public void setFile(Attachment file){
-        this.file = file;
+    public void setActeAttachment(Attachment acteAttachment){
+        this.acteAttachment = acteAttachment;
     }
 
     public List<Attachment> getAnnexes() {
@@ -173,7 +172,7 @@ public class Acte {
                 && StringUtils.isEmpty(code)
                 && StringUtils.isEmpty(codeLabel)
                 && StringUtils.isEmpty(objet)
-                && file == null
+                && acteAttachment == null
                 && (annexes == null || annexes.size() == 0)
                 && (acteHistories == null || acteHistories.size() == 0);
 

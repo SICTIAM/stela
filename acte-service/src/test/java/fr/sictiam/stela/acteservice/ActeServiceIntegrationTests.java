@@ -83,9 +83,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         Acte acte = acteService.getByUuid(acteUuid);
 
         assertNotNull(acte);
-        assertNotNull(acte.getFile());
+        assertNotNull(acte.getActeAttachment());
         assertNotNull(acte.getNumber());
-        assertEquals("Delib.pdf", acte.getFile().getFilename());
+        assertEquals("Delib.pdf", acte.getActeAttachment().getFilename());
         assertEquals("1-1-0-0-0", acte.getCode());
         assertEquals("Objet", acte.getObjet());
         assertEquals(LocalDate.now(), acte.getDecision());
@@ -145,7 +145,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_SIZE_CHECKED)));
 
         // uncomment to see the generated archive
-        // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+        // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(HttpStatus.FORBIDDEN, newResponse.getStatusCode());
 
         // uncomment to see the generated archive
-        // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+        // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
 
     @Test
@@ -290,7 +290,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         acteService.closeDraft(draft, localAuthority);
         assertEquals(1, acteService.getDrafts().size());
-        assertEquals(draft.getUuid(), acteService.getDraftByUuid(draft.getUuid()).getUuid());
+        assertNotNull(acteService.getDraftByUuid(draft.getUuid()));
 
         acteService.sendDraft(draft.getUuid());
         assertEquals(0, acteService.getDrafts().size());
@@ -301,8 +301,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void deleteDrafts() {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         Acte draft1 = acteService.saveDraft(acte(), localAuthority);
-        Acte draft2 = acteService.saveDraft(acte(), localAuthority);
-        Acte draft3 = acteService.saveDraft(acte(), localAuthority);
+        acteService.saveDraft(acte(), localAuthority);
+        acteService.saveDraft(acte(), localAuthority);
 
         assertEquals(3, acteService.getDrafts().size());
         acteService.deleteDrafts(Collections.singletonList(draft1.getUuid()));
@@ -322,10 +322,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         } catch (IOException e) {
             LOGGER.error("Unable to add a file to the draft: {}", e.toString());
         }
-        assertEquals("Delib.pdf", acteService.getDraftByUuid(draft.getUuid()).getFile().getFilename());
+        assertEquals("Delib.pdf", acteService.getDraftByUuid(draft.getUuid()).getActeAttachment().getFilename());
 
         acteService.deleteDraftFile(draft.getUuid());
-        assertNull(acteService.getDraftByUuid(draft.getUuid()).getFile());
+        assertNull(acteService.getDraftByUuid(draft.getUuid()).getActeAttachment());
 
         try {
             MultipartFile file = getMultipartResourceFile("data/Annexe_delib.pdf", "application/pdf");

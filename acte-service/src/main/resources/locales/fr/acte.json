@@ -28,7 +28,7 @@
       "decision": "Date de décision",
       "nature": "Nature",
       "code": "Code matière",
-      "file": "Fichier acte",
+      "acteAttachment": "Fichier acte",
       "annexes": "Fichiers annexes",
       "public": "Affichage dans le registre",
       "publicWebsite": "Affichage sur site internet",
@@ -48,7 +48,7 @@
     },
     "drafts": {
       "title": "Brouillons",
-      "no_drafts": "Aucun brouillon",
+      "no_draft": "Aucun brouillon",
       "delete_selected_drafts": "Supprimer les brouillons selectionnés",
       "delete_all_drafts": "Supprimer tous les brouillons"
     },
@@ -85,6 +85,14 @@
       "cancelled": {
         "success": "La demande d'annulation du dépot a bien été prise en compte",
         "forbidden": "Cet acte ne peut pas être annulé"
+      },
+      "draft": {
+        "single_deleted": {
+          "success": "Le brouillon a bien été supprimé"
+        },
+        "multiple_deleted": {
+          "success": "Les brouillons ont bien été supprimés"
+        }
       },
       "annexe_not_found": "Fichier annexe inexistant",
       "history_not_found": "Historique d'acte inexistant",
