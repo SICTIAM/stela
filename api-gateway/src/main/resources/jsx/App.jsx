@@ -25,6 +25,8 @@ import AdminMenuBar from './admin/AdminMenuBar'
 import AdminDashboard from './admin/AdminDashboard'
 import LocalAuthorityList from './admin/acte/LocalAuthorityList'
 import LocalAuthority from './admin/acte/LocalAuthority'
+import ModuleParam from './admin/acte/ModuleParam'
+
 
 import Validator from 'validatorjs'
 Validator.useLang(window.localStorage.i18nextLng);
@@ -121,6 +123,9 @@ const AppRoute = () =>
         <Route path='/admin/tableau-de-bord' render={() => <AdminApp><AdminDashboard /></AdminApp>} />
         <Route path='/admin/actes/parametrage-collectivite/:uuid' render={({ match }) => <AdminApp><LocalAuthority uuid={match.params.uuid} /></AdminApp>} />
         <Route path='/admin/actes/parametrage-collectivite' render={() => <AdminApp><LocalAuthorityList /></AdminApp>} />
+        <Route path='/admin/acte/parametrage-module' render={() => <AdminApp><ModuleParam /></AdminApp>} />
+
+
     </Switch>
 
 render((

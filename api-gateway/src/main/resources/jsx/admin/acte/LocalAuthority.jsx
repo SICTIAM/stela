@@ -102,46 +102,46 @@ class LocalAuthority extends Component {
                     <h2>{t('admin.modules.acte.local_authority_settings.general_informations')}</h2>
 
                     <Form onSubmit={this.submitForm}>
-                        <Field htmlFor="uuid" label={t('local_authority.uuid')}>
+                        <Field htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
                             <span id="uuid">{this.state.constantFields.uuid}</span>
                         </Field>
-                        <Field htmlFor="siren" label={t('local_authority.siren')}>
+                        <Field htmlFor="siren" label={t('api-gateway:local_authority.siren')}>
                             <span id="siren">{this.state.constantFields.siren}</span>
                         </Field>
-                        <Field htmlFor="department" label={t('local_authority.department')}>
+                        <Field htmlFor="department" label={t('api-gateway:local_authority.department')}>
                             <InputValidation id='department'
                                 value={this.state.fields.department}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.department}
-                                fieldName={t('local_authority.department')}
+                                fieldName={t('api-gateway:local_authority.department')}
                                 className='simpleInput' />
                         </Field>
-                        <Field htmlFor="district" label={t('local_authority.district')}>
+                        <Field htmlFor="district" label={t('api-gateway:local_authority.district')}>
                             <InputValidation id='district'
                                 value={this.state.fields.district}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.district}
-                                fieldName={t('local_authority.district')}
+                                fieldName={t('api-gateway:local_authority.district')}
                                 className='simpleInput' />
                         </Field>
-                        <Field htmlFor="nature" label={t('local_authority.nature')}>
+                        <Field htmlFor="nature" label={t('api-gateway:local_authority.nature')}>
                             <InputValidation id='nature'
                                 value={this.state.fields.nature}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.nature}
-                                fieldName={t('local_authority.nature')}
+                                fieldName={t('api-gateway:local_authority.nature')}
                                 className='simpleInput' />
                         </Field>
-                        <Field htmlFor="nomenclatureDate" label={t('local_authority.nomenclatureDate')}>
+                        <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
                             <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
                         </Field>
-                        <Field htmlFor="canPublishRegistre" label={t('local_authority.canPublishRegistre')}>
+                        <Field htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
                             <Checkbox id="canPublishRegistre" toggle checked={this.state.fields.canPublishRegistre} onChange={e => handleFieldCheckboxChange(this, 'canPublishRegistre')} />
                         </Field>
-                        <Field htmlFor='canPublishWebSite' label={t('local_authority.canPublishWebSite')}>
+                        <Field htmlFor='canPublishWebSite' label={t('api-gateway:local_authority.canPublishWebSite')}>
                             <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                         </Field>
-                        <Button style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('form.update')}</Button>
+                        <Button style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('api-gateway:form.update')}</Button>
                     </Form>
                 </Segment>
             )
@@ -149,4 +149,4 @@ class LocalAuthority extends Component {
     }
 }
 
-export default translate(['api-gateway'])(LocalAuthority)
+export default translate(['acte', 'api-gateway'])(LocalAuthority)
