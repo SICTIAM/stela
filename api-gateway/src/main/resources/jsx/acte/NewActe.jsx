@@ -267,8 +267,8 @@ class NewActe extends Component {
         return (
             <Segment>
                 <Grid>
-                    <Grid.Column width={12}><h1>{t('acte.new.title')}</h1></Grid.Column>
-                    <Grid.Column width={4} style={{ textAlign: 'right' }}>
+                    <Grid.Column width={10}><h1>{t('acte.new.title')}</h1></Grid.Column>
+                    <Grid.Column width={6} style={{ textAlign: 'right' }}>
                         {renderIf(this.state.formStatus)(
                             <span style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.formStatus}`)}</span>
                         )}

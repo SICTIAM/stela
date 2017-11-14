@@ -42,7 +42,7 @@ class DraftList extends Component {
     render() {
         const { t } = this.context
         const natureDisplay = (nature) => nature ? t(`acte.nature.${nature}`) : ''
-        const dateDisplay = (decision) => decision ? moment(decision).format('DD/MM/YYYY - HH:MM') : ''
+        const dateDisplay = (date) => date ? moment(date).format('DD/MM/YYYY - HH:mm') : ''
         const deleteSelection = { title: t('acte.drafts.delete_selected_drafts'), titleNoSelection: t('acte.drafts.delete_all_drafts'), action: this.deleteDrafts }
         return (
             <Segment>
