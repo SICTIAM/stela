@@ -17,6 +17,7 @@ import Footer from './_components/Footer'
 import Home from './Home'
 import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
+import DraftList from './acte/DraftList'
 import NewActe from './acte/NewActe'
 import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
@@ -103,6 +104,8 @@ const AppRoute = () =>
             <Redirect to="/actes/liste" />
         </Route>
         <Route path='/actes/liste' render={() => <FrontApp><ActeList /></FrontApp>} />
+        <Route path='/actes/brouillons/:uuid' render={({ match }) => <FrontApp><NewActe uuid={match.params.uuid} /></FrontApp>} />
+        <Route path='/actes/brouillons' render={() => <FrontApp><DraftList /></FrontApp>} />
         <Route path='/actes/nouveau' render={() => <FrontApp><NewActe /></FrontApp>} />
         <Route path='/actes/:uuid' render={({ match }) => <FrontApp><Acte uuid={match.params.uuid} /></FrontApp>} />
 

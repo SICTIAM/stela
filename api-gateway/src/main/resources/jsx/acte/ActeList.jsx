@@ -34,10 +34,7 @@ class ActeList extends Component {
         marginBottom: 1 + 'em'
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/acte/' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => this.setState({ actes: json }))
+        this.submitForm()
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search
@@ -56,13 +53,13 @@ class ActeList extends Component {
         return data
     }
     submitForm = (event) => {
-        event.preventDefault()
+        if (event) event.preventDefault()
         const data = this.getSearchData()
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        fetchWithAuthzHandling({ url: '/api/acte/query', method: 'GET', query: data, headers: headers, context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ actes: json }))

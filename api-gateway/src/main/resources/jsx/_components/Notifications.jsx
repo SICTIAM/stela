@@ -34,6 +34,24 @@ const acteSentSuccess = (t) => {
     }
 }
 
+const draftDeletedSuccess = (t) => {
+    return {
+        title: t('notifications.acte.title'),
+        message: t('notifications.acte.draft.single_deleted.success'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
+const draftsDeletedSuccess = (t) => {
+    return {
+        title: t('notifications.acte.title'),
+        message: t('notifications.acte.draft.multiple_deleted.success'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
 const acteCancelledSuccess = (t) => {
     return {
         title: t('notifications.acte.title'),
@@ -85,5 +103,7 @@ module.exports = {
     pesSentSuccess,
     pesSentVirus,
     pesSentMissingData,
-    localAuthorityUpdateSuccess
+    localAuthorityUpdateSuccess,
+    draftDeletedSuccess,
+    draftsDeletedSuccess
 }

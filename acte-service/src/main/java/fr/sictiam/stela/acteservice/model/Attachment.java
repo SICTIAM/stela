@@ -16,13 +16,15 @@ public class Attachment {
 
     private byte[] file;
     private String filename;
+    private long size;
 
     public Attachment() {
     }
 
-    public Attachment(byte[] file, String filename) {
+    public Attachment(byte[] file, String filename, long size) {
         this.file = file;
         this.filename = filename;
+        this.size = size;
     }
 
     public String getUuid() {
@@ -35,5 +37,9 @@ public class Attachment {
 
     public String getFilename() {
         return filename;
+    }
+
+    public long getSize() {
+        return size;
     }
 }

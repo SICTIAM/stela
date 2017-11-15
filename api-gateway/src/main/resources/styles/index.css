@@ -53,3 +53,6 @@ footer {
     width: 31.25%;
     margin-bottom: 0;
 }
+.ui.cards {
+    margin-bottom: 0.5em;
+}

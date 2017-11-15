@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -82,9 +83,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         Acte acte = acteService.getByUuid(acteUuid);
 
         assertNotNull(acte);
-        assertNotNull(acte.getFile());
+        assertNotNull(acte.getActeAttachment());
         assertNotNull(acte.getNumber());
-        assertEquals("Delib.pdf", acte.getFilename());
+        assertEquals("Delib.pdf", acte.getActeAttachment().getFilename());
         assertEquals("1-1-0-0-0", acte.getCode());
         assertEquals("Objet", acte.getObjet());
         assertEquals(LocalDate.now(), acte.getDecision());
@@ -144,7 +145,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_SIZE_CHECKED)));
 
         // uncomment to see the generated archive
-        // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+        // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
 
     @Test
@@ -215,7 +216,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(HttpStatus.FORBIDDEN, newResponse.getStatusCode());
 
         // uncomment to see the generated archive
-        // printXmlMessage(acteHistory.get().getFile(), acteHistory.get().getFileName());
+        // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
 
     @Test
@@ -236,7 +237,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\"}";
+        String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\", \"district\":\"1\", \"nature\":\"29\"}";
         HttpEntity<String> patchData = new HttpEntity<>(input, headers);
 
         this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class, localAuthority.getUuid());
@@ -246,6 +247,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(true, localAuthority.getCanPublishRegistre());
         assertEquals(false, localAuthority.getCanPublishWebSite());
         assertEquals("006", localAuthority.getDepartment());
+        assertEquals("29", localAuthority.getNature());
 
         // cleanup our local production
         localAuthorityService.delete(localAuthority);
@@ -260,6 +262,88 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertTrue(codesMatieres.containsKey("1-1-0-0-0"));
         assertEquals("Marchés publics", codesMatieres.get("1-1-0-0-0"));
         assertEquals("1-1-0-0-0", codesMatieres.keySet().iterator().next());
+    }
+
+    @Test
+    public void createRetrieveAndCloseDraft() {
+        assertEquals(0, acteService.getDrafts().size());
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        Acte acte = acteService.saveDraft(new Acte(), localAuthority);
+
+        Acte draft = acteService.getDraftByUuid(acte.getUuid());
+        assertEquals(acte.getUuid(), draft.getUuid());
+        assertTrue(draft.isDraft());
+
+        draft.setObjet("Object draft");
+        acteService.closeDraft(draft, localAuthority);
+        assertEquals(1, acteService.getDrafts().size());
+
+        draft.setObjet("");
+        acteService.closeDraft(draft, localAuthority);
+        assertEquals(0, acteService.getDrafts().size());
+    }
+
+    @Test
+    public void sendDraft() {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        Acte draft = acteService.saveDraft(acte(), localAuthority);
+
+        acteService.closeDraft(draft, localAuthority);
+        assertEquals(1, acteService.getDrafts().size());
+        assertNotNull(acteService.getDraftByUuid(draft.getUuid()));
+
+        acteService.sendDraft(draft.getUuid());
+        assertEquals(0, acteService.getDrafts().size());
+        assertEquals(draft.getUuid(), acteService.getByUuid(draft.getUuid()).getUuid());
+    }
+
+    @Test
+    public void deleteDrafts() {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        Acte draft1 = acteService.saveDraft(acte(), localAuthority);
+        acteService.saveDraft(acte(), localAuthority);
+        acteService.saveDraft(acte(), localAuthority);
+
+        assertEquals(3, acteService.getDrafts().size());
+        acteService.deleteDrafts(Collections.singletonList(draft1.getUuid()));
+        assertEquals(2, acteService.getDrafts().size());
+        acteService.deleteDrafts(Collections.emptyList());
+        assertEquals(0, acteService.getDrafts().size());
+    }
+
+    @Test
+    public void draftFiles() {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        Acte draft = acteService.saveDraft(acte(), localAuthority);
+
+        try {
+            MultipartFile file = getMultipartResourceFile("data/Delib.pdf", "application/pdf");
+            acteService.saveDraftFile(draft.getUuid(), file, localAuthority);
+        } catch (IOException e) {
+            LOGGER.error("Unable to add a file to the draft: {}", e.toString());
+        }
+        assertEquals("Delib.pdf", acteService.getDraftByUuid(draft.getUuid()).getActeAttachment().getFilename());
+
+        acteService.deleteDraftFile(draft.getUuid());
+        assertNull(acteService.getDraftByUuid(draft.getUuid()).getActeAttachment());
+
+        try {
+            MultipartFile file = getMultipartResourceFile("data/Annexe_delib.pdf", "application/pdf");
+            acteService.saveDraftAnnexe(draft.getUuid(), file, localAuthority);
+            acteService.saveDraftAnnexe(draft.getUuid(), file, localAuthority);
+        } catch (IOException e) {
+            LOGGER.error("Unable to add a file to the draft: {}", e.toString());
+        }
+        assertEquals(2, acteService.getDraftByUuid(draft.getUuid()).getAnnexes().size());
+
+        Attachment annexe = acteService.getDraftByUuid(draft.getUuid()).getAnnexes().get(0);
+        assertEquals("Annexe_delib.pdf", annexe.getFilename());
+
+        acteService.deleteDraftAnnexe(draft.getUuid(), annexe.getUuid());
+        assertEquals(1, acteService.getDraftByUuid(draft.getUuid()).getAnnexes().size());
+
+        // cleanup our local production
+        acteService.deleteDrafts(Collections.emptyList());
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {

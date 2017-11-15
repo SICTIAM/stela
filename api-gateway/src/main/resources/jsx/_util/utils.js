@@ -7,6 +7,14 @@ const checkStatus = (response) => {
     }
 }
 
+const bytesToSize = (bytes) => {
+    const sizes = ['octets', 'Ko', 'Mo', 'Go', 'To']
+    if (bytes === 0) return 'n/a'
+    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10)
+    if (i === 0) return `${bytes} ${sizes[i]}`
+    return `${(bytes / (1024 ** i)).toFixed(1)} ${sizes[i]}`
+}
+
 // TODO: add 403 controls
 const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
     const httpMethod = method || "GET"
@@ -43,4 +51,4 @@ const handleFieldChange = (that, e, callback) => {
     that.setState({ fields: fields }, callback)
 }
 
-module.exports = { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange }
+module.exports = { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange, bytesToSize }

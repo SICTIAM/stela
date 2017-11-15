@@ -2,9 +2,13 @@ package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,23 +17,32 @@ import java.util.SortedSet;
 @Entity
 public class Acte {
 
+    interface RestValidation {
+        // validation group marker interface
+    }
+
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @Column(unique=true)
+    @NotNull(groups = {RestValidation.class}) @Size(max = 15, groups = {RestValidation.class}) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/", groups = {RestValidation.class})
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
+    @NotNull(groups = {RestValidation.class})
     private LocalDate decision;
+    @NotNull(groups = {RestValidation.class})
     private ActeNature nature;
+    @NotNull(groups = {RestValidation.class})
     private String code;
     private String codeLabel;
+    @Column(length = 512)
+    @NotNull(groups = {RestValidation.class}) @Size(max = 500)
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
-    private byte[] file;
-    private String filename;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Attachment acteAttachment;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attachment> annexes;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -37,6 +50,7 @@ public class Acte {
     private SortedSet<ActeHistory> acteHistories;
     @ManyToOne
     private LocalAuthority localAuthority;
+    private boolean draft;
 
     public Acte() {
     }
@@ -83,6 +97,10 @@ public class Acte {
         return objet;
     }
 
+    public void setObjet(String objet) {
+        this.objet = objet;
+    }
+
     public boolean isPublic() {
         return isPublic;
     }
@@ -107,20 +125,12 @@ public class Acte {
         this.creation = creation;
     }
 
-    public byte[] getFile(){
-        return this.file;
+    public Attachment getActeAttachment(){
+        return this.acteAttachment;
     }
 
-    public void setFile(byte[] file){
-        this.file = file;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setActeAttachment(Attachment acteAttachment){
+        this.acteAttachment = acteAttachment;
     }
 
     public List<Attachment> getAnnexes() {
@@ -147,6 +157,27 @@ public class Acte {
         this.localAuthority = localAuthority;
     }
 
+    public boolean isDraft() {
+        return draft;
+    }
+
+    public void setDraft(boolean draft) {
+        this.draft = draft;
+    }
+
+    public boolean empty() {
+        return StringUtils.isEmpty(number)
+                && decision == null
+                && nature == null
+                && StringUtils.isEmpty(code)
+                && StringUtils.isEmpty(codeLabel)
+                && StringUtils.isEmpty(objet)
+                && acteAttachment == null
+                && (annexes == null || annexes.size() == 0)
+                && (acteHistories == null || acteHistories.size() == 0);
+
+    }
+
     @Override
     public String toString() {
         return "Acte{" +
@@ -159,7 +190,6 @@ public class Acte {
                 ", isPublic:" + isPublic +
                 ", isPublicWebsite:" + isPublicWebsite +
                 ", creation:" + creation +
-                ", filename:" + filename +
                 ", localAuthority:" + localAuthority +
                 '}';
     }

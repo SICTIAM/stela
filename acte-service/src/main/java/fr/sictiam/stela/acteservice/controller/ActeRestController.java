@@ -50,13 +50,7 @@ public class ActeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Acte>> getAll() {
-        List<Acte> actes = acteService.getAll();
-        return new ResponseEntity<>(actes, HttpStatus.OK);
-    }
-
-    @GetMapping("/query")
-    public ResponseEntity<List<Acte>> getAllWithQuery(
+    public ResponseEntity<List<Acte>> getAll(
             @RequestParam(value= "number", required = false) String number,
             @RequestParam(value= "objet", required = false) String objet,
             @RequestParam(value= "nature", required = false) ActeNature nature,
@@ -110,7 +104,7 @@ public class ActeRestController {
     @GetMapping("/{uuid}/file")
     public void getFile(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        outputFile(response, acte.getFile(), acte.getFilename());
+        outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
@@ -148,7 +142,7 @@ public class ActeRestController {
         ObjectMapper mapper = new ObjectMapper();
         try {
             Acte acte = mapper.readValue(acteJson, Acte.class);
-            
+
             LOGGER.debug("Received acte : {}", acte.getObjet());
             LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
 
@@ -163,6 +157,10 @@ public class ActeRestController {
             return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /* --------------------------- */
+    /* ----- FILE OPERATIONS ----- */
+    /* --------------------------- */
 
     private void outputCSV(HttpServletResponse response, Object[] beans, List<String> header, List<String> translatedHeader, String filename) {
         response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
