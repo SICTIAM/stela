@@ -35,7 +35,7 @@ public class ActeDraftRestController {
     public ResponseEntity<Acte> newDraft() {
         // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        Acte acte = acteService.saveDraft(new Acte(), currentLocalAuthority);
+        Acte acte = acteService.newDraft(currentLocalAuthority);
         return new ResponseEntity<>(acte, HttpStatus.OK);
     }
 

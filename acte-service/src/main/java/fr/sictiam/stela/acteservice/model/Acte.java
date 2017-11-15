@@ -65,7 +65,8 @@ public class Acte {
     private SortedSet<ActeHistory> acteHistories;
     @ManyToOne
     private LocalAuthority localAuthority;
-    private boolean draft;
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private ActeDraft draft;
 
     public Acte() {
     }
@@ -172,11 +173,11 @@ public class Acte {
         this.localAuthority = localAuthority;
     }
 
-    public boolean isDraft() {
+    public ActeDraft getDraft() {
         return draft;
     }
 
-    public void setDraft(boolean draft) {
+    public void setDraft(ActeDraft draft) {
         this.draft = draft;
     }
 

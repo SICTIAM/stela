@@ -42,7 +42,7 @@ class DraftList extends Component {
     render() {
         const { t } = this.context
         const natureDisplay = (nature) => nature ? t(`acte.nature.${nature}`) : ''
-        const dateDisplay = (date) => date ? moment(date).format('DD/MM/YYYY - HH:mm') : ''
+        const draftDateDisplay = (draft) => moment(draft.lastModified).format('DD/MM/YYYY - HH:mm')
         const deleteSelection = { title: t('acte.drafts.delete_selected_drafts'), titleNoSelection: t('acte.drafts.delete_all_drafts'), action: this.deleteDrafts }
         return (
             <Segment>
@@ -56,10 +56,11 @@ class DraftList extends Component {
                         { property: 'decision', displayed: false, searchable: false },
                         { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
                         { property: 'code', displayed: false, searchable: false },
-                        { property: 'creation', displayed: true, displayName: t('api-gateway:list.last_modified'), searchable: true, displayComponent: dateDisplay },
+                        { property: 'creation', displayed: false, searchable: false },
                         { property: 'acteHistories', displayed: false, displayName: t('acte.fields.status'), searchable: true },
                         { property: 'public', displayed: false, searchable: false },
                         { property: 'publicWebsite', displayed: false, searchable: false },
+                        { property: 'draft', displayed: true, displayName: t('api-gateway:list.last_modified'), searchable: false, displayComponent: draftDateDisplay },
                     ]}
                     header={true}
                     select={true}
