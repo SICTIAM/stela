@@ -56,8 +56,8 @@ class NewActe extends Component {
         regex: this.context.t('api-gateway:form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
     }
     componentDidMount() {
-        const uuid = this.props.uuid ? this.props.uuid : ''
-        fetch('/api/acte/draft/' + uuid, { credentials: 'same-origin' })
+        const url = this.props.uuid ? '/api/acte/drafts/' + this.props.uuid : '/api/acte/draft'
+        fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -70,7 +70,7 @@ class NewActe extends Component {
                 })
             })
 
-        fetch('/api/acte/localAuthority/depositFields', { credentials: 'same-origin' })
+        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/depositFields' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ depositFields: json }))
@@ -80,7 +80,7 @@ class NewActe extends Component {
                 })
             })
 
-        fetch('/api/acte/localAuthority/codes-matieres', { credentials: 'same-origin' })
+        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/codes-matieres' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ codesMatieres: json }))
@@ -94,7 +94,7 @@ class NewActe extends Component {
         if (this.state.fields.draft) {
             const acteData = this.getActeData()
             const headers = { 'Content-Type': 'application/json' }
-            fetchWithAuthzHandling({ url: '/api/acte/deleteOrSaveDraft', body: JSON.stringify(acteData), headers: headers, method: 'POST', context: this.context })
+            fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/leave`, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
                 .then(checkStatus)
                 .catch(response => {
                     response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
@@ -158,7 +158,7 @@ class NewActe extends Component {
     saveDraft = debounce((callback) => {
         const acteData = this.getActeData()
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: '/api/acte/saveDraft', body: JSON.stringify(acteData), headers: headers, method: 'POST', context: this.context })
+        fetchWithAuthzHandling({ url: `/api/acte/drafts/${acteData.uuid}`, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
@@ -170,8 +170,8 @@ class NewActe extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }, 3000)
-    saveDraftFile = (file) => this.saveDraftAttachment(file, `/api/acte/draft/${this.state.fields.uuid}/file`)
-    saveDraftAnnexe = (file) => this.saveDraftAttachment(file, `/api/acte/draft/${this.state.fields.uuid}/annexe`)
+    saveDraftFile = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.uuid}/file`)
+    saveDraftAnnexe = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.uuid}/annexe`)
     saveDraftAttachment = (file, url) => {
         if (file) {
             this.setState({ formStatus: 'saving' })
@@ -191,8 +191,8 @@ class NewActe extends Component {
                 })
         }
     }
-    deleteDraftFile = () => this.deleteDraftAttachment(`/api/acte/draft/${this.state.fields.uuid}/file`)
-    deleteDraftAnnexe = (annexeUuid) => this.deleteDraftAttachment(`/api/acte/draft/${this.state.fields.uuid}/annexe/${annexeUuid}`, annexeUuid)
+    deleteDraftFile = () => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.uuid}/file`)
+    deleteDraftAnnexe = (annexeUuid) => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.uuid}/annexe/${annexeUuid}`, annexeUuid)
     deleteDraftAttachment = (url, annexeUuid) => {
         this.setState({ formStatus: 'saving' })
         fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.context })
@@ -204,7 +204,7 @@ class NewActe extends Component {
                     fields['annexes'] = annexes
                     this.setState({ fields: fields, formStatus: 'saved' }, this.validateForm)
                 } else {
-                    fields['file'] = null
+                    fields['acteAttachment'] = null
                     this.setState({ fields: fields, formStatus: 'saved' }, this.validateForm)
                 }
             })
@@ -237,7 +237,7 @@ class NewActe extends Component {
         const fields = this.state.fields
         fields['draft'] = false
         this.setState({ fields })
-        fetchWithAuthzHandling({ url: '/api/acte/submitDraft', method: 'POST', body: this.state.fields.uuid, context: this.context })
+        fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {

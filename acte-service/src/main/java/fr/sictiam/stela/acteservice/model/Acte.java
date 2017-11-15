@@ -6,9 +6,9 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @NotNull(groups = {RestValidation.class}) @Max(value=15, groups = {RestValidation.class}) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/", groups = {RestValidation.class})
+    @NotNull(groups = {RestValidation.class}) @Size(max = 15, groups = {RestValidation.class}) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/", groups = {RestValidation.class})
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -37,7 +37,7 @@ public class Acte {
     private String code;
     private String codeLabel;
     @Column(length = 512)
-    @NotNull(groups = {RestValidation.class}) @Max(value=500, groups = {RestValidation.class})
+    @NotNull(groups = {RestValidation.class}) @Size(max = 500)
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
