@@ -1,16 +1,18 @@
 package fr.sictiam.stela.acteservice.model.ui;
 
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 public class LocalAuthorityUpdateUI {
-
-    @NotNull @Pattern(regexp="[\\d]{3}")
+    // TODO add specific message or not
+    @NotNull(message = "form.validation.mandatoryfield")
+    @Pattern(regexp = "[\\d]{3}", message = "form.validation.malformedfield")
     private String department;
-    @NotNull @Pattern(regexp="[\\d]{1}")
+    @NotNull(message = "form.validation.mandatoryfield")
+    @Pattern(regexp = "[\\d]{1}", message = "form.validation.malformedfield")
     private String district;
-    @NotNull @Pattern(regexp="[\\d]{2}")
+    @NotNull(message = "form.validation.mandatoryfield")
+    @Pattern(regexp = "[\\d]{2}", message = "form.validation.malformedfield")
     private String nature;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
@@ -19,22 +21,22 @@ public class LocalAuthorityUpdateUI {
     }
 
     public String getDepartment() {
-        return department;
+	return department;
     }
 
     public String getDistrict() {
-        return district;
+	return district;
     }
 
     public String getNature() {
-        return nature;
+	return nature;
     }
 
     public Boolean getCanPublishRegistre() {
-        return canPublishRegistre;
+	return canPublishRegistre;
     }
 
     public Boolean getCanPublishWebSite() {
-        return canPublishWebSite;
+	return canPublishWebSite;
     }
 }

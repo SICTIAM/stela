@@ -1,13 +1,17 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.validation.ValidationUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -62,9 +66,18 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{uuid}")
-    ResponseEntity<String> submitDraft(@PathVariable String uuid) {
-        Acte result = acteService.sendDraft(uuid);
-        return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+    ResponseEntity<Object> submitDraft(@PathVariable String uuid) {
+
+	Acte acte = acteService.getDraftByUuid(uuid);
+	List<ObjectError> errors = ValidationUtil.validateActe(acte);
+
+	if (!errors.isEmpty()) {
+	    CustomValidationUI customValidationUI = new CustomValidationUI(errors, "as fail");
+	    return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
+	} else {
+	    Acte result = acteService.sendDraft(acte);
+	    return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+	}
     }
 
     @PutMapping("/drafts/{uuid}/leave")

@@ -1,23 +1,35 @@
 package fr.sictiam.stela.acteservice.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+
 @Entity
 public class Acte {
 
-    interface RestValidation {
+    public interface RestValidation {
         // validation group marker interface
     }
 
@@ -25,19 +37,22 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @NotNull(groups = {RestValidation.class}) @Size(max = 15, groups = {RestValidation.class}) @Pattern(regexp = "/^[a-zA-Z0-9_]+$/", groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
+    @Size(max = 15, groups = { RestValidation.class })
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", groups = { RestValidation.class })
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     private LocalDate decision;
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     private ActeNature nature;
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     private String code;
     private String codeLabel;
     @Column(length = 512)
-    @NotNull(groups = {RestValidation.class}) @Size(max = 500)
+    @NotNull(groups = { RestValidation.class })
+    @Size(max = 500)
     private String objet;
     private boolean isPublic;
     private boolean isPublicWebsite;
