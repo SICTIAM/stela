@@ -7,8 +7,16 @@ import moment from 'moment'
 import { InputFile } from './UI'
 
 export default class InputValidation extends Component {
-    state = { isValid: true, errorMessage: '' }
-    static defaultProps = { value: '', type: '', accept: '', className: '' }
+    state = {
+        isValid: true,
+        errorMessage: ''
+    }
+    static defaultProps = {
+        value: '',
+        type: '',
+        accept: '',
+        className: ''
+    }
     validateValue = () => {
         const value = this.props.type === 'date' ? moment(this.props.value).format('MM.DD.YYYY') : this.props.value
         const validation = new Validator({ field: value }, { field: this.props.validationRule }, this.props.customErrorMessages)

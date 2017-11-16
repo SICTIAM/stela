@@ -39,9 +39,6 @@ class LocalAuthority extends Component {
         district: 'required|digits:1',
         nature: 'required|digits:2'
     }
-    style = {
-        marginTop: 1 + 'em'
-    }
     componentDidMount() {
         const uuid = this.props.uuid
         if (uuid !== '') {
@@ -144,7 +141,7 @@ class LocalAuthority extends Component {
                         <Field htmlFor='canPublishWebSite' label={t('local_authority.canPublishWebSite')}>
                             <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                         </Field>
-                        <Button style={this.style} disabled={!this.state.isFormValid} type='submit'>{t('form.update')}</Button>
+                        <Button style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('form.update')}</Button>
                     </Form>
                 </Segment>
             )

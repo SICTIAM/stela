@@ -8,22 +8,13 @@ class AdminMenuBar extends Component {
     static contextTypes = {
         t: PropTypes.func
     }
-    styles = {
-        appTitle: {
-            textAlign: 'center',
-        },
-        logo: {
-            width: '100%',
-            padding: '2em'
-        }
-    }
     render() {
         const { t } = this.context
         return (
             <Menu color='blue' fixed='left' inverted vertical>
 
                 <Menu.Item as={Link} to="/" header>
-                    <h1 style={this.styles.appTitle}>{t('app_title')}</h1>
+                    <h1 style={{ textAlign: 'center' }}>{t('app_title')}</h1>
                 </Menu.Item>
 
                 <Menu.Item as={Link} to="/admin/tableau-de-bord">

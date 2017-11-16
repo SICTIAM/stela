@@ -8,22 +8,13 @@ class MenuBar extends Component {
     static contextTypes = {
         t: PropTypes.func
     }
-    styles = {
-        appTitle: {
-            textAlign: 'center',
-        },
-        logo: {
-            width: '100%',
-            padding: '2em'
-        }
-    }
     render() {
         const { t } = this.context
         return (
             <Menu className='mainMenu' fixed='left' vertical>
 
                 <Menu.Item className='appTitle' as={Link} to="/" header>
-                    <h1 style={this.styles.appTitle}>{t('app_title')}</h1>
+                    <h1 style={{ textAlign: 'center' }}>{t('app_title')}</h1>
                 </Menu.Item>
 
                 <Menu.Item>
@@ -59,7 +50,7 @@ class MenuBar extends Component {
                 </Menu.Item>
 
                 <Menu.Item>
-                    <img style={this.styles.logo} src={process.env.PUBLIC_URL + '/img/logo_sictiam.jpg'} alt="SICTIAM" width="100%" />
+                    <img style={{ width: '100%', padding: '2em' }} src={process.env.PUBLIC_URL + '/img/logo_sictiam.jpg'} alt="SICTIAM" />
                 </Menu.Item>
 
             </Menu >

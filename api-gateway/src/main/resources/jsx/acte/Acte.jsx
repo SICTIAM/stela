@@ -31,11 +31,6 @@ class Acte extends Component {
         },
         acteFetched: false
     }
-    styles = {
-        alignRight: {
-            textAlign: 'right'
-        }
-    }
     componentDidMount() {
         const uuid = this.props.uuid
         if (uuid !== '') {
@@ -77,7 +72,7 @@ class Acte extends Component {
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
                             <Grid>
                                 <Grid.Column width={12}><h1>{acte.objet}</h1></Grid.Column>
-                                <Grid.Column width={4} style={this.styles.alignRight}>
+                                <Grid.Column width={4} style={{ textAlign: 'right' }}>
                                     {renderIf(lastHistory && lastHistory.status === 'ACK_RECEIVED')(
                                         <a className='ui blue basic icon button' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank' title='Télécharger le justificatif'><Icon name='download' /></a>
                                     )}
