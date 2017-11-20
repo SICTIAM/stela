@@ -53,14 +53,15 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     private final EnveloppeCounterRepository enveloppeCounterRepository;
     private final AdminRepository adminRepository;
 
-    public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher,
-                          EnveloppeCounterRepository enveloppeCounterRepository, AdminRepository adminModuleRepository) {
-        this.acteRepository = acteRepository;
-        this.jaxb2Marshaller = jaxb2Marshaller;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.enveloppeCounterRepository = enveloppeCounterRepository;
-        this.adminRepository= adminModuleRepository;
-    }
+	public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller,
+			ApplicationEventPublisher applicationEventPublisher, EnveloppeCounterRepository enveloppeCounterRepository,
+			AdminRepository adminRepository) {
+		this.acteRepository = acteRepository;
+		this.jaxb2Marshaller = jaxb2Marshaller;
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.enveloppeCounterRepository = enveloppeCounterRepository;
+		this.adminRepository = adminRepository;
+	}
 
     /**
      * Compress file and annexes into a tar.gz archive.
@@ -203,10 +204,10 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         idcl.setNature(acte.getNature().getCode());
         idcl.setSIREN(siren);
         
-        Admin adminModule=adminRepository.findAll().get(0);
+        Admin admin=adminRepository.findAll().get(0);
         Referent referent = new Referent();
         // TODO extract to local authority config
-        referent.setEmail(adminModule.getMainEmail());
+        referent.setEmail(admin.getMainEmail());
         referent.setNom("Demat SICTIAM");
         referent.setTelephone("0101010101");
 
@@ -215,11 +216,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         emetteur.setReferent(referent);
 
         DonneesEnveloppeCLMISILL.AdressesRetour adressesRetour = new DonneesEnveloppeCLMISILL.AdressesRetour();
-        adressesRetour.getEmail().add(adminModule.getMainEmail());
-        for (String email : adminModule.getAdditionalEmails()) {
-        	 adressesRetour.getEmail().add(email);
-		}
-       
+        adressesRetour.getEmail().add(admin.getMainEmail());
+		admin.getAdditionalEmails().forEach(eMail -> adressesRetour.getEmail().add(eMail));
 
         // TODO is it really the message file that is expected here ?
         FichierSigne fichierSigne = new FichierSigne();

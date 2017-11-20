@@ -8,19 +8,18 @@ import fr.sictiam.stela.acteservice.model.Admin;
 @Service
 public class AdminService {
 
-    private final AdminRepository adminRepository;
+	private final AdminRepository adminRepository;
 
+    public AdminService(AdminRepository adminRepository) {
+		this.adminRepository = adminRepository;
+	}
 
-    public AdminService(AdminRepository adminModuleRepository) {
-        this.adminRepository = adminModuleRepository;
-    }
+	public Admin create(Admin adminModule) {
+		return adminRepository.save(adminModule);
+	}
 
-    public Admin create(Admin adminModule) {
-    	return adminRepository.save(adminModule);
-    }
-  
-    public void updateMailInfo(Admin adminModule) {
-    	adminRepository.save(adminModule);
+	public void updateMailInfo(Admin adminModule) {
+		adminRepository.save(adminModule);
 	}
 
 	public Admin getAdmin() {

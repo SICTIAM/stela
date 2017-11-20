@@ -1,135 +1,135 @@
 {
-	"acte": {
-		"status": {
-			"CREATED": "Créé",
-			"ARCHIVE_CREATED": "Archive préparée",
-			"ANTIVIRUS_OK": "Antivirus OK",
-			"ANTIVIRUS_KO": "Antivirus KO",
-			"SENT": "Envoyé",
-			"NOT_SENT": "Non envoyé",
-			"ACK_RECEIVED": "AR Ministère",
-			"NACK_RECEIVED": "Anomalie Ministère",
-			"CANCELLATION_ASKED": "Annulation demandée",
-			"CANCELLATION_ARCHIVE_CREATED": "Archive d'annulation préparée",
-			"ARCHIVE_TOO_LARGE": "Archive trop large",
-			"ARCHIVE_SIZE_CHECKED": "Taille d'archive vérifiée",
-			"FILE_ERROR": "Erreur sur les fichiers de l'acte"
-		},
-		"nature": {
-			"DELIBERATIONS": "Délibérations",
-			"ARRETES_REGLEMENTAIRES": "Actes réglementaires",
-			"ARRETES_INDIVIDUELS": "Actes individuels",
-			"CONTRATS_ET_CONVENTIONS": "Contrats, conventions et avenants",
-			"DOCUMENTS_BUDGETAIRES_ET_FINANCIERS": "Documents budgétaires et financiers",
-			"AUTRES": "Autres"
-		},
-		"fields": {
-			"number": "Numéro d'acte",
-			"decision": "Date de décision",
-			"nature": "Nature",
-			"code": "Code matière",
-			"acteAttachment": "Fichier acte",
-			"annexes": "Fichiers annexes",
-			"public": "Affichage dans le registre",
-			"publicWebsite": "Affichage sur site internet",
-			"objet": "Objet",
-			"status": "Status"
-		},
-		"history": {
-			"message": "Anomalie envoyée par le MIAT"
-		},
-		"list": {
-			"title": "Liste des Actes",
-			"advanced_search": "Recherche avancée",
-			"download_all_ACKs": "Télécharger tous les justificatifs d'AR",
-			"download_selected_ACKs": "Télécharger les justificatifs d'AR de la selection",
-			"download_all_CSV": "Télécharger toute la liste des actes",
-			"download_selected_CSV": "Télécharger la liste des actes selectionnés"
-		},
-		"drafts": {
-			"title": "Brouillons",
-			"no_draft": "Aucun brouillon",
-			"delete_selected_drafts": "Supprimer les brouillons selectionnés",
-			"delete_all_drafts": "Supprimer tous les brouillons"
-		},
-		"page": {
-			"non_existing_act": "Acte non existant",
-			"historic": "Historique",
-			"detail_anomaly": "Détail de l'anomalie",
-			"no_history": "Aucun historique pour cet acte",
-			"linked_file": "Fichier joint",
-			"cancel_deposit": "Annuler le dépôt"
-		},
-		"new": {
-			"title": "Télétransmission d'acte",
-			"formStatus": {
-				"saving": "Enregistrement...",
-				"saved": "Enregistré",
-				"sending": "Envoi en cours..."
-			},
-			"acte": "Déposer un acte",
-			"acte_budgetaire": "Déposer un acte budgétaire",
-			"choose": "Choisir..."
-		}
-	},
-	"admin": {
-		"modules": {
-			"acte": {
-				"title": "Module Acte",
-				"local_authority_settings": {
-					"title": "Paramétrage des collectivités",
-					"general_informations": "Information générales",
-					"MIAT_transmission": "Transmission MIAT"
-				},
-				"module_settings": {
-					"title": "Paramétres du module",
-					"main_email": "Email principale",
-					"additional_emails": "Emails additionels",
-					"no_additional_email": "Aucun email additionel"
-				}
-			}
-		}
-	},
-	"notifications": {
-		"acte": {
-			"title": "Module Acte",
-			"sent": {
-				"success": "Le dépot de l'acte a bien été effectué",
-				"error": {
-					"empty_acte": "L'acte envoyé est vide",
-					"non_extrayable_act": "Impossible de récupérer les données de l'acte"
-				}
-			},
-			"cancelled": {
-				"success": "La demande d'annulation du dépot a bien été prise en compte",
-				"forbidden": "Cet acte ne peut pas être annulé"
-			},
-			"draft": {
-				"single_deleted": {
-					"success": "Le brouillon a bien été supprimé"
-				},
-				"multiple_deleted": {
-					"success": "Les brouillons ont bien été supprimés"
-				}
-			},
-			"admin": {
-				"title": "Admin module Acte",
-				"local_authority": {
-					"update": {
-						"success": "La mise à jour de la collectivité a bien été prise en compte"
-					}
-				},
-				"admin_module": {
-					"update": {
-						"success": "Les modifications ont bien été enregistrées"
-					}
-				}
-			},
-			"annexe_not_found": "Fichier annexe inexistant",
-			"history_not_found": "Historique d'acte inexistant",
-			"no_history_file": "Aucun fichier pour cet historique",
-			"not_found": "Acte inexistant",
-			"no_content": "Le résultat de cette requette ne contient aucun contenu"
-		}
-	}
+  "acte": {
+    "status": {
+      "CREATED": "Créé",
+      "ARCHIVE_CREATED": "Archive préparée",
+      "ANTIVIRUS_OK": "Antivirus OK",
+      "ANTIVIRUS_KO": "Antivirus KO",
+      "SENT": "Envoyé",
+      "NOT_SENT": "Non envoyé",
+      "ACK_RECEIVED": "AR Ministère",
+      "NACK_RECEIVED": "Anomalie Ministère",
+      "CANCELLATION_ASKED": "Annulation demandée",
+      "CANCELLATION_ARCHIVE_CREATED": "Archive d'annulation préparée",
+      "ARCHIVE_TOO_LARGE": "Archive trop large",
+      "ARCHIVE_SIZE_CHECKED": "Taille d'archive vérifiée",
+      "FILE_ERROR": "Erreur sur les fichiers de l'acte"
+    },
+    "nature": {
+      "DELIBERATIONS": "Délibérations",
+      "ARRETES_REGLEMENTAIRES": "Actes réglementaires",
+      "ARRETES_INDIVIDUELS": "Actes individuels",
+      "CONTRATS_ET_CONVENTIONS": "Contrats, conventions et avenants",
+      "DOCUMENTS_BUDGETAIRES_ET_FINANCIERS": "Documents budgétaires et financiers",
+      "AUTRES": "Autres"
+    },
+    "fields": {
+      "number": "Numéro d'acte",
+      "decision": "Date de décision",
+      "nature": "Nature",
+      "code": "Code matière",
+      "acteAttachment": "Fichier acte",
+      "annexes": "Fichiers annexes",
+      "public": "Affichage dans le registre",
+      "publicWebsite": "Affichage sur site internet",
+      "objet": "Objet",
+      "status": "Status"
+    },
+    "history": {
+      "message": "Anomalie envoyée par le MIAT"
+    },
+    "list": {
+      "title": "Liste des Actes",
+      "advanced_search": "Recherche avancée",
+      "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
+      "download_selected_ACKs": "Télécharger les justificatifs d'AR de la selection",
+      "download_all_CSV": "Télécharger toute la liste des actes",
+      "download_selected_CSV": "Télécharger la liste des actes selectionnés"
+    },
+    "drafts": {
+      "title": "Brouillons",
+      "no_draft": "Aucun brouillon",
+      "delete_selected_drafts": "Supprimer les brouillons selectionnés",
+      "delete_all_drafts": "Supprimer tous les brouillons"
+    },
+    "page": {
+      "non_existing_act": "Acte non existant",
+      "historic": "Historique",
+      "detail_anomaly": "Détail de l'anomalie",
+      "no_history": "Aucun historique pour cet acte",
+      "linked_file": "Fichier joint",
+      "cancel_deposit": "Annuler le dépôt"
+    },
+    "new": {
+      "title": "Télétransmission d'acte",
+      "formStatus": {
+        "saving": "Enregistrement...",
+        "saved": "Enregistré",
+        "sending": "Envoi en cours..."
+      },
+      "acte": "Déposer un acte",
+      "acte_budgetaire": "Déposer un acte budgétaire",
+      "choose": "Choisir..."
+    }
+  },
+  "admin": {
+    "modules": {
+      "acte": {
+        "title": "Module Acte",
+        "local_authority_settings": {
+          "title": "Paramétrage des collectivités",
+          "general_informations": "Information générales",
+          "MIAT_transmission": "Transmission MIAT"
+        },
+        "module_settings": {
+          "title": "Paramétres du module",
+          "main_email": "Email principale",
+          "additional_emails": "Emails additionels",
+          "no_additional_email": "Aucun email additionel"
+        }
+      }
+    }
+  },
+  "notifications": {
+    "acte": {
+      "title": "Module Acte",
+      "sent": {
+        "success": "Le dépot de l'acte a bien été effectué",
+        "error": {
+          "empty_acte": "L'acte envoyé est vide",
+          "non_extrayable_act": "Impossible de récupérer les données de l'acte"
+        }
+      },
+      "cancelled": {
+        "success": "La demande d'annulation du dépot a bien été prise en compte",
+        "forbidden": "Cet acte ne peut pas être annulé"
+      },
+      "draft": {
+        "single_deleted": {
+          "success": "Le brouillon a bien été supprimé"
+        },
+        "multiple_deleted": {
+          "success": "Les brouillons ont bien été supprimés"
+        }
+      },
+      "admin": {
+        "title": "Admin module Acte",
+        "local_authority": {
+          "update": {
+            "success": "La mise à jour de la collectivité a bien été prise en compte"
+          }
+        },
+        "admin_module": {
+          "update": {
+            "success": "Les modifications ont bien été enregistrées"
+          }
+        }
+      },
+      "annexe_not_found": "Fichier annexe inexistant",
+      "history_not_found": "Historique d'acte inexistant",
+      "no_history_file": "Aucun fichier pour cet historique",
+      "not_found": "Acte inexistant",
+      "no_content": "Le résultat de cette requette ne contient aucun contenu"
+    }
+  }
 }

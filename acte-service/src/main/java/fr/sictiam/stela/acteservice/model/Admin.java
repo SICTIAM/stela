@@ -18,7 +18,11 @@ public class Admin {
 	@CollectionTable(name="additional_emails", joinColumns=@JoinColumn(name="admin_uuid"))
 	@Column(name="additional_email")
 	private List<String> additionalEmails;
-
+	
+	public Admin() {
+		
+	}
+	
 	public Admin(String uuid, String mainEmail, List<String> additionalEmails) {
 		super();
 		this.uuid = uuid;

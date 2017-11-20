@@ -25,7 +25,7 @@ class ModuleParam extends Component {
         }
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/acte/adminModule' })
+        fetchWithAuthzHandling({ url: '/api/acte/admin' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ fields: json }))
@@ -36,6 +36,7 @@ class ModuleParam extends Component {
             })
     }
     onkeyPress = (event) => {
+        // prevent from sending the form on 'Enter' to add the email to the list
         if (event.key === 'Enter') {
             this.addMail(event)
         }
@@ -69,7 +70,7 @@ class ModuleParam extends Component {
         event.preventDefault()
         const data = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: '/api/acte/adminModule', method: 'PATCH', body: data, headers: headers, context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
             .then(() => this.context._addNotification(adminModuleUpdateSuccess(this.context.t)))
             .catch(response => {
