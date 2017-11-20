@@ -5,10 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EntityScan(basePackageClasses = { ActeServiceApplication.class })
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableScheduling
 @EnableAsync
 public class ActeServiceApplication {
     public static void main(String[] args) {

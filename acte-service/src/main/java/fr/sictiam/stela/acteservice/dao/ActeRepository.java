@@ -10,4 +10,5 @@ public interface ActeRepository extends JpaRepository<Acte, String> {
     List<Acte> findAllByDraftTrueOrderByCreationDesc();
     Optional<Acte> findByUuidAndDraftFalse(String uuid);
     Optional<Acte> findByUuidAndDraftTrue(String uuid);
+    Optional<Acte> findByNumber(String number);
 }
