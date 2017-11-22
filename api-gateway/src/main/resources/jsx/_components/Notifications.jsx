@@ -9,8 +9,17 @@ const errorNotification = (title, message) => {
 
 const localAuthorityUpdateSuccess = (t) => {
     return {
-        title: t('notifications.admin.acte.title'),
-        message: t('notifications.admin.acte.localAuthority.update.success'),
+        title: t('notifications.acte.admin.title'),
+        message: t('notifications.acte.admin.local_authority.update.success'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
+const adminModuleUpdateSuccess = (t) => {
+    return {
+        title: t('notifications.acte.admin.title'),
+        message: t('notifications.acte.admin.admin_module.update.success'),
         level: 'success',
         position: 'tc'
     }
@@ -105,5 +114,7 @@ module.exports = {
     pesSentMissingData,
     localAuthorityUpdateSuccess,
     draftDeletedSuccess,
-    draftsDeletedSuccess
+    draftsDeletedSuccess,
+    adminModuleUpdateSuccess
+
 }

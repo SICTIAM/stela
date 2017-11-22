@@ -72,6 +72,24 @@
       "choose": "Choisir..."
     }
   },
+  "admin": {
+    "modules": {
+      "acte": {
+        "title": "Module Acte",
+        "local_authority_settings": {
+          "title": "Paramétrage des collectivités",
+          "general_informations": "Information générales",
+          "MIAT_transmission": "Transmission MIAT"
+        },
+        "module_settings": {
+          "title": "Paramétres du module",
+          "main_email": "Email principale",
+          "additional_emails": "Emails additionels",
+          "no_additional_email": "Aucun email additionel"
+        }
+      }
+    }
+  },
   "notifications": {
     "acte": {
       "title": "Module Acte",
@@ -92,6 +110,19 @@
         },
         "multiple_deleted": {
           "success": "Les brouillons ont bien été supprimés"
+        }
+      },
+      "admin": {
+        "title": "Admin module Acte",
+        "local_authority": {
+          "update": {
+            "success": "La mise à jour de la collectivité a bien été prise en compte"
+          }
+        },
+        "admin_module": {
+          "update": {
+            "success": "Les modifications ont bien été enregistrées"
+          }
         }
       },
       "annexe_not_found": "Fichier annexe inexistant",

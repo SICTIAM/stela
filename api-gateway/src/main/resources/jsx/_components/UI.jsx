@@ -12,14 +12,14 @@ const FormField = ({ htmlFor, label, children, inline }) =>
 const FormFieldInline = ({ htmlFor, label, children }) =>
     <Form.Field inline>
         <Grid>
-            <Grid.Column className='inline-grid' width={4}><label htmlFor={htmlFor}>{label}</label></Grid.Column>
+            <Grid.Column className='inline-grid' width={4}><label style={{ verticalAlign: 'middle' }} htmlFor={htmlFor}>{label}</label></Grid.Column>
             <Grid.Column className='inline-grid' width={12}>{children}</Grid.Column>
         </Grid>
     </Form.Field>
 
 const Field = ({ htmlFor, label, children }) =>
     <Grid>
-        <Grid.Column width={4}><label htmlFor={htmlFor}>{label}</label></Grid.Column>
+        <Grid.Column width={4}><label style={{ verticalAlign: 'middle' }} htmlFor={htmlFor}>{label}</label></Grid.Column>
         <Grid.Column width={12}><strong>{children}</strong></Grid.Column>
     </Grid>
 

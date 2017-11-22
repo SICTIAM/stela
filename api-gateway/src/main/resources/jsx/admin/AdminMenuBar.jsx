@@ -20,7 +20,6 @@ class AdminMenuBar extends Component {
                 <Menu.Item as={Link} to="/admin/tableau-de-bord">
                     {t('admin.dashboard')}
                 </Menu.Item>
-
                 <Menu.Item>
                     {t('admin.users')}
                 </Menu.Item>
@@ -30,10 +29,10 @@ class AdminMenuBar extends Component {
                 </Menu.Item>
 
                 <Menu.Item>
-                    <Menu.Header>{t('admin.modules.acte.title')}</Menu.Header>
+                    <Menu.Header>{t('acte:admin.modules.acte.title')}</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item>{t('admin.modules.configuration')}</Menu.Item>
-                        <Menu.Item as={Link} to='/admin/actes/parametrage-collectivite'>{t('admin.modules.local_authority_settings')}</Menu.Item>
+                        <Menu.Item as={Link} to='/admin/actes/parametrage-collectivite'>{t('acte:admin.modules.acte.local_authority_settings.title')}</Menu.Item>
+                        <Menu.Item as={Link} to='/admin/acte/parametrage-module'>{t('acte:admin.modules.acte.module_settings.title')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
@@ -54,4 +53,4 @@ class AdminMenuBar extends Component {
     }
 }
 
-export default translate(['api-gateway'])(AdminMenuBar)
+export default translate(['api-gateway', 'acte'])(AdminMenuBar)

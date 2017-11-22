@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
+import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
@@ -50,14 +51,17 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final EnveloppeCounterRepository enveloppeCounterRepository;
+    private final AdminRepository adminRepository;
 
-    public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller, ApplicationEventPublisher applicationEventPublisher,
-                          EnveloppeCounterRepository enveloppeCounterRepository) {
-        this.acteRepository = acteRepository;
-        this.jaxb2Marshaller = jaxb2Marshaller;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.enveloppeCounterRepository = enveloppeCounterRepository;
-    }
+	public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller,
+			ApplicationEventPublisher applicationEventPublisher, EnveloppeCounterRepository enveloppeCounterRepository,
+			AdminRepository adminRepository) {
+		this.acteRepository = acteRepository;
+		this.jaxb2Marshaller = jaxb2Marshaller;
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.enveloppeCounterRepository = enveloppeCounterRepository;
+		this.adminRepository = adminRepository;
+	}
 
     /**
      * Compress file and annexes into a tar.gz archive.
@@ -199,10 +203,11 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         idcl.setArrondissement(arrondissement);
         idcl.setNature(acte.getNature().getCode());
         idcl.setSIREN(siren);
-
+        
+        Admin admin=adminRepository.findAll().get(0);
         Referent referent = new Referent();
         // TODO extract to local authority config
-        referent.setEmail("servicedemat@sictiam.fr");
+        referent.setEmail(admin.getMainEmail());
         referent.setNom("Demat SICTIAM");
         referent.setTelephone("0101010101");
 
@@ -211,9 +216,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         emetteur.setReferent(referent);
 
         DonneesEnveloppeCLMISILL.AdressesRetour adressesRetour = new DonneesEnveloppeCLMISILL.AdressesRetour();
-        // TODO extract to local authority config
-        adressesRetour.getEmail().add("servidemat@sictiam.fr");
-        adressesRetour.getEmail().add("dev@sictiam.fr");
+        adressesRetour.getEmail().add(admin.getMainEmail());
+		admin.getAdditionalEmails().forEach(eMail -> adressesRetour.getEmail().add(eMail));
 
         // TODO is it really the message file that is expected here ?
         FichierSigne fichierSigne = new FichierSigne();
