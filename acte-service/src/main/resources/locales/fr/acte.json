@@ -69,6 +69,7 @@
       },
       "acte": "Déposer un acte",
       "acte_budgetaire": "Déposer un acte budgétaire",
+      "acte_batch": "Déposer un lot d'actes",
       "choose": "Choisir..."
     }
   },

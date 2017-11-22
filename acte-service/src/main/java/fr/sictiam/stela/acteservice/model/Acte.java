@@ -66,7 +66,7 @@ public class Acte {
     @ManyToOne
     private LocalAuthority localAuthority;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private ActeDraft draft;
+    private Draft draft;
 
     public Acte() {
     }
@@ -89,16 +89,32 @@ public class Acte {
         return this.number;
     }
 
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
     public LocalDate getDecision() {
         return decision;
+    }
+
+    public void setDecision(LocalDate decision) {
+        this.decision = decision;
     }
 
     public ActeNature getNature() {
         return nature;
     }
 
+    public void setNature(ActeNature nature) {
+        this.nature = nature;
+    }
+
     public String getCode() {
         return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getCodeLabel() {
@@ -173,11 +189,11 @@ public class Acte {
         this.localAuthority = localAuthority;
     }
 
-    public ActeDraft getDraft() {
+    public Draft getDraft() {
         return draft;
     }
 
-    public void setDraft(ActeDraft draft) {
+    public void setDraft(Draft draft) {
         this.draft = draft;
     }
 

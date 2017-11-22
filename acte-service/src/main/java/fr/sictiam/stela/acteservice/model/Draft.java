@@ -6,19 +6,21 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class ActeDraft {
+public class Draft {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     private LocalDateTime lastModified;
+    private ActeMode mode;
 
-    public ActeDraft() {
+    public Draft() {
     }
 
-    public ActeDraft(LocalDateTime lastModified) {
+    public Draft(LocalDateTime lastModified, ActeMode mode) {
         this.lastModified = lastModified;
+        this.mode = mode;
     }
 
     public String getUuid() {
@@ -31,5 +33,9 @@ public class ActeDraft {
 
     public void setLastModified(LocalDateTime lastModified) {
         this.lastModified = lastModified;
+    }
+
+    public ActeMode getMode() {
+        return mode;
     }
 }

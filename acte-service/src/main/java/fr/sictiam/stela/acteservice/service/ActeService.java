@@ -64,7 +64,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private EntityManager entityManager;
 
     private final ActeRepository acteRepository;
-    private final ActeDraftRepository acteDraftRepository;
     private final ActeHistoryRepository acteHistoryRepository;
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -72,11 +71,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final PdfGeneratorUtil pdfGeneratorUtil;
 
     @Autowired
-    public ActeService(ActeRepository acteRepository, ActeDraftRepository acteDraftRepository, ActeHistoryRepository acteHistoryRepository,
+    public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
                        AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
                        LocalAuthorityService localAuthorityService, PdfGeneratorUtil pdfGeneratorUtil) {
         this.acteRepository = acteRepository;
-        this.acteDraftRepository = acteDraftRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -117,20 +115,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
         return created;
     }
-
-    public Acte sendDraft(Acte acte) {
-        ActeDraft draft = acte.getDraft();
-        acte.setDraft(null);
-        acteDraftRepository.delete(draft);
-        acte.setCreation(LocalDateTime.now());
-        Acte created = acteRepository.save(acte);
-
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED);
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
-
-        return created;
-    }
     
     public Acte receiveARActe(String number) {
         Acte acte = acteRepository.findByNumber(number).get();
@@ -138,74 +122,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         LOGGER.info("Acte {} AR with id {}", acte.getNumber(), acte.getUuid());
         return acte;
-    }
-
-    public Acte newDraft(LocalAuthority currentLocalAuthority) {
-        Acte acte = new Acte();
-        acte.setLocalAuthority(currentLocalAuthority);
-        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
-        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
-
-        acte.setDraft(new ActeDraft(LocalDateTime.now()));
-        return acteRepository.save(acte);
-    }
-
-    public Acte saveDraft(Acte acte, LocalAuthority currentLocalAuthority) {
-        acte.setLocalAuthority(currentLocalAuthority);
-        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
-        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
-
-        updateLastModifiedDraft(acte.getDraft().getUuid());
-        return acteRepository.save(acte);
-    }
-
-    public void closeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
-        if(acte.empty()) acteRepository.delete(acte);
-        else saveDraft(acte, currentLocalAuthority);
-    }
-
-    public Acte saveDraftFile(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
-        Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getDraftByUuid(uuid);
-        acte.setActeAttachment(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
-        return saveDraft(acte, currentLocalAuthority);
-    }
-
-    public Acte saveDraftAnnexe(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
-        Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getDraftByUuid(uuid);
-        List<Attachment> annexes = acte.getAnnexes();
-        annexes.add(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
-        acte.setAnnexes(annexes);
-        return saveDraft(acte, currentLocalAuthority);
-    }
-
-    public void deleteDraftAnnexe(String acteUuid, String uuid) {
-        Acte acte = getDraftByUuid(acteUuid);
-        if(acte.getAnnexes().stream().anyMatch( attachment -> attachment.getUuid().equals(uuid))) {
-            List<Attachment> annexes = acte.getAnnexes().stream().filter(attachment -> !attachment.getUuid().equals(uuid)).collect(Collectors.toList());
-            acte.setAnnexes(annexes);
-            acteRepository.save(acte);
-            attachmentRepository.delete(attachmentRepository.findByUuid(uuid).get());
-            updateLastModifiedDraft(acte.getDraft().getUuid());
-        }
-    }
-
-    public void deleteDraftFile(String uuid) {
-        Acte acte = getDraftByUuid(uuid);
-        Attachment file = acte.getActeAttachment();
-        if(file != null) {
-            acte.setActeAttachment(null);
-            acteRepository.save(acte);
-            attachmentRepository.delete(file);
-            updateLastModifiedDraft(acte.getDraft().getUuid());
-        }
-    }
-
-    private void updateLastModifiedDraft(String uuid) {
-        ActeDraft draft = acteDraftRepository.findByUuid(uuid);
-        draft.setLastModified(LocalDateTime.now());
-        acteDraftRepository.save(draft);
     }
 
     public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status) {
@@ -235,19 +151,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         TypedQuery<Acte> typedQuery = entityManager.createQuery(query);
         List<Acte> actes = typedQuery.getResultList();
         return actes;
-    }
-
-    public List<Acte> getDrafts() {
-        return acteRepository.findAllByDraftNotNullOrderByDraft_LastModifiedDesc();
-    }
-
-    public void deleteDrafts(List<String> uuids) {
-        List<Acte> drafts = getDraftsFromUuids(uuids);
-        drafts.forEach(acteRepository::delete);
-    }
-
-    public Acte getDraftByUuid(String uuid) {
-        return acteRepository.findByUuidAndDraftNotNull(uuid).orElseThrow(ActeNotFoundException::new);
     }
 
     public Acte getByUuid(String uuid) {
@@ -333,12 +236,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus());
     }
 
-    private List<Acte> getDraftsFromUuids(List<String> uuids) {
-        return uuids.size() > 0 ?
-                uuids.stream().map(this::getDraftByUuid).collect(Collectors.toList()) :
-                acteRepository.findAllByDraftNotNullOrderByDraft_LastModifiedDesc();
-    }
-      
     public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {
         List<String> pages = new ArrayList<>();
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
