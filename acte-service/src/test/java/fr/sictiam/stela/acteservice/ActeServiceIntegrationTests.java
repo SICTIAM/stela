@@ -4,6 +4,7 @@ package fr.sictiam.stela.acteservice;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -48,12 +49,24 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private ActeService acteService;
 
     @Autowired
+    private AdminService adminService;
+
+    @Autowired
     private LocalAuthorityService localAuthorityService;
 
     @Autowired
     private ActeRepository acteRepository;
 
     @Before
+    public void beforeTests() {
+        createAdmin();
+        createLocalAuthority();
+    }
+
+    public void createAdmin() {
+        adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", "dev@sictiam.fr", null));
+    }
+
     public void createLocalAuthority() {
         if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
             LocalAuthority localAuthority =

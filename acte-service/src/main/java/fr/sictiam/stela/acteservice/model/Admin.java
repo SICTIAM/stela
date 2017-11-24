@@ -14,7 +14,7 @@ public class Admin {
 	private String uuid;
 	private String mainEmail;
 	
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name="additional_emails", joinColumns=@JoinColumn(name="admin_uuid"))
 	@Column(name="additional_email")
 	private List<String> additionalEmails;
