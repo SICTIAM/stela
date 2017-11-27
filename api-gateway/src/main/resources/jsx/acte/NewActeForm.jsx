@@ -23,7 +23,9 @@ class NewActeForm extends Component {
     }
     static defaultProps = {
         mode: 'ACTE',
-        shouldUnmount: true
+        shouldUnmount: true,
+        nature: '',
+        decision: ''
     }
     state = {
         fields: {
@@ -84,8 +86,14 @@ class NewActeForm extends Component {
             })
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.draftUuid && nextProps.uuid && !this.state.acteFetched) {
+        const { fields, acteFetched } = this.state
+        if (nextProps.draftUuid && nextProps.uuid && !acteFetched) {
             this.fetchActe(`/api/acte/drafts/${nextProps.draftUuid}/${nextProps.uuid}`)
+        }
+        if (nextProps.mode === 'ACTE_BATCH' && (fields.nature !== nextProps.nature || fields.decision !== nextProps.decision)) {
+            fields.nature = nextProps.nature
+            fields.decision = nextProps.decision
+            this.setState({ fields }, this.validateForm)
         }
     }
     componentWillUnmount() {
@@ -138,6 +146,7 @@ class NewActeForm extends Component {
             fields['public'] = false
             fields['publicWebsite'] = false
         }
+        if (field === 'objet' && this.props.mode === 'ACTE_BATCH') this.props.setObjet(this.state.fields.uuid, value)
         this.props.setStatus('', this.state.fields.uuid)
         this.setState({ fields: fields }, () => {
             this.validateForm()
@@ -290,17 +299,19 @@ class NewActeForm extends Component {
                             validationRule={this.validationRules.objet}
                             fieldName={t('acte.fields.objet')} />
                     </FormField>
-                    <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
-                        <InputValidation id={`${this.state.fields.uuid}_decision`}
-                            type='date'
-                            placeholder='aaaa-mm-jj'
-                            value={this.state.fields.decision}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.decision}
-                            fieldName={t('acte.fields.decision')}
-                            max={moment().format('YYYY-MM-DD')} />
-                    </FormField>
-                    {renderIf(this.props.mode !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
+                    {renderIf(this.props.mode !== 'ACTE_BATCH')(
+                        <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
+                            <InputValidation id={`${this.state.fields.uuid}_decision`}
+                                type='date'
+                                placeholder='aaaa-mm-jj'
+                                value={this.state.fields.decision}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.decision}
+                                fieldName={t('acte.fields.decision')}
+                                max={moment().format('YYYY-MM-DD')} />
+                        </FormField>
+                    )}
+                    {renderIf(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH')(
                         <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')}>
                             <InputValidation id={`${this.state.fields.uuid}_nature`}
                                 type='select'
@@ -346,15 +357,17 @@ class NewActeForm extends Component {
                             {annexes}
                         </Card.Group>
                     )}
-                    {renderIf(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
-                        <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')}>
-                            <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public')} toggle />
-                        </FormField>
-                    )}
-                    {renderIf(this.state.depositFields.publicWebsiteField && this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
-                        <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}>
-                            <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite')} toggle />
-                        </FormField>
+                    {renderIf(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
+                        <div>
+                            <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')}>
+                                <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public')} toggle />
+                            </FormField>
+                            {renderIf(this.state.depositFields.publicWebsiteField)(
+                                <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}>
+                                    <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite')} toggle />
+                                </FormField>
+                            )}
+                        </div>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BATCH')(
                         <div>

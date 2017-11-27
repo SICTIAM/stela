@@ -50,7 +50,9 @@
       "title": "Brouillons",
       "no_draft": "Aucun brouillon",
       "delete_selected_drafts": "Supprimer les brouillons selectionnés",
-      "delete_all_drafts": "Supprimer tous les brouillons"
+      "delete_all_drafts": "Supprimer tous les brouillons",
+      "common_fields": "Champs communs",
+      "add_an_acte": "Ajouter un acte"
     },
     "page": {
       "non_existing_act": "Acte non existant",

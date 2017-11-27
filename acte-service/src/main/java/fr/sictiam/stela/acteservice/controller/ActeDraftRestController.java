@@ -86,6 +86,12 @@ public class ActeDraftRestController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PatchMapping("/drafts/{draftUuid}")
+    ResponseEntity<?> upddateDraftFields(@RequestBody DraftUI draftUI) {
+        draftService.upddateDraftFields(draftUI);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/drafts/{draftUuid}")
     ResponseEntity<?> deleteDraft(@PathVariable String draftUuid) {
         draftService.deleteDrafts(Collections.singletonList(draftUuid));

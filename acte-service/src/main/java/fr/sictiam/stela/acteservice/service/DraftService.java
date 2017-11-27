@@ -79,6 +79,13 @@ public class DraftService {
         acteDraftRepository.delete(draft);
     }
 
+    public void upddateDraftFields(DraftUI draftUI) {
+        Draft draft = getDraftByUuid(draftUI.getUuid());
+        draft.setDecision(draftUI.getDecision());
+        draft.setNature(draftUI.getNature());
+        acteDraftRepository.save(draft);
+    }
+
     private Acte getEmptyActe(LocalAuthority currentLocalAuthority) {
         Acte acte = new Acte();
         acte.setLocalAuthority(currentLocalAuthority);
@@ -98,7 +105,7 @@ public class DraftService {
         Acte acte = newDraft(currentLocalAuthority, ActeMode.ACTE_BATCH);
         Draft draft = acte.getDraft();
         ActeDraftUI acteDraftUI = new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature());
-        return new DraftUI(draft.getUuid(), Collections.singletonList(acteDraftUI), draft.getLastModified(), draft.getMode());
+        return new DraftUI(draft.getUuid(), Collections.singletonList(acteDraftUI), draft.getLastModified(), draft.getMode(), draft.getDecision(), draft.getNature());
     }
 
     @Transactional
@@ -180,7 +187,7 @@ public class DraftService {
             List<ActeDraftUI> acteUuids = getActeDrafts(draft.getUuid()).stream().map(acte ->
                     new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature())
             ).collect(Collectors.toList());
-            if(acteUuids.size() > 0) draftUIs.add(new DraftUI(draft.getUuid(), acteUuids, draft.getLastModified(), draft.getMode()));
+            if(acteUuids.size() > 0) draftUIs.add(new DraftUI(draft.getUuid(), acteUuids, draft.getLastModified(), draft.getMode(), draft.getDecision(), draft.getNature()));
         }
         return draftUIs;
     }
@@ -190,7 +197,7 @@ public class DraftService {
         List<ActeDraftUI> acteUuids = getActeDrafts(uuid).stream().map(acte ->
                 new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature())
         ).collect(Collectors.toList());
-        return new DraftUI(uuid, acteUuids, draft.getLastModified(), draft.getMode());
+        return new DraftUI(uuid, acteUuids, draft.getLastModified(), draft.getMode(), draft.getDecision(), draft.getNature());
     }
 
     public void deleteDrafts(List<String> uuids) {

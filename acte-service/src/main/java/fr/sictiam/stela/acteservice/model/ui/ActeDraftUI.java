@@ -9,6 +9,9 @@ public class ActeDraftUI {
     private String objet;
     private ActeNature nature;
 
+    public ActeDraftUI() {
+    }
+
     public ActeDraftUI(String uuid, String number, String objet, ActeNature nature) {
         this.uuid = uuid;
         this.number = number;
