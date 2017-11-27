@@ -111,6 +111,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
         return created;
     }
+    
+    public Acte receiveARActe(String number) {
+        Acte acte = acteRepository.findByNumber(number).get();
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} AR with id {}", acte.getNumber(), acte.getUuid());
+        return acte;
+    }
 
     public Acte saveDraft(Acte acte, LocalAuthority currentLocalAuthority) {
         acte.setCreation(LocalDateTime.now()); // Hack: Used as 'lastUpdated'
