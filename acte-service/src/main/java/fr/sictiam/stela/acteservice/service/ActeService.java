@@ -119,6 +119,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         LOGGER.info("Acte {} AR with id {}", acte.getNumber(), acte.getUuid());
         return acte;
     }
+    
+    public Acte receiveARActeCancelation(String number) {
+        Acte acte = acteRepository.findByNumber(number).get();
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CANCELLED);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} cancelation with id {}", acte.getNumber(), acte.getUuid());
+        return acte;
+    }
 
     public Acte saveDraft(Acte acte, LocalAuthority currentLocalAuthority) {
         acte.setCreation(LocalDateTime.now()); // Hack: Used as 'lastUpdated'
