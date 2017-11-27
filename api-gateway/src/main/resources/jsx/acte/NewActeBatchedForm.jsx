@@ -31,7 +31,7 @@ class NewActeBatchedForm extends Component {
             decision: '',
             nature: ''
         },
-        draftStatus: '',
+        draftStatus: null,
         draftValid: false,
         statuses: {},
         formValid: {},
@@ -53,6 +53,10 @@ class NewActeBatchedForm extends Component {
                     this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                 })
             })
+    }
+    componentWillUnmount() {
+        this.validateForm.clear()
+        this.saveDraft.clear()
     }
     loadDraft = (draft) => {
         // Hacks to prevent affecting `null` values

@@ -83,6 +83,7 @@ public class DraftService {
         Draft draft = getDraftByUuid(draftUI.getUuid());
         draft.setDecision(draftUI.getDecision());
         draft.setNature(draftUI.getNature());
+        updateLastModifiedDraft(draft.getUuid());
         acteDraftRepository.save(draft);
     }
 

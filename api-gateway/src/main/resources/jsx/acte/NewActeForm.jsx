@@ -106,6 +106,8 @@ class NewActeForm extends Component {
                     response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
                 })
         }
+        this.validateForm.clear()
+        this.saveDraft.clear()
     }
     fetchActe = (url) => {
         fetchWithAuthzHandling({ url })
