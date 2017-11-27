@@ -50,13 +50,13 @@ public class EmailCheckingTask {
     @Autowired
     private ActeService acteService;
 
-    @Value("${checkingemail.host}")
+    @Value("${application.checkingemail.host}")
     private String host;
 
-    @Value("${checkingemail.username}")
+    @Value("${application.checkingemail.username}")
     private String username;
 
-    @Value("${checkingemail.password}")
+    @Value("${application.checkingemail.password}")
     private String password;
 
     @PostConstruct
