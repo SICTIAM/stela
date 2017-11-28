@@ -47,7 +47,12 @@ class NewActeBatchedForm extends Component {
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.loadDraft(json))
+            .then(json =>
+                this.loadDraft(json, () => {
+                    this.validateForm()
+                    this.setState({ active: this.state.fields.actes[0].uuid })
+                })
+            )
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
@@ -58,11 +63,11 @@ class NewActeBatchedForm extends Component {
         this.validateForm.clear()
         this.saveDraft.clear()
     }
-    loadDraft = (draft) => {
+    loadDraft = (draft, callback) => {
         // Hacks to prevent affecting `null` values
         if (!draft.nature) draft.nature = ''
         if (!draft.decision) draft.decision = ''
-        this.setState({ fields: draft }, this.validateForm)
+        this.setState({ fields: draft }, callback)
     }
     getDraftData = () => {
         const draftData = Object.assign({}, this.state.fields)
@@ -75,9 +80,10 @@ class NewActeBatchedForm extends Component {
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
-                const { fields } = this.state
+                const { fields, formValid } = this.state
                 fields.actes.push(json)
-                this.setState({ fields })
+                formValid[json.uuid] = false
+                this.setState({ fields: fields, active: json.uuid, formValid: formValid }, this.updateAllFormValid)
             })
             .catch(response => {
                 response.json().then(json => {
@@ -89,9 +95,11 @@ class NewActeBatchedForm extends Component {
         fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
-                const { fields } = this.state
+                const { fields, statuses, formValid } = this.state
                 fields.actes = fields.actes.filter(acte => acte.uuid !== uuid)
-                this.setState({ fields })
+                delete statuses[uuid]
+                delete formValid[uuid]
+                this.setState({ fields: fields, statuses: statuses, formValid: formValid }, this.updateAllFormValid)
             })
             .catch(response => {
                 response.json().then(json => {
@@ -160,10 +168,10 @@ class NewActeBatchedForm extends Component {
         formValid.map(bool => isAllFormValid = isAllFormValid && bool)
         this.setState({ isAllFormValid })
     }
-    setObjet = (uuid, newObjet) => {
+    setField = (uuid, field, value) => {
         const { fields } = this.state
         const acte = fields.actes.find(acte => acte.uuid === uuid)
-        acte.objet = newObjet
+        acte[field] = value
         this.setState({ fields })
     }
     submitDraft = () => {
@@ -204,8 +212,10 @@ class NewActeBatchedForm extends Component {
             <WrappedActeForm
                 key={acte.uuid}
                 acte={acte}
+                formValid={this.state.formValid[acte.uuid]}
                 isActive={this.state.active === acte.uuid}
                 handleClick={this.handleClick}
+                titlePlaceholder={t('acte.new.batch_title_placeholder')}
                 deleteBatchedActe={this.deleteBatchedActe}>
                 <NewActeForm
                     uuid={acte.uuid}
@@ -217,7 +227,7 @@ class NewActeBatchedForm extends Component {
                     setStatus={this.setStatusForId}
                     status={this.state.status}
                     setFormValidForId={this.setFormValidForId}
-                    setObjet={this.setObjet}
+                    setField={this.setField}
                     shouldUnmount={this.shouldUnmount}
                 />
             </WrappedActeForm>
@@ -225,7 +235,7 @@ class NewActeBatchedForm extends Component {
         return (
             <div>
                 <Segment>
-                    <Header size='medium'>{t('acte.drafts.common_fields')}</Header>
+                    <Header size='medium'>{t('acte.new.common_fields')}</Header>
                     <Form>
                         <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
                             <InputValidation id={'decision'}
@@ -252,7 +262,7 @@ class NewActeBatchedForm extends Component {
                 </Segment>
                 <Accordion>
                     {wrappedActes}
-                    <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>{t('acte.drafts.add_an_acte')}</Button>
+                    <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>{t('acte.new.add_an_acte')}</Button>
                 </Accordion>
                 <Button onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
                 {renderIf(this.state.fields.uuid)(
@@ -265,15 +275,42 @@ class NewActeBatchedForm extends Component {
     }
 }
 
-const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe }) =>
-    <Segment style={{ marginBottom: '1em', paddingBottom: '1em' }}>
+const styles = {
+    overflow: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+    },
+    centered: {
+        display: 'flex',
+        alignItems: 'center'
+    }
+}
+
+const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, formValid }) =>
+    <Segment style={{ paddingTop: '0', paddingBottom: '0' }}>
         <Accordion.Title active={isActive} >
             <Grid>
-                <Grid.Column style={{ display: 'flex', alignItems: 'center' }} width={15} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small'><Icon name='dropdown' /> {acte.objet}</Header>
+                <Grid.Column style={styles.centered} width={1} onClick={() => handleClick(acte.uuid)}>
+                    <Header size='small'><Icon name='dropdown' /></Header>
                 </Grid.Column>
-                <Grid.Column width={1} style={{ textAlign: 'right' }}>
-                    <Button color='red' icon onClick={() => deleteBatchedActe(acte.uuid)}>
+                <Grid.Column style={styles.centered} width={3} onClick={() => handleClick(acte.uuid)}>
+                    <Header size='small' style={styles.overflow}>
+                        {!acte.number && !acte.objet ? titlePlaceholder
+                            : acte.number ? `N° ${acte.number}` : ''}
+                    </Header>
+                </Grid.Column>
+                <Grid.Column style={styles.centered} width={10} onClick={() => handleClick(acte.uuid)}>
+                    <Header size='small' style={styles.overflow}>
+                        {acte.objet}
+                    </Header>
+                </Grid.Column>
+                <Grid.Column width={1} style={styles.centered}>
+                    {formValid ? <Icon color='green' name='checkmark' size='large' />
+                        : <Icon color='red' name='warning circle' size='large' />}
+                </Grid.Column>
+                <Grid.Column width={1}>
+                    <Button color='red' size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
                         <Icon name='remove' />
                     </Button>
                 </Grid.Column>

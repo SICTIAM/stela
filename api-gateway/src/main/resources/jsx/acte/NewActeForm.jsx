@@ -148,7 +148,7 @@ class NewActeForm extends Component {
             fields['public'] = false
             fields['publicWebsite'] = false
         }
-        if (field === 'objet' && this.props.mode === 'ACTE_BATCH') this.props.setObjet(this.state.fields.uuid, value)
+        if ((field === 'objet' || field === 'number') && this.props.mode === 'ACTE_BATCH') this.props.setField(this.state.fields.uuid, field, value)
         this.props.setStatus('', this.state.fields.uuid)
         this.setState({ fields: fields }, () => {
             this.validateForm()
