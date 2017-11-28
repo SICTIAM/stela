@@ -286,6 +286,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(0, draftService.getActeDrafts().size());
 
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         DraftUI draft = draftService.getDraftUIs().get(0);
         assertEquals(draft.getUuid(), acte.getDraft().getUuid());
@@ -293,6 +294,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setObjet("Object draft");
         acte = draftService.saveActeDraft(acte, localAuthority);
         assertEquals("Object draft", acte.getObjet());
+
 
         acte.setObjet("");
         draftService.leaveActeDraft(acte, localAuthority);

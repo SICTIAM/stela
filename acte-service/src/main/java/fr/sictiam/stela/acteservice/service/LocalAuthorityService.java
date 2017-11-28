@@ -76,7 +76,7 @@ public class LocalAuthorityService {
             LOGGER.error("Unable to parse classification data !", e);
         }
     }
-
+    
     @Transactional
     public void loadCodesMatieres(String uuid, RetourClassification classification) {
 
@@ -130,12 +130,13 @@ public class LocalAuthorityService {
         localAuthorityRepository.save(localAuthority);
 
     }
+    
+    private MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) { 
+        MaterialCode newMat = new MaterialCode(key, label, localAuthority); 
+        materialCodeRepository.save(newMat); 
+        return newMat; 
+    } 
 
-    private MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) {
-        MaterialCode newMat = new MaterialCode(key, label, localAuthority);
-        materialCodeRepository.save(newMat);
-        return newMat;
-    }
 
     @Transactional
     public Map<String, String> getCodesMatieres(String uuid) {

@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -34,7 +33,6 @@ public class LocalAuthority {
     
     @OneToMany(mappedBy="localAuthority")
     private List<MaterialCode> materialCodes;
-
 
     public LocalAuthority() {
     }
