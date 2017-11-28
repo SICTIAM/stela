@@ -80,7 +80,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             } catch (IOException e) {
                 LOGGER.error("Unable to add codes matieres file for {} : {}", localAuthority.getName(), e.toString());
             }
-            localAuthorityService.createOrUpdate(localAuthority);
+            LocalAuthority localAuthorityCreated =localAuthorityService.createOrUpdate(localAuthority);
+            localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
         }
     }
 
@@ -275,7 +276,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         assertEquals(5, codesMatieres.size());
         assertTrue(codesMatieres.containsKey("1-1-0-0-0"));
-        assertEquals("Marchés publics", codesMatieres.get("1-1-0-0-0"));
+        assertEquals("Commande Publique / Marchés publics", codesMatieres.get("1-1-0-0-0"));
         assertEquals("1-1-0-0-0", codesMatieres.keySet().iterator().next());
     }
 

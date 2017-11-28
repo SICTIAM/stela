@@ -1,6 +1,7 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
 import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
@@ -62,11 +63,25 @@ public class LocalAuthorityRestController {
         return new ResponseEntity<>(new ActeDepositFieldsUI(currentLocalAuthority.getCanPublishRegistre(),
                 currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }
-
+    
+    @GetMapping("/load-matieres")
+    public void loadCodesMatieres() {
+        // TODO: Retrieve current LocalAuthority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        localAuthorityService.loadCodesMatieres(currentLocalAuthority.getUuid());
+    }
+    
     @GetMapping("/codes-matieres")
     public ResponseEntity<Map<String, String>> getCodesMatieres() {
         // TODO: Retrieve current LocalAuthority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         return new ResponseEntity<>(localAuthorityService.getCodesMatieres(currentLocalAuthority.getUuid()), HttpStatus.OK);
+    }
+    
+    @GetMapping("/codes-matiere/{code}")
+    public ResponseEntity< String> getCodeMatiereLabel(@PathVariable String code) {
+        // TODO: Retrieve current LocalAuthority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        return new ResponseEntity<>(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), code), HttpStatus.OK);
     }
 }
