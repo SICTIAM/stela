@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model.ui;
 
+import fr.sictiam.stela.acteservice.model.StampPosition;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -16,6 +17,7 @@ public class LocalAuthorityUpdateUI {
     private String nature;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
+    private StampPosition stampPosition;
 
     public LocalAuthorityUpdateUI() {
     }
@@ -38,5 +40,9 @@ public class LocalAuthorityUpdateUI {
 
     public Boolean getCanPublishWebSite() {
 	return canPublishWebSite;
+    }
+
+    public StampPosition getStampPosition() {
+        return stampPosition;
     }
 }

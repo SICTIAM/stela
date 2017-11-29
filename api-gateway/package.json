@@ -18,6 +18,7 @@
     "react": "^15.5.4",
     "react-datetime": "^2.9.0",
     "react-dom": "^15.5.4",
+    "react-draggable": "^3.0.4",
     "react-i18next": "^4.1.0",
     "react-jsonschema-form": "^0.48.2",
     "react-notification-system": "0.2.x",

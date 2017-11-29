@@ -3,9 +3,10 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import moment from 'moment'
-import { Grid, Segment, List, Checkbox, Label, Icon } from 'semantic-ui-react'
+import { Grid, Segment, List, Checkbox, Label, Icon, Button, Popup } from 'semantic-ui-react'
 
 import { errorNotification } from '../_components/Notifications'
+import DraggablePosition from '../_components/DraggablePosition'
 import { Field } from '../_components/UI'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -26,8 +27,11 @@ class Acte extends Component {
                 annexes: [],
                 acteHistories: []
             },
-            history: {},
-            cancellable: false
+            cancellable: false,
+            stampPosition: {
+                x: 10,
+                y: 10
+            }
         },
         acteFetched: false
     }
@@ -39,6 +43,7 @@ class Acte extends Component {
                 .then(response => response.json())
                 .then(json => this.setState({ acteUI: json, acteFetched: true }))
                 .catch(response => {
+                    console.log(response)
                     response.json().then(json => {
                         console.log(json)
                         this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
@@ -46,6 +51,11 @@ class Acte extends Component {
                     history.push('/acte')
                 })
         }
+    }
+    handleChangeDeltaPosition = (stampPosition) => {
+        const { acteUI } = this.state
+        acteUI.stampPosition = stampPosition
+        this.setState({ acteUI })
     }
     getStatusColor = (status) => {
         if (['ACK_RECEIVED'].includes(status)) return 'green'
@@ -62,6 +72,24 @@ class Acte extends Component {
             <List.Item key={annexe.uuid}>
                 <a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a>
             </List.Item>
+        )
+        const stampPosition = (
+            <div>
+                <DraggablePosition
+                    style={{ marginBottom: '0.5em' }}
+                    label={t('acte.stamp_pad.pad_label')}
+                    height={300}
+                    width={190}
+                    labelColor='#000'
+                    position={this.state.acteUI.stampPosition}
+                    handleChange={this.handleChangeDeltaPosition} />
+                <div style={{ textAlign: 'center' }}>
+                    <a className='ui blue icon button' target='_blank' title='Télécharger le justificatif'
+                        href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
+                        {t('api-gateway:form.download')}
+                    </a>
+                </div>
+            </div>
         )
         return (
             <div>
@@ -92,9 +120,20 @@ class Acte extends Component {
                             <Field htmlFor="code" label={t('acte.fields.code')}>
                                 <span id="code">{acte.codeLabel} ({acte.code})</span>
                             </Field>
-                            <Field htmlFor="acteAttachment" label={t('acte.fields.acteAttachment')}>
-                                <span id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
-                            </Field>
+                            <Grid>
+                                <Grid.Column width={4}>
+                                    <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
+                                </Grid.Column>
+                                <Grid.Column width={4}>
+                                    <span id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
+                                </Grid.Column>
+                                <Grid.Column width={8}>
+                                    <Popup
+                                        trigger={<Button content={t('acte.stamp_pad.choose_stamp_position')} />}
+                                        content={stampPosition} on='click' position='right center'
+                                    />
+                                </Grid.Column>
+                            </Grid>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 {renderIf(annexes.length > 0)(
                                     <List id="annexes">
@@ -122,4 +161,4 @@ class Acte extends Component {
     }
 }
 
-export default translate(['acte'])(Acte)
+export default translate(['acte', 'api-gateway'])(Acte)
