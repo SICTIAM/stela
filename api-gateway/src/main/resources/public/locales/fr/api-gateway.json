@@ -13,9 +13,9 @@
         "add_a_file": "Ajouter un fichier",
         "add": "Ajouter",
         "validation": {
-            "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des underscores.",
+            "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des tirets bas (_).",
             "mandatoryfield":"Le champ est obligatoire",
-            "malformedfield":"Le champ n'est form� correctement",
+            "malformedfield":"Le champ n'est pas formé correctement",
             "mandatoryfile":"Fichier obligatoire",
             "badextension":"L'extension du fichier un incorrect"
         }

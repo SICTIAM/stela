@@ -72,7 +72,7 @@ public class ActeDraftRestController {
 	List<ObjectError> errors = ValidationUtil.validateActe(acte);
 
 	if (!errors.isEmpty()) {
-	    CustomValidationUI customValidationUI = new CustomValidationUI(errors, "as fail");
+	    CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
 	    return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
 	} else {
 	    Acte result = acteService.sendDraft(acte);
