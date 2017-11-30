@@ -1,14 +1,26 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
-import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
-import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
-import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
-import fr.sictiam.stela.acteservice.service.exceptions.*;
-import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,20 +33,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
+import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
+import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
+import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
+import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
+import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -97,10 +114,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return created;
     }
 
-    public Acte sendDraft(String uuid) {
-        Acte acte = getDraftByUuid(uuid);
-        // TODO: Do some backend validations on the acte
-
+    public Acte sendDraft(Acte acte) {        
         acte.setDraft(false);
         acte.setCreation(LocalDateTime.now());
         Acte created = acteRepository.save(acte);
@@ -299,7 +313,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 uuids.stream().map(this::getDraftByUuid).collect(Collectors.toList()) :
                 acteRepository.findAllByDraftTrueOrderByCreationDesc();
     }
-
+      
     public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {
         List<String> pages = new ArrayList<>();
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);

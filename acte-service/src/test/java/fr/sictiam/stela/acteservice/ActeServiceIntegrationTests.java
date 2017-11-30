@@ -304,8 +304,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acteService.closeDraft(draft, localAuthority);
         assertEquals(1, acteService.getDrafts().size());
         assertNotNull(acteService.getDraftByUuid(draft.getUuid()));
-
-        acteService.sendDraft(draft.getUuid());
+        Acte acte=acteService.getDraftByUuid(draft.getUuid());
+        acteService.sendDraft(acte);
         assertEquals(0, acteService.getDrafts().size());
         assertEquals(draft.getUuid(), acteService.getByUuid(draft.getUuid()).getUuid());
     }
