@@ -233,6 +233,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         } else throw new CancelForbiddenException();
     }
+    
+    public void sent(String acteUuid) {
+        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.SENT);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));       
+    }
+    
+    public void notSent(String acteUuid) {
+        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.NOT_SENT);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));       
+    }
 
     public boolean isCancellable(String uuid) {
         // TODO: Improve later when phases will be supported
@@ -357,5 +367,5 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         acteHistories.add(event.getActeHistory());
         acte.setActeHistories(acteHistories);
         acteRepository.save(acte);
-    }
+    }  
 }
