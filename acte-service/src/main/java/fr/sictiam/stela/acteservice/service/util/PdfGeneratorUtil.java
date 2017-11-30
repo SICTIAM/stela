@@ -1,15 +1,21 @@
 package fr.sictiam.stela.acteservice.service.util;
 
-import com.lowagie.text.Document;
+import com.lowagie.text.*;
+import com.lowagie.text.Font;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.html.simpleparser.HTMLWorker;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +23,8 @@ import java.util.Map;
 
 @Component
 public class PdfGeneratorUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PdfGeneratorUtil.class);
 
     @Autowired
     private TemplateEngine templateEngine;
@@ -48,5 +56,73 @@ public class PdfGeneratorUtil {
             }
         }
         return templateEngine.process(templateName, ctx);
+    }
+
+    public byte[] stampPDF(String ARUuid, String ARDate, byte[] pdf, Integer percentPositionX, Integer percentPositionY) throws IOException, DocumentException {
+        PdfReader reader = new PdfReader(pdf);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        PdfStamper stamp = new PdfStamper(reader, baos, '\0', true);
+        PdfContentByte canvas = stamp.getOverContent(1);
+        Color color = new Color(43, 43, 43);
+        Rectangle mediabox = reader.getBoxSize(1, "media");
+        int pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
+        // Hack because the iTextPDF origin is at the lower-left, but the front is at the top-left
+        int pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
+
+        drawStampBorders(canvas, color, pixelPositionX, pixelPositionY);
+        drawStampTitle(canvas, color, pixelPositionX, pixelPositionY);
+        drawStampDetails(ARUuid, ARDate, canvas, color, pixelPositionX, pixelPositionY);
+        canvas.stroke();
+        stamp.close();
+        return baos.toByteArray();
+    }
+
+    private void drawStampTitle(PdfContentByte canvas, Color color, int pixelPositionX, int pixelPositionY) throws DocumentException {
+        ColumnText ct = new ColumnText(canvas);
+        ct.setSimpleColumn(pixelPositionX + 65f, pixelPositionY + 20f, pixelPositionX + 200f, pixelPositionY + 45f);
+
+        float fntSize = 12f;
+        float lineSpacing = 10f;
+        Font font = FontFactory.getFont(FontFactory.COURIER, fntSize, Font.BOLD, color);
+
+        Paragraph p = new Paragraph(new Phrase(lineSpacing, "AR Prefecture", font));
+        ct.addElement(p);
+        ct.go();
+    }
+
+    private void drawStampDetails(String ARUuid, String ARDate, PdfContentByte canvas, Color color, int pixelPositionX, int pixelPositionY) throws DocumentException {
+        ColumnText ct = new ColumnText(canvas);
+        ct.setSimpleColumn(pixelPositionX + 8f, pixelPositionY + 8f, pixelPositionX + 238f, pixelPositionY + 27f);
+
+        float fntSize = 9f;
+        float lineSpacing = 9f;
+        Font font = FontFactory.getFont(FontFactory.COURIER, fntSize, color);
+
+        Paragraph p1 = new Paragraph(new Phrase(lineSpacing, ARUuid, font));
+        Paragraph p2 = new Paragraph(new Phrase(lineSpacing,"Reçu le " + ARDate, font));
+        ct.addElement(p1);
+        ct.addElement(p2);
+        ct.go();
+    }
+
+    private void drawStampBorders(PdfContentByte canvas, Color color, int pixelPositionX, int pixelPositionY) {
+        canvas.setColorStroke(color);
+
+        // Draw thick outside line
+        canvas.setLineWidth(3);
+        canvas.moveTo(pixelPositionX, pixelPositionY);
+        canvas.lineTo(pixelPositionX + 235, pixelPositionY);
+        canvas.lineTo(pixelPositionX + 235, pixelPositionY + 50);
+        canvas.lineTo(pixelPositionX, pixelPositionY + 50);
+        canvas.closePathStroke();
+
+        // Draw thin inside line
+        canvas.setLineWidth(1);
+        canvas.moveTo(pixelPositionX + 5, pixelPositionY + 5);
+        canvas.lineTo(pixelPositionX + 230, pixelPositionY + 5);
+        canvas.lineTo(pixelPositionX + 230, pixelPositionY + 30);
+        canvas.lineTo(pixelPositionX + 5, pixelPositionY + 30);
+        canvas.closePathStroke();
     }
 }

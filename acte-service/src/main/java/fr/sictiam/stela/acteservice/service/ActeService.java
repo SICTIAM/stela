@@ -21,7 +21,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
-import fr.sictiam.stela.acteservice.dao.ActeDraftRepository;
+import com.lowagie.text.DocumentException;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
@@ -54,6 +54,7 @@ import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -68,17 +69,19 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
+    private final ArchiveService archiveService;
     private final PdfGeneratorUtil pdfGeneratorUtil;
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
                        AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-                       LocalAuthorityService localAuthorityService, PdfGeneratorUtil pdfGeneratorUtil) {
+                       LocalAuthorityService localAuthorityService, ArchiveService archiveService, PdfGeneratorUtil pdfGeneratorUtil) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
+        this.archiveService = archiveService;
         this.pdfGeneratorUtil = pdfGeneratorUtil;
     }
 
@@ -178,7 +181,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public void cancel(String uuid) {
-        if(isCancellable(uuid)) {
+        if(isActeACK(uuid)) {
             ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         } else throw new CancelForbiddenException();
@@ -194,7 +197,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));       
     }
 
-    public boolean isCancellable(String uuid) {
+    public boolean isActeACK(String uuid) {
         // TODO: Improve later when phases will be supported
         Acte acte = getByUuid(uuid);
         List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT);
@@ -302,6 +305,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 data.put(entry.getKey()+"_fieldName", entry.getKey());
         }
         return data;
+    }
+
+    public byte[] getStampedActe(Acte acte, Integer x, Integer y, LocalAuthority localAuthority) throws IOException, DocumentException {
+        if(x == null || y == null) {
+            x = localAuthority.getStampPosition().getX();
+            y = localAuthority.getStampPosition().getY();
+        }
+        ActeHistory ACKHistory = acte.getActeHistories().stream()
+                .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).collect(Collectors.toList()).get(0);
+        return pdfGeneratorUtil.stampPDF(archiveService.getBaseFilename(acte, Flux.TRANSMISSION_ACTE), ACKHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), acte.getActeAttachment().getFile(), x, y);
     }
 
     @Override

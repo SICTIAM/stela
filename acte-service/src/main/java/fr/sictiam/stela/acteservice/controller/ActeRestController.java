@@ -1,6 +1,12 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URLConnection;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+import com.lowagie.text.DocumentException;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
@@ -30,10 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -65,10 +67,10 @@ public class ActeRestController {
     @GetMapping("/{uuid}")
     public ResponseEntity<ActeUI> getByUuid(@PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        boolean isCancellable = acteService.isCancellable(uuid);
+        boolean isActeACK = acteService.isActeACK(uuid);
         // TODO Retrieve current local authority
         StampPosition stampPosition = localAuthorityService.getByName("SICTIAM-Test").get().getStampPosition();
-        return new ResponseEntity<>(new ActeUI(acte, isCancellable, stampPosition), HttpStatus.OK);
+        return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
@@ -107,15 +109,28 @@ public class ActeRestController {
     @GetMapping("/{uuid}/file")
     public void getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
-        // TODO: Stamp the file if ACK
         outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
     }
 
     @GetMapping("/{uuid}/file/stamped")
-    public void getStampedActeAttachment(HttpServletResponse response, @PathVariable String uuid, @RequestParam int x, @RequestParam int y) {
+    public void getStampedActeAttachment(HttpServletResponse response, @PathVariable String uuid,
+                                         @RequestParam(required = false) Integer x, @RequestParam(required = false) Integer y) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         Acte acte = acteService.getByUuid(uuid);
-        // TODO: Stamp the file if ACK, at position x% and y%
-        outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
+        byte[] pdf = new byte[0];
+        if(!acteService.isActeACK(uuid)) {
+            pdf = acte.getActeAttachment().getFile();
+        } else {
+            try {
+                pdf = acteService.getStampedActe(acte, x, y, currentLocalAuthority);
+            } catch (IOException e) {
+                LOGGER.error("Error trying to open the acte attachment PDF: {}", e);
+            } catch (DocumentException e) {
+                LOGGER.error("Error trying to stamp the acte attachment PDF: {}", e);
+            }
+        }
+        outputFile(response, pdf, acte.getActeAttachment().getFilename());
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")

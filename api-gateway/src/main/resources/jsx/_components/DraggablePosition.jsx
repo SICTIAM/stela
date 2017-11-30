@@ -18,8 +18,8 @@ class DraggablePosition extends Component {
         position: { x: 10, y: 10 },
         height: 300,
         width: 190,
-        boxWidth: 50,
-        boxHeight: 30,
+        boxWidth: 70,
+        boxHeight: 25,
         paddingPercent: 5
     }
     styles = {

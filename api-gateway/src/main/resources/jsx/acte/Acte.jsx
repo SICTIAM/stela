@@ -27,7 +27,7 @@ class Acte extends Component {
                 annexes: [],
                 acteHistories: []
             },
-            cancellable: false,
+            acteACK: false,
             stampPosition: {
                 x: 10,
                 y: 10
@@ -63,6 +63,7 @@ class Acte extends Component {
     }
     render() {
         const { t } = this.context
+        const { acteACK } = this.state.acteUI
         const acteFetched = renderIf(this.state.acteFetched)
         const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
@@ -103,7 +104,7 @@ class Acte extends Component {
                                     {renderIf(lastHistory && lastHistory.status === 'ACK_RECEIVED')(
                                         <a className='ui blue basic icon button' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank' title='Télécharger le justificatif'><Icon name='download' /></a>
                                     )}
-                                    <ActeCancelButton isCancellable={this.state.acteUI.cancellable} uuid={this.state.acteUI.acte.uuid} />
+                                    <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
                                 </Grid.Column>
                             </Grid>
 
@@ -123,15 +124,17 @@ class Acte extends Component {
                                 <Grid.Column width={4}>
                                     <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
                                 </Grid.Column>
-                                <Grid.Column width={4}>
+                                <Grid.Column width={acteACK ? 4 : 12}>
                                     <span id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
                                 </Grid.Column>
-                                <Grid.Column width={8}>
-                                    <Popup
-                                        trigger={<Button content={t('acte.stamp_pad.download_stamped_acte')} />}
-                                        content={stampPosition} on='click' position='right center'
-                                    />
-                                </Grid.Column>
+                                {renderIf(acteACK)(
+                                    <Grid.Column width={8}>
+                                        <Popup
+                                            trigger={<Button content={t('acte.stamp_pad.download_stamped_acte')} />}
+                                            content={stampPosition} on='click' position='right center'
+                                        />
+                                    </Grid.Column>
+                                )}
                             </Grid>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 {renderIf(annexes.length > 0)(
