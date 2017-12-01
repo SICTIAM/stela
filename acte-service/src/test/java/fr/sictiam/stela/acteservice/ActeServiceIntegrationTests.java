@@ -11,6 +11,7 @@ import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -141,7 +142,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         try {
             // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(2000);
+            Thread.sleep(4000);
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
@@ -152,13 +153,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertNotNull(acteHistory.get().getFileName());
 
         Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getActeHistories().last().getStatus());
+        assertEquals(StatusType.SENT, acte.getActeHistories().last().getStatus());
 
         SortedSet<ActeHistory> acteHistories = acte.getActeHistories();
-        assertEquals(3, acteHistories.size());
+        assertEquals(4, acteHistories.size());
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.CREATED)));
         assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_CREATED)));
-        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_SIZE_CHECKED)));
+        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.SENT)));
 
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
@@ -214,13 +215,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         try {
             // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(2000);
+            Thread.sleep(4000);
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
 
         acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.ARCHIVE_SIZE_CHECKED, acte.getActeHistories().last().getStatus());
+        assertEquals(StatusType.SENT, acte.getActeHistories().last().getStatus());
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
         assertTrue(acteHistory.isPresent());

@@ -183,11 +183,21 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         } else throw new CancelForbiddenException();
     }
+    
+    public void sent(String acteUuid) {
+        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.SENT);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));       
+    }
+    
+    public void notSent(String acteUuid) {
+        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.NOT_SENT);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));       
+    }
 
     public boolean isCancellable(String uuid) {
         // TODO: Improve later when phases will be supported
         Acte acte = getByUuid(uuid);
-        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED);
+        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT);
         SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))
@@ -301,5 +311,5 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         acteHistories.add(event.getActeHistory());
         acte.setActeHistories(acteHistories);
         acteRepository.save(acte);
-    }
+    }  
 }

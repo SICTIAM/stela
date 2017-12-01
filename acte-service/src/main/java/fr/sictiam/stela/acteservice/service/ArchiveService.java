@@ -171,7 +171,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_TOO_LARGE);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, newActeHistory));
         } else {
-            ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_SIZE_CHECKED);
+            ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_SIZE_CHECKED,
+                    acteHistory.getDate(), acteHistory.getFile(), acteHistory.getFileName());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, newActeHistory));
         }
     }
