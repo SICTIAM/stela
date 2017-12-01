@@ -247,7 +247,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public boolean isCancellable(String uuid) {
         // TODO: Improve later when phases will be supported
         Acte acte = getByUuid(uuid);
-        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED);
+        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT);
         SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))

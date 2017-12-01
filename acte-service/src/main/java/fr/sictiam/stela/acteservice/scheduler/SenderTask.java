@@ -52,7 +52,8 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                 break;
         }
     }
-
+    
+    //reset limitation every hour
     @Scheduled(cron = "0 0 0/1 * * ?")
     public void resetLimitation() {
         currentSizeUsed.set(0);
