@@ -72,7 +72,7 @@ public class LocalAuthorityRestController {
     }
     
     @GetMapping("/codes-matieres")
-    public ResponseEntity<Map<String, String>> getCodesMatieres() {
+    public ResponseEntity<List<MaterialCode>> getCodesMatieres() {
         // TODO: Retrieve current LocalAuthority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         return new ResponseEntity<>(localAuthorityService.getCodesMatieres(currentLocalAuthority.getUuid()), HttpStatus.OK);

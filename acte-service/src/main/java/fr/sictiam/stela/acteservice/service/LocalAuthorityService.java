@@ -139,16 +139,14 @@ public class LocalAuthorityService {
 
 
     @Transactional
-    public Map<String, String> getCodesMatieres(String uuid) {
+    public List<MaterialCode> getCodesMatieres(String uuid) {
 
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
         Map<String, String> codesMatieres = new LinkedHashMap<>();
         if (localAuthority.getMaterialCodes() == null || localAuthority.getMaterialCodes().isEmpty()) {
             loadCodesMatieres(uuid);
         }
-        localAuthority.getMaterialCodes()
-                .forEach(materialCode -> codesMatieres.put(materialCode.getCode(), materialCode.getLabel()));
-        return codesMatieres;
+        return localAuthority.getMaterialCodes();
     }
 
     public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {
