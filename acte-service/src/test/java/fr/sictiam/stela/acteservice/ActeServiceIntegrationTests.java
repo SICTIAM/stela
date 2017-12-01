@@ -312,7 +312,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(acte.getUuid(), draftUIs.get(0).getActes().get(0).getUuid());
         assertNotNull(draftService.getActeDraftByUuid(acte.getUuid()));
 
-        draftService.submitActeDraft(acte.getUuid());
+        acte = draftService.getActeDraftByUuid(acte.getUuid());
+        draftService.submitActeDraft(acte);
         assertEquals(0, draftService.getDraftUIs().size());
         assertNotNull(acteService.getByUuid(acte.getUuid()));
     }
@@ -391,6 +392,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draft = draftService.getDraftActesUI(draft.getUuid());
         assertEquals(2, draft.getActes().size());
 
+        Acte acte1 = draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid());
+        Acte acte2 = draftService.getActeDraftByUuid(draft.getActes().get(1).getUuid());
+        draftService.saveActeDraft(setActeValues(acte1), localAuthority);
+        draftService.saveActeDraft(setActeValues(acte2), localAuthority);
+
         draftService.sumitDraft(draft.getUuid());
         assertEquals(0, draftService.getDraftUIs().size());
         assertEquals(0, draftService.getActeDrafts().size());
@@ -426,6 +432,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setObjet("Objet");
         acte.setPublic(true);
         acte.setPublicWebsite(true);
+        try {
+            MultipartFile multipartFile = getMultipartResourceFile("data/Delib.pdf", "application/pdf");
+            Attachment attachment = new Attachment(multipartFile.getBytes(), multipartFile.getOriginalFilename(), multipartFile.getSize());
+            acte.setActeAttachment(attachment);
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to load an acteAttachment");
+        }
         return acte;
     }
 

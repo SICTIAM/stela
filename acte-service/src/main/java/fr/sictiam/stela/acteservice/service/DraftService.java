@@ -6,8 +6,10 @@ import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
+import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.exceptions.*;
+import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -44,10 +47,7 @@ public class DraftService {
         this.localAuthorityService = localAuthorityService;
     }
 
-    public Acte submitActeDraft(String uuid) {
-        Acte acte = getActeDraftByUuid(uuid);
-        // TODO: Do some backend validations on the acte
-
+    public Acte submitActeDraft(Acte acte) {
         Draft draft = acte.getDraft();
         acte.setDraft(null);
         acte.setCreation(LocalDateTime.now());
@@ -61,13 +61,24 @@ public class DraftService {
         return created;
     }
 
-    public void sumitDraft(String uuid) {
+    public Optional<CustomValidationUI> sumitDraft(String uuid) {
         List<Acte> actes = getActeDrafts(uuid);
         Draft draft = getDraftByUuid(uuid);
 
-        actes.forEach(acte -> {
-            // TODO: Do some backend validations on the acte
+        CustomValidationUI customValidationUI = null;
+        for (Acte acte:actes) {
+            List<ObjectError> errors = ValidationUtil.validateActe(acte);
+            if (!errors.isEmpty()) {
+                if (customValidationUI == null) {
+                    customValidationUI = new CustomValidationUI(errors, "has failed");
+                } else {
+                    customValidationUI.getErrors().addAll(errors);
+                }
+            }
+        }
+        if(customValidationUI != null) return Optional.of(customValidationUI);
 
+        actes.forEach(acte -> {
             acte.setDraft(null);
             acte.setCreation(LocalDateTime.now());
             Acte created = acteRepository.save(acte);
@@ -77,6 +88,7 @@ public class DraftService {
             LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
         });
         acteDraftRepository.delete(draft);
+        return Optional.empty();
     }
 
     public void upddateDraftFields(DraftUI draftUI) {

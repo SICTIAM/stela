@@ -2,20 +2,24 @@ package fr.sictiam.stela.acteservice.controller;
 
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
+import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 
+import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -82,7 +86,8 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}")
     ResponseEntity<?> submitDraft(@PathVariable String draftUuid) {
-        draftService.sumitDraft(draftUuid);
+        Optional opt =  draftService.sumitDraft(draftUuid);
+        if(opt.isPresent()) return new ResponseEntity<>(opt.get(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -99,9 +104,16 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
-    ResponseEntity<String> submitActeDraft(@PathVariable String uuid) {
-        Acte result = draftService.submitActeDraft(uuid);
-        return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+    ResponseEntity<?> submitActeDraft(@PathVariable String uuid) {
+        Acte acteDraft = draftService.getActeDraftByUuid(uuid);
+        List<ObjectError> errors = ValidationUtil.validateActe(acteDraft);
+        if (!errors.isEmpty()) {
+            CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
+            return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
+        } else {
+            Acte result = draftService.submitActeDraft(acteDraft);
+            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+        }
     }
 
     @PostMapping("/drafts/{uuid}/newActe")
