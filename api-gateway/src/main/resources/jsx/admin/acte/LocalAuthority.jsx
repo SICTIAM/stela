@@ -6,6 +6,7 @@ import { Checkbox, Form, Button, Segment } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import InputValidation from '../../_components/InputValidation'
+import DraggablePosition from '../../_components/DraggablePosition'
 import { errorNotification, localAuthorityUpdateSuccess } from '../../_components/Notifications'
 import { Field } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../../_util/utils'
@@ -29,7 +30,11 @@ class LocalAuthority extends Component {
             district: '',
             nature: '',
             canPublishRegistre: false,
-            canPublishWebSite: false
+            canPublishWebSite: false,
+            stampPosition: {
+                x: 10,
+                y: 10
+            }
         },
         localAuthorityFetched: false,
         isFormValid: false
@@ -47,6 +52,7 @@ class LocalAuthority extends Component {
                 .then(response => response.json())
                 .then(json => this.updateState(json))
                 .catch(response => {
+                    console.log(response)
                     response.json().then(json => {
                         this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                     })
@@ -54,15 +60,20 @@ class LocalAuthority extends Component {
                 })
         }
     }
-    updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite }) => {
+    updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite, stampPosition }) => {
         const constantFields = { uuid, name, siren, nomenclatureDate }
-        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite }
+        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite, stampPosition }
         this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true }, this.validateForm)
     }
     handleFieldChange = (field, value) => {
         const fields = this.state.fields
         fields[field] = value
         this.setState({ fields: fields }, this.validateForm)
+    }
+    handleChangeDeltaPosition = (position) => {
+        const { fields } = this.state
+        fields.stampPosition = position
+        this.setState({ fields })
     }
     validateForm = () => {
         const data = {
@@ -91,6 +102,7 @@ class LocalAuthority extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }
+    cancelSubmit = (event) => event.preventDefault()
     render() {
         const { t } = this.context
         const localAuthorityFetched = renderIf(this.state.localAuthorityFetched)
@@ -107,6 +119,9 @@ class LocalAuthority extends Component {
                         </Field>
                         <Field htmlFor="siren" label={t('api-gateway:local_authority.siren')}>
                             <span id="siren">{this.state.constantFields.siren}</span>
+                        </Field>
+                        <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
+                            <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
                         </Field>
                         <Field htmlFor="department" label={t('api-gateway:local_authority.department')}>
                             <InputValidation id='department'
@@ -132,8 +147,15 @@ class LocalAuthority extends Component {
                                 fieldName={t('api-gateway:local_authority.nature')}
                                 className='simpleInput' />
                         </Field>
-                        <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
-                            <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
+                        <Field htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
+                            <DraggablePosition
+                                label={t('acte.stamp_pad.pad_label')}
+                                height={300}
+                                width={190}
+                                showPercents={true}
+                                labelColor='#000'
+                                position={this.state.fields.stampPosition}
+                                handleChange={this.handleChangeDeltaPosition} />
                         </Field>
                         <Field htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
                             <Checkbox id="canPublishRegistre" toggle checked={this.state.fields.canPublishRegistre} onChange={e => handleFieldCheckboxChange(this, 'canPublishRegistre')} />

@@ -66,7 +66,9 @@ public class ActeRestController {
     public ResponseEntity<ActeUI> getByUuid(@PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         boolean isCancellable = acteService.isCancellable(uuid);
-        return new ResponseEntity<>(new ActeUI(acte, isCancellable), HttpStatus.OK);
+        // TODO Retrieve current local authority
+        StampPosition stampPosition = localAuthorityService.getByName("SICTIAM-Test").get().getStampPosition();
+        return new ResponseEntity<>(new ActeUI(acte, isCancellable, stampPosition), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
@@ -103,8 +105,16 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/file")
-    public void getFile(HttpServletResponse response, @PathVariable String uuid) {
+    public void getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
+        // TODO: Stamp the file if ACK
+        outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
+    }
+
+    @GetMapping("/{uuid}/file/stamped")
+    public void getStampedActeAttachment(HttpServletResponse response, @PathVariable String uuid, @RequestParam int x, @RequestParam int y) {
+        Acte acte = acteService.getByUuid(uuid);
+        // TODO: Stamp the file if ACK, at position x% and y%
         outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
     }
 
