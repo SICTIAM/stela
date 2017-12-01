@@ -92,11 +92,7 @@ public class EmailCheckingTask {
             errorBox = store.getFolder("ERROR");
             errorBox.open(Folder.READ_WRITE);
 
-        } catch (NoSuchProviderException e) {
-            LOGGER.error(e.getMessage());
-        } catch (MessagingException e) {
-            LOGGER.error(e.getMessage());
-        } catch (GeneralSecurityException e) {
+        } catch (MessagingException | GeneralSecurityException e) {
             LOGGER.error(e.getMessage());
         }
 

@@ -77,13 +77,6 @@ public class LocalAuthorityService {
         }
     }
 
-    public void requestClassification(String uuid) {
-        ObjectFactory objectFactory = new ObjectFactory();
-        DemandeClassification demandeClassification = objectFactory.createDemandeClassification();
-        demandeClassification.setDateClassification(LocalDate.now());
-        // TODO send to pref
-    }
-
     @Transactional
     public void loadCodesMatieres(String uuid, RetourClassification classification) {
 
@@ -138,12 +131,12 @@ public class LocalAuthorityService {
 
     }
 
-    public MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) {
-        MaterialCode newMat = new MaterialCode(key, label);
-        newMat.setLocalAuthority(localAuthority);
+    private MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) {
+        MaterialCode newMat = new MaterialCode(key, label, localAuthority);
         materialCodeRepository.save(newMat);
         return newMat;
     }
+
     @Transactional
     public Map<String, String> getCodesMatieres(String uuid) {
 

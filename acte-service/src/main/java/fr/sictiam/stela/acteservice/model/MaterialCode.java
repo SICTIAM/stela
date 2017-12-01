@@ -28,9 +28,10 @@ public class MaterialCode {
     public MaterialCode() {
     }
 
-    public MaterialCode(String code, String label) {
+    public MaterialCode(String code, String label, LocalAuthority localAuthority) {
         this.code = code;
         this.label = label;
+        this.localAuthority = localAuthority;
     }
 
     public String getUuid() {
@@ -60,9 +61,4 @@ public class MaterialCode {
     public LocalAuthority getLocalAuthority() {
         return localAuthority;
     }
-
-    public void setLocalAuthority(LocalAuthority localAuthority) {
-        this.localAuthority = localAuthority;
-    }
-
 }
