@@ -64,7 +64,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         createAdmin();
         createLocalAuthority();
     }
-
+    
     public void createAdmin() {
         adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", "dev@sictiam.fr", null));
     }
@@ -80,7 +80,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             } catch (IOException e) {
                 LOGGER.error("Unable to add codes matieres file for {} : {}", localAuthority.getName(), e.toString());
             }
-            localAuthorityService.createOrUpdate(localAuthority);
+            LocalAuthority localAuthorityCreated =localAuthorityService.createOrUpdate(localAuthority);
+            localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
         }
     }
 
@@ -271,12 +272,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void parseCodesMatieres() {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        Map<String, String> codesMatieres = localAuthorityService.getCodesMatieres(localAuthority.getUuid());
+        List<MaterialCode> codesMatieres = localAuthorityService.getCodesMatieres(localAuthority.getUuid());
 
         assertEquals(5, codesMatieres.size());
-        assertTrue(codesMatieres.containsKey("1-1-0-0-0"));
-        assertEquals("Marchés publics", codesMatieres.get("1-1-0-0-0"));
-        assertEquals("1-1-0-0-0", codesMatieres.keySet().iterator().next());
+        assertTrue(codesMatieres.stream().anyMatch(materialCode -> materialCode.getCode().equals("1-1-0-0-0")));
+        assertTrue(codesMatieres.stream().anyMatch(materialCode -> materialCode.getLabel().equals("Commande Publique / Marchés publics")));
     }
 
     @Test
@@ -285,6 +285,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertEquals(0, draftService.getActeDrafts().size());
 
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         DraftUI draft = draftService.getDraftUIs().get(0);
         assertEquals(draft.getUuid(), acte.getDraft().getUuid());
@@ -292,6 +293,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setObjet("Object draft");
         acte = draftService.saveActeDraft(acte, localAuthority);
         assertEquals("Object draft", acte.getObjet());
+
 
         acte.setObjet("");
         draftService.leaveActeDraft(acte, localAuthority);

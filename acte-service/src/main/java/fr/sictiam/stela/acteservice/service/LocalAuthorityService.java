@@ -1,17 +1,23 @@
 package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
+import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.xml.DemandeClassification;
+import fr.sictiam.stela.acteservice.model.xml.ObjectFactory;
 import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -21,11 +27,13 @@ public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
 
-    private Map<String, Map<String, String>> codesMatieresByLocalAuthority = new HashMap<>();
+    private final MaterialCodeRepository materialCodeRepository;
 
     @Autowired
-    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
+    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
+            MaterialCodeRepository materialCodeRepository) {
         this.localAuthorityRepository = localAuthorityRepository;
+        this.materialCodeRepository = materialCodeRepository;
     }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
@@ -46,43 +54,108 @@ public class LocalAuthorityService {
         return localAuthorityRepository.findByUuid(uuid);
     }
 
-
     public Optional<LocalAuthority> getByName(String name) {
         return localAuthorityRepository.findByName(name);
     }
 
-    // This is a first raw version, just caching the data in memory
-    public Map<String, String> getCodesMatieres(String uuid) {
-        if (codesMatieresByLocalAuthority.get(uuid) != null)
-            return codesMatieresByLocalAuthority.get(uuid);
+    public Optional<LocalAuthority> getBySiren(String siren) {
+        return localAuthorityRepository.findBySiren(siren);
+    }
+    
+    @Transactional
+    public void loadCodesMatieres(String uuid) {
 
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
-        Map<String, String> codesMatieres = new LinkedHashMap<>();
         try {
+            LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
             JAXBContext jaxbContext = JAXBContext.newInstance(RetourClassification.class);
             InputStream is = new ByteArrayInputStream(localAuthority.getNomenclatureFile());
             RetourClassification classification = (RetourClassification) jaxbContext.createUnmarshaller().unmarshal(is);
-            // fist brute version as we currently only deal with the first two levels
-            // maybe later make a smooth recursive function :)
-            classification.getMatieres().getMatiere1().forEach(matiere1 -> {
-                String baseKey = matiere1.getCodeMatiere().toString() + "-";
-                matiere1.getMatiere2().forEach(matiere2 -> {
-                    String key = baseKey + matiere2.getCodeMatiere().toString() + "-0-0-0";
-                    codesMatieres.put(key, matiere2.getLibelle());
-                });
-            });
+            loadCodesMatieres(uuid, classification);
+
         } catch (JAXBException e) {
             LOGGER.error("Unable to parse classification data !", e);
         }
+    }
+    
+    @Transactional
+    public void loadCodesMatieres(String uuid, RetourClassification classification) {
 
-        codesMatieresByLocalAuthority.put(uuid, codesMatieres);
-        return codesMatieres;
+        List<MaterialCode> codes = new ArrayList<>();
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+        materialCodeRepository.deleteAll(localAuthority.getMaterialCodes());
+        classification.getMatieres().getMatiere1().forEach(matiere1 -> {
+            String key1 = matiere1.getCodeMatiere().toString();
+            String label1 = matiere1.getLibelle();
+            if (!matiere1.getMatiere2().isEmpty()) {
+                matiere1.getMatiere2().forEach(matiere2 -> {
+                    String key2 = key1 + "-" + matiere2.getCodeMatiere().toString();
+                    String label2 = label1 + " / " + matiere2.getLibelle();
+
+                    if (!matiere2.getMatiere3().isEmpty()) {
+                        matiere2.getMatiere3().forEach(matiere3 -> {
+                            String key3 = key2 + "-" + matiere3.getCodeMatiere().toString();
+                            String label3 = label2 + " / " + matiere3.getLibelle();
+                            if (!matiere3.getMatiere4().isEmpty()) {
+                                matiere3.getMatiere4().forEach(matiere4 -> {
+                                    String key4 = key3 + "-" + matiere4.getCodeMatiere().toString();
+                                    String label4 = label3 + " / " + matiere4.getLibelle();
+                                    if (!matiere4.getMatiere5().isEmpty()) {
+                                        matiere4.getMatiere5().forEach(matiere5 -> {
+                                            String key5 = key4 + "-" + matiere5.getCodeMatiere().toString();
+                                            String label5 = label4 + " / " + matiere5.getLibelle();
+                                            codes.add(createMaterialCode(key5, label5, localAuthority));
+                                        });
+                                    } else {
+                                        codes.add(createMaterialCode(key4 + "-0", label4, localAuthority));
+                                    }
+                                });
+                            } else {
+                                codes.add(createMaterialCode(key3 + "-0-0", label3, localAuthority));
+                            }
+                        });
+
+                    } else {
+                        codes.add(createMaterialCode(key2 + "-0-0-0", label2, localAuthority));
+                    }
+
+                });
+            } else {
+                codes.add(createMaterialCode(key1 + "-0-0-0-0", label1, localAuthority));
+            }
+
+        });
+
+        localAuthority.setNomenclatureDate(classification.getDateClassification());
+        localAuthority.setMaterialCodes(codes);
+        localAuthorityRepository.save(localAuthority);
+
+    }
+    
+    private MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) { 
+        MaterialCode newMat = new MaterialCode(key, label, localAuthority); 
+        materialCodeRepository.save(newMat); 
+        return newMat; 
+    } 
+
+
+    @Transactional
+    public List<MaterialCode> getCodesMatieres(String uuid) {
+
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+        Map<String, String> codesMatieres = new LinkedHashMap<>();
+        if (localAuthority.getMaterialCodes() == null || localAuthority.getMaterialCodes().isEmpty()) {
+            loadCodesMatieres(uuid);
+        }
+        return localAuthority.getMaterialCodes();
     }
 
     public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {
-        if (codesMatieresByLocalAuthority.get(localAuthorityUuid) == null)
-            getCodesMatieres(localAuthorityUuid);
-
-        return codesMatieresByLocalAuthority.get(localAuthorityUuid).get(codeMatiereKey);
+        Optional<MaterialCode> materialCode = materialCodeRepository.findByCodeAndLocalAuthorityUuid(codeMatiereKey,
+                localAuthorityUuid);
+        if (materialCode.isPresent())
+            return materialCode.get().getLabel();
+        
+        return null;
     }
+
 }

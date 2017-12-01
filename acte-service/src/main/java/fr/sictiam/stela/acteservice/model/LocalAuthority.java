@@ -3,7 +3,13 @@ package fr.sictiam.stela.acteservice.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class LocalAuthority {
@@ -21,8 +27,12 @@ public class LocalAuthority {
     private byte[] nomenclatureFile;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
+    
     @Embedded
     private StampPosition stampPosition;
+    
+    @OneToMany(mappedBy="localAuthority")
+    private List<MaterialCode> materialCodes;
 
     public LocalAuthority() {
     }
@@ -118,6 +128,14 @@ public class LocalAuthority {
 
     public void setCanPublishWebSite(Boolean canPublishWebSite) {
         this.canPublishWebSite = canPublishWebSite;
+    }
+    
+    public List<MaterialCode> getMaterialCodes() {
+        return materialCodes;
+    }
+
+    public void setMaterialCodes(List<MaterialCode> materialCodes) {
+        this.materialCodes = materialCodes;
     }
 
     public StampPosition getStampPosition() {

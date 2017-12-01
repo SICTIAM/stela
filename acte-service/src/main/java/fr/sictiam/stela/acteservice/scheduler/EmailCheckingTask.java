@@ -34,9 +34,14 @@ import org.springframework.util.StringUtils;
 
 import com.sun.mail.util.MailSSLSocketFactory;
 
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.xml.ARActe;
 import fr.sictiam.stela.acteservice.model.xml.ARAnnulation;
+import fr.sictiam.stela.acteservice.model.xml.EnveloppeMISILLCL;
+import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.exceptions.NoEnveloppeException;
 
 @Component
 public class EmailCheckingTask {
@@ -50,6 +55,9 @@ public class EmailCheckingTask {
 
     @Autowired
     private ActeService acteService;
+
+    @Autowired
+    private LocalAuthorityService localAuthorityService;
 
     @Value("${application.checkingemail.host}")
     private String host;
@@ -84,11 +92,7 @@ public class EmailCheckingTask {
             errorBox = store.getFolder("ERROR");
             errorBox.open(Folder.READ_WRITE);
 
-        } catch (NoSuchProviderException e) {
-            LOGGER.error(e.getMessage());
-        } catch (MessagingException e) {
-            LOGGER.error(e.getMessage());
-        } catch (GeneralSecurityException e) {
+        } catch (MessagingException | GeneralSecurityException e) {
             LOGGER.error(e.getMessage());
         }
 
@@ -129,6 +133,8 @@ public class EmailCheckingTask {
 
                         Multipart multipart = (Multipart) message.getContent();
 
+                        EnveloppeMISILLCL enveloppe = null;
+
                         for (int j = 0; j < multipart.getCount(); j++) {
                             BodyPart bodyPart = multipart.getBodyPart(j);
                             if (!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())
@@ -148,14 +154,31 @@ public class EmailCheckingTask {
                             if ("ARActe".equals(rootName)) {
                                 ARActe arActe = unmarshall(xmlSourc2, ARActe.class);
                                 acteService.receiveARActe(arActe.getIDActe());
+
                             } else if ("ARAnnulation".equals(rootName)) {
                                 ARAnnulation arAnnulation = unmarshall(xmlSourc2, ARAnnulation.class);
                                 acteService.receiveARActeCancelation(arAnnulation.getIDActe());
+
+                            } else if ("RetourClassification".equals(rootName)) {
+                                RetourClassification retClassification = unmarshall(xmlSourc2,
+                                        RetourClassification.class);
+
+                                if (enveloppe == null) {
+                                    throw new NoEnveloppeException();
+                                }
+                                LocalAuthority currentLocalAuthority = localAuthorityService
+                                        .getBySiren(enveloppe.getDestinataire().getSIREN()).get();
+
+                                localAuthorityService.loadCodesMatieres(currentLocalAuthority.getUuid(),
+                                        retClassification);
+                            } else if ("EnveloppeMISILLCL".equals(rootName)) {
+                                enveloppe = unmarshall(xmlSourc2, EnveloppeMISILLCL.class);
                             }
                         }
                         message.setFlag(Flag.DELETED, true);
                         messagesOK.add(message);
                     } catch (Exception e) {
+                        message.setFlag(Flag.DELETED, true);
                         messagesKO.add(message);
                         LOGGER.error(e.getMessage());
                     }
