@@ -16,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.netflix.ribbon.proxy.annotation.Http;
-
 import fr.sictiam.stela.acteservice.model.PendingMessage;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.service.ActeService;
@@ -28,7 +26,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SenderTask.class);
 
-    Queue<PendingMessage> pendingQueue = new ConcurrentLinkedQueue<>();
+    private Queue<PendingMessage> pendingQueue = new ConcurrentLinkedQueue<>();
 
     @Value("${application.archive.maxSizePerHour}")
     private Integer maxSizePerHour;
@@ -49,9 +47,9 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
-        case ARCHIVE_SIZE_CHECKED:
-            pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
-            break;
+            case ARCHIVE_SIZE_CHECKED:
+                pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
+                break;
         }
     }
 
@@ -73,16 +71,18 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                     acteService.sent(pendingMessage.getActeUuid());
                     pendingMessageService.remove(pendingQueue.poll());
                     currentSizeUsed.addAndGet(pendingMessage.getFile().length);
-                    LOGGER.info("size used : " + currentSizeUsed);
+                    LOGGER.info("Amount of data sent for this hour : " + currentSizeUsed);
                 } else if (HttpStatus.NOT_FOUND.equals(sendStatus)) {
                     // pref offline
                     // just keep retrying
                 } else if (HttpStatus.BAD_REQUEST.equals(sendStatus)) {
                     // something wrong in what we send
+                    // TODO when prefecture sending is "plugged", look if we can extract some useful info about the error
                     acteService.notSent(pendingMessage.getActeUuid());
                     pendingMessageService.remove(pendingQueue.poll());
                 }
-
+            } else {
+                LOGGER.info("Hourly limit exceeded, waiting next hour");
             }
         }
     }
