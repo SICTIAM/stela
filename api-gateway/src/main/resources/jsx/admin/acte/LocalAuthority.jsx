@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
-import { Checkbox, Form, Button, Segment, Popup } from 'semantic-ui-react'
+import { Checkbox, Form, Button, Segment } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import InputValidation from '../../_components/InputValidation'
@@ -52,6 +52,7 @@ class LocalAuthority extends Component {
                 .then(response => response.json())
                 .then(json => this.updateState(json))
                 .catch(response => {
+                    console.log(response)
                     response.json().then(json => {
                         this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                     })
@@ -105,15 +106,6 @@ class LocalAuthority extends Component {
     render() {
         const { t } = this.context
         const localAuthorityFetched = renderIf(this.state.localAuthorityFetched)
-        const stampPosition = (
-            <DraggablePosition
-                label={t('acte.stamp_pad.pad_label')}
-                height={300}
-                width={190}
-                labelColor='#000'
-                position={this.state.fields.stampPosition}
-                handleChange={this.handleChangeDeltaPosition} />
-        )
         return (
             localAuthorityFetched(
                 <Segment>
@@ -156,10 +148,14 @@ class LocalAuthority extends Component {
                                 className='simpleInput' />
                         </Field>
                         <Field htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
-                            <Popup
-                                trigger={<Button id={'positionPad'} content={t('acte.stamp_pad.choose_position')} onClick={this.cancelSubmit} />}
-                                content={stampPosition} on='click' position='top right'
-                            />
+                            <DraggablePosition
+                                label={t('acte.stamp_pad.pad_label')}
+                                height={300}
+                                width={190}
+                                showPercents={true}
+                                labelColor='#000'
+                                position={this.state.fields.stampPosition}
+                                handleChange={this.handleChangeDeltaPosition} />
                         </Field>
                         <Field htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
                             <Checkbox id="canPublishRegistre" toggle checked={this.state.fields.canPublishRegistre} onChange={e => handleFieldCheckboxChange(this, 'canPublishRegistre')} />

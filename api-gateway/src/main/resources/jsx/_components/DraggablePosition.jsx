@@ -1,12 +1,17 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { translate } from 'react-i18next'
 import Draggable from 'react-draggable'
 
-export default class DraggablePosition extends Component {
+class DraggablePosition extends Component {
+    static contextTypes = {
+        t: PropTypes.func
+    }
     static propTypes = {
         position: PropTypes.object.isRequired,
         label: PropTypes.string.isRequired,
         style: PropTypes.object,
+        showPercents: PropTypes.bool,
         handleChange: PropTypes.func.isRequired
     }
     static defaultProps = {
@@ -41,6 +46,7 @@ export default class DraggablePosition extends Component {
         return { x: x, y: y }
     }
     render() {
+        const { t } = this.context
         const { style, label, labelColor, helpText, height, width, boxWidth, boxHeight, paddingPercent } = this.props
 
         const position = this.getPixelPosition()
@@ -55,7 +61,13 @@ export default class DraggablePosition extends Component {
             bottom: (height * revertPercentBound) - boxHeight
         }
         return (
-            <div style={style}>
+            <div style={{ ...style, width: this.props.width }}>
+                {this.props.showPercents &&
+                    <p style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{t('acte.stamp_pad.width')}: {this.props.position.x}%</span>
+                        <span>{t('acte.stamp_pad.height')}: {this.props.position.y}%</span>
+                    </p>
+                }
                 <div style={globalStyle}>
                     <Draggable position={position} bounds={bounds} onDrag={this.handleDrag}>
                         <div style={{ ...box, ...this.styles.draggablePositionBox }}>
@@ -68,3 +80,5 @@ export default class DraggablePosition extends Component {
         )
     }
 }
+
+export default translate(['acte'])(DraggablePosition)

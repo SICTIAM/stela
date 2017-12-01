@@ -43,9 +43,7 @@ class Acte extends Component {
                 .then(response => response.json())
                 .then(json => this.setState({ acteUI: json, acteFetched: true }))
                 .catch(response => {
-                    console.log(response)
                     response.json().then(json => {
-                        console.log(json)
                         this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                     })
                     history.push('/acte')
@@ -84,7 +82,7 @@ class Acte extends Component {
                     position={this.state.acteUI.stampPosition}
                     handleChange={this.handleChangeDeltaPosition} />
                 <div style={{ textAlign: 'center' }}>
-                    <a className='ui blue icon button' target='_blank' title='Télécharger le justificatif'
+                    <a className='ui blue icon button' target='_blank'
                         href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
                         {t('api-gateway:form.download')}
                     </a>
@@ -129,7 +127,7 @@ class Acte extends Component {
                                 </Grid.Column>
                                 <Grid.Column width={8}>
                                     <Popup
-                                        trigger={<Button content={t('acte.stamp_pad.choose_stamp_position')} />}
+                                        trigger={<Button content={t('acte.stamp_pad.download_stamped_acte')} />}
                                         content={stampPosition} on='click' position='right center'
                                     />
                                 </Grid.Column>

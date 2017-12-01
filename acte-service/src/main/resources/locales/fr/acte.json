@@ -63,8 +63,10 @@
     "stamp_pad": {
       "title": "Position du tampon",
       "choose_position": "Choisir la position",
-      "choose_stamp_position": "Choisir la position du tampon",
-      "pad_label": "AR"
+      "download_stamped_acte": "Télécharger l'acte visé",
+      "pad_label": "AR",
+      "height": "Hauteur",
+      "width": "Largeur"
     },
     "new": {
       "title": "Télétransmission d'acte",

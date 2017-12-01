@@ -21,7 +21,7 @@ public class LocalAuthority {
     private byte[] nomenclatureFile;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Embedded
     private StampPosition stampPosition;
 
     public LocalAuthority() {
