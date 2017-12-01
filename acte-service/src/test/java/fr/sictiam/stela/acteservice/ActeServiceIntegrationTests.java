@@ -3,7 +3,9 @@ package fr.sictiam.stela.acteservice;
 
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.compress.utils.IOUtils;
@@ -29,10 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.SortedSet;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -47,6 +46,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ActeService acteService;
+
+    @Autowired
+    private DraftService draftService;
 
     @Autowired
     private AdminService adminService;
@@ -278,85 +280,127 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void createRetrieveAndCloseDraft() {
-        assertEquals(0, acteService.getDrafts().size());
+    public void createRetrieveAndLeaveDraft() {
+        assertEquals(0, draftService.getDraftUIs().size());
+        assertEquals(0, draftService.getActeDrafts().size());
+
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        Acte acte = acteService.saveDraft(new Acte(), localAuthority);
+        Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
+        DraftUI draft = draftService.getDraftUIs().get(0);
+        assertEquals(draft.getUuid(), acte.getDraft().getUuid());
 
-        Acte draft = acteService.getDraftByUuid(acte.getUuid());
-        assertEquals(acte.getUuid(), draft.getUuid());
-        assertTrue(draft.isDraft());
+        acte.setObjet("Object draft");
+        acte = draftService.saveActeDraft(acte, localAuthority);
+        assertEquals("Object draft", acte.getObjet());
 
-        draft.setObjet("Object draft");
-        acteService.closeDraft(draft, localAuthority);
-        assertEquals(1, acteService.getDrafts().size());
+        acte.setObjet("");
+        draftService.leaveActeDraft(acte, localAuthority);
 
-        draft.setObjet("");
-        acteService.closeDraft(draft, localAuthority);
-        assertEquals(0, acteService.getDrafts().size());
+        assertEquals(0, draftService.getDraftUIs().size());
+        assertEquals(0, draftService.getActeDrafts().size());
     }
 
     @Test
     public void sendDraft() {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        Acte draft = acteService.saveDraft(acte(), localAuthority);
+        Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
+        draftService.leaveActeDraft(setActeValues(acte), localAuthority);
 
-        acteService.closeDraft(draft, localAuthority);
-        assertEquals(1, acteService.getDrafts().size());
-        assertNotNull(acteService.getDraftByUuid(draft.getUuid()));
-        Acte acte=acteService.getDraftByUuid(draft.getUuid());
-        acteService.sendDraft(acte);
-        assertEquals(0, acteService.getDrafts().size());
-        assertEquals(draft.getUuid(), acteService.getByUuid(draft.getUuid()).getUuid());
+        List<DraftUI> draftUIs = draftService.getDraftUIs();
+        assertEquals(1, draftUIs.size());
+        assertEquals(1, draftUIs.get(0).getActes().size());
+        assertEquals(acte.getUuid(), draftUIs.get(0).getActes().get(0).getUuid());
+        assertNotNull(draftService.getActeDraftByUuid(acte.getUuid()));
+
+        acte = draftService.getActeDraftByUuid(acte.getUuid());
+        draftService.submitActeDraft(acte);
+        assertEquals(0, draftService.getDraftUIs().size());
+        assertNotNull(acteService.getByUuid(acte.getUuid()));
     }
 
     @Test
     public void deleteDrafts() {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        Acte draft1 = acteService.saveDraft(acte(), localAuthority);
-        acteService.saveDraft(acte(), localAuthority);
-        acteService.saveDraft(acte(), localAuthority);
 
-        assertEquals(3, acteService.getDrafts().size());
-        acteService.deleteDrafts(Collections.singletonList(draft1.getUuid()));
-        assertEquals(2, acteService.getDrafts().size());
-        acteService.deleteDrafts(Collections.emptyList());
-        assertEquals(0, acteService.getDrafts().size());
+        Acte acte1 = draftService.newDraft(localAuthority, ActeMode.ACTE);
+        Acte acte2 = draftService.newDraft(localAuthority, ActeMode.ACTE);
+        Acte acte3 = draftService.newDraft(localAuthority, ActeMode.ACTE);
+        draftService.leaveActeDraft(setActeValues(acte1), localAuthority);
+        draftService.leaveActeDraft(setActeValues(acte2), localAuthority);
+        draftService.leaveActeDraft(setActeValues(acte3), localAuthority);
+
+        assertEquals(3, draftService.getDraftUIs().size());
+        draftService.deleteDrafts(Collections.singletonList(acte1.getDraft().getUuid()));
+        assertEquals(2, draftService.getDraftUIs().size());
+        draftService.deleteActeDraftByUuid(acte2.getUuid());
+        assertEquals(1, draftService.getDraftUIs().size());
+        draftService.deleteDrafts(Collections.emptyList());
+        assertEquals(0, draftService.getDraftUIs().size());
     }
 
     @Test
     public void draftFiles() {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        Acte draft = acteService.saveDraft(acte(), localAuthority);
+        Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
+        draftService.leaveActeDraft(setActeValues(acte), localAuthority);
 
         try {
             MultipartFile file = getMultipartResourceFile("data/Delib.pdf", "application/pdf");
-            acteService.saveDraftFile(draft.getUuid(), file, localAuthority);
+            draftService.saveActeDraftFile(acte.getUuid(), file, localAuthority);
         } catch (IOException e) {
             LOGGER.error("Unable to add a file to the draft: {}", e.toString());
         }
-        assertEquals("Delib.pdf", acteService.getDraftByUuid(draft.getUuid()).getActeAttachment().getFilename());
+        assertEquals("Delib.pdf", draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment().getFilename());
 
-        acteService.deleteDraftFile(draft.getUuid());
-        assertNull(acteService.getDraftByUuid(draft.getUuid()).getActeAttachment());
+        draftService.deleteActeDraftFile(acte.getUuid());
+        assertNull(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment());
 
         try {
             MultipartFile file = getMultipartResourceFile("data/Annexe_delib.pdf", "application/pdf");
-            acteService.saveDraftAnnexe(draft.getUuid(), file, localAuthority);
-            acteService.saveDraftAnnexe(draft.getUuid(), file, localAuthority);
+            draftService.saveActeDraftAnnexe(acte.getUuid(), file, localAuthority);
+            draftService.saveActeDraftAnnexe(acte.getUuid(), file, localAuthority);
         } catch (IOException e) {
             LOGGER.error("Unable to add a file to the draft: {}", e.toString());
         }
-        assertEquals(2, acteService.getDraftByUuid(draft.getUuid()).getAnnexes().size());
+        assertEquals(2, draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes().size());
 
-        Attachment annexe = acteService.getDraftByUuid(draft.getUuid()).getAnnexes().get(0);
+        Attachment annexe = draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes().get(0);
         assertEquals("Annexe_delib.pdf", annexe.getFilename());
 
-        acteService.deleteDraftAnnexe(draft.getUuid(), annexe.getUuid());
-        assertEquals(1, acteService.getDraftByUuid(draft.getUuid()).getAnnexes().size());
+        draftService.deleteActeDraftAnnexe(acte.getUuid(), annexe.getUuid());
+        assertEquals(1, draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes().size());
 
         // cleanup our local production
-        acteService.deleteDrafts(Collections.emptyList());
+        draftService.deleteDrafts(Collections.emptyList());
+    }
+
+    @Test
+    public void batchedActes() {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+
+        DraftUI draft = draftService.newBatchedDraft(localAuthority);
+        assertNotNull(draftService.getDraftByUuid(draft.getUuid()));
+        assertEquals(1, draft.getActes().size());
+        assertNotNull(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()));
+
+        draftService.leaveActeDraft(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()), localAuthority);
+        assertEquals(0, draftService.getDraftUIs().size());
+        assertEquals(0, draftService.getActeDrafts().size());
+
+        draft = draftService.newBatchedDraft(localAuthority);
+        draftService.newActeForDraft(draft.getUuid(), localAuthority);
+        draft = draftService.getDraftActesUI(draft.getUuid());
+        assertEquals(2, draft.getActes().size());
+
+        Acte acte1 = draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid());
+        Acte acte2 = draftService.getActeDraftByUuid(draft.getActes().get(1).getUuid());
+        draftService.saveActeDraft(setActeValues(acte1), localAuthority);
+        draftService.saveActeDraft(setActeValues(acte2), localAuthority);
+
+        draftService.sumitDraft(draft.getUuid());
+        assertEquals(0, draftService.getDraftUIs().size());
+        assertEquals(0, draftService.getActeDrafts().size());
+        assertEquals(2, acteRepository.findAll().size());
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
@@ -378,6 +422,24 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private Acte acte() {
         return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "1-1-0-0-0",
                 "Objet", true, true);
+    }
+
+    private Acte setActeValues(Acte acte) {
+        acte.setNumber(RandomStringUtils.randomAlphabetic(15));
+        acte.setDecision(LocalDate.now());
+        acte.setNature(ActeNature.ARRETES_INDIVIDUELS);
+        acte.setCode("1-1-0-0-0");
+        acte.setObjet("Objet");
+        acte.setPublic(true);
+        acte.setPublicWebsite(true);
+        try {
+            MultipartFile multipartFile = getMultipartResourceFile("data/Delib.pdf", "application/pdf");
+            Attachment attachment = new Attachment(multipartFile.getBytes(), multipartFile.getOriginalFilename(), multipartFile.getSize());
+            acte.setActeAttachment(attachment);
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to load an acteAttachment");
+        }
+        return acte;
     }
 
     private void printXmlMessage(byte[] file, String filename) {

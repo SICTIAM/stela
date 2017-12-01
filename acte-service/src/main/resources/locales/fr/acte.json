@@ -69,7 +69,11 @@
       },
       "acte": "Déposer un acte",
       "acte_budgetaire": "Déposer un acte budgétaire",
-      "choose": "Choisir..."
+      "acte_batch": "Déposer un lot d'actes",
+      "choose": "Choisir...",
+      "common_fields": "Champs communs",
+      "add_an_acte": "Ajouter un acte",
+      "batch_title_placeholder": "Nouvel acte..."
     }
   },
   "admin": {

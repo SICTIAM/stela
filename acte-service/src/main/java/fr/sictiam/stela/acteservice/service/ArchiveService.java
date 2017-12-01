@@ -67,7 +67,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
      * Compress file and annexes into a tar.gz archive.
      */
     private void createArchive(String acteUuid) {
-        Acte acte = acteRepository.findByUuidAndDraftFalse(acteUuid).orElseThrow(ActeNotFoundException::new);
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
             int deliveryNumber = getNextIncrement();
@@ -118,7 +118,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private void createCancellationMessage(String acteUuid) {
 
-        Acte acte = acteRepository.findByUuidAndDraftFalse(acteUuid).orElseThrow(ActeNotFoundException::new);
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
             LOGGER.debug("Creating cancellation message for acte {}", acteUuid);

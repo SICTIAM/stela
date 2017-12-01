@@ -92,8 +92,8 @@ class Acte extends Component {
                             <Field htmlFor="code" label={t('acte.fields.code')}>
                                 <span id="code">{acte.codeLabel} ({acte.code})</span>
                             </Field>
-                            <Field htmlFor="filename" label={t('acte.fields.file')}>
-                                <span id="filename"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
+                            <Field htmlFor="acteAttachment" label={t('acte.fields.acteAttachment')}>
+                                <span id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
                             </Field>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 {renderIf(annexes.length > 0)(
