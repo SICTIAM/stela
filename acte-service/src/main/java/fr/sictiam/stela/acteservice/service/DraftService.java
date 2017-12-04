@@ -189,6 +189,10 @@ public class DraftService {
         acteDraftRepository.save(draft);
     }
 
+    public List<Draft> getAllLastModifiedBefore(LocalDateTime localDateTime) {
+        return acteDraftRepository.findAllByLastModifiedBefore(localDateTime);
+    }
+
     public List<Acte> getActeDrafts() {
         return acteRepository.findAllByDraftNotNullOrderByDraft_LastModifiedDesc();
     }
