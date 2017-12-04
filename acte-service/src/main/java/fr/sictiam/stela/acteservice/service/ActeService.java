@@ -198,8 +198,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public boolean isActeACK(String uuid) {
+        return isActeACK(getByUuid(uuid));
+    }
+    public boolean isActeACK(Acte acte) {
         // TODO: Improve later when phases will be supported
-        Acte acte = getByUuid(uuid);
         List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT);
         SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
@@ -255,6 +257,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return ui.getUuids().size() > 0 ?
                 ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList()) :
                 getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus());
+    }
+
+    public byte[] getStampedAttachments(ActeUuidsAndSearchUI acteUuidsAndSearchUI, LocalAuthority currentLocalAuthority) throws IOException, DocumentException {
+        List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI).stream().filter(this::isActeACK).collect(Collectors.toList());
+        if(actes.size() == 0) throw new NoContentException();
+        List<byte[]> stampPdfs = new ArrayList<>();
+        for(Acte acte : actes) {
+            stampPdfs.add(getStampedActe(acte, null,null, currentLocalAuthority));
+        }
+        return pdfGeneratorUtil.mergePDFs(stampPdfs);
     }
 
     public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {

@@ -44,7 +44,9 @@
       "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
       "download_selected_ACKs": "Télécharger les justificatifs d'AR de la selection",
       "download_all_CSV": "Télécharger toute la liste des actes",
-      "download_selected_CSV": "Télécharger la liste des actes selectionnés"
+      "download_selected_CSV": "Télécharger la liste des actes selectionnés",
+      "download_all_stamped": "Télécharger tous les actes visés",
+      "download_selected_stamped": "Télécharger les actes visés de la selection"
     },
     "drafts": {
       "title": "Brouillons",

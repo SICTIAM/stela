@@ -87,6 +87,21 @@ public class ActeRestController {
     }
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
+    @PostMapping("/actes.pdf")
+    public void downloadStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        try {
+            byte[] pdf = acteService.getStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
+            outputFile(response, pdf, "actes.pdf");
+        } catch (NoContentException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Error while merging PDFs: {}", e);
+        }
+    }
+
+    // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/ARs.pdf")
     public void downloadACKsPdf(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         try {
