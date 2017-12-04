@@ -76,19 +76,22 @@ public class PdfGeneratorUtil {
     public byte[] stampPDF(String ARUuid, String ARDate, byte[] pdf, Integer percentPositionX, Integer percentPositionY) throws IOException, DocumentException {
         PdfReader reader = new PdfReader(pdf);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         PdfStamper stamp = new PdfStamper(reader, baos, '\0', true);
-        PdfContentByte canvas = stamp.getOverContent(1);
+
         Color color = new Color(43, 43, 43);
         Rectangle mediabox = reader.getBoxSize(1, "media");
         int pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
         // Hack because the iTextPDF origin is at the lower-left, but the front is at the top-left
         int pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
 
-        drawStampBorders(canvas, color, pixelPositionX, pixelPositionY);
-        drawStampTitle(canvas, color, pixelPositionX, pixelPositionY);
-        drawStampDetails(ARUuid, ARDate, canvas, color, pixelPositionX, pixelPositionY);
-        canvas.stroke();
+        int pageNumber = reader.getNumberOfPages();
+        for (int i = 1; i <= pageNumber; i++) {
+            PdfContentByte canvas = stamp.getOverContent(i);
+            drawStampBorders(canvas, color, pixelPositionX, pixelPositionY);
+            drawStampTitle(canvas, color, pixelPositionX, pixelPositionY);
+            drawStampDetails(ARUuid, ARDate, canvas, color, pixelPositionX, pixelPositionY);
+            canvas.stroke();
+        }
         stamp.close();
         return baos.toByteArray();
     }
