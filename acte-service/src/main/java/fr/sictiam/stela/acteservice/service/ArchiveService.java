@@ -1,6 +1,9 @@
 package fr.sictiam.stela.acteservice.service;
 
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
+import xyz.capybara.clamav.ClamavClient;
+import xyz.capybara.clamav.commands.scan.result.ScanResult;
+import xyz.capybara.clamav.commands.scan.result.ScanResult.OK;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
@@ -41,6 +45,12 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     @Value("${application.archive.maxSize}")
     private Integer archiveMaxSize;
+    
+    @Value("${application.clamav.port}")
+    private Integer clamavPort;
+    
+    @Value("${application.clamav.ip}")
+    private String clamavIp;
 
     private String departement = "006";
     private String arrondissement = "2";
@@ -52,16 +62,39 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final EnveloppeCounterRepository enveloppeCounterRepository;
     private final AdminRepository adminRepository;
+    private ClamavClient clamavClient;
 
-	public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller,
-			ApplicationEventPublisher applicationEventPublisher, EnveloppeCounterRepository enveloppeCounterRepository,
-			AdminRepository adminRepository) {
-		this.acteRepository = acteRepository;
-		this.jaxb2Marshaller = jaxb2Marshaller;
-		this.applicationEventPublisher = applicationEventPublisher;
-		this.enveloppeCounterRepository = enveloppeCounterRepository;
-		this.adminRepository = adminRepository;
-	}
+    public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller,
+            ApplicationEventPublisher applicationEventPublisher, EnveloppeCounterRepository enveloppeCounterRepository,
+            AdminRepository adminRepository) {
+        this.acteRepository = acteRepository;
+        this.jaxb2Marshaller = jaxb2Marshaller;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.enveloppeCounterRepository = enveloppeCounterRepository;
+        this.adminRepository = adminRepository;      
+    }
+    
+    @PostConstruct
+    private void init() {
+        clamavClient = new ClamavClient(clamavIp, clamavPort);
+    }
+    private void checkAntivirus(String acteUuid) {
+
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
+        Attachment mainAttachment = acte.getActeAttachment();
+        ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(mainAttachment.getFile()));
+        StatusType status = StatusType.ANTIVIRUS_OK;
+        if (!mainResult.equals(OK.INSTANCE)) {
+            status = StatusType.ANTIVIRUS_KO;
+        }
+        for (Attachment attachment : acte.getAnnexes()) {
+            ScanResult attachmentResult = clamavClient.scan(new ByteArrayInputStream(attachment.getFile()));
+            if (!attachmentResult.equals(OK.INSTANCE)) {
+                status = StatusType.ANTIVIRUS_KO;
+            }
+        }
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, new ActeHistory(acteUuid, status)));
+    }
 
     /**
      * Compress file and annexes into a tar.gz archive.
@@ -75,16 +108,15 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             // this is the base filename for the message and attachments
             String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
 
-            String acteFilename =
-                    String.format("CO_DE-%s_%d.%s", baseFilename, 1, StringUtils.getFilenameExtension(acte.getActeAttachment().getFilename()));
+            String acteFilename = String.format("CO_DE-%s_%d.%s", baseFilename, 1,
+                    StringUtils.getFilenameExtension(acte.getActeAttachment().getFilename()));
 
             Map<String, byte[]> annexes = new HashMap<>();
             acte.getAnnexes().forEach(attachment -> {
                 // sequence 1 is taken by the Acte file, so we start at two
                 int sequence = annexes.size() + 2;
-                String tempFilename =
-                        String.format("CO_DE-%s_%d.%s", baseFilename, sequence,
-                                StringUtils.getFilenameExtension(attachment.getFilename()));
+                String tempFilename = String.format("CO_DE-%s_%d.%s", baseFilename, sequence,
+                        StringUtils.getFilenameExtension(attachment.getFilename()));
                 annexes.put(tempFilename, attachment.getFile());
             });
 
@@ -92,15 +124,15 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             JAXBElement<DonneesActe> donneesActe = generateDonneesActe(acte, acteFilename, annexes.keySet());
             String messageContent = marshalToString(donneesActe);
 
-            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()), deliveryNumber);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()),
+                    deliveryNumber);
             JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
             String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
 
             String archiveName = getArchiveName(enveloppeName);
 
-            ByteArrayOutputStream baos =
-                    createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, messageContent,
-                            acte.getActeAttachment().getFile(), acteFilename, annexes);
+            ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
+                    messageContent, acte.getActeAttachment().getFile(), acteFilename, annexes);
 
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
                     baos.toByteArray(), archiveName);
@@ -126,16 +158,14 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             int deliveryNumber = getNextIncrement();
 
             String baseFilename = getBaseFilename(acte, Flux.ANNULATION_TRANSMISSION);
-            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()), deliveryNumber);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()),
+                    deliveryNumber);
             String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
 
             ObjectFactory objectFactory = new ObjectFactory();
             Annulation annulation = objectFactory.createAnnulation();
-            String idActe = String.format("%s-%s-%s-%s-%s",
-                    departement,
-                    siren,
-                    acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")),
-                    acte.getNumber(),
+            String idActe = String.format("%s-%s-%s-%s-%s", departement, siren,
+                    acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")), acte.getNumber(),
                     acte.getNature().getAbbreviation());
             annulation.setIDActe(idActe);
 
@@ -147,9 +177,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
             String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
 
-            ByteArrayOutputStream baos =
-                    createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, sw.toString(),
-                            null, null, null);
+            ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
+                    sw.toString(), null, null, null);
 
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CANCELLATION_ARCHIVE_CREATED,
                     LocalDateTime.now(), baos.toByteArray(), archiveName);
@@ -158,8 +187,10 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             LOGGER.info("Cancellation archive created : {}", archiveName);
         } catch (IOException e) {
-            LOGGER.error("Error while generating archive for cancellation of acte {} : {}", acte.getNumber(), e.getMessage());
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(), e.getMessage());
+            LOGGER.error("Error while generating archive for cancellation of acte {} : {}", acte.getNumber(),
+                    e.getMessage());
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(),
+                    e.getMessage());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
     }
@@ -178,23 +209,14 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     private String getArchiveName(String enveloppeName) {
-        return String.format("%s-%s.%s",
-                trigraph,
-                StringUtils.stripFilenameExtension(enveloppeName),
-                "tar.gz");
+        return String.format("%s-%s.%s", trigraph, StringUtils.stripFilenameExtension(enveloppeName), "tar.gz");
     }
 
     public String getBaseFilename(Acte acte, Flux flux) {
         String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
 
-        return String.format("%s-%s-%s-%s-%s-%s-%s",
-                departement,
-                siren,
-                today,
-                acte.getNumber(),
-                acte.getNature().getAbbreviation(),
-                flux.getTransactionNumber(),
-                flux.getFluxNumber());
+        return String.format("%s-%s-%s-%s-%s-%s-%s", departement, siren, today, acte.getNumber(),
+                acte.getNature().getAbbreviation(), flux.getTransactionNumber(), flux.getFluxNumber());
     }
 
     private JAXBElement<DonneesEnveloppeCLMISILL> generateEnveloppe(Acte acte, String messageFilename) {
@@ -204,8 +226,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         idcl.setArrondissement(arrondissement);
         idcl.setNature(acte.getNature().getCode());
         idcl.setSIREN(siren);
-        
-        Admin admin=adminRepository.findAll().get(0);
+
+        Admin admin = adminRepository.findAll().get(0);
         Referent referent = new Referent();
         // TODO extract to local authority config
         referent.setEmail(admin.getMainEmail());
@@ -218,7 +240,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
         DonneesEnveloppeCLMISILL.AdressesRetour adressesRetour = new DonneesEnveloppeCLMISILL.AdressesRetour();
         adressesRetour.getEmail().add(admin.getMainEmail());
-		admin.getAdditionalEmails().forEach(eMail -> adressesRetour.getEmail().add(eMail));
+        admin.getAdditionalEmails().forEach(eMail -> adressesRetour.getEmail().add(eMail));
 
         // TODO is it really the message file that is expected here ?
         FichierSigne fichierSigne = new FichierSigne();
@@ -277,9 +299,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     private ByteArrayOutputStream createArchiveAndCompress(String enveloppeName, String enveloppeContent,
-                                                           String messageFilename, String messageContent,
-                                                           byte[] acteFile, String acteFilename,
-                                                           Map<String, byte[]> annexes) throws IOException {
+            String messageFilename, String messageContent, byte[] acteFile, String acteFilename,
+            Map<String, byte[]> annexes) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
 
@@ -347,10 +368,21 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
-            case CREATED: createArchive(event.getActeHistory().getActeUuid()); break;
-            case ARCHIVE_CREATED: checkArchiveSize(event.getActeHistory()); break;
-            case CANCELLATION_ASKED: createCancellationMessage(event.getActeHistory().getActeUuid()); break;
-            case CANCELLATION_ARCHIVE_CREATED: checkArchiveSize(event.getActeHistory()); break;
+        case CREATED:
+            checkAntivirus(event.getActeHistory().getActeUuid());
+            break;
+        case ANTIVIRUS_OK:
+            createArchive(event.getActeHistory().getActeUuid());
+            break;
+        case ARCHIVE_CREATED:
+            checkArchiveSize(event.getActeHistory());
+            break;
+        case CANCELLATION_ASKED:
+            createCancellationMessage(event.getActeHistory().getActeUuid());
+            break;
+        case CANCELLATION_ARCHIVE_CREATED:
+            checkArchiveSize(event.getActeHistory());
+            break;
         }
     }
 }

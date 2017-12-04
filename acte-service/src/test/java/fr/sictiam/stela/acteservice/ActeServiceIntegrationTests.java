@@ -179,7 +179,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
   
         List<ActeHistory> acteHistories = acteHistoryRepository.findByacteUuidOrderByDate(acteUuid);
    
-        assertThat(acteHistories, hasSize(4));
+        assertThat(acteHistories, hasSize(5));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_CREATED))));
         
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteHistories, StatusType.ARCHIVE_CREATED);
@@ -187,8 +187,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(acteHistory.get().getFileName(), notNullValue());
         
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.CREATED))));
+        assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ANTIVIRUS_OK))));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_SIZE_CHECKED))));
-        assertThat(acteHistories.get(3).getStatus(), is(StatusType.SENT));
+        assertThat(acteHistories.get(4).getStatus(), is(StatusType.SENT));
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
