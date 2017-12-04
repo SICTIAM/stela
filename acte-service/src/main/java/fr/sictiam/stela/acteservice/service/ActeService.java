@@ -317,6 +317,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return pdfGeneratorUtil.stampPDF(archiveService.getBaseFilename(acte, Flux.TRANSMISSION_ACTE), ACKHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), acte.getActeAttachment().getFile(), x, y);
     }
 
+    public byte[] getActeAttachmentThumbnail(String uuid) throws IOException {
+        byte[] pdf = getByUuid(uuid).getActeAttachment().getFile();
+        return pdfGeneratorUtil.getPDFThumbnail(pdf);
+    }
+
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         Acte acte = getByUuid(event.getActeHistory().getActeUuid());

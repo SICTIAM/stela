@@ -19,6 +19,7 @@ import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
 import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,18 @@ public class ActeRestController {
     public void getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
+    }
+
+    @GetMapping("/{uuid}/file/thumbnail")
+    public void getActeAttachmentThumbnail(HttpServletResponse response, @PathVariable String uuid) {
+        if(StringUtils.isNotBlank(uuid)){
+            try {
+                byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
+                outputFile(response, thumbnail, "thumbnail.png");
+            } catch (IOException e) {
+                LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
+            }
+        }
     }
 
     @GetMapping("/{uuid}/file/stamped")

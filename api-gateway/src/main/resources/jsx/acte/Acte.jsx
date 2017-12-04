@@ -77,6 +77,7 @@ class Acte extends Component {
             <div>
                 <DraggablePosition
                     style={{ marginBottom: '0.5em' }}
+                    backgroundImage={`/api/acte/${acte.uuid}/file/thumbnail`}
                     label={t('acte.stamp_pad.pad_label')}
                     height={300}
                     width={190}

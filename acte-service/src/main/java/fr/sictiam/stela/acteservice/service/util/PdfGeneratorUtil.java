@@ -5,6 +5,10 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.html.simpleparser.HTMLWorker;
 import com.lowagie.text.pdf.*;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +18,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -56,6 +61,16 @@ public class PdfGeneratorUtil {
             }
         }
         return templateEngine.process(templateName, ctx);
+    }
+
+    public byte[] getPDFThumbnail(byte[] pdf) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PDDocument document = PDDocument.load(pdf);
+        PDFRenderer pdfRenderer = new PDFRenderer(document);
+        BufferedImage bim = pdfRenderer.renderImageWithDPI(0, 30, ImageType.RGB);
+        ImageIOUtil.writeImage(bim, "png", baos, 30);
+        document.close();
+        return baos.toByteArray();
     }
 
     public byte[] stampPDF(String ARUuid, String ARDate, byte[] pdf, Integer percentPositionX, Integer percentPositionY) throws IOException, DocumentException {
