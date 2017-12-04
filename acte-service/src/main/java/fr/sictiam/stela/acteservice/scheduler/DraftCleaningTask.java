@@ -24,10 +24,9 @@ public class DraftCleaningTask {
     @Value("${application.drafts.maxDaysDraftLifetime}")
     private int maxDaysDraftLifetime;
 
-    @Scheduled(cron = "${application.drafts.cleanCheckCron}")
+    @Scheduled(cron = "${application.drafts.deleteExpiredCron}")
     public void cleanDrafts() {
-        LocalDateTime daysAgo = LocalDateTime.now().minusDays(maxDaysDraftLifetime);
-        List<Draft> drafts = draftService.getAllLastModifiedBefore(daysAgo);
+        List<Draft> drafts = draftService.getAllLastModifiedBefore(LocalDateTime.now().minusDays(maxDaysDraftLifetime));
     	List<String> uuids = drafts.stream().map(Draft::getUuid).collect(Collectors.toList());
     	if(uuids.size() > 0) {
     	    LOGGER.debug("Cleaning {} old drafts.", uuids.size());
