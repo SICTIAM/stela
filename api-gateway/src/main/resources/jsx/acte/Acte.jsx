@@ -43,7 +43,6 @@ class Acte extends Component {
                 .then(response => response.json())
                 .then(json => this.setState({ acteUI: json, acteFetched: true }))
                 .catch(response => {
-                    console.log(response)
                     response.json().then(json => {
                         this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                     })

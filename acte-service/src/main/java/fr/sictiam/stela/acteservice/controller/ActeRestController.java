@@ -118,7 +118,7 @@ public class ActeRestController {
         if(StringUtils.isNotBlank(uuid)){
             try {
                 byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
-                outputFile(response, thumbnail, "thumbnail.png");
+                outputFile(response, thumbnail, "thumbnail-" + uuid + ".png");
             } catch (IOException e) {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
             }

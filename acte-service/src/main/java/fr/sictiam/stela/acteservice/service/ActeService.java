@@ -312,9 +312,9 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             x = localAuthority.getStampPosition().getX();
             y = localAuthority.getStampPosition().getY();
         }
-        ActeHistory ACKHistory = acte.getActeHistories().stream()
-                .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).collect(Collectors.toList()).get(0);
-        return pdfGeneratorUtil.stampPDF(archiveService.getBaseFilename(acte, Flux.TRANSMISSION_ACTE), ACKHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), acte.getActeAttachment().getFile(), x, y);
+        ActeHistory ackHistory = acte.getActeHistories().stream()
+                .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
+        return pdfGeneratorUtil.stampPDF(archiveService.getBaseFilename(acte, Flux.TRANSMISSION_ACTE), ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), acte.getActeAttachment().getFile(), x, y);
     }
 
     public byte[] getActeAttachmentThumbnail(String uuid) throws IOException {
