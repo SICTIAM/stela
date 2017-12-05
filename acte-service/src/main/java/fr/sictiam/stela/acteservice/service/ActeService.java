@@ -269,7 +269,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                     put("nature", acte.getNature().toString());
                     put("code", acte.getCode() + " (" + acte.getCodeLabel() +")");
                     put("objet", acte.getObjet());
-                    put("filename", acte.getActeAttachment().getFilename());
+                    put("acteAttachment", acte.getActeAttachment().getFilename());
                 }};
                 Map<String,String> data = getTranslatedFieldsAndValues(mapString, language);
                 pages.add(pdfGeneratorUtil.getContentPage("acte", data));
