@@ -71,6 +71,7 @@ services:
     depends_on:
      - config
      - discovery
+     - postgresql
     environment:
      - "SPRING_PROFILES_ACTIVE=prod"
   acte-service:
@@ -81,5 +82,6 @@ services:
     depends_on:
      - config
      - discovery
+     - postgresql
     environment:
      - "SPRING_PROFILES_ACTIVE=prod"
