@@ -57,7 +57,8 @@ class ActeList extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }
-    downloadStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'ARs.pdf')
+    downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
+    downloadZipedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.zip', 'actes.zip')
     downloadACKs = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
     downloadCSV = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
     downloadFromSelectionOrSearch = (selectedUuids, url, filename) => {
@@ -85,7 +86,8 @@ class ActeList extends Component {
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
         const downloadACKsSelectOption = { title: t('acte.list.download_selected_ACKs'), titleNoSelection: t('acte.list.download_all_ACKs'), action: this.downloadACKs }
         const downloadCSVSelectOption = { title: t('acte.list.download_selected_CSV'), titleNoSelection: t('acte.list.download_all_CSV'), action: this.downloadCSV }
-        const downloadStampedsSelectOption = { title: t('acte.list.download_selected_stamped'), titleNoSelection: t('acte.list.download_all_stamped'), action: this.downloadStamp }
+        const downloadMergedStampedsSelectOption = { title: t('acte.list.download_selected_merged_stamped'), titleNoSelection: t('acte.list.download_all_merged_stamped'), action: this.downloadMergedStamp }
+        const downloadZipedStampedsSelectOption = { title: t('acte.list.download_selected_ziped_stamped'), titleNoSelection: t('acte.list.download_all_ziped_stamped'), action: this.downloadZipedStamp }
         return (
             <Segment>
                 <h1>{t('acte.list.title')}</h1>
@@ -110,7 +112,7 @@ class ActeList extends Component {
                     ]}
                     header={true}
                     select={true}
-                    selectOptions={[downloadStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
+                    selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
                     link='/actes/'
                     linkProperty='uuid'
                     noDataMessage='Aucun acte'

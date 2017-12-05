@@ -259,14 +259,26 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus());
     }
 
-    public byte[] getStampedAttachments(ActeUuidsAndSearchUI acteUuidsAndSearchUI, LocalAuthority currentLocalAuthority) throws IOException, DocumentException {
+    public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI).stream().filter(this::isActeACK).collect(Collectors.toList());
         if(actes.size() == 0) throw new NoContentException();
+        return actes;
+    }
+
+    public byte[] getMergedStampedAttachments(ActeUuidsAndSearchUI acteUuidsAndSearchUI, LocalAuthority currentLocalAuthority) throws IOException, DocumentException {
+        List<Acte> actes = getAckedActeFromUuidsOrSearch(acteUuidsAndSearchUI);
         List<byte[]> stampPdfs = new ArrayList<>();
         for(Acte acte : actes) {
             stampPdfs.add(getStampedActe(acte, null,null, currentLocalAuthority));
         }
         return pdfGeneratorUtil.mergePDFs(stampPdfs);
+    }
+
+    public Map<String, byte[]> getStampedAttachments(ActeUuidsAndSearchUI acteUuidsAndSearchUI, LocalAuthority currentLocalAuthority) throws IOException, DocumentException {
+        List<Acte> actes = getAckedActeFromUuidsOrSearch(acteUuidsAndSearchUI);
+        Map<String, byte[]> pdfs = new HashMap<>();
+        actes.forEach(acte -> pdfs.put(acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile()));
+        return pdfs;
     }
 
     public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {

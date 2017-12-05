@@ -45,8 +45,10 @@
       "download_selected_ACKs": "Télécharger les justificatifs d'AR de la selection",
       "download_all_CSV": "Télécharger toute la liste des actes",
       "download_selected_CSV": "Télécharger la liste des actes selectionnés",
-      "download_all_stamped": "Télécharger tous les actes visés",
-      "download_selected_stamped": "Télécharger les actes visés de la selection"
+      "download_all_merged_stamped": "Télécharger tous les actes visés au format impression",
+      "download_selected_merged_stamped": "Télécharger les actes visés de la selection au format impression",
+      "download_all_ziped_stamped": "Télécharger tous les actes visés au format Zip",
+      "download_selected_ziped_stamped": "Télécharger les actes visés de la selection au format Zip"
     },
     "drafts": {
       "title": "Brouillons",

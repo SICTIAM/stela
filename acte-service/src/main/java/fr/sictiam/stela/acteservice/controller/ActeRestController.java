@@ -1,6 +1,8 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.ByteArrayOutputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -37,6 +39,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -88,16 +93,31 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/actes.pdf")
-    public void downloadStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+    public void downloadMergedStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         try {
-            byte[] pdf = acteService.getStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
+            byte[] pdf = acteService.getMergedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, pdf, "actes.pdf");
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Error while merging PDFs: {}", e);
+        }
+    }
+
+    // Hack: Not possible to have an infinite UUID list in a GET request with params
+    @PostMapping("/actes.zip")
+    public void downloadZipedStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        try {
+            Map<String, byte[]> pdfs = acteService.getStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
+            outputFile(response, createZip(pdfs), "actes.zip");
+        } catch (NoContentException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Error while creating zip file: {}", e);
         }
     }
 
@@ -219,6 +239,19 @@ public class ActeRestController {
     /* --------------------------- */
     /* ----- FILE OPERATIONS ----- */
     /* --------------------------- */
+
+    private byte[] createZip(Map<String, byte[]> files) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream out = new ZipOutputStream(baos);
+        for (Map.Entry<String, byte[]> entry : files.entrySet()) {
+            ZipEntry e = new ZipEntry(entry.getKey());
+            out.putNextEntry(e);
+            out.write(entry.getValue(), 0, entry.getValue().length);
+            out.closeEntry();
+        }
+        out.close();
+        return baos.toByteArray();
+    }
 
     private void outputCSV(HttpServletResponse response, Object[] beans, List<String> header, List<String> translatedHeader, String filename) {
         response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
