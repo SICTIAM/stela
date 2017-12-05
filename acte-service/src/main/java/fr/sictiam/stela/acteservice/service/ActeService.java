@@ -63,7 +63,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     @PersistenceContext
     private EntityManager entityManager;
-
+    
     private final ActeRepository acteRepository;
     private final ActeHistoryRepository acteHistoryRepository;
     private final AttachmentRepository attachmentRepository;
@@ -325,9 +325,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         Acte acte = getByUuid(event.getActeHistory().getActeUuid());
-        SortedSet<ActeHistory> acteHistories = acte.getActeHistories();
-        acteHistories.add(event.getActeHistory());
-        acte.setActeHistories(acteHistories);
+        acte.getActeHistories().add(event.getActeHistory());
         acteRepository.save(acte);
-    }  
+    }
 }

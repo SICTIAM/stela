@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -14,7 +15,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.ObjectError;
@@ -32,7 +32,7 @@ public class ValidationTest {
 		Admin admin = new Admin("test", "fail@gmail.com", null);
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
-		assertThat(validation, IsEmptyCollection.empty());
+		assertThat(validation, empty());
 
 	}
 
@@ -44,7 +44,7 @@ public class ValidationTest {
 		Admin admin = new Admin("test", "rapderivas@gmail.com", array);
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
-		assertThat(validation, not(IsEmptyCollection.empty()));
+		assertThat(validation, not(empty()));
 		assertThat(validation, hasSize(1));
 	}
 
@@ -55,14 +55,14 @@ public class ValidationTest {
 		Admin admin = new Admin("test", "rapderivas@gmail.com", array);
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
-		assertThat(validation, IsEmptyCollection.empty());
+		assertThat(validation, empty());
 	}
 
 	@Test
 	public void testEmptyActeValidation() {
 		Acte acte = new Acte();
 		List<ObjectError> errors = ValidationUtil.validateActe(acte);
-		assertThat(errors, not(IsEmptyCollection.empty()));
+		assertThat(errors, not(empty()));
 		assertThat(errors, hasSize(5));
 	}
 
@@ -73,7 +73,7 @@ public class ValidationTest {
 		MultipartFile file = new MockMultipartFile("file.csv", "file.csv", "application/test", new byte[0]);
 		MultipartFile[] annexes = new MultipartFile[] {};
 		List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
-		assertThat(errors, not(IsEmptyCollection.empty()));
+		assertThat(errors, not(empty()));
 		assertThat(errors, hasSize(1));
 		assertThat(errors.get(0).getDefaultMessage(), is("form.validation.mandatoryfile"));
 	}
@@ -85,7 +85,7 @@ public class ValidationTest {
 		MultipartFile file = new MockMultipartFile("file.csv", "file.csv", "application/test", new byte[256]);
 		MultipartFile[] annexes = new MultipartFile[] {};
 		List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
-		assertThat(errors, not(IsEmptyCollection.empty()));
+		assertThat(errors, not(empty()));
 		assertThat(errors, hasSize(1));
 		assertThat(errors.get(0).getDefaultMessage(), is("form.validation.badextension"));
 	}
@@ -97,7 +97,7 @@ public class ValidationTest {
 		MultipartFile file = new MockMultipartFile("file.pdf", "file.pdf", "application/test", new byte[256]);
 		MultipartFile[] annexes = new MultipartFile[] { new MockMultipartFile("file.csv", new byte[256]) };
 		List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
-		assertThat(errors, not(IsEmptyCollection.empty()));
+		assertThat(errors, not(empty()));
 		assertThat(errors, hasSize(1));
 		assertThat(errors.get(0).getDefaultMessage(), is("form.validation.badextension"));
 
@@ -111,7 +111,7 @@ public class ValidationTest {
 
 		MultipartFile[] annexes = new MultipartFile[] {};
 		List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
-		assertThat(errors, IsEmptyCollection.empty());
+		assertThat(errors, empty());
 
 	}
 
