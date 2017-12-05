@@ -16,6 +16,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile('org.xhtmlrenderer:flying-saucer-pdf:9.1.4')
     compile('net.sf.supercsv:super-csv:2.4.0')
+    compile('org.apache.pdfbox:pdfbox:2.0.8')
+    compile('org.apache.pdfbox:pdfbox-tools:2.0.8')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

@@ -184,7 +184,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                 "tar.gz");
     }
 
-    private String getBaseFilename(Acte acte, Flux flux) {
+    public String getBaseFilename(Acte acte, Flux flux) {
         String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
 
         return String.format("%s-%s-%s-%s-%s-%s-%s",

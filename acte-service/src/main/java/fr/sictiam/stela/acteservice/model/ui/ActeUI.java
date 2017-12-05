@@ -9,12 +9,12 @@ import java.util.List;
 public class ActeUI {
 
     private Acte acte;
-    private boolean isCancellable;
+    private boolean acteACK;
     private StampPosition stampPosition;
 
-    public ActeUI(Acte acte, boolean isCancellable, StampPosition stampPosition) {
+    public ActeUI(Acte acte, boolean acteACK, StampPosition stampPosition) {
         this.acte = acte;
-        this.isCancellable = isCancellable;
+        this.acteACK = acteACK;
         this.stampPosition = stampPosition;
     }
 
@@ -22,8 +22,8 @@ public class ActeUI {
         return acte;
     }
 
-    public boolean isCancellable() {
-        return isCancellable;
+    public boolean isActeACK() {
+        return acteACK;
     }
 
     public StampPosition getStampPosition() {

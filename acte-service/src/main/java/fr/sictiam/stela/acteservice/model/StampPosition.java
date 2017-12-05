@@ -4,7 +4,6 @@ import javax.persistence.*;
 
 @Embeddable
 public class StampPosition {
-
 	private int x;
 	private int y;
 

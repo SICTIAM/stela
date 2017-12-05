@@ -12,14 +12,15 @@ class DraggablePosition extends Component {
         label: PropTypes.string.isRequired,
         style: PropTypes.object,
         showPercents: PropTypes.bool,
-        handleChange: PropTypes.func.isRequired
+        handleChange: PropTypes.func.isRequired,
+        backgroundImage: PropTypes.string
     }
     static defaultProps = {
         position: { x: 10, y: 10 },
         height: 300,
         width: 190,
-        boxWidth: 50,
-        boxHeight: 30,
+        boxWidth: 70,
+        boxHeight: 25,
         paddingPercent: 5
     }
     styles = {
@@ -47,8 +48,11 @@ class DraggablePosition extends Component {
     }
     render() {
         const { t } = this.context
-        const { style, label, labelColor, helpText, height, width, boxWidth, boxHeight, paddingPercent } = this.props
+        const { style, label, labelColor, helpText, height, width, boxWidth, boxHeight, paddingPercent, backgroundImage } = this.props
 
+        const backgroundImageStyle = backgroundImage
+            ? { backgroundImage: `url("${backgroundImage}")`, backgroundSize: '100% 100%' }
+            : {}
         const position = this.getPixelPosition()
         const percentBound = paddingPercent / 100
         const revertPercentBound = (100 - paddingPercent) / 100
@@ -68,7 +72,7 @@ class DraggablePosition extends Component {
                         <span>{t('acte.stamp_pad.height')}: {this.props.position.y}%</span>
                     </p>
                 }
-                <div style={globalStyle}>
+                <div style={{ ...globalStyle, ...backgroundImageStyle }}>
                     <Draggable position={position} bounds={bounds} onDrag={this.handleDrag}>
                         <div style={{ ...box, ...this.styles.draggablePositionBox }}>
                             {label}
