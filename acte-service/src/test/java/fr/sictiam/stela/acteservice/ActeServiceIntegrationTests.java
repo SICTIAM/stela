@@ -1,17 +1,30 @@
 package fr.sictiam.stela.acteservice;
 
 
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.ui.DraftUI;
-import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.DraftService;
-import fr.sictiam.stela.acteservice.service.AdminService;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -20,7 +33,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.FileCopyUtils;
@@ -28,13 +46,22 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.*;
-
-import static org.junit.Assert.*;
+import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.ActeMode;
+import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.Admin;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.ui.DraftUI;
+import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.AdminService;
+import fr.sictiam.stela.acteservice.service.DraftService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -58,12 +85,16 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private LocalAuthorityService localAuthorityService;
 
     @Autowired
-    private ActeRepository acteRepository;
+    private ActeRepository acteRepository;    
+    
+    @Autowired
+    private ActeHistoryRepository acteHistoryRepository; 
 
     @Before
     public void beforeTests() {
         createAdmin();
         createLocalAuthority();
+        acteRepository.deleteAll();
     }
     
     public void createAdmin() {
@@ -85,7 +116,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
         }
     }
-
+    
     @Test
     public void testCreateActe() {
         MultiValueMap<String, Object> params = acteWithAttachments();
@@ -93,21 +124,21 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
-        assertEquals(response.getStatusCode(), HttpStatus.CREATED);
-        assertNotNull(response.getBody());
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        assertThat(response.getBody(), notNullValue());
 
         String acteUuid = response.getBody();
         Acte acte = acteService.getByUuid(acteUuid);
 
-        assertNotNull(acte);
-        assertNotNull(acte.getActeAttachment());
-        assertNotNull(acte.getNumber());
-        assertEquals("Delib.pdf", acte.getActeAttachment().getFilename());
-        assertEquals("1-1-0-0-0", acte.getCode());
-        assertEquals("Objet", acte.getObjet());
-        assertEquals(LocalDate.now(), acte.getDecision());
-        assertTrue(acte.isPublic());
-        assertEquals(2, acteService.getAnnexes(acteUuid).size());
+        assertThat(acte, notNullValue());
+        assertThat(acte.getActeAttachment(), notNullValue());
+        assertThat(acte.getNumber(), notNullValue());
+        assertThat(acte.getActeAttachment().getFilename(), is("Delib.pdf"));
+        assertThat(acte.getCode(), is("1-1-0-0-0"));
+        assertThat(acte.getObjet(), is("Objet"));
+        assertThat(acte.getDecision(), is(LocalDate.now()));
+        assertThat(acte.isPublic(), is(true));
+        assertThat(acteService.getAnnexes(acteUuid), hasSize(2));
     }
 
     @Test
@@ -125,9 +156,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         Acte[] actes = this.restTemplate.getForObject("/api/acte", Acte[].class);
-        assertTrue(actes.length > 0);
-        assertNotNull(actes[0].getActeHistories().last().getStatus());
-        assertNotNull(actes[0].getActeHistories().last().getDate());
+        assertThat(actes, not(emptyArray()));
+        assertThat(actes[0].getActeHistories().last().getStatus(), notNullValue());
+        assertThat(actes[0].getActeHistories().last().getDate(), notNullValue());
     }
 
     @Test
@@ -139,28 +170,25 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();
-
+        
         try {
-            // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(4000);
+            Thread.sleep(2000);           
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
-
-        Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.ARCHIVE_CREATED);
-        assertTrue(acteHistory.isPresent());
-        assertNotNull(acteHistory.get().getFile());
-        assertNotNull(acteHistory.get().getFileName());
-
-        Acte acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.SENT, acte.getActeHistories().last().getStatus());
-
-        SortedSet<ActeHistory> acteHistories = acte.getActeHistories();
-        assertEquals(4, acteHistories.size());
-        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.CREATED)));
-        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.ARCHIVE_CREATED)));
-        assertTrue(acteHistories.stream().anyMatch(acteHistory1 -> acteHistory1.getStatus().equals(StatusType.SENT)));
-
+  
+        List<ActeHistory> acteHistories = acteHistoryRepository.findByacteUuidOrderByDate(acteUuid);
+   
+        assertThat(acteHistories, hasSize(4));
+        assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_CREATED))));
+        
+        Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteHistories, StatusType.ARCHIVE_CREATED);
+        assertThat(acteHistory.get().getFile(), notNullValue());
+        assertThat(acteHistory.get().getFileName(), notNullValue());
+        
+        assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.CREATED))));
+        assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_SIZE_CHECKED))));
+        assertThat(acteHistories.get(3).getStatus(), is(StatusType.SENT));
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
@@ -186,7 +214,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.ARCHIVE_TOO_LARGE);
-        assertTrue(acteHistory.isPresent());
+        assertThat(acteHistory.isPresent(), is(true));
     }
 
     @Test
@@ -221,16 +249,16 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         acte = acteService.getByUuid(acteUuid);
-        assertEquals(StatusType.SENT, acte.getActeHistories().last().getStatus());
+        assertThat(acte.getActeHistories().last().getStatus(), is(StatusType.SENT));
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
-        assertTrue(acteHistory.isPresent());
-        assertNotNull(acteHistory.get().getFile());
-        assertNotNull(acteHistory.get().getFileName());
+        assertThat(acteHistory.isPresent(), is(true));
+        assertThat(acteHistory.get().getFile(), notNullValue());
+        assertThat(acteHistory.get().getFileName(), notNullValue());
 
         ResponseEntity<String> newResponse = this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
-
-        assertEquals(HttpStatus.FORBIDDEN, newResponse.getStatusCode());
+        
+        assertThat(newResponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
 
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
@@ -240,9 +268,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void createAndRetrieveLocalAuthority() {
         LocalAuthority localAuthority = new LocalAuthority("New-Test", "999888777", "999", "1", "31");
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
-        assertEquals("New-Test", localAuthorityService.getByUuid(localAuthority.getUuid()).getName());
-        assertEquals(localAuthority.getUuid(), localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid());
-
+        assertThat(localAuthorityService.getByUuid(localAuthority.getUuid()).getName(), is("New-Test"));
+        assertThat(localAuthority.getUuid(), is(localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid()));
         // cleanup our local production
         localAuthorityService.delete(localAuthority);
     }
@@ -261,10 +288,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         localAuthority = localAuthorityService.getByUuid(localAuthority.getUuid());
 
-        assertEquals(true, localAuthority.getCanPublishRegistre());
-        assertEquals(false, localAuthority.getCanPublishWebSite());
-        assertEquals("006", localAuthority.getDepartment());
-        assertEquals("29", localAuthority.getNature());
+        assertThat(localAuthority.getCanPublishRegistre(), is(true));
+        assertThat(localAuthority.getCanPublishWebSite(), is(false));
+        assertThat(localAuthority.getDepartment(), is("006"));
+        assertThat(localAuthority.getNature(), is("29"));
 
         // cleanup our local production
         localAuthorityService.delete(localAuthority);
@@ -275,32 +302,32 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
         List<MaterialCode> codesMatieres = localAuthorityService.getCodesMatieres(localAuthority.getUuid());
 
-        assertEquals(5, codesMatieres.size());
-        assertTrue(codesMatieres.stream().anyMatch(materialCode -> materialCode.getCode().equals("1-1-0-0-0")));
-        assertTrue(codesMatieres.stream().anyMatch(materialCode -> materialCode.getLabel().equals("Commande Publique / Marchés publics")));
+        assertThat(codesMatieres, hasSize(5));
+        assertThat(codesMatieres, hasItem(Matchers.<MaterialCode>hasProperty("code", is("1-1-0-0-0"))));
+        assertThat(codesMatieres, hasItem(Matchers.<MaterialCode>hasProperty("label", is("Commande Publique / Marchés publics"))));
     }
 
     @Test
     public void createRetrieveAndLeaveDraft() {
-        assertEquals(0, draftService.getDraftUIs().size());
-        assertEquals(0, draftService.getActeDrafts().size());
+        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getActeDrafts(), empty());
 
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
 
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         DraftUI draft = draftService.getDraftUIs().get(0);
-        assertEquals(draft.getUuid(), acte.getDraft().getUuid());
+        assertThat(draft.getUuid(), is(acte.getDraft().getUuid()));
 
         acte.setObjet("Object draft");
         acte = draftService.saveActeDraft(acte, localAuthority);
-        assertEquals("Object draft", acte.getObjet());
+        assertThat("Object draft", is(acte.getObjet()));
 
 
         acte.setObjet("");
         draftService.leaveActeDraft(acte, localAuthority);
 
-        assertEquals(0, draftService.getDraftUIs().size());
-        assertEquals(0, draftService.getActeDrafts().size());
+        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getActeDrafts(), empty());
     }
 
     @Test
@@ -310,15 +337,15 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draftService.leaveActeDraft(setActeValues(acte), localAuthority);
 
         List<DraftUI> draftUIs = draftService.getDraftUIs();
-        assertEquals(1, draftUIs.size());
-        assertEquals(1, draftUIs.get(0).getActes().size());
-        assertEquals(acte.getUuid(), draftUIs.get(0).getActes().get(0).getUuid());
-        assertNotNull(draftService.getActeDraftByUuid(acte.getUuid()));
+        assertThat(draftUIs, hasSize(1));
+        assertThat(draftUIs.get(0).getActes(), hasSize(1));
+        assertThat(acte.getUuid(), is(draftUIs.get(0).getActes().get(0).getUuid()));
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()),notNullValue());
 
         acte = draftService.getActeDraftByUuid(acte.getUuid());
         draftService.submitActeDraft(acte);
-        assertEquals(0, draftService.getDraftUIs().size());
-        assertNotNull(acteService.getByUuid(acte.getUuid()));
+        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(acteService.getByUuid(acte.getUuid()),notNullValue());
     }
 
     @Test
@@ -333,12 +360,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draftService.leaveActeDraft(setActeValues(acte3), localAuthority);
 
         assertEquals(3, draftService.getDraftUIs().size());
+        assertThat(draftService.getDraftUIs(), hasSize(3));
         draftService.deleteDrafts(Collections.singletonList(acte1.getDraft().getUuid()));
-        assertEquals(2, draftService.getDraftUIs().size());
+        assertThat(draftService.getDraftUIs(), hasSize(2));
         draftService.deleteActeDraftByUuid(acte2.getUuid());
-        assertEquals(1, draftService.getDraftUIs().size());
+        assertThat(draftService.getDraftUIs(), hasSize(1));
         draftService.deleteDrafts(Collections.emptyList());
-        assertEquals(0, draftService.getDraftUIs().size());
+        assertThat(draftService.getDraftUIs(), empty());
     }
 
     @Test
@@ -353,10 +381,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         } catch (IOException e) {
             LOGGER.error("Unable to add a file to the draft: {}", e.toString());
         }
-        assertEquals("Delib.pdf", draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment().getFilename());
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment().getFilename(),is("Delib.pdf"));
 
         draftService.deleteActeDraftFile(acte.getUuid());
-        assertNull(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment());
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment(),nullValue());
 
         try {
             MultipartFile file = getMultipartResourceFile("data/Annexe_delib.pdf", "application/pdf");
@@ -365,13 +393,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         } catch (IOException e) {
             LOGGER.error("Unable to add a file to the draft: {}", e.toString());
         }
-        assertEquals(2, draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes().size());
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes(), hasSize(2));
 
         Attachment annexe = draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes().get(0);
-        assertEquals("Annexe_delib.pdf", annexe.getFilename());
+        assertThat(annexe.getFilename(), is("Annexe_delib.pdf"));
 
         draftService.deleteActeDraftAnnexe(acte.getUuid(), annexe.getUuid());
-        assertEquals(1, draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes().size());
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getAnnexes(), hasSize(1));
 
         // cleanup our local production
         draftService.deleteDrafts(Collections.emptyList());
@@ -382,18 +410,18 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
 
         DraftUI draft = draftService.newBatchedDraft(localAuthority);
-        assertNotNull(draftService.getDraftByUuid(draft.getUuid()));
-        assertEquals(1, draft.getActes().size());
-        assertNotNull(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()));
+        assertThat(draftService.getDraftByUuid(draft.getUuid()), notNullValue());
+        assertThat(draft.getActes(), hasSize(1));
+        assertThat(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()), notNullValue());
 
         draftService.leaveActeDraft(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()), localAuthority);
-        assertEquals(0, draftService.getDraftUIs().size());
-        assertEquals(0, draftService.getActeDrafts().size());
+        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getActeDrafts(), empty());
 
         draft = draftService.newBatchedDraft(localAuthority);
         draftService.newActeForDraft(draft.getUuid(), localAuthority);
         draft = draftService.getDraftActesUI(draft.getUuid());
-        assertEquals(2, draft.getActes().size());
+        assertThat(draft.getActes(), hasSize(2));
 
         Acte acte1 = draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid());
         Acte acte2 = draftService.getActeDraftByUuid(draft.getActes().get(1).getUuid());
@@ -401,9 +429,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draftService.saveActeDraft(setActeValues(acte2), localAuthority);
 
         draftService.sumitDraft(draft.getUuid());
-        assertEquals(0, draftService.getDraftUIs().size());
-        assertEquals(0, draftService.getActeDrafts().size());
-        assertEquals(2, acteRepository.findAll().size());
+        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getActeDrafts(), empty());
+        assertThat(acteRepository.findAll(), hasSize(2));
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
@@ -454,8 +482,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     private Optional<ActeHistory> getActeHistoryForStatus(String acteUuid, StatusType status) {
-        Acte acte = acteService.getByUuid(acteUuid);
-        return acte.getActeHistories().stream()
+        return getActeHistoryForStatus(acteHistoryRepository.findByacteUuidOrderByDate(acteUuid), status);
+    }
+    
+    private Optional<ActeHistory> getActeHistoryForStatus(List<ActeHistory> acte, StatusType status) {
+        return acte.stream()
                 .filter(ah -> ah.getStatus().equals(status))
                 .findFirst();
     }
