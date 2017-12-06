@@ -23,7 +23,9 @@ services:
     ports:
      - "8888:8888"
     volumes:
-     - ../stela-config:/stela-config
+     - /usr/bin/ssh-agent:/ssh-agent # Forward local machine SSH key to docker
+    environment:
+      -SSH_AUTH_SOCK: /ssh-agent
     depends_on:
      - postgresql
      - rabbitmq

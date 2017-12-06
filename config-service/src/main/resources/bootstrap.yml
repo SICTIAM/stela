@@ -2,12 +2,23 @@ spring:
   application:
     name: config-service
   profiles:
-    active: native
+    active: default
+  cloud:
+    config:
+      server: 
+         # Need to have SSH host key locally in RSA format 
+          uri: ssh://git@forge.sictiam.fr:6666/internet/stela-config.git
+          cloneOnStart: true         
+server:
+  port: 8888
+
+---
+
+spring:
+  profiles:
+   active: native
   cloud:
     config:
       server:
         native:
           search-locations: file:../stela-config
-
-server:
-  port: 8888

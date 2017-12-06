@@ -41,6 +41,8 @@ subprojects {
         compile "org.jetbrains.kotlin:kotlin-stdlib:$ktVersion"
 		compile "org.jetbrains.kotlin:kotlin-reflect:$ktVersion"
         compile ('xyz.capybara:clamav-client:2.0.1')
+        compile("org.springframework.retry:spring-retry")
+        compile("org.springframework.boot:spring-boot-starter-aop")
         runtime('org.flywaydb:flyway-core')
         testCompile('junit:junit:4.12')
         testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
@@ -75,7 +77,12 @@ subprojects {
             copy {
                 from jar
                 into stageDir
+            } 
+            copy {
+                from ("${gradle.gradleUserHomeDir}/../.ssh/id_rsa")
+                into stageDir
             }
+
         }
     }
 }
