@@ -22,10 +22,6 @@ services:
     container_name: config
     ports:
      - "8888:8888"
-    volumes:
-     - /usr/bin/ssh-agent:/ssh-agent # Forward local machine SSH key to docker
-    environment:
-      -SSH_AUTH_SOCK: /ssh-agent
     depends_on:
      - postgresql
      - rabbitmq
@@ -43,7 +39,7 @@ services:
      - config
      - discovery
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
   tracing-service:
     image: stela-poc/tracing-service
     container_name: tracing-service
@@ -54,7 +50,7 @@ services:
      - discovery
      - rabbitmq
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
   api-gateway:
     image: stela-poc/api-gateway
     container_name: api-gateway
@@ -75,7 +71,7 @@ services:
      - discovery
      - postgresql
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
   acte-service:
     image: stela-poc/acte-service
     container_name: acte-service
@@ -86,4 +82,4 @@ services:
      - discovery
      - postgresql
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
