@@ -35,7 +35,7 @@ public class PdfGeneratorUtil {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public byte[] createPdf(List<String> pages) throws Exception {
+    public byte[] createPdf(List<String> pages) throws DocumentException, IOException {
         Document document = new Document();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, baos);

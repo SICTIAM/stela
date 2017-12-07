@@ -84,7 +84,7 @@ public class ActeRestController {
             byte[] pdf = acteService.getACKPdfs(new ActeUuidsAndSearchUI(Collections.singletonList(uuid)), lng);
             outputFile(response, pdf, "AR_" + uuid + ".pdf");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (IOException|DocumentException e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -99,7 +99,7 @@ public class ActeRestController {
             byte[] pdf = acteService.getMergedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, pdf, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (IOException|DocumentException e) {
             LOGGER.error("Error while merging PDFs: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -114,9 +114,7 @@ public class ActeRestController {
             byte[] zip = acteService.getZipedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, zip, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (NoContentException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (IOException|DocumentException e) {
             LOGGER.error("Error while creating zip file: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -129,9 +127,7 @@ public class ActeRestController {
             byte[] pdf = acteService.getACKPdfs(acteUuidsAndSearchUI, lng);
             outputFile(response, pdf, "ARs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (NoContentException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (DocumentException|IOException e) {
             LOGGER.error("Error while generating the ACKs PDF: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }

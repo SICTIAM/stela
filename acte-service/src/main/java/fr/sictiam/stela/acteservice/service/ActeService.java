@@ -287,7 +287,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return zipGeneratorUtil.createZip(pdfs);
     }
 
-    public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {
+    public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws IOException, DocumentException {
         List<String> pages = new ArrayList<>();
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
         for (Acte acte: actes) {
