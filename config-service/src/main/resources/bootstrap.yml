@@ -1,8 +1,7 @@
 spring:
   application:
     name: config-service
-  profiles:
-    active: default
+  profiles: default
   cloud:
     config:
       server: 
@@ -16,8 +15,7 @@ server:
 ---
 
 spring:
-  profiles:
-   active: native
+  profiles: native
   cloud:
     config:
       server:
