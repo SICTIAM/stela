@@ -30,6 +30,7 @@ import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
 import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
+import fr.sictiam.stela.acteservice.service.util.ZipGeneratorUtil;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -71,11 +72,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final LocalAuthorityService localAuthorityService;
     private final ArchiveService archiveService;
     private final PdfGeneratorUtil pdfGeneratorUtil;
+    private final ZipGeneratorUtil zipGeneratorUtil;
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
                        AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-                       LocalAuthorityService localAuthorityService, ArchiveService archiveService, PdfGeneratorUtil pdfGeneratorUtil) {
+                       LocalAuthorityService localAuthorityService, ArchiveService archiveService,
+                       PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -83,6 +86,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         this.localAuthorityService = localAuthorityService;
         this.archiveService = archiveService;
         this.pdfGeneratorUtil = pdfGeneratorUtil;
+        this.zipGeneratorUtil = zipGeneratorUtil;
     }
 
     /**
@@ -198,8 +202,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public boolean isActeACK(String uuid) {
+        return isActeACK(getByUuid(uuid));
+    }
+    public boolean isActeACK(Acte acte) {
         // TODO: Improve later when phases will be supported
-        Acte acte = getByUuid(uuid);
         List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT);
         SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
@@ -257,7 +263,31 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus());
     }
 
-    public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws Exception {
+    public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+        List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI).stream().filter(this::isActeACK).collect(Collectors.toList());
+        if(actes.isEmpty()) throw new NoContentException();
+        return actes;
+    }
+
+    public byte[] getMergedStampedAttachments(ActeUuidsAndSearchUI acteUuidsAndSearchUI, LocalAuthority currentLocalAuthority) throws IOException, DocumentException {
+        List<Acte> actes = getAckedActeFromUuidsOrSearch(acteUuidsAndSearchUI);
+        List<byte[]> stampPdfs = new ArrayList<>();
+        for(Acte acte : actes) {
+            stampPdfs.add(getStampedActe(acte, null,null, currentLocalAuthority));
+        }
+        return pdfGeneratorUtil.mergePDFs(stampPdfs);
+    }
+
+    public byte[] getZipedStampedAttachments(ActeUuidsAndSearchUI acteUuidsAndSearchUI, LocalAuthority currentLocalAuthority) throws IOException, DocumentException {
+        List<Acte> actes = getAckedActeFromUuidsOrSearch(acteUuidsAndSearchUI);
+        Map<String, byte[]> pdfs = new HashMap<>();
+        for(Acte acte : actes) {
+            pdfs.put(acte.getActeAttachment().getFilename(), getStampedActe(acte, null,null, currentLocalAuthority));
+        }
+        return zipGeneratorUtil.createZip(pdfs);
+    }
+
+    public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) throws IOException, DocumentException {
         List<String> pages = new ArrayList<>();
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
         for (Acte acte: actes) {

@@ -1,8 +1,11 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.net.URLConnection;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -75,58 +79,95 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
-    public void downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
+    public ResponseEntity downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
         try {
             byte[] pdf = acteService.getACKPdfs(new ActeUuidsAndSearchUI(Collections.singletonList(uuid)), lng);
             outputFile(response, pdf, "AR_" + uuid + ".pdf");
-        } catch (NoContentException e) {
-            throw e;
-        } catch (Exception e) {
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (IOException|DocumentException e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Hack: Not possible to have an infinite UUID list in a GET request with params
+    @PostMapping("/actes.pdf")
+    public ResponseEntity downloadMergedStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        try {
+            byte[] pdf = acteService.getMergedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
+            outputFile(response, pdf, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (IOException|DocumentException e) {
+            LOGGER.error("Error while merging PDFs: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Hack: Not possible to have an infinite UUID list in a GET request with params
+    @PostMapping("/actes.zip")
+    public ResponseEntity downloadZipedStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+        // TODO Retrieve current local authority
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        try {
+            byte[] zip = acteService.getZipedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
+            outputFile(response, zip, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip");
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (IOException|DocumentException e) {
+            LOGGER.error("Error while creating zip file: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/ARs.pdf")
-    public void downloadACKsPdf(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
+    public ResponseEntity downloadACKsPdf(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         try {
             byte[] pdf = acteService.getACKPdfs(acteUuidsAndSearchUI, lng);
-            outputFile(response, pdf, "ARs.pdf");
-        } catch (NoContentException e) {
-            throw e;
-        } catch (Exception e) {
+            outputFile(response, pdf, "ARs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (DocumentException|IOException e) {
             LOGGER.error("Error while generating the ACKs PDF: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params 
     @PostMapping("/actes.csv")
-    public void getCSVFromList(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
+    public ResponseEntity getCSVFromList(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         List<String> fields = ActeCSVUI.getFields();
         List<String> translatedFields = acteService.getTranslatedCSVFields(fields, lng);
         outputCSV(response, acteService.getActesCSV(acteUuidsAndSearchUI, lng).toArray(), fields, translatedFields, "actes.csv");
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/file")
-    public void getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/file/thumbnail")
-    public void getActeAttachmentThumbnail(HttpServletResponse response, @PathVariable String uuid) {
-        if(StringUtils.isNotBlank(uuid)){
+    public ResponseEntity getActeAttachmentThumbnail(HttpServletResponse response, @PathVariable String uuid) {
+        if(StringUtils.isNotBlank(uuid)) {
             try {
                 byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
                 outputFile(response, thumbnail, "thumbnail-" + uuid + ".png");
+                return new ResponseEntity(HttpStatus.OK);
             } catch (IOException e) {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             }
+        }
+        else {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }
 
     @GetMapping("/{uuid}/file/stamped")
-    public void getStampedActeAttachment(HttpServletResponse response, @PathVariable String uuid,
+    public ResponseEntity getStampedActeAttachment(HttpServletResponse response, @PathVariable String uuid,
                                          @RequestParam(required = false) Integer x, @RequestParam(required = false) Integer y) {
         // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
@@ -139,18 +180,22 @@ public class ActeRestController {
                 pdf = acteService.getStampedActe(acte, x, y, currentLocalAuthority);
             } catch (IOException e) {
                 LOGGER.error("Error trying to open the acte attachment PDF: {}", e);
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             } catch (DocumentException e) {
                 LOGGER.error("Error trying to stamp the acte attachment PDF: {}", e);
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         outputFile(response, pdf, acte.getActeAttachment().getFilename());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
-    public void getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
+    public ResponseEntity getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
         ActeHistory acteHistory = acteService.getHistoryByUuid(historyUuid);
         if(acteHistory.getFile() != null) {
             outputFile(response, acteHistory.getFile(), acteHistory.getFileName());
+            return new ResponseEntity(HttpStatus.OK);
         }
         else throw new FileNotFoundException();
     }
@@ -162,9 +207,10 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/annexe/{annexeUuid}")
-    public void getAnnexe(HttpServletResponse response, @PathVariable String annexeUuid) {
+    public ResponseEntity getAnnexe(HttpServletResponse response, @PathVariable String annexeUuid) {
         Attachment annexe = acteService.getAnnexeByUuid(annexeUuid);
         outputFile(response, annexe.getFile(), annexe.getFilename());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/status/cancel")

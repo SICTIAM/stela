@@ -5,6 +5,7 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.html.simpleparser.HTMLWorker;
 import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.PdfCopy.PageStamp;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -34,7 +35,7 @@ public class PdfGeneratorUtil {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public byte[] createPdf(List<String> pages) throws Exception {
+    public byte[] createPdf(List<String> pages) throws DocumentException, IOException {
         Document document = new Document();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, baos);
@@ -69,6 +70,30 @@ public class PdfGeneratorUtil {
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         BufferedImage bim = pdfRenderer.renderImageWithDPI(0, 30, ImageType.RGB);
         ImageIOUtil.writeImage(bim, "png", baos, 30);
+        document.close();
+        return baos.toByteArray();
+    }
+
+    public byte[] mergePDFs(List<byte[]> pdfs) throws DocumentException, IOException {
+        Document document = new Document();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfCopy copy = new PdfSmartCopy(document, baos);
+        document.open();
+        PageStamp stamp;
+        PdfImportedPage page;
+        PdfReader reader;
+        for(byte[] pdf : pdfs) {
+            reader = new PdfReader(pdf);
+            int pageNumber = reader.getNumberOfPages();
+            for (int i = 1; i <= pageNumber; i++) {
+                document.newPage();
+                page = copy.getImportedPage(reader, i);
+                stamp = copy.createPageStamp(page);
+                stamp.alterContents();
+                copy.addPage(page);
+            }
+            reader.close();
+        }
         document.close();
         return baos.toByteArray();
     }

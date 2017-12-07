@@ -19,10 +19,30 @@ class ActeList extends Component {
         _addNotification: PropTypes.func
     }
     state = {
-        actes: []
+        actes: [],
+        search: {
+            number: '',
+            objet: '',
+            nature: '',
+            status: '',
+            decisionFrom: '',
+            decisionTo: ''
+        }
     }
     componentDidMount() {
         this.submitForm({})
+    }
+    handleFieldChange = (field, value) => {
+        const search = this.state.search
+        search[field] = value
+        this.setState({ search: search })
+    }
+    getSearchData = () => {
+        const data = {}
+        Object.keys(this.state.search)
+            .filter(k => this.state.search[k] !== '')
+            .map(k => data[k] = this.state.search[k])
+        return data
     }
     submitForm = (data) => {
         const headers = {
@@ -37,6 +57,8 @@ class ActeList extends Component {
                 response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
             })
     }
+    downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
+    downloadZipedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.zip', 'actes.zip')
     downloadACKs = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
     downloadCSV = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
     downloadFromSelectionOrSearch = (selectedUuids, url, filename) => {
@@ -47,7 +69,6 @@ class ActeList extends Component {
         fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => {
-                console.log(response)
                 if (response.status === 204) throw response
                 else return response
             })
@@ -65,10 +86,15 @@ class ActeList extends Component {
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
         const downloadACKsSelectOption = { title: t('acte.list.download_selected_ACKs'), titleNoSelection: t('acte.list.download_all_ACKs'), action: this.downloadACKs }
         const downloadCSVSelectOption = { title: t('acte.list.download_selected_CSV'), titleNoSelection: t('acte.list.download_all_CSV'), action: this.downloadCSV }
+        const downloadMergedStampedsSelectOption = { title: t('acte.list.download_selected_merged_stamped'), titleNoSelection: t('acte.list.download_all_merged_stamped'), action: this.downloadMergedStamp }
+        const downloadZipedStampedsSelectOption = { title: t('acte.list.download_selected_ziped_stamped'), titleNoSelection: t('acte.list.download_all_ziped_stamped'), action: this.downloadZipedStamp }
         return (
             <Segment>
                 <h1>{t('acte.list.title')}</h1>
                 <ActeListForm
+                    search={this.state.search}
+                    getSearchData={this.getSearchData}
+                    handleFieldChange={this.handleFieldChange}
                     submitForm={this.submitForm} />
                 <StelaTable
                     data={this.state.actes}
@@ -86,7 +112,7 @@ class ActeList extends Component {
                     ]}
                     header={true}
                     select={true}
-                    selectOptions={[downloadACKsSelectOption, downloadCSVSelectOption]}
+                    selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
                     link='/actes/'
                     linkProperty='uuid'
                     noDataMessage='Aucun acte'
@@ -101,35 +127,15 @@ class ActeListForm extends Component {
         t: PropTypes.func
     }
     state = {
-        search: {
-            number: '',
-            objet: '',
-            nature: '',
-            status: '',
-            decisionFrom: '',
-            decisionTo: ''
-        },
         isAccordionOpen: false
-    }
-    handleFieldChange = (field, value) => {
-        const search = this.state.search
-        search[field] = value
-        this.setState({ search: search })
     }
     handleAccordion = () => {
         const isAccordionOpen = this.state.isAccordionOpen
         this.setState({ isAccordionOpen: !isAccordionOpen })
     }
-    getSearchData = () => {
-        const data = {}
-        Object.keys(this.state.search)
-            .filter(k => this.state.search[k] !== '')
-            .map(k => data[k] = this.state.search[k])
-        return data
-    }
     submitForm = (event) => {
         if (event) event.preventDefault()
-        this.props.submitForm(this.getSearchData())
+        this.props.submitForm(this.props.getSearchData())
     }
     render() {
         const { t } = this.context
@@ -145,29 +151,29 @@ class ActeListForm extends Component {
                 <Accordion.Content active={this.state.isAccordionOpen}>
                     <Form onSubmit={this.submitForm}>
                         <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
-                            <input id='number' value={this.state.search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
+                            <input id='number' value={this.props.search.number} onChange={e => this.props.handleFieldChange('number', e.target.value)} />
                         </FormFieldInline>
                         <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                            <input id='objet' value={this.state.search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                            <input id='objet' value={this.props.search.objet} onChange={e => this.props.handleFieldChange('objet', e.target.value)} />
                         </FormFieldInline>
                         <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                             <Form.Group style={{ marginBottom: 0 }} widths='equal'>
                                 <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
-                                    <input type='date' id='decisionFrom' value={this.state.search.decisionFrom} onChange={e => this.handleFieldChange('decisionFrom', e.target.value)} />
+                                    <input type='date' id='decisionFrom' value={this.props.search.decisionFrom} onChange={e => this.props.handleFieldChange('decisionFrom', e.target.value)} />
                                 </FormField>
                                 <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
-                                    <input type='date' id='decisionTo' value={this.state.search.decisionTo} onChange={e => this.handleFieldChange('decisionTo', e.target.value)} />
+                                    <input type='date' id='decisionTo' value={this.props.search.decisionTo} onChange={e => this.props.handleFieldChange('decisionTo', e.target.value)} />
                                 </FormField>
                             </Form.Group>
                         </FormFieldInline>
                         <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
-                            <select id='nature' value={this.state.search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
+                            <select id='nature' value={this.props.search.nature} onChange={e => this.props.handleFieldChange('nature', e.target.value)}>
                                 <option value=''>{t('api-gateway:form.all_feminine')}</option>
                                 {natureOptions}
                             </select>
                         </FormFieldInline>
                         <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                            <select id='status' value={this.state.search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                            <select id='status' value={this.props.search.status} onChange={e => this.props.handleFieldChange('status', e.target.value)}>
                                 <option value=''>{t('api-gateway:form.all')}</option>
                                 {statusOptions}
                             </select>
