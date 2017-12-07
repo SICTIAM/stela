@@ -231,12 +231,14 @@ class NewActeForm extends Component {
                 this.props.setStatus('', this.state.fields.uuid)
             })
     }
-    deteleDraft = () => {
-        const fields = this.state.fields
+    deteleDraft = (event) => {
+        event.preventDefault()
+        const draftUuid = this.state.fields.draft.uuid
+        const { fields } = this.state
         fields['draft'] = false
         this.setState({ fields })
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify([this.state.fields.draft.uuid]), headers: headers, method: 'DELETE', context: this.context })
+        fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
                 this.context._addNotification(draftDeletedSuccess(this.context.t))
@@ -375,7 +377,7 @@ class NewActeForm extends Component {
                         <div>
                             <Button type='submit' disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
                             {renderIf(this.state.fields.uuid)(
-                                <Button style={{ marginLeft: '1em' }} onClick={this.deteleDraft} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
+                                <Button style={{ marginLeft: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
                                     {t('api-gateway:form.delete_draft')}
                                 </Button>
                             )}
