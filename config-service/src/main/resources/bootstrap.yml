@@ -6,9 +6,10 @@ spring:
   cloud:
     config:
       server: 
-         # Need to have SSH host key locally in RSA format 
+       git:
           uri: ssh://git@forge.sictiam.fr:6666/internet/stela-config.git
-          cloneOnStart: true         
+          cloneOnStart: true 
+          default-label: develop        
 server:
   port: 8888
 
