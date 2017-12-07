@@ -22,13 +22,9 @@ services:
     container_name: config
     ports:
      - "8888:8888"
-    volumes:
-     - ../stela-config:/stela-config
     depends_on:
      - postgresql
      - rabbitmq
-    environment:
-      - "SPRING_PROFILES_ACTIVE=native"
   discovery:
     image: stela-poc/discovery-service
     container_name: discovery
@@ -43,7 +39,7 @@ services:
      - config
      - discovery
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
   tracing-service:
     image: stela-poc/tracing-service
     container_name: tracing-service
@@ -54,7 +50,7 @@ services:
      - discovery
      - rabbitmq
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
   api-gateway:
     image: stela-poc/api-gateway
     container_name: api-gateway
@@ -64,4 +60,26 @@ services:
      - config
      - discovery
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=integration"
+  admin-service:
+    image: stela-poc/admin-service
+    container_name: admin-service
+    ports:
+     - "9006:9006"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+    environment:
+     - "SPRING_PROFILES_ACTIVE=integration"
+  acte-service:
+    image: stela-poc/acte-service
+    container_name: acte-service
+    ports:
+     - "9008:9008"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+    environment:
+     - "SPRING_PROFILES_ACTIVE=integration"
