@@ -10,9 +10,16 @@ services:
       POSTGRES_DB: stela-acte-test
   config:
     image: stela-poc/config-service
+    healthcheck:  
+      test: ["CMD", "curl", "-f", "http://localhost:8888/acte-service/test"]  
+      interval: 1s  
+      timeout: 5s  
+      retries: 12 
     ports:
      - "8888:8888"
     volumes:
      - ../../../../../stela-config:/stela-config
     depends_on:
      - postgresql
+    environment:
+     - "SPRING_PROFILES_ACTIVE=native"
