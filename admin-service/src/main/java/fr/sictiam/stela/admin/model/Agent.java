@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import java.util.Set;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -28,7 +30,10 @@ public class Agent {
     private String email;
     @NotNull
     private Boolean admin;
-
+    
+    @OneToMany(mappedBy = "agent")
+    private Set<Profile> profiles;
+    
     protected Agent() {
     }
 
@@ -81,7 +86,15 @@ public class Agent {
     public void setAdmin(Boolean admin) {
         this.admin = admin;
     }
+    
+    public Set<Profile> getProfiles() {
+        return profiles;
+    }
 
+    public void setProfiles(Set<Profile> profiles) {
+        this.profiles = profiles;
+    }
+    
     @Override
     public String toString() {
         return "Agent{" +

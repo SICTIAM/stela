@@ -18,9 +18,16 @@ public class LocalAuthority {
     private String siren;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Set<Module> activatedModules;
-    private OzwilloInstanceInfo ozwilloInstanceInfo;
+    private Set<Module> activatedModules;   
 
+    private OzwilloInstanceInfo ozwilloInstanceInfo;
+    
+    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)
+    private Set<WorkGroup> groups;
+    
+    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)
+    private Set<Profile> profiles;
+    
     protected LocalAuthority() {
         this.activatedModules = new HashSet<>();
     }
@@ -74,7 +81,23 @@ public class LocalAuthority {
     public void setOzwilloInstanceInfo(OzwilloInstanceInfo ozwilloInstanceInfo) {
         this.ozwilloInstanceInfo = ozwilloInstanceInfo;
     }
+    
+    public Set<WorkGroup> getGroups() {
+        return groups;
+    }
 
+    public void setGroups(Set<WorkGroup> groups) {
+        this.groups = groups;
+    }
+
+    public Set<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(Set<Profile> profiles) {
+        this.profiles = profiles;
+    }
+    
     @Override
     public String toString() {
         return "LocalAuthority{" +
