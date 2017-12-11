@@ -1,6 +1,11 @@
 {
     "app_title": "STELA",
     "heavy_development": "en cours de fort développement",
+    "top_bar": {
+        "log_in": "Connexion",
+        "log_out": "Déconnexion",
+        "params": "Paramètres"
+    },
     "form": {
         "search": "Rechercher",
         "all": "Tous",
@@ -15,10 +20,10 @@
         "download": "Télécharger",
         "validation": {
             "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des tirets bas (_).",
-            "mandatoryfield":"Le champ est obligatoire",
-            "malformedfield":"Le champ n'est pas formé correctement",
-            "mandatoryfile":"Fichier obligatoire",
-            "badextension":"L'extension du fichier un incorrect"
+            "mandatoryfield": "Le champ est obligatoire",
+            "malformedfield": "Le champ n'est pas formé correctement",
+            "mandatoryfile": "Fichier obligatoire",
+            "badextension": "L'extension du fichier un incorrect"
         }
     },
     "list": {
@@ -43,7 +48,8 @@
             "send_a_convocation": "Déposer une convocation",
             "reveived_convocations": "Convocations reçues",
             "sent_convocations": "Convocations envoyées"
-        }
+        },
+        "admin": "Admin"
     },
     "pes": {
         "list": {
@@ -102,5 +108,15 @@
             "local_authority_settings": "Paramétrage des collectivités"
         },
         "back_to_stela": "Retourner sur STELA"
+    },
+    "error": {
+        "401": {
+            "title": "Erreur 401",
+            "content": "Vous devez être authentifié pour accéder à cette page"
+        },
+        "404": {
+            "title": "Erreur 404",
+            "content": "Cette page n'existe pas"
+        }
     }
 }

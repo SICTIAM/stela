@@ -11,6 +11,7 @@ import '../styles/index.css';
 
 import history from './_util/history'
 import i18n from './_util/i18n'
+import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
 import Footer from './_components/Footer'
@@ -42,17 +43,20 @@ class App extends Component {
     static childContextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
+        isLoggedIn: PropTypes.bool,
         t: PropTypes.func,
         _addNotification: PropTypes.func
     }
     state = {
         csrfToken: '',
-        csrfTokenHeaderName: ''
+        csrfTokenHeaderName: '',
+        isLoggedIn: false
     }
     getChildContext() {
         return {
             csrfToken: this.state.csrfToken,
             csrfTokenHeaderName: this.state.csrfTokenHeaderName,
+            isLoggedIn: this.state.isLoggedIn,
             t: this.t,
             _addNotification: this._addNotification
         }
@@ -64,6 +68,11 @@ class App extends Component {
     }
     componentDidMount() {
         fetch('/api/csrf-token', { credentials: 'same-origin' })
+            .then(response => {
+                // TODO: Improve (coockies..) 
+                this.setState({ isLoggedIn: response.status !== 401 })
+                return response
+            })
             .then(response => response.headers)
             .then(headers =>
                 this.setState({ csrfToken: headers.get('X-CSRF-TOKEN'), csrfTokenHeaderName: headers.get('X-CSRF-HEADER') }))
@@ -82,50 +91,61 @@ class App extends Component {
     }
 }
 
-const FrontApp = ({ children }) =>
-    <div>
-        <MenuBar />
-        <Container className='mainContainer'>
-            {children}
-        </Container>
-    </div>
-
-const AdminApp = ({ children }) =>
-    <div>
-        <AdminMenuBar />
-        <Container className='mainContainer'>
-            {children}
-        </Container>
-    </div>
+const PublicRoute = ({ component: Component, ...rest }) => (
+    <Route {...rest} render={(props) =>
+        <div>
+            <MenuBar />
+            <Container className='mainContainer'>
+                <Component {...props} />
+            </Container>
+        </div>
+    } />
+)
+const AuthRoute = ({ component: Component, menu: Menu, ...rest }, { isLoggedIn }) => (
+    <Route {...rest} render={(props) =>
+        <div>
+            <Menu />
+            <Container className='mainContainer'>
+                {isLoggedIn
+                    ? <Component {...props} {...props.match.params} />
+                    : <ErrorPage error={401} />}
+            </Container>
+        </div>
+    } />
+)
+AuthRoute.contextTypes = {
+    isLoggedIn: PropTypes.bool
+}
 
 const AppRoute = () =>
     <Switch>
-        <Route exact path='/' render={() => <FrontApp><Home /></FrontApp>} />
+        <PublicRoute exact path='/' component={Home} />
 
         <Route exact path='/actes'>
             <Redirect to="/actes/liste" />
         </Route>
-        <Route path='/actes/liste' render={() => <FrontApp><ActeList /></FrontApp>} />
-        <Route path='/actes/brouillons/:uuid' render={({ match }) => <FrontApp><NewActeSwitch uuid={match.params.uuid} /></FrontApp>} />
-        <Route path='/actes/brouillons' render={() => <FrontApp><DraftList /></FrontApp>} />
-        <Route path='/actes/nouveau' render={() => <FrontApp><NewActeSwitch /></FrontApp>} />
-        <Route path='/actes/:uuid' render={({ match }) => <FrontApp><Acte uuid={match.params.uuid} /></FrontApp>} />
+        <AuthRoute path='/actes/liste' component={ActeList} menu={MenuBar} />
+        <AuthRoute path='/actes/brouillons/:uuid' component={NewActeSwitch} menu={MenuBar} />
+        <AuthRoute path='/actes/brouillons' component={DraftList} menu={MenuBar} />
+        <AuthRoute path='/actes/nouveau' component={NewActeSwitch} menu={MenuBar} />
+        <AuthRoute path='/actes/:uuid' component={Acte} menu={MenuBar} />
 
         <Route exact path='/pes'>
             <Redirect to="/pes/liste" />
         </Route>
-        <Route path='/pes/liste' render={() => <FrontApp><PesList /></FrontApp>} />
-        <Route path='/pes/nouveau' render={() => <FrontApp><NewPes /></FrontApp>} />
+        <AuthRoute path='/pes/liste' component={PesList} menu={MenuBar} />
+        <AuthRoute path='/pes/nouveau' component={NewPes} menu={MenuBar} />
 
         <Route exact path='/admin'>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
-        <Route path='/admin/tableau-de-bord' render={() => <AdminApp><AdminDashboard /></AdminApp>} />
-        <Route path='/admin/actes/parametrage-collectivite/:uuid' render={({ match }) => <AdminApp><LocalAuthority uuid={match.params.uuid} /></AdminApp>} />
-        <Route path='/admin/actes/parametrage-collectivite' render={() => <AdminApp><LocalAuthorityList /></AdminApp>} />
-        <Route path='/admin/acte/parametrage-module' render={() => <AdminApp><ModuleParam /></AdminApp>} />
+        <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/actes/parametrage-collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/actes/parametrage-collectivite' component={LocalAuthorityList} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/acte/parametrage-module' component={ModuleParam} menu={AdminMenuBar} />
 
-
+        <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
+        <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
     </Switch>
 
 render((
