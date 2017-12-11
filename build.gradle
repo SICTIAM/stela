@@ -37,6 +37,7 @@ subprojects {
 
 	dependencies {
         compile('org.springframework.boot:spring-boot-devtools')
+        compile('org.springframework.boot:spring-boot-starter-mail:1.5.9.RELEASE')        
         compile('ch.qos.logback:logback-classic:1.1.5')
         compile "org.jetbrains.kotlin:kotlin-stdlib:$ktVersion"
 		compile "org.jetbrains.kotlin:kotlin-reflect:$ktVersion"
@@ -46,7 +47,8 @@ subprojects {
         runtime('org.flywaydb:flyway-core')
         testCompile('junit:junit:4.12')
         testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
-
+        testCompile('com.icegreen:greenmail:1.5.5')
+        testCompile('org.apache.commons:commons-email:1.4')
     }
 
     ext {

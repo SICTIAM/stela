@@ -59,13 +59,16 @@ public class EmailCheckingTask {
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
-    @Value("${application.checkingemail.host}")
+    @Value("${application.email.listening.host}")
     private String host;
+    
+    @Value("${application.email.listening.port}")
+    private Integer port;
 
-    @Value("${application.checkingemail.username}")
+    @Value("${application.email.username}")
     private String username;
 
-    @Value("${application.checkingemail.password}")
+    @Value("${application.email.password}")
     private String password;
 
     @PostConstruct
@@ -79,7 +82,7 @@ public class EmailCheckingTask {
             properties.put("mail.imap.ssl.trust", "*");
             properties.put("mail.imap.ssl.socketFactory", sf);
             properties.put("mail.imap.host", host);
-            properties.put("mail.imap.port", "993");
+            properties.put("mail.imap.port", port);
             properties.put("mail.imap.ssl.enable", "true");
             Session emailSession = Session.getDefaultInstance(properties);
             store = emailSession.getStore("imap");
