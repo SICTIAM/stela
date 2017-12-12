@@ -1,7 +1,6 @@
 package fr.sictiam.stela.acteservice;
 
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -21,12 +20,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
@@ -50,7 +49,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.FileCopyUtils;
@@ -65,11 +63,16 @@ import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeMode;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Admin;
+import fr.sictiam.stela.acteservice.model.Agent;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.Profile;
 import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.WorkGroup;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
@@ -77,6 +80,7 @@ import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.LocalesService;
 import fr.sictiam.stela.acteservice.service.NotificationService;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -114,6 +118,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Rule
     public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
+
     @Before
     public void beforeTests() {
         createAdmin();
@@ -128,7 +133,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void createLocalAuthority() {
         if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
             LocalAuthority localAuthority =
-                    new LocalAuthority("SICTIAM-Test", "999888777", "999", "1", "31", true, true);
+                    new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test", "999888777", "999", "1", "31", true, true);
             try {
                 MultipartFile codesMatieresFile = getMultipartResourceFile("data/exemple_codes_matieres.xml", "application/xml");
                 localAuthority.setNomenclatureDate(LocalDate.now());
@@ -291,18 +296,34 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void createAndRetrieveLocalAuthority() {
-        LocalAuthority localAuthority = new LocalAuthority("New-Test", "999888777", "999", "1", "31");
-        localAuthority = localAuthorityService.createOrUpdate(localAuthority);
+    public void handleLocalAuthoriyEvent() {
+             
+        Agent agent = new Agent("546ece6c-7bf9-4192-a73b-689193443d5d","John", "Doe", "john.doe@fbi.fr");
+        agent.setSub("sub");
+        agent.setAdmin(false);
+        
+        Profile profile = new Profile("be639bb7-1b20-452f-b67b-b706cfd6e5df", agent, false);
+        Set<Profile> profiles = new HashSet<>();
+        profiles.add(profile);
+        
+        WorkGroup workGroup = new WorkGroup("febb077f-c014-4f18-802f-8315726caa82", "GlobalGroup");
+        workGroup.setProfiles(profiles);
+        Set<WorkGroup> groups = new HashSet<>();
+        groups.add(workGroup);
+        
+        LocalAuthority localAuthority = new LocalAuthority("d4055204-ce91-48a5-bb53-458bd543bc5a", "New-Test","siren", true,groups, profiles);
+        
+        LocalAuthorityEvent localAuthorityEvent =new LocalAuthorityEvent(localAuthority);
+        localAuthorityEvent.setActivatedModules(Collections.singleton(Module.ACTES));
+        localAuthorityService.handleEvent(localAuthorityEvent);
         assertThat(localAuthorityService.getByUuid(localAuthority.getUuid()).getName(), is("New-Test"));
-        assertThat(localAuthority.getUuid(), is(localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid()));
-        // cleanup our local production
-        localAuthorityService.delete(localAuthority);
+        assertThat(localAuthority.getUuid(), is(localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid()));    
+        
     }
 
     @Test
     public void partialLocalAuthorityUpdate() {
-        LocalAuthority localAuthority = new LocalAuthority("Patch-Test", "999888777", "999", "1", "31");
+        LocalAuthority localAuthority = new LocalAuthority("f11551be-e83b-47cb-b431-b57704bd7fad","Patch-Test", "999888777", "999", "1", "31");
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
 
         HttpHeaders headers = new HttpHeaders();
@@ -318,9 +339,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(localAuthority.getCanPublishWebSite(), is(false));
         assertThat(localAuthority.getDepartment(), is("006"));
         assertThat(localAuthority.getNature(), is("29"));
-
-        // cleanup our local production
+        
         localAuthorityService.delete(localAuthority);
+
     }
 
     @Test

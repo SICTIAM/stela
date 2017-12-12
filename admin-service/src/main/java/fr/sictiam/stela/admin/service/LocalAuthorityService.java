@@ -1,26 +1,44 @@
 package fr.sictiam.stela.admin.service;
 
-import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
-import fr.sictiam.stela.admin.model.*;
-import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
+import fr.sictiam.stela.admin.model.LocalAuthority;
+import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
+
 
 @Service
 public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
 
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+
+    @Value("${application.amqp.admin.createdKey}")
+    private String createdKey;
+
+    @Value("${application.amqp.admin.exchange}")
+    private String exchange;
+
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
         this.localAuthorityRepository = localAuthorityRepository;
     }
 
     public LocalAuthority create(LocalAuthority localAuthority) {
-        localAuthority = localAuthorityRepository.save(localAuthority);
+        localAuthority = localAuthorityRepository.saveAndFlush(localAuthority);
 
-        // TODO : send a message to the bus
+        LocalAuthorityEvent localAutorityCreation = new LocalAuthorityEvent(localAuthority);
+        
+        amqpTemplate.convertAndSend(exchange, createdKey, localAutorityCreation);
 
         return localAuthority;
     }

@@ -1,22 +1,20 @@
 package fr.sictiam.stela.acteservice.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class LocalAuthority {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     private String name;
     private String siren;
@@ -27,17 +25,25 @@ public class LocalAuthority {
     private byte[] nomenclatureFile;
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
-    
+    private Boolean active;
+
     @Embedded
     private StampPosition stampPosition;
     
     @OneToMany(mappedBy="localAuthority")
     private List<MaterialCode> materialCodes;
-
+    
+    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.MERGE)
+    private Set<WorkGroup> groups;
+    
+    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.MERGE)
+    private Set<Profile> profiles;
+    
     public LocalAuthority() {
     }
-
-    public LocalAuthority(String name, String siren, String department, String district, String nature) {
+    //uiid is generated only once in AdminService
+    public LocalAuthority(String uuid, String name, String siren, String department, String district, String nature) {
+        this.uuid=uuid;
         this.name = name;
         this.siren = siren;
         this.department = department;
@@ -47,8 +53,9 @@ public class LocalAuthority {
         this.canPublishWebSite = false;
     }
 
-    public LocalAuthority(String name, String siren, String department, String district, String nature,
+    public LocalAuthority(String uuid, String name, String siren, String department, String district, String nature,
                           Boolean canPublishRegistre, Boolean canPublishWebSite) {
+        this.uuid=uuid;
         this.name = name;
         this.siren = siren;
         this.department = department;
@@ -58,6 +65,16 @@ public class LocalAuthority {
         this.canPublishWebSite = canPublishWebSite;
     }
 
+    public LocalAuthority(String uuid, String name, String siren, Boolean active, Set<WorkGroup> groups,
+            Set<Profile> profiles) {
+        this.uuid = uuid;
+        this.name = name;
+        this.siren = siren;
+        this.active = active;
+        this.groups = groups;
+        this.profiles = profiles;
+    }
+    
     public String getUuid() {
         return uuid;
     }
@@ -145,7 +162,27 @@ public class LocalAuthority {
     public void setStampPosition(StampPosition stampPosition) {
         this.stampPosition = stampPosition;
     }
-
+    
+    public Boolean isActive() {
+        return active;
+    }
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+    
+    public Set<WorkGroup> getGroups() {
+        return groups;
+    }
+    public void setGroups(Set<WorkGroup> groups) {
+        this.groups = groups;
+    }
+    public Set<Profile> getProfiles() {
+        return profiles;
+    }
+    public void setProfiles(Set<Profile> profiles) {
+        this.profiles = profiles;
+    }
+    
     @Override
     public String toString() {
         return "LocalAuthority{" +

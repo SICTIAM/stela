@@ -1,6 +1,5 @@
-package fr.sictiam.stela.admin.model;
+package fr.sictiam.stela.acteservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -14,8 +13,6 @@ import javax.validation.constraints.NotNull;
 public class Agent {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     @JsonProperty(value = "family_name")
     private String familyName;
@@ -25,7 +22,6 @@ public class Agent {
     @NotNull
     @NotEmpty
     @Column(unique = true)
-    @JsonIgnore
     private String sub;
     @NotNull
     @NotEmpty
@@ -34,13 +30,13 @@ public class Agent {
     private Boolean admin;
     
     @OneToMany(mappedBy = "agent")
-    @JsonIgnore
     private Set<Profile> profiles;
     
     protected Agent() {
     }
 
-    public Agent(String familyName, String givenName, String email) {
+    public Agent(String uuid, String familyName, String givenName, String email) {
+        this.uuid = uuid;
         this.familyName = familyName;
         this.givenName = givenName;
         this.email = email;

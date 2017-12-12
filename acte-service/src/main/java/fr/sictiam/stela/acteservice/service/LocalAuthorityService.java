@@ -4,6 +4,10 @@ import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.Profile;
+import fr.sictiam.stela.acteservice.model.WorkGroup;
+import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.xml.DemandeClassification;
 import fr.sictiam.stela.acteservice.model.xml.ObjectFactory;
 import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
@@ -61,7 +65,7 @@ public class LocalAuthorityService {
     public Optional<LocalAuthority> getBySiren(String siren) {
         return localAuthorityRepository.findBySiren(siren);
     }
-    
+
     @Transactional
     public void loadCodesMatieres(String uuid) {
 
@@ -76,7 +80,7 @@ public class LocalAuthorityService {
             LOGGER.error("Unable to parse classification data !", e);
         }
     }
-    
+
     @Transactional
     public void loadCodesMatieres(String uuid, RetourClassification classification) {
 
@@ -130,19 +134,17 @@ public class LocalAuthorityService {
         localAuthorityRepository.save(localAuthority);
 
     }
-    
-    private MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) { 
-        MaterialCode newMat = new MaterialCode(key, label, localAuthority); 
-        materialCodeRepository.save(newMat); 
-        return newMat; 
-    } 
 
+    private MaterialCode createMaterialCode(String key, String label, LocalAuthority localAuthority) {
+        MaterialCode newMat = new MaterialCode(key, label, localAuthority);
+        materialCodeRepository.save(newMat);
+        return newMat;
+    }
 
     @Transactional
     public List<MaterialCode> getCodesMatieres(String uuid) {
 
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
-        Map<String, String> codesMatieres = new LinkedHashMap<>();
         if (localAuthority.getMaterialCodes() == null || localAuthority.getMaterialCodes().isEmpty()) {
             loadCodesMatieres(uuid);
         }
@@ -154,8 +156,19 @@ public class LocalAuthorityService {
                 localAuthorityUuid);
         if (materialCode.isPresent())
             return materialCode.get().getLabel();
-        
+
         return null;
+    }
+
+    public void handleEvent(LocalAuthorityEvent event) {
+
+        LocalAuthority localAutority = new LocalAuthority(event.getUuid(), event.getName(), event.getSiren(),
+                event.getActivatedModules().contains(Module.ACTES), event.getGroups(), event.getProfiles());
+        
+        localAutority.getGroups().forEach(group -> group.setLocalAuthority(localAutority));
+        localAutority.getProfiles().forEach(profile -> profile.setLocalAuthority(localAutority));
+        createOrUpdate(localAutority);
+
     }
 
 }

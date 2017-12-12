@@ -1,11 +1,13 @@
-package fr.sictiam.stela.admin.model;
+package fr.sictiam.stela.acteservice.model;
 
 import java.util.Set;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,15 +17,13 @@ public class WorkGroup {
     
     
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     
     @ManyToOne
     @JsonIgnore
     private LocalAuthority localAuthority;
     
-    @ManyToMany(targetEntity=Profile.class)
+    @ManyToMany(targetEntity=Profile.class, cascade=CascadeType.ALL)
     @JoinTable(name = "group_to_profile")
     private Set<Profile> profiles;
     
@@ -33,14 +33,15 @@ public class WorkGroup {
         
     }
     
-    public WorkGroup(LocalAuthority localAuthority, String name) {
-        super();
+    public WorkGroup(String uuid, LocalAuthority localAuthority, String name) {
+        this.uuid= uuid;
         this.localAuthority = localAuthority;
         this.name = name;
     }
-
-    public String getUuid() {
-        return uuid;
+    
+    public WorkGroup(String uuid, String name) {
+        this.uuid= uuid;
+        this.name = name;
     }
 
     public LocalAuthority getLocalAuthority() {
@@ -66,8 +67,14 @@ public class WorkGroup {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getUuid() {
         return uuid;
     }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+    
+    
 }
