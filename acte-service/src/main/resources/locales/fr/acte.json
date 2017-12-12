@@ -98,7 +98,7 @@
           "MIAT_transmission": "Transmission MIAT"
         },
         "module_settings": {
-          "title": "Paramétres du module",
+          "title": "Paramétres du module Acte",
           "main_email": "Email principale",
           "additional_emails": "Emails additionels",
           "no_additional_email": "Aucun email additionel"

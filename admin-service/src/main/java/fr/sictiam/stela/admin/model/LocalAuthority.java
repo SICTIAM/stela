@@ -1,5 +1,6 @@
 package fr.sictiam.stela.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ public class LocalAuthority {
     @Enumerated(EnumType.STRING)
     private Set<Module> activatedModules;   
 
+    @JsonIgnore
     private OzwilloInstanceInfo ozwilloInstanceInfo;
     
     @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)

@@ -7,6 +7,10 @@ const checkStatus = (response) => {
     }
 }
 
+const capitalizeFirstLetter = (string) => {
+    return string[0].toUpperCase() + string.slice(1);
+}
+
 const bytesToSize = (bytes) => {
     const sizes = ['octets', 'Ko', 'Mo', 'Go', 'To']
     if (bytes === 0) return 'n/a'
@@ -44,11 +48,11 @@ const handleFieldCheckboxChange = (that, field) => {
 }
 
 const handleFieldChange = (that, e, callback) => {
-    callback  = callback || null
+    callback = callback || null
     const { id, value } = e.target
     const fields = that.state.fields
     fields[id] = value
     that.setState({ fields: fields }, callback)
 }
 
-module.exports = { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange, bytesToSize }
+module.exports = { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange, bytesToSize, capitalizeFirstLetter }

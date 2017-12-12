@@ -20,28 +20,20 @@ class AdminMenuBar extends Component {
                 <Menu.Item as={Link} to="/admin/tableau-de-bord">
                     {t('admin.dashboard')}
                 </Menu.Item>
-                <Menu.Item>
-                    {t('admin.users')}
-                </Menu.Item>
 
                 <Menu.Item>
-                    {t('admin.collectivities')}
-                </Menu.Item>
-
-                <Menu.Item>
-                    <Menu.Header>{t('acte:admin.modules.acte.title')}</Menu.Header>
+                    <Menu.Header>Admin collectivité</Menu.Header>
                     <Menu.Menu>
-                        <Menu.Item as={Link} to='/admin/actes/parametrage-collectivite'>{t('acte:admin.modules.acte.local_authority_settings.title')}</Menu.Item>
-                        <Menu.Item as={Link} to='/admin/acte/parametrage-module'>{t('acte:admin.modules.acte.module_settings.title')}</Menu.Item>
+                        <Menu.Item as={Link} to='/admin/ma-collectivite'>{t('admin.my_local_authority')}</Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
 
                 <Menu.Item>
-                    {t('admin.modules.pes')}
-                </Menu.Item>
-
-                <Menu.Item>
-                    {t('admin.modules.convocation')}
+                    <Menu.Header>Admin instance</Menu.Header>
+                    <Menu.Menu>
+                        <Menu.Item as={Link} to='/admin/collectivite'>{t('admin.local_authorities')}</Menu.Item>
+                        <Menu.Item as={Link} to='/admin/actes/parametrage-module'>{t('acte:admin.modules.acte.module_settings.title')}</Menu.Item>
+                    </Menu.Menu>
                 </Menu.Item>
 
                 <Menu.Item as={Link} to="/" header>

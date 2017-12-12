@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
@@ -21,14 +22,17 @@ public class Profile {
     private String uuid;
     
     @ManyToOne
+    @JsonIgnore
     private LocalAuthority localAuthority;
     
     @ManyToOne
+    @JsonIgnore
     private Agent agent;
     
     private Boolean admin;
     
     @ManyToMany(mappedBy="profiles")
+    @JsonIgnore
     private Set<WorkGroup> groups;
     
     public Profile() {

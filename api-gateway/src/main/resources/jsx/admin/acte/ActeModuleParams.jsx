@@ -9,7 +9,7 @@ import { errorNotification, adminModuleUpdateSuccess } from '../../_components/N
 import { Field } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
-class ModuleParam extends Component {
+class ActeModuleParams extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
@@ -103,11 +103,11 @@ class ModuleParam extends Component {
                             className='simpleInput' />
                         <Button style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>{t('api-gateway:form.add')}</Button>
                     </Field>
-                    <Button type='submit'>{t('api-gateway:form.update')}</Button>
+                    <Button primary type='submit'>{t('api-gateway:form.update')}</Button>
                 </Form>
             </Segment>
         )
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ModuleParam)
+export default translate(['acte', 'api-gateway'])(ActeModuleParams)
