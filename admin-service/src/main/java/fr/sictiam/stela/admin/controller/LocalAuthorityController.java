@@ -49,13 +49,23 @@ public class LocalAuthorityController {
         return new LocalAuthorityUI(localAuthorityService.getByUuid(uuid));
     }
 
+    @PostMapping("/current/{module}")
+    public void addModule(@PathVariable Module module) {
+        localAuthorityService.addModule(localAuthorityService.getCurrent().getUuid(), module);
+    }
+
+    @DeleteMapping("/current/{module}")
+    public void removeModule(@PathVariable Module module) {
+        localAuthorityService.removeModule(localAuthorityService.getCurrent().getUuid(), module);
+    }
+
     @PostMapping("/{uuid}/{module}")
-    public void addModule(@PathVariable String uuid, @PathVariable Module module) {
+    public void addModuleByUuid(@PathVariable String uuid, @PathVariable Module module) {
         localAuthorityService.addModule(uuid, module);
     }
 
     @DeleteMapping("/{uuid}/{module}")
-    public void removeModule(@PathVariable String uuid, @PathVariable Module module) {
+    public void removeModuleByUuid(@PathVariable String uuid, @PathVariable Module module) {
         localAuthorityService.removeModule(uuid, module);
     }
 }
