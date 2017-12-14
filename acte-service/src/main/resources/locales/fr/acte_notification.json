@@ -1,0 +1,20 @@
+{
+  "acte": {
+    "ACK_RECEIVED":{
+    	"subject":"[Stela V3] Actes reçu",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a bien été reçu par préfecture <br/> Cordialement le Sictiam"
+    },
+    "SENT":{
+    	"subject":"[Stela V3] Actes transmis",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
+    },
+    "NACK_RECEIVED":{
+    	"subject":"[Stela V3] Actes rejeté",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a été rejeté par la préfecture <br/> Cordialement le Sictiam"
+    },
+    "CANCELLED":{
+    	"subject":"[Stela V3] Actes annulé",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a bien été annulé <br/> Cordialement le Sictiam"
+    }
+  }
+}

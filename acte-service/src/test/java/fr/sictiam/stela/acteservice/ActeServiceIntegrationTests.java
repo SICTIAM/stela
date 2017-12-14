@@ -1,7 +1,9 @@
 package fr.sictiam.stela.acteservice;
 
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -18,13 +20,22 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.mail.util.MimeMessageParser;
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -39,6 +50,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.FileCopyUtils;
@@ -57,11 +69,14 @@ import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.LocalesService;
+import fr.sictiam.stela.acteservice.service.NotificationService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -89,6 +104,15 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     
     @Autowired
     private ActeHistoryRepository acteHistoryRepository; 
+    
+    @Autowired
+    private NotificationService notificationService;
+    
+    @Autowired
+    private LocalesService localService;
+
+    @Rule
+    public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
     @Before
     public void beforeTests() {
@@ -179,7 +203,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
   
         List<ActeHistory> acteHistories = acteHistoryRepository.findByacteUuidOrderByDate(acteUuid);
    
-        assertThat(acteHistories, hasSize(5));
+        assertThat(acteHistories, hasSize(6));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_CREATED))));
         
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteHistories, StatusType.ARCHIVE_CREATED);
@@ -189,7 +213,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.CREATED))));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ANTIVIRUS_OK))));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_SIZE_CHECKED))));
-        assertThat(acteHistories.get(4).getStatus(), is(StatusType.SENT));
+        assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.SENT))));
+        assertThat(acteHistories.get(5).getStatus(), is(StatusType.NOTIFICATION_SENT));
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
     }
@@ -250,7 +275,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         acte = acteService.getByUuid(acteUuid);
-        assertThat(acte.getActeHistories().last().getStatus(), is(StatusType.SENT));
+        assertThat(acte.getActeHistories().last().getStatus(), is(StatusType.NOTIFICATION_SENT));
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteUuid, StatusType.CANCELLATION_ARCHIVE_CREATED);
         assertThat(acteHistory.isPresent(), is(true));
@@ -434,6 +459,50 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(draftService.getActeDrafts(), empty());
         assertThat(acteRepository.findAll(), hasSize(2));
     }
+    
+    @Test
+    public void testNotification() throws Exception {
+
+        StatusType statusType = StatusType.SENT;
+        String firstName = "John";
+        String lastName = "Doe";
+        Map<String, String> variables = new HashMap<>();
+        variables.put("firstname", firstName);
+        variables.put("lastname", lastName);
+
+        String body = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".body",
+                variables);
+        String subject = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".subject",
+                variables);
+
+        try {
+            // sleep some seconds to let async creation of the archive happens
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+        MultiValueMap<String, Object> params = acteWithAttachments();
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
+
+        ResponseEntity<String> response = this.restTemplate.exchange("/api/acte", HttpMethod.POST, request,
+                String.class);
+        String acteUuid = response.getBody();
+
+        ActeHistory history = new ActeHistory(acteUuid, StatusType.SENT);
+        ActeHistoryEvent mockEvent = new ActeHistoryEvent(this, history);
+        notificationService.sendMail(mockEvent);
+
+        MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+        assertThat(receivedMessages, not(emptyArray()));
+
+        MimeMessage current = receivedMessages[0];
+        assertThat(current, notNullValue());
+        MimeMessageParser parser = new MimeMessageParser(current);
+        parser.parse();
+        assertThat(parser.getSubject(), is(subject));
+        assertThat(current.getContent(), instanceOf(MimeMultipart.class));
+        assertThat(parser.getHtmlContent(), is(body));
+    } 
 
     private MultiValueMap<String, Object> acteWithAttachments() {
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
