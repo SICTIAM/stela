@@ -18,7 +18,7 @@ const bytesToSize = (bytes) => {
 // TODO: add 403 controls
 const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
     const httpMethod = method || "GET"
-    const data = body || {}
+    const data = body || undefined
     const params = query || {}
     const queryParams = '?' + Object.keys(params)
         .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
