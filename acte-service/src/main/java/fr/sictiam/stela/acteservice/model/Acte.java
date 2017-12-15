@@ -67,6 +67,9 @@ public class Acte {
     private LocalAuthority localAuthority;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Draft draft;
+    
+    @ManyToOne
+    private Profile profile;
 
     public Acte() {
     }
@@ -195,6 +198,15 @@ public class Acte {
 
     public void setDraft(Draft draft) {
         this.draft = draft;
+    }
+    
+    
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     public boolean empty() {
