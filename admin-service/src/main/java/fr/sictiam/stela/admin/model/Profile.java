@@ -78,7 +78,4 @@ public class Profile {
         this.groups = groups;
     }  
     
-    public String getUuid() {
-        return uuid;
-    }
 }
