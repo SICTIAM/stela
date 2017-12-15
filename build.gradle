@@ -44,6 +44,7 @@ subprojects {
         compile ('xyz.capybara:clamav-client:2.0.1')
         compile("org.springframework.retry:spring-retry")
         compile("org.springframework.boot:spring-boot-starter-aop")
+        compile('com.jayway.jsonpath:json-path:2.4.0')
         runtime('org.flywaydb:flyway-core')
         testCompile('junit:junit:4.12')
         testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
