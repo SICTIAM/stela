@@ -11,7 +11,7 @@ import { errorNotification, localAuthorityUpdateSuccess } from '../../_component
 import { Field } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../../_util/utils'
 
-class LocalAuthority extends Component {
+class ActeLocalAuthorityParams extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
@@ -46,19 +46,17 @@ class LocalAuthority extends Component {
     }
     componentDidMount() {
         const uuid = this.props.uuid
-        if (uuid !== '') {
-            fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + uuid })
-                .then(checkStatus)
-                .then(response => response.json())
-                .then(json => this.updateState(json))
-                .catch(response => {
-                    console.log(response)
-                    response.json().then(json => {
-                        this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
-                    })
-                    history.push('/admin/actes/parametrage-collectivite')
+        const url = uuid ? '/api/acte/localAuthority/' + uuid : '/api/acte/localAuthority/current'
+        fetchWithAuthzHandling({ url })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => this.updateState(json))
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
                 })
-        }
+                history.push('/admin/actes/parametrage-collectivite')
+            })
     }
     updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite, stampPosition }) => {
         const constantFields = { uuid, name, siren, nomenclatureDate }
@@ -111,15 +109,9 @@ class LocalAuthority extends Component {
                 <Segment>
                     <h1>{this.state.constantFields.name}</h1>
 
-                    <h2>{t('admin.modules.acte.local_authority_settings.general_informations')}</h2>
+                    <h2>{t('admin.modules.acte.module_settings.title')}</h2>
 
                     <Form onSubmit={this.submitForm}>
-                        <Field htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
-                            <span id="uuid">{this.state.constantFields.uuid}</span>
-                        </Field>
-                        <Field htmlFor="siren" label={t('api-gateway:local_authority.siren')}>
-                            <span id="siren">{this.state.constantFields.siren}</span>
-                        </Field>
                         <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
                             <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
                         </Field>
@@ -163,7 +155,7 @@ class LocalAuthority extends Component {
                         <Field htmlFor='canPublishWebSite' label={t('api-gateway:local_authority.canPublishWebSite')}>
                             <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                         </Field>
-                        <Button style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('api-gateway:form.update')}</Button>
+                        <Button primary style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('api-gateway:form.update')}</Button>
                     </Form>
                 </Segment>
             )
@@ -171,4 +163,4 @@ class LocalAuthority extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(LocalAuthority)
+export default translate(['acte', 'api-gateway'])(ActeLocalAuthorityParams)

@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, String> {
 
     List<LocalAuthority> findAll();
+    Optional<LocalAuthority> findByUuid(String uuid);
     Optional<LocalAuthority> findByName(String name);
     Optional<LocalAuthority> findBySiren(String siren);
 }

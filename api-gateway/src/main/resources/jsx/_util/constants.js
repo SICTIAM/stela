@@ -1,3 +1,8 @@
+const modules = [
+    "ACTES",
+    "PES",
+    "CONVOCATION"
+]
 
 const natures = [
     "DELIBERATIONS",
@@ -32,4 +37,4 @@ const anomalies = [
     "FILE_ERROR"
 ]
 
-module.exports = { natures, status, anomalies }
+module.exports = { modules, natures, status, anomalies }

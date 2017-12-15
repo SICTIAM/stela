@@ -18,6 +18,7 @@
         "add_a_file": "Ajouter un fichier",
         "add": "Ajouter",
         "download": "Télécharger",
+        "configure": "Configurer",
         "validation": {
             "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des tirets bas (_).",
             "mandatoryfield": "Le champ est obligatoire",
@@ -81,6 +82,10 @@
                 "virus": "Le dépot PES a échoué car il contenait un virus",
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             }
+        },
+        "admin": {
+            "title": "Administration",
+            "local_authority_not_found": "Collectivité non trouvée"
         }
     },
     "local_authority": {
@@ -97,17 +102,40 @@
         "miatConnectionStartDate": "Début d'inaccessibilité du serveur MIAT",
         "miatConnectionEndDate": "Fin d'inaccessibilité du serveur MIAT"
     },
+    "agent": {
+        "family_name": "Nom",
+        "given_name": "Prénom",
+        "email": "Email"
+    },
+    "group": {
+        "name": "Nom"
+    },
     "admin": {
         "dashboard": "Tableau de bord",
         "users": "Utilisateurs",
-        "collectivities": "Collectivités",
+        "local_authorities": "Collectivités",
+        "my_local_authority": "Ma collectivité",
+        "local_authority": {
+            "general_informations": "Informations générales",
+            "modules": "Modules",
+            "users": "Agents",
+            "no_user": "Aucune agent dans cette collectivité",
+            "groups": "Groupes",
+            "no_group": "Aucun groupe dans cette collectivité"
+        },
         "modules": {
+            "title": "Module",
             "pes": "Module PES",
             "convocation": "Module Convocation",
             "configuration": "Configuration",
             "local_authority_settings": "Paramétrage des collectivités"
         },
         "back_to_stela": "Retourner sur STELA"
+    },
+    "modules": {
+        "ACTES": "Actes",
+        "PES": "PES",
+        "CONVOCATION": "Convocation"
     },
     "error": {
         "401": {

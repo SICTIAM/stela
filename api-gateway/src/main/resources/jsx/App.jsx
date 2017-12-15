@@ -24,9 +24,10 @@ import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminDashboard from './admin/AdminDashboard'
-import LocalAuthorityList from './admin/acte/LocalAuthorityList'
-import LocalAuthority from './admin/acte/LocalAuthority'
-import ModuleParam from './admin/acte/ModuleParam'
+import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
+import LocalAuthority from './admin/localAuthority/LocalAuthority'
+import ActeLocalAuthorityParams from './admin/acte/ActeLocalAuthorityParams'
+import ActeModuleParams from './admin/acte/ActeModuleParams'
 
 
 import Validator from 'validatorjs'
@@ -140,9 +141,12 @@ const AppRoute = () =>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
         <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/actes/parametrage-collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/actes/parametrage-collectivite' component={LocalAuthorityList} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/acte/parametrage-module' component={ModuleParam} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/collectivite/:uuid/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/collectivite' component={LocalAuthorityList} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/actes/parametrage-module' component={ActeModuleParams} menu={AdminMenuBar} />
 
         <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
         <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />

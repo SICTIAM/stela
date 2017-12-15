@@ -2,13 +2,9 @@ package fr.sictiam.stela.admin.model;
 
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 //Group is reserved in Postgresql
@@ -22,6 +18,7 @@ public class WorkGroup {
     private String uuid;
     
     @ManyToOne
+    @JsonIgnore
     private LocalAuthority localAuthority;
     
     @ManyToMany(targetEntity=Profile.class)
@@ -38,6 +35,10 @@ public class WorkGroup {
         super();
         this.localAuthority = localAuthority;
         this.name = name;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public LocalAuthority getLocalAuthority() {
