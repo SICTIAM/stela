@@ -13,8 +13,6 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static fr.sictiam.stela.admin.service.LocalAuthorityService.toUI;
-
 @RestController
 @RequestMapping("/api/admin/local-authority")
 public class LocalAuthorityController {
@@ -38,17 +36,17 @@ public class LocalAuthorityController {
 
     @GetMapping("/current")
     public LocalAuthorityUI getCurrentLocalAuthority() {
-        return toUI(localAuthorityService.getCurrent());
+        return new LocalAuthorityUI(localAuthorityService.getCurrent());
     }
 
     @GetMapping
     public List<LocalAuthorityUI> getAllLocalAuthorities() {
-        return localAuthorityService.getAll().stream().map(LocalAuthorityService::toUI).collect(Collectors.toList());
+        return localAuthorityService.getAll().stream().map(LocalAuthorityUI::new).collect(Collectors.toList());
     }
 
     @GetMapping("/{uuid}")
     public LocalAuthorityUI getLocalAuthorityByUuid(@PathVariable String uuid) {
-        return toUI(localAuthorityService.getByUuid(uuid));
+        return new LocalAuthorityUI(localAuthorityService.getByUuid(uuid));
     }
 
     @PostMapping("/{uuid}/{module}")

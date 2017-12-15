@@ -6,7 +6,7 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.UI.LocalAuthorityUI;
-import fr.sictiam.stela.admin.service.exceptions.LocalAuthorityException;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,12 +56,7 @@ public class LocalAuthorityService {
     }
 
     public LocalAuthority getByUuid(String uuid) {
-        return localAuthorityRepository.findByUuid(uuid).orElseThrow(LocalAuthorityException::new);
-    }
-
-    public static LocalAuthorityUI toUI(LocalAuthority la) {
-        Set<Agent> agents = la.getProfiles().stream().map(Profile::getAgent).collect(Collectors.toSet());
-        return new LocalAuthorityUI(la.getUuid(), la.getName(), la.getSiren(), la.getActivatedModules(), la.getGroups(), agents);
+        return localAuthorityRepository.findByUuid(uuid).orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_not_found"));
     }
 
     public Optional<LocalAuthority> findByName(String name) {

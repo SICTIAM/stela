@@ -5,6 +5,7 @@ import fr.sictiam.stela.admin.model.*;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LocalAuthorityUI {
 
@@ -15,13 +16,13 @@ public class LocalAuthorityUI {
     private Set<WorkGroup> groups;
     private Set<Agent> agents;
 
-    public LocalAuthorityUI(String uuid, String name, String siren, Set<Module> activatedModules, Set<WorkGroup> groups, Set<Agent> agents) {
-        this.uuid = uuid;
-        this.name = name;
-        this.siren = siren;
-        this.activatedModules = activatedModules;
-        this.groups = groups;
-        this.agents = agents;
+    public LocalAuthorityUI(LocalAuthority localAuthority) {
+        this.uuid = localAuthority.getUuid();
+        this.name = localAuthority.getName();
+        this.siren = localAuthority.getSiren();
+        this.activatedModules = localAuthority.getActivatedModules();
+        this.groups = localAuthority.getGroups();
+        this.agents = localAuthority.getProfiles().stream().map(Profile::getAgent).collect(Collectors.toSet());
     }
 
     public String getUuid() {

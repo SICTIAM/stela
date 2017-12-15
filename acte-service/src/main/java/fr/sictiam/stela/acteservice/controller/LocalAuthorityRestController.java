@@ -40,8 +40,7 @@ public class LocalAuthorityRestController {
     public ResponseEntity<LocalAuthority> getCurrent() {
         // TODO: Retrieve current LocalAuthority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
-        LocalAuthority localAuthority = localAuthorityService.getByUuid(currentLocalAuthority.getUuid());
-        return new ResponseEntity<>(localAuthority, HttpStatus.OK);
+        return new ResponseEntity<>(currentLocalAuthority, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
