@@ -67,7 +67,4 @@ public class WorkGroup {
         this.name = name;
     }
     
-    public String getUuid() {
-        return uuid;
-    }
 }

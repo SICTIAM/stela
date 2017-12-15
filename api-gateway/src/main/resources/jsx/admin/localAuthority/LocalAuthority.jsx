@@ -48,7 +48,6 @@ class LocalAuthority extends Component {
                 })
             })
     }
-<<<<<<< HEAD
     activateModule = (moduleName) => this.editModule(moduleName, 'POST', () => {
         const { fields } = this.state
         if (!fields.activatedModules.includes(moduleName)) fields.activatedModules.push(moduleName)
