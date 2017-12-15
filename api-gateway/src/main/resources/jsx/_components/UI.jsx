@@ -1,5 +1,5 @@
 import React from 'react'
-import { Form, Grid, Card, Icon } from 'semantic-ui-react'
+import { Form, Grid, Card, Icon, List, Header } from 'semantic-ui-react'
 
 import { bytesToSize } from '../_util/utils'
 
@@ -41,5 +41,14 @@ const InputFile = ({ htmlFor, label, children }) =>
         {children}
     </div>
 
+const ListItem = ({ children, icon, iconColor, title }) =>
+    <List.Item>
+        {children}
+        {icon &&
+            <List.Icon name={icon} size='large' color={iconColor} />
+        }
+        <List.Content><Header size='small'>{title}</Header></List.Content>
+    </List.Item>
 
-module.exports = { FormField, FormFieldInline, Field, File, InputFile }
+
+module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem }

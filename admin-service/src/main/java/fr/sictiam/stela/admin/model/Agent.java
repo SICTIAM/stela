@@ -1,5 +1,6 @@
 package fr.sictiam.stela.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -24,6 +25,7 @@ public class Agent {
     @NotNull
     @NotEmpty
     @Column(unique = true)
+    @JsonIgnore
     private String sub;
     @NotNull
     @NotEmpty

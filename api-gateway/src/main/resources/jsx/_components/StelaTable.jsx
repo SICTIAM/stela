@@ -10,6 +10,7 @@ export default class StelaTable extends Component {
         className: PropTypes.string,
         data: PropTypes.array,
         header: PropTypes.bool,
+        search: PropTypes.bool,
         select: PropTypes.bool,
         selectOptions: PropTypes.array,
         headerTitle: PropTypes.string,
@@ -22,12 +23,14 @@ export default class StelaTable extends Component {
     static defaultProps = {
         className: '',
         header: false,
+        search: true,
         select: false,
         selectOptions: [],
         headerTitle: '',
         link: '',
         linkProperty: '',
-        metaData: []
+        metaData: [],
+        celled: true
     }
     state = {
         column: null,
@@ -110,6 +113,7 @@ export default class StelaTable extends Component {
 
         const title = renderIf(this.props.headerTitle !== '')
         const header = renderIf(this.props.header)
+        const search = renderIf(this.props.search)
         const isEmpty = renderIf(data.length === 0)
         const isFilled = renderIf(data.length > 0)
         const select = renderIf(this.props.select)
@@ -128,7 +132,9 @@ export default class StelaTable extends Component {
 
         return (
             <div className={this.props.className}>
-                <Input style={this.floatRightStyle} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
+                {search(
+                    <Input style={this.floatRightStyle} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
+                )}
 
                 {options(
                     <Dropdown style={this.floatRightStyle} text='Actions' button>
@@ -138,7 +144,7 @@ export default class StelaTable extends Component {
                     </Dropdown>
                 )}
 
-                <Table sortable={this.props.header} celled fixed>
+                <Table sortable={this.props.header} basic={this.props.basic} celled={this.props.celled} fixed>
                     {title(
                         <Table.Header>
                             <Table.Row>
@@ -178,7 +184,7 @@ export default class StelaTable extends Component {
                             data.map(row =>
                                 <Table.Row key={row[this.props.keyProperty]}>
                                     {select(
-                                        <Table.Cell>
+                                        <Table.Cell style={{ width: '40px' }}>
                                             <Checkbox checked={this.state.checkboxes[row[this.props.keyProperty]]}
                                                 onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
                                         </Table.Cell>

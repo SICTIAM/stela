@@ -27,6 +27,7 @@ import AdminDashboard from './admin/AdminDashboard'
 import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
 import LocalAuthority from './admin/localAuthority/LocalAuthority'
 import ActeLocalAuthorityParams from './admin/acte/ActeLocalAuthorityParams'
+import AgentProfile from './admin/localAuthority/AgentProfile'
 import ActeModuleParams from './admin/acte/ActeModuleParams'
 
 
@@ -143,6 +144,7 @@ const AppRoute = () =>
         <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' component={AgentProfile} menu={AdminMenuBar} />
         <AuthRoute path='/admin/collectivite/:uuid/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
         <AuthRoute path='/admin/collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} />
         <AuthRoute path='/admin/collectivite' component={LocalAuthorityList} menu={AdminMenuBar} />

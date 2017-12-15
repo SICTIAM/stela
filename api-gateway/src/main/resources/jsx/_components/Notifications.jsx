@@ -103,6 +103,15 @@ const pesSentMissingData = (t) => {
     }
 }
 
+const groupsUpdatedSuccess = (t) => {
+    return {
+        title: t('notifications.admin.title'),
+        message: t('notifications.admin.groups_updated'),
+        level: 'success',
+        position: 'tc'
+    }
+}
+
 module.exports = {
     errorNotification,
     acteSentSuccess,
@@ -115,6 +124,6 @@ module.exports = {
     localAuthorityUpdateSuccess,
     draftDeletedSuccess,
     draftsDeletedSuccess,
-    adminModuleUpdateSuccess
-
+    adminModuleUpdateSuccess,
+    groupsUpdatedSuccess
 }
