@@ -1,18 +1,12 @@
 package fr.sictiam.stela.admin.service;
 
 import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
-import fr.sictiam.stela.admin.model.Agent;
-import fr.sictiam.stela.admin.model.LocalAuthority;
-import fr.sictiam.stela.admin.model.Module;
-import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.UI.LocalAuthorityUI;
+import fr.sictiam.stela.admin.model.*;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class LocalAuthorityService {

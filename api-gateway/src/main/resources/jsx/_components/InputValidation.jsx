@@ -15,7 +15,8 @@ export default class InputValidation extends Component {
         value: '',
         type: '',
         accept: '',
-        className: ''
+        className: '',
+        style: {}
     }
     validateValue = () => {
         const value = this.props.type === 'date' ? moment(this.props.value).format('MM.DD.YYYY') : this.props.value
@@ -27,7 +28,7 @@ export default class InputValidation extends Component {
     }
     render() {
         return (
-            <div>
+            <div style={this.props.style}>
                 {(this.props.type === 'text' || this.props.type === '')
                     && <input id={this.props.id}
                         className={this.props.className}
