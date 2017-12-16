@@ -1,11 +1,18 @@
 package fr.sictiam.stela.admin.service;
 
-import fr.sictiam.stela.admin.dao.AgentRepository;
-import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
-import fr.sictiam.stela.admin.model.Agent;
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import fr.sictiam.stela.admin.dao.AgentRepository;
+import fr.sictiam.stela.admin.dao.ProfileRepository;
+import fr.sictiam.stela.admin.model.Agent;
+import fr.sictiam.stela.admin.model.LocalAuthority;
+import fr.sictiam.stela.admin.model.Profile;
 
 @Service
 public class AgentService {
@@ -13,23 +20,49 @@ public class AgentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentService.class);
 
     private final AgentRepository agentRepository;
-    private final LocalAuthorityRepository localAuthorityRepository;
+    private final ProfileRepository profileRepository;
+    private final LocalAuthorityService localAuthorityService;
 
-    public AgentService(AgentRepository agentRepository, LocalAuthorityRepository localAuthorityRepository) {
+    public AgentService(AgentRepository agentRepository, ProfileRepository profileRepository,
+            LocalAuthorityService localAuthorityService) {
         this.agentRepository = agentRepository;
-        this.localAuthorityRepository = localAuthorityRepository;
+        this.profileRepository = profileRepository;
+        this.localAuthorityService = localAuthorityService;
     }
 
     public Agent createIfNotExists(Agent agent) {
         return agentRepository.findBySub(agent.getSub()).orElseGet(() -> create(agent));
     }
 
+    public Optional<Agent> findBySub(String sub) {
+        return agentRepository.findBySub(sub);
+    }
+
     public Agent create(Agent agent) {
         Agent savedAgent = agentRepository.save(agent);
         if (agent.isAdmin()) {
-            // if agent is an admin, give it access to all activated modules for current local authority
+            // if agent is an admin, give it access to all activated modules for current
+            // local authority
         }
 
         return savedAgent;
+    }
+
+    public Agent createAndAttach(Agent agent, LocalAuthority localAuthority) {
+        agent = createIfNotExists(agent);
+        if (agent.getProfiles() != null && agent.getProfiles().stream()
+                .anyMatch(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()))) {
+            //notify the services so we are sure they up to date
+            localAuthorityService.createOrUpdate(localAuthority);
+            return agent;
+        }
+        Profile profile = new Profile(localAuthority, agent, agent.isAdmin());
+        profileRepository.save(profile);
+        agent.getProfiles().add(profile);
+        agent = agentRepository.save(agent);
+        localAuthority.getProfiles().add(profile);
+        localAuthorityService.createOrUpdate(localAuthority);
+
+        return agent;
     }
 }

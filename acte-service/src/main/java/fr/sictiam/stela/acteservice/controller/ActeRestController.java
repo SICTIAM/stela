@@ -1,7 +1,8 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,18 +10,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
-import com.lowagie.text.DocumentException;
-import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
-import fr.sictiam.stela.acteservice.model.ui.ActeUI;
-import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
-import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
-import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
-import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
-import fr.sictiam.stela.acteservice.validation.ValidationUtil;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,17 +21,38 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lowagie.text.DocumentException;
+
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.StampPosition;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
+import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
+import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
+import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -70,11 +82,11 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<ActeUI> getByUuid(@PathVariable String uuid) {
+    public ResponseEntity<ActeUI> getByUuid(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         boolean isActeACK = acteService.isActeACK(uuid);
         // TODO Retrieve current local authority
-        StampPosition stampPosition = localAuthorityService.getByName("SICTIAM-Test").get().getStampPosition();
+        StampPosition stampPosition = localAuthorityService.getByUuid(currentLocalAuthUuid).getStampPosition();
         return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
     }
 
@@ -92,9 +104,8 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/actes.pdf")
-    public ResponseEntity downloadMergedStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity downloadMergedStampedAttachments(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
             byte[] pdf = acteService.getMergedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, pdf, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
@@ -107,9 +118,9 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/actes.zip")
-    public ResponseEntity downloadZipedStampedAttachments(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+    public ResponseEntity downloadZipedStampedAttachments(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
             byte[] zip = acteService.getZipedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, zip, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip");
@@ -167,10 +178,10 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/file/stamped")
-    public ResponseEntity getStampedActeAttachment(HttpServletResponse response, @PathVariable String uuid,
+    public ResponseEntity getStampedActeAttachment(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @PathVariable String uuid,
                                          @RequestParam(required = false) Integer x, @RequestParam(required = false) Integer y) {
         // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         Acte acte = acteService.getByUuid(uuid);
         byte[] pdf = new byte[0];
         if(!acteService.isActeACK(uuid)) {
@@ -219,10 +230,9 @@ public class ActeRestController {
     }
 
     @PostMapping
-    ResponseEntity<Object> create(@RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
+    ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
                                   @RequestParam("annexes") MultipartFile... annexes) {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         ObjectMapper mapper = new ObjectMapper();
         try {
             Acte acte = mapper.readValue(acteJson, Acte.class);

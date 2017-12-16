@@ -1,6 +1,7 @@
 package fr.sictiam.stela.acteservice.model;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,10 +34,10 @@ public class LocalAuthority {
     @OneToMany(mappedBy="localAuthority")
     private List<MaterialCode> materialCodes;
     
-    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.MERGE)
+    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.ALL, orphanRemoval=true)
     private Set<WorkGroup> groups;
     
-    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.MERGE)
+    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.ALL, orphanRemoval=true)
     private Set<Profile> profiles;
     
     public LocalAuthority() {
@@ -64,7 +65,7 @@ public class LocalAuthority {
         this.canPublishRegistre = canPublishRegistre;
         this.canPublishWebSite = canPublishWebSite;
     }
-
+    
     public LocalAuthority(String uuid, String name, String siren, Boolean active, Set<WorkGroup> groups,
             Set<Profile> profiles) {
         this.uuid = uuid;
@@ -73,6 +74,12 @@ public class LocalAuthority {
         this.active = active;
         this.groups = groups;
         this.profiles = profiles;
+    }
+    
+    public LocalAuthority(String uuid, String name, String siren) {
+        this.uuid = uuid;
+        this.name = name;
+        this.siren = siren;
     }
     
     public String getUuid() {
@@ -171,13 +178,13 @@ public class LocalAuthority {
     }
     
     public Set<WorkGroup> getGroups() {
-        return groups;
+        return groups != null ? groups : new HashSet<>();
     }
     public void setGroups(Set<WorkGroup> groups) {
         this.groups = groups;
     }
     public Set<Profile> getProfiles() {
-        return profiles;
+        return profiles != null ? profiles : new HashSet<>();
     }
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;

@@ -17,12 +17,11 @@ public class Profile {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.EAGER)
     @JsonIgnore
     private LocalAuthority localAuthority;
     
     @ManyToOne
-    @JsonIgnore
     private Agent agent;
     
     private Boolean admin;

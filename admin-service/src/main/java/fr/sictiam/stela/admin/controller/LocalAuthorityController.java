@@ -1,22 +1,31 @@
 package fr.sictiam.stela.admin.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.ProvisioningRequest;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.LocalAuthorityUI;
 import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.OzwilloProvisioningService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/local-authority")
@@ -36,7 +45,8 @@ public class LocalAuthorityController {
         this.workGroupService = workGroupService;
         this.ozwilloProvisioningService = ozwilloProvisioningService;
     }
-
+    
+    
     @PostMapping
     public void create(@RequestBody @Valid ProvisioningRequest provisioningRequest) {
         LOGGER.debug("Got a provisioning request : {}", provisioningRequest);
@@ -44,8 +54,8 @@ public class LocalAuthorityController {
     }
 
     @GetMapping("/current")
-    public LocalAuthorityUI getCurrentLocalAuthority() {
-        return new LocalAuthorityUI(localAuthorityService.getCurrent());
+    public LocalAuthorityUI getCurrentLocalAuthority(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        return new LocalAuthorityUI(localAuthorityService.getByUuid(currentLocalAuthUuid));
     }
 
     @GetMapping
@@ -60,13 +70,13 @@ public class LocalAuthorityController {
 
 
     @PostMapping("/current/{module}")
-    public void addModule(@PathVariable Module module) {
-        localAuthorityService.addModule(localAuthorityService.getCurrent().getUuid(), module);
+    public void addModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable Module module) {
+        localAuthorityService.addModule(currentLocalAuthUuid, module);
     }
 
     @DeleteMapping("/current/{module}")
-    public void removeModule(@PathVariable Module module) {
-        localAuthorityService.removeModule(localAuthorityService.getCurrent().getUuid(), module);
+    public void removeModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable Module module) {
+        localAuthorityService.removeModule(currentLocalAuthUuid, module);
     }
     
     @GetMapping("/{uuid}/agent/{agentUuid}")

@@ -37,9 +37,9 @@ subprojects {
 
 	dependencies {
         compile('org.springframework.boot:spring-boot-devtools')
-        compile('org.springframework.boot:spring-boot-starter-mail:1.5.9.RELEASE')        
-        compile('org.springframework.boot:spring-boot-starter-actuator')
-		compile('org.springframework.boot:spring-boot-starter-amqp')
+        compile('org.springframework.boot:spring-boot-starter-mail:1.5.9.RELEASE')
+        compile('org.springframework.boot:spring-boot-starter-actuator') 
+        compile('org.springframework.boot:spring-boot-starter-amqp') 
         compile('ch.qos.logback:logback-classic:1.1.5')
         compile "org.jetbrains.kotlin:kotlin-stdlib:$ktVersion"
 		compile "org.jetbrains.kotlin:kotlin-reflect:$ktVersion"

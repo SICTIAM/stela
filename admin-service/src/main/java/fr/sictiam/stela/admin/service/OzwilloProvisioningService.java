@@ -98,7 +98,7 @@ public class OzwilloProvisioningService {
                 provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getId(),
                 provisioningRequest.getOrganization().getDcId());
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
-        localAuthorityService.create(localAuthority);
+        localAuthorityService.createOrUpdate(localAuthority);
 
         notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo);
     }

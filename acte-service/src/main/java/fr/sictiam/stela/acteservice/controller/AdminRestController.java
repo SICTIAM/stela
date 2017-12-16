@@ -20,17 +20,17 @@ public class AdminRestController {
     private final AdminService adminService;
 
     public AdminRestController(AdminService adminService) {
-	this.adminService = adminService;
+        this.adminService = adminService;
     }
 
     @PatchMapping
     public void updateMailInfo(@Valid @RequestBody Admin adminModule) {
-	adminService.updateMailInfo(adminModule);
+        adminService.updateMailInfo(adminModule);
     }
 
     @GetMapping
     public ResponseEntity<Admin> getModuleParams() {
-	return new ResponseEntity<>(adminService.getAdmin(), HttpStatus.OK);
+        return new ResponseEntity<>(adminService.getAdmin(), HttpStatus.OK);
     }
 
 }

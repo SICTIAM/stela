@@ -37,7 +37,7 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.addZuulRequestHeader("Authorization", "Bearer " + ((OpenIdCAuthentication)authentication).getAccessToken());
-
+        ctx.addZuulRequestHeader("sub", ((OpenIdCAuthentication)authentication).getUserInfo().getUserId());
         return null;
     }
 }

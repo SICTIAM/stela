@@ -54,7 +54,7 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
         localAuthority.addModule(Module.ACTES);
         OzwilloInstanceInfo ow=new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test", "test");
         localAuthority.setOzwilloInstanceInfo(ow);
-        localAuthority =localAuthorityService.create(localAuthority);
+        localAuthority =localAuthorityService.createOrUpdate(localAuthority);
         WorkGroup workGroup = workGroupService.create(new WorkGroup(localAuthority, "GlobalGroup"));
         Set<WorkGroup> groups = new HashSet<>();
         groups.add(workGroup);
@@ -69,7 +69,7 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
         Set<Profile> profiles = new HashSet<>();
         profiles.add(profile);
         
-        localAuthorityService.create(localAuthority);
+        localAuthorityService.createOrUpdate(localAuthority);
     }
 
     @Test

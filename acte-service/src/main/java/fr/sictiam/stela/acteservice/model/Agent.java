@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -29,7 +30,8 @@ public class Agent {
     @NotNull
     private Boolean admin;
     
-    @OneToMany(mappedBy = "agent")
+    @OneToMany(mappedBy = "agent",fetch=FetchType.EAGER)
+    @JsonIgnore
     private Set<Profile> profiles;
     
     protected Agent() {

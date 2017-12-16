@@ -1,21 +1,29 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
-import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.Profile;
+import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
+import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 
 @RestController
 @RequestMapping("/api/acte/localAuthority")
@@ -37,9 +45,8 @@ public class LocalAuthorityRestController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity<LocalAuthority> getCurrent() {
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<LocalAuthority> getCurrent(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(currentLocalAuthority, HttpStatus.OK);
     }
 
@@ -63,32 +70,30 @@ public class LocalAuthorityRestController {
     }
 
     @GetMapping("/depositFields")
-    public ResponseEntity<ActeDepositFieldsUI> getActeDepositFields() {
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<ActeDepositFieldsUI> getActeDepositFields(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
+        
         LOGGER.info("currentLocalAuthority: {}", currentLocalAuthority.getName());
         return new ResponseEntity<>(new ActeDepositFieldsUI(currentLocalAuthority.getCanPublishRegistre(),
                 currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }
     
     @GetMapping("/load-matieres")
-    public void loadCodesMatieres() {
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public void loadCodesMatieres(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+                LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         localAuthorityService.loadCodesMatieres(currentLocalAuthority.getUuid());
     }
     
     @GetMapping("/codes-matieres")
-    public ResponseEntity<List<MaterialCode>> getCodesMatieres() {
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<List<MaterialCode>> getCodesMatieres(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+                LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(localAuthorityService.getCodesMatieres(currentLocalAuthority.getUuid()), HttpStatus.OK);
     }
     
     @GetMapping("/codes-matiere/{code}")
-    public ResponseEntity< String> getCodeMatiereLabel(@PathVariable String code) {
-        // TODO: Retrieve current LocalAuthority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity< String> getCodeMatiereLabel(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String code) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), code), HttpStatus.OK);
     }
 }
