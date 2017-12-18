@@ -44,6 +44,6 @@ public class LocalesServiceTest {
         String text = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".body",
                 variables);
 
-        assertThat(text, is("Bonjour John Doe, <br/> Votre acte a bien été reçu par prefecture <br/> Cordialement le Sictiam"));
+        assertThat(text, is("Bonjour John Doe, <br/> Votre acte a bien été reçu par préfecture <br/> Cordialement le Sictiam"));
     }
 }
