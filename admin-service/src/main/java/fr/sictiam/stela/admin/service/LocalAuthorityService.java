@@ -33,7 +33,7 @@ public class LocalAuthorityService {
         this.localAuthorityRepository = localAuthorityRepository;
     }
 
-    public LocalAuthority create(LocalAuthority localAuthority) {
+    public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
         localAuthority = localAuthorityRepository.saveAndFlush(localAuthority);
 
         LocalAuthorityEvent localAutorityCreation = new LocalAuthorityEvent(localAuthority);
@@ -42,7 +42,7 @@ public class LocalAuthorityService {
 
         return localAuthority;
     }
-
+    
     public LocalAuthority modify(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
     }
@@ -57,10 +57,6 @@ public class LocalAuthorityService {
         LocalAuthority localAuthority = localAuthorityRepository.getOne(uuid);
         localAuthority.removeModule(module);
         localAuthorityRepository.save(localAuthority);
-    }
-
-    public LocalAuthority getCurrent() {
-        return localAuthorityRepository.findAll().get(0);
     }
 
     public List<LocalAuthority> getAll() {

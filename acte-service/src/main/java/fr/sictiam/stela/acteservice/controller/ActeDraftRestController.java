@@ -37,17 +37,15 @@ public class ActeDraftRestController {
     }
 
     @GetMapping("/draft/{mode}")
-    public ResponseEntity<Acte> newDraft(@PathVariable ActeMode mode) {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<Acte> newDraft(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable ActeMode mode) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         Acte acte = draftService.newDraft(currentLocalAuthority, mode);
         return new ResponseEntity<>(acte, HttpStatus.OK);
     }
 
     @GetMapping("/draft/batch")
-    public ResponseEntity<DraftUI> newBatchedDraft() {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<DraftUI> newBatchedDraft(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid ) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         DraftUI draft = draftService.newBatchedDraft(currentLocalAuthority);
         return new ResponseEntity<>(draft, HttpStatus.OK);
     }
@@ -77,9 +75,9 @@ public class ActeDraftRestController {
     }
 
     @PutMapping("/drafts/{draftUuid}/{uuid}")
-    ResponseEntity<String> saveActeDraft(@RequestBody Acte acte) {
+    ResponseEntity<String> saveActeDraft(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @RequestBody Acte acte) {
         // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         Acte result = draftService.saveActeDraft(acte, currentLocalAuthority);
         return new ResponseEntity<>(result.getUuid(), HttpStatus.OK);
     }
@@ -117,9 +115,9 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{uuid}/newActe")
-    public ResponseEntity<ActeDraftUI> newActeForDraft(@PathVariable String uuid) {
+    public ResponseEntity<ActeDraftUI> newActeForDraft(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String uuid) {
         // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         ActeDraftUI acte = draftService.newActeForDraft(uuid, currentLocalAuthority);
         return new ResponseEntity<>(acte, HttpStatus.OK);
     }
@@ -131,17 +129,15 @@ public class ActeDraftRestController {
     }
 
     @PutMapping("/drafts/{draftUuid}/{uuid}/leave")
-    public ResponseEntity<?> leaveActeDraft(@RequestBody Acte acte) {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<?> leaveActeDraft(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @RequestBody Acte acte) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         draftService.leaveActeDraft(acte, currentLocalAuthority);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}/file")
-    public ResponseEntity<Acte> saveActeDraftFile(@PathVariable String uuid, @RequestParam("file") MultipartFile file) {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<Acte> saveActeDraftFile(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
             Acte acte = draftService.saveActeDraftFile(uuid, file, currentLocalAuthority);
             return new ResponseEntity<>(acte, HttpStatus.OK);
@@ -152,9 +148,8 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}/annexe")
-    public ResponseEntity<Acte> saveActeDraftAnnexe(@PathVariable String uuid, @RequestParam("file") MultipartFile file) {
-        // TODO Retrieve current local authority
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+    public ResponseEntity<Acte> saveActeDraftAnnexe(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
             Acte acte = draftService.saveActeDraftAnnexe(uuid, file, currentLocalAuthority);
             return new ResponseEntity<>(acte, HttpStatus.OK);

@@ -1,26 +1,50 @@
 package fr.sictiam.stela.apigateway.config;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
+
+import fr.sictiam.stela.apigateway.model.Agent;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StelaAuthenticationSuccessHandler.class);
 
     private final String applicationUrl;
+        
+    private final EurekaClient discoveryClient;
 
     //AuthenticationSuccessHandler defaultHandler = new SavedRequestAwareAuthenticationSuccessHandler();
 
-    public StelaAuthenticationSuccessHandler(String applicationUrl) {
+    public StelaAuthenticationSuccessHandler(String applicationUrl, EurekaClient diClient) {
         this.applicationUrl = applicationUrl;
+        this.discoveryClient=diClient;
     }
 
     @Override
@@ -28,14 +52,28 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
 
         LOGGER.debug("Authentication succeded, returning to home page");
 
-        // TODO : agent bootstrap in admin service
-        // TODO : handle origin (ie before authentication) URL to forward on it instead
+        RestTemplate restTemplate = new RestTemplate();        
+        
+        
+        OpenIdCAuthentication authenticationOpen= (OpenIdCAuthentication) authentication;
+        
+        if(authenticationOpen.isAppAdmin() || authenticationOpen.isAppUser()) {
+            Agent agent = new Agent(authenticationOpen.getUserInfo(), authenticationOpen.isAppAdmin());
+            restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent", agent, Agent.class);
+//            defaultHandler.onAuthenticationSuccess(request, response, authentication)
 
-//        defaultHandler.onAuthenticationSuccess(request, response, authentication)
-
-        // Hard redirect on configured applicationUrl
-        // Kind of a hack since back end and front end are two different apps in dev profile
-        //   and the backend has no other way to know where is the front end
-        response.sendRedirect(applicationUrl);
+            // Hard redirect on configured applicationUrl
+            // Kind of a hack since back end and front end are two different apps in dev profile
+            //   and the backend has no other way to know where is the front end
+            response.sendRedirect(applicationUrl);
+        }else {
+            response.sendError(401);
+        }
+       
+    }
+    
+    private String adminServiceUrl() {
+        InstanceInfo instance = discoveryClient.getNextServerFromEureka("admin-service", false);
+        return instance.getHomePageUrl();
     }
 }

@@ -121,9 +121,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Before
     public void beforeTests() {
+        
         createAdmin();
         createLocalAuthority();
         acteRepository.deleteAll();
+ 
     }
     
     public void createAdmin() {
@@ -143,6 +145,33 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             }
             LocalAuthority localAuthorityCreated =localAuthorityService.createOrUpdate(localAuthority);
             localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
+            
+            WorkGroup workGroup =new WorkGroup("42a0076e-e941-4b5f-afe7-58cc293f2db4", localAuthorityCreated, "GlobalGroup");
+            Set<WorkGroup> groups = new HashSet<>();
+            groups.add(workGroup);
+            localAuthorityCreated.setGroups(groups);
+            
+            Agent agent = new Agent("b0deb0ab-70d3-4b76-b14b-ab88cdaf7701","John", "Doe", "john.doe@fbi.fr");
+            agent.setSub("4f146466-ea58-4e5c-851c-46db18ac173b");
+            agent.setAdmin(false);
+            
+            
+            Profile profile =new Profile("6f179af3-0b92-4383-9510-e9b24c91ae47", localAuthorityCreated, agent, false);
+            Set<Profile> profiles = new HashSet<>();
+            profiles.add(profile);
+            agent.setProfiles(profiles);
+            localAuthorityCreated.getGroups().add(workGroup);
+            localAuthorityCreated.setProfiles(profiles);
+            
+            localAuthorityService.createOrUpdate(localAuthorityCreated);
+            
+            this.restTemplate.getRestTemplate().setInterceptors(
+                    Collections.singletonList((request1, body, execution) -> {
+                        request1.getHeaders()
+                                .add("sub", "4f146466-ea58-4e5c-851c-46db18ac173b");
+                        return execution.execute(request1, body);
+                    }));
+            
         }
     }
     
@@ -150,7 +179,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void testCreateActe() {
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
-
+        
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
@@ -194,8 +223,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void testArchiveCreation() {
 
         MultiValueMap<String, Object> params = acteWithAttachments();
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
-
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);        
+        
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();

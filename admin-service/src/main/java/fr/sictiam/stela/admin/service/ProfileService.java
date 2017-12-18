@@ -20,10 +20,12 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final WorkGroupService workGroupService;
+    private final LocalAuthorityService localAuthorityService;
 
-    public ProfileService(ProfileRepository profileRepository, WorkGroupService workGroupService) {
+    public ProfileService(ProfileRepository profileRepository, WorkGroupService workGroupService, LocalAuthorityService localAuthorityService) {
         this.profileRepository = profileRepository;
         this.workGroupService = workGroupService;
+        this.localAuthorityService= localAuthorityService;
     }
     
     public Profile create(Profile profile) {
@@ -47,5 +49,6 @@ public class ProfileService {
         groups.forEach(workGroup -> workGroup.getProfiles().add(profile));
         profile.setGroups(groups);
         profileRepository.save(profile);
+        localAuthorityService.createOrUpdate(profile.getLocalAuthority());
     }
 }

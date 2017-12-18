@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, String> {
-    LocalAuthority findByUuid(String uuid);
+    Optional<LocalAuthority> findByUuid(String uuid);
 
     Optional<LocalAuthority> findByName(String name);
 

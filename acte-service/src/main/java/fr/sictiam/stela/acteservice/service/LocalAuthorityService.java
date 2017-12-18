@@ -1,28 +1,31 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
-import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.Profile;
-import fr.sictiam.stela.acteservice.model.WorkGroup;
-import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
-import fr.sictiam.stela.acteservice.model.event.Module;
-import fr.sictiam.stela.acteservice.model.xml.DemandeClassification;
-import fr.sictiam.stela.acteservice.model.xml.ObjectFactory;
-import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.transaction.Transactional;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.*;
+import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
+import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.Profile;
+import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.acteservice.model.event.Module;
+import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
 
 @Service
 public class LocalAuthorityService {
@@ -55,7 +58,7 @@ public class LocalAuthorityService {
     }
 
     public LocalAuthority getByUuid(String uuid) {
-        return localAuthorityRepository.findByUuid(uuid);
+        return localAuthorityRepository.findByUuid(uuid).get();
     }
 
     public Optional<LocalAuthority> getByName(String name) {
@@ -70,7 +73,7 @@ public class LocalAuthorityService {
     public void loadCodesMatieres(String uuid) {
 
         try {
-            LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+            LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
             JAXBContext jaxbContext = JAXBContext.newInstance(RetourClassification.class);
             InputStream is = new ByteArrayInputStream(localAuthority.getNomenclatureFile());
             RetourClassification classification = (RetourClassification) jaxbContext.createUnmarshaller().unmarshal(is);
@@ -85,7 +88,7 @@ public class LocalAuthorityService {
     public void loadCodesMatieres(String uuid, RetourClassification classification) {
 
         List<MaterialCode> codes = new ArrayList<>();
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
         materialCodeRepository.deleteAll(localAuthority.getMaterialCodes());
         classification.getMatieres().getMatiere1().forEach(matiere1 -> {
             String key1 = matiere1.getCodeMatiere().toString();
@@ -144,7 +147,7 @@ public class LocalAuthorityService {
     @Transactional
     public List<MaterialCode> getCodesMatieres(String uuid) {
 
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid);
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
         if (localAuthority.getMaterialCodes() == null || localAuthority.getMaterialCodes().isEmpty()) {
             loadCodesMatieres(uuid);
         }
@@ -159,15 +162,38 @@ public class LocalAuthorityService {
 
         return null;
     }
-
+    
+    @Transactional
     public void handleEvent(LocalAuthorityEvent event) {
-
-        LocalAuthority localAutority = new LocalAuthority(event.getUuid(), event.getName(), event.getSiren(),
-                event.getActivatedModules().contains(Module.ACTES), event.getGroups(), event.getProfiles());
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
+                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
         
-        localAutority.getGroups().forEach(group -> group.setLocalAuthority(localAutority));
-        localAutority.getProfiles().forEach(profile -> profile.setLocalAuthority(localAutority));
-        createOrUpdate(localAutority);
+        localAuthority.getGroups().clear();
+        localAuthority.getProfiles().clear();
+        localAuthority.setActive(event.getActivatedModules().contains(Module.ACTES));
+        localAuthority.getGroups().addAll(event.getGroups());
+
+        Set<Profile> allProfiles = event.getProfiles();
+        
+        localAuthority.getGroups().forEach(group -> {
+            group.setLocalAuthority(localAuthority);
+            Set<Profile> groupProfiles = new HashSet<>();
+            //must not have multiple object representing the same entity
+            group.getProfiles().forEach(profile -> {
+                allProfiles.forEach(refProfile -> {
+                    if (refProfile.getUuid().equals(profile.getUuid())) {
+                        refProfile.setLocalAuthority(localAuthority);
+                        groupProfiles.add(refProfile);
+                    }
+                });
+                group.setProfiles(groupProfiles);
+            });
+
+        });
+
+        localAuthority.getProfiles().addAll(allProfiles);
+        localAuthority.getProfiles().forEach(profile -> profile.setLocalAuthority(localAuthority));
+        createOrUpdate(localAuthority);
 
     }
 

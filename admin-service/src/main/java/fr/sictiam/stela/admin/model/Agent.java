@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -25,18 +26,17 @@ public class Agent {
     @NotNull
     @NotEmpty
     @Column(unique = true)
-    @JsonIgnore
     private String sub;
     @NotNull
     @NotEmpty
     private String email;
     @NotNull
     private Boolean admin;
-    
-    @OneToMany(mappedBy = "agent")
+
+    @OneToMany(mappedBy = "agent", fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<Profile> profiles;
-    
+
     protected Agent() {
     }
 
@@ -89,24 +89,18 @@ public class Agent {
     public void setAdmin(Boolean admin) {
         this.admin = admin;
     }
-    
+
     public Set<Profile> getProfiles() {
-        return profiles;
+        return profiles != null ? profiles : new HashSet<>();
     }
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
     }
-    
+
     @Override
     public String toString() {
-        return "Agent{" +
-                "uuid='" + uuid + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", givenName='" + givenName + '\'' +
-                ", sub='" + sub + '\'' +
-                ", email='" + email + '\'' +
-                ", admin=" + admin +
-                '}';
+        return "Agent{" + "uuid='" + uuid + '\'' + ", familyName='" + familyName + '\'' + ", givenName='" + givenName
+                + '\'' + ", sub='" + sub + '\'' + ", email='" + email + '\'' + ", admin=" + admin + '}';
     }
 }

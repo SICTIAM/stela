@@ -1,9 +1,11 @@
 package fr.sictiam.stela.acteservice.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -16,7 +18,7 @@ public class Profile {
     @Id
     private String uuid;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
     private LocalAuthority localAuthority;
 
@@ -25,7 +27,8 @@ public class Profile {
 
     private Boolean admin;
 
-    @ManyToMany(mappedBy = "profiles", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "profiles")
+    @JsonIgnore
     private Set<WorkGroup> groups;
 
     public Profile() {
@@ -69,7 +72,7 @@ public class Profile {
     }
 
     public Set<WorkGroup> getGroups() {
-        return groups;
+        return groups != null ? groups : new HashSet<>();
     }
 
     public void setGroups(Set<WorkGroup> groups) {
