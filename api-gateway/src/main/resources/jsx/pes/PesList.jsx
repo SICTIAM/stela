@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 
-import { pesSentSuccess, pesSentVirus, pesSentMissingData } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 import StelaTable from '../_components/StelaTable'
 
 class PesList extends Component {
@@ -26,9 +26,9 @@ class PesList extends Component {
             <div>
                 <h1>{t('pes.list.title')}</h1>
 
-                <button onClick={() => _addNotification(pesSentSuccess(t))}>pesSentSuccess</button>
-                <button onClick={() => _addNotification(pesSentVirus(t))}>pesSentVirus</button>
-                <button onClick={() => _addNotification(pesSentMissingData(t))}>pesSentMissingData</button>
+                <button onClick={() => _addNotification(notifications.pes.sent)}>pesSentSuccess</button>
+                <button onClick={() => _addNotification(notifications.pes.virus)}>pesSentVirus</button>
+                <button onClick={() => _addNotification(notifications.pes.missingData)}>pesSentMissingData</button>
 
                 {renderIf(this.state.pess && this.state.pess.length > 0)(
                     <StelaTable

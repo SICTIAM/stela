@@ -8,7 +8,7 @@ import debounce from 'debounce'
 
 import { FormField, File, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import { errorNotification, acteSentSuccess, draftDeletedSuccess } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
 import { natures } from '../_util/constants'
@@ -71,7 +71,7 @@ class NewActeForm extends Component {
             .then(json => this.setState({ depositFields: json }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
 
@@ -81,7 +81,7 @@ class NewActeForm extends Component {
             .then(json => this.setState({ codesMatieres: json }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
@@ -103,7 +103,7 @@ class NewActeForm extends Component {
             fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/leave`, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
                 .then(checkStatus)
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 })
         }
         this.validateForm.clear()
@@ -118,7 +118,7 @@ class NewActeForm extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
@@ -184,7 +184,7 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }, 3000)
     saveDraftFile = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
@@ -203,7 +203,7 @@ class NewActeForm extends Component {
                     this.loadActe(json, this.validateForm)
                 })
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
                     this.props.setStatus('', this.state.fields.uuid)
                     this.validateForm()
                 })
@@ -227,7 +227,7 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 this.props.setStatus('', this.state.fields.uuid)
             })
     }
@@ -241,11 +241,11 @@ class NewActeForm extends Component {
         fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
-                this.context._addNotification(draftDeletedSuccess(this.context.t))
+                this.context._addNotification(notifications.acte.draftDeleted)
                 history.push('/actes/liste')
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     saveAndSubmitForm = (event) => {
@@ -261,11 +261,11 @@ class NewActeForm extends Component {
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                this.context._addNotification(acteSentSuccess(this.context.t))
+                this.context._addNotification(notifications.acte.sent)
                 history.push('/actes/' + acteUuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     render() {

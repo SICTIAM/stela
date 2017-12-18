@@ -7,7 +7,7 @@ import Validator from 'validatorjs'
 
 import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
-import { errorNotification, localAuthorityUpdateSuccess } from '../../_components/Notifications'
+import { notifications } from '../../_util/Notifications'
 import { Field } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../../_util/utils'
 
@@ -53,7 +53,7 @@ class ActeLocalAuthorityParams extends Component {
             .then(json => this.updateState(json))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
                 history.push('/admin/actes/parametrage-collectivite')
             })
@@ -93,11 +93,11 @@ class ActeLocalAuthorityParams extends Component {
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
-                this.context._addNotification(localAuthorityUpdateSuccess(this.context.t))
+                this.context._addNotification(notifications.admin.localAuthorityUpdate)
                 this.updateState(json)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     cancelSubmit = (event) => event.preventDefault()

@@ -8,7 +8,7 @@ import Validator from 'validatorjs'
 import debounce from 'debounce'
 
 import history from '../_util/history'
-import { errorNotification, acteSentSuccess, draftDeletedSuccess } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 import { FormField } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -55,7 +55,7 @@ class NewActeBatchedForm extends Component {
             )
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
@@ -87,7 +87,7 @@ class NewActeBatchedForm extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
@@ -103,7 +103,7 @@ class NewActeBatchedForm extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
@@ -139,7 +139,7 @@ class NewActeBatchedForm extends Component {
                 this.setState({ draftStatus: 'saved' }, this.updateStatus)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }, 3000)
     setStatusForId = (statusValue, uuid) => {
@@ -180,11 +180,11 @@ class NewActeBatchedForm extends Component {
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                this.context._addNotification(acteSentSuccess(this.context.t))
+                this.context._addNotification(notifications.acte.sent)
                 history.push('/actes')
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     initDelete = () => this.setState({ shouldUnmount: false }, this.deleteDraft)
@@ -194,11 +194,11 @@ class NewActeBatchedForm extends Component {
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                this.context._addNotification(draftDeletedSuccess(this.context.t))
+                this.context._addNotification(notifications.acte.draftDeleted)
                 history.push('/actes')
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     render() {
