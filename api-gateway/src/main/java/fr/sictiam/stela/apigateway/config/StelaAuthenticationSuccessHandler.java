@@ -17,6 +17,7 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 
 import fr.sictiam.stela.apigateway.model.Agent;
+import fr.sictiam.stela.apigateway.model.StelaUserInfo;
 
 public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -45,6 +46,7 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
         
         if(authenticationOpen.isAppAdmin() || authenticationOpen.isAppUser()) {
             Agent agent = new Agent(authenticationOpen.getUserInfo(), authenticationOpen.isAppAdmin());
+            authenticationOpen.setUserInfo(StelaUserInfo.from(authenticationOpen.getUserInfo()));
             restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent", agent, Agent.class);
 //            defaultHandler.onAuthenticationSuccess(request, response, authentication)
 
