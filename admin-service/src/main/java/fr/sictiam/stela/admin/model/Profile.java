@@ -5,6 +5,10 @@ import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.UI.Views;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,19 +19,22 @@ public class Profile {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ProfileViewPublic.class)
     private String uuid;
     
     @ManyToOne(fetch=FetchType.EAGER)
-    @JsonIgnore
+    @JsonView(Views.ProfileViewPrivate.class)
     private LocalAuthority localAuthority;
     
     @ManyToOne
+    @JsonView(Views.ProfileViewPublic.class)
     private Agent agent;
     
+    @JsonView(Views.ProfileViewPublic.class)
     private Boolean admin;
     
     @ManyToMany(mappedBy="profiles")
-    @JsonIgnore
+    @JsonView(Views.ProfileViewPrivate.class)
     private Set<WorkGroup> groups;
     
     public Profile() {

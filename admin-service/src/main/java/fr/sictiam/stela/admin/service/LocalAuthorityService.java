@@ -3,14 +3,22 @@ package fr.sictiam.stela.admin.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 
@@ -19,6 +27,8 @@ import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
     @Autowired
     private AmqpTemplate amqpTemplate;
@@ -38,8 +48,17 @@ public class LocalAuthorityService {
 
         LocalAuthorityEvent localAutorityCreation = new LocalAuthorityEvent(localAuthority);
         
-        amqpTemplate.convertAndSend(exchange, createdKey, localAutorityCreation);
-
+        try { 
+            ObjectMapper mapper = new ObjectMapper(); 
+            String body = mapper.writerWithView(Views.LocalAuthorityView.class).writeValueAsString(localAutorityCreation); 
+            MessageProperties messageProperties =new MessageProperties(); 
+            messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON); 
+            Message amMessage=new Message(body.getBytes(), messageProperties); 
+            amqpTemplate.send(exchange, createdKey, amMessage); 
+        } catch (JsonProcessingException e) { 
+            LOGGER.error(e.getMessage());
+        }
+        
         return localAuthority;
     }
     
