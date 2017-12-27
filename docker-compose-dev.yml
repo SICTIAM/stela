@@ -51,7 +51,7 @@ services:
      - config
      - discovery
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
   admin-service:
     image: stela-poc/admin-service
     container_name: admin-service
@@ -63,7 +63,7 @@ services:
      - postgresql
      - rabbitmq
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
   acte-service:
     image: stela-poc/acte-service
     container_name: acte-service
@@ -75,4 +75,4 @@ services:
      - postgresql
      - rabbitmq
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
