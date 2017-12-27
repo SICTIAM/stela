@@ -1,1 +1,1 @@
-include "acte-service", "admin-service", "api-gateway", "config-service", "discovery-service", "hystrix-dashboard", "tracing-service"
+include "acte-service", "admin-service", "api-gateway", "config-service", "discovery-service"
