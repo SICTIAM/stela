@@ -21,9 +21,16 @@ import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.Views;
+
+import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
+
+
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
+
+
 
 @RestController
 @RequestMapping("/api/admin/local-authority")
@@ -60,6 +67,12 @@ public class LocalAuthorityController {
         return localAuthorityService.getByUuid(uuid);
     }
 
+    @GetMapping("/instance/{slugName}")
+    public OzwilloInstanceInfo getInstanceInfoBySlugName(@PathVariable String slugName) {
+        return localAuthorityService.getBySlugName(slugName)
+                .map(LocalAuthority::getOzwilloInstanceInfo)
+                .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
+    }
 
     @PostMapping("/current/{module}")
     public void addModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable Module module) {

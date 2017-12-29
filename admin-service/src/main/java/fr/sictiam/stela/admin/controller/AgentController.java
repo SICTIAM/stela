@@ -20,7 +20,7 @@ public class AgentController {
     public AgentController(AgentService agentService) {
         this.agentService = agentService;
     }
-    
+  
     @GetMapping
     @JsonView(Views.AgentViewPublic.class)
     public Agent getCurrent(@RequestHeader("sub") String sub) {

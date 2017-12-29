@@ -2,8 +2,7 @@ package fr.sictiam.stela.admin.service;
 
 import java.util.Optional;
 
-import javax.transaction.Transactional;
-
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,32 +29,20 @@ public class AgentService {
         this.localAuthorityService = localAuthorityService;
     }
 
-    public Agent createIfNotExists(Agent agent) {
-        return agentRepository.findBySub(agent.getSub()).orElseGet(() -> create(agent));
+    private Agent createIfNotExists(Agent agent) {
+        return agentRepository.findBySub(agent.getSub()).orElseGet(() -> agentRepository.save(agent));
     }
 
     public Optional<Agent> findBySub(String sub) {
         return agentRepository.findBySub(sub);
     }
 
-    public Agent create(Agent agent) {
-        Agent savedAgent = agentRepository.save(agent);
-        if (agent.isAdmin()) {
-            // if agent is an admin, give it access to all activated modules for current
-            // local authority
-        }
-
-        return savedAgent;
-    }
-
-    public Agent createAndAttach(Agent agent, LocalAuthority localAuthority) {
+    public Agent createAndAttach(Agent agent) {
+        final String slugName = agent.getSlugName();
+        LocalAuthority localAuthority =
+                localAuthorityService.getBySlugName(slugName)
+                        .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
         agent = createIfNotExists(agent);
-        if (agent.getProfiles() != null && agent.getProfiles().stream()
-                .anyMatch(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()))) {
-            //notify the services so we are sure they up to date
-            localAuthorityService.createOrUpdate(localAuthority);
-            return agent;
-        }
         Profile profile = new Profile(localAuthority, agent, agent.isAdmin());
         profileRepository.save(profile);
         agent.getProfiles().add(profile);

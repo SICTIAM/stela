@@ -15,7 +15,6 @@ public class OzwilloInstanceInfo {
     private String statusChangedSecret;
     private String creatorId;
     private String creatorName;
-    private String kernelId;
     private String dcId;
     private boolean notifiedToKernel = false;
     private String serviceId;
@@ -24,7 +23,7 @@ public class OzwilloInstanceInfo {
     }
 
     public OzwilloInstanceInfo(String instanceId, String clientId, String clientSecret, String instanceRegistrationUri,
-                               String creatorId, String creatorName, String kernelId, String dcId) {
+                               String creatorId, String creatorName, String dcId) {
         this.instanceId = instanceId;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -33,7 +32,6 @@ public class OzwilloInstanceInfo {
         this.statusChangedSecret = RandomStringUtils.randomAlphanumeric(48);
         this.creatorId = creatorId;
         this.creatorName = creatorName;
-        this.kernelId = kernelId;
         this.dcId = dcId;
     }
 
@@ -69,10 +67,6 @@ public class OzwilloInstanceInfo {
         return creatorName;
     }
 
-    public String getKernelId() {
-        return kernelId;
-    }
-
     public String getDcId() {
         return dcId;
     }
@@ -102,7 +96,6 @@ public class OzwilloInstanceInfo {
                 ", instanceRegistrationUri='" + instanceRegistrationUri + '\'' +
                 ", creatorId='" + creatorId + '\'' +
                 ", creatorName='" + creatorName + '\'' +
-                ", kernelId='" + kernelId + '\'' +
                 ", dcId='" + dcId + '\'' +
                 ", notifiedToKernel=" + notifiedToKernel +
                 '}';

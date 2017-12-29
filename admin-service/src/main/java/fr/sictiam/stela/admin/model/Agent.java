@@ -9,10 +9,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -46,6 +47,11 @@ public class Agent {
     @NotNull
     @JsonView(Views.AgentViewPublic.class)
     private Boolean admin;
+    @NotNull
+    @NotEmpty
+    @Transient
+    @JsonProperty(value = "slug_name")
+    private String slugName;
 
     @OneToMany(mappedBy = "agent", fetch = FetchType.EAGER)
     @JsonView(Views.AgentViewPrivate.class)
@@ -102,6 +108,10 @@ public class Agent {
 
     public void setAdmin(Boolean admin) {
         this.admin = admin;
+    }
+
+    public String getSlugName() {
+        return slugName;
     }
 
     public Set<Profile> getProfiles() {

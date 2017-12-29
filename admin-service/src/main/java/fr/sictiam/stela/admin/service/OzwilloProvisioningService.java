@@ -96,8 +96,7 @@ public class OzwilloProvisioningService {
         OzwilloInstanceInfo ozwilloInstanceInfo = new OzwilloInstanceInfo(provisioningRequest.getInstanceId(),
                 provisioningRequest.getClientId(), provisioningRequest.getClientSecret(),
                 provisioningRequest.getInstanceRegistrationUri(), provisioningRequest.getUser().getId(),
-                provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getId(),
-                provisioningRequest.getOrganization().getDcId());
+                provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getDcId());
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
         localAuthorityService.createOrUpdate(localAuthority);
 

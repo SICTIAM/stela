@@ -1,12 +1,10 @@
 package fr.sictiam.stela.apigateway.config;
 
-import java.util.Arrays;
-
+import fr.sictiam.stela.apigateway.config.filter.CsrfTokenGeneratorFilter;
 import org.oasis_eu.spring.config.OasisSecurityConfiguration;
 import org.oasis_eu.spring.kernel.security.OasisAuthenticationFilter;
 import org.oasis_eu.spring.kernel.security.OpenIdCConfiguration;
 import org.oasis_eu.spring.kernel.security.StaticOpenIdCConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +15,7 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.netflix.discovery.EurekaClient;
-
-import fr.sictiam.stela.apigateway.config.filter.CsrfTokenGeneratorFilter;
+import java.util.Arrays;
 
 @Configuration
 public class WebSecurityConfig extends OasisSecurityConfiguration {
@@ -27,8 +23,6 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     @Value("${application.url}")
     String applicationUrl;
 
-    @Autowired EurekaClient eurekaClient;
-    
     @Bean
     @Primary
     public OpenIdCConfiguration openIdCConfiguration() {
@@ -40,7 +34,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     @Override
     public OasisAuthenticationFilter oasisAuthenticationFilter() throws Exception {
         OasisAuthenticationFilter filter = super.oasisAuthenticationFilter();
-        filter.setSuccessHandler(new StelaAuthenticationSuccessHandler(applicationUrl, eurekaClient));
+        filter.setSuccessHandler(new StelaAuthenticationSuccessHandler(applicationUrl));
         return filter;
     }
 

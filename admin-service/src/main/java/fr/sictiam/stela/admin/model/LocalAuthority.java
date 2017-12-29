@@ -21,6 +21,9 @@ public class LocalAuthority {
     private String uuid;
     @JsonView(Views.LocalAuthorityViewPublic.class)
     private String name;
+    // the slug name used in local authority's domain name, eg <valbonne>.stela.fr
+    @Column(unique = true)
+    private String slugName;
     @Column(unique = true)
     @JsonView(Views.LocalAuthorityViewPublic.class)
     private String siren;
@@ -56,6 +59,10 @@ public class LocalAuthority {
 
     public String getName() {
         return name;
+    }
+
+    public String getSlugName() {
+        return slugName;
     }
 
     public void setName(String name) {
