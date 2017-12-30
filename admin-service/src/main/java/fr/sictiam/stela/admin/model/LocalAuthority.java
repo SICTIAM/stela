@@ -47,9 +47,10 @@ public class LocalAuthority {
         this.activatedModules = new HashSet<>();
     }
 
-    public LocalAuthority(String name, String siren) {
+    public LocalAuthority(String name, String siren, String slugName) {
         this.name = name;
         this.siren = siren;
+        this.slugName = slugName;
         this.activatedModules = new HashSet<>();
     }
 

@@ -48,7 +48,9 @@ public class LogRequestResponseFilter implements ClientHttpRequestInterceptor {
     private void traceResponse(ClientHttpResponse response) throws IOException {
         LOGGER.debug("response status code: " + response.getStatusCode());
         LOGGER.debug("response status text: " + response.getStatusText());
-        LOGGER.debug("response body : " + getBodyString(response));
+        // TODO : find a way to log response body without "perverting" the original response
+        // TODO : maybe the simpler would be to use the trace actuator endpoint ?
+//        LOGGER.debug("response body : " + getBodyString(response));
     }
 
     private String getBodyString(ClientHttpResponse response) {

@@ -20,8 +20,8 @@ import java.util.Arrays;
 @Configuration
 public class WebSecurityConfig extends OasisSecurityConfiguration {
 
-    @Value("${application.url}")
-    String applicationUrl;
+    @Value("${application.urlWithSlug}")
+    String applicationUrlWithSlug;
 
     @Bean
     @Primary
@@ -34,7 +34,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     @Override
     public OasisAuthenticationFilter oasisAuthenticationFilter() throws Exception {
         OasisAuthenticationFilter filter = super.oasisAuthenticationFilter();
-        filter.setSuccessHandler(new StelaAuthenticationSuccessHandler(applicationUrl));
+        filter.setSuccessHandler(new StelaAuthenticationSuccessHandler(applicationUrlWithSlug));
         return filter;
     }
 

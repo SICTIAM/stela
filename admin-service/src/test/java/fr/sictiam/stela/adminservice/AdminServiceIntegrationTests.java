@@ -49,7 +49,7 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
 
     @Before
     public void beforeTests() {
-        LocalAuthority localAuthority = new LocalAuthority("Test", "368569321");
+        LocalAuthority localAuthority = new LocalAuthority("Test", "368569321", "test");
         localAuthority.addModule(Module.ACTES);
         OzwilloInstanceInfo ow=new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test");
         localAuthority.setOzwilloInstanceInfo(ow);

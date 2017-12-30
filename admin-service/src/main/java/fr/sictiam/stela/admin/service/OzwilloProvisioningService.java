@@ -3,10 +3,10 @@ package fr.sictiam.stela.admin.service;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.slugify.Slugify;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.ProvisioningRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +70,11 @@ public class OzwilloProvisioningService {
         }
     }
 
-    @Value("${application.host.suffix}")
-    private String hostSuffix;
+    @Value("${application.url}")
+    private String applicationUrl;
+
+    @Value("${application.urlWithSlug}")
+    private String applicationUrlWithSlug;
 
     private final LocalAuthorityService localAuthorityService;
     private final OzwilloServiceProperties ozwilloServiceProperties;
@@ -92,7 +95,8 @@ public class OzwilloProvisioningService {
         String siret = dcId.substring(dcId.lastIndexOf('/') + 1);
         if (localAuthorityService.findBySiren(siret).isPresent())
             throw new EntityExistsException("There already exists a local authority with SIRET " + siret);
-        LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siret);
+        String slugName = new Slugify().slugify(provisioningRequest.getOrganization().getName());
+        LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siret, slugName);
         OzwilloInstanceInfo ozwilloInstanceInfo = new OzwilloInstanceInfo(provisioningRequest.getInstanceId(),
                 provisioningRequest.getClientId(), provisioningRequest.getClientSecret(),
                 provisioningRequest.getInstanceRegistrationUri(), provisioningRequest.getUser().getId(),
@@ -163,14 +167,12 @@ public class OzwilloProvisioningService {
         @JsonProperty("services")
         private List<Service> services;
 
-        public KernelInstanceRegistrationRequest(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
-                                                 OzwilloServiceProperties ozwilloServiceProperties) {
+        KernelInstanceRegistrationRequest(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
+                                          OzwilloServiceProperties ozwilloServiceProperties) {
             this.instanceId = ozwilloInstanceInfo.getInstanceId();
-            this.destructionUri = getInstanceUri(provisioningRequest.getOrganization().getName(),
-                    "api/admin/ozwillo/delete");
+            this.destructionUri = applicationUrl + "/api/admin/ozwillo/delete";
             this.destructionSecret = ozwilloInstanceInfo.getDestructionSecret();
-            this.statusChangedUri = getInstanceUri(provisioningRequest.getOrganization().getName(),
-                    "api/admin/ozwillo/status");
+            this.statusChangedUri = applicationUrl + "/api/admin/ozwillo/status";
             this.statusChangedSecret = ozwilloInstanceInfo.getStatusChangedSecret();
             this.services = Collections.singletonList(new Service(ozwilloServiceProperties, provisioningRequest.getOrganization()));
         }
@@ -215,7 +217,7 @@ public class OzwilloProvisioningService {
             @JsonProperty("redirect_uris")
             private List<String> redirectUris;
 
-            public Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest.Organization organization) {
+            Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest.Organization organization) {
                 this.localId = ozwilloServiceProperties.localId;
                 this.name = ozwilloServiceProperties.name + " - " + organization.getName();
                 this.description = ozwilloServiceProperties.description;
@@ -227,8 +229,9 @@ public class OzwilloProvisioningService {
                 this.targetAudience = Collections.singletonList("PUBLIC_BODIES");
                 this.visibility = "VISIBLE";
                 this.accessControl = "RESTRICTED";
-                this.serviceUri = getInstanceUri(organization.getName(), "login");
-                this.redirectUris = Collections.singletonList(getInstanceUri(organization.getName(), "login"));
+                String applicationInstanceUrl = applicationUrlWithSlug.replace("%SLUG%", new Slugify().slugify(organization.getName()));
+                this.serviceUri = applicationInstanceUrl + "/login";
+                this.redirectUris = Collections.singletonList(applicationInstanceUrl + "/callback");
             }
 
             @Override
@@ -250,10 +253,5 @@ public class OzwilloProvisioningService {
                         '}';
             }
         }
-    }
-
-    private String getInstanceUri(String organizationName, String uriPath) {
-        String organizationNameForSubdomain = StringUtils.replacePattern(organizationName, "[^a-zA-Z]+", "").toLowerCase();
-        return String.format("https://%s.%s/%s", organizationNameForSubdomain, hostSuffix, uriPath);
     }
 }

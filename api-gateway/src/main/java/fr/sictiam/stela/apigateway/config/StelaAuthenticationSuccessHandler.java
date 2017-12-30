@@ -20,10 +20,10 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StelaAuthenticationSuccessHandler.class);
 
-    private final String applicationUrl;
+    private final String applicationUrlWithSlug;
 
-    public StelaAuthenticationSuccessHandler(String applicationUrl) {
-        this.applicationUrl = applicationUrl;
+    public StelaAuthenticationSuccessHandler(String applicationUrlWithSlug) {
+        this.applicationUrlWithSlug = applicationUrlWithSlug;
     }
 
     @Override
@@ -41,10 +41,10 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
             authenticationOpen.setUserInfo(StelaUserInfo.from(authenticationOpen.getUserInfo()));
             restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent", agent, Agent.class);
 
-            // Hard redirect on configured applicationUrl in which we add the slug name
+            // Hard redirect on configured slugified application's URL
             // Kind of a hack since back end and front end are two different apps in dev profile
             //   and the backend has no other way to know where is the front end
-            response.sendRedirect(applicationUrl.replace("://", "://" + SlugUtils.getSlugNameFromRequest(request) + "."));
+            response.sendRedirect(applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromRequest(request)));
         } else {
             LOGGER.info("Authentication succeded but user not authorized for this instance !");
             response.sendError(401);
