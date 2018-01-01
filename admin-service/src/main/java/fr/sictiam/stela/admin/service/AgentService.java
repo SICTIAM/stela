@@ -43,12 +43,17 @@ public class AgentService {
                 localAuthorityService.getBySlugName(slugName)
                         .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
         agent = createIfNotExists(agent);
-        Profile profile = new Profile(localAuthority, agent, agent.isAdmin());
-        profileRepository.save(profile);
-        agent.getProfiles().add(profile);
-        agent = agentRepository.save(agent);
-        localAuthority.getProfiles().add(profile);
-        localAuthorityService.createOrUpdate(localAuthority);
+
+        boolean hasProfileOnLocalAuthority =
+                agent.getProfiles().stream().anyMatch(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()));
+        if (!hasProfileOnLocalAuthority) {
+            Profile profile = new Profile(localAuthority, agent, agent.isAdmin());
+            profileRepository.save(profile);
+            agent.getProfiles().add(profile);
+            agent = agentRepository.save(agent);
+            localAuthority.getProfiles().add(profile);
+            localAuthorityService.createOrUpdate(localAuthority);
+        }
 
         return agent;
     }
