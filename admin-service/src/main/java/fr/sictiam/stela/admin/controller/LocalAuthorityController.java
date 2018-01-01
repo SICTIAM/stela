@@ -69,7 +69,11 @@ public class LocalAuthorityController {
 
     @GetMapping("/instance/{slugName}")
     public OzwilloInstanceInfo getInstanceInfoBySlugName(@PathVariable String slugName) {
+        // as soon as an instance is stopped, consider it does no longer exist
+        // even if it seems that, for a STOPPED instance, we don't even get to this point
+        // as the client_id is rejected by the kernel when trying to authenticate
         return localAuthorityService.getBySlugName(slugName)
+                .filter(localAuthority -> localAuthority.getStatus().equals(LocalAuthority.Status.RUNNING))
                 .map(LocalAuthority::getOzwilloInstanceInfo)
                 .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
     }

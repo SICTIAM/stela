@@ -97,4 +97,8 @@ public class LocalAuthorityService {
     public Optional<LocalAuthority> findBySiren(String siren) {
         return localAuthorityRepository.findBySiren(siren);
     }
+
+    public Optional<LocalAuthority> getByInstanceId(String instanceId) {
+        return localAuthorityRepository.findByOzwilloInstanceInfo_InstanceId(instanceId);
+    }
 }

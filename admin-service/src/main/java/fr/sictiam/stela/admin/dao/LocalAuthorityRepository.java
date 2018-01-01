@@ -11,4 +11,5 @@ public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, 
     Optional<LocalAuthority> findByName(String name);
     Optional<LocalAuthority> findBySiren(String siren);
     Optional<LocalAuthority> findBySlugName(String slugName);
+    Optional<LocalAuthority> findByOzwilloInstanceInfo_InstanceId(String instanceId);
 }

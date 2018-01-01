@@ -7,6 +7,8 @@ import com.github.slugify.Slugify;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.ProvisioningRequest;
+import fr.sictiam.stela.admin.model.StatusChangeRequest;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -88,6 +91,11 @@ public class OzwilloProvisioningService {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Handle Ozwillo request to create a new instance.
+     *
+     * See http://doc.ozwillo.com/#s3-1-ozwillo-request for full details.
+     */
     public void createNewInstance(ProvisioningRequest provisioningRequest) {
 
         String dcId = provisioningRequest.getOrganization().getDcId();
@@ -112,6 +120,8 @@ public class OzwilloProvisioningService {
      *
      * A sample response is like this :
      * {"instance_id":"bce53130-af7d-44a0-8a87-291a37f22e4c","destruction_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/delete","destruction_secret":"secret","status_changed_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/status","status_changed_secret":"secret","services":[{"local_id":"back-office","name":"STELA - SICTIAM","description":"Tiers de télétransmission","tos_uri":"https://stela.fr/tos","policy_uri":"https://stela.fr/policy","icon":"https://stela.fr/icon.png","contacts":["admin@stela.fr","demat@sictiam.fr"],"payment_option":"PAID","target_audience":"PUBLIC_BODY","visibility":"VISIBLE","access_control":"RESTRICTED","service_uri":"https://sictiam.stela3-dev.sictiam.fr/login","redirect_uris":["https://sictiam.stela3-dev.sictiam.fr/login"]}]}
+     *
+     * See http://doc.ozwillo.com/#s3-3-provider-acknowledgement for full details.
      */
     private void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo) {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -151,6 +161,25 @@ public class OzwilloProvisioningService {
         } else {
             LOGGER.warn("Unknown status code returned from the kernel : {} ({})", response.getBody(), response.getStatusCodeValue());
         }
+    }
+
+    /**
+     * Handle status change of an instance.
+     *
+     * See http://doc.ozwillo.com/#s3-status-change for full details.
+     */
+    public void changeInstanceStatus(StatusChangeRequest statusChangeRequest) {
+        Optional<LocalAuthority> optionalLocalAuthority = localAuthorityService.getByInstanceId(statusChangeRequest.getInstanceId());
+        if (!optionalLocalAuthority.isPresent())
+            throw new NotFoundException("No local authority found for instance id : " + statusChangeRequest.getInstanceId());
+
+        LocalAuthority localAuthority = optionalLocalAuthority.get();
+        switch (statusChangeRequest.getStatus()) {
+            case "STOPPED": localAuthority.setStatus(LocalAuthority.Status.STOPPED);
+            case "RUNNING": localAuthority.setStatus(LocalAuthority.Status.RUNNING);
+        }
+
+        localAuthorityService.modify(localAuthority);
     }
 
     private class KernelInstanceRegistrationRequest {

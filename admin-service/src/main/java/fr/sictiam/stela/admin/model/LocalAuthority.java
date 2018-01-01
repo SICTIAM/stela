@@ -27,6 +27,9 @@ public class LocalAuthority {
     @Column(unique = true)
     @JsonView(Views.LocalAuthorityViewPublic.class)
     private String siren;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 12)
+    private Status status;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @JsonView(Views.LocalAuthorityViewPublic.class)
@@ -51,6 +54,7 @@ public class LocalAuthority {
         this.name = name;
         this.siren = siren;
         this.slugName = slugName;
+        this.status = Status.RUNNING;
         this.activatedModules = new HashSet<>();
     }
 
@@ -76,6 +80,14 @@ public class LocalAuthority {
 
     public void setSiren(String siren) {
         this.siren = siren;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Set<Module> getActivatedModules() {
@@ -125,5 +137,10 @@ public class LocalAuthority {
                 ", name='" + name + '\'' +
                 ", siren='" + siren + '\'' +
                 '}';
+    }
+
+    public enum Status {
+        RUNNING,
+        STOPPED
     }
 }

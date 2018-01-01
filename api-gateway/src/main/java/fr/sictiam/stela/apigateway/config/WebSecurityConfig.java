@@ -27,7 +27,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     @Primary
     public OpenIdCConfiguration openIdCConfiguration() {
         StaticOpenIdCConfiguration configuration = new OpenIdConnectConfiguration();
-        configuration.addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo/instance", "/build/"));
+        configuration.addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/"));
         return configuration;
     }
 

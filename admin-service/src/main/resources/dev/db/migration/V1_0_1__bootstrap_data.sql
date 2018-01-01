@@ -5,8 +5,8 @@
 INSERT INTO local_authority (uuid, name, client_id, client_secret, creator_id, creator_name, dc_id,
                              destruction_secret, instance_id, instance_registration_uri,
                              notified_to_kernel, service_id, status_changed_secret, siren)
-  VALUES ('639fd48c-93b9-4569-a414-3b372c71e0a1', 'SICTIAM-Test', '7b638c0a-ec1a-4d37-ac5b-9e91f43ea68f',
-          'Va4gjDY9XzMXOCtWy57Oxl0OmFUR0nuJ6cROzc8mjc0', '7188c3b1-a284-4840-935d-036ba2b7cc6d', 'Admin Dev SICTIAM',
-          'http://data.sictiam.fr/dc/type/orgfr:Organisation_0/FR/25060187900027', 'Qs27IWFc69k8iqw89lfRgSWqY4Gs4SBnwDIhn7y65qZvOCYx6vMYdAylnPOqgmo',
-          '7b638c0a-ec1a-4d37-ac5b-9e91f43ea68f', 'https://kernel.sictiam.fr', true, '28c16508-98a3-459d-b5a7-c520294f9a1c',
-          null, '25060187900027');
+  VALUES ('f706fe20-e28a-4bfc-8b0e-6ee47758cf37', 'SICTIAM', 'cf379cef-3ebd-4324-86e2-2c3923e89105',
+          'sictiam-instantiation-secret', '7188c3b1-a284-4840-935d-036ba2b7cc6d', 'Administrator',
+          'http://data.sictiam.fr/dc/type/orgfr:Organisation_0/FR/25060187900027', 'sictiam-destruction-secret',
+          'cf379cef-3ebd-4324-86e2-2c3923e89105', 'https://kernel.sictiam.fr/apps/pending-instance/cf379cef-3ebd-4324-86e2-2c3923e89105',
+          true, 'f4c56d61-e096-4f3d-897e-b259d0c223e7', 'sictiam-status-change-secret', '25060187900027');
