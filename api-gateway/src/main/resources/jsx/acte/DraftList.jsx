@@ -6,7 +6,7 @@ import { Segment } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
-import { errorNotification, draftsDeletedSuccess } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 
 class DraftList extends Component {
     static contextTypes = {
@@ -31,12 +31,12 @@ class DraftList extends Component {
         fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify(selectedUuids), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
-                this.context._addNotification(draftsDeletedSuccess(this.context.t))
+                this.context._addNotification(notifications.acte.draftsDeleted)
                 const actes = selectedUuids.length > 0 ? this.state.actes.filter(acte => !selectedUuids.includes(acte.uuid)) : []
                 this.setState({ actes })
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     render() {

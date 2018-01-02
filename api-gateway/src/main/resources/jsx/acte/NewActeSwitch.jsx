@@ -6,7 +6,7 @@ import { Menu, Segment, Grid } from 'semantic-ui-react'
 
 import NewActeForm from './NewActeForm'
 import NewActeBatchedForm from './NewActeBatchedForm'
-import { errorNotification } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class NewActeSwitch extends Component {
@@ -32,7 +32,7 @@ class NewActeSwitch extends Component {
                 .then(json => this.setState({ fields: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
         } else {

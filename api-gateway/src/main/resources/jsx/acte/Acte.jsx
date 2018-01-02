@@ -5,10 +5,10 @@ import renderIf from 'render-if'
 import moment from 'moment'
 import { Grid, Segment, List, Checkbox, Label, Icon, Button, Popup } from 'semantic-ui-react'
 
-import { errorNotification } from '../_components/Notifications'
 import DraggablePosition from '../_components/DraggablePosition'
 import { Field } from '../_components/UI'
 import history from '../_util/history'
+import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { anomalies } from '../_util/constants'
 import ActeHistory from './ActeHistory'
@@ -44,7 +44,7 @@ class Acte extends Component {
                 .then(json => this.setState({ acteUI: json, acteFetched: true }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(json.message)))
+                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                     history.push('/acte')
                 })

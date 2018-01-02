@@ -7,7 +7,7 @@ import FileSaver from 'file-saver'
 
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
-import { errorNotification, acteNoContent } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
@@ -54,7 +54,7 @@ class ActeList extends Component {
             .then(response => response.json())
             .then(json => this.setState({ actes: json }))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
@@ -75,8 +75,8 @@ class ActeList extends Component {
             .then(response => response.blob())
             .then(blob => FileSaver.saveAs(blob, filename))
             .catch(response => {
-                if (response.status === 204) this.context._addNotification(acteNoContent(this.context.t))
-                else response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.acte.title'), this.context.t(text))))
+                if (response.status === 204) this.context._addNotification(notifications.acte.noContent)
+                else response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     render() {

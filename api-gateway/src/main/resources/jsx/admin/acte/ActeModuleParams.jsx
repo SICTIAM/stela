@@ -5,7 +5,7 @@ import { Form, Button, Segment, Label, Icon } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import InputValidation from '../../_components/InputValidation'
-import { errorNotification, adminModuleUpdateSuccess } from '../../_components/Notifications'
+import { notifications } from '../../_util/Notifications'
 import { Field } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
@@ -31,7 +31,7 @@ class ActeModuleParams extends Component {
             .then(json => this.setState({ fields: json }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.admin.instance.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
                 })
             })
     }
@@ -72,9 +72,9 @@ class ActeModuleParams extends Component {
         const headers = { 'Content-Type': 'application/json' }
         fetchWithAuthzHandling({ url: '/api/acte/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(adminModuleUpdateSuccess(this.context.t)))
+            .then(() => this.context._addNotification(notifications.admin.moduleUpdated))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(errorNotification(this.context.t('notifications.admin.instance.title'), this.context.t(text))))
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
             })
     }
     render() {

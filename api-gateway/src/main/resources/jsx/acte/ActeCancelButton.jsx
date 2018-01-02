@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import { Button } from 'semantic-ui-react'
 
-import { acteCancelledSuccess, acteCancelledForbidden } from '../_components/Notifications'
+import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class ActeCancelButton extends Component {
@@ -23,11 +23,11 @@ class ActeCancelButton extends Component {
             fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/status/cancel', method: 'POST', context: this.context })
                 .then(checkStatus)
                 .then(() => {
-                    this.context._addNotification(acteCancelledSuccess(this.context.t))
+                    this.context._addNotification(notifications.acte.cancelled)
                     this.setState({ requestSent: true })
                 })
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(acteCancelledForbidden(this.context.t)))
+                    response.text().then(text => this.context._addNotification(notifications.acte.cancelledForbidden))
                 })
         }
     }

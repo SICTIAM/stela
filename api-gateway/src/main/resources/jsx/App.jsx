@@ -5,6 +5,7 @@ import { Router, Route, Switch, Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Container } from 'semantic-ui-react'
 import NotificationSystem from 'react-notification-system'
+import { translate } from 'react-i18next'
 
 import 'semantic-ui-css/semantic.min.css';
 import '../styles/index.css';
@@ -39,6 +40,9 @@ class App extends Component {
         super()
         this._notificationSystem = null
     }
+    static contextTypes = {
+        t: PropTypes.func
+    }
     static propTypes = {
         children: PropTypes.element.isRequired
     }
@@ -63,7 +67,10 @@ class App extends Component {
             _addNotification: this._addNotification
         }
     }
-    _addNotification = (notification) => {
+    _addNotification = (notification, title, message) => {
+        const { t } = this.context
+        notification.title = t(title ? title : notification.title)
+        notification.message = t(message ? message : notification.message)
         if (this._notificationSystem) {
             this._notificationSystem.addNotification(notification)
         }
@@ -154,12 +161,14 @@ const AppRoute = () =>
         <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
     </Switch>
 
+const TranslatedApp = translate('api-gateway')(App)
+
 render((
     <I18nextProvider i18n={i18n}>
         <Router history={history}>
-            <App>
+            <TranslatedApp>
                 <AppRoute />
-            </App>
+            </TranslatedApp>
         </Router>
     </I18nextProvider>
 ), document.getElementById('app'))

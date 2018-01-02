@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Header, Label, Icon, Dropdown, Form, Button } from 'semantic-ui-react'
 
-import { errorNotification, groupsUpdatedSuccess } from '../../_components/Notifications'
+import { notifications } from '../../_util/Notifications'
 import { Field } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
@@ -42,7 +42,7 @@ class AgentProfile extends Component {
                 .then(json => this.setState({ fields: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(errorNotification(this.context.t('notifications.admin.title'), this.context.t(json.message)))
+                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                     })
                 })
             fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid}/group` })
@@ -51,7 +51,7 @@ class AgentProfile extends Component {
                 .then(json => this.setState({ allGroups: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(errorNotification(this.context.t('notifications.admin.title'), this.context.t(json.message)))
+                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                     })
                 })
         }
@@ -62,11 +62,11 @@ class AgentProfile extends Component {
         fetchWithAuthzHandling({ url: `/api/admin/profile/${this.state.fields.uuid}/group`, method: 'PUT', body, headers, context: this.context })
             .then(checkStatus)
             .then(() =>
-                this.context._addNotification(groupsUpdatedSuccess(this.context.t))
+                this.context._addNotification(notifications.admin.groupsUpdated)
             )
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(errorNotification(this.context.t('notifications.admin.title'), this.context.t(json.message)))
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
