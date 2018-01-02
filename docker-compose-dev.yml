@@ -34,27 +34,17 @@ services:
     container_name: discovery
     ports:
      - "8761:8761"
-  hystrix-dashboard:
-    image: stela-poc/hystrix-dashboard
-    container_name: hystrix-dashboard
-    ports:
-     - "7979:7979"
-    depends_on:
-     - config
-     - discovery
-    environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
-  tracing-service:
-    image: stela-poc/tracing-service
-    container_name: tracing-service
-    ports:
-     - "9411:9411"
-    depends_on:
-     - config
-     - discovery
-     - rabbitmq
-    environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+#  tracing-service:
+#    image: openzipkin/zipkin
+#    container_name: zipkin
+#    ports:
+#     - "9411:9411"
+#    depends_on:
+#     - config
+#     - discovery
+#     - rabbitmq
+#    environment:
+#     - "SPRING_PROFILES_ACTIVE=prod"
   api-gateway:
     image: stela-poc/api-gateway
     container_name: api-gateway
