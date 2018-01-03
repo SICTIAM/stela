@@ -1,4 +1,4 @@
-package fr.sictiam.stela.admin.filter;
+package fr.sictiam.stela.admin.config.filter;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -19,7 +19,7 @@ import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.ProfileService;
 
 @Component
-public class Authfilter extends OncePerRequestFilter {
+public class AuthFilter extends OncePerRequestFilter {
 
     @Autowired
     AgentService agentService;
@@ -31,21 +31,21 @@ public class Authfilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        String sub = request.getHeader("sub");
-        String activeProfile = request.getHeader("activeProfile");
+        String sub = request.getHeader("STELA-Sub");
+        String activeProfile = request.getHeader("STELA-Active-Profile");
         
         Profile profile = null;
         
-        if(StringUtils.isNotBlank(activeProfile)) {
-            profile =profileService.getByUuid(activeProfile);
-        }else {
+        if (StringUtils.isNotBlank(activeProfile)) {
+            profile = profileService.getByUuid(activeProfile);
+        } else {
             Optional<Agent> currentAgent = agentService.findBySub(sub);
-            if(currentAgent.isPresent()) {
+            if (currentAgent.isPresent()) {
                 profile = currentAgent.get().getProfiles().stream().findFirst().get();
             }
         }
-        if(profile != null) {
-            request.setAttribute("CurrentProfile", profile.getUuid());
+        if (profile != null) {
+            request.setAttribute("STELA-Current-Profile", profile.getUuid());
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
         }
             

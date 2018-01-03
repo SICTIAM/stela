@@ -38,11 +38,11 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
     public Object run() {
         LOGGER.debug("Adding Authorization header to downstream request");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OpenIdCAuthentication authenticationOpen= (OpenIdCAuthentication) authentication;
+        OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.addZuulRequestHeader("Authorization", "Bearer " + authenticationOpen.getAccessToken());
-        ctx.addZuulRequestHeader("sub", authenticationOpen.getUserInfo().getUserId());
-        ctx.addZuulRequestHeader("activeProfile",((StelaUserInfo) authenticationOpen.getUserInfo()).getCurrentProfile());
+        ctx.addZuulRequestHeader("STELA-Sub", authenticationOpen.getUserInfo().getUserId());
+        ctx.addZuulRequestHeader("STELA-Active-Profile",((StelaUserInfo) authenticationOpen.getUserInfo()).getCurrentProfile());
         return null;
     }
 }

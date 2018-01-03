@@ -1,11 +1,14 @@
 package fr.sictiam.stela.apigateway.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.apigateway.model.Agent;
 import fr.sictiam.stela.apigateway.model.StelaUserInfo;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.client.RestTemplate;
@@ -38,8 +41,14 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
 
             Agent agent = new Agent(authenticationOpen.getUserInfo(), authenticationOpen.isAppAdmin(),
                     SlugUtils.getSlugNameFromRequest(request));
-            authenticationOpen.setUserInfo(StelaUserInfo.from(authenticationOpen.getUserInfo()));
-            restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent", agent, Agent.class);
+            ResponseEntity<String> agentProfile =
+                    restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent", agent, String.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode node = objectMapper.readTree(agentProfile.getBody());
+
+            StelaUserInfo stelaUserInfo = StelaUserInfo.from(((OpenIdCAuthentication) authentication).getUserInfo());
+            stelaUserInfo.setCurrentProfile(node.get("uuid").asText());
+            authenticationOpen.setUserInfo(stelaUserInfo);
 
             // Hard redirect on configured slugified application's URL
             // Kind of a hack since back end and front end are two different apps in dev profile

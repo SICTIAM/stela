@@ -2,7 +2,7 @@ package fr.sictiam.stela.apigateway.model;
 
 import org.oasis_eu.spring.kernel.model.UserInfo;
 
-public class StelaUserInfo extends UserInfo{
+public class StelaUserInfo extends UserInfo {
     
     private String currentProfile;
 

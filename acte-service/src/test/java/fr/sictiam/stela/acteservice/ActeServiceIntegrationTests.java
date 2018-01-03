@@ -168,7 +168,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             this.restTemplate.getRestTemplate().setInterceptors(
                     Collections.singletonList((request1, body, execution) -> {
                         request1.getHeaders()
-                                .add("sub", "4f146466-ea58-4e5c-851c-46db18ac173b");
+                                .add("STELA-Sub", "4f146466-ea58-4e5c-851c-46db18ac173b");
+                        request1.getHeaders()
+                                .add("STELA-Current-Local-Authority-UUID", localAuthority.getUuid());
                         return execution.execute(request1, body);
                     }));
             

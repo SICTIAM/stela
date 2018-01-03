@@ -37,7 +37,7 @@ public class AgentService {
         return agentRepository.findBySub(sub);
     }
 
-    public Agent createAndAttach(Agent agent) {
+    public Profile createAndAttach(Agent agent) {
         final String slugName = agent.getSlugName();
         LocalAuthority localAuthority =
                 localAuthorityService.getBySlugName(slugName)
@@ -50,11 +50,15 @@ public class AgentService {
             Profile profile = new Profile(localAuthority, agent, agent.isAdmin());
             profileRepository.save(profile);
             agent.getProfiles().add(profile);
-            agent = agentRepository.save(agent);
+            agentRepository.save(agent);
             localAuthority.getProfiles().add(profile);
             localAuthorityService.createOrUpdate(localAuthority);
+            return profile;
+        } else {
+            return agent.getProfiles().stream()
+                    .filter(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()))
+                    .findFirst()
+                    .get();
         }
-
-        return agent;
     }
 }
