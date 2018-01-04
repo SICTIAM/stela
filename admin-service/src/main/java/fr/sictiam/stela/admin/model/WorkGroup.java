@@ -2,12 +2,20 @@ package fr.sictiam.stela.admin.model;
 
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.model.UI.Views.WorkGroupViewChain;
+import fr.sictiam.stela.admin.model.UI.Views.WorkGroupViewPublic;
 
 //Group is reserved in Postgresql
 @Entity
@@ -17,16 +25,19 @@ public class WorkGroup {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(WorkGroupViewPublic.class)
     private String uuid;
     
     @ManyToOne
-    @JsonIgnore
+    @JsonView(Views.WorkGroupViewPrivate.class)
     private LocalAuthority localAuthority;
     
     @ManyToMany(targetEntity=Profile.class)
     @JoinTable(name = "group_to_profile")
+    @JsonView(WorkGroupViewChain.class)
     private Set<Profile> profiles;
     
+    @JsonView(WorkGroupViewPublic.class)
     private String name;    
 
     public WorkGroup() {

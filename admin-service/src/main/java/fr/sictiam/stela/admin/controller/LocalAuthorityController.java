@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.ProvisioningRequest;
 import fr.sictiam.stela.admin.model.WorkGroup;
-import fr.sictiam.stela.admin.model.UI.LocalAuthorityUI;
-import fr.sictiam.stela.admin.model.UI.ProfileUI;
-import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
+import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.OzwilloProvisioningService;
 import fr.sictiam.stela.admin.service.ProfileService;
@@ -54,18 +56,21 @@ public class LocalAuthorityController {
     }
 
     @GetMapping("/current")
-    public LocalAuthorityUI getCurrentLocalAuthority(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        return new LocalAuthorityUI(localAuthorityService.getByUuid(currentLocalAuthUuid));
+    @JsonView(Views.LocalAuthorityView.class)
+    public LocalAuthority getCurrentLocalAuthority(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        return localAuthorityService.getByUuid(currentLocalAuthUuid);
     }
 
     @GetMapping
-    public List<LocalAuthorityUI> getAllLocalAuthorities() {
-        return localAuthorityService.getAll().stream().map(LocalAuthorityUI::new).collect(Collectors.toList());
+    @JsonView(Views.LocalAuthorityView.class)
+    public List<LocalAuthority> getAllLocalAuthorities() {
+        return localAuthorityService.getAll().stream().collect(Collectors.toList());
     }
 
     @GetMapping("/{uuid}")
-    public LocalAuthorityUI getLocalAuthorityByUuid(@PathVariable String uuid) {
-        return new LocalAuthorityUI(localAuthorityService.getByUuid(uuid));
+    @JsonView(Views.LocalAuthorityView.class)
+    public LocalAuthority getLocalAuthorityByUuid(@PathVariable String uuid) {
+        return localAuthorityService.getByUuid(uuid);
     }
 
 
@@ -80,18 +85,22 @@ public class LocalAuthorityController {
     }
     
     @GetMapping("/{uuid}/agent/{agentUuid}")
-    public ProfileUI getProfile(@PathVariable String uuid, @PathVariable String agentUuid) {
-        return new ProfileUI(profileService.getByAgentAndLocalAuthority(uuid, agentUuid));
+    @JsonView(Views.ProfileView.class)
+    public Profile getProfile(@PathVariable String uuid, @PathVariable String agentUuid) {
+        return profileService.getByAgentAndLocalAuthority(uuid, agentUuid);
     }
 
     @GetMapping("/{uuid}/group")
-    public List<WorkGroupUI> getAllGroupByLocalAuthority(@PathVariable String uuid) {
-        return workGroupService.getAllByLocalAuthority(uuid).stream().map(WorkGroupUI::new).collect(Collectors.toList());
+    @JsonView(Views.WorkGroupView.class)
+    public List<WorkGroup> getAllGroupByLocalAuthority(@PathVariable String uuid) {
+        return workGroupService.getAllByLocalAuthority(uuid).stream().collect(Collectors.toList());
     }
 
     @PostMapping("/{uuid}/group")
-    public WorkGroupUI addGroup(@PathVariable String uuid, @RequestBody String groupName) {
-        return new WorkGroupUI(workGroupService.create(new WorkGroup(localAuthorityService.getByUuid(uuid), groupName)));
+    @JsonView(Views.WorkGroupView.class)
+    public WorkGroup addGroup(@PathVariable String uuid, @RequestBody String groupName) {
+        WorkGroup workGroup = workGroupService.create(new WorkGroup(localAuthorityService.getByUuid(uuid), groupName));
+        return workGroup;
     }
 
     @DeleteMapping("/{uuid}/group/{groupUuid}")

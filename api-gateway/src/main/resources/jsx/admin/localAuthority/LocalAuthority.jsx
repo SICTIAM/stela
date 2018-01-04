@@ -41,7 +41,14 @@ class LocalAuthority extends Component {
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ fields: json }))
+            .then(json =>{
+                //flaten agent properties for the table component
+                var agents = [];
+                for ( var i in json.profiles ) {
+                    agents.push( json.profiles[i].agent );
+                }
+                json.agents = agents;
+                this.setState({ fields: json })})
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)

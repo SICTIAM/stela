@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.sictiam.stela.admin.model.UI.ProfileUI;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.ProfileService;
 
 @RestController
@@ -27,9 +30,10 @@ public class ProfileController {
     public void updateGroups(@PathVariable String uuid, @RequestBody List<String> groupUuids) {
         profileService.updateGroups(uuid, groupUuids);
     }
-    
+
     @GetMapping
-    public ProfileUI getCurrentProfile(@RequestAttribute("CurrentProfile") String profile) {
-        return new ProfileUI(profileService.getByUuid(profile));
+    @JsonView(Views.ProfileView.class)
+    public Profile getCurrentProfile(@RequestAttribute("CurrentProfile") String profile) {
+        return profileService.getByUuid(profile);
     }
 }

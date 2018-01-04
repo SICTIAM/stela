@@ -1,6 +1,10 @@
 package fr.sictiam.stela.admin.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.UI.Views;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -13,21 +17,27 @@ public class LocalAuthority {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.LocalAuthorityViewPublic.class)
     private String uuid;
+    @JsonView(Views.LocalAuthorityViewPublic.class)
     private String name;
     @Column(unique = true)
+    @JsonView(Views.LocalAuthorityViewPublic.class)
     private String siren;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.LocalAuthorityViewPublic.class)
     private Set<Module> activatedModules;   
 
     @JsonIgnore
     private OzwilloInstanceInfo ozwilloInstanceInfo;
     
     @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)
+    @JsonView(Views.LocalAuthorityViewPrivate.class)
     private Set<WorkGroup> groups;
     
     @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)
+    @JsonView(Views.LocalAuthorityViewPrivate.class)
     private Set<Profile> profiles;
     
     protected LocalAuthority() {

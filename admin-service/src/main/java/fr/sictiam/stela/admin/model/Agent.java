@@ -1,15 +1,23 @@
 package fr.sictiam.stela.admin.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotEmpty;
-
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.UI.Views;
 
 @Entity
 public class Agent {
@@ -17,24 +25,30 @@ public class Agent {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.AgentViewPublic.class)
     private String uuid;
     @JsonProperty(value = "family_name")
+    @JsonView(Views.AgentViewPublic.class)
     private String familyName;
     @JsonProperty(value = "given_name")
+    @JsonView(Views.AgentViewPublic.class)
     private String givenName;
     // the sub in OpenId Connect parliance
     @NotNull
     @NotEmpty
     @Column(unique = true)
+    @JsonView(Views.AgentViewPublic.class)
     private String sub;
     @NotNull
     @NotEmpty
+    @JsonView(Views.AgentViewPublic.class)
     private String email;
     @NotNull
+    @JsonView(Views.AgentViewPublic.class)
     private Boolean admin;
 
     @OneToMany(mappedBy = "agent", fetch = FetchType.EAGER)
-    @JsonIgnore
+    @JsonView(Views.AgentViewPrivate.class)
     private Set<Profile> profiles;
 
     protected Agent() {
