@@ -232,7 +232,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         String acteUuid = response.getBody();
         
         try {
-            Thread.sleep(2000);           
+            Thread.sleep(3000);           
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }

@@ -2,7 +2,7 @@
 -- Data for Name: local_authority; Type: TABLE DATA; Schema: public; Owner: stela
 --
 
-INSERT INTO local_authority VALUES ('639fd48c-93b9-4569-a414-3b372c71e0a1', false, false, '999', '1', 'SICTIAM-Test', '31', '999888777');
+INSERT INTO local_authority VALUES ('f706fe20-e28a-4bfc-8b0e-6ee47758cf37', false, false, '999', '1', 'SICTIAM', '31', '25060187900027');
 
 
 --

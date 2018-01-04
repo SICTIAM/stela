@@ -55,6 +55,7 @@ public class AgentService {
             localAuthorityService.createOrUpdate(localAuthority);
             return profile;
         } else {
+            localAuthorityService.createOrUpdate(localAuthority);
             return agent.getProfiles().stream()
                     .filter(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()))
                     .findFirst()

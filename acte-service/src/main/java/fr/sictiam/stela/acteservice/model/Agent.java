@@ -34,6 +34,10 @@ public class Agent {
     @JsonIgnore
     private Set<Profile> profiles;
     
+    @Transient
+    @JsonProperty(value = "slug_name")
+    private String slugName;
+
     protected Agent() {
     }
 
@@ -94,6 +98,14 @@ public class Agent {
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
+    }
+    
+    public String getSlugName() {
+        return slugName;
+    }
+
+    public void setSlugName(String slugName) {
+        this.slugName = slugName;
     }
     
     @Override
