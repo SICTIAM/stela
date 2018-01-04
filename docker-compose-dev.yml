@@ -24,9 +24,6 @@ services:
      - "8888:8888"
     volumes:
      - ../stela-config:/stela-config
-    depends_on:
-     - postgresql
-     - rabbitmq
     environment:
       - "SPRING_PROFILES_ACTIVE=native"
   discovery:
@@ -54,4 +51,28 @@ services:
      - config
      - discovery
     environment:
-     - "SPRING_PROFILES_ACTIVE=prod"
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+  admin-service:
+    image: stela-poc/admin-service
+    container_name: admin-service
+    ports:
+     - "9006:9006"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+  acte-service:
+    image: stela-poc/acte-service
+    container_name: acte-service
+    ports:
+     - "9008:9008"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"

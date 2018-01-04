@@ -3,10 +3,12 @@ package fr.sictiam.stela.admin.service;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.slugify.Slugify;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.ProvisioningRequest;
-import org.apache.commons.lang3.StringUtils;
+import fr.sictiam.stela.admin.model.StatusChangeRequest;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @EnableConfigurationProperties(OzwilloProvisioningService.OzwilloServiceProperties.class)
@@ -69,8 +73,11 @@ public class OzwilloProvisioningService {
         }
     }
 
-    @Value("${application.host.suffix}")
-    private String hostSuffix;
+    @Value("${application.url}")
+    private String applicationUrl;
+
+    @Value("${application.urlWithSlug}")
+    private String applicationUrlWithSlug;
 
     private final LocalAuthorityService localAuthorityService;
     private final OzwilloServiceProperties ozwilloServiceProperties;
@@ -84,6 +91,11 @@ public class OzwilloProvisioningService {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Handle Ozwillo request to create a new instance.
+     *
+     * See http://doc.ozwillo.com/#s3-1-ozwillo-request for full details.
+     */
     public void createNewInstance(ProvisioningRequest provisioningRequest) {
 
         String dcId = provisioningRequest.getOrganization().getDcId();
@@ -91,18 +103,26 @@ public class OzwilloProvisioningService {
         String siret = dcId.substring(dcId.lastIndexOf('/') + 1);
         if (localAuthorityService.findBySiren(siret).isPresent())
             throw new EntityExistsException("There already exists a local authority with SIRET " + siret);
-        LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siret);
+        String slugName = new Slugify().slugify(provisioningRequest.getOrganization().getName());
+        LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siret, slugName);
         OzwilloInstanceInfo ozwilloInstanceInfo = new OzwilloInstanceInfo(provisioningRequest.getInstanceId(),
                 provisioningRequest.getClientId(), provisioningRequest.getClientSecret(),
                 provisioningRequest.getInstanceRegistrationUri(), provisioningRequest.getUser().getId(),
-                provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getId(),
-                provisioningRequest.getOrganization().getDcId());
+                provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getDcId());
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
         localAuthorityService.createOrUpdate(localAuthority);
 
-        notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo);
+        CompletableFuture.runAsync(() -> notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo));
     }
 
+    /**
+     * Provider acknoledgement sent to Ozwillo's kernel.
+     *
+     * A sample response is like this :
+     * {"instance_id":"bce53130-af7d-44a0-8a87-291a37f22e4c","destruction_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/delete","destruction_secret":"secret","status_changed_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/status","status_changed_secret":"secret","services":[{"local_id":"back-office","name":"STELA - SICTIAM","description":"Tiers de télétransmission","tos_uri":"https://stela.fr/tos","policy_uri":"https://stela.fr/policy","icon":"https://stela.fr/icon.png","contacts":["admin@stela.fr","demat@sictiam.fr"],"payment_option":"PAID","target_audience":"PUBLIC_BODY","visibility":"VISIBLE","access_control":"RESTRICTED","service_uri":"https://sictiam.stela3-dev.sictiam.fr/login","redirect_uris":["https://sictiam.stela3-dev.sictiam.fr/login"]}]}
+     *
+     * See http://doc.ozwillo.com/#s3-3-provider-acknowledgement for full details.
+     */
     private void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo) {
         HttpHeaders httpHeaders = new HttpHeaders();
         String clientInfo = provisioningRequest.getClientId() + ":" + provisioningRequest.getClientSecret();
@@ -120,7 +140,7 @@ public class OzwilloProvisioningService {
 
         HttpEntity<KernelInstanceRegistrationRequest> request = new HttpEntity<>(kernelInstanceRegistrationRequest, httpHeaders);
         ResponseEntity<String> response =
-                restTemplate.exchange(provisioningRequest.getInstanceRegistrationUri(), HttpMethod.POST, request, String.class);
+                restTemplate.postForEntity(provisioningRequest.getInstanceRegistrationUri(), request, String.class);
 
         if (response.getStatusCode().is4xxClientError()) {
             LOGGER.error("Error while acknowledging instanciation response : {}", response.getBody());
@@ -143,6 +163,25 @@ public class OzwilloProvisioningService {
         }
     }
 
+    /**
+     * Handle status change of an instance.
+     *
+     * See http://doc.ozwillo.com/#s3-status-change for full details.
+     */
+    public void changeInstanceStatus(StatusChangeRequest statusChangeRequest) {
+        Optional<LocalAuthority> optionalLocalAuthority = localAuthorityService.getByInstanceId(statusChangeRequest.getInstanceId());
+        if (!optionalLocalAuthority.isPresent())
+            throw new NotFoundException("No local authority found for instance id : " + statusChangeRequest.getInstanceId());
+
+        LocalAuthority localAuthority = optionalLocalAuthority.get();
+        switch (statusChangeRequest.getStatus()) {
+            case "STOPPED": localAuthority.setStatus(LocalAuthority.Status.STOPPED);
+            case "RUNNING": localAuthority.setStatus(LocalAuthority.Status.RUNNING);
+        }
+
+        localAuthorityService.modify(localAuthority);
+    }
+
     private class KernelInstanceRegistrationRequest {
         @JsonProperty("instance_id")
         private String instanceId;
@@ -154,16 +193,17 @@ public class OzwilloProvisioningService {
         private String statusChangedUri;
         @JsonProperty("status_changed_secret")
         private String statusChangedSecret;
-        private Service service;
+        @JsonProperty("services")
+        private List<Service> services;
 
-        public KernelInstanceRegistrationRequest(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
-                                                 OzwilloServiceProperties ozwilloServiceProperties) {
+        KernelInstanceRegistrationRequest(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo,
+                                          OzwilloServiceProperties ozwilloServiceProperties) {
             this.instanceId = ozwilloInstanceInfo.getInstanceId();
-            this.destructionUri = getInstanceUri(provisioningRequest.getOrganization().getName(), "ozwillo/delete");
+            this.destructionUri = applicationUrl + "/api/admin/ozwillo/delete";
             this.destructionSecret = ozwilloInstanceInfo.getDestructionSecret();
-            this.statusChangedUri = getInstanceUri(provisioningRequest.getOrganization().getName(), "ozwillo/status");
+            this.statusChangedUri = applicationUrl + "/api/admin/ozwillo/status";
             this.statusChangedSecret = ozwilloInstanceInfo.getStatusChangedSecret();
-            this.service = new Service(ozwilloServiceProperties, provisioningRequest.getOrganization());
+            this.services = Collections.singletonList(new Service(ozwilloServiceProperties, provisioningRequest.getOrganization()));
         }
 
         @Override
@@ -174,25 +214,30 @@ public class OzwilloProvisioningService {
                     ", destructionSecret='" + destructionSecret + '\'' +
                     ", statusChangedUri='" + statusChangedUri + '\'' +
                     ", statusChangedSecret='" + statusChangedSecret + '\'' +
-                    ", service=" + service +
+                    ", services=" + services +
                     '}';
         }
 
         private class Service {
             @JsonProperty("local_id")
             private String localId;
+            @JsonProperty("name")
             private String name;
+            @JsonProperty("description")
             private String description;
             @JsonProperty("tos_uri")
             private String tosUri;
             @JsonProperty("policy_uri")
             private String policyUri;
+            @JsonProperty("icon")
             private String icon;
+            @JsonProperty("contacts")
             private List<String> contacts;
             @JsonProperty("payment_option")
             private String paymentOption;
             @JsonProperty("target_audience")
-            private String targetAudience;
+            private List<String> targetAudience;
+            @JsonProperty("visibility")
             private String visibility;
             @JsonProperty("access_control")
             private String accessControl;
@@ -201,7 +246,7 @@ public class OzwilloProvisioningService {
             @JsonProperty("redirect_uris")
             private List<String> redirectUris;
 
-            public Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest.Organization organization) {
+            Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest.Organization organization) {
                 this.localId = ozwilloServiceProperties.localId;
                 this.name = ozwilloServiceProperties.name + " - " + organization.getName();
                 this.description = ozwilloServiceProperties.description;
@@ -210,11 +255,12 @@ public class OzwilloProvisioningService {
                 this.icon = ozwilloServiceProperties.icon;
                 this.contacts = ozwilloServiceProperties.contacts;
                 this.paymentOption = "PAID";
-                this.targetAudience = "PUBLIC_BODY";
+                this.targetAudience = Collections.singletonList("PUBLIC_BODIES");
                 this.visibility = "VISIBLE";
                 this.accessControl = "RESTRICTED";
-                this.serviceUri = getInstanceUri(organization.getName(), "login");
-                this.redirectUris = Collections.singletonList(getInstanceUri(organization.getName(), "login"));
+                String applicationInstanceUrl = applicationUrlWithSlug.replace("%SLUG%", new Slugify().slugify(organization.getName()));
+                this.serviceUri = applicationInstanceUrl + "/login";
+                this.redirectUris = Collections.singletonList(applicationInstanceUrl + "/callback");
             }
 
             @Override
@@ -236,10 +282,5 @@ public class OzwilloProvisioningService {
                         '}';
             }
         }
-    }
-
-    private String getInstanceUri(String organizationName, String uriPath) {
-        String organizationNameForSubdomain = StringUtils.replacePattern(organizationName, "[^a-zA-Z]+", "").toLowerCase();
-        return String.format("https://%s.%s/%s", organizationNameForSubdomain, hostSuffix, uriPath);
     }
 }

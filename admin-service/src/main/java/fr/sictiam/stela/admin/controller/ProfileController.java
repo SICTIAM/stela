@@ -2,6 +2,8 @@ package fr.sictiam.stela.admin.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -33,7 +35,12 @@ public class ProfileController {
 
     @GetMapping
     @JsonView(Views.ProfileView.class)
-    public Profile getCurrentProfile(@RequestAttribute("CurrentProfile") String profile) {
+    public Profile getCurrentProfile(@RequestAttribute("STELA-Current-Profile") String profile) {
         return profileService.getByUuid(profile);
+    }
+
+    @GetMapping("/{uuid}/slug")
+    public String getSlugForProfile(@PathVariable String uuid) {
+        return profileService.getByUuid(uuid).getLocalAuthority().getSlugName();
     }
 }

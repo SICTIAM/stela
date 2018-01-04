@@ -2,6 +2,9 @@ package fr.sictiam.stela.apigateway.config.filter;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+
+import fr.sictiam.stela.apigateway.model.StelaUserInfo;
+
 import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +38,11 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
     public Object run() {
         LOGGER.debug("Adding Authorization header to downstream request");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
         RequestContext ctx = RequestContext.getCurrentContext();
-        ctx.addZuulRequestHeader("Authorization", "Bearer " + ((OpenIdCAuthentication)authentication).getAccessToken());
-        ctx.addZuulRequestHeader("sub", ((OpenIdCAuthentication)authentication).getUserInfo().getUserId());
+        ctx.addZuulRequestHeader("Authorization", "Bearer " + authenticationOpen.getAccessToken());
+        ctx.addZuulRequestHeader("STELA-Sub", authenticationOpen.getUserInfo().getUserId());
+        ctx.addZuulRequestHeader("STELA-Active-Profile",((StelaUserInfo) authenticationOpen.getUserInfo()).getCurrentProfile());
         return null;
     }
 }

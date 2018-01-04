@@ -2,16 +2,18 @@ package fr.sictiam.stela.admin.model;
 
 import java.util.Set;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
-
-import fr.sictiam.stela.admin.model.UI.Views;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import fr.sictiam.stela.admin.model.UI.Views;
 
 @Entity
 public class Profile {

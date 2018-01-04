@@ -86,11 +86,19 @@ public class LocalAuthorityService {
         return localAuthorityRepository.findByUuid(uuid).orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_not_found"));
     }
 
+    public Optional<LocalAuthority> getBySlugName(String slugName) {
+        return localAuthorityRepository.findBySlugName(slugName);
+    }
+
     public Optional<LocalAuthority> findByName(String name) {
         return localAuthorityRepository.findByName(name);
     }
 
     public Optional<LocalAuthority> findBySiren(String siren) {
         return localAuthorityRepository.findBySiren(siren);
+    }
+
+    public Optional<LocalAuthority> getByInstanceId(String instanceId) {
+        return localAuthorityRepository.findByOzwilloInstanceInfo_InstanceId(instanceId);
     }
 }

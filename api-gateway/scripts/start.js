@@ -204,7 +204,13 @@ function addMiddleware(devServer) {
       secure: false,
       changeOrigin: true,
       ws: true,
-      xfwd: true
+      xfwd: true,
+      router: {
+          // let's say we will make multi local authorities with Valbonne (and the default SICTIAM one)
+          // if another is needed, just add it here
+          // TODO : check if a regexp matcher syntax can be used to avoid editing this file
+          'commune-de-valbonne.stela3.localtest.me:3000' : 'http://commune-de-valbonne.stela3.localtest.me:9004'
+      }
     });
     devServer.use(mayProxy, hpm);
 
@@ -284,7 +290,7 @@ function runDevServer(host, port, protocol) {
 
 function run(port) {
   var protocol = process.env.HTTPS === 'true' ? "https" : "http";
-  var host = process.env.HOST || 'localhost';
+  var host = process.env.HOST || 'sictiam.stela3.localtest.me';
   setupCompiler(host, port, protocol);
   runDevServer(host, port, protocol);
 }

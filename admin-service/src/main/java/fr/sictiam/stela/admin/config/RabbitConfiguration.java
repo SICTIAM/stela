@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(value = "application.rabbit.enabled")
 public class RabbitConfiguration {
 
-    @Value("${spring.rabbitmq.hostname}")
+    @Value("${spring.rabbitmq.host}")
     private String hostname;
 
     @Value("${spring.rabbitmq.username}")

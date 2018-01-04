@@ -37,7 +37,7 @@ public class Views {
 
     }
 
-    public interface AgentView extends AgentViewPublic, AgentViewPrivate {
+    public interface AgentView extends AgentViewPublic, AgentViewPrivate, LocalAuthorityViewPublic, ProfileViewPublic {
 
     }
 

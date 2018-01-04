@@ -12,39 +12,71 @@ class TopBar extends Component {
     }
     state = {
         isUpdated: false,
-        fields: {
+        current: {
             agent: {
                 family_name: '',
                 given_name: '',
                 email: '',
+            },
+            uuid: '',
+            localAuthority: {
+                name: ''
             }
-        }
+        },
+        profiles: []
     }
     refreshUser() {
-        fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => {
-                this.setState({ fields: json, isUpdated: true })
-            })
-            .catch(response => {
-                response.json().then(json => {
+        fetchWithAuthzHandling( { url: '/api/admin/profile' } )
+            .then( checkStatus )
+            .then( response => response.json() )
+            .then( json => {
+                this.setState( { current: json, isUpdated: true } )
+            } )
+            .catch( response => {
+                response.json().then( json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                })
-            })
+                } )
+            } )
+        fetchWithAuthzHandling( { url: '/api/admin/agent' } )
+            .then( checkStatus )
+            .then( response => response.json() )
+            .then( json => {
+                this.setState( { profiles: json.profiles } )
+            } )
+            .catch( response => {
+                response.json().then( json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                } )
+            } )
     }
     render() {
         const { isLoggedIn, t } = this.context
-        if (isLoggedIn && !this.state.isUpdated) this.refreshUser()
+
+        const listProfile = this.state.profiles.map(( item, index ) => {
+            if ( item.uuid !== this.state.current.uuid )
+                return <Dropdown.Item onClick={() => window.location.href = '/api/api-gateway/switch/' + item.uuid} value={item.uuid}>{item.localAuthority.name}</Dropdown.Item>
+        })
+
+        if ( isLoggedIn && !this.state.isUpdated ) {
+            this.refreshUser()
+        }
         return (
             <Menu className='topBar' fixed='top' secondary>
                 <Container>
                     <Menu.Menu position='right'>
+
                         {isLoggedIn &&
-                            <Dropdown item text={`${this.state.fields.agent.given_name} ${this.state.fields.agent.family_name}`}>
+                            <Dropdown item text={`${this.state.current.agent.given_name} ${this.state.current.agent.family_name}`}>
                                 <Dropdown.Menu>
                                     <Dropdown.Item>{t('top_bar.params')}</Dropdown.Item>
                                     <Dropdown.Item onClick={() => window.location.href = '/logout'}>{t('top_bar.log_out')}</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        }
+                        {isLoggedIn &&
+                            <Dropdown item text={`${this.state.current.localAuthority.name}`}>
+                                <Dropdown.Menu>
+                                    {listProfile}
                                 </Dropdown.Menu>
                             </Dropdown>
                         }
@@ -53,6 +85,7 @@ class TopBar extends Component {
                                 <Button primary onClick={() => window.location.href = '/login'}>{t('top_bar.log_in')}</Button>
                             </Menu.Item>
                         }
+
                     </Menu.Menu>
                 </Container>
             </Menu>

@@ -21,9 +21,15 @@ public class LocalAuthority {
     private String uuid;
     @JsonView(Views.LocalAuthorityViewPublic.class)
     private String name;
+    // the slug name used in local authority's domain name, eg <valbonne>.stela.fr
+    @Column(unique = true)
+    private String slugName;
     @Column(unique = true)
     @JsonView(Views.LocalAuthorityViewPublic.class)
     private String siren;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 12)
+    private Status status;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @JsonView(Views.LocalAuthorityViewPublic.class)
@@ -44,9 +50,11 @@ public class LocalAuthority {
         this.activatedModules = new HashSet<>();
     }
 
-    public LocalAuthority(String name, String siren) {
+    public LocalAuthority(String name, String siren, String slugName) {
         this.name = name;
         this.siren = siren;
+        this.slugName = slugName;
+        this.status = Status.RUNNING;
         this.activatedModules = new HashSet<>();
     }
 
@@ -56,6 +64,10 @@ public class LocalAuthority {
 
     public String getName() {
         return name;
+    }
+
+    public String getSlugName() {
+        return slugName;
     }
 
     public void setName(String name) {
@@ -68,6 +80,14 @@ public class LocalAuthority {
 
     public void setSiren(String siren) {
         this.siren = siren;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Set<Module> getActivatedModules() {
@@ -117,5 +137,10 @@ public class LocalAuthority {
                 ", name='" + name + '\'' +
                 ", siren='" + siren + '\'' +
                 '}';
+    }
+
+    public enum Status {
+        RUNNING,
+        STOPPED
     }
 }

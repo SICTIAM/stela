@@ -28,7 +28,6 @@ import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
-import org.hamcrest.Matchers;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AdminServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -50,9 +49,9 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
 
     @Before
     public void beforeTests() {
-        LocalAuthority localAuthority = new LocalAuthority("Test", "368569321");
+        LocalAuthority localAuthority = new LocalAuthority("Test", "368569321", "test");
         localAuthority.addModule(Module.ACTES);
-        OzwilloInstanceInfo ow=new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test", "test");
+        OzwilloInstanceInfo ow=new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test");
         localAuthority.setOzwilloInstanceInfo(ow);
         localAuthority =localAuthorityService.createOrUpdate(localAuthority);
         WorkGroup workGroup = workGroupService.create(new WorkGroup(localAuthority, "GlobalGroup"));
@@ -63,7 +62,7 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
         Agent agent = new Agent("John", "Doe", "john.doe@fbi.fr");
         agent.setSub("sub");
         agent.setAdmin(false);
-        agent = agentService.create(agent);
+        agent = agentService.createAndAttach(agent).getAgent();
         
         Profile profile = profileService.create(new Profile(localAuthority, agent, false));
         Set<Profile> profiles = new HashSet<>();
