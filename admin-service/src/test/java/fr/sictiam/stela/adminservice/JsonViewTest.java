@@ -1,22 +1,17 @@
 package fr.sictiam.stela.adminservice;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 
 import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.LocalAuthority;
@@ -34,9 +29,9 @@ public class JsonViewTest {
     public void testLocalAuthView() throws IOException {
         
         
-        LocalAuthority localAuthority = new LocalAuthority("Test", "368569321");
+        LocalAuthority localAuthority = new LocalAuthority("Test", "368569321", "test");
         localAuthority.addModule(Module.ACTES);
-        OzwilloInstanceInfo ow=new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test", "test");
+        OzwilloInstanceInfo ow=new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test");
         localAuthority.setOzwilloInstanceInfo(ow);
         WorkGroup workGroup = new WorkGroup(localAuthority, "GlobalGroup");
         Set<WorkGroup> groups = new HashSet<>();

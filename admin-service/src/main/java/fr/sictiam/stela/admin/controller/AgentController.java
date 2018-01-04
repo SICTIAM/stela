@@ -31,7 +31,7 @@ public class AgentController {
     }
     
     @GetMapping
-    @JsonView(Views.AgentViewPublic.class)
+    @JsonView(Views.AgentView.class)
     public Agent getCurrent(@RequestHeader("STELA-Sub") String sub) {
         return agentService.findBySub(sub).get();
     }

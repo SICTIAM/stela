@@ -41,7 +41,6 @@ class TopBar extends Component {
             .then( checkStatus )
             .then( response => response.json() )
             .then( json => {
-                console.log( json )
                 this.setState( { profiles: json.profiles } )
             } )
             .catch( response => {
