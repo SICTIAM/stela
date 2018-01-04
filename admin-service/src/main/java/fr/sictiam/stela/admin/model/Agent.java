@@ -113,6 +113,10 @@ public class Agent {
     public String getSlugName() {
         return slugName;
     }
+    
+    public void setSlugName(String slugName) {
+        this.slugName = slugName;
+    }
 
     public Set<Profile> getProfiles() {
         return profiles != null ? profiles : new HashSet<>();

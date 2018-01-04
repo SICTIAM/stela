@@ -42,21 +42,27 @@ public class AgentService {
         LocalAuthority localAuthority =
                 localAuthorityService.getBySlugName(slugName)
                         .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
-        agent = createIfNotExists(agent);
-
+        Agent agentFetched = createIfNotExists(agent);
+        
+        agentFetched.setAdmin(agent.isAdmin());
+        agentFetched.setFamilyName(agent.getFamilyName());
+        agentFetched.setGivenName(agent.getGivenName());
+        agentFetched.setEmail(agent.getEmail());
+        
         boolean hasProfileOnLocalAuthority =
-                agent.getProfiles().stream().anyMatch(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()));
+                agentFetched.getProfiles().stream().anyMatch(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()));
         if (!hasProfileOnLocalAuthority) {
-            Profile profile = new Profile(localAuthority, agent, agent.isAdmin());
+            Profile profile = new Profile(localAuthority, agentFetched, agentFetched.isAdmin());
             profileRepository.save(profile);
-            agent.getProfiles().add(profile);
-            agentRepository.save(agent);
+            agentFetched.getProfiles().add(profile);
+            agentRepository.save(agentFetched);
             localAuthority.getProfiles().add(profile);
             localAuthorityService.createOrUpdate(localAuthority);
             return profile;
         } else {
+            agentRepository.save(agentFetched);
             localAuthorityService.createOrUpdate(localAuthority);
-            return agent.getProfiles().stream()
+            return agentFetched.getProfiles().stream()
                     .filter(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()))
                     .findFirst()
                     .get();
