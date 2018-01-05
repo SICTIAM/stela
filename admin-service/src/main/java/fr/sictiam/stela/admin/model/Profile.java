@@ -29,7 +29,7 @@ public class Profile {
     private LocalAuthority localAuthority;
     
     @ManyToOne
-    @JsonView(Views.ProfileViewPublic.class)
+    @JsonView(Views.ProfileViewChain.class)
     private Agent agent;
     
     @JsonView(Views.ProfileViewPublic.class)

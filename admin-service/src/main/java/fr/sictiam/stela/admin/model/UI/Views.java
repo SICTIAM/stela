@@ -1,18 +1,19 @@
 package fr.sictiam.stela.admin.model.UI;
 
 public class Views {
-    public interface LocalAuthorityView extends LocalAuthorityViewPrivate, LocalAuthorityViewPublic, WorkGroupViewPublic, WorkGroupViewChain, ProfileViewPublic, AgentViewPublic {
+    public interface LocalAuthorityView extends LocalAuthorityViewPrivate, LocalAuthorityViewPublic,
+            WorkGroupViewPublic, WorkGroupViewChain, ProfileViewPublic, ProfileViewChain, AgentViewPublic {
 
     }
-    
+
     public interface LocalAuthorityViewPublic {
 
     }
-    
+
     public interface LocalAuthorityViewPrivate {
 
     }
-    
+
     public interface WorkGroupView extends WorkGroupViewPublic, WorkGroupViewPrivate, WorkGroupViewChain {
     }
 
@@ -21,11 +22,12 @@ public class Views {
 
     public interface WorkGroupViewPrivate {
     }
-    
+
     public interface WorkGroupViewChain {
     }
 
-    public interface ProfileView extends ProfileViewPublic, ProfileViewPrivate, LocalAuthorityViewPublic, WorkGroupViewPublic, AgentViewPublic {
+    public interface ProfileView extends ProfileViewPublic, ProfileViewPrivate, ProfileViewChain,
+            LocalAuthorityViewPublic, WorkGroupViewPublic, AgentViewPublic {
 
     }
 
@@ -37,7 +39,12 @@ public class Views {
 
     }
 
-    public interface AgentView extends AgentViewPublic, AgentViewPrivate, LocalAuthorityViewPublic, ProfileViewPublic {
+    public interface ProfileViewChain {
+
+    }
+
+    public interface AgentView
+            extends AgentViewPublic, AgentViewPrivate, LocalAuthorityViewPublic, ProfileViewPublic, ProfileViewPrivate {
 
     }
 
