@@ -43,7 +43,10 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
         http
                 .addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
+                    .antMatchers("/api/admin/local-authority/all-basic").permitAll()
                     .antMatchers("/api/admin/ozwillo/**").permitAll()
+                    .antMatchers("/api/api-gateway/isLocalAuthorityInstance").permitAll()
+                    .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
                     .antMatchers("/api/*/locales/**").permitAll()
                     .antMatchers("/api/**").authenticated().and()
                 .csrf()

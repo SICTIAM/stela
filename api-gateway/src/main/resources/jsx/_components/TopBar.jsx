@@ -2,8 +2,10 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Menu, Dropdown, Container } from 'semantic-ui-react'
+
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import history from '../_util/history'
 
 class TopBar extends Component {
     static contextTypes = {
@@ -11,6 +13,7 @@ class TopBar extends Component {
         t: PropTypes.func
     }
     state = {
+        isLocalAuthorityInstance: false,
         isUpdated: false,
         current: {
             agent: {
@@ -25,39 +28,46 @@ class TopBar extends Component {
         },
         profiles: []
     }
-    refreshUser() {
-        fetchWithAuthzHandling( { url: '/api/admin/profile' } )
-            .then( checkStatus )
-            .then( response => response.json() )
-            .then( json => {
-                this.setState( { current: json, isUpdated: true } )
-            } )
-            .catch( response => {
-                response.json().then( json => {
+    componentDidMount() {
+        fetchWithAuthzHandling({ url: '/api/api-gateway/isLocalAuthorityInstance' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(isLocalAuthorityInstance => this.setState({ isLocalAuthorityInstance }))
+    }
+    refreshUser = () => {
+        fetchWithAuthzHandling({ url: '/api/admin/profile' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ current: json, isUpdated: true })
+            })
+            .catch(response => {
+                response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                } )
-            } )
-        fetchWithAuthzHandling( { url: '/api/admin/agent' } )
-            .then( checkStatus )
-            .then( response => response.json() )
-            .then( json => {
-                this.setState( { profiles: json.profiles } )
-            } )
-            .catch( response => {
-                response.json().then( json => {
+                })
+            })
+        fetchWithAuthzHandling({ url: '/api/admin/agent' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ profiles: json.profiles })
+            })
+            .catch(response => {
+                response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                } )
-            } )
+                })
+            })
+    }
+    login = () => {
+        if (this.state.isLocalAuthorityInstance) window.location.href = '/login'
+        else history.push('/choix-collectivite')
     }
     render() {
         const { isLoggedIn, t } = this.context
-
-        const listProfile = this.state.profiles.map(( item, index ) => {
-            if ( item.uuid !== this.state.current.uuid )
-                return <Dropdown.Item onClick={() => window.location.href = '/api/api-gateway/switch/' + item.uuid} value={item.uuid}>{item.localAuthority.name}</Dropdown.Item>
-        })
-
-        if ( isLoggedIn && !this.state.isUpdated ) {
+        const listProfile = this.state.profiles.map((item, index) => item.uuid !== this.state.current.uuid &&
+            <Dropdown.Item onClick={() => window.location.href = '/api/api-gateway/switch/' + item.uuid} value={item.uuid}>{item.localAuthority.name}</Dropdown.Item>
+        )
+        if (isLoggedIn && !this.state.isUpdated) {
             this.refreshUser()
         }
         return (
@@ -82,7 +92,7 @@ class TopBar extends Component {
                         }
                         {!isLoggedIn &&
                             <Menu.Item>
-                                <Button primary onClick={() => window.location.href = '/login'}>{t('top_bar.log_in')}</Button>
+                                <Button primary onClick={this.login}>{t('top_bar.log_in')}</Button>
                             </Menu.Item>
                         }
 

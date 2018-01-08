@@ -1,7 +1,6 @@
 package fr.sictiam.stela.admin.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +57,13 @@ public class LocalAuthorityController {
     @GetMapping
     @JsonView(Views.LocalAuthorityView.class)
     public List<LocalAuthority> getAllLocalAuthorities() {
-        return localAuthorityService.getAll().stream().collect(Collectors.toList());
+        return localAuthorityService.getAll();
+    }
+
+    @GetMapping("/all-basic")
+    @JsonView(Views.LocalAuthorityViewBasic.class)
+    public List<LocalAuthority> getAllBasicLocalAuthorities() {
+        return localAuthorityService.getAll();
     }
 
     @GetMapping("/{uuid}")
@@ -97,7 +102,7 @@ public class LocalAuthorityController {
     @GetMapping("/{uuid}/group")
     @JsonView(Views.WorkGroupView.class)
     public List<WorkGroup> getAllGroupByLocalAuthority(@PathVariable String uuid) {
-        return workGroupService.getAllByLocalAuthority(uuid).stream().collect(Collectors.toList());
+        return workGroupService.getAllByLocalAuthority(uuid);
     }
 
     @PostMapping("/{uuid}/group")

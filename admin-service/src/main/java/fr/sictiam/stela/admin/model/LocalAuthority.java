@@ -17,15 +17,16 @@ public class LocalAuthority {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.LocalAuthorityViewPublic.class)
+    @JsonView(Views.LocalAuthorityViewBasic.class)
     private String uuid;
-    @JsonView(Views.LocalAuthorityViewPublic.class)
+    @JsonView(Views.LocalAuthorityViewBasic.class)
     private String name;
     // the slug name used in local authority's domain name, eg <valbonne>.stela.fr
+    @JsonView(Views.LocalAuthorityViewBasic.class)
     @Column(unique = true)
     private String slugName;
     @Column(unique = true)
-    @JsonView(Views.LocalAuthorityViewPublic.class)
+    @JsonView(Views.LocalAuthorityViewBasic.class)
     private String siren;
     @Enumerated(EnumType.STRING)
     @Column(length = 12)
