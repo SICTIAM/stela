@@ -4,6 +4,7 @@ import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.oasis_eu.spring.kernel.security.StaticOpenIdCConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -20,6 +21,9 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
 
     @Autowired
     private HttpServletRequest request;
+
+    @Value("${application.urlWithSlug}")
+    private String applicationUrlWithSlug;
 
     @Override
     public boolean requireAuthenticationForPath(String path) {
@@ -48,7 +52,7 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
 
     @Override
     public String getCallbackUri() {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/callback";
+        return applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromRequest(request)) + "/callback";
     }
 
     private LocalAuthorityInstance findLocalAuthorityInstance() {

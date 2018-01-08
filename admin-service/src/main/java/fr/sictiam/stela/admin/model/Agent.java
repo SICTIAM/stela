@@ -47,8 +47,6 @@ public class Agent {
     @NotNull
     @JsonView(Views.AgentViewPublic.class)
     private Boolean admin;
-    @NotNull
-    @NotEmpty
     @Transient
     @JsonProperty(value = "slug_name")
     private String slugName;
