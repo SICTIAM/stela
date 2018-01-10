@@ -8,7 +8,10 @@ import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.client.RestTemplate;
@@ -28,7 +31,7 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
     public StelaAuthenticationSuccessHandler(String applicationUrlWithSlug) {
         this.applicationUrlWithSlug = applicationUrlWithSlug;
     }
-
+        
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
@@ -43,13 +46,12 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
                     SlugUtils.getSlugNameFromRequest(request));
             ResponseEntity<String> agentProfile =
                     restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent", agent, String.class);
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode node = objectMapper.readTree(agentProfile.getBody());
+
+            String token = agentProfile.getBody();
 
             StelaUserInfo stelaUserInfo = StelaUserInfo.from(((OpenIdCAuthentication) authentication).getUserInfo());
-            stelaUserInfo.setCurrentProfile(node.get("uuid").asText());
+            stelaUserInfo.setStelaToken(token);
             authenticationOpen.setUserInfo(stelaUserInfo);
-
             // Hard redirect on configured slugified application's URL
             // Kind of a hack since back end and front end are two different apps in dev profile
             //   and the backend has no other way to know where is the front end

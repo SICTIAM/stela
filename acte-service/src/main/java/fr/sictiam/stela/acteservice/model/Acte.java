@@ -68,8 +68,9 @@ public class Acte {
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Draft draft;
     
-    @ManyToOne
-    private Profile profile;
+    private String profileUuid;
+    
+    private String groupUuid;
 
     public Acte() {
     }
@@ -200,13 +201,20 @@ public class Acte {
         this.draft = draft;
     }
     
-    
-    public Profile getProfile() {
-        return profile;
+    public String getProfileUuid() {
+        return profileUuid;
     }
 
-    public void setProfile(Profile profile) {
-        this.profile = profile;
+    public void setProfileUuid(String profileUuid) {
+        this.profileUuid = profileUuid;
+    }
+
+    public String getGroupUuid() {
+        return groupUuid;
+    }
+
+    public void setGroupUuid(String groupUuid) {
+        this.groupUuid = groupUuid;
     }
 
     public boolean empty() {

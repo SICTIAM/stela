@@ -19,6 +19,8 @@ dependencies {
     compile('net.sf.supercsv:super-csv:2.4.0')
     compile('org.apache.pdfbox:pdfbox:2.0.8')
     compile('org.apache.pdfbox:pdfbox-tools:2.0.8')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

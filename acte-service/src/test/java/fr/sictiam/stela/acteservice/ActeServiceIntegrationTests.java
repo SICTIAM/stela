@@ -19,12 +19,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -40,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -63,13 +63,10 @@ import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeMode;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Admin;
-import fr.sictiam.stela.acteservice.model.Agent;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.Profile;
 import fr.sictiam.stela.acteservice.model.StatusType;
-import fr.sictiam.stela.acteservice.model.WorkGroup;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.event.Module;
@@ -80,6 +77,8 @@ import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.LocalesService;
 import fr.sictiam.stela.acteservice.service.NotificationService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 
 @RunWith(SpringRunner.class)
@@ -87,7 +86,10 @@ import fr.sictiam.stela.acteservice.service.NotificationService;
 public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeServiceIntegrationTests.class);
-
+    
+    @Value("${application.jwt.secret}")
+    String SECRET;
+    
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -145,32 +147,20 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             }
             LocalAuthority localAuthorityCreated =localAuthorityService.createOrUpdate(localAuthority);
             localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
-            
-            WorkGroup workGroup =new WorkGroup("42a0076e-e941-4b5f-afe7-58cc293f2db4", localAuthorityCreated, "GlobalGroup");
-            Set<WorkGroup> groups = new HashSet<>();
-            groups.add(workGroup);
-            localAuthorityCreated.setGroups(groups);
-            
-            Agent agent = new Agent("b0deb0ab-70d3-4b76-b14b-ab88cdaf7701","John", "Doe", "john.doe@fbi.fr");
-            agent.setSub("4f146466-ea58-4e5c-851c-46db18ac173b");
-            agent.setAdmin(false);
-            
-            
-            Profile profile =new Profile("6f179af3-0b92-4383-9510-e9b24c91ae47", localAuthorityCreated, agent, false);
-            Set<Profile> profiles = new HashSet<>();
-            profiles.add(profile);
-            agent.setProfiles(profiles);
-            localAuthorityCreated.getGroups().add(workGroup);
-            localAuthorityCreated.setProfiles(profiles);
-            
+                    
             localAuthorityService.createOrUpdate(localAuthorityCreated);
             
-            this.restTemplate.getRestTemplate().setInterceptors(
-                    Collections.singletonList((request1, body, execution) -> {
-                        request1.getHeaders()
-                                .add("STELA-Sub", "4f146466-ea58-4e5c-851c-46db18ac173b");
-                        request1.getHeaders()
-                                .add("STELA-Current-Local-Authority-UUID", localAuthority.getUuid());
+            this.restTemplate.getRestTemplate()
+                    .setInterceptors(Collections.singletonList((request1, body, execution) -> {
+
+                        String jwtToken = Jwts.builder().setSubject(
+                                "{\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\",\"localAuthority\":{\"uuid\":\""
+                                        + localAuthority.getUuid() + "\"}}")
+                                .setExpiration(new Date(System.currentTimeMillis() + 500000))
+                                .signWith(SignatureAlgorithm.HS512, SECRET).compact();
+
+                        request1.getHeaders().add("STELA-Active-Token", jwtToken);
+
                         return execution.execute(request1, body);
                     }));
             
@@ -225,7 +215,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void testArchiveCreation() {
 
         MultiValueMap<String, Object> params = acteWithAttachments();
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);        
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);  
         
         ResponseEntity<String> response =
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
@@ -329,20 +319,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void handleLocalAuthoriyEvent() throws IOException {
              
-        Agent agent = new Agent("546ece6c-7bf9-4192-a73b-689193443d5d","John", "Doe", "john.doe@fbi.fr");
-        agent.setSub("sub");
-        agent.setAdmin(false);
-        
-        Profile profile = new Profile("be639bb7-1b20-452f-b67b-b706cfd6e5df", agent, false);
-        Set<Profile> profiles = new HashSet<>();
-        profiles.add(profile);
-        
-        WorkGroup workGroup = new WorkGroup("febb077f-c014-4f18-802f-8315726caa82", "GlobalGroup");
-        workGroup.setProfiles(profiles);
-        Set<WorkGroup> groups = new HashSet<>();
-        groups.add(workGroup);
-        
-        LocalAuthority localAuthority = new LocalAuthority("d4055204-ce91-48a5-bb53-458bd543bc5a", "New-Test","siren", true,groups, profiles);
+
+        LocalAuthority localAuthority = new LocalAuthority("d4055204-ce91-48a5-bb53-458bd543bc5a", "New-Test","siren", true);
         
         LocalAuthorityEvent localAuthorityEvent =new LocalAuthorityEvent(localAuthority);
         localAuthorityEvent.setActivatedModules(Collections.singleton(Module.ACTES));

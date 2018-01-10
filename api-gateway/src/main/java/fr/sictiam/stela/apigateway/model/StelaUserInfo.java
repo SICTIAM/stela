@@ -4,16 +4,17 @@ import org.oasis_eu.spring.kernel.model.UserInfo;
 
 public class StelaUserInfo extends UserInfo {
     
-    private String currentProfile;
-
-    public String getCurrentProfile() {
-        return currentProfile;
-    }
-
-    public void setCurrentProfile(String currentProfile) {
-        this.currentProfile = currentProfile;
-    }
     
+    private String stelaToken;
+    
+    public String getStelaToken() {
+        return stelaToken;
+    }
+
+    public void setStelaToken(String stelaToken) {
+        this.stelaToken = stelaToken;
+    }
+
     public static StelaUserInfo from(UserInfo in) {
         StelaUserInfo out = new StelaUserInfo();
         out.setName(in.getName());

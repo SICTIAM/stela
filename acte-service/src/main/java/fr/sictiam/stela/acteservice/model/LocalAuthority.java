@@ -36,12 +36,6 @@ public class LocalAuthority {
     @OneToMany(mappedBy="localAuthority")
     private List<MaterialCode> materialCodes;
     
-    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.ALL, orphanRemoval=true)
-    private Set<WorkGroup> groups;
-    
-    @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER ,cascade= CascadeType.ALL, orphanRemoval=true)
-    private Set<Profile> profiles;
-    
     public LocalAuthority() {
     }
     //uiid is generated only once in AdminService
@@ -68,14 +62,11 @@ public class LocalAuthority {
         this.canPublishWebSite = canPublishWebSite;
     }
     
-    public LocalAuthority(String uuid, String name, String siren, Boolean active, Set<WorkGroup> groups,
-            Set<Profile> profiles) {
+    public LocalAuthority(String uuid, String name, String siren, Boolean active) {
         this.uuid = uuid;
         this.name = name;
         this.siren = siren;
         this.active = active;
-        this.groups = groups;
-        this.profiles = profiles;
     }
     
     public LocalAuthority(String uuid, String name, String siren) throws IOException {
@@ -187,20 +178,7 @@ public class LocalAuthority {
     public void setActive(Boolean active) {
         this.active = active;
     }
-    
-    public Set<WorkGroup> getGroups() {
-        return groups != null ? groups : new HashSet<>();
-    }
-    public void setGroups(Set<WorkGroup> groups) {
-        this.groups = groups;
-    }
-    public Set<Profile> getProfiles() {
-        return profiles != null ? profiles : new HashSet<>();
-    }
-    public void setProfiles(Set<Profile> profiles) {
-        this.profiles = profiles;
-    }
-    
+   
     @Override
     public String toString() {
         return "LocalAuthority{" +

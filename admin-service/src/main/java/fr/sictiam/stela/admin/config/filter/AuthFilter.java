@@ -10,45 +10,64 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.ProfileService;
+import io.jsonwebtoken.Jwts;
 
 @Component
 public class AuthFilter extends OncePerRequestFilter {
 
     @Autowired
     AgentService agentService;
-    
+
     @Autowired
     ProfileService profileService;
-   
+    
+    @Value("${application.jwt.secret}")
+    String SECRET;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
-        String sub = request.getHeader("STELA-Sub");
-        String activeProfile = request.getHeader("STELA-Active-Profile");
-        
+
+        JsonNode token =getToken(request);
+                
         Profile profile = null;
-        
-        if (StringUtils.isNotBlank(activeProfile)) {
-            profile = profileService.getByUuid(activeProfile);
-        } else {
-            Optional<Agent> currentAgent = agentService.findBySub(sub);
-            if (currentAgent.isPresent()) {
-                profile = currentAgent.get().getProfiles().stream().findFirst().get();
-            }
+
+        if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
+            profile = profileService.getByUuid(token.get("uuid").asText());
         }
+        
         if (profile != null) {
             request.setAttribute("STELA-Current-Profile", profile.getUuid());
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
         }
-            
+
         filterChain.doFilter(request, response);
+    }
+
+    
+    JsonNode getToken(HttpServletRequest request) throws IOException {
+        String token = request.getHeader("STELA-Active-Token");
+        if (token != null) {
+            // parse the token.
+            String tokenParsed = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getSubject();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode node = objectMapper.readTree(tokenParsed);
+
+            return node;
+
+        }
+        return null;
     }
 }

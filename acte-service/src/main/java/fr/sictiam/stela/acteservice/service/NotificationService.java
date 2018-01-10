@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.service;
 
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,15 +17,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
+import reactor.core.publisher.Mono;
 
 @Service
 public class NotificationService implements ApplicationListener<ActeHistoryEvent> {
@@ -66,7 +71,14 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     public void sendMail(ActeHistoryEvent event) throws MessagingException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
-        // TODO retrieve the user who submited the acte
+        
+        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        Mono<String> profile = webClient.get()
+                .uri("/api/admin/profile/{uuid}", acte.getProfileUuid())
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new RuntimeException("Profile not Found")))
+                .bodyToMono(String.class);
+        
         String mail = "stelasictiam.test@gmail.com";
         String firstName = "John";
         String lastName = "Doe";

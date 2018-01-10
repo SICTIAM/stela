@@ -3,8 +3,6 @@ package fr.sictiam.stela.acteservice.model.event;
 import java.util.Set;
 
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.Profile;
-import fr.sictiam.stela.acteservice.model.WorkGroup;
 
 public class LocalAuthorityEvent extends Event {
 
@@ -13,11 +11,7 @@ public class LocalAuthorityEvent extends Event {
     private String siren;
 
     private Set<Module> activatedModules;
-    
-    private Set<WorkGroup> groups;
-    
-    private Set<Profile> profiles;
-    
+        
     public LocalAuthorityEvent() {
         super(LocalAuthorityEvent.class.getName());
     }
@@ -27,8 +21,6 @@ public class LocalAuthorityEvent extends Event {
         this.uuid = localAuthority.getUuid();
         this.name = localAuthority.getName();
         this.siren = localAuthority.getSiren();
-        this.groups = localAuthority.getGroups();
-        this.profiles = localAuthority.getProfiles();
     }
 
     public String getUuid() {
@@ -63,19 +55,4 @@ public class LocalAuthorityEvent extends Event {
         this.activatedModules = activatedModules;
     }    
     
-    public Set<WorkGroup> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(Set<WorkGroup> groups) {
-        this.groups = groups;
-    }
-
-    public Set<Profile> getProfiles() {
-        return profiles;
-    }
-
-    public void setProfiles(Set<Profile> profiles) {
-        this.profiles = profiles;
-    }
 }
