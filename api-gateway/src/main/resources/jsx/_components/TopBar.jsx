@@ -64,8 +64,10 @@ class TopBar extends Component {
     }
     render() {
         const { isLoggedIn, t } = this.context
-        const listProfile = this.state.profiles.map((item, index) => item.uuid !== this.state.current.uuid &&
-            <Dropdown.Item onClick={() => window.location.href = '/api/api-gateway/switch/' + item.uuid} value={item.uuid}>{item.localAuthority.name}</Dropdown.Item>
+        const listProfile = this.state.profiles.map(profile => profile.uuid !== this.state.current.uuid &&
+            <Dropdown.Item key={profile.uuid} onClick={() => window.location.href = '/api/api-gateway/switch/' + profile.uuid} value={profile.uuid}>
+                {profile.localAuthority.name}
+            </Dropdown.Item>
         )
         if (isLoggedIn && !this.state.isUpdated) {
             this.refreshUser()

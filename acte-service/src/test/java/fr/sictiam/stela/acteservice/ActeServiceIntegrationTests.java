@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
@@ -110,6 +112,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private AdminService adminService;
 
     @Autowired
+    private AdminRepository adminRepository;
+
+    @Autowired
     private LocalAuthorityService localAuthorityService;
 
     @Autowired
@@ -143,7 +148,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
     
     public void createAdmin() {
-        adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", "dev@sictiam.fr", null));
+        adminRepository.deleteAll();
+        adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", "dev@sictiam.fr", null, true, LocalDateTime.now(), LocalDateTime.now()));
     }
 
     public void createLocalAuthority() {
@@ -569,7 +575,22 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         HttpStatus status = senderTask.send(targetArray,"SIC-EACT--210600730--20180115-1.tar.gz");
 
         assertThat(status, is(HttpStatus.OK));
+    }
 
+    @Test
+    public void isMiatAccessibleTest() {
+        assertThat(adminService.isMiatAccessible(), is(true));
+
+        Admin admin = adminService.getAdmin();
+        admin.setMiatAccessible(false);
+        adminService.updateAdmin(admin);
+        assertThat(adminService.isMiatAccessible(), is(false));
+
+        admin.setMiatAccessible(true);
+        admin.setInaccessibilityMiatStartDate(LocalDateTime.now().minusDays(1));
+        admin.setInaccessibilityMiatEndDate(LocalDateTime.now().plusDays(1));
+        adminService.updateAdmin(admin);
+        assertThat(adminService.isMiatAccessible(), is(false));
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {

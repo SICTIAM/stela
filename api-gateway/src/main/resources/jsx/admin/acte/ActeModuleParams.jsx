@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon } from 'semantic-ui-react'
+import { Form, Button, Segment, Label, Icon, Checkbox } from 'semantic-ui-react'
 import Validator from 'validatorjs'
+import moment from 'moment'
 
 import InputValidation from '../../_components/InputValidation'
+import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
-import { Field } from '../../_components/UI'
+import { Field, FormField } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class ActeModuleParams extends Component {
@@ -21,14 +23,21 @@ class ActeModuleParams extends Component {
         isFormValid: true,
         fields: {
             mainEmail: '',
-            additionalEmails: []
+            additionalEmails: [],
+            miatAccessible: true,
+            inaccessibilityMiatStartDate: '',
+            inaccessibilityMiatEndDate: ''
         }
     }
     componentDidMount() {
         fetchWithAuthzHandling({ url: '/api/acte/admin' })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ fields: json }))
+            .then(json => {
+                json.inaccessibilityMiatStartDate = new moment.utc(json.inaccessibilityMiatStartDate)
+                json.inaccessibilityMiatEndDate = new moment.utc(json.inaccessibilityMiatEndDate)
+                this.setState({ fields: json })
+            })
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
@@ -58,6 +67,11 @@ class ActeModuleParams extends Component {
         const fields = this.state.fields
         fields[field] = value
         this.setState({ fields: fields }, this.validateForm)
+    }
+    handleCheckboxChange = (event, { id }) => {
+        const { fields } = this.state
+        fields[id] = !fields[id]
+        this.setState({ fields })
     }
     validateForm = () => {
         this.setState({ isFormValid: this.validateEmail(this.state.fields.mainEmail) })
@@ -95,7 +109,7 @@ class ActeModuleParams extends Component {
                             className='simpleInput' />
                     </Field>
                     <Field htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
-                        <div style={{ marginBottom: '1em' }}>{listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}</div>
+                        <div>{listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}</div>
                         <input id='additionalEmail'
                             onKeyPress={this.onkeyPress}
                             value={this.state.newEmail}
@@ -103,7 +117,26 @@ class ActeModuleParams extends Component {
                             className='simpleInput' />
                         <Button style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>{t('api-gateway:form.add')}</Button>
                     </Field>
-                    <Button primary type='submit'>{t('api-gateway:form.update')}</Button>
+                    <Field htmlFor='miatAccessible' label={t('admin.modules.acte.module_settings.miatAccessible')}>
+                        <Checkbox id="miatAccessible"
+                            toggle checked={this.state.fields.miatAccessible}
+                            onChange={this.handleCheckboxChange} />
+                    </Field>
+                    <Field htmlFor='inaccessibilityMiat' label={t('admin.modules.acte.module_settings.inaccessibilityMiat')}>
+                        <Form.Group style={{ marginBottom: 0 }}>
+                            <FormField htmlFor='inaccessibilityMiatStartDate' label={t('api-gateway:form.from')}>
+                                <InputDatetime id='inaccessibilityMiatStartDate'
+                                    value={this.state.fields.inaccessibilityMiatStartDate}
+                                    onChange={date => this.handleFieldChange('inaccessibilityMiatStartDate', date)} />
+                            </FormField>
+                            <FormField htmlFor='inaccessibilityMiatEndDate' label={t('api-gateway:form.to')}>
+                                <InputDatetime id='inaccessibilityMiatEndDate'
+                                    value={this.state.fields.inaccessibilityMiatEndDate}
+                                    onChange={date => this.handleFieldChange('inaccessibilityMiatEndDate', date)} />
+                            </FormField>
+                        </Form.Group>
+                    </Field>
+                    <Button style={{ marginTop: '2em' }} primary type='submit'>{t('api-gateway:form.update')}</Button>
                 </Form>
             </Segment>
         )

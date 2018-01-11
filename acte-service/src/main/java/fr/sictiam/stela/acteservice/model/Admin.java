@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CollectionTable;
@@ -35,15 +36,24 @@ public class Admin {
     @EmailCollection
     private List<String> additionalEmails;
 
+    @NotNull
+    private boolean miatAccessible;
+    @NotNull
+    private LocalDateTime inaccessibilityMiatStartDate;
+    @NotNull
+    private LocalDateTime inaccessibilityMiatEndDate;
+
     public Admin() {
 
     }
 
-    public Admin(String uuid, String mainEmail, List<String> additionalEmails) {
-	super();
-	this.uuid = uuid;
-	this.mainEmail = mainEmail;
-	this.additionalEmails = additionalEmails;
+    public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAccessible, LocalDateTime inaccessibilityMiatStartDate, LocalDateTime inaccessibilityMiatEndDate) {
+        this.uuid = uuid;
+        this.mainEmail = mainEmail;
+        this.additionalEmails = additionalEmails;
+        this.miatAccessible = miatAccessible;
+        this.inaccessibilityMiatStartDate = inaccessibilityMiatStartDate;
+        this.inaccessibilityMiatEndDate = inaccessibilityMiatEndDate;
     }
 
     public String getUuid() {
@@ -68,6 +78,30 @@ public class Admin {
 
     public void setAdditionalEmails(List<String> additionalEmails) {
 	this.additionalEmails = additionalEmails;
+    }
+
+    public boolean isMiatAccessible() {
+        return miatAccessible;
+    }
+
+    public void setMiatAccessible(boolean miatAccessible) {
+        this.miatAccessible = miatAccessible;
+    }
+
+    public LocalDateTime getInaccessibilityMiatStartDate() {
+        return inaccessibilityMiatStartDate;
+    }
+
+    public void setInaccessibilityMiatStartDate(LocalDateTime inaccessibilityMiatStartDate) {
+        this.inaccessibilityMiatStartDate = inaccessibilityMiatStartDate;
+    }
+
+    public LocalDateTime getInaccessibilityMiatEndDate() {
+        return inaccessibilityMiatEndDate;
+    }
+
+    public void setInaccessibilityMiatEndDate(LocalDateTime inaccessibilityMiatEndDate) {
+        this.inaccessibilityMiatEndDate = inaccessibilityMiatEndDate;
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 
+import fr.sictiam.stela.acteservice.service.AdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,9 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     private ActeService acteService;
 
     @Autowired
+    private AdminService adminService;
+
+    @Autowired
     private PendingMessageService pendingMessageService;
     
     @Autowired
@@ -79,7 +83,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     @Scheduled(fixedRate = 100)
     public void senderTask() {
 
-        if (!pendingQueue.isEmpty()) {
+        if (!pendingQueue.isEmpty() && adminService.isMiatAccessible()) {
             PendingMessage pendingMessage = pendingQueue.peek();
             if ((pendingMessage.getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
 
