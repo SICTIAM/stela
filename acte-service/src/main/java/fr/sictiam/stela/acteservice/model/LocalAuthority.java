@@ -1,5 +1,7 @@
 package fr.sictiam.stela.acteservice.model;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -76,10 +78,17 @@ public class LocalAuthority {
         this.profiles = profiles;
     }
     
-    public LocalAuthority(String uuid, String name, String siren) {
+    public LocalAuthority(String uuid, String name, String siren) throws IOException {
         this.uuid = uuid;
         this.name = name;
         this.siren = siren;
+        this.nomenclatureDate = LocalDate.now();
+
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("exemples/exemple_codes_matieres.xml");
+
+        byte[] targetArray = new byte[in.available()];
+        in.read(targetArray);
+        this.nomenclatureFile = targetArray;
     }
     
     public String getUuid() {

@@ -1,6 +1,7 @@
 package fr.sictiam.stela.acteservice.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -164,7 +165,7 @@ public class LocalAuthorityService {
     }
     
     @Transactional
-    public void handleEvent(LocalAuthorityEvent event) {
+    public void handleEvent(LocalAuthorityEvent event) throws IOException {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
         

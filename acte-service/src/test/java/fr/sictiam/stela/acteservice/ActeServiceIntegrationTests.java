@@ -327,7 +327,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void handleLocalAuthoriyEvent() {
+    public void handleLocalAuthoriyEvent() throws IOException {
              
         Agent agent = new Agent("546ece6c-7bf9-4192-a73b-689193443d5d","John", "Doe", "john.doe@fbi.fr");
         agent.setSub("sub");
