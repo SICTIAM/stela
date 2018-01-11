@@ -33,8 +33,8 @@ public class InstanceController {
         response.sendRedirect(loginUrlToRedirectTo);
     }
 
-    @GetMapping(value="/isLocalAuthorityInstance")
-    public boolean isLocalAuthorityInstance() {
-        return localAuthorityInstanceService.findLocalAuthorityInstanceFromRequest() != null;
+    @GetMapping(value="/isMainDomain")
+    public boolean isMainDomain() {
+        return localAuthorityInstanceService.findLocalAuthorityInstanceFromRequest() == null;
     }
 }

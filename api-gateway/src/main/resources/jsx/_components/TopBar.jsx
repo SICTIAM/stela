@@ -13,7 +13,7 @@ class TopBar extends Component {
         t: PropTypes.func
     }
     state = {
-        isLocalAuthorityInstance: false,
+        isMainDomain: true,
         isUpdated: false,
         current: {
             agent: {
@@ -29,10 +29,10 @@ class TopBar extends Component {
         profiles: []
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/api-gateway/isLocalAuthorityInstance' })
+        fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
             .then(checkStatus)
             .then(response => response.json())
-            .then(isLocalAuthorityInstance => this.setState({ isLocalAuthorityInstance }))
+            .then(isMainDomain => this.setState({ isMainDomain }))
     }
     refreshUser = () => {
         fetchWithAuthzHandling({ url: '/api/admin/profile' })
@@ -59,7 +59,7 @@ class TopBar extends Component {
             })
     }
     login = () => {
-        if (this.state.isLocalAuthorityInstance) window.location.href = '/login'
+        if (!this.state.isMainDomain) window.location.href = '/login'
         else history.push('/choix-collectivite')
     }
     render() {

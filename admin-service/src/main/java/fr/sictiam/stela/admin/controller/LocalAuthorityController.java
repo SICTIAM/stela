@@ -60,7 +60,7 @@ public class LocalAuthorityController {
         return localAuthorityService.getAll();
     }
 
-    @GetMapping("/all-basic")
+    @GetMapping("/all")
     @JsonView(Views.LocalAuthorityViewBasic.class)
     public List<LocalAuthority> getAllBasicLocalAuthorities() {
         return localAuthorityService.getAll();

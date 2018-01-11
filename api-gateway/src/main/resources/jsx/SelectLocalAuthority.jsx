@@ -16,7 +16,7 @@ class SelectLocalAuthority extends Component {
         selected: {}
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all-basic' })
+        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
