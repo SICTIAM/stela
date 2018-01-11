@@ -1,23 +1,15 @@
 package fr.sictiam.stela.apigateway.config;
 
 import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
+import fr.sictiam.stela.apigateway.service.LocalAuthorityInstanceService;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.oasis_eu.spring.kernel.security.StaticOpenIdCConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.Optional;
-
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
 
 public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
-
-    private static final String INSTANCE_KEY = "instance";
 
     @Autowired
     private HttpServletRequest request;
@@ -25,14 +17,23 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
     @Value("${application.urlWithSlug}")
     private String applicationUrlWithSlug;
 
+    @Autowired
+    private LocalAuthorityInstanceService localAuthorityInstanceService;
+
     @Override
     public boolean requireAuthenticationForPath(String path) {
-        return (path.contains("/api/") && !path.contains("/locales/") && !path.contains("/api/admin/ozwillo")) || path.contains("/index.html");
+        return (path.contains("/api/")
+                && !path.contains("/locales/")
+                && !path.contains("/api/admin/local-authority/all")
+                && !path.contains("/api/api-gateway/loginWithSlug")
+                && !path.contains("/api/api-gateway/isMainDomain")
+                && !path.contains("/api/admin/ozwillo"))
+                || path.contains("/index.html");
     }
 
     @Override
     public String getClientId() {
-        LocalAuthorityInstance localAuthorityInstance = findLocalAuthorityInstance();
+        LocalAuthorityInstance localAuthorityInstance = localAuthorityInstanceService.findLocalAuthorityInstance();
         if (localAuthorityInstance != null) {
             return localAuthorityInstance.getClientId();
         } else {
@@ -42,7 +43,7 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
 
     @Override
     public String getClientSecret() {
-        LocalAuthorityInstance localAuthorityInstance = findLocalAuthorityInstance();
+        LocalAuthorityInstance localAuthorityInstance = localAuthorityInstanceService.findLocalAuthorityInstance();
         if (localAuthorityInstance != null) {
             return localAuthorityInstance.getClientSecret();
         } else {
@@ -53,31 +54,5 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
     @Override
     public String getCallbackUri() {
         return applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromRequest(request)) + "/callback";
-    }
-
-    private LocalAuthorityInstance findLocalAuthorityInstance() {
-
-        HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute(INSTANCE_KEY) != null) {
-            return (LocalAuthorityInstance) session.getAttribute(INSTANCE_KEY);
-        }
-
-        String slugName = SlugUtils.getSlugNameFromRequest(request);
-
-        WebClient webClient = WebClient.create(adminServiceUrl());
-        Mono<LocalAuthorityInstance> localAuthorityInstanceMono = webClient.get()
-                .uri("/api/admin/local-authority/instance/{slugName}", slugName)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new RuntimeException("No local authority found for " + slugName)))
-                .bodyToMono(LocalAuthorityInstance.class);
-
-
-        Optional<LocalAuthorityInstance> optLocalAuthorityInstance = localAuthorityInstanceMono.blockOptional();
-        if (optLocalAuthorityInstance.isPresent()) {
-            session.setAttribute(INSTANCE_KEY, optLocalAuthorityInstance.get());
-            return optLocalAuthorityInstance.get();
-        }
-
-        return null;
     }
 }

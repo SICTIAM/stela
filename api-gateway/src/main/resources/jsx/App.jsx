@@ -17,6 +17,7 @@ import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
 import Footer from './_components/Footer'
 import Home from './Home'
+import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
 import DraftList from './acte/DraftList'
@@ -89,11 +90,8 @@ class App extends Component {
     render() {
         return (
             <div>
-                <TopBar />
                 <NotificationSystem ref={n => this._notificationSystem = n} />
-                <div className='wrapperContainer'>
-                    {this.props.children}
-                </div>
+                {this.props.children}
                 <Footer />
             </div>
         )
@@ -103,22 +101,28 @@ class App extends Component {
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={(props) =>
         <div>
-            <MenuBar />
-            <Container className='mainContainer'>
-                <Component {...props} />
-            </Container>
+            <TopBar />
+            <div className='wrapperContainer'>
+                <MenuBar />
+                <Container className='mainContainer'>
+                    <Component {...props} />
+                </Container>
+            </div>
         </div>
     } />
 )
 const AuthRoute = ({ component: Component, menu: Menu, ...rest }, { isLoggedIn }) => (
     <Route {...rest} render={(props) =>
         <div>
-            <Menu />
-            <Container className='mainContainer'>
-                {isLoggedIn
-                    ? <Component {...props} {...props.match.params} />
-                    : <ErrorPage error={401} />}
-            </Container>
+            <TopBar />
+            <div className='wrapperContainer'>
+                <Menu />
+                <Container className='mainContainer'>
+                    {isLoggedIn
+                        ? <Component {...props} {...props.match.params} />
+                        : <ErrorPage error={401} />}
+                </Container>
+            </div>
         </div>
     } />
 )
@@ -129,6 +133,8 @@ AuthRoute.contextTypes = {
 const AppRoute = () =>
     <Switch>
         <PublicRoute exact path='/' component={Home} />
+
+        <Route path='/choix-collectivite' component={SelectLocalAuthority} />
 
         <Route exact path='/actes'>
             <Redirect to="/actes/liste" />

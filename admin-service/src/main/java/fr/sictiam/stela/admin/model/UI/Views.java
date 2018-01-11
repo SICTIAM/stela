@@ -6,7 +6,11 @@ public class Views {
 
     }
 
-    public interface LocalAuthorityViewPublic {
+    public interface LocalAuthorityViewBasic {
+
+    }
+
+    public interface LocalAuthorityViewPublic extends LocalAuthorityViewBasic{
 
     }
 

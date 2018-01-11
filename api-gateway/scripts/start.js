@@ -206,10 +206,11 @@ function addMiddleware(devServer) {
       ws: true,
       xfwd: true,
       router: {
-          // let's say we will make multi local authorities with Valbonne (and the default SICTIAM one)
-          // if another is needed, just add it here
-          // TODO : check if a regexp matcher syntax can be used to avoid editing this file
-          'commune-de-valbonne.stela3.localtest.me:3000' : 'http://commune-de-valbonne.stela3.localtest.me:9004'
+        // let's say we will make multi local authorities with Valbonne (and the default SICTIAM one)
+        // if another is needed, just add it here
+        // TODO : check if a regexp matcher syntax can be used to avoid editing this file
+        'commune-de-valbonne.stela3.localtest.me:3000': 'http://commune-de-valbonne.stela3.localtest.me:9004',
+        'stela3.localtest.me:3000': 'http://stela3.localtest.me:9004'
       }
     });
     devServer.use(mayProxy, hpm);

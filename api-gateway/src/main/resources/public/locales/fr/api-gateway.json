@@ -6,6 +6,7 @@
         "log_out": "Déconnexion",
         "params": "Paramètres"
     },
+    "select_localAuthority": "Sélectionner la collectivité",
     "form": {
         "search": "Rechercher",
         "all": "Tous",
