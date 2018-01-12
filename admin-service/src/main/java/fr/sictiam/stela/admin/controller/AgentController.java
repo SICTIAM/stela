@@ -9,6 +9,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,7 +70,7 @@ public class AgentController {
 
     @GetMapping
     @JsonView(Views.AgentView.class)
-    public Agent getCurrent(@RequestHeader("STELA-Sub") String sub) {
+    public Agent getCurrent(@RequestAttribute("STELA-Sub") String sub) {
         return agentService.findBySub(sub).get();
     }
 }

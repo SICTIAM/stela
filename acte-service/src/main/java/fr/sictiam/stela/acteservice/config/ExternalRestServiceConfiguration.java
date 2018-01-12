@@ -13,7 +13,7 @@ import fr.sictiam.stela.acteservice.service.ExternalRestService;
 public class ExternalRestServiceConfiguration {
     @Bean
     @Primary
-    public ExternalRestService nameService() {
+    public ExternalRestService externalRestService() {
         return Mockito.mock(ExternalRestService.class);
     }
 }
