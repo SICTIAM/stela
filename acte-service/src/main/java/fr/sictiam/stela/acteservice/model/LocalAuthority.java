@@ -84,7 +84,7 @@ public class LocalAuthority {
         this.siren = siren;
         this.nomenclatureDate = LocalDate.now();
 
-        InputStream in = this.getClass().getClassLoader().getResourceAsStream("exemples/exemple_codes_matieres.xml");
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("examples/exemple_codes_matieres.xml");
 
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
