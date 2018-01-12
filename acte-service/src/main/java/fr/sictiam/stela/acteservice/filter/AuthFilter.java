@@ -36,7 +36,7 @@ public class AuthFilter extends OncePerRequestFilter {
         
         Profile profile = null;
         
-        if (StringUtils.isNotBlank(activeProfile)) {
+        if (StringUtils.isNotBlank(activeProfile) && profileRepository.findById(activeProfile).isPresent()) {
             profile = profileRepository.findById(activeProfile).get();
         } else {
             Optional<Agent> currentAgent = agentService.findBySub(sub);
