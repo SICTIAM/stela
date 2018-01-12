@@ -40,8 +40,8 @@ class DraggablePosition extends Component {
         const y = Math.trunc(ui.y / this.props.height * 100)
         this.props.handleChange({ x: x, y: y })
     }
-    getPixelPosition = () => {
-        const { position, height, width } = this.props
+    getPixelPosition = (position) => {
+        const { height, width } = this.props
         const x = Math.trunc(position.x * width / 100)
         const y = Math.trunc(position.y * height / 100)
         return { x: x, y: y }
@@ -53,7 +53,8 @@ class DraggablePosition extends Component {
         const backgroundImageStyle = backgroundImage
             ? { backgroundImage: `url("${backgroundImage}")`, backgroundSize: '100% 100%' }
             : {}
-        const position = this.getPixelPosition()
+        const position = this.props.position ? this.props.position : { x: 10, y: 10 }
+        const pixelPosition = this.getPixelPosition(position)
         const percentBound = paddingPercent / 100
         const revertPercentBound = (100 - paddingPercent) / 100
         const globalStyle = { height: `${this.props.height}px`, width: `${this.props.width}px`, ...this.globalStyle, ...this.styles.draggablePositionBox }
@@ -68,12 +69,12 @@ class DraggablePosition extends Component {
             <div style={{ ...style, width: this.props.width }}>
                 {this.props.showPercents &&
                     <p style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{t('acte.stamp_pad.width')}: {this.props.position.x}%</span>
-                        <span>{t('acte.stamp_pad.height')}: {this.props.position.y}%</span>
+                        <span>{t('acte.stamp_pad.width')}: {position.x}%</span>
+                        <span>{t('acte.stamp_pad.height')}: {position.y}%</span>
                     </p>
                 }
                 <div style={{ ...globalStyle, ...backgroundImageStyle }}>
-                    <Draggable position={position} bounds={bounds} onDrag={this.handleDrag}>
+                    <Draggable position={pixelPosition} bounds={bounds} onDrag={this.handleDrag}>
                         <div style={{ ...box, ...this.styles.draggablePositionBox }}>
                             {label}
                         </div>
