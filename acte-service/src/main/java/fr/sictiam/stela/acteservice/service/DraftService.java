@@ -61,7 +61,7 @@ public class DraftService {
         return created;
     }
 
-    public Optional<CustomValidationUI> sumitDraft(String uuid) {
+    public Optional<CustomValidationUI> sumitDraft(String uuid, String profileUuid) {
         List<Acte> actes = getActeDrafts(uuid);
         Draft draft = getDraftByUuid(uuid);
 
@@ -81,6 +81,7 @@ public class DraftService {
         actes.forEach(acte -> {
             acte.setDraft(null);
             acte.setCreation(LocalDateTime.now());
+            acte.setProfileUuid(profileUuid);
             Acte created = acteRepository.save(acte);
 
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED);

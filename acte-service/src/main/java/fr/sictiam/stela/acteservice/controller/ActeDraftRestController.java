@@ -83,8 +83,8 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}")
-    ResponseEntity<?> submitDraft(@PathVariable String draftUuid) {
-        Optional opt =  draftService.sumitDraft(draftUuid);
+    ResponseEntity<?> submitDraft(@PathVariable String draftUuid, @RequestAttribute("STELA-Current-Profile") String profileUuid) {
+        Optional opt =  draftService.sumitDraft(draftUuid, profileUuid);
         if(opt.isPresent()) return new ResponseEntity<>(opt.get(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -102,13 +102,14 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
-    ResponseEntity<?> submitActeDraft(@PathVariable String uuid) {
+    ResponseEntity<?> submitActeDraft(@PathVariable String uuid, @RequestAttribute("STELA-Current-Profile") String profileUuid) {
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);
         List<ObjectError> errors = ValidationUtil.validateActe(acteDraft);
         if (!errors.isEmpty()) {
             CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
             return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
         } else {
+            acteDraft.setProfileUuid(profileUuid);
             Acte result = draftService.submitActeDraft(acteDraft);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
         }

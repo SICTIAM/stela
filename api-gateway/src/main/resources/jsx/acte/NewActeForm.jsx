@@ -276,7 +276,7 @@ class NewActeForm extends Component {
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
         )
         const codeOptions = this.state.codesMatieres.map(materialCode => {
-            const object = { key: materialCode.code, value: materialCode.label, text: materialCode.code + " - " + materialCode.label }
+            const object = { key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label }
             return object
         })
         const annexes = this.state.fields.annexes.map(annexe =>

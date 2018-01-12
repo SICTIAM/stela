@@ -1,10 +1,8 @@
 package fr.sictiam.stela.acteservice.service;
 
-
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -13,23 +11,18 @@ import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
-import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
-import reactor.core.publisher.Mono;
 
 @Service
 public class NotificationService implements ApplicationListener<ActeHistoryEvent> {
@@ -41,6 +34,9 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     @Autowired
     ActeService acteService;
+
+    @Autowired
+    ExternalRestService externalRestService;
 
     @Autowired
     JavaMailSender emailSender;
@@ -60,6 +56,8 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                 sendMail(event);
             } catch (MessagingException e) {
                 LOGGER.error(e.getMessage());
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage());
             }
         }
 
@@ -69,19 +67,14 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
         }
     }
 
-    public void sendMail(ActeHistoryEvent event) throws MessagingException {
+    public void sendMail(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
-        
-        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
-        Mono<String> profile = webClient.get()
-                .uri("/api/admin/profile/{uuid}", acte.getProfileUuid())
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new RuntimeException("Profile not Found")))
-                .bodyToMono(String.class);
-        
-        String mail = "stelasictiam.test@gmail.com";
-        String firstName = "John";
-        String lastName = "Doe";
+
+        JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
+
+        String mail = node.get("agent").get("email").asText();
+        String firstName = node.get("agent").get("given_name").asText();
+        String lastName = node.get("agent").get("family_name").asText();
 
         StatusType statusType = event.getActeHistory().getStatus();
 

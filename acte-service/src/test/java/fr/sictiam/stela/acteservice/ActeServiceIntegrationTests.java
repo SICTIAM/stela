@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
@@ -74,6 +78,7 @@ import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.DraftService;
+import fr.sictiam.stela.acteservice.service.ExternalRestService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.LocalesService;
 import fr.sictiam.stela.acteservice.service.NotificationService;
@@ -116,6 +121,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     
     @Autowired
     private LocalesService localService;
+    
+    @Autowired
+    private ExternalRestService externalRestService;
 
     @Rule
     public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
@@ -149,13 +157,21 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
                     
             localAuthorityService.createOrUpdate(localAuthorityCreated);
+            String json = "{\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\",\"localAuthority\":{\"uuid\":\""
+                    + localAuthority.getUuid()
+                    + "\",\"name\":\"SICTIAM-Test\",\"siren\":\"999888777\",\"activatedModules\":[\"ACTES\"]},\"agent\":{\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\",\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\",\"email\":\"john.doe@sictiam.com\",\"admin\":true,\"family_name\":\"Doe\",\"given_name\":\"John\"},\"admin\":true,\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]}";           
             
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode node = objectMapper.readTree(json);
+                Mockito.when(externalRestService.getProfile("4f146466-ea58-4e5c-851c-46db18ac173b")).thenReturn(node);
+            } catch (IOException e) {
+               LOGGER.error(e.getMessage());
+            }
             this.restTemplate.getRestTemplate()
                     .setInterceptors(Collections.singletonList((request1, body, execution) -> {
 
-                        String jwtToken = Jwts.builder().setSubject(
-                                "{\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\",\"localAuthority\":{\"uuid\":\""
-                                        + localAuthority.getUuid() + "\"}}")
+                        String jwtToken = Jwts.builder().setSubject(json)
                                 .setExpiration(new Date(System.currentTimeMillis() + 500000))
                                 .signWith(SignatureAlgorithm.HS512, SECRET).compact();
 
@@ -484,7 +500,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draftService.saveActeDraft(setActeValues(acte1), localAuthority);
         draftService.saveActeDraft(setActeValues(acte2), localAuthority);
 
-        draftService.sumitDraft(draft.getUuid());
+        draftService.sumitDraft(draft.getUuid(), "4f146466-ea58-4e5c-851c-46db18ac173b");
         assertThat(draftService.getDraftUIs(), empty());
         assertThat(draftService.getActeDrafts(), empty());
         assertThat(acteRepository.findAll(), hasSize(2));
@@ -551,8 +567,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     private Acte acte() {
-        return new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "1-1-0-0-0",
+        Acte acte = new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "1-1-0-0-0",
                 "Objet", true, true);
+        acte.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
+        return acte;
     }
 
     private Acte setActeValues(Acte acte) {
@@ -563,6 +581,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setObjet("Objet");
         acte.setPublic(true);
         acte.setPublicWebsite(true);
+        acte.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
         try {
             MultipartFile multipartFile = getMultipartResourceFile("data/Delib.pdf", "application/pdf");
             Attachment attachment = new Attachment(multipartFile.getBytes(), multipartFile.getOriginalFilename(), multipartFile.getSize());
