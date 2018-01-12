@@ -89,6 +89,8 @@ public class LocalAuthority {
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
         this.nomenclatureFile = targetArray;
+        this.canPublishRegistre = false;
+        this.canPublishWebSite = false;
     }
     
     public String getUuid() {
