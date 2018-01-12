@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
@@ -75,6 +76,7 @@ import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
+import fr.sictiam.stela.acteservice.scheduler.SenderTask;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.DraftService;
@@ -127,8 +129,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Rule
     public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
-
-
+    
+    @Autowired
+    SenderTask senderTask;
+    
     @Before
     public void beforeTests() {
         
@@ -549,6 +553,19 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(current.getContent(), instanceOf(MimeMultipart.class));
         assertThat(parser.getHtmlContent(), is(body));
     } 
+    
+    @Test
+    public void testSend() throws Exception {
+        InputStream in = new ClassPathResource("data/SIC-EACT--210600730--20180115-1.tar.gz").getInputStream();
+
+        byte[] targetArray = new byte[in.available()];
+        in.read(targetArray);
+
+        HttpStatus status = senderTask.send(targetArray,"SIC-EACT--210600730--20180115-1.tar.gz");
+
+        assertThat(status, is(HttpStatus.OK));
+
+    }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
