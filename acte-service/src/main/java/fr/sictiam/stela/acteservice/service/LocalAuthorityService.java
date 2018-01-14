@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.xml.bind.JAXBContext;
@@ -23,7 +21,6 @@ import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.Profile;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
@@ -169,31 +166,8 @@ public class LocalAuthorityService {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
         
-        localAuthority.getGroups().clear();
-        localAuthority.getProfiles().clear();
         localAuthority.setActive(event.getActivatedModules().contains(Module.ACTES));
-        localAuthority.getGroups().addAll(event.getGroups());
-
-        Set<Profile> allProfiles = event.getProfiles();
-        
-        localAuthority.getGroups().forEach(group -> {
-            group.setLocalAuthority(localAuthority);
-            Set<Profile> groupProfiles = new HashSet<>();
-            //must not have multiple object representing the same entity
-            group.getProfiles().forEach(profile -> {
-                allProfiles.forEach(refProfile -> {
-                    if (refProfile.getUuid().equals(profile.getUuid())) {
-                        refProfile.setLocalAuthority(localAuthority);
-                        groupProfiles.add(refProfile);
-                    }
-                });
-                group.setProfiles(groupProfiles);
-            });
-
-        });
-
-        localAuthority.getProfiles().addAll(allProfiles);
-        localAuthority.getProfiles().forEach(profile -> profile.setLocalAuthority(localAuthority));
+       
         createOrUpdate(localAuthority);
 
     }

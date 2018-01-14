@@ -38,6 +38,12 @@ public class ProfileController {
     public Profile getCurrentProfile(@RequestAttribute("STELA-Current-Profile") String profile) {
         return profileService.getByUuid(profile);
     }
+    
+    @GetMapping("/{uuid}")
+    @JsonView(Views.ProfileView.class)
+    public Profile getCurrentProfileByUuid(@PathVariable String uuid) {
+        return profileService.getByUuid(uuid);
+    }
 
     @GetMapping("/{uuid}/slug")
     public String getSlugForProfile(@PathVariable String uuid) {

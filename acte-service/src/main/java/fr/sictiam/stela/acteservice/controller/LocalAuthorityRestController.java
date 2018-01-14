@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.Profile;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
 import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;

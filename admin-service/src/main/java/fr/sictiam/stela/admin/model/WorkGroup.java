@@ -2,7 +2,11 @@ package fr.sictiam.stela.admin.model;
 
 import java.util.Set;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
@@ -39,6 +43,11 @@ public class WorkGroup {
     
     @JsonView(WorkGroupViewPublic.class)
     private String name;    
+    
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @JsonView(Views.WorkGroupViewPublic.class)
+    private Set<Right> rights; 
 
     public WorkGroup() {
         
@@ -68,6 +77,14 @@ public class WorkGroup {
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
+    }
+    
+    public Set<Right> getRights() {
+        return rights;
+    }
+
+    public void setRights(Set<Right> rights) {
+        this.rights = rights;
     }
     
     public String getName() {
