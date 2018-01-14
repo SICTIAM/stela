@@ -23,6 +23,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-webflux')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.mockito:mockito-core:2.13.0')
 }
 
 test {
