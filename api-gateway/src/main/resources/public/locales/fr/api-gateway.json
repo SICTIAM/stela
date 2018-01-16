@@ -29,7 +29,8 @@
             "mandatoryfield": "Le champ est obligatoire",
             "malformedfield": "Le champ n'est pas formé correctement",
             "mandatoryfile": "Fichier obligatoire",
-            "badextension": "L'extension du fichier un incorrect"
+            "badextension": "L'extension du fichier un incorrect",
+            "date_begin_before_date_end": "La date de début doit se trouver avant la date de fin"
         }
     },
     "list": {

@@ -37,23 +37,23 @@ public class Admin {
     private List<String> additionalEmails;
 
     @NotNull
-    private boolean miatAccessible;
+    private boolean miatAvailable;
     @NotNull
-    private LocalDateTime inaccessibilityMiatStartDate;
+    private LocalDateTime unavailabilityMiatStartDate;
     @NotNull
-    private LocalDateTime inaccessibilityMiatEndDate;
+    private LocalDateTime unavailabilityMiatEndDate;
 
     public Admin() {
 
     }
 
-    public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAccessible, LocalDateTime inaccessibilityMiatStartDate, LocalDateTime inaccessibilityMiatEndDate) {
+    public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAvailable, LocalDateTime unavailabilityMiatStartDate, LocalDateTime unavailabilityMiatEndDate) {
         this.uuid = uuid;
         this.mainEmail = mainEmail;
         this.additionalEmails = additionalEmails;
-        this.miatAccessible = miatAccessible;
-        this.inaccessibilityMiatStartDate = inaccessibilityMiatStartDate;
-        this.inaccessibilityMiatEndDate = inaccessibilityMiatEndDate;
+        this.miatAvailable = miatAvailable;
+        this.unavailabilityMiatStartDate = unavailabilityMiatStartDate;
+        this.unavailabilityMiatEndDate = unavailabilityMiatEndDate;
     }
 
     public String getUuid() {
@@ -80,28 +80,28 @@ public class Admin {
 	this.additionalEmails = additionalEmails;
     }
 
-    public boolean isMiatAccessible() {
-        return miatAccessible;
+    public boolean isMiatAvailable() {
+        return miatAvailable;
     }
 
-    public void setMiatAccessible(boolean miatAccessible) {
-        this.miatAccessible = miatAccessible;
+    public void setMiatAvailable(boolean miatAvailable) {
+        this.miatAvailable = miatAvailable;
     }
 
-    public LocalDateTime getInaccessibilityMiatStartDate() {
-        return inaccessibilityMiatStartDate;
+    public LocalDateTime getUnavailabilityMiatStartDate() {
+        return unavailabilityMiatStartDate;
     }
 
-    public void setInaccessibilityMiatStartDate(LocalDateTime inaccessibilityMiatStartDate) {
-        this.inaccessibilityMiatStartDate = inaccessibilityMiatStartDate;
+    public void setUnavailabilityMiatStartDate(LocalDateTime unavailabilityMiatStartDate) {
+        this.unavailabilityMiatStartDate = unavailabilityMiatStartDate;
     }
 
-    public LocalDateTime getInaccessibilityMiatEndDate() {
-        return inaccessibilityMiatEndDate;
+    public LocalDateTime getUnavailabilityMiatEndDate() {
+        return unavailabilityMiatEndDate;
     }
 
-    public void setInaccessibilityMiatEndDate(LocalDateTime inaccessibilityMiatEndDate) {
-        this.inaccessibilityMiatEndDate = inaccessibilityMiatEndDate;
+    public void setUnavailabilityMiatEndDate(LocalDateTime unavailabilityMiatEndDate) {
+        this.unavailabilityMiatEndDate = unavailabilityMiatEndDate;
     }
 
     @Override

@@ -8,6 +8,7 @@ class InputDatetime extends Component {
             <Datetime
                 id={this.props.id}
                 utc={true}
+                onBlur={this.props.onBlur}
                 locale="fr-fr"
                 value={this.props.value}
                 inputProps={this.props.inputProps}

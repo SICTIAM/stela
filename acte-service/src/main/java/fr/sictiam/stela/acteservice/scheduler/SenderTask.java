@@ -83,7 +83,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     @Scheduled(fixedRate = 100)
     public void senderTask() {
 
-        if (!pendingQueue.isEmpty() && adminService.isMiatAccessible()) {
+        if (!pendingQueue.isEmpty() && adminService.isMiatAvailable()) {
             PendingMessage pendingMessage = pendingQueue.peek();
             if ((pendingMessage.getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
 

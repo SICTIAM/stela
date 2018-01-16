@@ -579,18 +579,18 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void isMiatAccessibleTest() {
-        assertThat(adminService.isMiatAccessible(), is(true));
+        assertThat(adminService.isMiatAvailable(), is(true));
 
         Admin admin = adminService.getAdmin();
-        admin.setMiatAccessible(false);
+        admin.setMiatAvailable(false);
         adminService.updateAdmin(admin);
-        assertThat(adminService.isMiatAccessible(), is(false));
+        assertThat(adminService.isMiatAvailable(), is(false));
 
-        admin.setMiatAccessible(true);
-        admin.setInaccessibilityMiatStartDate(LocalDateTime.now().minusDays(1));
-        admin.setInaccessibilityMiatEndDate(LocalDateTime.now().plusDays(1));
+        admin.setMiatAvailable(true);
+        admin.setUnavailabilityMiatStartDate(LocalDateTime.now().minusDays(1));
+        admin.setUnavailabilityMiatEndDate(LocalDateTime.now().plusDays(1));
         adminService.updateAdmin(admin);
-        assertThat(adminService.isMiatAccessible(), is(false));
+        assertThat(adminService.isMiatAvailable(), is(false));
     }
 
     private MultiValueMap<String, Object> acteWithAttachments() {
