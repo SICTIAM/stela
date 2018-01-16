@@ -7,6 +7,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class ValidationTest {
 
 	@Test
 	public void testEmailValidation() {
-		Admin admin = new Admin("test", "fail@gmail.com", null);
+		Admin admin = new Admin("test", "fail@gmail.com", null, true, LocalDateTime.now(), LocalDateTime.now());
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
 		assertThat(validation, empty());
@@ -41,7 +42,7 @@ public class ValidationTest {
 		List<String> array = new ArrayList<String>();
 		array.add("fail");
 
-		Admin admin = new Admin("test", "rapderivas@gmail.com", array);
+		Admin admin = new Admin("test", "rapderivas@gmail.com", array, true, LocalDateTime.now(), LocalDateTime.now());
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
 		assertThat(validation, not(empty()));
@@ -52,7 +53,7 @@ public class ValidationTest {
 	public void testOk() {
 		List<String> array = new ArrayList<String>();
 		array.add("dev@sictiam.fr");
-		Admin admin = new Admin("test", "rapderivas@gmail.com", array);
+		Admin admin = new Admin("test", "rapderivas@gmail.com", array, true, LocalDateTime.now(), LocalDateTime.now());
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
 		assertThat(validation, empty());

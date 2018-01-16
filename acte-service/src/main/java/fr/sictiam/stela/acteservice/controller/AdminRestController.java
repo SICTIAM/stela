@@ -24,8 +24,8 @@ public class AdminRestController {
     }
 
     @PatchMapping
-    public void updateMailInfo(@Valid @RequestBody Admin adminModule) {
-        adminService.updateMailInfo(adminModule);
+    public void updateAdmin(@Valid @RequestBody Admin adminModule) {
+        adminService.updateAdmin(adminModule);
     }
 
     @GetMapping

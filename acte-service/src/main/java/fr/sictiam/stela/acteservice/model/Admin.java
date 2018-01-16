@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CollectionTable;
@@ -35,15 +36,24 @@ public class Admin {
     @EmailCollection
     private List<String> additionalEmails;
 
+    @NotNull
+    private boolean miatAvailable;
+    @NotNull
+    private LocalDateTime unavailabilityMiatStartDate;
+    @NotNull
+    private LocalDateTime unavailabilityMiatEndDate;
+
     public Admin() {
 
     }
 
-    public Admin(String uuid, String mainEmail, List<String> additionalEmails) {
-	super();
-	this.uuid = uuid;
-	this.mainEmail = mainEmail;
-	this.additionalEmails = additionalEmails;
+    public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAvailable, LocalDateTime unavailabilityMiatStartDate, LocalDateTime unavailabilityMiatEndDate) {
+        this.uuid = uuid;
+        this.mainEmail = mainEmail;
+        this.additionalEmails = additionalEmails;
+        this.miatAvailable = miatAvailable;
+        this.unavailabilityMiatStartDate = unavailabilityMiatStartDate;
+        this.unavailabilityMiatEndDate = unavailabilityMiatEndDate;
     }
 
     public String getUuid() {
@@ -68,6 +78,30 @@ public class Admin {
 
     public void setAdditionalEmails(List<String> additionalEmails) {
 	this.additionalEmails = additionalEmails;
+    }
+
+    public boolean isMiatAvailable() {
+        return miatAvailable;
+    }
+
+    public void setMiatAvailable(boolean miatAvailable) {
+        this.miatAvailable = miatAvailable;
+    }
+
+    public LocalDateTime getUnavailabilityMiatStartDate() {
+        return unavailabilityMiatStartDate;
+    }
+
+    public void setUnavailabilityMiatStartDate(LocalDateTime unavailabilityMiatStartDate) {
+        this.unavailabilityMiatStartDate = unavailabilityMiatStartDate;
+    }
+
+    public LocalDateTime getUnavailabilityMiatEndDate() {
+        return unavailabilityMiatEndDate;
+    }
+
+    public void setUnavailabilityMiatEndDate(LocalDateTime unavailabilityMiatEndDate) {
+        this.unavailabilityMiatEndDate = unavailabilityMiatEndDate;
     }
 
     @Override
