@@ -215,12 +215,14 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void testGetAll() {
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
-
+        
+        MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.ARCHIVE_CREATED);
         this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
 
         try {
-            // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(2000);
+            synchronized (mockActeEventListener) {
+                mockActeEventListener.wait(4000);
+            }
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
@@ -241,8 +243,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();
         
+        MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.NOTIFICATION_SENT);
         try {
-            Thread.sleep(3000);           
+            synchronized (mockActeEventListener) {
+                mockActeEventListener.wait(4000);
+            }
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
@@ -278,9 +283,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();
 
+        MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.ARCHIVE_TOO_LARGE);
         try {
-            // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(2000);
+            synchronized (mockActeEventListener) {
+                mockActeEventListener.wait(4000);
+            }
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
@@ -298,9 +305,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                 this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
         String acteUuid = response.getBody();
 
+        MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.NOTIFICATION_SENT);
         try {
-            // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(2000);
+            synchronized (mockActeEventListener) {
+                mockActeEventListener.wait(4000);
+            }
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
@@ -313,9 +322,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
 
+        MockActeEventListener mockActeEventListener2 = new MockActeEventListener(StatusType.NOTIFICATION_SENT);
         try {
-            // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(4000);
+            synchronized (mockActeEventListener2) {
+                mockActeEventListener2.wait(4000);
+            }
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
@@ -524,13 +535,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                 variables);
         String subject = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".subject",
                 variables);
-
-        try {
-            // sleep some seconds to let async creation of the archive happens
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            fail("Should not have thrown an exception");
-        }
+     
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
 
