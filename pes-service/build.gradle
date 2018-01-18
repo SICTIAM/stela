@@ -12,16 +12,15 @@ dependencies {
     compile('org.apache.commons:commons-lang3:3.7')
     compile('com.sun.mail:javax.mail:1.6.0')
     compile('org.springframework:spring-oxm')
-    compile('org.springframework:spring-mock:2.0.8')
     compile('commons-beanutils:commons-beanutils:1.8.3')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile('org.xhtmlrenderer:flying-saucer-pdf:9.1.4')
     compile('net.sf.supercsv:super-csv:2.4.0')
-    compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-webflux')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')
+    testCompile('org.springframework:spring-mock:2.0.8')
 }
 
 test {
