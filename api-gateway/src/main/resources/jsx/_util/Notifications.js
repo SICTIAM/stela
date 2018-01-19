@@ -3,44 +3,44 @@ const notifications = {
         title: 'notifications.error.title',
         message: 'notifications.error.message',
         level: 'error',
-        position: 'tc'
+        position: 'br'
     },
     acte: {
         noContent: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.no_content',
             level: 'warning',
-            position: 'tc'
+            position: 'br'
         },
         sent: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.sent.success',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         },
         cancelled: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.cancelled.success',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         },
         cancelledForbidden: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.cancelled.forbidden',
             level: 'error',
-            position: 'tc'
+            position: 'br'
         },
         draftDeleted: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.draft.single_deleted.success',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         },
         draftsDeleted: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.draft.multiple_deleted.success',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         }
     },
     pes: {
@@ -48,19 +48,20 @@ const notifications = {
             title: 'notifications.pes.title',
             message: 'notifications.pes.sent.success',
             level: 'success',
-            position: 'tc'
+            position: 'br',
+            autoDismiss: 0
         },
         virus: {
             title: 'notifications.pes.title',
             message: 'notifications.pes.sent.virus',
             level: 'error',
-            position: 'tc'
+            position: 'br'
         },
         missingData: {
             title: 'notifications.pes.title',
             message: 'notifications.pes.sent.missing_data',
             level: 'warning',
-            position: 'tc'
+            position: 'br'
         }
     },
     admin: {
@@ -68,19 +69,19 @@ const notifications = {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.local_authority.update.success',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         },
         moduleUpdated: {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.admin_module.update.success',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         },
         groupsUpdated: {
             title: 'notifications.admin.title',
             message: 'notifications.admin.groups_updated',
             level: 'success',
-            position: 'tc'
+            position: 'br'
         }
     }
 }

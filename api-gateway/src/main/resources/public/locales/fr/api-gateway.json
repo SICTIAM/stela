@@ -4,7 +4,8 @@
     "top_bar": {
         "log_in": "Connexion",
         "log_out": "Déconnexion",
-        "params": "Paramètres"
+        "profile": "Profil",
+        "admin": "Administration"
     },
     "select_localAuthority": "Sélectionner la collectivité",
     "form": {
@@ -184,6 +185,10 @@
             "convocation": "Module Convocation",
             "configuration": "Configuration",
             "local_authority_settings": "Paramétrage des collectivités"
+        },
+        "agent": {
+            "no_group": "Aucun groupe",
+            "add_group": "Affecter un groupe..."
         },
         "back_to_stela": "Retourner sur STELA"
     },

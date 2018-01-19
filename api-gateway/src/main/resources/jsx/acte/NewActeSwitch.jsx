@@ -6,6 +6,7 @@ import { Menu, Segment, Grid } from 'semantic-ui-react'
 
 import NewActeForm from './NewActeForm'
 import NewActeBatchedForm from './NewActeBatchedForm'
+import { Page } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
@@ -54,55 +55,57 @@ class NewActeSwitch extends Component {
                 : this.state.fields.actes[0] ? this.state.fields.actes[0].uuid : ''
             : ''
         return (
-            <Segment>
-                <Grid>
-                    <Grid.Column width={12}><h1>{t('acte.new.title')}</h1></Grid.Column>
-                    <Grid.Column width={4} style={{ textAlign: 'right' }}>
-                        {renderIf(this.state.status)(
-                            <span style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.status}`)}</span>
+            <Page title={t('acte.new.title')}>
+                <Segment>
+                    <Grid>
+                        <Grid.Column width={12}></Grid.Column>
+                        <Grid.Column width={4} style={{ textAlign: 'right' }}>
+                            {renderIf(this.state.status)(
+                                <span style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.status}`)}</span>
+                            )}
+                        </Grid.Column>
+                    </Grid>
+                    <Menu tabular>
+                        {renderIf(this.state.fields.mode === 'ACTE' || !this.props.uuid)(
+                            <Menu.Item id='ACTE' active={this.state.fields.mode === 'ACTE'} onClick={this.handleModeChange}>
+                                {t('acte.new.acte')}
+                            </Menu.Item>
                         )}
-                    </Grid.Column>
-                </Grid>
-                <Menu tabular>
-                    {renderIf(this.state.fields.mode === 'ACTE' || !this.props.uuid)(
-                        <Menu.Item id='ACTE' active={this.state.fields.mode === 'ACTE'} onClick={this.handleModeChange}>
-                            {t('acte.new.acte')}
-                        </Menu.Item>
+                        {renderIf(this.state.fields.mode === 'ACTE_BUDGETAIRE' || !this.props.uuid)(
+                            <Menu.Item id='ACTE_BUDGETAIRE' active={this.state.fields.mode === 'ACTE_BUDGETAIRE'} onClick={this.handleModeChange}>
+                                {t('acte.new.acte_budgetaire')}
+                            </Menu.Item>
+                        )}
+                        {renderIf(this.state.fields.mode === 'ACTE_BATCH' || !this.props.uuid)(
+                            <Menu.Item id='ACTE_BATCH' active={this.state.fields.mode === 'ACTE_BATCH'} onClick={this.handleModeChange}>
+                                {t('acte.new.acte_batch')}
+                            </Menu.Item>
+                        )}
+                    </Menu>
+                    {renderIf(this.state.fields.mode === 'ACTE')(
+                        <NewActeForm
+                            uuid={uuid}
+                            draftUuid={this.props.uuid}
+                            mode={this.state.fields.mode}
+                            setStatus={this.setStatus}
+                            status={this.state.status} />
                     )}
-                    {renderIf(this.state.fields.mode === 'ACTE_BUDGETAIRE' || !this.props.uuid)(
-                        <Menu.Item id='ACTE_BUDGETAIRE' active={this.state.fields.mode === 'ACTE_BUDGETAIRE'} onClick={this.handleModeChange}>
-                            {t('acte.new.acte_budgetaire')}
-                        </Menu.Item>
+                    {renderIf(this.state.fields.mode === 'ACTE_BUDGETAIRE')(
+                        <NewActeForm
+                            uuid={uuid}
+                            draftUuid={this.props.uuid}
+                            mode={this.state.fields.mode}
+                            setStatus={this.setStatus}
+                            status={this.state.status} />
                     )}
-                    {renderIf(this.state.fields.mode === 'ACTE_BATCH' || !this.props.uuid)(
-                        <Menu.Item id='ACTE_BATCH' active={this.state.fields.mode === 'ACTE_BATCH'} onClick={this.handleModeChange}>
-                            {t('acte.new.acte_batch')}
-                        </Menu.Item>
+                    {renderIf(this.state.fields.mode === 'ACTE_BATCH')(
+                        <NewActeBatchedForm
+                            uuid={uuid}
+                            setStatus={this.setStatus}
+                            status={this.state.status} />
                     )}
-                </Menu>
-                {renderIf(this.state.fields.mode === 'ACTE')(
-                    <NewActeForm
-                        uuid={uuid}
-                        draftUuid={this.props.uuid}
-                        mode={this.state.fields.mode}
-                        setStatus={this.setStatus}
-                        status={this.state.status} />
-                )}
-                {renderIf(this.state.fields.mode === 'ACTE_BUDGETAIRE')(
-                    <NewActeForm
-                        uuid={uuid}
-                        draftUuid={this.props.uuid}
-                        mode={this.state.fields.mode}
-                        setStatus={this.setStatus}
-                        status={this.state.status} />
-                )}
-                {renderIf(this.state.fields.mode === 'ACTE_BATCH')(
-                    <NewActeBatchedForm
-                        uuid={uuid}
-                        setStatus={this.setStatus}
-                        status={this.state.status} />
-                )}
-            </Segment>
+                </Segment>
+            </Page>
         )
     }
 }

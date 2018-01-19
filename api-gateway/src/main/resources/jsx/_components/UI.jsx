@@ -35,7 +35,7 @@ const File = ({ attachment, onDelete }) =>
 
 const InputFile = ({ htmlFor, label, children }) =>
     <div>
-        <label htmlFor={htmlFor} className="ui icon button">
+        <label htmlFor={htmlFor} className="ui icon button basic">
             <Icon name='file' /> {label}
         </label>
         {children}
@@ -50,5 +50,13 @@ const ListItem = ({ children, icon, iconColor, title }) =>
         <List.Content><Header size='small'>{title}</Header></List.Content>
     </List.Item>
 
+const Page = ({ children, title, subtitle }) =>
+    <div>
+        <Header as='h1' style={{ textAlign: 'center' }}>{title && title.toUpperCase()}</Header>
+        {subtitle &&
+            <Header style={{ textAlign: 'center', marginTop: 0 }}><Header.Subheader>{subtitle}</Header.Subheader></Header>}
+        {children}
+    </div>
 
-module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem }
+
+module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem, Page }

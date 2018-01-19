@@ -15,7 +15,6 @@ import i18n from './_util/i18n'
 import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
-import Footer from './_components/Footer'
 import Home from './Home'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
@@ -59,6 +58,13 @@ class App extends Component {
         csrfTokenHeaderName: '',
         isLoggedIn: false
     }
+    NotificationStyle = {
+        Containers: {
+            DefaultStyle: {
+                width: 400
+            },
+        }
+    }
     getChildContext() {
         return {
             csrfToken: this.state.csrfToken,
@@ -90,9 +96,8 @@ class App extends Component {
     render() {
         return (
             <div>
-                <NotificationSystem ref={n => this._notificationSystem = n} />
+                <NotificationSystem ref={n => this._notificationSystem = n} style={this.NotificationStyle} />
                 {this.props.children}
-                <Footer />
             </div>
         )
     }

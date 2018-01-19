@@ -6,11 +6,29 @@ body, html {
     height: auto;
     background-color: #f7f7f7;
 }
-.mainMenu .header.item.appTitle {
+.ui.vertical.menu.mainMenu {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5em;
+    margin-left: 0.5em;
+    margin-bottom: 0.5em;
+    padding-top: 1em;
+    height: calc(100% - 5.5em);
+    box-shadow: 0 2px 2px 0 rgba(34,36,38,.15);
+    overflow-y: auto;
+    padding-right: 0.5em;
+}
+@media (min-height:550px){
+    .mainMenus {
+        height: 100%;
+    }
+}
+.topBar .header.item.appTitle {
     height: 4.5em;
+    margin-left: 4em;
 }
 .wrapperContainer { 
-    margin-left: 15em; 
+    margin-left: 16em; 
     padding: 0 1em 0 1em;
 } 
 .mainContainer {
