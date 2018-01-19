@@ -76,3 +76,15 @@ services:
      - rabbitmq
     environment:
      - "SPRING_PROFILES_ACTIVE=dev-docker"
+  pes-service:
+    image: stela-poc/pes-service
+    container_name: pes-service
+    ports:
+     - "9010:9010"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"

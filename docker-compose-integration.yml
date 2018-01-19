@@ -62,3 +62,15 @@ services:
      - postgresql
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
+  pes-service:
+      image: stela-poc/pes-service
+      container_name: pes-service
+      ports:
+       - "9010:9010"
+      depends_on:
+       - config
+       - discovery
+       - postgresql
+       - rabbitmq
+      environment:
+       - "SPRING_PROFILES_ACTIVE=integration"  

@@ -1,0 +1,9 @@
+{
+  "pes": {
+    "status": { 
+      "SENT": "Envoyé",
+      "ACK_RECEIVED": "AR Ministère",
+      "CREATED": "Créé"     
+    }
+  }    
+}
