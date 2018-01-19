@@ -126,6 +126,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         ftpClient.sendSiteCommand("quote site P_MSG PESALR2#" + colCode + "#" + postId + "#" + budCode + "");
         ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
         ftpSession.close();
+
     }
 
 }
