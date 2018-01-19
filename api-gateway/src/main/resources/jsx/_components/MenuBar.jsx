@@ -54,11 +54,11 @@ class MenuBar extends Component {
 
                     <Menu.Item style={{ width: '100%' }}>
                         <Icon name='help' size='large' />
-                        <Menu.Header>Informations</Menu.Header>
+                        <Menu.Header>{t('menu.informations.title')}</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item>Aide</Menu.Item>
-                            <Menu.Item>Contact</Menu.Item>
-                            <Menu.Item>CGU</Menu.Item>
+                            <Menu.Item>{t('menu.informations.help')}</Menu.Item>
+                            <Menu.Item>{t('menu.informations.contact')}</Menu.Item>
+                            <Menu.Item>{t('menu.informations.cgu')}</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>
@@ -69,7 +69,7 @@ class MenuBar extends Component {
                     </Menu.Item>
 
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
-                        Créé avec ❤ par le SICTIAM
+                        {t('made_with_love')}
                     </Menu.Item>
                 </div>
 
