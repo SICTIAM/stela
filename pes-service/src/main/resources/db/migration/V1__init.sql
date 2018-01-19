@@ -88,10 +88,10 @@ CREATE TABLE pending_message (
 
 
 --
--- Name: pes; Type: TABLE; Schema: public; Owner: -
+-- Name: pes_aller; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE pes (
+CREATE TABLE pes_aller (
     uuid character varying(255) NOT NULL,
     attachment_only boolean NOT NULL,
     comment character varying(255),
@@ -100,9 +100,18 @@ CREATE TABLE pes (
     objet character varying(500),
     profile_uuid character varying(255),
     signed boolean NOT NULL,
-    local_authority_uuid character varying(255),
-    pes_receive_uuid character varying(255),
-    pes_sent_uuid character varying(255)
+    attachment_uuid character varying(255),
+    local_authority_uuid character varying(255)
+);
+
+
+--
+-- Name: pes_aller_pes_histories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE pes_aller_pes_histories (
+    pes_aller_uuid character varying(255) NOT NULL,
+    pes_histories_uuid character varying(255) NOT NULL
 );
 
 
@@ -122,14 +131,15 @@ CREATE TABLE pes_history (
 
 
 --
--- Name: pes_pes_histories; Type: TABLE; Schema: public; Owner: -
+-- Name: pes_retour; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE pes_pes_histories (
-    pes_uuid character varying(255) NOT NULL,
-    pes_histories_uuid character varying(255) NOT NULL
+CREATE TABLE pes_retour (
+    uuid character varying(255) NOT NULL,
+    creation timestamp without time zone,
+    attachment_uuid character varying(255),
+    local_authority_uuid character varying(255)
 );
-
 
 --
 -- Name: sirens; Type: TABLE; Schema: public; Owner: -
@@ -174,6 +184,22 @@ ALTER TABLE ONLY pending_message
 
 
 --
+-- Name: pes_aller_pes_histories pes_aller_pes_histories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY pes_aller_pes_histories
+    ADD CONSTRAINT pes_aller_pes_histories_pkey PRIMARY KEY (pes_aller_uuid, pes_histories_uuid);
+
+
+--
+-- Name: pes_aller pes_aller_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY pes_aller
+    ADD CONSTRAINT pes_aller_pkey PRIMARY KEY (uuid);
+
+
+--
 -- Name: pes_history pes_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -182,27 +208,20 @@ ALTER TABLE ONLY pes_history
 
 
 --
--- Name: pes_pes_histories pes_pes_histories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pes_retour pes_retour_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY pes_pes_histories
-    ADD CONSTRAINT pes_pes_histories_pkey PRIMARY KEY (pes_uuid, pes_histories_uuid);
-
-
---
--- Name: pes pes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY pes
-    ADD CONSTRAINT pes_pkey PRIMARY KEY (uuid);
+ALTER TABLE ONLY pes_retour
+    ADD CONSTRAINT pes_retour_pkey PRIMARY KEY (uuid);
 
 
 --
--- Name: pes_pes_histories uk_b34rbi19jfr0uqvewwtvqx4dw; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pes_aller_pes_histories uk_89mwpcedc1u59r59g7kuw75ym; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY pes_pes_histories
-    ADD CONSTRAINT uk_b34rbi19jfr0uqvewwtvqx4dw UNIQUE (pes_histories_uuid);
+ALTER TABLE ONLY pes_aller_pes_histories
+    ADD CONSTRAINT uk_89mwpcedc1u59r59g7kuw75ym UNIQUE (pes_histories_uuid);
+
 
 
 --
@@ -214,43 +233,51 @@ ALTER TABLE ONLY sirens
 
 
 --
--- Name: pes fk2e61gk9nbsuc50r2t2u12oac4; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: pes_aller_pes_histories fk58wo4339npokfyhgt1eh3gsji; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY pes
-    ADD CONSTRAINT fk2e61gk9nbsuc50r2t2u12oac4 FOREIGN KEY (local_authority_uuid) REFERENCES local_authority(uuid);
-
-
---
--- Name: pes_pes_histories fk2mfj5yss2lm7re12l0qrtlyt1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY pes_pes_histories
-    ADD CONSTRAINT fk2mfj5yss2lm7re12l0qrtlyt1 FOREIGN KEY (pes_histories_uuid) REFERENCES pes_history(uuid);
+ALTER TABLE ONLY pes_aller_pes_histories
+    ADD CONSTRAINT fk58wo4339npokfyhgt1eh3gsji FOREIGN KEY (pes_aller_uuid) REFERENCES pes_aller(uuid);
 
 
 --
--- Name: pes fk5p8o9kxd7bmfyfs285078p5h6; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: pes_aller fk5x9ebwj8fmanugx34adgippki; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY pes
-    ADD CONSTRAINT fk5p8o9kxd7bmfyfs285078p5h6 FOREIGN KEY (pes_sent_uuid) REFERENCES attachment(uuid);
-
-
---
--- Name: pes_pes_histories fk9iw6bi5kf9nyljmnsvcashay0; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY pes_pes_histories
-    ADD CONSTRAINT fk9iw6bi5kf9nyljmnsvcashay0 FOREIGN KEY (pes_uuid) REFERENCES pes(uuid);
+ALTER TABLE ONLY pes_aller
+    ADD CONSTRAINT fk5x9ebwj8fmanugx34adgippki FOREIGN KEY (attachment_uuid) REFERENCES attachment(uuid);
 
 
 --
--- Name: pes fkjlrsavd1nh2nmkhyhlv81k9bx; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: pes_retour fkdlv7pbk9wwxn2tfy5c88x191v; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY pes
-    ADD CONSTRAINT fkjlrsavd1nh2nmkhyhlv81k9bx FOREIGN KEY (pes_receive_uuid) REFERENCES attachment(uuid);
+ALTER TABLE ONLY pes_retour
+    ADD CONSTRAINT fkdlv7pbk9wwxn2tfy5c88x191v FOREIGN KEY (local_authority_uuid) REFERENCES local_authority(uuid);
+
+
+--
+-- Name: pes_retour fklshs29ak5kfkg4h180v6bng41; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY pes_retour
+    ADD CONSTRAINT fklshs29ak5kfkg4h180v6bng41 FOREIGN KEY (attachment_uuid) REFERENCES attachment(uuid);
+
+
+--
+-- Name: pes_aller_pes_histories fkseeaewngs3o1p96cjqjeg038x; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY pes_aller_pes_histories
+    ADD CONSTRAINT fkseeaewngs3o1p96cjqjeg038x FOREIGN KEY (pes_histories_uuid) REFERENCES pes_history(uuid);
+
+
+--
+-- Name: pes_aller fksex8lq3vm3co1qdy41bw9pr1e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY pes_aller
+    ADD CONSTRAINT fksex8lq3vm3co1qdy41bw9pr1e FOREIGN KEY (local_authority_uuid) REFERENCES local_authority(uuid);
 
 
 --

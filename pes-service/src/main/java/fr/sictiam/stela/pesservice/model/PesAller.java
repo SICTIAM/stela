@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
 
 @Entity
-public class Pes {
+public class PesAller {
 
     public interface RestValidation {
         // validation group marker interface
@@ -44,11 +44,7 @@ public class Pes {
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Attachment pesSent;
-    
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Attachment pesReceive;
-    
+    private Attachment attachment;  
    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("date ASC")
@@ -67,7 +63,7 @@ public class Pes {
     
     private boolean signed;
 
-    public Pes() {
+    public PesAller() {
     }
 
     public String getUuid() {
@@ -122,20 +118,12 @@ public class Pes {
         this.groupUuid = groupUuid;
     }
     
-    public Attachment getPesSent() {
-        return pesSent;
+    public Attachment getAttachment() {
+        return attachment;
     }
 
-    public void setPesSent(Attachment pesSent) {
-        this.pesSent = pesSent;
-    }
-
-    public Attachment getPesReceive() {
-        return pesReceive;
-    }
-
-    public void setPesReceive(Attachment pesReceive) {
-        this.pesReceive = pesReceive;
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
     }
 
     public String getComment() {

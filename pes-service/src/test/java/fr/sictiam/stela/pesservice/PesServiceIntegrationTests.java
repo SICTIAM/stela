@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sictiam.stela.pesservice.dao.AdminRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.dao.PesRepository;
+import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.model.Admin;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesHistory;
@@ -47,7 +47,7 @@ import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.LocalesService;
 import fr.sictiam.stela.pesservice.service.NotificationService;
-import fr.sictiam.stela.pesservice.service.PesService;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -65,7 +65,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private PesService pesService;
+    private PesAllerService pesService;
 
     @Autowired
     private AdminService adminService;
@@ -74,7 +74,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     private AdminRepository adminRepository;
 
     @Autowired
-    private PesRepository pesRepository;    
+    private PesAllerRepository pesRepository;    
     
     @Autowired
     private PesHistoryRepository pesHistoryRepository; 

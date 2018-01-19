@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import fr.sictiam.stela.pesservice.model.Pes;
+import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
@@ -33,7 +33,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     LocalesService localesService;
 
     @Autowired
-    PesService pesService;
+    PesAllerService pesService;
 
     @Autowired
     ExternalRestService externalRestService;
@@ -61,7 +61,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     }
 
     public void sendMail(PesHistoryEvent event) throws MessagingException, IOException {
-        Pes acte = pesService.getByUuid(event.getPesHistory().getActeUuid());
+        PesAller acte = pesService.getByUuid(event.getPesHistory().getActeUuid());
 
         JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
 

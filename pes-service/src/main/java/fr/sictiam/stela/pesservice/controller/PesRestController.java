@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.sictiam.stela.pesservice.model.Pes;
+import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
-import fr.sictiam.stela.pesservice.service.PesService;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
 
 @RestController
 @RequestMapping("/api/pes")
@@ -28,30 +28,30 @@ public class PesRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesRestController.class);
 
-    private final PesService pesService;
+    private final PesAllerService pesService;
     private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public PesRestController(PesService pesService, LocalAuthorityService localAuthorityService) {
+    public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService) {
         this.pesService = pesService;
         this.localAuthorityService = localAuthorityService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Pes>> getAll(@RequestParam(value = "number", required = false) String number,
+    public ResponseEntity<List<PesAller>> getAll(@RequestParam(value = "number", required = false) String number,
             @RequestParam(value = "objet", required = false) String objet,
             @RequestParam(value = "decisionFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate decisionFrom,
             @RequestParam(value = "decisionTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate decisionTo,
             @RequestParam(value = "status", required = false) StatusType status) {
-        List<Pes> pesList = pesService.getAllWithQuery(number, objet, decisionFrom, decisionTo, status);
+        List<PesAller> pesList = pesService.getAllWithQuery(number, objet, decisionFrom, decisionTo, status);
         return new ResponseEntity<>(pesList, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<Pes> getByUuid(
+    public ResponseEntity<PesAller> getByUuid(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String uuid) {
-        Pes pes = pesService.getByUuid(uuid);
+        PesAller pes = pesService.getByUuid(uuid);
 
         return new ResponseEntity<>(pes, HttpStatus.OK);
     }

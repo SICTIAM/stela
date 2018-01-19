@@ -24,44 +24,43 @@ import org.springframework.stereotype.Service;
 
 import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.dao.PesRepository;
-import fr.sictiam.stela.pesservice.model.Pes;
-import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 
 @Service
-public class PesService implements ApplicationListener<PesHistoryEvent> {
+public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PesService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PesAllerService.class);
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    private final PesRepository pesRepository;
+    private final PesAllerRepository pesAllerRepository;
     private final PesHistoryRepository pesHistoryRepository;
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public PesService(PesRepository pesRepository, PesHistoryRepository pesHistoryRepository,
+    public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
             LocalAuthorityService localAuthorityService) {
-        this.pesRepository = pesRepository;
+        this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
 
     }
-    public List<Pes> getAllWithQuery(String number, String objet, LocalDate decisionFrom, LocalDate decisionTo,
+    public List<PesAller> getAllWithQuery(String number, String objet, LocalDate decisionFrom, LocalDate decisionTo,
             StatusType status) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Pes> query = builder.createQuery(Pes.class);
-        Root<Pes> pesRoot = query.from(Pes.class);
+        CriteriaQuery<PesAller> query = builder.createQuery(PesAller.class);
+        Root<PesAller> pesRoot = query.from(PesAller.class);
 
         List<Predicate> predicates = new ArrayList<>();        
         if (StringUtils.isNotBlank(objet))
@@ -84,19 +83,19 @@ public class PesService implements ApplicationListener<PesHistoryEvent> {
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(builder.desc(pesRoot.get("creation")));
 
-        TypedQuery<Pes> typedQuery = entityManager.createQuery(query);
-        List<Pes> pesList = typedQuery.getResultList();
+        TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
+        List<PesAller> pesList = typedQuery.getResultList();
         return pesList;
     }
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        Pes pes = getByUuid(event.getPesHistory().getActeUuid());
+        PesAller pes = getByUuid(event.getPesHistory().getActeUuid());
         pes.getPesHistories().add(event.getPesHistory());
-        pesRepository.save(pes);
+        pesAllerRepository.save(pes);
     }
 
-    public Pes getByUuid(String uuid) {
-        return pesRepository.findById(uuid).orElseThrow(PesNotFoundException::new);
+    public PesAller getByUuid(String uuid) {
+        return pesAllerRepository.findById(uuid).orElseThrow(PesNotFoundException::new);
     }
 }
