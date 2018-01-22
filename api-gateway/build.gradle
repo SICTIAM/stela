@@ -10,12 +10,6 @@ node {
     download = true
 }
 
-repositories {
-    // TEMP : while the new version of the ozwillo-java-spring-integration lib is not published on the Maven repos
-    // meanwhile, run ./gradlew install in the lib's project to have it locally published
-    mavenLocal()
-}
-
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile('org.springframework.cloud:spring-cloud-starter-config')
