@@ -62,6 +62,8 @@ services:
      - postgresql
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
+    volumes:
+       - ./../stela-config/certificates:/certificates
   pes-service:
       image: stela-poc/pes-service
       container_name: pes-service

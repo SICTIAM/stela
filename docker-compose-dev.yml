@@ -76,6 +76,8 @@ services:
      - rabbitmq
     environment:
      - "SPRING_PROFILES_ACTIVE=dev-docker"
+    volumes:
+        - ./../stela-config/certificates:/certificates
   pes-service:
     image: stela-poc/pes-service
     container_name: pes-service
