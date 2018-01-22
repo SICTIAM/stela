@@ -2,16 +2,10 @@ package fr.sictiam.stela.admin.controller;
 
 import java.util.List;
 
+import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -56,8 +50,12 @@ public class LocalAuthorityController {
 
     @GetMapping
     @JsonView(Views.LocalAuthorityView.class)
-    public List<LocalAuthority> getAllLocalAuthorities() {
-        return localAuthorityService.getAll();
+    public LocalAuthorityResultsUI getAllLocalAuthorities(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset) {
+        List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset);
+        Long count = localAuthorityService.countAll();
+        return new LocalAuthorityResultsUI(count, localAuthorities);
     }
 
     @GetMapping("/all")

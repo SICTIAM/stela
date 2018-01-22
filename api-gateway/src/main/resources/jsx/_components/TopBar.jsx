@@ -87,7 +87,7 @@ class TopBar extends Component {
                     <Menu.Menu position='right'>
 
                         {isLoggedIn &&
-                            <Menu.Item simple basic>
+                            <Menu.Item>
                                 <Dropdown basic trigger={triggerLA} icon={false}>
                                     <Dropdown.Menu>
                                         {listProfile}
@@ -101,7 +101,7 @@ class TopBar extends Component {
                                     <Menu vertical>
                                         <Menu.Item><span><Icon name='user' /> {t('top_bar.profile')}</span></Menu.Item>
                                         <Menu.Item as={Link} to='/admin'><span><Icon name='settings' /> {t('top_bar.admin')}</span></Menu.Item>
-                                        <Menu.Item onClick={() => window.location.href = '/logout'}><span><Icon name='sign out' /> {t('top_bar.log_out')}</span>&</Menu.Item>
+                                        <Menu.Item onClick={() => window.location.href = '/logout'}><span><Icon name='sign out' /> {t('top_bar.log_out')}</span></Menu.Item>
                                     </Menu>
                                 </Popup>
                             </Menu.Item>

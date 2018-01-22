@@ -79,3 +79,17 @@ footer {
 .ui.label {
     margin-bottom: 0.142857em;
 }
+ul.pagination {
+    padding: 0;
+    list-style-type: none;
+}
+ul.pagination li:not(:first-child) {
+    border-left: 1px solid;
+    border-color: rgba(34,36,38,.1);
+}
+ul.pagination li.active {
+    background: rgba(0,0,0,.05);
+}
+ul.pagination li a.item:focus {
+    outline:0;
+}

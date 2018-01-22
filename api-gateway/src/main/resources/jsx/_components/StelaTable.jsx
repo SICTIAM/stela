@@ -117,6 +117,7 @@ export default class StelaTable extends Component {
         const isEmpty = renderIf(data.length === 0)
         const isFilled = renderIf(data.length > 0)
         const select = renderIf(this.props.select)
+        const pagination = renderIf(this.props.pagination)
         const options = renderIf(this.props.selectOptions.length > 0 && this.state.originalData.length > 0)
 
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
@@ -202,6 +203,7 @@ export default class StelaTable extends Component {
                             )
                         )}
                     </Table.Body>
+                    {pagination(this.props.pagination)}
                 </Table>
             </div>
         )

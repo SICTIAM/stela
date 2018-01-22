@@ -5,7 +5,7 @@ import { Segment, Icon } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
 import { modules } from '../../_util/constants'
-import { Page } from '../../_components/UI'
+import { Page, Pagination } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthorityList extends Component {
@@ -13,15 +13,28 @@ class LocalAuthorityList extends Component {
         t: PropTypes.func
     }
     state = {
-        localAuthorities: []
+        localAuthorities: [],
+        totalCount: 0,
+        limit: 25,
+        offset: 0
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority' })
+        this.fetchLocalAuthorityies()
+    }
+    handlePageClick = (data) => {
+        const offset = Math.ceil(data.selected * this.state.limit)
+        this.setState({ offset }, this.fetchLocalAuthorityies)
+    }
+    fetchLocalAuthorityies = () => {
+        const { limit, offset } = this.state
+        let params = { limit, offset }
+        fetchWithAuthzHandling({ url: '/api/admin/local-authority', query: params })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ localAuthorities: json }))
+            .then(json => this.setState({ localAuthorities: json.results, totalCount: json.totalCount }))
     }
-    renderActivatedModule = (activatedModules, moduleName) => activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
+    renderActivatedModule = (activatedModules, moduleName) =>
+        activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
     render() {
         const { t } = this.context
         const metaData = [
@@ -39,6 +52,13 @@ class LocalAuthorityList extends Component {
                 displayComponent: (activatedModules) => this.renderActivatedModule(activatedModules, moduleName)
             })
         )
+        const displayedColumns = metaData.filter(metaData => metaData.displayed)
+        const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
+        const pagination =
+            <Pagination
+                columns={displayedColumns.length}
+                pageCount={pageCount}
+                handlePageClick={this.handlePageClick} />
         return (
             <Page title={t('admin.modules.local_authority_settings')}>
                 <Segment>
@@ -49,7 +69,8 @@ class LocalAuthorityList extends Component {
                         link='/admin/collectivite/'
                         linkProperty='uuid'
                         noDataMessage='Aucune collectivité'
-                        keyProperty='uuid' />
+                        keyProperty='uuid'
+                        pagination={pagination} />
                 </Segment>
             </Page>
         )

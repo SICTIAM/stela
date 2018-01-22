@@ -3,6 +3,7 @@ package fr.sictiam.stela.admin.service;
 import java.util.List;
 import java.util.Optional;
 
+import fr.sictiam.stela.admin.service.util.OffsetBasedPageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -10,6 +11,8 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -80,6 +83,16 @@ public class LocalAuthorityService {
 
     public List<LocalAuthority> getAll() {
         return localAuthorityRepository.findAll();
+    }
+
+    public List<LocalAuthority> getAllWithPagination(Integer limit, Integer offset) {
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit);
+        Page page = localAuthorityRepository.findAll(pageable);
+        return page.getContent();
+    }
+
+    public Long countAll() {
+        return localAuthorityRepository.countAll();
     }
 
     public LocalAuthority getByUuid(String uuid) {
