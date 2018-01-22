@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import moment from 'moment'
-import { Grid, Segment, List, Checkbox, Label, Icon, Button, Popup } from 'semantic-ui-react'
+import { Grid, Segment, List, Checkbox, Label, Dropdown, Button, Popup } from 'semantic-ui-react'
 
 import DraggablePosition from '../_components/DraggablePosition'
-import { Field } from '../_components/UI'
+import { Field, Page } from '../_components/UI'
 import history from '../_util/history'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -91,22 +91,36 @@ class Acte extends Component {
                 </div>
             </div >
         )
+        // TODO: Find a way to have a LEFT submenu instead of the popup
         return (
-            <div>
+            <Page title={acte.objet}>
                 {acteFetched(
                     <div>
                         <ActeAnomaly lastHistory={lastHistory} />
                         <Segment>
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
-                            <Grid>
-                                <Grid.Column width={12}><h1>{acte.objet}</h1></Grid.Column>
-                                <Grid.Column width={4} style={{ textAlign: 'right' }}>
-                                    {renderIf(lastHistory && lastHistory.status === 'ACK_RECEIVED')(
-                                        <a className='ui blue basic icon button' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank' title='Télécharger le justificatif'><Icon name='download' /></a>
-                                    )}
-                                    <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
-                                </Grid.Column>
-                            </Grid>
+                            <div style={{ textAlign: 'right' }}>
+                                {renderIf(lastHistory && lastHistory.status === 'ACK_RECEIVED')(
+                                    <Dropdown basic trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
+                                        <Dropdown.Menu>
+                                            <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
+                                                {t('acte.page.download_original')}
+                                            </a>
+                                            <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
+                                                {t('acte.page.download_justificative')}
+                                            </a>
+                                            {renderIf(acteACK)(
+                                                <Dropdown.Item>
+                                                    <Popup content={stampPosition} on='click' position='left center'
+                                                        trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
+                                                    />
+                                                </Dropdown.Item>
+                                            )}
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                )}
+                                <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
+                            </div>
 
                             <Field htmlFor="number" label={t('acte.fields.number')}>
                                 <span id="number">{acte.number}</span>
@@ -124,17 +138,9 @@ class Acte extends Component {
                                 <Grid.Column width={4}>
                                     <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
                                 </Grid.Column>
-                                <Grid.Column width={acteACK ? 4 : 12}>
+                                <Grid.Column width={12}>
                                     <span id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
                                 </Grid.Column>
-                                {renderIf(acteACK)(
-                                    <Grid.Column width={8}>
-                                        <Popup
-                                            trigger={<Button content={t('acte.stamp_pad.download_stamped_acte')} />}
-                                            content={stampPosition} on='click' position='right center'
-                                        />
-                                    </Grid.Column>
-                                )}
                             </Grid>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 {renderIf(annexes.length > 0)(
@@ -158,7 +164,7 @@ class Acte extends Component {
                 {acteNotFetched(
                     <p>{t('acte.page.non_existent_act')}</p>
                 )}
-            </div>
+            </Page>
         )
     }
 }

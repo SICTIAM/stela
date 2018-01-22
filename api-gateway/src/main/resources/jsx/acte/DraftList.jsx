@@ -5,6 +5,7 @@ import { translate } from 'react-i18next'
 import { Segment } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
+import { Page } from '../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
@@ -48,26 +49,27 @@ class DraftList extends Component {
         const deleteSelection = { title: t('acte.drafts.delete_selected_drafts'), titleNoSelection: t('acte.drafts.delete_all_drafts'), action: this.deleteDrafts }
 
         return (
-            <Segment>
-                <h1>{t('acte.drafts.title')}</h1>
-                <StelaTable
-                    data={this.state.actes}
-                    metaData={[
-                        { property: 'uuid', displayed: false, searchable: false },
-                        { property: 'actes', displayed: true, displayName: t('acte.fields.number'), searchable: true, displayComponent: numberDisplay },
-                        { property: 'actes', displayed: true, displayName: t('acte.fields.objet'), searchable: true, displayComponent: objetDisplay },
-                        { property: 'actes', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
-                        { property: 'lastModified', displayed: true, displayName: t('api-gateway:list.last_modified'), searchable: false, displayComponent: draftDateDisplay },
-                        { property: 'batch', displayed: false, searchable: false }
-                    ]}
-                    header={true}
-                    select={true}
-                    selectOptions={[deleteSelection]}
-                    link='/actes/brouillons/'
-                    linkProperty='uuid'
-                    noDataMessage={t('acte.drafts.no_draft')}
-                    keyProperty='uuid' />
-            </Segment >
+            <Page title={t('acte.drafts.title')}>
+                <Segment>
+                    <StelaTable
+                        data={this.state.actes}
+                        metaData={[
+                            { property: 'uuid', displayed: false, searchable: false },
+                            { property: 'actes', displayed: true, displayName: t('acte.fields.number'), searchable: true, displayComponent: numberDisplay },
+                            { property: 'actes', displayed: true, displayName: t('acte.fields.objet'), searchable: true, displayComponent: objetDisplay },
+                            { property: 'actes', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
+                            { property: 'lastModified', displayed: true, displayName: t('api-gateway:list.last_modified'), searchable: false, displayComponent: draftDateDisplay },
+                            { property: 'batch', displayed: false, searchable: false }
+                        ]}
+                        header={true}
+                        select={true}
+                        selectOptions={[deleteSelection]}
+                        link='/actes/brouillons/'
+                        linkProperty='uuid'
+                        noDataMessage={t('acte.drafts.no_draft')}
+                        keyProperty='uuid' />
+                </Segment >
+            </Page>
         )
     }
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { Menu } from 'semantic-ui-react'
+import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
 class AdminMenuBar extends Component {
@@ -11,35 +11,30 @@ class AdminMenuBar extends Component {
     render() {
         const { t } = this.context
         return (
-            <Menu color='blue' fixed='left' inverted vertical>
+            <Menu color='blue' fixed='left' className='mainMenu' inverted secondary vertical>
+                <div className='mainMenus'>
+                    <Menu.Item as={Link} to="/admin/tableau-de-bord">
+                        <Icon name='dashboard' size='large' /> {t('admin.dashboard')}
+                    </Menu.Item>
+                    <Menu.Item as={Link} to='/admin/ma-collectivite'>
+                        <Icon name='building' size='large' /> {t('admin.my_local_authority')}
+                    </Menu.Item>
+                    <Menu.Item as={Link} to='/admin/collectivite'>
+                        <Icon name='building' size='large' /> {t('admin.local_authorities')}
+                    </Menu.Item>
+                    <Menu.Item as={Link} to='/admin/actes/parametrage-module'>
+                        <Icon name='checkmark box' size='large' /> {t('acte:admin.modules.acte.module_settings.title')}
+                    </Menu.Item>
+                </div>
 
-                <Menu.Item as={Link} to="/" header>
-                    <h1 style={{ textAlign: 'center' }}>{t('app_title')}</h1>
-                </Menu.Item>
-
-                <Menu.Item as={Link} to="/admin/tableau-de-bord">
-                    {t('admin.dashboard')}
-                </Menu.Item>
-
-                <Menu.Item>
-                    <Menu.Header>Admin collectivité</Menu.Header>
-                    <Menu.Menu>
-                        <Menu.Item as={Link} to='/admin/ma-collectivite'>{t('admin.my_local_authority')}</Menu.Item>
-                    </Menu.Menu>
-                </Menu.Item>
-
-                <Menu.Item>
-                    <Menu.Header>Admin instance</Menu.Header>
-                    <Menu.Menu>
-                        <Menu.Item as={Link} to='/admin/collectivite'>{t('admin.local_authorities')}</Menu.Item>
-                        <Menu.Item as={Link} to='/admin/actes/parametrage-module'>{t('acte:admin.modules.acte.module_settings.title')}</Menu.Item>
-                    </Menu.Menu>
-                </Menu.Item>
-
-                <Menu.Item as={Link} to="/" header>
-                    {t('admin.back_to_stela')}
-                </Menu.Item>
-
+                <div>
+                    <Menu.Item style={{ width: '100%' }} >
+                        <img style={{ width: '100%', padding: '2em' }} src={process.env.PUBLIC_URL + '/img/logo_sictiam_white.png'} alt="SICTIAM" />
+                    </Menu.Item>
+                    <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
+                        Créé avec ❤ par le SICTIAM
+                    </Menu.Item>
+                </div>
             </Menu>
         )
     }

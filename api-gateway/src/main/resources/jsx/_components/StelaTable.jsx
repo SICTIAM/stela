@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import renderIf from 'render-if'
-import { Table, Input, Checkbox, Dropdown } from 'semantic-ui-react'
+import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
 import history from '../_util/history'
 
@@ -122,6 +122,7 @@ export default class StelaTable extends Component {
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
         const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
 
+        const trigger = <Button basic color='grey'>Actions <Icon style={{ marginLeft: '0.5em', marginRight: 0 }} name='caret down' /></Button>
         const selectOptions = this.props.selectOptions.map(selectOption =>
             <Dropdown.Item key={selectOption.title} onClick={() => this.handleSelectAction(selectOption.action)}>
                 {Object.entries(this.state.checkboxes).filter(checkbox => checkbox[1]).length > 0 ?
@@ -137,14 +138,14 @@ export default class StelaTable extends Component {
                 )}
 
                 {options(
-                    <Dropdown style={this.floatRightStyle} text='Actions' button>
+                    <Dropdown style={this.floatRightStyle} trigger={trigger} icon={false} basic>
                         <Dropdown.Menu>
                             {selectOptions}
                         </Dropdown.Menu>
                     </Dropdown>
                 )}
 
-                <Table sortable={this.props.header} basic={this.props.basic} celled={this.props.celled} fixed>
+                <Table selectable sortable={this.props.header} basic={this.props.basic} celled={this.props.celled} fixed>
                     {title(
                         <Table.Header>
                             <Table.Row>
@@ -155,11 +156,6 @@ export default class StelaTable extends Component {
                     {header(
                         <Table.Header>
                             <Table.Row>
-                                {select(
-                                    <Table.HeaderCell style={{ width: '40px' }} onClick={this.handleChekAll}>
-                                        <Checkbox checked={this.state.checkAll} onClick={this.handleChekAll} />
-                                    </Table.HeaderCell>
-                                )}
                                 {this.props.metaData.map((metaData, index) =>
                                     renderIf(!undisplayedColumnsProperties.includes(metaData.property))(
                                         <Table.HeaderCell key={index + '-' + metaData.displayName}
@@ -168,6 +164,11 @@ export default class StelaTable extends Component {
                                             {metaData.displayName}
                                         </Table.HeaderCell>
                                     )
+                                )}
+                                {select(
+                                    <Table.HeaderCell style={{ width: '40px' }} onClick={this.handleChekAll}>
+                                        <Checkbox checked={this.state.checkAll} onClick={this.handleChekAll} />
+                                    </Table.HeaderCell>
                                 )}
                             </Table.Row>
                         </Table.Header>
@@ -183,18 +184,18 @@ export default class StelaTable extends Component {
                         {isFilled(
                             data.map(row =>
                                 <Table.Row key={row[this.props.keyProperty]}>
-                                    {select(
-                                        <Table.Cell style={{ width: '40px' }}>
-                                            <Checkbox checked={this.state.checkboxes[row[this.props.keyProperty]]}
-                                                onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
-                                        </Table.Cell>
-                                    )}
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell onClick={() => this.handleLink(row[this.props.linkProperty])}
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}
                                             key={index + '-' + row[displayedColumn.property]}>
                                             {displayedColumn.displayComponent ?
                                                 displayedColumn.displayComponent(row[displayedColumn.property]) : row[displayedColumn.property]}
+                                        </Table.Cell>
+                                    )}
+                                    {select(
+                                        <Table.Cell style={{ width: '40px' }}>
+                                            <Checkbox checked={this.state.checkboxes[row[this.props.keyProperty]]}
+                                                onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
                                         </Table.Cell>
                                     )}
                                 </Table.Row>

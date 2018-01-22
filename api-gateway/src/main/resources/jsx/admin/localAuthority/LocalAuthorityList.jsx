@@ -5,6 +5,7 @@ import { Segment, Icon } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
 import { modules } from '../../_util/constants'
+import { Page } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthorityList extends Component {
@@ -39,17 +40,18 @@ class LocalAuthorityList extends Component {
             })
         )
         return (
-            <Segment>
-                <h1>{t('admin.modules.local_authority_settings')}</h1>
-                <StelaTable
-                    data={this.state.localAuthorities}
-                    metaData={metaData}
-                    header={true}
-                    link='/admin/collectivite/'
-                    linkProperty='uuid'
-                    noDataMessage='Aucune collectivité'
-                    keyProperty='uuid' />
-            </Segment>
+            <Page title={t('admin.modules.local_authority_settings')}>
+                <Segment>
+                    <StelaTable
+                        data={this.state.localAuthorities}
+                        metaData={metaData}
+                        header={true}
+                        link='/admin/collectivite/'
+                        linkProperty='uuid'
+                        noDataMessage='Aucune collectivité'
+                        keyProperty='uuid' />
+                </Segment>
+            </Page>
         )
     }
 }

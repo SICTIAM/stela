@@ -62,7 +62,9 @@
       "detail_anomaly": "Détail de l'anomalie",
       "no_history": "Aucun historique pour cet acte",
       "linked_file": "Fichier joint",
-      "cancel_deposit": "Annuler le dépôt"
+      "cancel_deposit": "Annuler le dépôt",
+      "download_original": "Télécharger le fichier original",
+      "download_justificative": "Télécharger le justificatif"
     },
     "stamp_pad": {
       "title": "Position du tampon",

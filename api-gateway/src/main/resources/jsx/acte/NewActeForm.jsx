@@ -374,13 +374,13 @@ class NewActeForm extends Component {
                         </div>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BATCH')(
-                        <div>
-                            <Button type='submit' disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
+                        <div style={{ textAlign: 'right' }}>
                             {renderIf(this.state.fields.uuid)(
-                                <Button style={{ marginLeft: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
+                                <Button style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
                                     {t('api-gateway:form.delete_draft')}
                                 </Button>
                             )}
+                            <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
                         </div>
                     )}
                 </Form>

@@ -3,14 +3,14 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { translate } from 'react-i18next'
 
-import { Segment, List, Form, Button, Icon, Confirm } from 'semantic-ui-react'
+import { Segment, List, Form, Button, Icon, Confirm, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 
 import StelaTable from '../../_components/StelaTable'
 import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
-import { Field, ListItem } from '../../_components/UI'
+import { Field, ListItem, Page } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthority extends Component {
@@ -41,14 +41,15 @@ class LocalAuthority extends Component {
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json =>{
+            .then(json => {
                 //flaten agent properties for the table component
                 var agents = [];
-                for ( var i in json.profiles ) {
-                    agents.push( json.profiles[i].agent );
+                for (var i in json.profiles) {
+                    agents.push(json.profiles[i].agent);
                 }
                 json.agents = agents;
-                this.setState({ fields: json })})
+                this.setState({ fields: json })
+            })
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
@@ -124,17 +125,17 @@ class LocalAuthority extends Component {
                 <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='cube' iconColor={isActivated ? 'green' : 'red'}>
                     {isActivated &&
                         <List.Content floated='right'>
-                            <Button color='red' compact onClick={() => this.alertModal(moduleName, 'deactivation')}>{t('form.deactivate')}</Button>
+                            <Button basic color='red' compact onClick={() => this.alertModal(moduleName, 'deactivation')}>{t('form.deactivate')}</Button>
                         </List.Content>
                     }
                     {!isActivated &&
                         <List.Content floated='right'>
-                            <Button color='green' compact onClick={() => this.alertModal(moduleName, 'activation')}>{t('form.activate')}</Button>
+                            <Button basic color='green' compact onClick={() => this.alertModal(moduleName, 'activation')}>{t('form.activate')}</Button>
                         </List.Content>
                     }
                     {isActivated &&
                         <List.Content floated='right'>
-                            <Link to={isActivatedUrl} className='ui button compact'>{t('form.configure')}</Link>
+                            <Link to={isActivatedUrl} className='ui button compact basic primary'>{t('form.configure')}</Link>
                         </List.Content>
                     }
                 </ListItem>
@@ -148,32 +149,37 @@ class LocalAuthority extends Component {
             </ListItem>
         )
         return (
-            <Segment>
-                <h1>{this.state.fields.name}</h1>
+            <Page title={this.state.fields.name}>
 
-                <Segment>
-                    <h2>{t('admin.local_authority.general_informations')}</h2>
-                    <Field htmlFor="uuid" label={t('local_authority.uuid')}>
-                        <span id="uuid">{this.state.fields.uuid}</span>
-                    </Field>
-                    <Field htmlFor="siren" label={t('local_authority.siren')}>
-                        <span id="siren">{this.state.fields.siren}</span>
-                    </Field>
-                </Segment>
+                <Grid columns={2}>
+                    <Grid.Column>
+                        <Segment style={{ height: '100%' }}>
+                            <h2>{t('admin.local_authority.general_informations')}</h2>
+                            <Field htmlFor="uuid" label={t('local_authority.uuid')}>
+                                <span id="uuid">{this.state.fields.uuid}</span>
+                            </Field>
+                            <Field htmlFor="siren" label={t('local_authority.siren')}>
+                                <span id="siren">{this.state.fields.siren}</span>
+                            </Field>
+                        </Segment>
+                    </Grid.Column>
 
-                <Segment>
-                    <h2>{t('admin.local_authority.modules')}</h2>
-                    <List divided relaxed verticalAlign='middle'>
-                        {moduleList}
-                    </List>
-                    <Confirm
-                        open={isConfirmModalOpen}
-                        content={confirmModalMessage}
-                        confirmButton={t('form.confirm')}
-                        cancelButton={t('form.cancel')}
-                        onCancel={this.closeConfirmModal}
-                        onConfirm={this.confirmModal} />
-                </Segment>
+                    <Grid.Column>
+                        <Segment>
+                            <h2>{t('admin.local_authority.modules')}</h2>
+                            <List divided relaxed verticalAlign='middle'>
+                                {moduleList}
+                            </List>
+                            <Confirm
+                                open={isConfirmModalOpen}
+                                content={confirmModalMessage}
+                                confirmButton={t('form.confirm')}
+                                cancelButton={t('form.cancel')}
+                                onCancel={this.closeConfirmModal}
+                                onConfirm={this.confirmModal} />
+                        </Segment>
+                    </Grid.Column>
+                </Grid>
 
                 <Segment>
                     <h2>{t('admin.local_authority.users')}</h2>
@@ -199,7 +205,7 @@ class LocalAuthority extends Component {
                         {groupList}
                     </List>
                 </Segment>
-            </Segment>
+            </Page>
         )
     }
 }
@@ -237,7 +243,7 @@ class AddGroup extends Component {
                                 value={this.state.newGroup}
                                 onChange={this.handleFieldChange} />
                         </div>
-                        <Button style={{ marginLeft: '1em' }} onClick={this.addNewGroup} primary disabled={!this.state.isFormValid} type='submit'>{t('form.add')}</Button>
+                        <Button basic primary style={{ marginLeft: '1em' }} onClick={this.addNewGroup} disabled={!this.state.isFormValid} type='submit'>{t('form.add')}</Button>
                     </div>
                 </Form.Field>
             </Form>

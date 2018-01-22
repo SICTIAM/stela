@@ -8,7 +8,7 @@ import FileSaver from 'file-saver'
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-import { FormFieldInline, FormField } from '../_components/UI'
+import { FormFieldInline, FormField, Page } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
 class ActeList extends Component {
@@ -89,35 +89,36 @@ class ActeList extends Component {
         const downloadMergedStampedsSelectOption = { title: t('acte.list.download_selected_merged_stamped'), titleNoSelection: t('acte.list.download_all_merged_stamped'), action: this.downloadMergedStamp }
         const downloadZipedStampedsSelectOption = { title: t('acte.list.download_selected_ziped_stamped'), titleNoSelection: t('acte.list.download_all_ziped_stamped'), action: this.downloadZipedStamp }
         return (
-            <Segment>
-                <h1>{t('acte.list.title')}</h1>
-                <ActeListForm
-                    search={this.state.search}
-                    getSearchData={this.getSearchData}
-                    handleFieldChange={this.handleFieldChange}
-                    submitForm={this.submitForm} />
-                <StelaTable
-                    data={this.state.actes}
-                    metaData={[
-                        { property: 'uuid', displayed: false, searchable: false },
-                        { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },
-                        { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true },
-                        { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay },
-                        { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
-                        { property: 'code', displayed: false, searchable: false },
-                        { property: 'creation', displayed: false, searchable: false },
-                        { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
-                        { property: 'public', displayed: false, searchable: false },
-                        { property: 'publicWebsite', displayed: false, searchable: false },
-                    ]}
-                    header={true}
-                    select={true}
-                    selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
-                    link='/actes/'
-                    linkProperty='uuid'
-                    noDataMessage='Aucun acte'
-                    keyProperty='uuid' />
-            </Segment >
+            <Page title={t('acte.list.title')}>
+                <Segment>
+                    <ActeListForm
+                        search={this.state.search}
+                        getSearchData={this.getSearchData}
+                        handleFieldChange={this.handleFieldChange}
+                        submitForm={this.submitForm} />
+                    <StelaTable
+                        data={this.state.actes}
+                        metaData={[
+                            { property: 'uuid', displayed: false, searchable: false },
+                            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },
+                            { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true },
+                            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay },
+                            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
+                            { property: 'code', displayed: false, searchable: false },
+                            { property: 'creation', displayed: false, searchable: false },
+                            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
+                            { property: 'public', displayed: false, searchable: false },
+                            { property: 'publicWebsite', displayed: false, searchable: false },
+                        ]}
+                        header={true}
+                        select={true}
+                        selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
+                        link='/actes/'
+                        linkProperty='uuid'
+                        noDataMessage='Aucun acte'
+                        keyProperty='uuid' />
+                </Segment >
+            </Page>
         )
     }
 }
@@ -178,7 +179,7 @@ class ActeListForm extends Component {
                                 {statusOptions}
                             </select>
                         </FormFieldInline>
-                        <Button type='submit'>{t('api-gateway:form.search')}</Button>
+                        <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
                     </Form>
                 </Accordion.Content>
             </Accordion>

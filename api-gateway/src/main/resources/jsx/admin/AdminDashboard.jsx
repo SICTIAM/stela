@@ -3,14 +3,15 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Label, Statistic, Grid } from 'semantic-ui-react'
 
+import { Page } from '../_components/UI'
+
 class AdminDashboard extends Component {
     static propTypes = {
         t: PropTypes.func.isRequired
     }
     render() {
         return (
-            <div>
-                <h1>Tableau de bord</h1>
+            <Page title='Tableau de bord'>
                 <Segment raised>
                     <Label as='a' color='blue' ribbon>Ces dernière 24h</Label>
                     <Statistic.Group widths='four'>
@@ -54,7 +55,7 @@ class AdminDashboard extends Component {
 
                 <h2>Les dernières utilisateurs créés</h2>
                 <p>[WIP]</p>
-            </div>
+            </Page>
         )
     }
 }

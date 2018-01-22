@@ -264,12 +264,14 @@ class NewActeBatchedForm extends Component {
                     {wrappedActes}
                     <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>{t('acte.new.add_an_acte')}</Button>
                 </Accordion>
-                <Button onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
-                {renderIf(this.state.fields.uuid)(
-                    <Button style={{ marginLeft: '1em' }} onClick={this.initDelete} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
-                        {t('api-gateway:form.delete_draft')}
-                    </Button>
-                )}
+                <div style={{ textAlign: 'right' }}>
+                    {renderIf(this.state.fields.uuid)(
+                        <Button style={{ marginRight: '1em' }} onClick={this.initDelete} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
+                            {t('api-gateway:form.delete_draft')}
+                        </Button>
+                    )}
+                    <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
+                </div>
             </div>
         )
     }
@@ -289,7 +291,7 @@ const styles = {
 
 const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, formValid }) =>
     <Segment style={{ paddingTop: '0', paddingBottom: '0' }}>
-        <Accordion.Title active={isActive} >
+        <Accordion.Title active={isActive}>
             <Grid>
                 <Grid.Column style={styles.centered} width={1} onClick={() => handleClick(acte.uuid)}>
                     <Header size='small'><Icon name='dropdown' /></Header>
@@ -310,7 +312,7 @@ const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedA
                         : <Icon color='red' name='warning circle' size='large' />}
                 </Grid.Column>
                 <Grid.Column width={1}>
-                    <Button color='red' size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
+                    <Button color='red' basic size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
                         <Icon name='remove' />
                     </Button>
                 </Grid.Column>
