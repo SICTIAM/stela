@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
@@ -13,16 +13,16 @@ class AdminMenuBar extends Component {
         return (
             <Menu color='blue' fixed='left' className='mainMenu' inverted secondary vertical>
                 <div className='mainMenus'>
-                    <Menu.Item as={Link} to="/admin/tableau-de-bord">
+                    <Menu.Item as={NavLink} to="/admin/tableau-de-bord">
                         <Icon name='dashboard' size='large' /> {t('admin.dashboard')}
                     </Menu.Item>
-                    <Menu.Item as={Link} to='/admin/ma-collectivite'>
+                    <Menu.Item as={NavLink} to='/admin/ma-collectivite'>
                         <Icon name='building' size='large' /> {t('admin.my_local_authority')}
                     </Menu.Item>
-                    <Menu.Item as={Link} to='/admin/collectivite'>
+                    <Menu.Item as={NavLink} to='/admin/collectivite'>
                         <Icon name='building' size='large' /> {t('admin.local_authorities')}
                     </Menu.Item>
-                    <Menu.Item as={Link} to='/admin/actes/parametrage-module'>
+                    <Menu.Item as={NavLink} to='/admin/actes/parametrage-module'>
                         <Icon name='checkmark box' size='large' /> {t('acte:admin.modules.acte.module_settings.title')}
                     </Menu.Item>
                 </div>

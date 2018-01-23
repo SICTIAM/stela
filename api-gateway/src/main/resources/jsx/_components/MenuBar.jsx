@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
@@ -20,9 +20,9 @@ class MenuBar extends Component {
                             <Icon name='checkmark box' size='large' />
                             <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
                             <Menu.Menu>
-                                <Menu.Item as={Link} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
-                                <Menu.Item as={Link} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
-                                <Menu.Item as={Link} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
+                                <Menu.Item as={NavLink} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
+                                <Menu.Item as={NavLink} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
+                                <Menu.Item as={NavLink} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
                                 <Menu.Item>{t('menu.acte.deliberation_register')}</Menu.Item>
                             </Menu.Menu>
                         </Menu.Item>
@@ -33,8 +33,8 @@ class MenuBar extends Component {
                             <Icon name='calculator' size='large' />
                             <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
                             <Menu.Menu>
-                                <Menu.Item as={Link} to="/pes/nouveau">{t('menu.pes.submit_a_PES_Aller')}</Menu.Item>
-                                <Menu.Item as={Link} to="/pes/liste">{t('menu.pes.PES_Aller_list')}</Menu.Item>
+                                <Menu.Item as={NavLink} to="/pes/nouveau">{t('menu.pes.submit_a_PES_Aller')}</Menu.Item>
+                                <Menu.Item as={NavLink} to="/pes/liste">{t('menu.pes.PES_Aller_list')}</Menu.Item>
                                 <Menu.Item>{t('menu.pes.PES_Retour_list')}</Menu.Item>
                             </Menu.Menu>
                         </Menu.Item>
