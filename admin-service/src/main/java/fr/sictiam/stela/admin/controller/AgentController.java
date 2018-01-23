@@ -19,7 +19,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fr.sictiam.stela.admin.dao.AgentConnectionRepository;
 import fr.sictiam.stela.admin.model.Agent;
+import fr.sictiam.stela.admin.model.AgentConnection;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.service.AgentService;
@@ -31,6 +33,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class AgentController {
 
     private final AgentService agentService;
+    
+    private final AgentConnectionRepository agentConnectionRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentController.class);
     
@@ -40,8 +44,9 @@ public class AgentController {
     @Value("${application.jwt.secret}")
     String SECRET;
 
-    public AgentController(AgentService agentService) {
+    public AgentController(AgentService agentService, AgentConnectionRepository agentConnectionRepository) {
         this.agentService = agentService;
+        this.agentConnectionRepository = agentConnectionRepository;
     }
 
     @PostMapping
@@ -49,6 +54,7 @@ public class AgentController {
     public String createCurrentUser(@RequestBody Agent agent) {
 
         Profile profile = agentService.createAndAttach(agent);
+        agentConnectionRepository.save(new AgentConnection(profile));
         try {
             ObjectMapper mapper = new ObjectMapper();
             String body = mapper.writerWithView(Views.ProfileView.class).writeValueAsString(profile);
