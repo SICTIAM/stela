@@ -31,7 +31,7 @@ class ActeList extends Component {
             decisionFrom: '',
             decisionTo: ''
         },
-        limit: 1,
+        limit: 25,
         offset: 0
     }
     componentDidMount() {
@@ -133,6 +133,7 @@ class ActeList extends Component {
                         metaData={metaData}
                         header={true}
                         select={true}
+                        search={false}
                         selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
                         link='/actes/'
                         linkProperty='uuid'

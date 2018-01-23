@@ -52,7 +52,7 @@ public class LocalAuthorityController {
     @GetMapping
     @JsonView(Views.LocalAuthorityView.class)
     public LocalAuthorityResultsUI getAllLocalAuthorities(
-            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "uuid") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") Sort.Direction direction) {

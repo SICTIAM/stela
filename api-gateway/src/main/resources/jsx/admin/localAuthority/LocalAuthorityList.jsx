@@ -15,7 +15,7 @@ class LocalAuthorityList extends Component {
     state = {
         localAuthorities: [],
         totalCount: 0,
-        limit: 1,
+        limit: 25,
         offset: 0,
         column: '',
         direction: ''
@@ -77,6 +77,7 @@ class LocalAuthorityList extends Component {
                         data={this.state.localAuthorities}
                         metaData={metaData}
                         header={true}
+                        search={false}
                         link='/admin/collectivite/'
                         linkProperty='uuid'
                         noDataMessage='Aucune collectivité'
