@@ -38,8 +38,8 @@ public class ReceiverService {
     private LocalAuthorityService localAuthorityService;
 
     @RabbitListener(bindings = @QueueBinding(           
-            value = @Queue(name="listeningQueue", durable= "true"),
-            exchange = @Exchange(value = "#{'${application.amqp.acte.exchange}'}", type = ExchangeTypes.TOPIC, durable = "true"),
+            value = @Queue(name="acteQueue", durable= "true"),
+            exchange = @Exchange(value = "#{'${application.amqp.acte.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"),
             key = "#{'${application.amqp.acte.adminKey}'}")
     )
     public void fromAdminService(Message message) {

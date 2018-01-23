@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.config;
 
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -35,8 +36,8 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    TopicExchange topicExchange() {
-        return new TopicExchange(exchangeName, true, false);
+    FanoutExchange fanoutExchange() {
+        return new FanoutExchange(exchangeName, true, false);
     }
 
     @Bean
@@ -61,7 +62,7 @@ public class RabbitConfiguration {
     RabbitAdmin rabbitAdmin() {
         RabbitAdmin admin = new RabbitAdmin(connectionFactory());
         admin.setAutoStartup(true);
-        admin.declareExchange(topicExchange());
+        admin.declareExchange(fanoutExchange());
         return admin;
     }
 }
