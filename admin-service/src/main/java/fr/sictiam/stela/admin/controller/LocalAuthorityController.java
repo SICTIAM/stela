@@ -5,6 +5,7 @@ import java.util.List;
 import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -52,8 +53,10 @@ public class LocalAuthorityController {
     @JsonView(Views.LocalAuthorityView.class)
     public LocalAuthorityResultsUI getAllLocalAuthorities(
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset) {
-        List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset);
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "uuid") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") Sort.Direction direction) {
+        List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset, column, direction);
         Long count = localAuthorityService.countAll();
         return new LocalAuthorityResultsUI(count, localAuthorities);
     }

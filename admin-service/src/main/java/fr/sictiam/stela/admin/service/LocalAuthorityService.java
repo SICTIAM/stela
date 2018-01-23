@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -85,8 +86,8 @@ public class LocalAuthorityService {
         return localAuthorityRepository.findAll();
     }
 
-    public List<LocalAuthority> getAllWithPagination(Integer limit, Integer offset) {
-        Pageable pageable = new OffsetBasedPageRequest(offset, limit);
+    public List<LocalAuthority> getAllWithPagination(Integer limit, Integer offset, String column, Sort.Direction direction) {
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit, new Sort(direction, column));
         Page page = localAuthorityRepository.findAll(pageable);
         return page.getContent();
     }

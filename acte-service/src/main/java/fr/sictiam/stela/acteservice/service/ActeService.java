@@ -15,10 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 
 import com.lowagie.text.DocumentException;
@@ -151,14 +148,15 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status, Integer limit, Integer offset) {
+    public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status, Integer limit, Integer offset, String column, String direction) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
+        String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
         List<Predicate> predicates = getQueryPredicates(builder, acteRoot, number, objet, nature, decisionFrom, decisionTo, status);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
-                .orderBy(builder.desc(acteRoot.get("creation")));
+                .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC") ? builder.asc(acteRoot.get(columnAttribute)) : builder.desc(acteRoot.get(columnAttribute)));
 
         return entityManager.createQuery(query)
                 .setFirstResult(offset)
@@ -277,7 +275,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ?
                 ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList()) :
-                getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0);
+                getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "");
     }
 
     public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {

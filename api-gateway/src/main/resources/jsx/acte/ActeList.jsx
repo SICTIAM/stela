@@ -21,6 +21,8 @@ class ActeList extends Component {
     state = {
         actes: [],
         totalCount: 0,
+        column: '',
+        direction: '',
         search: {
             number: '',
             objet: '',
@@ -29,11 +31,11 @@ class ActeList extends Component {
             decisionFrom: '',
             decisionTo: ''
         },
-        limit: 25,
+        limit: 1,
         offset: 0
     }
     componentDidMount() {
-        this.submitForm({})
+        this.submitForm()
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search
@@ -41,7 +43,8 @@ class ActeList extends Component {
         this.setState({ search: search })
     }
     getSearchData = () => {
-        const data = {}
+        const { limit, offset, direction, column } = this.state
+        const data = { limit, offset, direction, column }
         Object.keys(this.state.search)
             .filter(k => this.state.search[k] !== '')
             .map(k => data[k] = this.state.search[k])
@@ -49,14 +52,20 @@ class ActeList extends Component {
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, () => this.submitForm({}))
+        this.setState({ offset }, () => this.submitForm())
     }
-    submitForm = (data) => {
+    sort = (clickedColumn) => {
+        const { column, direction } = this.state
+        if (column !== clickedColumn) {
+            this.setState({ column: clickedColumn, direction: 'ASC' }, () => this.submitForm())
+            return
+        }
+        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
+    }
+    submitForm = () => {
         const headers = { 'Accept': 'application/json' }
-        let params = data
-        params.limit = this.state.limit
-        params.offset = this.state.offset
-        fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: params, headers: headers })
+        const data = this.getSearchData()
+        fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ actes: json.results, totalCount: json.totalCount }))
@@ -95,13 +104,13 @@ class ActeList extends Component {
         const downloadZipedStampedsSelectOption = { title: t('acte.list.download_selected_ziped_stamped'), titleNoSelection: t('acte.list.download_all_ziped_stamped'), action: this.downloadZipedStamp }
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
-            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },
-            { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true },
-            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay },
-            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
+            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true },
+            { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true },
+            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay, sortable: true },
+            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay, sortable: true },
             { property: 'code', displayed: false, searchable: false },
             { property: 'creation', displayed: false, searchable: false },
-            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
+            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay, sortable: false },
             { property: 'public', displayed: false, searchable: false },
             { property: 'publicWebsite', displayed: false, searchable: false },
         ]
@@ -117,7 +126,6 @@ class ActeList extends Component {
                 <Segment>
                     <ActeListForm
                         search={this.state.search}
-                        getSearchData={this.getSearchData}
                         handleFieldChange={this.handleFieldChange}
                         submitForm={this.submitForm} />
                     <StelaTable
@@ -130,7 +138,10 @@ class ActeList extends Component {
                         linkProperty='uuid'
                         noDataMessage='Aucun acte'
                         keyProperty='uuid'
-                        pagination={pagination} />
+                        pagination={pagination}
+                        sort={this.sort}
+                        direction={this.state.direction}
+                        column={this.state.column} />
                 </Segment >
             </Page>
         )
@@ -150,7 +161,7 @@ class ActeListForm extends Component {
     }
     submitForm = (event) => {
         if (event) event.preventDefault()
-        this.props.submitForm(this.props.getSearchData())
+        this.props.submitForm()
     }
     render() {
         const { t } = this.context

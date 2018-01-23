@@ -15,8 +15,10 @@ class LocalAuthorityList extends Component {
     state = {
         localAuthorities: [],
         totalCount: 0,
-        limit: 25,
-        offset: 0
+        limit: 1,
+        offset: 0,
+        column: '',
+        direction: ''
     }
     componentDidMount() {
         this.fetchLocalAuthorityies()
@@ -26,12 +28,20 @@ class LocalAuthorityList extends Component {
         this.setState({ offset }, this.fetchLocalAuthorityies)
     }
     fetchLocalAuthorityies = () => {
-        const { limit, offset } = this.state
-        let params = { limit, offset }
+        const { limit, offset, column, direction } = this.state
+        let params = { limit, offset, column, direction }
         fetchWithAuthzHandling({ url: '/api/admin/local-authority', query: params })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ localAuthorities: json.results, totalCount: json.totalCount }))
+    }
+    sort = (clickedColumn) => {
+        const { column, direction } = this.state
+        if (column !== clickedColumn) {
+            this.setState({ column: clickedColumn, direction: 'ASC' }, this.fetchLocalAuthorityies)
+            return
+        }
+        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchLocalAuthorityies)
     }
     renderActivatedModule = (activatedModules, moduleName) =>
         activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
@@ -39,8 +49,8 @@ class LocalAuthorityList extends Component {
         const { t } = this.context
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
-            { property: 'siren', displayed: true, displayName: t('local_authority.siren'), searchable: true },
-            { property: 'name', displayed: true, displayName: t('local_authority.name'), searchable: true }
+            { property: 'siren', displayed: true, displayName: t('local_authority.siren'), searchable: true, sortable: true },
+            { property: 'name', displayed: true, displayName: t('local_authority.name'), searchable: true, sortable: true }
         ]
         // TODO: fetch module list from backend
         modules.forEach(moduleName =>
@@ -49,6 +59,7 @@ class LocalAuthorityList extends Component {
                 displayed: true,
                 displayName: t(`modules.${moduleName}`),
                 searchable: false,
+                sortable: false,
                 displayComponent: (activatedModules) => this.renderActivatedModule(activatedModules, moduleName)
             })
         )
@@ -70,7 +81,10 @@ class LocalAuthorityList extends Component {
                         linkProperty='uuid'
                         noDataMessage='Aucune collectivité'
                         keyProperty='uuid'
-                        pagination={pagination} />
+                        pagination={pagination}
+                        sort={this.sort}
+                        direction={this.state.direction}
+                        column={this.state.column} />
                 </Segment>
             </Page>
         )
