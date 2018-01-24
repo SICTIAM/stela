@@ -54,7 +54,7 @@ public class LocalAuthorityController {
     public LocalAuthorityResultsUI getAllLocalAuthorities(
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
-            @RequestParam(value = "column", required = false, defaultValue = "uuid") String column,
+            @RequestParam(value = "column", required = false, defaultValue = "name") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") Sort.Direction direction) {
         List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset, column, direction);
         Long count = localAuthorityService.countAll();

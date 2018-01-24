@@ -21,16 +21,15 @@ class LocalAuthorityList extends Component {
         direction: ''
     }
     componentDidMount() {
-        this.fetchLocalAuthorityies()
+        this.fetchLocalAuthorities()
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, this.fetchLocalAuthorityies)
+        this.setState({ offset }, this.fetchLocalAuthorities)
     }
-    fetchLocalAuthorityies = () => {
+    fetchLocalAuthorities = () => {
         const { limit, offset, column, direction } = this.state
-        let params = { limit, offset, column, direction }
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority', query: params })
+        fetchWithAuthzHandling({ url: '/api/admin/local-authority', query: { limit, offset, column, direction } })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ localAuthorities: json.results, totalCount: json.totalCount }))
@@ -38,10 +37,10 @@ class LocalAuthorityList extends Component {
     sort = (clickedColumn) => {
         const { column, direction } = this.state
         if (column !== clickedColumn) {
-            this.setState({ column: clickedColumn, direction: 'ASC' }, this.fetchLocalAuthorityies)
+            this.setState({ column: clickedColumn, direction: 'ASC' }, this.fetchLocalAuthorities)
             return
         }
-        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchLocalAuthorityies)
+        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchLocalAuthorities)
     }
     renderActivatedModule = (activatedModules, moduleName) =>
         activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />

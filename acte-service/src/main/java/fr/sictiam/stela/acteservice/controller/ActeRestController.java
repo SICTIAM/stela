@@ -74,10 +74,10 @@ public class ActeRestController {
             @RequestParam(value= "decisionFrom", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionFrom,
             @RequestParam(value= "decisionTo", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionTo,
             @RequestParam(value= "status", required = false) StatusType status,
-            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
-            @RequestParam(value = "column", required = false, defaultValue = "") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "") String direction) {
+            @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction) {
 
         List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, limit, offset, column, direction);
         Long count = acteService.countAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status);
