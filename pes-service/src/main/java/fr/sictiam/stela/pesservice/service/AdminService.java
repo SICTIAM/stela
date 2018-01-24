@@ -1,5 +1,7 @@
 package fr.sictiam.stela.pesservice.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import fr.sictiam.stela.pesservice.dao.AdminRepository;
@@ -25,4 +27,11 @@ public class AdminService {
 	public Admin getAdmin() {
 		return adminRepository.findAll().get(0);
 	}
+	
+	public boolean isHeliosAvailable() {
+        Admin admin = getAdmin();
+        if(!admin.isHeliosAvailable()) return false;
+        LocalDateTime today = LocalDateTime.now();
+        return today.isBefore(admin.getUnavailabilityHeliosStartDate()) || today.isAfter(admin.getUnavailabilityHeliosEndDate());
+    }
 }

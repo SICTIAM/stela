@@ -30,6 +30,7 @@ import LocalAuthority from './admin/localAuthority/LocalAuthority'
 import ActeLocalAuthorityParams from './admin/acte/ActeLocalAuthorityParams'
 import AgentProfile from './admin/localAuthority/AgentProfile'
 import ActeModuleParams from './admin/acte/ActeModuleParams'
+import PesModuleParams from './admin/pes/PesModuleParams'
 
 
 import Validator from 'validatorjs'
@@ -167,7 +168,8 @@ const AppRoute = () =>
         <AuthRoute path='/admin/collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} />
         <AuthRoute path='/admin/collectivite' component={LocalAuthorityList} menu={AdminMenuBar} />
         <AuthRoute path='/admin/actes/parametrage-module' component={ActeModuleParams} menu={AdminMenuBar} />
-
+        <AuthRoute path='/admin/pes/parametrage-module' component={PesModuleParams} menu={AdminMenuBar} />
+        
         <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
         <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
     </Switch>

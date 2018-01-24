@@ -96,7 +96,7 @@
         "title": "Module Acte",
         "local_authority_settings": {
           "title": "Paramétrage des collectivités",
-          "general_informations": "Information générales",
+          "general_informations": "Informations générales",
           "MIAT_transmission": "Transmission MIAT"
         },
         "module_settings": {

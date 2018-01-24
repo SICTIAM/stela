@@ -17,7 +17,7 @@ dependencies {
     compile('org.xhtmlrenderer:flying-saucer-pdf:9.1.4')
     compile('net.sf.supercsv:super-csv:2.4.0')
     compile('org.springframework.boot:spring-boot-starter-webflux')
-    compile('org.springframework.integration:spring-integration-ftp:5.0.0.RELEASE')
+    compile('org.springframework.integration:spring-integration-ftp')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')

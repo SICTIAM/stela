@@ -25,6 +25,9 @@ class AdminMenuBar extends Component {
                     <Menu.Item as={NavLink} to='/admin/actes/parametrage-module'>
                         <Icon name='checkmark box' size='large' /> {t('acte:admin.modules.acte.module_settings.title')}
                     </Menu.Item>
+                     <Menu.Item as={NavLink} to='/admin/pes/parametrage-module'>
+                        <Icon name='calculator' size='large' /> {t('pes:admin.modules.pes.module_settings.title')}
+                    </Menu.Item>
                 </div>
 
                 <div>
@@ -40,4 +43,4 @@ class AdminMenuBar extends Component {
     }
 }
 
-export default translate(['api-gateway', 'acte'])(AdminMenuBar)
+export default translate(['api-gateway', 'acte', 'pes'])(AdminMenuBar)
