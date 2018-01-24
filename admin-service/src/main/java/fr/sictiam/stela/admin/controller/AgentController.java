@@ -4,14 +4,12 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,11 +17,11 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.sictiam.stela.admin.dao.AgentConnectionRepository;
 import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.AgentConnection;
-import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.service.AgentConnectionService;
 import fr.sictiam.stela.admin.service.AgentService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -34,7 +32,7 @@ public class AgentController {
 
     private final AgentService agentService;
     
-    private final AgentConnectionRepository agentConnectionRepository;
+    private final AgentConnectionService agentConnectionService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentController.class);
     
@@ -44,9 +42,9 @@ public class AgentController {
     @Value("${application.jwt.secret}")
     String SECRET;
 
-    public AgentController(AgentService agentService, AgentConnectionRepository agentConnectionRepository) {
+    public AgentController(AgentService agentService, AgentConnectionService agentConnectionService) {
         this.agentService = agentService;
-        this.agentConnectionRepository = agentConnectionRepository;
+        this.agentConnectionService = agentConnectionService;
     }
 
     @PostMapping
@@ -54,7 +52,7 @@ public class AgentController {
     public String createCurrentUser(@RequestBody Agent agent) {
 
         Profile profile = agentService.createAndAttach(agent);
-        agentConnectionRepository.save(new AgentConnection(profile));
+        agentConnectionService.save(new AgentConnection(profile));
         try {
             ObjectMapper mapper = new ObjectMapper();
             String body = mapper.writerWithView(Views.ProfileView.class).writeValueAsString(profile);
