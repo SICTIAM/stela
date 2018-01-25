@@ -44,6 +44,12 @@ public class PesRetour {
     @ManyToOne
     private LocalAuthority localAuthority;
 
+    public PesRetour(Attachment attachment, LocalAuthority localAuthority) {
+        this.creation = LocalDateTime.now();
+        this.attachment = attachment;
+        this.localAuthority = localAuthority;
+    }
+
     public PesRetour() {
     }
 

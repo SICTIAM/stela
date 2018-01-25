@@ -40,11 +40,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pesservice.dao.AdminRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
+import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.Admin;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.scheduler.SenderTask;
@@ -80,6 +82,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private PesAllerRepository pesRepository;
+    
+    @Autowired
+    private PesRetourRepository pesRetourRepository;
 
     @Autowired
     private PesHistoryRepository pesHistoryRepository;
@@ -111,6 +116,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         createAdmin();
         createLocalAuthority();
         pesRepository.deleteAll();
+        pesRetourRepository.deleteAll();
 
     }
 
@@ -125,6 +131,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test",
                     "999888777", true);
             localAuthority.setServerCode("VHICE21");
+            localAuthority.setSiret("20003531900017");
             localAuthorityService.createOrUpdate(localAuthority);
 
             String json = "{\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\",\"localAuthority\":{\"uuid\":\""
@@ -167,7 +174,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
         pesService.updateStatus(pes.getUuid(), StatusType.CREATED);
 
-        MockPesEventListener mockActeEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
+        MockPesEventListener mockActeEventListener = new MockPesEventListener(StatusType.NOT_SENT);
         try {
             synchronized (mockActeEventListener) {
                 mockActeEventListener.wait(4000);
@@ -177,8 +184,8 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         }
         List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
 
-        assertThat(pesHistories, hasSize(3));
-        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.SENT))));
+        assertThat(pesHistories, hasSize(2));
+        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOT_SENT))));
     }
 
     @Test
@@ -210,6 +217,28 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
         assertThat(pesHistories, hasSize(2));
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.ACK_RECEIVED))));
+    }
+    
+    @Test
+    public void receivePesRetourTest()
+            throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+
+        InputStream ackStream = new ClassPathResource(
+                "data/PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml").getInputStream();
+        receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml");
+        
+        assertThat(pesRetourRepository.count(), is(1L));       
+    }
+    
+    @Test
+    public void receivePesRetourUnknow()
+            throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+
+        InputStream ackStream = new ClassPathResource(
+                "data/PES2R_DEP_P_unknow.xml").getInputStream();
+        receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_unknow.xml");
+        
+        assertThat(pesRetourRepository.count(), is(0L));       
     }
 
     private PesAller samplePesAller() throws IOException {
