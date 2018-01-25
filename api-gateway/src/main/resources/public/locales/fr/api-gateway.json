@@ -170,6 +170,7 @@
     "admin": {
         "dashboard": "Tableau de bord",
         "users": "Utilisateurs",
+        "all_local_authorities": "Toutes collectivités",
         "local_authorities": "Collectivités",
         "my_local_authority": "Ma collectivité",
         "local_authority": {

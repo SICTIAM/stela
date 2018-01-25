@@ -25,6 +25,7 @@ import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminDashboard from './admin/AdminDashboard'
+import AgentList from './admin/AgentList'
 import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
 import LocalAuthority from './admin/localAuthority/LocalAuthority'
 import ActeLocalAuthorityParams from './admin/acte/ActeLocalAuthorityParams'
@@ -161,6 +162,7 @@ const AppRoute = () =>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
         <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/agents' component={AgentList} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} />
         <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' component={AgentProfile} menu={AdminMenuBar} />

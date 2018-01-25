@@ -38,7 +38,7 @@ public class Agent {
     @NotNull
     @NotEmpty
     @Column(unique = true)
-    @JsonView(Views.AgentViewPublic.class)
+    @JsonView(Views.AgentViewPrivate.class)
     private String sub;
     @NotNull
     @NotEmpty

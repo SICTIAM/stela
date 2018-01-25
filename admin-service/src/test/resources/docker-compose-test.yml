@@ -19,5 +19,7 @@ services:
      - "8888:8888"
     volumes:
      - ../../../../../stela-config:/stela-config
+    depends_on:
+     - postgresql
     environment:
      - "SPRING_PROFILES_ACTIVE=native"  

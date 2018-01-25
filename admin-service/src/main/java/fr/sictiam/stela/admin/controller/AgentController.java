@@ -1,7 +1,9 @@
 package fr.sictiam.stela.admin.controller;
 
 import java.util.Date;
+import java.util.List;
 
+import fr.sictiam.stela.admin.model.UI.AgentResultsUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageProperties;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -76,5 +79,19 @@ public class AgentController {
     @JsonView(Views.AgentView.class)
     public Agent getCurrent(@RequestAttribute("STELA-Sub") String sub) {
         return agentService.findBySub(sub).get();
+    }
+
+    @GetMapping("/all")
+    @JsonView(Views.AgentViewPublic.class)
+    public AgentResultsUI getAllAgent(
+            @RequestParam(value = "search", required = false, defaultValue = "") String search,
+            @RequestParam(value = "localAuthorityUuid", required = false, defaultValue = "") String localAuthorityUuid,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "familyName") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction) {
+        List<Agent> localAuthorities = agentService.getAllWithPagination(search, localAuthorityUuid, limit, offset, column, direction);
+        Long count = agentService.countAll();
+        return new AgentResultsUI(count, localAuthorities);
     }
 }

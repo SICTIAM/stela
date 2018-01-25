@@ -20,7 +20,9 @@ export default class StelaTable extends Component {
         metaData: PropTypes.array,
         noDataMessage: PropTypes.string.isRequired,
         direction: PropTypes.string,
-        column: PropTypes.string
+        column: PropTypes.string,
+        fetchedSearch: PropTypes.func,
+        additionalElements: PropTypes.array
     }
     static defaultProps = {
         className: '',
@@ -34,7 +36,8 @@ export default class StelaTable extends Component {
         metaData: [],
         celled: true,
         direction: '',
-        column: ''
+        column: '',
+        additionalElements: []
     }
     state = {
         column: null,
@@ -71,14 +74,17 @@ export default class StelaTable extends Component {
         }
     }
     handleSearch = (e, { value }) => {
-        const unsearchableColumns = this.props.metaData.filter(metaData => !metaData.searchable).map(metaData => metaData.property)
-        let newData = this.state.originalData
-            .filter(row => Object.entries(row)
-                .filter(column => !unsearchableColumns.includes(column[0]) && column[1].toString().search(new RegExp(value, "i")) !== -1)
-                .length > 0)
-        if (this.state.column != null && this.state.direction != null)
-            newData = newData.sort(this.dynamicSort(this.state.column, this.state.direction))
-        this.setState({ data: newData })
+        if (this.props.fetchedSearch) this.props.fetchedSearch(value)
+        else {
+            const unsearchableColumns = this.props.metaData.filter(metaData => !metaData.searchable).map(metaData => metaData.property)
+            let newData = this.state.originalData
+                .filter(row => Object.entries(row)
+                    .filter(column => !unsearchableColumns.includes(column[0]) && column[1].toString().search(new RegExp(value, "i")) !== -1)
+                    .length > 0)
+            if (this.state.column != null && this.state.direction != null)
+                newData = newData.sort(this.dynamicSort(this.state.column, this.state.direction))
+            this.setState({ data: newData })
+        }
     }
     handleSort = clickedColumn => () => {
         if (this.props.pagination && this.props.sort) {
@@ -135,6 +141,7 @@ export default class StelaTable extends Component {
         const select = renderIf(this.props.select)
         const pagination = renderIf(this.props.pagination)
         const options = renderIf(this.props.selectOptions.length > 0 && this.state.originalData.length > 0)
+        const additionalElements = renderIf(this.props.additionalElements.length > 0)
 
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
         const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
@@ -160,6 +167,12 @@ export default class StelaTable extends Component {
                             {selectOptions}
                         </Dropdown.Menu>
                     </Dropdown>
+                )}
+
+                {additionalElements(
+                    this.props.additionalElements.map((element, index) =>
+                        <span key={'element-' + index} style={this.floatRightStyle}>{element}</span>
+                    )
                 )}
 
                 <Table selectable sortable={this.props.header} basic={this.props.basic} celled={this.props.celled} fixed>

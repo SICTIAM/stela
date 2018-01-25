@@ -19,6 +19,9 @@ class AdminMenuBar extends Component {
                     <Menu.Item as={NavLink} to='/admin/ma-collectivite'>
                         <Icon name='building' size='large' /> {t('admin.my_local_authority')}
                     </Menu.Item>
+                    <Menu.Item as={NavLink} to='/admin/agents'>
+                        <Icon name='users' size='large' /> {t('admin.users')}
+                    </Menu.Item>
                     <Menu.Item as={NavLink} to='/admin/collectivite'>
                         <Icon name='building' size='large' /> {t('admin.local_authorities')}
                     </Menu.Item>
