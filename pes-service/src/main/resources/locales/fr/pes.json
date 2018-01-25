@@ -5,5 +5,22 @@
       "ACK_RECEIVED": "AR Ministère",
       "CREATED": "Créé"     
     }
-  }    
+  }, 
+  "admin": {
+    "modules": {
+      "pes": {
+        "title": "Module Helios",
+        "local_authority_settings": {
+          "title": "Paramétrage des collectivités",
+          "general_informations": "Informations générales",
+          "HELIOS_transmission": "Transmission Helios"
+        },
+        "module_settings": {
+          "title": "Paramètres du module Helios",
+          "heliosAvailable": "Accessibilité du serveur Helios",
+          "unavailabilityHelios": "Couper l'accès Helios"
+        }
+      }
+    }
+  }  
 }

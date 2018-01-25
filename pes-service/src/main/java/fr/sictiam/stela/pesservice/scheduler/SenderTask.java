@@ -34,6 +34,7 @@ import fr.sictiam.stela.pesservice.model.PendingMessage;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
+import fr.sictiam.stela.pesservice.service.AdminService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 
 @Component
@@ -56,6 +57,9 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
 
     @Autowired
     private DefaultFtpSessionFactory defaultFtpSessionFactory;
+    
+    @Autowired 
+    private AdminService adminService;
 
     @PostConstruct
     public void initQueue() {
@@ -80,7 +84,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     @Scheduled(fixedRate = 100)
     public void senderTask() {
 
-        if (!pendingQueue.isEmpty()) {
+        if (!pendingQueue.isEmpty() && adminService.isHeliosAvailable()) {
             PendingMessage pendingMessage = pendingQueue.peek();
             PesAller pes = pesService.getByUuid(pendingMessage.getPesUuid());
             Attachment attachment = pes.getAttachment();
@@ -126,6 +130,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         ftpClient.sendSiteCommand("quote site P_MSG PESALR2#" + colCode + "#" + postId + "#" + budCode + "");
         ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
         ftpSession.close();
+
     }
 
 }

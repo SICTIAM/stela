@@ -10,7 +10,7 @@ i18n
         fallbackLng: 'fr', 
  
         // have a common namespace used around the full app 
-        ns: ['api-gateway', 'acte'],
+        ns: ['api-gateway', 'acte', 'pes'],
         defaultNS: 'api-gateway',
 
         debug: false,
