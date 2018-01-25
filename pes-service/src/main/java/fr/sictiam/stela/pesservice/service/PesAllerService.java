@@ -26,6 +26,7 @@ import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
@@ -55,14 +56,16 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         this.localAuthorityService = localAuthorityService;
 
     }
+    
     public List<PesAller> getAllWithQuery(String number, String objet, LocalDate decisionFrom, LocalDate decisionTo,
+
             StatusType status) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PesAller> query = builder.createQuery(PesAller.class);
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
-        List<Predicate> predicates = new ArrayList<>();        
+        List<Predicate> predicates = new ArrayList<>();
         if (StringUtils.isNotBlank(objet))
             predicates.add(
                     builder.and(builder.like(builder.lower(pesRoot.get("objet")), "%" + objet.toLowerCase() + "%")));
@@ -97,5 +100,14 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
     public PesAller getByUuid(String uuid) {
         return pesAllerRepository.findById(uuid).orElseThrow(PesNotFoundException::new);
+    }
+
+    public void updateStatus(String pesUuid, StatusType updatedStatus) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus);
+        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+    }
+
+    public PesAller save(PesAller pes) {
+        return pesAllerRepository.save(pes);
     }
 }
