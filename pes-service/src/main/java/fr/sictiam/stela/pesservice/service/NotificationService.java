@@ -75,9 +75,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         variables.put("firstname", firstName);
         variables.put("lastname", lastName);
 
-        String subject = localesService.getMessage("fr", "acte_notification",
-                "$.acte." + statusType.name() + ".subject");
-        String text = localesService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".body",
+        String subject = localesService.getMessage("fr", "pes_notification",
+                "$.pes." + statusType.name() + ".subject");
+        String text = localesService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
                 variables);
 
         // JavaMailSender emailSender = getJavaMailSender();

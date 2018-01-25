@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pesservice.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,8 +107,17 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
+    
+    public void updateStatus(String pesUuid, StatusType updatedStatus, byte [] file ,String fileName) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName);
+        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+    }
 
     public PesAller save(PesAller pes) {
         return pesAllerRepository.save(pes);
+    }
+
+    public PesAller getByAttachementName(String fileName) {
+        return pesAllerRepository.findByAttachment_filename(fileName).orElseThrow(PesNotFoundException::new);
     }
 }

@@ -100,7 +100,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
                 } catch (Exception e) {
                     sendStatus = StatusType.NOT_SENT;
                 }
-                pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus);
+                pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus, attachment.getFile(), attachment.getFilename());
 
             } else {
                 LOGGER.info("Hourly limit exceeded, waiting next hour");
@@ -123,11 +123,12 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         XPathFactory xpf = XPathFactory.newInstance();
 
         XPath path = xpf.newXPath();
-
+        
+        String fileType = path.evaluate("/PES_Aller/Enveloppe/Parametres/TypFic/@V", document);
         String colCode = path.evaluate("/PES_Aller/EnTetePES/CodCol/@V", document);
         String postId = path.evaluate("/PES_Aller/EnTetePES/IdPost/@V", document);
         String budCode = path.evaluate("/PES_Aller/EnTetePES/CodBud/@V", document);
-        ftpClient.sendSiteCommand("quote site P_MSG PESALR2#" + colCode + "#" + postId + "#" + budCode + "");
+        ftpClient.sendSiteCommand("quote site P_MSG " + fileType + "#" + colCode + "#" + postId + "#" + budCode + "");
         ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
         ftpSession.close();
 

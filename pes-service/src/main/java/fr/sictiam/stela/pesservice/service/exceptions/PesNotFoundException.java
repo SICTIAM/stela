@@ -9,7 +9,7 @@ public class PesNotFoundException extends RuntimeException {
     static final long serialVersionUID = 42L;
 
     public PesNotFoundException() {
-        super("notifications.acte.not_found");
+        super("notifications.pes.not_found");
     }
     public PesNotFoundException(String message, Throwable cause){
         super(message, cause);
