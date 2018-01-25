@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import fr.sictiam.stela.acteservice.model.ui.*;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -44,10 +45,6 @@ import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.StampPosition;
 import fr.sictiam.stela.acteservice.model.StatusType;
-import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
-import fr.sictiam.stela.acteservice.model.ui.ActeUI;
-import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
-import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
@@ -70,15 +67,21 @@ public class ActeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Acte>> getAll(
+    public ResponseEntity<SearchResultsUI> getAll(
             @RequestParam(value= "number", required = false) String number,
             @RequestParam(value= "objet", required = false) String objet,
             @RequestParam(value= "nature", required = false) ActeNature nature,
             @RequestParam(value= "decisionFrom", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionFrom,
             @RequestParam(value= "decisionTo", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionTo,
-            @RequestParam(value= "status", required = false) StatusType status) {
-        List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status);
-        return new ResponseEntity<>(actes, HttpStatus.OK);
+            @RequestParam(value= "status", required = false) StatusType status,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction) {
+
+        List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, limit, offset, column, direction);
+        Long count = acteService.countAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status);
+        return new ResponseEntity<>(new SearchResultsUI(count, actes), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")

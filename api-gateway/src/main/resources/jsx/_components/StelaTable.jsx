@@ -18,7 +18,9 @@ export default class StelaTable extends Component {
         link: PropTypes.string,
         linkProperty: PropTypes.string,
         metaData: PropTypes.array,
-        noDataMessage: PropTypes.string.isRequired
+        noDataMessage: PropTypes.string.isRequired,
+        direction: PropTypes.string,
+        column: PropTypes.string
     }
     static defaultProps = {
         className: '',
@@ -30,7 +32,9 @@ export default class StelaTable extends Component {
         link: '',
         linkProperty: '',
         metaData: [],
-        celled: true
+        celled: true,
+        direction: '',
+        column: ''
     }
     state = {
         column: null,
@@ -55,7 +59,7 @@ export default class StelaTable extends Component {
         }
     }
     dynamicSort = (property, direction) => {
-        const sortOrder = direction === 'ascending' ? 1 : -1
+        const sortOrder = direction === 'ASC' ? 1 : -1
         return (a, b) => {
             const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0
             return result * sortOrder
@@ -77,18 +81,22 @@ export default class StelaTable extends Component {
         this.setState({ data: newData })
     }
     handleSort = clickedColumn => () => {
+        if (this.props.pagination && this.props.sort) {
+            this.props.sort(clickedColumn)
+            return
+        }
         const { column, data, direction } = this.state
         if (column !== clickedColumn) {
             this.setState({
                 column: clickedColumn,
-                data: data.sort(this.dynamicSort(clickedColumn, 'ascending')),
-                direction: 'ascending',
+                data: data.sort(this.dynamicSort(clickedColumn, 'ASC')),
+                direction: 'ASC',
             })
             return
         }
         this.setState({
             data: data.reverse(),
-            direction: direction === 'ascending' ? 'descending' : 'ascending',
+            direction: direction === 'ASC' ? 'DESC' : 'ASC',
         })
     }
     handleCheckbox = (keyProperty) => {
@@ -108,8 +116,16 @@ export default class StelaTable extends Component {
             .map(checkbox => checkbox[0])
         action(selectedUuids)
     }
+    getDirectionClass = () => {
+        const direction = this.props.direction ? this.props.direction : this.state.direction
+        if (direction === 'ASC') return 'ascending'
+        else if (direction === 'DESC') return 'descending'
+        else return null
+    }
     render() {
-        const { column, data, direction } = this.state
+        const { data } = this.state
+        const column = this.props.column ? this.props.column : this.state.column
+        const direction = this.getDirectionClass()
 
         const title = renderIf(this.props.headerTitle !== '')
         const header = renderIf(this.props.header)
@@ -117,6 +133,7 @@ export default class StelaTable extends Component {
         const isEmpty = renderIf(data.length === 0)
         const isFilled = renderIf(data.length > 0)
         const select = renderIf(this.props.select)
+        const pagination = renderIf(this.props.pagination)
         const options = renderIf(this.props.selectOptions.length > 0 && this.state.originalData.length > 0)
 
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
@@ -160,7 +177,7 @@ export default class StelaTable extends Component {
                                     renderIf(!undisplayedColumnsProperties.includes(metaData.property))(
                                         <Table.HeaderCell key={index + '-' + metaData.displayName}
                                             sorted={column === metaData.property ? direction : null}
-                                            onClick={this.handleSort(metaData.property)}>
+                                            onClick={metaData.sortable && this.handleSort(metaData.property)}>
                                             {metaData.displayName}
                                         </Table.HeaderCell>
                                     )
@@ -202,6 +219,7 @@ export default class StelaTable extends Component {
                             )
                         )}
                     </Table.Body>
+                    {pagination(this.props.pagination)}
                 </Table>
             </div>
         )

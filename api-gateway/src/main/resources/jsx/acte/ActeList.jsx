@@ -8,7 +8,7 @@ import FileSaver from 'file-saver'
 import StelaTable from '../_components/StelaTable'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-import { FormFieldInline, FormField, Page } from '../_components/UI'
+import { FormFieldInline, FormField, Page, Pagination } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
 class ActeList extends Component {
@@ -20,6 +20,9 @@ class ActeList extends Component {
     }
     state = {
         actes: [],
+        totalCount: 0,
+        column: '',
+        direction: '',
         search: {
             number: '',
             objet: '',
@@ -27,10 +30,12 @@ class ActeList extends Component {
             status: '',
             decisionFrom: '',
             decisionTo: ''
-        }
+        },
+        limit: 25,
+        offset: 0
     }
     componentDidMount() {
-        this.submitForm({})
+        this.submitForm()
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search
@@ -38,21 +43,32 @@ class ActeList extends Component {
         this.setState({ search: search })
     }
     getSearchData = () => {
-        const data = {}
+        const { limit, offset, direction, column } = this.state
+        const data = { limit, offset, direction, column }
         Object.keys(this.state.search)
             .filter(k => this.state.search[k] !== '')
             .map(k => data[k] = this.state.search[k])
         return data
     }
-    submitForm = (data) => {
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+    handlePageClick = (data) => {
+        const offset = Math.ceil(data.selected * this.state.limit)
+        this.setState({ offset }, () => this.submitForm())
+    }
+    sort = (clickedColumn) => {
+        const { column, direction } = this.state
+        if (column !== clickedColumn) {
+            this.setState({ column: clickedColumn, direction: 'ASC' }, () => this.submitForm())
+            return
         }
-        fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers, context: this.context })
+        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
+    }
+    submitForm = () => {
+        const headers = { 'Accept': 'application/json' }
+        const data = this.getSearchData()
+        fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ actes: json }))
+            .then(json => this.setState({ actes: json.results, totalCount: json.totalCount }))
             .catch(response => {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
@@ -63,9 +79,7 @@ class ActeList extends Component {
     downloadCSV = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
     downloadFromSelectionOrSearch = (selectedUuids, url, filename) => {
         const ActeUuidsAndSearchUI = Object.assign({ uuids: selectedUuids }, this.getSearchData())
-        const headers = {
-            'Content-Type': 'application/json'
-        }
+        const headers = { 'Content-Type': 'application/json' }
         fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => {
@@ -88,35 +102,47 @@ class ActeList extends Component {
         const downloadCSVSelectOption = { title: t('acte.list.download_selected_CSV'), titleNoSelection: t('acte.list.download_all_CSV'), action: this.downloadCSV }
         const downloadMergedStampedsSelectOption = { title: t('acte.list.download_selected_merged_stamped'), titleNoSelection: t('acte.list.download_all_merged_stamped'), action: this.downloadMergedStamp }
         const downloadZipedStampedsSelectOption = { title: t('acte.list.download_selected_ziped_stamped'), titleNoSelection: t('acte.list.download_all_ziped_stamped'), action: this.downloadZipedStamp }
+        const metaData = [
+            { property: 'uuid', displayed: false, searchable: false },
+            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true },
+            { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true },
+            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay, sortable: true },
+            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay, sortable: true },
+            { property: 'code', displayed: false, searchable: false },
+            { property: 'creation', displayed: false, searchable: false },
+            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay, sortable: false },
+            { property: 'public', displayed: false, searchable: false },
+            { property: 'publicWebsite', displayed: false, searchable: false },
+        ]
+        const displayedColumns = metaData.filter(metaData => metaData.displayed)
+        const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
+        const pagination =
+            <Pagination
+                columns={displayedColumns.length + 1}
+                pageCount={pageCount}
+                handlePageClick={this.handlePageClick} />
         return (
             <Page title={t('acte.list.title')}>
                 <Segment>
                     <ActeListForm
                         search={this.state.search}
-                        getSearchData={this.getSearchData}
                         handleFieldChange={this.handleFieldChange}
                         submitForm={this.submitForm} />
                     <StelaTable
                         data={this.state.actes}
-                        metaData={[
-                            { property: 'uuid', displayed: false, searchable: false },
-                            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true },
-                            { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true },
-                            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay },
-                            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay },
-                            { property: 'code', displayed: false, searchable: false },
-                            { property: 'creation', displayed: false, searchable: false },
-                            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay },
-                            { property: 'public', displayed: false, searchable: false },
-                            { property: 'publicWebsite', displayed: false, searchable: false },
-                        ]}
+                        metaData={metaData}
                         header={true}
                         select={true}
+                        search={false}
                         selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
                         link='/actes/'
                         linkProperty='uuid'
                         noDataMessage='Aucun acte'
-                        keyProperty='uuid' />
+                        keyProperty='uuid'
+                        pagination={pagination}
+                        sort={this.sort}
+                        direction={this.state.direction}
+                        column={this.state.column} />
                 </Segment >
             </Page>
         )
@@ -136,7 +162,7 @@ class ActeListForm extends Component {
     }
     submitForm = (event) => {
         if (event) event.preventDefault()
-        this.props.submitForm(this.props.getSearchData())
+        this.props.submitForm()
     }
     render() {
         const { t } = this.context

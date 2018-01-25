@@ -22,6 +22,7 @@
     "react-i18next": "^4.1.0",
     "react-jsonschema-form": "^0.48.2",
     "react-notification-system": "0.2.x",
+    "react-paginate": "^5.0.0",
     "react-router-dom": "^4.1.1",
     "render-if": "^0.1.1",
     "semantic-ui-css": "^2.2.12",
