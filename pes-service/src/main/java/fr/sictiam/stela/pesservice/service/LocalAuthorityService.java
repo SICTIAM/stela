@@ -55,7 +55,10 @@ public class LocalAuthorityService {
     public Optional<LocalAuthority> getBySiren(String siren) {
         return localAuthorityRepository.findBySiren(siren);
     }
-
+    
+    public Optional<LocalAuthority> getBySiret(String siret) {
+        return localAuthorityRepository.findBySiret(siret);        
+    }
     
     @Transactional
     public void handleEvent(LocalAuthorityEvent event) throws IOException {
