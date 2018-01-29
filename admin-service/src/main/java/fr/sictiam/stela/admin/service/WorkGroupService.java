@@ -27,8 +27,8 @@ public class WorkGroupService {
     }
 
     public WorkGroup create(WorkGroup workGroup) {
-        workGroup= workGroupRepository.save(workGroup);
         LocalAuthority localAuthority= workGroup.getLocalAuthority();
+        workGroup= workGroupRepository.save(workGroup);        
         localAuthority.getGroups().add(workGroup);
         localAuthorityService.createOrUpdate(localAuthority);
         return workGroup;

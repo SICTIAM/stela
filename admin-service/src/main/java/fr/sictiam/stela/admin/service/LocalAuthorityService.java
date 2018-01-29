@@ -59,7 +59,7 @@ public class LocalAuthorityService {
             messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON); 
             Message amMessage=new Message(body.getBytes(), messageProperties); 
             amqpTemplate.send(exchange, "", amMessage);
-        } catch (JsonProcessingException e) { 
+        } catch (Exception e) { 
             LOGGER.error(e.getMessage());
         }
         

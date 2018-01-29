@@ -116,7 +116,7 @@ public class LocalAuthority {
     }
     
     public Set<WorkGroup> getGroups() {
-        return groups;
+        return groups == null ? new HashSet<>() : groups;
     }
 
     public void setGroups(Set<WorkGroup> groups) {
@@ -124,7 +124,7 @@ public class LocalAuthority {
     }
 
     public Set<Profile> getProfiles() {
-        return profiles;
+        return profiles == null ? new HashSet<>() : profiles;
     }
 
     public void setProfiles(Set<Profile> profiles) {
