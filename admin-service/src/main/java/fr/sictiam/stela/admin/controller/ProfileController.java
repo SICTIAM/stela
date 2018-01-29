@@ -1,5 +1,6 @@
 package fr.sictiam.stela.admin.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import fr.sictiam.stela.admin.model.Notification;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +20,16 @@ import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.ProfileService;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/api/admin/profile")
 public class ProfileController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileController.class);
+
+    @Value("${application.ozwilloUrl}")
+    String ozwilloUrl;
 
     private final ProfileService profileService;
 
@@ -70,5 +77,8 @@ public class ProfileController {
         return Arrays.asList(Notification.values());
     }
 
-
+    @GetMapping("/ozwillo")
+    public void redirectOzwilloProfile(HttpServletResponse response) throws IOException {
+        response.sendRedirect(ozwilloUrl + "my/profile");
+    }
 }

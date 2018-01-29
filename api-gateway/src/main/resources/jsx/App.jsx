@@ -17,7 +17,7 @@ import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
 import Home from './Home'
-import Profile from './Profile'
+import { UserProfile, AdminProfile } from './Profile'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
@@ -154,7 +154,7 @@ const AppRoute = () =>
 
         <Route path='/choix-collectivite' component={SelectLocalAuthority} />
 
-        <AuthRoute path='/profil' component={Profile} menu={MenuBar} />
+        <AuthRoute path='/profil' component={UserProfile} menu={MenuBar} />
 
         <Route exact path='/actes'>
             <Redirect to="/actes/liste" />
@@ -175,6 +175,7 @@ const AppRoute = () =>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
         <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/agents/:uuid' component={AdminProfile} menu={AdminMenuBar} />
         <AuthRoute path='/admin/agents' component={AgentList} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} />

@@ -94,6 +94,8 @@ class AgentList extends Component {
                         fetchedSearch={this.search}
                         noDataMessage='Aucun agent'
                         keyProperty='uuid'
+                        link='/admin/agents/'
+                        linkProperty='uuid'
                         pagination={pagination}
                         sort={this.sort}
                         direction={this.state.direction}

@@ -9,13 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -94,6 +88,12 @@ public class AgentController {
         List<Agent> localAuthorities = agentService.getAllWithPagination(search, localAuthorityUuid, limit, offset, column, direction);
         Long count = agentService.countAll();
         return new AgentResultsUI(count, localAuthorities);
+    }
+
+    @GetMapping("/{uuid}")
+    @JsonView(Views.AgentView.class)
+    public Agent getAgent(@PathVariable String uuid) {
+        return agentService.findByUuid(uuid).get();
     }
 
     @GetMapping("/profiles")

@@ -30,42 +30,50 @@ class Profile extends Component {
                 activatedModules: []
             }
         },
-        profiles: [],
+        agent: {
+            uuid: '',
+            email: '',
+            family_name: '',
+            given_name: '',
+            profiles: []
+        },
         allNotifications: []
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/profile' })
+        const { uuid } = this.props
+        if (!uuid)
+            fetchWithAuthzHandling({ url: '/api/admin/profile' })
+                .then(response => response.json())
+                .then(json => this.setState({ activeProfile: json }))
+        fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
             .then(response => response.json())
-            .then(json => this.setState({ activeProfile: json }))
-        fetchWithAuthzHandling({ url: '/api/admin/agent/profiles' })
-            .then(response => response.json())
-            .then(json => this.setState({ profiles: json }))
+            .then(json => this.setState({ agent: json }))
         fetchWithAuthzHandling({ url: '/api/admin/profile/all-notifications' })
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
     }
     onChange = (uuidProfile, id, value) => {
-        const { profiles } = this.state
-        const profile = profiles.find(profile => profile.uuid === uuidProfile)
+        const { agent } = this.state
+        const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
         profile[id] = value
-        this.setState({ profiles })
+        this.setState({ agent })
     }
     onCheckboxChange = (uuidProfile, id) => {
-        const { profiles } = this.state
-        const profile = profiles.find(profile => profile.uuid === uuidProfile)
+        const { agent } = this.state
+        const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
         const index = profile.notifications.indexOf(id)
         index === -1 ? profile.notifications.push(id) : profile.notifications.splice(index, 1)
-        this.setState({ profiles })
+        this.setState({ agent })
     }
     updateProfile = (uuid) => {
-        const profile = this.state.profiles.find(profile => profile.uuid === uuid)
+        const profile = this.state.agent.profiles.find(profile => profile.uuid === uuid)
         const profileUI = {
             uuid: profile.uuid,
             email: profile.email,
             notifications: profile.notifications
         }
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers: headers, method: 'PATCH', context: this.context })
+        fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers: headers, method: 'PATCH', context: this.context })
             .then(checkStatus)
             .then(() => this.context._addNotification(notifications.profile.updated))
             .catch(response => {
@@ -74,9 +82,9 @@ class Profile extends Component {
     }
     render() {
         const { t, user } = this.context
-        const { activeProfile, profiles, allNotifications } = this.state
-        const currentLocalAuthorityProfile = profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
-        const allLocalAuthorityProfiles = [
+        const { activeProfile, agent, allNotifications } = this.state
+        const currentLocalAuthorityProfile = agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
+        const allLocalAuthorityProfiles = this.props.uuid ? [] : [
             <LocalAuthorityProfile
                 key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
                 profile={currentLocalAuthorityProfile}
@@ -85,8 +93,8 @@ class Profile extends Component {
                 allNotifications={allNotifications}
                 onCheckboxChange={this.onCheckboxChange} />
         ]
-        profiles
-            .filter(profile => profile.localAuthority.uuid !== activeProfile.localAuthority.uuid)
+        agent.profiles
+            .filter(profile => this.props.uuid || (profile.localAuthority.uuid !== activeProfile.localAuthority.uuid))
             .map(profile => allLocalAuthorityProfiles.push(
                 <LocalAuthorityProfile
                     key={profile.uuid}
@@ -109,9 +117,12 @@ class Profile extends Component {
                     <Field htmlFor='email' label={t('agent.email')}>
                         <span id='email'>{user.email}</span>
                     </Field>
-                    <div style={{ textAlign: 'right' }}>
-                        <Button style={{ color: '#663399', boxShadow: '0 0 0 1px #663399', background: 'transparent none' }}>{t('profile.modify_my_profile')}</Button>
-                    </div>
+                    {!this.props.uuid &&
+                        <div style={{ textAlign: 'right' }}>
+                            <a href={`/api/admin/profile/ozwillo`} target='_blank' className='ui button' style={{ color: '#663399', boxShadow: '0 0 0 1px #663399', background: 'transparent none' }}>
+                                {t('profile.modify_my_profile')}
+                            </a>
+                        </div>}
                 </Segment>
 
                 {allLocalAuthorityProfiles}
@@ -175,7 +186,7 @@ class LocalAuthorityProfile extends Component {
                     <Input id='email' value={profile.email || ''} placeholder={t('profile.no_email')}
                         onChange={(e, { id, value }) => onChange(profile.uuid, id, value)} />
                 </Field>
-                <Header size='small'>Notifications</Header>
+                <Header size='small'>{t('profile.notifications_title')}</Header>
                 {profileNotifications}
                 <div style={{ textAlign: 'right' }}>
                     <Button basic primary onClick={() => updateProfile(profile.uuid)}>{t('form.update')}</Button>
@@ -188,4 +199,7 @@ class LocalAuthorityProfile extends Component {
     }
 }
 
-export default translate('api-gateway')(Profile)
+const UserProfile = translate('api-gateway')((props) => <Profile {...props} />)
+const AdminProfile = translate('api-gateway')((props) => <Profile {...props} />)
+
+module.exports = { UserProfile, AdminProfile }

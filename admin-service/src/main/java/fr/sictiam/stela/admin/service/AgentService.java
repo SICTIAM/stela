@@ -51,6 +51,10 @@ public class AgentService {
         return agentRepository.findBySub(sub);
     }
 
+    public Optional<Agent> findByUuid(String uuid) {
+        return agentRepository.findByUuid(uuid);
+    }
+
     public Profile createAndAttach(Agent agent) {
         final String slugName = agent.getSlugName();
         LocalAuthority localAuthority =

@@ -92,6 +92,7 @@
         "title": "Profil",
         "modify_my_profile": "Modifier mon profil",
         "no_email": "Aucun email",
+        "notifications_title": "Notifications",
         "notifications": {
             "ACTE_ACK_RECEIVED": "Reception de l'AR d'un acte",
             "ACTE_SENT": "Envoi réussi d'un acte",
