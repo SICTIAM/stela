@@ -2,6 +2,7 @@ package fr.sictiam.stela.admin.controller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import fr.sictiam.stela.admin.model.UI.AgentResultsUI;
 import org.slf4j.Logger;
@@ -93,5 +94,11 @@ public class AgentController {
         List<Agent> localAuthorities = agentService.getAllWithPagination(search, localAuthorityUuid, limit, offset, column, direction);
         Long count = agentService.countAll();
         return new AgentResultsUI(count, localAuthorities);
+    }
+
+    @GetMapping("/profiles")
+    @JsonView(Views.AgentView.class)
+    public Set<Profile> getCurrentProfiles(@RequestAttribute("STELA-Sub") String sub) {
+        return agentService.findBySub(sub).get().getProfiles();
     }
 }

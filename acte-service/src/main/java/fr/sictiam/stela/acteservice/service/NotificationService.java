@@ -1,13 +1,14 @@
 package fr.sictiam.stela.acteservice.service;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
         case CANCELLED:
         case NACK_RECEIVED: {
             try {
-                sendMail(event);
+                proccessEvent(event);
             } catch (MessagingException e) {
                 LOGGER.error(e.getMessage());
             } catch (IOException e) {
@@ -67,16 +68,25 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
         }
     }
 
-    public void sendMail(ActeHistoryEvent event) throws MessagingException, IOException {
+    public void proccessEvent(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
-
         JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
 
-        String mail = node.get("agent").get("email").asText();
+        List<String> notifications = new ArrayList<>();
+        node.get("notifications").forEach(notification -> notifications.add(notification.asText()));
+        List<String> filteredNotifications = notifications.stream()
+                .filter(notification -> StringUtils.startsWith(notification, "ACTE_"))
+                .map(notification -> StringUtils.removeStart(notification, "ACTE_"))
+                .collect(Collectors.toList());
+        if(filteredNotifications.contains(event.getActeHistory().getStatus().toString()))
+            sendMail(acte.getUuid(), node, event.getActeHistory().getStatus());
+    }
+
+    private void sendMail(String uuid, JsonNode node, StatusType statusType) throws MessagingException {
+
+        String mail = StringUtils.isNotBlank(node.get("email").asText()) ? node.get("email").asText() : node.get("agent").get("email").asText();
         String firstName = node.get("agent").get("given_name").asText();
         String lastName = node.get("agent").get("family_name").asText();
-
-        StatusType statusType = event.getActeHistory().getStatus();
 
         Map<String, String> variables = new HashMap<>();
         variables.put("firstname", firstName);
@@ -98,7 +108,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
         emailSender.send(message);
 
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
+        ActeHistory acteHistory = new ActeHistory(uuid, StatusType.NOTIFICATION_SENT);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
     }
 

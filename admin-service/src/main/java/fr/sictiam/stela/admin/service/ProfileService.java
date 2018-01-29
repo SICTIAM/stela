@@ -28,7 +28,7 @@ public class ProfileService {
         this.localAuthorityService= localAuthorityService;
     }
     
-    public Profile create(Profile profile) {
+    public Profile createOrUpdate(Profile profile) {
         return profileRepository.save(profile);
     }
 

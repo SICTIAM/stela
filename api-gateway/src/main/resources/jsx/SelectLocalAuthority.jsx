@@ -17,65 +17,65 @@ class SelectLocalAuthority extends Component {
         selected: {}
     }
     componentDidMount() {
-        fetchWithAuthzHandling( { url: '/api/admin/local-authority/all' } )
-            .then( checkStatus )
-            .then( response => response.json() )
-            .then( json => {
-                this.setState( { localAuthorities: json } )
-            } )
-            .catch( response => {
-                response.json().then( json => {
-                    this.context._addNotification( notifications.defaultError, 'notifications.admin.title', json.message )
-                } )
-            } )
+        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ localAuthorities: json })
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                })
+            })
 
-        var lastUsedLocalAuths = localStorage.getItem( 'lastUsedLocalAuths' );
-        if ( lastUsedLocalAuths ) {
-            this.setState( { lastUsedLocalAuths: JSON.parse( lastUsedLocalAuths ) } )
+        var lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths');
+        if (lastUsedLocalAuths) {
+            this.setState({ lastUsedLocalAuths: JSON.parse(lastUsedLocalAuths) })
         }
     }
     submit = () => {
 
-        var lastUsedLocalAuths = localStorage.getItem( 'lastUsedLocalAuths' )
+        var lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths')
 
         var localAuth = this.state.selected;
         localAuth.date = new Date().toLocaleDateString()
-        if ( lastUsedLocalAuths ) {
-            lastUsedLocalAuths = JSON.parse( lastUsedLocalAuths )
+        if (lastUsedLocalAuths) {
+            lastUsedLocalAuths = JSON.parse(lastUsedLocalAuths)
             var index = -1;
-            for ( var i = 0; i < lastUsedLocalAuths.length; i++ ) {
-                if ( lastUsedLocalAuths[i].uuid == localAuth.uuid ) {
+            for (var i = 0; i < lastUsedLocalAuths.length; i++) {
+                if (lastUsedLocalAuths[i].uuid == localAuth.uuid) {
                     index = i;
                     break;
                 }
             }
-            if ( index > -1 ) {
-                lastUsedLocalAuths.splice( index, 1 )
+            if (index > -1) {
+                lastUsedLocalAuths.splice(index, 1)
             } else {
-                if ( lastUsedLocalAuths.length >= 5 ) {
+                if (lastUsedLocalAuths.length >= 5) {
                     lastUsedLocalAuths.pop()
                 }
             }
-            lastUsedLocalAuths.unshift( localAuth );
+            lastUsedLocalAuths.unshift(localAuth);
         } else {
             lastUsedLocalAuths = [localAuth]
         }
 
-        localStorage.setItem( 'lastUsedLocalAuths', JSON.stringify( lastUsedLocalAuths ) )
+        localStorage.setItem('lastUsedLocalAuths', JSON.stringify(lastUsedLocalAuths))
         window.location.href = '/api/api-gateway/loginWithSlug/' + this.state.selected.slugName
 
     }
-    onChange = ( event, { value } ) => {
-        const selected = this.state.localAuthorities.find( localAuthority => localAuthority.uuid === value )
-        this.setState( { selected } )
+    onChange = (event, { value }) => {
+        const selected = this.state.localAuthorities.find(localAuthority => localAuthority.uuid === value)
+        this.setState({ selected })
     }
     render() {
         const { t } = this.context
-        const localAuthoritiesOptions = this.state.localAuthorities.map( localAuthority => {
+        const localAuthoritiesOptions = this.state.localAuthorities.map(localAuthority => {
             return { key: localAuthority.uuid, value: localAuthority.uuid, text: localAuthority.name }
-        } )
+        })
 
-        const lastLocalAuthorities = this.state.lastUsedLocalAuths.map( localAuthority =>
+        const lastLocalAuthorities = this.state.lastUsedLocalAuths.map(localAuthority =>
             <Card
                 href={'/api/api-gateway/loginWithSlug/' + localAuthority.slugName}
                 header={localAuthority.name}
@@ -85,7 +85,7 @@ class SelectLocalAuthority extends Component {
         )
         return (
             <div style={{ marginTop: '5em' }}>
-                <Header as='h2' textAlign='center'>{t( 'last_localAuthorities' )}</Header>
+                <Header as='h2' textAlign='center'>{t('last_localAuthorities')}</Header>
                 <Grid textAlign='center' verticalAlign='middle' >
                     <Grid.Row >
                         <Card.Group >
@@ -94,13 +94,13 @@ class SelectLocalAuthority extends Component {
                     </Grid.Row>
                     <Grid.Row >
                         <Grid.Column style={{ maxWidth: 450 }}>
-                            <Header as='h2' textAlign='center'>{t( 'select_localAuthority' )}</Header>
+                            <Header as='h2' textAlign='center'>{t('select_localAuthority')}</Header>
                             <Form onSubmit={this.submit} size='large'>
                                 <Segment>
-                                    <Dropdown style={{ marginBottom: '1em' }} placeholder={`${t( 'form.search' )}...`} fluid search selection
+                                    <Dropdown style={{ marginBottom: '1em' }} placeholder={`${t('form.search')}...`} fluid search selection
                                         options={localAuthoritiesOptions}
                                         onChange={this.onChange} />
-                                    <Button disabled={!this.state.selected.uuid} primary fluid size='large'>{t( 'top_bar.log_in' )}</Button>
+                                    <Button primary basic disabled={!this.state.selected.uuid} fluid size='large'>{t('top_bar.log_in')}</Button>
                                 </Segment>
                             </Form>
                         </Grid.Column>
@@ -111,4 +111,4 @@ class SelectLocalAuthority extends Component {
     }
 }
 
-export default translate( 'api-gateway' )( SelectLocalAuthority)
+export default translate('api-gateway')(SelectLocalAuthority)
