@@ -3,6 +3,8 @@ package fr.sictiam.stela.pesservice.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
@@ -108,6 +111,11 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
     
+    public void updateStatus(String pesUuid, StatusType updatedStatus, String messsage) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), messsage);
+        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+    }
+    
     public void updateStatus(String pesUuid, StatusType updatedStatus, byte [] file ,String fileName) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
@@ -119,5 +127,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
     public PesAller getByAttachementName(String fileName) {
         return pesAllerRepository.findByAttachment_filename(fileName).orElseThrow(PesNotFoundException::new);
+    }
+
+    public List<PesAller> getBlockedFlux() {
+        return pesAllerRepository.findAllByPesHistories_statusAndPesHistories_statusNotIn(StatusType.SENT, Arrays.asList(StatusType.ACK_RECEIVED, StatusType.MAX_RETRY_REACH));
+    }
+    
+    public PesHistory getLastSentHistory(String uuid) {
+        return pesHistoryRepository.findBypesUuidAndStatusInOrderByDateDesc(uuid, Arrays.asList(StatusType.SENT, StatusType.RESENT)).get(0);        
     }
 }

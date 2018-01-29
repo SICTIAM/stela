@@ -49,6 +49,7 @@ import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
+import fr.sictiam.stela.pesservice.scheduler.RetryTask;
 import fr.sictiam.stela.pesservice.scheduler.SenderTask;
 import fr.sictiam.stela.pesservice.service.AdminService;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
@@ -103,6 +104,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ReceiverTask receiverTask;
+    
+    @Autowired
+    private RetryTask retryTask;
 
     @Autowired
     private ExternalRestService externalRestService;
@@ -228,6 +232,37 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml");
         
         assertThat(pesRetourRepository.count(), is(1L));       
+    }
+    
+    @Test
+    public void retryTest() throws IOException {
+        PesAller pes = samplePesAller();
+        pesService.updateStatus(pes.getUuid(), StatusType.SENT);
+
+        MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
+        try {
+            synchronized (mockPesEventListener) {
+                mockPesEventListener.wait(4000);
+            }
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+        retryTask.resendBlockedFlux();
+        
+        MockPesEventListener mockPesEventListener2 = new MockPesEventListener(StatusType.RESENT);
+        try {
+            synchronized (mockPesEventListener2) {
+                mockPesEventListener2.wait(4000);
+            }
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+        
+        List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
+        assertThat(pesHistories, hasSize(3));
+        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.RESENT))));
+        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOTIFICATION_SENT))));
+                
     }
     
     @Test
