@@ -8,6 +8,7 @@
         "admin": "Administration"
     },
     "select_localAuthority": "Sélectionner la collectivité",
+    "last_localAuthorities": "Dernières collectivités utilisées",
     "form": {
         "search": "Rechercher",
         "all": "Tous",
