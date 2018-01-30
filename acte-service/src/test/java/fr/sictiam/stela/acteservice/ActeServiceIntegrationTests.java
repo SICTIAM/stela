@@ -185,7 +185,16 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                     "}," +
                     "\"email\":\"john.doe@sictiam.com\"," +
                     "\"admin\":true," +
-                    "\"notifications\":[\"ACTE_SENT\",\"ACTE_ACK_RECEIVED\"]," +
+                    "\"notificationValues\":[" +
+                        "{" +
+                            "\"name\":\"ACTE_SENT\"," +
+                            "\"active\":true" +
+                        "}," +
+                        "{" +
+                            "\"name\":\"ACTE_CANCELLED\"," +
+                            "\"active\":true" +
+                        "}" +
+                    "]," +
                     "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
                 "}";
             

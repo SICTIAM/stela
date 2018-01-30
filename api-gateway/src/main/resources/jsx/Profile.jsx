@@ -21,7 +21,7 @@ class Profile extends Component {
         activeProfile: {
             uuid: '',
             email: '',
-            notifications: [],
+            notificationValues: [],
             localAuthority: {
                 uuid: '',
                 name: '',
@@ -48,7 +48,7 @@ class Profile extends Component {
         fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
             .then(response => response.json())
             .then(json => this.setState({ agent: json }))
-        fetchWithAuthzHandling({ url: '/api/admin/profile/all-notifications' })
+        fetchWithAuthzHandling({ url: '/api/api-gateway/profile/all-notifications' })
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
     }
@@ -58,11 +58,11 @@ class Profile extends Component {
         profile[id] = value
         this.setState({ agent })
     }
-    onCheckboxChange = (uuidProfile, id) => {
+    onCheckboxChange = (uuidProfile, statusType, checked) => {
         const { agent } = this.state
         const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
-        const index = profile.notifications.indexOf(id)
-        index === -1 ? profile.notifications.push(id) : profile.notifications.splice(index, 1)
+        const notification = profile.notificationValues.find(notification => notification.name === statusType)
+        notification ? notification.active = checked : profile.notificationValues.push({ name: statusType, active: checked })
         this.setState({ agent })
     }
     updateProfile = (uuid) => {
@@ -70,7 +70,7 @@ class Profile extends Component {
         const profileUI = {
             uuid: profile.uuid,
             email: profile.email,
-            notifications: profile.notifications
+            notificationValues: profile.notificationValues
         }
         const headers = { 'Content-Type': 'application/json' }
         fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers: headers, method: 'PATCH', context: this.context })
@@ -119,7 +119,7 @@ class Profile extends Component {
                     </Field>
                     {!this.props.uuid &&
                         <div style={{ textAlign: 'right' }}>
-                            <a href={`/api/admin/profile/ozwillo`} target='_blank' className='ui button' style={{ color: '#663399', boxShadow: '0 0 0 1px #663399', background: 'transparent none' }}>
+                            <a href='/api/api-gateway/ozwillo-portal/my/profile' target='_blank' className='ui button' style={{ color: '#663399', boxShadow: '0 0 0 1px #663399', background: 'transparent none' }}>
                                 {t('profile.modify_my_profile')}
                             </a>
                         </div>}
@@ -148,7 +148,7 @@ class LocalAuthorityProfile extends Component {
         profile: {
             uuid: '',
             email: '',
-            notifications: [],
+            notificationValues: [],
             localAuthority: {
                 uuid: '',
                 name: '',
@@ -167,14 +167,19 @@ class LocalAuthorityProfile extends Component {
                 <Label color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
             </Grid.Column>
         )
-        const profileNotifications = allNotifications.map(notification =>
-            <Field key={notification} htmlFor={notification} label={t(`profile.notifications.${notification}`)}>
-                <Checkbox toggle
-                    id={notification}
-                    checked={profile.notifications.includes(notification)}
-                    onChange={((e, { id }) => onCheckboxChange(profile.uuid, id))} />
-            </Field>
-        )
+        const profileNotifications = allNotifications.map(notification => {
+            const notificationValue = profile.notificationValues.find(notif => notif.name === notification.statusType)
+            return (
+                <Field key={`${profile.uuid}-${notification.statusType}`} htmlFor={`${profile.uuid}-${notification.statusType}`}
+                    label={t(`profile.notifications.${notification.statusType}`)}>
+                    <Checkbox toggle
+                        id={`${profile.uuid}-${notification.statusType}`}
+                        checked={!notification.deactivatable || (notificationValue ? notificationValue.active : notification.defaultValue)}
+                        disabled={!notification.deactivatable}
+                        onChange={((e, { checked }) => onCheckboxChange(profile.uuid, notification.statusType, checked))} />
+                </Field>
+            )
+        })
         const content = (
             <div>
                 <Field htmlFor='modules' label={t('agent.modules')}>

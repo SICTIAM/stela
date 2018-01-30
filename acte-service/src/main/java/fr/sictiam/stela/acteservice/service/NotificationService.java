@@ -8,6 +8,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 
 @Service
@@ -47,12 +46,10 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        // TODO add every event that request mail notification
-        switch (event.getActeHistory().getStatus()) {
-        case ACK_RECEIVED:
-        case SENT:
-        case CANCELLED:
-        case NACK_RECEIVED: {
+        List<StatusType> notificationTypes = Notification.notifications.stream()
+                .map(Notification::getStatusType)
+                .collect(Collectors.toList());
+        if(notificationTypes.contains(event.getActeHistory().getStatus())) {
             try {
                 proccessEvent(event);
             } catch (MessagingException e) {
@@ -61,24 +58,28 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                 LOGGER.error(e.getMessage());
             }
         }
-
-        default:
-            break;
-
-        }
     }
 
     public void proccessEvent(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
         JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
 
-        List<String> notifications = new ArrayList<>();
-        node.get("notifications").forEach(notification -> notifications.add(notification.asText()));
-        List<String> filteredNotifications = notifications.stream()
-                .filter(notification -> StringUtils.startsWith(notification, "ACTE_"))
-                .map(notification -> StringUtils.removeStart(notification, "ACTE_"))
-                .collect(Collectors.toList());
-        if(filteredNotifications.contains(event.getActeHistory().getStatus().toString()))
+        Notification notification = Notification.notifications.stream()
+                .filter(notif -> notif.getStatusType().equals(event.getActeHistory().getStatus()))
+                .findFirst().get();
+
+        List<NotificationValue> notifications = new ArrayList<>();
+        node.get("notificationValues").forEach(notif -> {
+            if(StringUtils.startsWith(notif.get("active").asText(), "ACTE_"))
+                notifications.add(new NotificationValue(
+                        notif.get("uuid").asText(),
+                        StringUtils.removeStart(notif.get("name").asText(), "ACTE_"),
+                        notif.get("active").asBoolean()
+                ));
+        });
+        if(notification.isDeactivatable()
+            || notifications.stream().anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString()) && notif.isActive())
+            || (notification.isDefaultValue() && notifications.isEmpty()))
             sendMail(acte.getUuid(), node, event.getActeHistory().getStatus());
     }
 

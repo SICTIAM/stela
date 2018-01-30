@@ -1,5 +1,7 @@
 package fr.sictiam.stela.admin.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -37,10 +39,10 @@ public class Profile {
     @JsonView(Views.ProfileViewPublic.class)
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_uuid")
     @JsonView(Views.ProfileViewPublic.class)
-    private Set<Notification> notifications;
+    private List<NotificationValue> notificationValues;
 
     public Profile() {
     }
@@ -97,11 +99,7 @@ public class Profile {
         this.email = email;
     }
 
-    public Set<Notification> getNotifications() {
-        return notifications;
-    }
-
-    public void setNotifications(Set<Notification> notifications) {
-        this.notifications = notifications;
+    public List<NotificationValue> getNotificationValues() {
+        return notificationValues != null ? notificationValues : new ArrayList<>();
     }
 }

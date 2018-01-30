@@ -1,14 +1,14 @@
 package fr.sictiam.stela.admin.model.UI;
 
-import fr.sictiam.stela.admin.model.Notification;
+import fr.sictiam.stela.admin.model.NotificationValue;
 
-import java.util.Set;
+import java.util.List;
 
 public class ProfileUI {
 
     private String uuid;
     private String email;
-    private Set<Notification> notifications;
+    private List<NotificationValue> notificationValues;
 
     public ProfileUI() {
     }
@@ -21,7 +21,7 @@ public class ProfileUI {
         return email;
     }
 
-    public Set<Notification> getNotifications() {
-        return notifications;
+    public List<NotificationValue> getNotificationValues() {
+        return notificationValues;
     }
 }
