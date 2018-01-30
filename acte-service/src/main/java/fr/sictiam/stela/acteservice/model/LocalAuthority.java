@@ -82,6 +82,7 @@ public class LocalAuthority {
         this.nomenclatureFile = targetArray;
         this.canPublishRegistre = false;
         this.canPublishWebSite = false;
+        this.setStampPosition(new StampPosition(10, 10));
     }
     
     public String getUuid() {
