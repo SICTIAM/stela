@@ -1,5 +1,10 @@
 version: '3'
 services:
+  clamav:
+    image: mkodockx/docker-clamav:latest
+    container_name: clamav
+    ports:
+     - "3310:3310"
   postgresql:
     image: postgres:latest
     container_name: postgresql
@@ -60,6 +65,7 @@ services:
      - config
      - discovery
      - postgresql
+     - clamav    
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
     volumes:
