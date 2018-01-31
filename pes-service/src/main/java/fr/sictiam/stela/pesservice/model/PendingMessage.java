@@ -36,7 +36,7 @@ public class PendingMessage {
     }
 
     public PendingMessage(PesHistory pesHistory) {
-        this.pesUuid = pesHistory.getActeUuid();
+        this.pesUuid = pesHistory.getPesUuid();
         this.date = pesHistory.getDate();
         this.file = pesHistory.getFile();
         this.fileName = pesHistory.getFileName();

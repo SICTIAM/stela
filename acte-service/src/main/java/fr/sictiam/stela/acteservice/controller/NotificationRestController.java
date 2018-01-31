@@ -10,12 +10,6 @@ import java.util.List;
 @RequestMapping("/api/acte/notifications")
 public class NotificationRestController {
 
-    private final NotificationService notificationService;
-
-    public NotificationRestController(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
-
     @GetMapping("/all")
     public List<Notification> getAllNotifications() {
         return Notification.notifications;

@@ -1,7 +1,11 @@
 package fr.sictiam.stela.pesservice;
 
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -11,13 +15,18 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.mail.util.MimeMessageParser;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,7 +40,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.MultiValueMap;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -138,10 +151,37 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             localAuthority.setSiret("20003531900017");
             localAuthorityService.createOrUpdate(localAuthority);
 
-            String json = "{\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\",\"localAuthority\":{\"uuid\":\""
-                    + localAuthority.getUuid()
-                    + "\",\"name\":\"SICTIAM-Test\",\"siren\":\"999888777\",\"activatedModules\":[\"ACTES\"]},\"agent\":{\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\",\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\",\"email\":\"john.doe@sictiam.com\",\"admin\":true,\"family_name\":\"Doe\",\"given_name\":\"John\"},\"admin\":true,\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]}";
-
+            String json = "{" +
+                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\"," +
+                    "\"localAuthority\":{" +
+                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
+                        "\"name\":\"SICTIAM-Test\"," +
+                        "\"siren\":\"999888777\"," +
+                        "\"activatedModules\":[\"ACTES\"]" +
+                    "}," +
+                    "\"agent\":{" +
+                        "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
+                        "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
+                        "\"email\":\"john.doe@sictiam.com\"," +
+                        "\"admin\":true," +
+                        "\"family_name\":\"Doe\"," +
+                        "\"given_name\":\"John\"" +
+                    "}," +
+                    "\"email\":\"john.doe@sictiam.com\"," +
+                    "\"admin\":true," +
+                    "\"notificationValues\":[" +
+                        "{" +
+                            "\"name\":\"PES_ACK_RECEIVED\"," +
+                            "\"active\":true" +
+                        "}," +
+                        "{" +
+                            "\"name\":\"PES_SENT\"," +
+                            "\"active\":true" +
+                        "}" +
+                    "]," +
+                    "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
+                "}";
+            
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode node = objectMapper.readTree(json);
@@ -296,6 +336,45 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         pes = pesService.save(pes);
         return pes;
     }
+    
+    @Test
+    public void testNotification() throws Exception {
+
+        StatusType statusType = StatusType.SENT;
+        String firstName = "John";
+        String lastName = "Doe";
+        Map<String, String> variables = new HashMap<>();
+        variables.put("firstname", firstName);
+        variables.put("lastname", lastName);
+
+        String body = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
+                variables);
+        String subject = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".subject",
+                variables);
+     
+        PesAller pes = samplePesAller();
+        pesService.updateStatus(pes.getUuid(), statusType);
+        
+        MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
+        try {
+            synchronized (mockPesEventListener) {
+                mockPesEventListener.wait(4000);
+            }
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+
+        MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+        assertThat(receivedMessages, not(emptyArray()));
+
+        MimeMessage current = receivedMessages[0];
+        assertThat(current, notNullValue());
+        MimeMessageParser parser = new MimeMessageParser(current);
+        parser.parse();
+        assertThat(parser.getSubject(), is(subject));
+        assertThat(current.getContent(), instanceOf(MimeMultipart.class));
+        assertThat(parser.getHtmlContent(), is(body));
+    } 
 
     private Optional<PesHistory> getPesHistoryForStatus(String pesUuid, StatusType status) {
         return getPesHistoryForStatus(pesHistoryRepository.findBypesUuidOrderByDate(pesUuid), status);

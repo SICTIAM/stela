@@ -98,7 +98,6 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
         String text = localesService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".body",
                 variables);
 
-        // JavaMailSender emailSender = getJavaMailSender();
         MimeMessage message = emailSender.createMimeMessage();
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);

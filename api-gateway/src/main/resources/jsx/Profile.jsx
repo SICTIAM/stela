@@ -72,6 +72,7 @@ class Profile extends Component {
             email: profile.email,
             notificationValues: profile.notificationValues
         }
+        console.log(profileUI)
         const headers = { 'Content-Type': 'application/json' }
         fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers: headers, method: 'PATCH', context: this.context })
             .then(checkStatus)
