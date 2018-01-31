@@ -70,10 +70,10 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
         List<NotificationValue> notifications = new ArrayList<>();
         node.get("notificationValues").forEach(notif -> {
-            if(StringUtils.startsWith(notif.get("active").asText(), "ACTE_"))
+            if(StringUtils.startsWith(notif.get("active").asText(), "ACTES_"))
                 notifications.add(new NotificationValue(
                         notif.get("uuid").asText(),
-                        StringUtils.removeStart(notif.get("name").asText(), "ACTE_"),
+                        StringUtils.removeStart(notif.get("name").asText(), "ACTES_"),
                         notif.get("active").asBoolean()
                 ));
         });

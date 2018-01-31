@@ -72,7 +72,6 @@ class Profile extends Component {
             email: profile.email,
             notificationValues: profile.notificationValues
         }
-        console.log(profileUI)
         const headers = { 'Content-Type': 'application/json' }
         fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers: headers, method: 'PATCH', context: this.context })
             .then(checkStatus)
@@ -168,19 +167,26 @@ class LocalAuthorityProfile extends Component {
                 <Label color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
             </Grid.Column>
         )
-        const profileNotifications = allNotifications.map(notification => {
-            const notificationValue = profile.notificationValues.find(notif => notif.name === notification.statusType)
-            return (
-                <Field key={`${profile.uuid}-${notification.statusType}`} htmlFor={`${profile.uuid}-${notification.statusType}`}
-                    label={t(`profile.notifications.${notification.statusType}`)}>
-                    <Checkbox toggle
-                        id={`${profile.uuid}-${notification.statusType}`}
-                        checked={!notification.deactivatable || (notificationValue ? notificationValue.active : notification.defaultValue)}
-                        disabled={!notification.deactivatable}
-                        onChange={((e, { checked }) => onCheckboxChange(profile.uuid, notification.statusType, checked))} />
-                </Field>
-            )
-        })
+        const profileNotifications = profile.localAuthority.activatedModules.map(activatedModule =>
+            <div style={{ marginTop: '2em' }} key={activatedModule}>
+                <Header size='small'>{t('profile.notifications_title')} {activatedModule}</Header>
+                {allNotifications
+                    .filter(notification => notification.statusType.startsWith(`${activatedModule}_`))
+                    .map(notification => {
+                        const notificationValue = profile.notificationValues.find(notif => notif.name === notification.statusType)
+                        return (
+                            <Field key={`${profile.uuid}-${notification.statusType}`} htmlFor={`${profile.uuid}-${notification.statusType}`}
+                                label={t(`profile.notifications.${notification.statusType}`)}>
+                                <Checkbox toggle
+                                    id={`${profile.uuid}-${notification.statusType}`}
+                                    checked={!notification.deactivatable || (notificationValue ? notificationValue.active : notification.defaultValue)}
+                                    disabled={!notification.deactivatable}
+                                    onChange={((e, { checked }) => onCheckboxChange(profile.uuid, notification.statusType, checked))} />
+                            </Field>
+                        )
+                    })}
+            </div>
+        )
         const content = (
             <div>
                 <Field htmlFor='modules' label={t('agent.modules')}>
@@ -192,12 +198,11 @@ class LocalAuthorityProfile extends Component {
                     <Input id='email' value={profile.email || ''} placeholder={t('profile.no_email')}
                         onChange={(e, { id, value }) => onChange(profile.uuid, id, value)} />
                 </Field>
-                <Header size='small'>{t('profile.notifications_title')}</Header>
-                {profileNotifications}
+                {profile.localAuthority.activatedModules.length > 0 && profileNotifications}
                 <div style={{ textAlign: 'right' }}>
                     <Button basic primary onClick={() => updateProfile(profile.uuid)}>{t('form.update')}</Button>
                 </div>
-            </div>
+            </div >
         )
         return (
             <AccordionSegment title={profile.localAuthority.name} isDefaultOpen={isDefaultOpen} content={content} />

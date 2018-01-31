@@ -44,7 +44,7 @@ class SelectLocalAuthority extends Component {
             lastUsedLocalAuths = JSON.parse(lastUsedLocalAuths)
             var index = -1;
             for (var i = 0; i < lastUsedLocalAuths.length; i++) {
-                if (lastUsedLocalAuths[i].uuid == localAuth.uuid) {
+                if (lastUsedLocalAuths[i].uuid === localAuth.uuid) {
                     index = i;
                     break;
                 }

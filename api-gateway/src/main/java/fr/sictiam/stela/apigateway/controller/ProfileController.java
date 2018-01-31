@@ -62,7 +62,7 @@ public class ProfileController {
         
         List<Notification> notificationFiltered = new ArrayList<>();
 
-        notificationFiltered.addAll(mapNotififaction("ACTE_", acteNotifications));
+        notificationFiltered.addAll(mapNotififaction("ACTES_", acteNotifications));
         notificationFiltered.addAll(mapNotififaction("PES_", pesNotifications));
 
         return notificationFiltered;
