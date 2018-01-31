@@ -2,25 +2,25 @@ package fr.sictiam.stela.admin.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.commons.beanutils.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.ProfileService;
 
 @RestController
 @RequestMapping("/api/admin/profile")
 public class ProfileController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProfileController.class);
 
     private final ProfileService profileService;
 
@@ -48,5 +48,18 @@ public class ProfileController {
     @GetMapping("/{uuid}/slug")
     public String getSlugForProfile(@PathVariable String uuid) {
         return profileService.getByUuid(uuid).getLocalAuthority().getSlugName();
+    }
+
+    @PatchMapping("/{uuid}")
+    public ResponseEntity updateProfile(@PathVariable String uuid, @RequestBody ProfileUI profileUI) {
+        Profile profile = profileService.getByUuid(uuid);
+        try {
+            BeanUtils.copyProperties(profile, profileUI);
+        } catch (Exception e) {
+            LOGGER.error("Error while updating properties: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        profileService.createOrUpdate(profile);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

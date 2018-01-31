@@ -83,6 +83,14 @@ const notifications = {
             level: 'success',
             position: 'br'
         }
+    },
+    profile: {
+        updated: {
+            title: 'notifications.profile.title',
+            message: 'notifications.profile.updated',
+            level: 'success',
+            position: 'br'
+        }
     }
 }
 

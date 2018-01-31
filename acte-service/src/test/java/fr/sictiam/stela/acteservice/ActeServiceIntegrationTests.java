@@ -167,9 +167,36 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
                     
             localAuthorityService.createOrUpdate(localAuthorityCreated);
-            String json = "{\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\",\"localAuthority\":{\"uuid\":\""
-                    + localAuthority.getUuid()
-                    + "\",\"name\":\"SICTIAM-Test\",\"siren\":\"999888777\",\"activatedModules\":[\"ACTES\"]},\"agent\":{\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\",\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\",\"email\":\"john.doe@sictiam.com\",\"admin\":true,\"family_name\":\"Doe\",\"given_name\":\"John\"},\"admin\":true,\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]}";           
+            String json = "{" +
+                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\"," +
+                    "\"localAuthority\":{" +
+                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
+                        "\"name\":\"SICTIAM-Test\"," +
+                        "\"siren\":\"999888777\"," +
+                        "\"activatedModules\":[\"ACTES\"]" +
+                    "}," +
+                    "\"agent\":{" +
+                        "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
+                        "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
+                        "\"email\":\"john.doe@sictiam.com\"," +
+                        "\"admin\":true," +
+                        "\"family_name\":\"Doe\"," +
+                        "\"given_name\":\"John\"" +
+                    "}," +
+                    "\"email\":\"john.doe@sictiam.com\"," +
+                    "\"admin\":true," +
+                    "\"notificationValues\":[" +
+                        "{" +
+                            "\"name\":\"ACTE_SENT\"," +
+                            "\"active\":true" +
+                        "}," +
+                        "{" +
+                            "\"name\":\"ACTE_CANCELLED\"," +
+                            "\"active\":true" +
+                        "}" +
+                    "]," +
+                    "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
+                "}";
             
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -551,7 +578,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         ActeHistory history = new ActeHistory(acteUuid, StatusType.SENT);
         ActeHistoryEvent mockEvent = new ActeHistoryEvent(this, history);
-        notificationService.sendMail(mockEvent);
+        notificationService.proccessEvent(mockEvent);
 
         MimeMessage[] receivedMessages = smtpServerRule.getMessages();
         assertThat(receivedMessages, not(emptyArray()));

@@ -1,5 +1,6 @@
 package fr.sictiam.stela.admin.service;
 
+import fr.sictiam.stela.admin.model.NotificationValue;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.Profile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -27,8 +29,15 @@ public class ProfileService {
         this.workGroupService = workGroupService;
         this.localAuthorityService= localAuthorityService;
     }
-    
-    public Profile create(Profile profile) {
+
+    @Transactional
+    public Profile createOrUpdate(Profile profile) {
+        List<NotificationValue> notificationValues = profile.getNotificationValues().stream().map(notificationValue -> {
+            notificationValue.setProfileUuid(profile.getUuid());
+            return notificationValue;
+        }).collect(Collectors.toList());
+        profile.getNotificationValues().clear();
+        profile.getNotificationValues().addAll(notificationValues);
         return profileRepository.save(profile);
     }
 

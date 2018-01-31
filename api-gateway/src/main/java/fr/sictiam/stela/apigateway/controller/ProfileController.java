@@ -1,5 +1,6 @@
 package fr.sictiam.stela.apigateway.controller;
 
+import fr.sictiam.stela.apigateway.model.Notification;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +11,11 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.acteServiceUrl;
 import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
 
 @RestController
@@ -19,6 +24,9 @@ public class ProfileController {
     
     @Value("${application.urlWithSlug}")
     String applicationUrlWithSlug;
+
+    @Value("${application.ozwilloPortalUrl}")
+    String ozwilloPortalUrl;
 
     @GetMapping(value="/switch/{profileUuid}")
     public void switchProfile(@PathVariable String profileUuid, HttpServletResponse response,
@@ -33,5 +41,21 @@ public class ProfileController {
         String loginUrlToRedirectTo = applicationUrlWithSlug.replace("%SLUG%", slugForProfile) + "/login";
 
         response.sendRedirect(loginUrlToRedirectTo);
+    }
+
+    @GetMapping("/ozwillo-portal/my/profile")
+    public void redirectOzwilloProfile(HttpServletResponse response) throws IOException {
+        response.sendRedirect(ozwilloPortalUrl + "my/profile");
+    }
+
+    @GetMapping("/profile/all-notifications")
+    public List<Notification> getAllNotifications()  {
+        RestTemplate restTemplate = new RestTemplate();
+        Notification[] notifications =
+                restTemplate.getForObject(acteServiceUrl() + "/api/acte/notifications/all", Notification[].class);
+        List<Notification> notificationFiltered = Arrays.asList(notifications).stream()
+                .map(notification -> new Notification("ACTE_" + notification.getStatusType(), notification.isDeactivatable(), notification.isDefaultValue()))
+                .collect(Collectors.toList());
+        return notificationFiltered;
     }
 }

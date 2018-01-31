@@ -88,6 +88,18 @@
             "title": "Déposer un PES"
         }
     },
+    "profile": {
+        "title": "Profil",
+        "modify_my_profile": "Modifier mon profil",
+        "no_email": "Aucun email",
+        "notifications_title": "Notifications",
+        "notifications": {
+            "ACTE_ACK_RECEIVED": "Reception de l'AR d'un acte",
+            "ACTE_SENT": "Envoi réussi d'un acte",
+            "ACTE_CANCELLED": "Annulation d'un acte",
+            "ACTE_NACK_RECEIVED": "Réception d'une anomalie d'un acte"
+        }
+    },
     "notifications": {
         "acte": {
             "title": "Module Acte",
@@ -142,6 +154,10 @@
             "local_authority_not_found": "Collectivité non trouvée",
             "agent_not_found": "Agent non trouvé",
             "groups_updated": "Les groupes de l'agent ont bien été mis à jour"
+        },
+        "profile": {
+            "title": "Profil",
+            "updated": "Votre profil a bien été mis à jour"
         }
     },
     "local_authority": {
@@ -162,6 +178,7 @@
         "family_name": "Nom",
         "given_name": "Prénom",
         "email": "Email",
+        "modules": "Modules",
         "groups": "Groupes",
         "add_group": "Ajouter un groupe"
     },

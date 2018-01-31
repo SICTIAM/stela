@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon, Checkbox } from 'semantic-ui-react'
+import { Form, Button, Segment, Label, Checkbox } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
-import InputValidation from '../../_components/InputValidation'
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { Field } from '../../_components/UI'

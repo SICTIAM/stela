@@ -1,13 +1,10 @@
 package fr.sictiam.stela.admin.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -38,7 +35,15 @@ public class Profile {
     @ManyToMany(mappedBy="profiles")
     @JsonView(Views.ProfileViewPrivate.class)
     private Set<WorkGroup> groups;
-    
+
+    @JsonView(Views.ProfileViewPublic.class)
+    private String email;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_uuid")
+    @JsonView(Views.ProfileViewPublic.class)
+    private List<NotificationValue> notificationValues;
+
     public Profile() {
     }
     
@@ -84,6 +89,17 @@ public class Profile {
 
     public void setGroups(Set<WorkGroup> groups) {
         this.groups = groups;
-    }  
-    
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<NotificationValue> getNotificationValues() {
+        return notificationValues != null ? notificationValues : new ArrayList<>();
+    }
 }

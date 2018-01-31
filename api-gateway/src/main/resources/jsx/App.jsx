@@ -10,12 +10,14 @@ import { translate } from 'react-i18next'
 import 'semantic-ui-css/semantic.min.css';
 import '../styles/index.css';
 
+import { fetchWithAuthzHandling } from './_util/utils'
 import history from './_util/history'
 import i18n from './_util/i18n'
 import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
 import Home from './Home'
+import { UserProfile, AdminProfile } from './Profile'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
@@ -52,13 +54,15 @@ class App extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         isLoggedIn: PropTypes.bool,
+        user: PropTypes.object,
         t: PropTypes.func,
         _addNotification: PropTypes.func
     }
     state = {
         csrfToken: '',
         csrfTokenHeaderName: '',
-        isLoggedIn: false
+        isLoggedIn: false,
+        user: {}
     }
     NotificationStyle = {
         Containers: {
@@ -72,6 +76,7 @@ class App extends Component {
             csrfToken: this.state.csrfToken,
             csrfTokenHeaderName: this.state.csrfTokenHeaderName,
             isLoggedIn: this.state.isLoggedIn,
+            user: this.state.user,
             t: this.t,
             _addNotification: this._addNotification
         }
@@ -85,15 +90,21 @@ class App extends Component {
         }
     }
     componentDidMount() {
-        fetch('/api/csrf-token', { credentials: 'same-origin' })
+        fetchWithAuthzHandling({ url: '/api/csrf-token' })
             .then(response => {
                 // TODO: Improve (coockies..) 
-                this.setState({ isLoggedIn: response.status !== 401 })
+                this.setState({ isLoggedIn: response.status !== 401 }, this.fetchUser)
                 return response
             })
             .then(response => response.headers)
             .then(headers =>
                 this.setState({ csrfToken: headers.get('X-CSRF-TOKEN'), csrfTokenHeaderName: headers.get('X-CSRF-HEADER') }))
+    }
+    fetchUser = () => {
+        if (this.state.isLoggedIn)
+            fetchWithAuthzHandling({ url: '/api/admin/agent' })
+                .then(response => response.json())
+                .then(json => this.setState({ user: json }))
     }
     render() {
         return (
@@ -143,6 +154,8 @@ const AppRoute = () =>
 
         <Route path='/choix-collectivite' component={SelectLocalAuthority} />
 
+        <AuthRoute path='/profil' component={UserProfile} menu={MenuBar} />
+
         <Route exact path='/actes'>
             <Redirect to="/actes/liste" />
         </Route>
@@ -162,6 +175,7 @@ const AppRoute = () =>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
         <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/agents/:uuid' component={AdminProfile} menu={AdminMenuBar} />
         <AuthRoute path='/admin/agents' component={AgentList} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
         <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} />
