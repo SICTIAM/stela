@@ -119,7 +119,9 @@ class Profile extends Component {
                     </Field>
                     {!this.props.uuid &&
                         <div style={{ textAlign: 'right' }}>
-                            <a href='/api/api-gateway/ozwillo-portal/my/profile' target='_blank' className='ui button' style={{ color: '#663399', boxShadow: '0 0 0 1px #663399', background: 'transparent none' }}>
+                            <a href='/api/api-gateway/ozwillo-portal/my/profile' target='_blank' className='ui button'
+                                style={{ display: 'inline-flex', alignItems: 'center', color: '#663399', boxShadow: '0 0 0 1px #663399', background: 'transparent none' }}>
+                                <img style={{ height: '1.5em', float: 'left', marginRight: '1em' }} src={process.env.PUBLIC_URL + '/img/logo_ozwillo.png'} alt="Ozwillo" />
                                 {t('profile.modify_my_profile')}
                             </a>
                         </div>}
