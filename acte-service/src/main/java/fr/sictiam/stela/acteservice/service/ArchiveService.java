@@ -49,8 +49,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     @Value("${application.clamav.port}")
     private Integer clamavPort;
     
-    @Value("${application.clamav.ip}")
-    private String clamavIp;
+    @Value("${application.clamav.host}")
+    private String clamavHost;
 
     private String departement = "006";
     private String arrondissement = "2";
@@ -76,7 +76,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     
     @PostConstruct
     private void init() {
-        clamavClient = new ClamavClient(clamavIp, clamavPort);
+        clamavClient = new ClamavClient(clamavHost, clamavPort);
     }
     private void checkAntivirus(String acteUuid) {
 
