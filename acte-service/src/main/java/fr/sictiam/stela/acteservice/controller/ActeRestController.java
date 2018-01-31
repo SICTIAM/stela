@@ -7,8 +7,10 @@ import java.net.URLConnection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,12 +45,14 @@ import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.StampPosition;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.acteservice.service.util.RightUtils;
 import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 
 @RestController
@@ -184,7 +188,6 @@ public class ActeRestController {
     @GetMapping("/{uuid}/file/stamped")
     public ResponseEntity getStampedActeAttachment(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @PathVariable String uuid,
                                          @RequestParam(required = false) Integer x, @RequestParam(required = false) Integer y) {
-        // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         Acte acte = acteService.getByUuid(uuid);
         byte[] pdf = new byte[0];
@@ -234,8 +237,15 @@ public class ActeRestController {
     }
 
     @PostMapping
-    ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
-                                  @RequestParam("annexes") MultipartFile... annexes) {
+    ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
+            @RequestParam("annexes") MultipartFile... annexes) {
+          //TODO REACTIVE WHEN WE HAVE THE FRONT 
+//        if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_ADMIN, Right.ACTES_DEPOSIT))) {
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         ObjectMapper mapper = new ObjectMapper();
         try {

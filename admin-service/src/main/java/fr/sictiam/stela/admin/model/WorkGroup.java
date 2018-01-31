@@ -4,8 +4,6 @@ import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -45,9 +43,8 @@ public class WorkGroup {
     private String name;    
     
     @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
     @JsonView(Views.WorkGroupViewPublic.class)
-    private Set<Right> rights; 
+    private Set<String> rights; 
 
     public WorkGroup() {
         
@@ -79,11 +76,11 @@ public class WorkGroup {
         this.profiles = profiles;
     }
     
-    public Set<Right> getRights() {
+    public Set<String> getRights() {
         return rights;
     }
 
-    public void setRights(Set<Right> rights) {
+    public void setRights(Set<String> rights) {
         this.rights = rights;
     }
     

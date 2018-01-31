@@ -22,7 +22,6 @@ import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
-import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
 
 @Service
@@ -166,7 +165,7 @@ public class LocalAuthorityService {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
         
-        localAuthority.setActive(event.getActivatedModules().contains(Module.ACTES));
+        localAuthority.setActive(event.getActivatedModules().contains("ACTES"));
        
         createOrUpdate(localAuthority);
 

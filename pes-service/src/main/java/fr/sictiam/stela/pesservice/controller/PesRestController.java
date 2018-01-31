@@ -54,7 +54,7 @@ public class PesRestController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile") String currentProfileUuid,
+    public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
                                          @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
                                          @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
         ObjectMapper mapper = new ObjectMapper();

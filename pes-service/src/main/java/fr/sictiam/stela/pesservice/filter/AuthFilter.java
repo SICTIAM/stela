@@ -1,6 +1,8 @@
 package fr.sictiam.stela.pesservice.filter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -15,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fr.sictiam.stela.pesservice.model.Right;
 import io.jsonwebtoken.Jwts;
 
 @Component
@@ -26,19 +29,20 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
-        String profile = null;
-        String currentLocalAuthority = null;
         
         JsonNode token =getToken(request);
            
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
-            profile = token.get("uuid").asText();
-            currentLocalAuthority = token.get("localAuthority").get("uuid").asText();
-        } 
-        if (profile != null) {
-            request.setAttribute("STELA-Current-Profile", profile);
-            request.setAttribute("STELA-Current-Local-Authority-UUID", currentLocalAuthority);
+            Set<Right> rights = new HashSet<>();
+            token.get("groups").forEach(group -> group.get("rights").forEach(right -> {
+                if (StringUtils.startsWith(right.asText(), "PES_")) {
+                    rights.add(Right.valueOf(right.asText()));
+                }
+            }));
+            request.setAttribute("STELA-Current-Profile-Rights", rights);
+            request.setAttribute("STELA-Current-Profile-UUID", token.get("uuid").asText());
+            request.setAttribute("STELA-Current-Local-Authority-UUID",
+                    token.get("localAuthority").get("uuid").asText());
         }
             
         filterChain.doFilter(request, response);    

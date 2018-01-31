@@ -48,7 +48,7 @@ public class AuthFilter extends OncePerRequestFilter {
         }
         
         if (profile != null) {
-            request.setAttribute("STELA-Current-Profile", profile.getUuid());
+            request.setAttribute("STELA-Current-Profile-UUID", profile.getUuid());
             request.setAttribute("STELA-Sub", profile.getAgent().getSub());
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
         }

@@ -35,7 +35,7 @@ public class ProfileController {
 
     @GetMapping
     @JsonView(Views.ProfileView.class)
-    public Profile getCurrentProfile(@RequestAttribute("STELA-Current-Profile") String profile) {
+    public Profile getCurrentProfile(@RequestAttribute("STELA-Current-Profile-UUID") String profile) {
         return profileService.getByUuid(profile);
     }
     
@@ -51,15 +51,15 @@ public class ProfileController {
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity updateProfile(@PathVariable String uuid, @RequestBody ProfileUI profileUI) {
+    public ResponseEntity<?> updateProfile(@PathVariable String uuid, @RequestBody ProfileUI profileUI) {
         Profile profile = profileService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(profile, profileUI);
         } catch (Exception e) {
             LOGGER.error("Error while updating properties: {}", e);
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         profileService.createOrUpdate(profile);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 }
