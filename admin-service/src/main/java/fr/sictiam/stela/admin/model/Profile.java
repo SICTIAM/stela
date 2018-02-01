@@ -102,4 +102,8 @@ public class Profile {
     public List<NotificationValue> getNotificationValues() {
         return notificationValues != null ? notificationValues : new ArrayList<>();
     }
+
+    public void setNotificationValues(List<NotificationValue> notificationValues) {
+        this.notificationValues = notificationValues;
+    }
 }

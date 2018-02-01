@@ -97,7 +97,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        PesAller pes = getByUuid(event.getPesHistory().getActeUuid());
+        PesAller pes = getByUuid(event.getPesHistory().getPesUuid());
         pes.getPesHistories().add(event.getPesHistory());
         pesAllerRepository.save(pes);
     }

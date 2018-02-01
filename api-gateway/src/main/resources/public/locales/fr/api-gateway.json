@@ -94,10 +94,12 @@
         "no_email": "Aucun email",
         "notifications_title": "Notifications",
         "notifications": {
-            "ACTE_ACK_RECEIVED": "Reception de l'AR d'un acte",
-            "ACTE_SENT": "Envoi réussi d'un acte",
-            "ACTE_CANCELLED": "Annulation d'un acte",
-            "ACTE_NACK_RECEIVED": "Réception d'une anomalie d'un acte"
+            "ACTES_ACK_RECEIVED": "Reception de l'AR d'un acte",
+            "ACTES_SENT": "Envoi réussi d'un acte",
+            "ACTES_CANCELLED": "Annulation d'un acte",
+            "ACTES_NACK_RECEIVED": "Réception d'une anomalie d'un acte",
+            "PES_ACK_RECEIVED": "Reception de l'AR d'un PES",
+            "PES_SENT": "Envoi réussi d'un PES"
         }
     },
     "notifications": {

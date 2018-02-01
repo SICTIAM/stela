@@ -55,7 +55,7 @@ public class PesHistory implements Comparable<PesHistory> {
         return uuid;
     }
 
-    public String getActeUuid() {
+    public String getPesUuid() {
         return pesUuid;
     }
 

@@ -78,6 +78,7 @@ import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
+import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.acteservice.scheduler.SenderTask;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
@@ -260,10 +261,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             fail("Should not have thrown an exception");
         }
 
-        Acte[] actes = this.restTemplate.getForObject("/api/acte", Acte[].class);
-        assertThat(actes, not(emptyArray()));
-        assertThat(actes[0].getActeHistories().last().getStatus(), notNullValue());
-        assertThat(actes[0].getActeHistories().last().getDate(), notNullValue());
+        SearchResultsUI searchResultsUIs = this.restTemplate.getForObject("/api/acte", SearchResultsUI.class);
+        assertThat(searchResultsUIs.getResults(), not(empty()));
     }
 
     @Test

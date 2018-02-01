@@ -1,13 +1,17 @@
 package fr.sictiam.stela.pesservice.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import fr.sictiam.stela.pesservice.model.Notification;
+import fr.sictiam.stela.pesservice.model.NotificationValue;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
@@ -46,12 +52,12 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        // TODO add every event that request mail notification
-        switch (event.getPesHistory().getStatus()) {
-        case SENT:
-        case ACK_RECEIVED:
+        List<StatusType> notificationTypes = Notification.notifications.stream()
+                .map(Notification::getStatusType)
+                .collect(Collectors.toList());
+        if(notificationTypes.contains(event.getPesHistory().getStatus())) {
             try {
-                sendMail(event);
+                proccessEvent(event);
             } catch (MessagingException e) {
                 LOGGER.error(e.getMessage());
             } catch (IOException e) {
@@ -59,17 +65,35 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
             }
         }
     }
-
-    public void sendMail(PesHistoryEvent event) throws MessagingException, IOException {
-        PesAller acte = pesService.getByUuid(event.getPesHistory().getActeUuid());
-
+    
+    public void proccessEvent(PesHistoryEvent event ) throws MessagingException, IOException {
+        PesAller acte = pesService.getByUuid(event.getPesHistory().getPesUuid());
         JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
 
-        String mail = node.get("agent").get("email").asText();
+        Notification notification = Notification.notifications.stream()
+                .filter(notif -> notif.getStatusType().equals(event.getPesHistory().getStatus()))
+                .findFirst().get();
+
+        List<NotificationValue> notifications = new ArrayList<>();
+        node.get("notificationValues").forEach(notif -> {
+            if(StringUtils.startsWith(notif.get("active").asText(), "PES_"))
+                notifications.add(new NotificationValue(
+                        notif.get("uuid").asText(),
+                        StringUtils.removeStart(notif.get("name").asText(), "PES_"),
+                        notif.get("active").asBoolean()
+                ));
+        });
+        if(notification.isDeactivatable()
+            || notifications.stream().anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString()) && notif.isActive())
+            || (notification.isDefaultValue() && notifications.isEmpty()))
+            sendMail(acte.getUuid(), node, event.getPesHistory().getStatus());
+    }
+
+    public void sendMail(String uuid, JsonNode node, StatusType statusType) throws MessagingException, IOException {
+
+        String mail = StringUtils.isNotBlank(node.get("email").asText()) ? node.get("email").asText() : node.get("agent").get("email").asText();
         String firstName = node.get("agent").get("given_name").asText();
         String lastName = node.get("agent").get("family_name").asText();
-
-        StatusType statusType = event.getPesHistory().getStatus();
 
         Map<String, String> variables = new HashMap<>();
         variables.put("firstname", firstName);
@@ -80,7 +104,6 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         String text = localesService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
                 variables);
 
-        // JavaMailSender emailSender = getJavaMailSender();
         MimeMessage message = emailSender.createMimeMessage();
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -91,8 +114,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
         emailSender.send(message);
 
-        PesHistory acteHistory = new PesHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
-        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, acteHistory));
+        PesHistory pesHistory = new PesHistory(uuid, StatusType.NOTIFICATION_SENT);
+        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
 }
