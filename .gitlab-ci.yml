@@ -20,9 +20,10 @@ test:
   stage: test
   script:
     - ./gradlew --build-cache --stacktrace test
-  artifacts:
-    paths:
-    - acte-service/build/reports/tests/*
+# Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
+#  artifacts:
+#    paths:
+#    - acte-service/build/reports/tests/*
 
 #integrationTest:
 #  stage: integrationTest
