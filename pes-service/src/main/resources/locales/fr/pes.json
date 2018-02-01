@@ -4,6 +4,14 @@
       "SENT": "Envoyé",
       "ACK_RECEIVED": "AR Ministère",
       "CREATED": "Créé"     
+    },
+    "fields": {
+      "objet": "Objet",
+      "comment": "Commentaire",
+      "attachment": "Fichier"
+    },
+    "new": {
+      "title": "Télétransmission d'une enveloppe"
     }
   }, 
   "admin": {

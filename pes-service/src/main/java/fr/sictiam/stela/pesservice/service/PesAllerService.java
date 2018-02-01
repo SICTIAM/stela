@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
+import fr.sictiam.stela.pesservice.model.Attachment;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
@@ -100,6 +103,18 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         PesAller pes = getByUuid(event.getPesHistory().getPesUuid());
         pes.getPesHistories().add(event.getPesHistory());
         pesAllerRepository.save(pes);
+    }
+
+    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller, MultipartFile file) throws IOException {
+        pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
+        pesAller.setProfileUuid(currentProfileUuid);
+        Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
+        pesAller.setAttachment(attachment);
+        pesAller.setCreation(LocalDateTime.now());
+
+        pesAller = pesAllerRepository.save(pesAller);
+        updateStatus(pesAller.getUuid(), StatusType.CREATED);
+        return pesAller;
     }
 
     public PesAller getByUuid(String uuid) {
