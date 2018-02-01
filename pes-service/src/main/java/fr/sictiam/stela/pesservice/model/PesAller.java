@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesservice.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
@@ -54,12 +53,10 @@ public class PesAller {
     private LocalAuthority localAuthority;
 
     private String profileUuid;
-
-    private String groupUuid;
     
     private String comment;
     
-    private boolean attachmentOnly;
+    private boolean Pj;
     
     private boolean signed;
 
@@ -109,14 +106,6 @@ public class PesAller {
     public void setProfileUuid(String profileUuid) {
         this.profileUuid = profileUuid;
     }
-
-    public String getGroupUuid() {
-        return groupUuid;
-    }
-
-    public void setGroupUuid(String groupUuid) {
-        this.groupUuid = groupUuid;
-    }
     
     public Attachment getAttachment() {
         return attachment;
@@ -134,12 +123,12 @@ public class PesAller {
         this.comment = comment;
     }
 
-    public boolean isAttachmentOnly() {
-        return attachmentOnly;
+    public boolean isPj() {
+        return Pj;
     }
 
-    public void setAttachmentOnly(boolean attachmentOnly) {
-        this.attachmentOnly = attachmentOnly;
+    public void setPj(boolean pj) {
+        this.Pj = pj;
     }
 
     public boolean isSigned() {

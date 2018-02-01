@@ -1,26 +1,23 @@
 package fr.sictiam.stela.pesservice.controller;
 
-import java.net.URLConnection;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/pes")
@@ -54,5 +51,20 @@ public class PesRestController {
         PesAller pes = pesService.getByUuid(uuid);
 
         return new ResponseEntity<>(pes, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile") String currentProfileUuid,
+                                         @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+                                         @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
+            PesAller result = pesService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
+            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+        } catch (IOException e) {
+            LOGGER.error("IOException: Could not convert JSON to PesAller: {}", e);
+            return new ResponseEntity<>("notifications.pes.sent.error.non_extractable_pes", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

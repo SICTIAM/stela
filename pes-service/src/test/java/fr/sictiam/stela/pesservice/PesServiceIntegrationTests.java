@@ -314,10 +314,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     private PesAller samplePesAller() throws IOException {
         Optional<LocalAuthority> localAuthority = localAuthorityService.getByName("SICTIAM-Test");
         PesAller pes = new PesAller();
-        pes.setAttachmentOnly(false);
+        pes.setPj(false);
         pes.setComment("comment");
         pes.setCreation(LocalDateTime.now());
-        pes.setGroupUuid("dd");
         pes.setLocalAuthority(localAuthority.get());
         pes.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
 

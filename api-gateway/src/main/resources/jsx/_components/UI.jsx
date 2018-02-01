@@ -30,7 +30,9 @@ const File = ({ attachment, onDelete }) =>
             <Icon style={{ float: 'left' }} name='file outline' size='big' />
             <Icon style={{ float: 'right', cursor: 'pointer' }} name='remove' onClick={() => onDelete(attachment.uuid)} />
             <Card.Header style={{ fontSize: 1 + 'em' }}>{attachment.filename}</Card.Header>
-            <Card.Meta>{bytesToSize(attachment.size)}</Card.Meta>
+            {attachment.size &&
+                <Card.Meta>{bytesToSize(attachment.size)}</Card.Meta>
+            }
         </Card.Content>
     </Card>
 
