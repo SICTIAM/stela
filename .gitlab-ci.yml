@@ -24,13 +24,13 @@ test:
     paths:
     - acte-service/build/reports/tests/*
 
-integrationTest:
-  stage: integrationTest
-  script:
-    - ./gradlew --build-cache --stacktrace integrationTest
-  artifacts:
-    paths:
-    - acte-service/build/reports/tests/*
+#integrationTest:
+#  stage: integrationTest
+#  script:
+#    - ./gradlew --build-cache --stacktrace integrationTest
+#  artifacts:
+#    paths:
+#    - acte-service/build/reports/tests/*
 
 build:
   stage: build
