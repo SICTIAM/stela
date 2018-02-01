@@ -8,11 +8,19 @@ buildscript {
         maven {
             url 'https://repo.spring.io/libs-milestone'
         }
+        jcenter()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 		classpath('se.transmode.gradle:gradle-docker:1.2')
+        classpath('ru.vyarus:gradle-quality-plugin:2.4.0')
 	}
+}
+
+// Add a taskTree task to display, as its name implies, the dependency tree of a given task
+// eg ./gradlew bootRun taskTree
+plugins {
+    id "com.dorongold.task-tree" version "1.3"
 }
 
 subprojects {
@@ -22,6 +30,8 @@ subprojects {
 	apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 	apply plugin: 'docker'
+
+    apply plugin: 'ru.vyarus.quality'
 
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
@@ -66,6 +76,10 @@ subprojects {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
         }
+    }
+
+    quality {
+        strict = false
     }
 
     task image(type: Docker, dependsOn: build) {
