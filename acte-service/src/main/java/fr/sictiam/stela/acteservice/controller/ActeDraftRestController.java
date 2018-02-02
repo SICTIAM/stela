@@ -83,7 +83,7 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}")
-    ResponseEntity<?> submitDraft(@PathVariable String draftUuid, @RequestAttribute("STELA-Current-Profile") String profileUuid) {
+    ResponseEntity<?> submitDraft(@PathVariable String draftUuid, @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         Optional opt =  draftService.sumitDraft(draftUuid, profileUuid);
         if(opt.isPresent()) return new ResponseEntity<>(opt.get(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -102,7 +102,7 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
-    ResponseEntity<?> submitActeDraft(@PathVariable String uuid, @RequestAttribute("STELA-Current-Profile") String profileUuid) {
+    ResponseEntity<?> submitActeDraft(@PathVariable String uuid, @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);
         List<ObjectError> errors = ValidationUtil.validateActe(acteDraft);
         if (!errors.isEmpty()) {

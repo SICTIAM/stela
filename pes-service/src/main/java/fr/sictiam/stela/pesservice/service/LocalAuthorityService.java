@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import fr.sictiam.stela.pesservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.event.LocalAuthorityEvent;
-import fr.sictiam.stela.pesservice.model.event.Module;
 
 @Service
 public class LocalAuthorityService {
@@ -65,7 +64,7 @@ public class LocalAuthorityService {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
         
-        localAuthority.setActive(event.getActivatedModules().contains(Module.PES));
+        localAuthority.setActive(event.getActivatedModules().contains("PES"));
        
         createOrUpdate(localAuthority);
 

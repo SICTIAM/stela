@@ -3,7 +3,6 @@ package fr.sictiam.stela.admin.service;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import fr.sictiam.stela.admin.dao.WorkGroupRepository;
@@ -48,5 +47,9 @@ public class WorkGroupService {
         localAuthority.getGroups().remove(workGroup);
         workGroupRepository.delete(workGroup);
         localAuthorityService.createOrUpdate(localAuthority);
+    }
+
+    public WorkGroup update(WorkGroup workGroup) {
+        return workGroupRepository.save(workGroup);        
     }
 }

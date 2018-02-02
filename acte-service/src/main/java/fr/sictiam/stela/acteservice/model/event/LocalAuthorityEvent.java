@@ -10,7 +10,7 @@ public class LocalAuthorityEvent extends Event {
     private String name;
     private String siren;
 
-    private Set<Module> activatedModules;
+    private Set<String> activatedModules;
         
     public LocalAuthorityEvent() {
         super(LocalAuthorityEvent.class.getName());
@@ -47,11 +47,11 @@ public class LocalAuthorityEvent extends Event {
         this.siren = siren;
     }
     
-    public Set<Module> getActivatedModules() {
+    public Set<String> getActivatedModules() {
         return activatedModules;
     }
 
-    public void setActivatedModules(Set<Module> activatedModules) {
+    public void setActivatedModules(Set<String> activatedModules) {
         this.activatedModules = activatedModules;
     }    
     

@@ -76,7 +76,6 @@ import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
-import fr.sictiam.stela.acteservice.model.event.Module;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.acteservice.scheduler.SenderTask;
@@ -196,7 +195,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                             "\"active\":true" +
                         "}" +
                     "]," +
-                    "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
+                    "\"groups\":[" + 
+                       "{" + 
+                           "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + 
+                           "\"name\":\"aa\"," + 
+                           "\"rights\":[\"ACTES_ADMIN\"]" + 
+                       "}" + 
+                    "]" +
                 "}";
             
             try {
@@ -386,7 +391,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         LocalAuthority localAuthority = new LocalAuthority("d4055204-ce91-48a5-bb53-458bd543bc5a", "New-Test","siren", true);
         
         LocalAuthorityEvent localAuthorityEvent =new LocalAuthorityEvent(localAuthority);
-        localAuthorityEvent.setActivatedModules(Collections.singleton(Module.ACTES));
+        localAuthorityEvent.setActivatedModules(Collections.singleton("ACTES"));
         localAuthorityService.handleEvent(localAuthorityEvent);
         assertThat(localAuthorityService.getByUuid(localAuthority.getUuid()).getName(), is("New-Test"));
         assertThat(localAuthority.getUuid(), is(localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid()));    
