@@ -4,8 +4,9 @@ import { translate } from 'react-i18next'
 import { Segment, Icon } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
+import Pagination from '../../_components/Pagination'
 import { modules } from '../../_util/constants'
-import { Page, Pagination } from '../../_components/UI'
+import { Page } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthorityList extends Component {
@@ -21,7 +22,9 @@ class LocalAuthorityList extends Component {
         direction: ''
     }
     componentDidMount() {
-        this.fetchLocalAuthorities()
+        const itemPerPage = localStorage.getItem('itemPerPage')
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.fetchLocalAuthorities)
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
@@ -41,6 +44,9 @@ class LocalAuthorityList extends Component {
             return
         }
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchLocalAuthorities)
+    }
+    updateItemPerPage = (limit) => {
+        this.setState({ limit }, this.fetchLocalAuthorities)
     }
     renderActivatedModule = (activatedModules, moduleName) =>
         activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
@@ -68,7 +74,9 @@ class LocalAuthorityList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick} />
+                handlePageClick={this.handlePageClick}
+                itemPerPage={this.state.limit}
+                updateItemPerPage={this.updateItemPerPage} />
         return (
             <Page title={t('admin.modules.local_authority_settings')}>
                 <Segment>
