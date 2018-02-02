@@ -8,7 +8,6 @@ import StelaTable from '../_components/StelaTable'
 import { Page, Pagination, FormFieldInline, FormField } from '../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-import { pesStatus } from '../_util/constants'
 
 class PesList extends Component {
     static contextTypes = {
@@ -120,7 +119,13 @@ class PesListForm extends Component {
         t: PropTypes.func
     }
     state = {
-        isAccordionOpen: false
+        isAccordionOpen: false,
+        pesStatuses: []
+    }
+    componentDidMount() {
+        fetchWithAuthzHandling({ url: '/api/pes/statuses' })
+            .then(response => response.json())
+            .then(json => this.setState({ pesStatuses: json }))
     }
     handleAccordion = () => {
         const isAccordionOpen = this.state.isAccordionOpen
@@ -133,7 +138,7 @@ class PesListForm extends Component {
     render() {
         const { t } = this.context
         const { search, handleFieldChange } = this.props
-        const statusOptions = pesStatus.map(statusItem =>
+        const statusOptions = this.state.pesStatuses.map(statusItem =>
             <option key={statusItem} value={statusItem}>{t(`pes.status.${statusItem}`)}</option>
         )
         return (

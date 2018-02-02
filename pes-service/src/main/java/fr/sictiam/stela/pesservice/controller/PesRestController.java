@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -83,7 +84,7 @@ public class PesRestController {
     }
 
     @GetMapping("/{uuid}/file")
-    public ResponseEntity getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
         PesAller pesAller = pesService.getByUuid(uuid);
         outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename());
         return new ResponseEntity(HttpStatus.OK);
@@ -91,11 +92,16 @@ public class PesRestController {
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
     public ResponseEntity getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
-        PesHistory acteHistory = pesService.getHistoryByUuid(historyUuid);
-        if (acteHistory.getFile() != null) {
-            outputFile(response, acteHistory.getFile(), acteHistory.getFileName());
+        PesHistory pesHistory = pesService.getHistoryByUuid(historyUuid);
+        if (pesHistory.getFile() != null) {
+            outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
             return new ResponseEntity(HttpStatus.OK);
         } else throw new FileNotFoundException();
+    }
+
+    @GetMapping("/statuses")
+    public List<StatusType> getStatuses() {
+        return Arrays.asList(StatusType.values());
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {
