@@ -95,7 +95,10 @@ class ActeList extends Component {
     }
     render() {
         const { t } = this.context
-        const statusDisplay = (history) => t(`acte.status.${history[history.length - 1].status}`)
+        const statusDisplay = (histories) => {
+            const lastHistory = histories[histories.length - 1]
+            return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(`acte.status.${lastHistory.status}`)}</span>
+        }
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
         const downloadACKsSelectOption = { title: t('acte.list.download_selected_ACKs'), titleNoSelection: t('acte.list.download_all_ACKs'), action: this.downloadACKs }
@@ -174,7 +177,7 @@ class ActeListForm extends Component {
         )
         return (
             <Accordion style={{ marginBottom: '1em' }} styled>
-                <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('acte.list.advanced_search')}</Accordion.Title>
+                <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('api-gateway:form.advanced_search')}</Accordion.Title>
                 <Accordion.Content active={this.state.isAccordionOpen}>
                     <Form onSubmit={this.submitForm}>
                         <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >

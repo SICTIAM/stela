@@ -40,7 +40,6 @@
     },
     "list": {
       "title": "Liste des Actes",
-      "advanced_search": "Recherche avancée",
       "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
       "download_selected_ACKs": "Télécharger les justificatifs d'AR de la sélection",
       "download_all_CSV": "Télécharger toute la liste des actes",

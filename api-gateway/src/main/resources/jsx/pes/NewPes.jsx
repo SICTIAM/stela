@@ -8,6 +8,7 @@ import debounce from 'debounce'
 import { Page, FormField, File } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
+import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class NewPes extends Component {
@@ -57,7 +58,7 @@ class NewPes extends Component {
                 .then(response => response.text())
                 .then(pesUuid => {
                     this.context._addNotification(notifications.pes.sent)
-                    //history.push('/pes/' + pesUuid)
+                    history.push('/pes/' + pesUuid)
                 })
                 .catch(response => {
                     response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))

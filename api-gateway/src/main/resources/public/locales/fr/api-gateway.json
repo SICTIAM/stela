@@ -11,6 +11,7 @@
     "last_localAuthorities": "Dernières collectivités utilisées",
     "form": {
         "search": "Rechercher",
+        "advanced_search": "Recherche avancée",
         "all": "Tous",
         "all_feminine": "Toutes",
         "from": "de",
@@ -65,28 +66,6 @@
             "cgu": "CGU"
         },
         "admin": "Admin"
-    },
-    "pes": {
-        "list": {
-            "title": "Liste des PES",
-            "table": {
-                "empty": "Aucun PES",
-                "objet": "Objet",
-                "comment": "Commentaire",
-                "creation": "Date de création",
-                "status": "Status",
-                "lastUpdateTime": "Dernière mise à jour"
-            },
-            "status": {
-                "CREATED": "Créé",
-                "SENT": "Envoyé",
-                "ACK_RECEIVED": "AR Ministère",
-                "NACK_RECEIVED": "Anomalie Ministère"
-            }
-        },
-        "new": {
-            "title": "Déposer un PES"
-        }
     },
     "profile": {
         "title": "Profil",

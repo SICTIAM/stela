@@ -48,8 +48,7 @@ const notifications = {
             title: 'notifications.pes.title',
             message: 'notifications.pes.sent.success',
             level: 'success',
-            position: 'br',
-            autoDismiss: 0
+            position: 'br'
         },
         virus: {
             title: 'notifications.pes.title',
