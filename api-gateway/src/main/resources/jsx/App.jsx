@@ -25,6 +25,7 @@ import DraftList from './acte/DraftList'
 import NewActeSwitch from './acte/NewActeSwitch'
 import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
+import Pes from './pes/Pes'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminDashboard from './admin/AdminDashboard'
 import AgentList from './admin/AgentList'
@@ -170,6 +171,7 @@ const AppRoute = () =>
         </Route>
         <AuthRoute path='/pes/liste' component={PesList} menu={MenuBar} />
         <AuthRoute path='/pes/nouveau' component={NewPes} menu={MenuBar} />
+        <AuthRoute path='/pes/:uuid' component={Pes} menu={MenuBar} />
 
         <Route exact path='/admin'>
             <Redirect to="/admin/tableau-de-bord" />

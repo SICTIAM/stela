@@ -56,7 +56,7 @@ public class PesAller {
     
     private String comment;
     
-    private boolean Pj;
+    private boolean pj;
     
     private boolean signed;
 
@@ -124,11 +124,11 @@ public class PesAller {
     }
 
     public boolean isPj() {
-        return Pj;
+        return pj;
     }
 
     public void setPj(boolean pj) {
-        this.Pj = pj;
+        this.pj = pj;
     }
 
     public boolean isSigned() {

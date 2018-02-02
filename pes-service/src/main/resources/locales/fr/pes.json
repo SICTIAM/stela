@@ -1,19 +1,38 @@
 {
   "pes": {
-    "status": { 
+    "status": {
+      "CREATED": "Créé",
       "SENT": "Envoyé",
-      "ACK_RECEIVED": "AR Ministère",
-      "CREATED": "Créé"     
+      "NOT_SENT": "Non envoyé",
+      "ACK_RECEIVED": "AR Préfecture",
+      "NACK_RECEIVED": "Anomalie Préfecture",
+      "PES_RETOUR_RECEIVED": "PES Retour reçu",
+      "MAX_RETRY_REACH": "Nombre de tentative de renvoi automatique excédé",
+      "FILE_ERROR": "Erreur sur le fichier PES",
+      "NOTIFICATION_SENT": "Notification envoyée",
+      "RESENT": "Renvoyé"
     },
     "fields": {
       "objet": "Objet",
       "comment": "Commentaire",
-      "attachment": "Fichier"
+      "attachment": "Fichier",
+      "creation": "Date de création",
+      "status": "Status"
     },
     "new": {
       "title": "Télétransmission d'une enveloppe"
+    },
+    "page": {
+      "non_existing_pes": "PES non existant",
+      "title_anomaly": "Anomalie envoyée par la Préfecture",
+      "historic": "Historique",
+      "no_history": "Aucun historique pour cet acte"
+    },
+    "list": {
+      "title": "Liste des PES",
+      "empty": "Aucun PES"
     }
-  }, 
+  },
   "admin": {
     "modules": {
       "pes": {
@@ -30,5 +49,5 @@
         }
       }
     }
-  }  
+  }
 }

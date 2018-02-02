@@ -7,12 +7,11 @@ import { Grid, Segment, List, Checkbox, Label, Dropdown, Button, Popup } from 's
 
 import DraggablePosition from '../_components/DraggablePosition'
 import { Field, Page } from '../_components/UI'
-import history from '../_util/history'
+import Anomaly from '../_components/Anomaly'
+import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { anomalies } from '../_util/constants'
-import ActeHistory from './ActeHistory'
-import ActeAnomaly from './ActeAnomaly'
 import ActeCancelButton from './ActeCancelButton'
 
 class Acte extends Component {
@@ -46,7 +45,6 @@ class Acte extends Component {
                     response.json().then(json => {
                         this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
-                    history.push('/acte')
                 })
         }
     }
@@ -96,7 +94,7 @@ class Acte extends Component {
             <Page title={acte.objet}>
                 {acteFetched(
                     <div>
-                        <ActeAnomaly lastHistory={lastHistory} />
+                        <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
                         <Segment>
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
                             <div style={{ textAlign: 'right' }}>
@@ -158,11 +156,15 @@ class Acte extends Component {
                                 <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
                             </Grid>
                         </Segment>
-                        <ActeHistory history={this.state.acteUI.acte.acteHistories} />
+                        <History
+                            title={t('acte.page.historic')}
+                            moduleName='acte'
+                            emptyMessage={t('acte.page.no_history')}
+                            history={this.state.acteUI.acte.acteHistories} />
                     </div>
                 )}
                 {acteNotFetched(
-                    <p>{t('acte.page.non_existent_act')}</p>
+                    <p>{t('acte.page.non_existing_act')}</p>
                 )}
             </Page>
         )

@@ -1,15 +1,10 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import { Message } from 'semantic-ui-react'
 
 import { anomalies } from '../_util/constants'
 
-class ActeAnomaly extends Component {
-    static contextTypes = {
-        t: PropTypes.func
-    }
+class Anomaly extends Component {
     static defaultProps = {
         lastHistory: {
             status: '',
@@ -17,12 +12,11 @@ class ActeAnomaly extends Component {
         }
     }
     render() {
-        const { t } = this.context
-        const { lastHistory } = this.props
+        const { header, lastHistory } = this.props
         return (
             renderIf(anomalies.includes(lastHistory.status) && lastHistory.message)(
                 <Message negative>
-                    <Message.Header>{t('acte.history.message')}</Message.Header>
+                    <Message.Header>{header}</Message.Header>
                     <p>{lastHistory.message}</p>
                 </Message>
             )
@@ -30,4 +24,4 @@ class ActeAnomaly extends Component {
     }
 }
 
-export default translate(['acte'])(ActeAnomaly)
+export default Anomaly

@@ -29,6 +29,19 @@ const status = [
     "FILE_ERROR"
 ]
 
+const pesStatus = [
+    "CREATED",
+    "SENT",
+    "NOT_SENT",
+    "ACK_RECEIVED",
+    "NACK_RECEIVED",
+    "PES_RETOUR_RECEIVED",
+    "MAX_RETRY_REACH",
+    "FILE_ERROR",
+    "NOTIFICATION_SENT",
+    "RESENT"
+]
+
 const anomalies = [
     "ANTIVIRUS_KO",
     "NOT_SENT",
@@ -37,4 +50,4 @@ const anomalies = [
     "FILE_ERROR"
 ]
 
-module.exports = { modules, natures, status, anomalies }
+module.exports = { modules, natures, status, anomalies, pesStatus }
