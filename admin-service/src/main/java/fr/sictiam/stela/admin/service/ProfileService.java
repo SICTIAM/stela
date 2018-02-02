@@ -1,19 +1,19 @@
 package fr.sictiam.stela.admin.service;
 
-import fr.sictiam.stela.admin.model.NotificationValue;
-import fr.sictiam.stela.admin.model.WorkGroup;
-import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import fr.sictiam.stela.admin.dao.ProfileRepository;
-import fr.sictiam.stela.admin.model.Profile;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import fr.sictiam.stela.admin.dao.ProfileRepository;
+import fr.sictiam.stela.admin.model.NotificationValue;
+import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.WorkGroup;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 
 @Service
 public class ProfileService {
@@ -59,5 +59,9 @@ public class ProfileService {
         profile.setGroups(groups);
         profileRepository.save(profile);
         localAuthorityService.createOrUpdate(profile.getLocalAuthority());
+    }
+
+    public List<Profile> getProfilesByLocalAuthorityUuid(String uuid) {
+        return profileRepository.findByLocalAuthority_Uuid(uuid);
     }
 }

@@ -43,6 +43,11 @@ public class Profile {
     @JoinColumn(name = "profile_uuid")
     @JsonView(Views.ProfileViewPublic.class)
     private List<NotificationValue> notificationValues;
+    
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @JsonView(Views.ProfileViewPublic.class)
+    private Set<Module> localAuthorityNotifications; 
 
     public Profile() {
     }
@@ -104,6 +109,16 @@ public class Profile {
     }
 
     public void setNotificationValues(List<NotificationValue> notificationValues) {
-        this.notificationValues = notificationValues;
+        getNotificationValues().clear();
+        getNotificationValues().addAll(notificationValues);
+    }
+
+    public Set<Module> getLocalAuthorityNotifications() {
+        return localAuthorityNotifications;
+    }
+
+
+    public void setLocalAuthorityNotifications(Set<Module> localAuthorityNotifications) {
+        this.localAuthorityNotifications = localAuthorityNotifications;
     }
 }

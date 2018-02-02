@@ -22,6 +22,7 @@ class Profile extends Component {
             uuid: '',
             email: '',
             notificationValues: [],
+            localAuthorityNotifications: [],
             localAuthority: {
                 uuid: '',
                 name: '',
@@ -58,6 +59,12 @@ class Profile extends Component {
         profile[id] = value
         this.setState({ agent })
     }
+    onLocalAuthorityNotificationsChange = (uuidProfile, module , checked) => {
+        const { agent } = this.state
+        const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
+        checked ? profile.localAuthorityNotifications.push(module) : profile.localAuthorityNotifications.splice(profile.localAuthorityNotifications.indexOf(module), 1)
+        this.setState({ agent })
+    }
     onCheckboxChange = (uuidProfile, statusType, checked) => {
         const { agent } = this.state
         const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
@@ -70,7 +77,8 @@ class Profile extends Component {
         const profileUI = {
             uuid: profile.uuid,
             email: profile.email,
-            notificationValues: profile.notificationValues
+            notificationValues: profile.notificationValues,
+            localAuthorityNotifications: profile.localAuthorityNotifications
         }
         const headers = { 'Content-Type': 'application/json' }
         fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers: headers, method: 'PATCH', context: this.context })
@@ -91,7 +99,9 @@ class Profile extends Component {
                 onChange={this.onChange}
                 updateProfile={this.updateProfile}
                 allNotifications={allNotifications}
-                onCheckboxChange={this.onCheckboxChange} />
+                onCheckboxChange={this.onCheckboxChange}
+                onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
+            />
         ]
         agent.profiles
             .filter(profile => this.props.uuid || (profile.localAuthority.uuid !== activeProfile.localAuthority.uuid))
@@ -103,7 +113,8 @@ class Profile extends Component {
                     onChange={this.onChange}
                     updateProfile={this.updateProfile}
                     allNotifications={allNotifications}
-                    onCheckboxChange={this.onCheckboxChange} />
+                    onCheckboxChange={this.onCheckboxChange}
+                    onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}/>
             ))
         return (
             <Page title={t('profile.title')}>
@@ -144,13 +155,15 @@ class LocalAuthorityProfile extends Component {
         allNotifications: PropTypes.array.isRequired,
         onChange: PropTypes.func.isRequired,
         updateProfile: PropTypes.func.isRequired,
-        onCheckboxChange: PropTypes.func.isRequired
+        onCheckboxChange: PropTypes.func.isRequired,
+        onLocalAuthorityNotificationsChange: PropTypes.func.isRequired 
     }
     static defaultProps = {
         profile: {
             uuid: '',
             email: '',
             notificationValues: [],
+            localAuthorityNotifications : [],
             localAuthority: {
                 uuid: '',
                 name: '',
@@ -163,7 +176,7 @@ class LocalAuthorityProfile extends Component {
     }
     render() {
         const { t } = this.context
-        const { profile, isDefaultOpen, allNotifications, onChange, updateProfile, onCheckboxChange } = this.props
+        const { profile, isDefaultOpen, allNotifications, onChange, updateProfile, onCheckboxChange, onLocalAuthorityNotificationsChange } = this.props
         const modulesRows = modules.map(moduleName =>
             <Grid.Column key={moduleName} textAlign='center'>
                 <Label color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
@@ -172,6 +185,11 @@ class LocalAuthorityProfile extends Component {
         const profileNotifications = profile.localAuthority.activatedModules.map(activatedModule =>
             <div style={{ marginTop: '2em' }} key={activatedModule}>
                 <Header size='small'>{t('profile.notifications_title')} {activatedModule}</Header>
+                <Field htmlFor={activatedModule} label={t(`profile.localAuthorityNotifications`)}>
+                    <Checkbox toggle
+                        id={activatedModule} checked={profile.localAuthorityNotifications.includes(activatedModule)}
+                        onChange={((e, { id, checked }) => onLocalAuthorityNotificationsChange(profile.uuid, id, checked))} />
+                </Field>
                 {allNotifications
                     .filter(notification => notification.statusType.startsWith(`${activatedModule}_`))
                     .map(notification => {

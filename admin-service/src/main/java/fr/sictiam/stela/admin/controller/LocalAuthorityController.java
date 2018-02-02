@@ -127,4 +127,11 @@ public class LocalAuthorityController {
     public void removeModuleByUuid(@PathVariable String uuid, @PathVariable Module module) {
         localAuthorityService.removeModule(uuid, module);
     }
+    
+    
+    @GetMapping("/{uuid}/profiles")
+    @JsonView(Views.ProfileView.class)
+    public List<Profile> getProfiles(@PathVariable String uuid) {
+        return profileService.getProfilesByLocalAuthorityUuid(uuid);
+    }
 }
