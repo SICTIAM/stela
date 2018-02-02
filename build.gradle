@@ -83,8 +83,9 @@ subprojects {
     }
 
     task image(type: Docker, dependsOn: build) {
-        push = false
-        applicationName = jar.baseName
+        registry = 'forge-registry.sictiam.fr/internet'
+        push = project.hasProperty('ush')
+        applicationName = 'stela-poc/' + jar.baseName
         dockerfile = file('src/main/docker/Dockerfile')
         doFirst {
             copy {

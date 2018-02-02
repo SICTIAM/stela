@@ -1,8 +1,4 @@
-# This file is a template, and might need editing before it works on your project.
-# This is the Gradle build system for JVM applications
-# https://gradle.org/
-# https://github.com/gradle/gradle
-image: gradle:alpine
+image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
 
 # Disable the Gradle daemon for Continuous Integration servers as correctness
 # is usually a priority over speed in CI environments. Using a fresh
@@ -11,27 +7,34 @@ image: gradle:alpine
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
+services:
+  - docker:dind
 
-build:
-  stage: build
-  script: ./gradlew --build-cache assemble
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: push
-    paths:
-      - build
-      - .gradle
-
+stages:
+  - build
+  - test
+# Disabled for now as it does not work and it's a pita to know why
+#  - integrationTest
 
 test:
   stage: test
-  script: ./gradlew check
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - build
-      - .gradle
+  script:
+    - ./gradlew --build-cache --stacktrace test
+# Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
+#  artifacts:
+#    paths:
+#    - acte-service/build/reports/tests/*
 
+#integrationTest:
+#  stage: integrationTest
+#  script:
+#    - ./gradlew --build-cache --stacktrace integrationTest
+#  artifacts:
+#    paths:
+#    - acte-service/build/reports/tests/*
+
+build:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - ./gradlew --build-cache --stacktrace image -Push

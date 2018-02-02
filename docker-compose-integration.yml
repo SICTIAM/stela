@@ -30,6 +30,8 @@ services:
     depends_on:
      - postgresql
      - rabbitmq
+    volumes:
+     - ~/.ssh:/root/.ssh
   discovery:
     image: stela-poc/discovery-service
     container_name: discovery
