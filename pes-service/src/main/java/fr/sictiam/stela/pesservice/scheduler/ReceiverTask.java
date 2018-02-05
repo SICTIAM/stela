@@ -74,7 +74,8 @@ public class ReceiverTask {
 
     public void readACK(InputStream inputStream, String ackName)
             throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
-
+        
+        LOGGER.debug("ACK RECEIVED : " + ackName);
         byte[] targetArray = new byte[inputStream.available()];
         inputStream.read(targetArray);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(targetArray);
