@@ -96,7 +96,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
                     send(pes);
                     sendStatus = StatusType.SENT;
                     pendingMessageRepository.delete(pendingQueue.poll());
-                    currentSizeUsed.addAndGet(pendingMessage.getFile().length);
+                    currentSizeUsed.addAndGet(attachment.getFile().length);
                 } catch (Exception e) {
                     if (e.getMessage() != null)
                         LOGGER.error(e.getMessage());
