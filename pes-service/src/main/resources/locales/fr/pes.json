@@ -41,7 +41,10 @@
         "local_authority_settings": {
           "title": "Paramétrage des collectivités",
           "general_informations": "Informations générales",
-          "HELIOS_transmission": "Transmission Helios"
+          "HELIOS_transmission": "Transmission Helios",
+          "serverCode": "Code serveur préfecture",
+          "sirens": "Liste des SIRENs autorisés",
+          "no_siren": "Aucun SIREN"
         },
         "module_settings": {
           "title": "Paramètres du module Helios",

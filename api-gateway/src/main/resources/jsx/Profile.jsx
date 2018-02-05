@@ -178,7 +178,7 @@ class LocalAuthorityProfile extends Component {
         const { t } = this.context
         const { profile, isDefaultOpen, allNotifications, onChange, updateProfile, onCheckboxChange, onLocalAuthorityNotificationsChange } = this.props
         const modulesRows = modules.map(moduleName =>
-            <Label style={{ marginRight: '1em' }} color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
+            <Label key={moduleName} style={{ marginRight: '1em' }} color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
         )
         const profileNotifications = profile.localAuthority.activatedModules.map(activatedModule =>
             <div style={{ marginTop: '2em' }} key={activatedModule}>

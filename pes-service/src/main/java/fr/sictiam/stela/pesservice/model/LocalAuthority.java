@@ -1,14 +1,7 @@
 package fr.sictiam.stela.pesservice.model;
 
+import javax.persistence.*;
 import java.util.List;
-
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 
 @Entity
 public class LocalAuthority {
@@ -18,7 +11,8 @@ public class LocalAuthority {
     private String name;
     private String siren;
     private String siret;
-    private String serverCode;
+    @Enumerated(EnumType.STRING)
+    private ServerCode serverCode;
     private Boolean active;
     
     @ElementCollection(fetch = FetchType.EAGER)
@@ -66,11 +60,11 @@ public class LocalAuthority {
         this.siret = siret;
     }
 
-    public String getServerCode() {
+    public ServerCode getServerCode() {
         return serverCode;
     }
 
-    public void setServerCode(String serverCode) {
+    public void setServerCode(ServerCode serverCode) {
         this.serverCode = serverCode;
     }
 

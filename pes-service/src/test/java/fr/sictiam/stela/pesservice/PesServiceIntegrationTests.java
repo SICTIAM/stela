@@ -25,6 +25,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import fr.sictiam.stela.pesservice.model.*;
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -49,12 +50,6 @@ import fr.sictiam.stela.pesservice.dao.AdminRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
-import fr.sictiam.stela.pesservice.model.Admin;
-import fr.sictiam.stela.pesservice.model.Attachment;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.scheduler.RetryTask;
 import fr.sictiam.stela.pesservice.scheduler.SenderTask;
@@ -138,7 +133,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
             LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test",
                     "999888777", true);
-            localAuthority.setServerCode("VHICE21");
+            localAuthority.setServerCode(ServerCode.VHICE21);
             localAuthority.setSiret("20003531900017");
             localAuthorityService.createOrUpdate(localAuthority);
 
