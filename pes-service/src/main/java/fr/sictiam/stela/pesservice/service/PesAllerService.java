@@ -14,12 +14,22 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -110,12 +120,26 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         pesAllerRepository.save(pes);
     }
 
-    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller, MultipartFile file) throws IOException {
+    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller,
+            MultipartFile file)
+            throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
         pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
         pesAller.setProfileUuid(currentProfileUuid);
         Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
         pesAller.setAttachment(attachment);
         pesAller.setCreation(LocalDateTime.now());
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new ByteArrayInputStream(file.getBytes()));
+
+        XPathFactory xpf = XPathFactory.newInstance();
+        XPath path = xpf.newXPath();
+
+        pesAller.setFileType(path.evaluate("/PES_Aller/Enveloppe/Parametres/TypFic/@V", document));
+        pesAller.setColCode(path.evaluate("/PES_Aller/EnTetePES/CodCol/@V", document));
+        pesAller.setPostId(path.evaluate("/PES_Aller/EnTetePES/IdPost/@V", document));
+        pesAller.setBudCode(path.evaluate("/PES_Aller/EnTetePES/CodBud/@V", document));
 
         pesAller = pesAllerRepository.save(pesAller);
         updateStatus(pesAller.getUuid(), StatusType.CREATED);

@@ -33,31 +33,36 @@ public class PesAller {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    
+
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDateTime creation;
-   
+
     @Column(length = 512)
     @NotNull(groups = { RestValidation.class })
     @Size(max = 500)
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Attachment attachment;  
-   
+    private Attachment attachment;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("date ASC")
     private SortedSet<PesHistory> pesHistories;
-   
+
     @ManyToOne
     private LocalAuthority localAuthority;
 
     private String profileUuid;
-    
+
     private String comment;
-    
+
+    private String fileType;
+    private String colCode;
+    private String postId;
+    private String budCode;
+
     private boolean pj;
-    
+
     private boolean signed;
 
     public PesAller() {
@@ -106,7 +111,7 @@ public class PesAller {
     public void setProfileUuid(String profileUuid) {
         this.profileUuid = profileUuid;
     }
-    
+
     public Attachment getAttachment() {
         return attachment;
     }
@@ -121,6 +126,38 @@ public class PesAller {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getColCode() {
+        return colCode;
+    }
+
+    public void setColCode(String colCode) {
+        this.colCode = colCode;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
+
+    public String getBudCode() {
+        return budCode;
+    }
+
+    public void setBudCode(String budCode) {
+        this.budCode = budCode;
     }
 
     public boolean isPj() {

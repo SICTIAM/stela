@@ -116,23 +116,9 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         FTPClient ftpClient = ftpSession.getClientInstance();
         ftpClient.sendSiteCommand("quote site P_DEST " + pes.getLocalAuthority().getServerCode());
         ftpClient.sendSiteCommand("quote site P_APPLI GHELPES2");
-
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(byteArrayInputStream);
-
-        XPathFactory xpf = XPathFactory.newInstance();
-
-        XPath path = xpf.newXPath();
-        
-        String fileType = path.evaluate("/PES_Aller/Enveloppe/Parametres/TypFic/@V", document);
-        String colCode = path.evaluate("/PES_Aller/EnTetePES/CodCol/@V", document);
-        String postId = path.evaluate("/PES_Aller/EnTetePES/IdPost/@V", document);
-        String budCode = path.evaluate("/PES_Aller/EnTetePES/CodBud/@V", document);
-        ftpClient.sendSiteCommand("quote site P_MSG " + fileType + "#" + colCode + "#" + postId + "#" + budCode + "");
+        ftpClient.sendSiteCommand("quote site P_MSG " + pes.getFileType() + "#" + pes.getColCode() + "#"
+                + pes.getPostId() + "#" + pes.getBudCode());
         ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
         ftpSession.close();
-
     }
-
 }

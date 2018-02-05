@@ -17,8 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +30,8 @@ import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/pes")
@@ -71,15 +77,22 @@ public class PesRestController {
     @PostMapping
     public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
                                          @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-                                         @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
-            PesAller result = pesService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
-            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-        } catch (IOException e) {
-            LOGGER.error("IOException: Could not convert JSON to PesAller: {}", e);
-            return new ResponseEntity<>("notifications.pes.sent.error.non_extractable_pes", HttpStatus.INTERNAL_SERVER_ERROR);
+                                         @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {  
+        Pattern pattern = Pattern.compile(
+                "^([0-9]{5})-([0-9]{4})-([P]-(([D][N|A])|([R][N|A])|([B][U])|([I][N])|([P][J]))|[A]-(([B][P])|([B][S])|([D][M])|([C][A])))-([0-9]{1,4})-([0-9]{1,4}-)*([0-9]{13})\\.xml$");
+        Matcher matcher = pattern.matcher(file.getOriginalFilename());
+        if(matcher.matches()) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
+                PesAller result = pesService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
+                return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+            } catch (IOException | XPathExpressionException | SAXException | ParserConfigurationException e) {
+                LOGGER.error("IOException: Could not convert JSON to PesAller: {}", e);
+                return new ResponseEntity<>("notifications.pes.sent.error.non_extractable_pes", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>("notifications.pes.sent.error.bad_file_name", HttpStatus.BAD_REQUEST); 
         }
     }
 

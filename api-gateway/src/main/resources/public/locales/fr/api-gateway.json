@@ -129,6 +129,10 @@
             "sent": {
                 "success": "Le dépot PES a bien été effectué",
                 "virus": "Le dépot PES a échoué car il contenait un virus",
+                "error" : {
+                	"bad_file_name": "Le nom de fichier est incorrect",
+                	"non_extractable_pes": "Erreur lors de l'extraction du pes"
+                },                
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             }
         },

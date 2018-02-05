@@ -361,13 +361,16 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         pes.setCreation(LocalDateTime.now());
         pes.setLocalAuthority(localAuthority.get());
         pes.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
-
+        pes.setFileType("PESALR1");
+        pes.setColCode("280");
+        pes.setPostId("030004");
+        pes.setBudCode("00");
         InputStream in = new ClassPathResource("data/28000-2017-P-RN-22-1516807373820.xml").getInputStream();
 
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        Attachment pesSent = new Attachment(targetArray, "28000-2017-P-RN-22-1516807373820", in.available());
+        Attachment pesSent = new Attachment(targetArray, "28000-2017-P-RN-22-1516807373820.xml", in.available());
         pes.setAttachment(pesSent);
         pes = pesService.save(pes);
         return pes;
