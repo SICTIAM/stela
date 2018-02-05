@@ -72,6 +72,7 @@
         "modify_my_profile": "Modifier mon profil",
         "no_email": "Aucun email",
         "notifications_title": "Notifications",
+        "localAuthorityNotifications": "Être notifié de l'évolution du flux de ma collectivité",
         "notifications": {
             "ACTES_ACK_RECEIVED": "Reception de l'AR d'un acte",
             "ACTES_SENT": "Envoi réussi d'un acte",

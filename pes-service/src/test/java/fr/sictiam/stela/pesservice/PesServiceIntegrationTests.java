@@ -146,13 +146,14 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             localAuthority.setSiret("20003531900017");
             localAuthorityService.createOrUpdate(localAuthority);
 
-            String json = "{" +
+            String profile1 = "{" +
                     "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\"," +
+                    "\"localAuthorityNotifications\":[\"PES\"]," +
                     "\"localAuthority\":{" +
                         "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
                         "\"name\":\"SICTIAM-Test\"," +
                         "\"siren\":\"999888777\"," +
-                        "\"activatedModules\":[\"ACTES\"]" +
+                        "\"activatedModules\":[\"PES\"]" +
                     "}," +
                     "\"agent\":{" +
                         "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
@@ -182,18 +183,53 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
                         "}" + 
                      "]" +
                 "}";
-            
+
+            String profile2 = "{" +
+                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\"," +
+                    "\"localAuthorityNotifications\":[\"PES\"]," +
+                    "\"localAuthority\":{" +
+                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
+                        "\"name\":\"SICTIAM-Test\"," +
+                        "\"siren\":\"999888777\"," +
+                        "\"activatedModules\":[\"PES\"]" +
+                    "}," +
+                    "\"agent\":{" +
+                        "\"uuid\":\"442087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
+                        "\"sub\":\"4424b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
+                        "\"email\":\"Laurent.Rojmeko@gmail.com\"," +
+                        "\"admin\":true," +
+                        "\"family_name\":\"De Rojmeko\"," +
+                        "\"given_name\":\"Laurent\"" +
+                    "}," +
+                    "\"email\":\"Laurent.Rojmeko@sictiam.com\"," +
+                    "\"admin\":true," +
+                    "\"notificationValues\":[" +
+                        "{" +
+                            "\"name\":\"PES_ACK_RECEIVED\"," +
+                            "\"active\":true" +
+                        "}," +
+                        "{" +
+                            "\"name\":\"PES_SENT\"," +
+                            "\"active\":true" +
+                        "}" +
+                    "]," +
+                    "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
+                "}";
+            String profilesJson = "["+profile1+","+profile2+"]";
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode node = objectMapper.readTree(json);
+                JsonNode node = objectMapper.readTree(profile1);
+                JsonNode profilesNode = objectMapper.readTree(profilesJson);
                 Mockito.when(externalRestService.getProfile("4f146466-ea58-4e5c-851c-46db18ac173b")).thenReturn(node);
+                Mockito.when(externalRestService.getProfiles(localAuthority.getUuid())).thenReturn(profilesNode);
+
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
             }
             this.restTemplate.getRestTemplate()
                     .setInterceptors(Collections.singletonList((request1, body, execution) -> {
 
-                        String jwtToken = Jwts.builder().setSubject(json)
+                        String jwtToken = Jwts.builder().setSubject(profile1)
                                 .setExpiration(new Date(System.currentTimeMillis() + 500000))
                                 .signWith(SignatureAlgorithm.HS512, SECRET).compact();
 
@@ -341,12 +377,20 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     public void testNotification() throws Exception {
 
         StatusType statusType = StatusType.SENT;
-        String firstName = "John";
-        String lastName = "Doe";
-        Map<String, String> variables = new HashMap<>();
-        variables.put("firstname", firstName);
-        variables.put("lastname", lastName);
 
+        Map<String, String> variables = new HashMap<>();
+        variables.put("firstname", "John");
+        variables.put("lastname", "Doe");
+
+        Map<String, String> variables2 = new HashMap<>();
+        variables2.put("firstname", "Laurent");
+        variables2.put("lastname", "De Rojmeko");
+
+        String bodyCopy = localService.getMessage("fr", "pes_notification", "$.pes.copy." + statusType.name() + ".body",
+                variables2);
+        String subjectCopy = localService.getMessage("fr", "pes_notification", "$.pes.copy." + statusType.name() + ".subject",
+                variables2);
+        
         String body = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
                 variables);
         String subject = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".subject",
@@ -366,14 +410,22 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
         MimeMessage[] receivedMessages = smtpServerRule.getMessages();
         assertThat(receivedMessages, not(emptyArray()));
-
+        assertThat(receivedMessages.length, is(2));
         MimeMessage current = receivedMessages[0];
         assertThat(current, notNullValue());
         MimeMessageParser parser = new MimeMessageParser(current);
         parser.parse();
-        assertThat(parser.getSubject(), is(subject));
+        assertThat(parser.getSubject(), is(subjectCopy));
         assertThat(current.getContent(), instanceOf(MimeMultipart.class));
-        assertThat(parser.getHtmlContent(), is(body));
+        assertThat(parser.getHtmlContent(), is(bodyCopy));
+        
+        MimeMessage secondMsg = receivedMessages[1];
+        assertThat(secondMsg, notNullValue());
+        MimeMessageParser secondParser = new MimeMessageParser(secondMsg);
+        secondParser.parse();
+        assertThat(secondParser.getSubject(), is(subject));
+        assertThat(secondMsg.getContent(), instanceOf(MimeMultipart.class));
+        assertThat(secondParser.getHtmlContent(), is(body));
     } 
 
     private Optional<PesHistory> getPesHistoryForStatus(String pesUuid, StatusType status) {
