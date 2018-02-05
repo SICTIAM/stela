@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Label } from 'semantic-ui-react'
+import moment from 'moment'
 
 import History from '../_components/History'
 import { Field, Page } from '../_components/UI'
@@ -67,7 +68,7 @@ class Pes extends Component {
                                 <span id='comment'>{pes.comment}</span>
                             </Field>
                             <Field htmlFor='creation' label={t('pes.fields.creation')}>
-                                <span id='creation'>{pes.creation}</span>
+                                <span id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</span>
                             </Field>
                             <Field htmlFor='attachment' label={t('pes.fields.objet')}>
                                 <a id='attachment' target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a>
