@@ -37,7 +37,8 @@
         }
     },
     "list": {
-        "last_modified": "Dernière modification"
+        "last_modified": "Dernière modification",
+        "item_per_page": "résultats par page"
     },
     "menu": {
         "acte": {

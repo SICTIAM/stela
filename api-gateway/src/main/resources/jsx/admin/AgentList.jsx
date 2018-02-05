@@ -5,7 +5,8 @@ import { Segment, Dropdown } from 'semantic-ui-react'
 import debounce from 'debounce'
 
 import StelaTable from '../_components/StelaTable'
-import { Page, Pagination } from '../_components/UI'
+import Pagination from '../_components/Pagination'
+import { Page } from '../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
 class AgentList extends Component {
@@ -24,7 +25,9 @@ class AgentList extends Component {
         selected: {}
     }
     componentDidMount() {
-        this.fetchAgents()
+        const itemPerPage = localStorage.getItem('itemPerPage')
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.fetchAgents)
         fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
             .then(checkStatus)
             .then(response => response.json())
@@ -61,6 +64,9 @@ class AgentList extends Component {
         }
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchAgents)
     }
+    updateItemPerPage = (limit) => {
+        this.setState({ limit }, this.fetchAgents)
+    }
     render() {
         const { t } = this.context
         const metaData = [
@@ -83,7 +89,9 @@ class AgentList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick} />
+                handlePageClick={this.handlePageClick}
+                itemPerPage={this.state.limit}
+                updateItemPerPage={this.updateItemPerPage} />
         return (
             <Page title={t('admin.users')}>
                 <Segment>

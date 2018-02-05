@@ -5,7 +5,8 @@ import { Segment, Form, Accordion, Button } from 'semantic-ui-react'
 import moment from 'moment'
 
 import StelaTable from '../_components/StelaTable'
-import { Page, Pagination, FormFieldInline, FormField } from '../_components/UI'
+import Pagination from '../_components/Pagination'
+import { Page, FormFieldInline, FormField } from '../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
@@ -29,7 +30,9 @@ class PesList extends Component {
         offset: 0
     }
     componentDidMount() {
-        this.submitForm()
+        const itemPerPage = localStorage.getItem('itemPerPage')
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
     }
     getSearchData = () => {
         const { limit, offset, direction, column } = this.state
@@ -67,6 +70,9 @@ class PesList extends Component {
         }
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
     }
+    updateItemPerPage = (limit) => {
+        this.setState({ limit }, this.submitForm)
+    }
     render() {
         const { t, _addNotification } = this.context
         const statusDisplay = (histories) => {
@@ -87,7 +93,9 @@ class PesList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick} />
+                handlePageClick={this.handlePageClick}
+                itemPerPage={this.state.limit}
+                updateItemPerPage={this.updateItemPerPage} />
         return (
             <Page title={t('pes.list.title')}>
                 <Segment>

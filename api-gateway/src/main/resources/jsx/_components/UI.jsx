@@ -1,6 +1,5 @@
 import React from 'react'
-import { Form, Grid, Card, Icon, List, Header, Table } from 'semantic-ui-react'
-import ReactPaginate from 'react-paginate'
+import { Form, Grid, Card, Icon, List, Header } from 'semantic-ui-react'
 
 import { bytesToSize } from '../_util/utils'
 
@@ -61,25 +60,4 @@ const Page = ({ children, title, subtitle }) =>
         {children}
     </div>
 
-const Pagination = ({ columns, pageCount, handlePageClick }) =>
-    <Table.Footer>
-        <Table.Row>
-            <Table.HeaderCell colSpan={columns}>
-                <ReactPaginate previousLabel={<Icon name='left chevron' />}
-                    nextLabel={<Icon name='right chevron' />}
-                    breakLabel={<span className='item'>...</span>}
-                    pageCount={pageCount}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={5}
-                    onPageChange={handlePageClick}
-                    containerClassName={'ui pagination right floated menu'}
-                    previousLinkClassName={'icon item'}
-                    nextLinkClassName={'icon item'}
-                    pageLinkClassName={'item'}
-                    activeClassName={'active'} />
-            </Table.HeaderCell>
-        </Table.Row>
-    </Table.Footer>
-
-
-module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem, Page, Pagination }
+module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem, Page }

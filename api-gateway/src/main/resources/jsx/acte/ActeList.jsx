@@ -6,9 +6,10 @@ import { Accordion, Form, Button, Segment } from 'semantic-ui-react'
 import FileSaver from 'file-saver'
 
 import StelaTable from '../_components/StelaTable'
+import Pagination from '../_components/Pagination'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-import { FormFieldInline, FormField, Page, Pagination } from '../_components/UI'
+import { FormFieldInline, FormField, Page } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
 class ActeList extends Component {
@@ -35,7 +36,9 @@ class ActeList extends Component {
         offset: 0
     }
     componentDidMount() {
-        this.submitForm()
+        const itemPerPage = localStorage.getItem('itemPerPage')
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search
@@ -61,6 +64,9 @@ class ActeList extends Component {
             return
         }
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
+    }
+    updateItemPerPage = (limit) => {
+        this.setState({ limit }, this.submitForm)
     }
     submitForm = () => {
         const headers = { 'Accept': 'application/json' }
@@ -123,7 +129,9 @@ class ActeList extends Component {
             <Pagination
                 columns={displayedColumns.length + 1}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick} />
+                handlePageClick={this.handlePageClick}
+                itemPerPage={this.state.limit}
+                updateItemPerPage={this.updateItemPerPage} />
         return (
             <Page title={t('acte.list.title')}>
                 <Segment>
