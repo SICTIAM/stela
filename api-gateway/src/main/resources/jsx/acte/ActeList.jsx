@@ -216,7 +216,9 @@ class ActeListForm extends Component {
                                 {statusOptions}
                             </select>
                         </FormFieldInline>
-                        <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                        <div style={{ textAlign: 'right' }}>
+                            <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                        </div>
                     </Form>
                 </Accordion.Content>
             </Accordion>

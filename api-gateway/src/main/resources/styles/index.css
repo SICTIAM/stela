@@ -28,9 +28,13 @@ body, html {
     margin-left: 4em;
 }
 .wrapperContainer { 
-    margin-left: 16em; 
-    padding: 0 1em 0 1em;
-} 
+    margin-left: 16em;
+}
+@media only screen and (max-width: 1450px) and (min-width: 723px) {
+    .wrapperContainer {
+        padding: 0 4em;
+    }
+}
 .mainContainer {
     padding-top: 6em;
     padding-bottom: 3em;

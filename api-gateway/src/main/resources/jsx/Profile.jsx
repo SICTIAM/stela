@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Button, Segment, Grid, Label, Input, Header, Checkbox } from 'semantic-ui-react'
+import { Button, Segment, Label, Input, Header, Checkbox } from 'semantic-ui-react'
 
 import { Field, Page } from './_components/UI'
 import { notifications } from './_util/Notifications'
@@ -178,9 +178,7 @@ class LocalAuthorityProfile extends Component {
         const { t } = this.context
         const { profile, isDefaultOpen, allNotifications, onChange, updateProfile, onCheckboxChange, onLocalAuthorityNotificationsChange } = this.props
         const modulesRows = modules.map(moduleName =>
-            <Grid.Column key={moduleName} textAlign='center'>
-                <Label color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
-            </Grid.Column>
+            <Label style={{ marginRight: '1em' }} color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
         )
         const profileNotifications = profile.localAuthority.activatedModules.map(activatedModule =>
             <div style={{ marginTop: '2em' }} key={activatedModule}>
@@ -210,9 +208,7 @@ class LocalAuthorityProfile extends Component {
         const content = (
             <div>
                 <Field htmlFor='modules' label={t('agent.modules')}>
-                    <Grid id='modules' columns={modules.length}>
-                        <Grid.Row>{modulesRows}</Grid.Row>
-                    </Grid>
+                    <span id='modules'>{modulesRows}</span>
                 </Field>
                 <Field htmlFor='email' label={t('agent.email')}>
                     <Input id='email' value={profile.email || ''} placeholder={t('profile.no_email')}
