@@ -23,7 +23,7 @@ services:
      - RABBITMQ_DEFAULT_USER=test
      - RABBITMQ_DEFAULT_PASS=password
   config:
-    image: stela-poc/config-service
+    image: forge-registry.sictiam.fr/internet/stela-poc/config-service:latest
     container_name: config
     ports:
      - "8888:8888"
@@ -33,12 +33,12 @@ services:
     volumes:
      - ~/.ssh:/root/.ssh
   discovery:
-    image: stela-poc/discovery-service
+    image: forge-registry.sictiam.fr/internet/stela-poc/discovery-service
     container_name: discovery
     ports:
      - "8761:8761"
   api-gateway:
-    image: stela-poc/api-gateway
+    image: forge-registry.sictiam.fr/internet/stela-poc/api-gateway
     container_name: api-gateway
     ports:
      - "9004:9004"
@@ -48,7 +48,7 @@ services:
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
   admin-service:
-    image: stela-poc/admin-service
+    image: forge-registry.sictiam.fr/internet/stela-poc/admin-service
     container_name: admin-service
     ports:
      - "9006:9006"
@@ -59,7 +59,7 @@ services:
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
   acte-service:
-    image: stela-poc/acte-service
+    image: forge-registry.sictiam.fr/internet/stela-poc/acte-service
     container_name: acte-service
     ports:
      - "9008:9008"
@@ -73,7 +73,7 @@ services:
     volumes:
        - ./../stela-config/certificates:/certificates
   pes-service:
-      image: stela-poc/pes-service
+      image: forge-registry.sictiam.fr/internet/stela-poc/pes-service
       container_name: pes-service
       ports:
        - "9010:9010"
@@ -84,3 +84,4 @@ services:
        - rabbitmq
       environment:
        - "SPRING_PROFILES_ACTIVE=integration"  
+
