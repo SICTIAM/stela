@@ -255,7 +255,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
         pesService.updateStatus(pes.getUuid(), StatusType.CREATED);
 
-        MockPesEventListener mockActeEventListener = new MockPesEventListener(StatusType.NOT_SENT);
+        MockPesEventListener mockActeEventListener = new MockPesEventListener(StatusType.SENT);
         try {
             synchronized (mockActeEventListener) {
                 mockActeEventListener.wait(4000);
@@ -265,8 +265,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         }
         List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
 
-        assertThat(pesHistories, hasSize(2));
-        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOT_SENT))));
+        assertThat(pesHistories, hasSize(3));
+        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.SENT))));
+        assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOTIFICATION_SENT))));
     }
 
     @Test
