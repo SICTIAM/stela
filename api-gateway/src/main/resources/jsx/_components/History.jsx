@@ -22,7 +22,7 @@ class History extends Component {
         const historyNotEmpty = renderIf(history.length > 0)
 
         const histories = history.map(status =>
-            <Feed.Event key={status.status}>
+            <Feed.Event key={status.uuid}>
                 <Feed.Label icon='check' />
                 <Feed.Content>
                     <Feed.Date>{moment(status.date).format('DD/MM/YYYY hh:mm')}</Feed.Date>

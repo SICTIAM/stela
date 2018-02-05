@@ -7,6 +7,7 @@ import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.pesservice.scheduler.SenderTask;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
@@ -47,14 +48,16 @@ public class PesRestController {
 
     private final PesAllerService pesService;
     private final LocalAuthorityService localAuthorityService;
+    private final SenderTask senderTask;
 
     @Value("application.filenamepattern")
     private String fileNamePattern;
 
     @Autowired
-    public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService) {
+    public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService, SenderTask senderTask) {
         this.pesService = pesService;
         this.localAuthorityService = localAuthorityService;
+        this.senderTask = senderTask;
     }
 
     @GetMapping
@@ -81,6 +84,20 @@ public class PesRestController {
         PesAller pes = pesService.getByUuid(uuid);
 
         return new ResponseEntity<>(pes, HttpStatus.OK);
+    }
+
+    @GetMapping("/resend/{uuid}")
+    public ResponseEntity<String> reSendFlux(@PathVariable String uuid) {
+        PesAller pes = pesService.getByUuid(uuid);       
+        try {
+            senderTask.send(pes);
+            StatusType statusType = StatusType.MANUAL_RESENT;
+            pesService.updateStatus(pes.getUuid(), statusType, pes.getAttachment().getFile(),
+                    pes.getAttachment().getFilename());
+        } catch (XPathExpressionException | IOException | SAXException | ParserConfigurationException e) {
+            return new ResponseEntity<>("notifications.pes.sent.error.resend", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping
