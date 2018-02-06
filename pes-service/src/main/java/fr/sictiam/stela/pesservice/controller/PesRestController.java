@@ -1,5 +1,7 @@
 package fr.sictiam.stela.pesservice.controller;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
@@ -8,10 +10,14 @@ import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
+
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +48,9 @@ public class PesRestController {
     private final PesAllerService pesService;
     private final LocalAuthorityService localAuthorityService;
 
+    @Value("application.filenamepattern")
+    private String fileNamePattern;
+
     @Autowired
     public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService) {
         this.pesService = pesService;
@@ -49,8 +58,7 @@ public class PesRestController {
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(
-            @RequestParam(value = "objet", required = false) String objet,
+    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
             @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
             @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
             @RequestParam(value = "status", required = false) StatusType status,
@@ -60,7 +68,8 @@ public class PesRestController {
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        List<PesAller> pesList = pesService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset, column, direction, currentLocalAuthUuid);
+        List<PesAller> pesList = pesService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset,
+                column, direction, currentLocalAuthUuid);
         Long count = pesService.countAllWithQuery(objet, creationFrom, creationTo, status, currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, pesList), HttpStatus.OK);
     }
@@ -76,23 +85,17 @@ public class PesRestController {
 
     @PostMapping
     public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
-                                         @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-                                         @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {  
-        Pattern pattern = Pattern.compile(
-                "^([0-9]{5})-([0-9]{4})-([P]-(([D][N|A])|([R][N|A])|([B][U])|([I][N])|([P][J]))|[A]-(([B][P])|([B][S])|([D][M])|([C][A])))-([0-9]{1,4})-([0-9]{1,4}-)*([0-9]{13})\\.xml$");
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file)
+            throws PesCreationException {
+        Pattern pattern = Pattern.compile(fileNamePattern);
         Matcher matcher = pattern.matcher(file.getOriginalFilename());
-        if(matcher.matches()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
-                PesAller result = pesService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
-                return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-            } catch (IOException | XPathExpressionException | SAXException | ParserConfigurationException e) {
-                LOGGER.error("IOException: Could not convert JSON to PesAller: {}", e);
-                return new ResponseEntity<>("notifications.pes.sent.error.non_extractable_pes", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        if (matcher.matches()) {
+            PesAller result = pesService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson, file);
+            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+
         } else {
-            return new ResponseEntity<>("notifications.pes.sent.error.bad_file_name", HttpStatus.BAD_REQUEST); 
+            return new ResponseEntity<>("notifications.pes.sent.error.bad_file_name", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -109,7 +112,8 @@ public class PesRestController {
         if (pesHistory.getFile() != null) {
             outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
             return new ResponseEntity(HttpStatus.OK);
-        } else throw new FileNotFoundException();
+        } else
+            throw new FileNotFoundException();
     }
 
     @GetMapping("/statuses")

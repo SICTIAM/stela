@@ -109,8 +109,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         }
     }
 
-    public void send(PesAller pes)
-            throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+    public void send(PesAller pes) throws IOException  {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pes.getAttachment().getFile());
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();
