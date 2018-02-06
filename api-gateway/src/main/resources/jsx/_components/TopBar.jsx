@@ -64,21 +64,21 @@ class TopBar extends Component {
                 <Icon name='building' size='large' /> {profile.localAuthority.name}
             </Dropdown.Item>
         )
-        const trigger = <Button basic color='blue'><Icon name='user circle outline' size='large' /> {`${user && user.given_name} ${user && user.family_name}`}</Button>
+        const trigger = <Button basic className='rosso'><Icon name='user circle outline' size='large' /> {`${user && user.given_name} ${user && user.family_name}`}</Button>
         const triggerLA = <Button basic color='grey'><Icon name='building' size='large' /> {`${this.state.currentProfile.localAuthority.name}`} <Icon style={{ marginLeft: '0.5em', marginRight: 0 }} name='caret down' /></Button>
         // FIXME : isLoggedIn in the context is not reliable (false then true)
         if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
-            <Menu className='topBar' fixed='top' secondary>
+            <Menu style={{ borderBottom: `2px solid ${this.props.admin ? '#d24d57' : '#16a085'}` }} className='topBar' fixed='top' secondary>
 
                 <Menu.Item className='appTitle' as={Link} to="/" header>
-                    <h1 style={{ textAlign: 'center' }}>{t('app_title')}</h1>
+                    <h1 style={{ textAlign: 'center' }}><img src={process.env.PUBLIC_URL + '/img/logo_stela.png'} alt="STELA" /></h1>
                 </Menu.Item>
 
                 <Container>
                     <Menu.Menu position='right'>
 
-                        {isLoggedIn &&
+                        {(isLoggedIn && listProfile.length > 1) &&
                             <Menu.Item>
                                 <Dropdown basic trigger={triggerLA} icon={false}>
                                     <Dropdown.Menu>
@@ -100,7 +100,7 @@ class TopBar extends Component {
                         }
                         {!isLoggedIn &&
                             <Menu.Item>
-                                <Button basic primary onClick={this.login}>{t('top_bar.log_in')}</Button>
+                                <Button basic className='rosso' onClick={this.login}>{t('top_bar.log_in')}</Button>
                             </Menu.Item>
                         }
 

@@ -122,7 +122,7 @@ class LocalAuthority extends Component {
                 ? `/admin/collectivite/${this.state.fields.uuid}/${moduleName.toLowerCase()}`
                 : `/admin/ma-collectivite/${moduleName.toLowerCase()}`
             return (
-                <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='cube' iconColor={isActivated ? 'green' : 'red'}>
+                <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='setting' iconColor={isActivated ? 'green' : 'red'}>
                     {isActivated &&
                         <List.Content floated='right'>
                             <Button basic color='red' compact onClick={() => this.alertModal(moduleName, 'deactivation')}>{t('form.deactivate')}</Button>

@@ -12,7 +12,7 @@ class MenuBar extends Component {
     render() {
         const { isLoggedIn, t } = this.context
         return (
-            <Menu style={{ backgroundColor: 'white' }} className='mainMenu' fixed='left' secondary vertical >
+            <Menu style={{ backgroundColor: 'white', color: 'red' }} className='mainMenu' fixed='left' secondary vertical >
 
                 <div className='mainMenus'>
                     {isLoggedIn &&

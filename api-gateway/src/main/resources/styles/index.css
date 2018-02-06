@@ -4,7 +4,7 @@ html {
 }
 body, html {
     height: auto;
-    background-color: #f7f7f7;
+    background-color: #f4f4f4;
 }
 .ui.vertical.menu.mainMenu {
     display: flex;
@@ -18,14 +18,20 @@ body, html {
     overflow-y: auto;
     padding-right: 0.5em;
 }
+.ui.vertical.menu.mainMenu.admin {
+    background-color: #d24d57
+}
 @media (min-height:550px){
     .mainMenus {
         height: 100%;
     }
 }
 .topBar .header.item.appTitle {
-    height: 4.5em;
-    margin-left: 4em;
+    margin-top: 0.5em;
+    margin-left: 3em;
+}
+.topBar .header.item.appTitle img{
+    width: 3.5em;
 }
 .wrapperContainer { 
     margin-left: 16em;
@@ -53,6 +59,12 @@ fieldset {
     background-color: white;
     height: 4.5em;
     box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+}
+.ui.menu.mainMenu .item {
+    color:#16a085;
+}
+.ui.menu.mainMenu.admin .item {
+    color: white;
 }
 footer {
     position: absolute;
@@ -96,4 +108,24 @@ ul.pagination li.active {
 }
 ul.pagination li a.item:focus {
     outline:0;
+}
+.ui.segment h2:after {
+    content:' ';
+    display:block;
+    border:1px solid #d24d57;
+}
+.ui.table.sortable thead tr th,
+.ui.table.sortable thead tr th:hover,
+.ui.table.sortable thead tr th.sorted,
+.ui.table.sortable thead tr th.sorted:hover  {
+    color: white;
+    background-color: #16a085;
+}
+.ui.button.basic.rosso, .ui.basic.blue.buttons .button {
+    box-shadow: 0 0 0 1px #d24d57 inset!important;
+    color: #d24d57!important;
+}
+.ui.tabular.menu,
+.ui.tabular.menu .active.item {
+    border-color: #16a085;
 }

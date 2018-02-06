@@ -11,25 +11,34 @@ class AdminMenuBar extends Component {
     render() {
         const { t } = this.context
         return (
-            <Menu color='blue' fixed='left' className='mainMenu' inverted secondary vertical>
+            <Menu fixed='left' className='mainMenu admin' inverted secondary vertical>
                 <div className='mainMenus'>
-                    <Menu.Item as={NavLink} to="/admin/tableau-de-bord">
-                        <Icon name='dashboard' size='large' /> {t('admin.dashboard')}
+
+                    <Menu.Item style={{ width: '100%' }}>
+                        <Icon name='tasks' size='large' />
+                        <Menu.Header>Général</Menu.Header>
+                        <Menu.Menu>
+                            <Menu.Item as={NavLink} to='/admin/tableau-de-bord'>{t('admin.dashboard')}</Menu.Item>
+                            <Menu.Item as={NavLink} to='/admin/ma-collectivite'>{t('admin.my_local_authority')}</Menu.Item>
+                            <Menu.Item as={NavLink} to='/admin/agents'>{t('admin.users')}</Menu.Item>
+                            <Menu.Item as={NavLink} to='/admin/collectivite'>{t('admin.local_authorities')}</Menu.Item>
+                        </Menu.Menu>
                     </Menu.Item>
-                    <Menu.Item as={NavLink} to='/admin/ma-collectivite'>
-                        <Icon name='building' size='large' /> {t('admin.my_local_authority')}
+
+                    <Menu.Item style={{ width: '100%' }}>
+                        <Icon name='checkmark box' size='large' />
+                        <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
+                        <Menu.Menu>
+                            <Menu.Item as={NavLink} to='/admin/actes/parametrage-module'>Paramètres</Menu.Item>
+                        </Menu.Menu>
                     </Menu.Item>
-                    <Menu.Item as={NavLink} to='/admin/agents'>
-                        <Icon name='users' size='large' /> {t('admin.users')}
-                    </Menu.Item>
-                    <Menu.Item as={NavLink} to='/admin/collectivite'>
-                        <Icon name='building' size='large' /> {t('admin.local_authorities')}
-                    </Menu.Item>
-                    <Menu.Item as={NavLink} to='/admin/actes/parametrage-module'>
-                        <Icon name='checkmark box' size='large' /> {t('acte:admin.modules.acte.module_settings.title')}
-                    </Menu.Item>
-                     <Menu.Item as={NavLink} to='/admin/pes/parametrage-module'>
-                        <Icon name='calculator' size='large' /> {t('pes:admin.modules.pes.module_settings.title')}
+
+                    <Menu.Item style={{ width: '100%' }}>
+                        <Icon name='calculator' size='large' />
+                        <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
+                        <Menu.Menu>
+                            <Menu.Item as={NavLink} to='/admin/pes/parametrage-module'>Paramètres</Menu.Item>
+                        </Menu.Menu>
                     </Menu.Item>
                 </div>
 

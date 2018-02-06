@@ -131,10 +131,10 @@ const PublicRoute = ({ component: Component, ...rest }) => (
         </div>
     } />
 )
-const AuthRoute = ({ component: Component, menu: Menu, ...rest }, { isLoggedIn }) => (
+const AuthRoute = ({ component: Component, menu: Menu, admin, ...rest }, { isLoggedIn }) => (
     <Route {...rest} render={(props) =>
         <div>
-            <TopBar />
+            <TopBar admin={!!admin} />
             <div className='wrapperContainer'>
                 <Menu />
                 <Container className='mainContainer'>
@@ -177,19 +177,19 @@ const AppRoute = () =>
         <Route exact path='/admin'>
             <Redirect to="/admin/tableau-de-bord" />
         </Route>
-        <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/agents/:uuid' component={AdminProfile} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/agents' component={AgentList} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/ma-collectivite/pes' component={PesLocalAuthorityParams} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' component={AgentProfile} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/collectivite/:uuid/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/collectivite/:uuid/pes' component={PesLocalAuthorityParams} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/collectivite' component={LocalAuthorityList} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/actes/parametrage-module' component={ActeModuleParams} menu={AdminMenuBar} />
-        <AuthRoute path='/admin/pes/parametrage-module' component={PesModuleParams} menu={AdminMenuBar} />
+        <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/agents/:uuid' component={AdminProfile} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/agents' component={AgentList} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/ma-collectivite/pes' component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' component={AgentProfile} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/collectivite/:uuid/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/collectivite/:uuid/pes' component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/collectivite' component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/actes/parametrage-module' component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
+        <AuthRoute path='/admin/pes/parametrage-module' component={PesModuleParams} menu={AdminMenuBar} admin={true} />
 
         <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
         <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
