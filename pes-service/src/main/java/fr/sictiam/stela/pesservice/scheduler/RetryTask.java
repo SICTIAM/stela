@@ -57,7 +57,7 @@ public class RetryTask {
                     }
                     pesAllerService.updateStatus(pes.getUuid(), statusType, pes.getAttachment().getFile(),
                             pes.getAttachment().getFilename());
-                } catch (XPathExpressionException | IOException | SAXException | ParserConfigurationException e) {
+                } catch (IOException e) {
                     pesAllerService.updateStatus(pes.getUuid(), StatusType.FILE_ERROR, e.getClass().getName());
                     LOGGER.error(e.getMessage());
                 }

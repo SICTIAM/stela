@@ -86,7 +86,7 @@ public class ReceiverTask {
         Document document = builder.parse(byteArrayInputStream);
         String fileName = path.evaluate("/PES_ACQUIT/Enveloppe/Parametres/NomFic/@V", document);
 
-        PesAller pesAller = pesService.getByAttachementName(fileName);
+        PesAller pesAller = pesService.getByAttachementName(fileName + ".xml");
 
         pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
     }

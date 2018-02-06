@@ -91,7 +91,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private PesAllerRepository pesRepository;
-    
+
     @Autowired
     private PesRetourRepository pesRetourRepository;
 
@@ -112,7 +112,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ReceiverTask receiverTask;
-    
+
     @Autowired
     private RetryTask retryTask;
 
@@ -146,76 +146,31 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             localAuthority.setSiret("20003531900017");
             localAuthorityService.createOrUpdate(localAuthority);
 
-            String profile1 = "{" +
-                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\"," +
-                    "\"localAuthorityNotifications\":[\"PES\"]," +
-                    "\"localAuthority\":{" +
-                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
-                        "\"name\":\"SICTIAM-Test\"," +
-                        "\"siren\":\"999888777\"," +
-                        "\"activatedModules\":[\"PES\"]" +
-                    "}," +
-                    "\"agent\":{" +
-                        "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
-                        "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
-                        "\"email\":\"john.doe@sictiam.com\"," +
-                        "\"admin\":true," +
-                        "\"family_name\":\"Doe\"," +
-                        "\"given_name\":\"John\"" +
-                    "}," +
-                    "\"email\":\"john.doe@sictiam.com\"," +
-                    "\"admin\":true," +
-                    "\"notificationValues\":[" +
-                        "{" +
-                            "\"name\":\"PES_ACK_RECEIVED\"," +
-                            "\"active\":true" +
-                        "}," +
-                        "{" +
-                            "\"name\":\"PES_SENT\"," +
-                            "\"active\":true" +
-                        "}" +
-                    "]," +
-                    "\"groups\":[" + 
-                        "{" + 
-                            "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + 
-                            "\"name\":\"aa\"," + 
-                            "\"rights\":[\"PES_ADMIN\"]" + 
-                        "}" + 
-                     "]" +
-                "}";
+            String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","
+                    + "\"localAuthorityNotifications\":[\"PES\"]," + "\"localAuthority\":{" + "\"uuid\":\""
+                    + localAuthority.getUuid() + "\"," + "\"name\":\"SICTIAM-Test\"," + "\"siren\":\"999888777\","
+                    + "\"activatedModules\":[\"PES\"]" + "}," + "\"agent\":{"
+                    + "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\","
+                    + "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," + "\"email\":\"john.doe@sictiam.com\","
+                    + "\"admin\":true," + "\"family_name\":\"Doe\"," + "\"given_name\":\"John\"" + "},"
+                    + "\"email\":\"john.doe@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":[" + "{"
+                    + "\"name\":\"PES_ACK_RECEIVED\"," + "\"active\":true" + "}," + "{" + "\"name\":\"PES_SENT\","
+                    + "\"active\":true" + "}" + "]," + "\"groups\":[" + "{"
+                    + "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + "\"name\":\"aa\","
+                    + "\"rights\":[\"PES_ADMIN\"]" + "}" + "]" + "}";
 
-            String profile2 = "{" +
-                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\"," +
-                    "\"localAuthorityNotifications\":[\"PES\"]," +
-                    "\"localAuthority\":{" +
-                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
-                        "\"name\":\"SICTIAM-Test\"," +
-                        "\"siren\":\"999888777\"," +
-                        "\"activatedModules\":[\"PES\"]" +
-                    "}," +
-                    "\"agent\":{" +
-                        "\"uuid\":\"442087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
-                        "\"sub\":\"4424b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
-                        "\"email\":\"Laurent.Rojmeko@gmail.com\"," +
-                        "\"admin\":true," +
-                        "\"family_name\":\"De Rojmeko\"," +
-                        "\"given_name\":\"Laurent\"" +
-                    "}," +
-                    "\"email\":\"Laurent.Rojmeko@sictiam.com\"," +
-                    "\"admin\":true," +
-                    "\"notificationValues\":[" +
-                        "{" +
-                            "\"name\":\"PES_ACK_RECEIVED\"," +
-                            "\"active\":true" +
-                        "}," +
-                        "{" +
-                            "\"name\":\"PES_SENT\"," +
-                            "\"active\":true" +
-                        "}" +
-                    "]," +
-                    "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
-                "}";
-            String profilesJson = "["+profile1+","+profile2+"]";
+            String profile2 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\","
+                    + "\"localAuthorityNotifications\":[\"PES\"]," + "\"localAuthority\":{" + "\"uuid\":\""
+                    + localAuthority.getUuid() + "\"," + "\"name\":\"SICTIAM-Test\"," + "\"siren\":\"999888777\","
+                    + "\"activatedModules\":[\"PES\"]" + "}," + "\"agent\":{"
+                    + "\"uuid\":\"442087ee-0a32-4acb-b521-8c0ed56ee43d\","
+                    + "\"sub\":\"4424b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," + "\"email\":\"Laurent.Rojmeko@gmail.com\","
+                    + "\"admin\":true," + "\"family_name\":\"De Rojmeko\"," + "\"given_name\":\"Laurent\"" + "},"
+                    + "\"email\":\"Laurent.Rojmeko@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":["
+                    + "{" + "\"name\":\"PES_ACK_RECEIVED\"," + "\"active\":true" + "}," + "{" + "\"name\":\"PES_SENT\","
+                    + "\"active\":true" + "}" + "],"
+                    + "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" + "}";
+            String profilesJson = "[" + profile1 + "," + profile2 + "]";
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode node = objectMapper.readTree(profile1);
@@ -271,8 +226,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void sendTest()
-            throws IOException, XPathExpressionException, JAXBException, SAXException, ParserConfigurationException {
+    public void sendTest() throws IOException {
         PesAller pes = samplePesAller();
 
         senderTask.send(pes);
@@ -300,7 +254,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(pesHistories, hasSize(2));
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.ACK_RECEIVED))));
     }
-    
+
     @Test
     public void receivePesRetourTest()
             throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
@@ -308,10 +262,10 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         InputStream ackStream = new ClassPathResource(
                 "data/PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml").getInputStream();
         receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml");
-        
-        assertThat(pesRetourRepository.count(), is(1L));       
+
+        assertThat(pesRetourRepository.count(), is(1L));
     }
-    
+
     @Test
     public void retryTest() throws IOException {
         PesAller pes = samplePesAller();
@@ -326,7 +280,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             fail("Should not have thrown an exception");
         }
         retryTask.resendBlockedFlux();
-        
+
         MockPesEventListener mockPesEventListener2 = new MockPesEventListener(StatusType.RESENT);
         try {
             synchronized (mockPesEventListener2) {
@@ -335,23 +289,22 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
-        
+
         List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
         assertThat(pesHistories, hasSize(3));
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.RESENT))));
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOTIFICATION_SENT))));
-                
+
     }
-    
+
     @Test
     public void receivePesRetourUnknow()
             throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
 
-        InputStream ackStream = new ClassPathResource(
-                "data/PES2R_DEP_P_unknow.xml").getInputStream();
+        InputStream ackStream = new ClassPathResource("data/PES2R_DEP_P_unknow.xml").getInputStream();
         receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_unknow.xml");
-        
-        assertThat(pesRetourRepository.count(), is(0L));       
+
+        assertThat(pesRetourRepository.count(), is(0L));
     }
 
     private PesAller samplePesAller() throws IOException {
@@ -362,18 +315,21 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         pes.setCreation(LocalDateTime.now());
         pes.setLocalAuthority(localAuthority.get());
         pes.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
-
+        pes.setFileType("PESALR1");
+        pes.setColCode("280");
+        pes.setPostId("030004");
+        pes.setBudCode("00");
         InputStream in = new ClassPathResource("data/28000-2017-P-RN-22-1516807373820.xml").getInputStream();
 
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        Attachment pesSent = new Attachment(targetArray, "28000-2017-P-RN-22-1516807373820", in.available());
+        Attachment pesSent = new Attachment(targetArray, "28000-2017-P-RN-22-1516807373820.xml", in.available());
         pes.setAttachment(pesSent);
         pes = pesService.save(pes);
         return pes;
     }
-    
+
     @Test
     public void testNotification() throws Exception {
 
@@ -389,17 +345,17 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
         String bodyCopy = localService.getMessage("fr", "pes_notification", "$.pes.copy." + statusType.name() + ".body",
                 variables2);
-        String subjectCopy = localService.getMessage("fr", "pes_notification", "$.pes.copy." + statusType.name() + ".subject",
-                variables2);
-        
+        String subjectCopy = localService.getMessage("fr", "pes_notification",
+                "$.pes.copy." + statusType.name() + ".subject", variables2);
+
         String body = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
                 variables);
         String subject = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".subject",
                 variables);
-     
+
         PesAller pes = samplePesAller();
         pesService.updateStatus(pes.getUuid(), statusType);
-        
+
         MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
         try {
             synchronized (mockPesEventListener) {
@@ -419,7 +375,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(parser.getSubject(), is(subjectCopy));
         assertThat(current.getContent(), instanceOf(MimeMultipart.class));
         assertThat(parser.getHtmlContent(), is(bodyCopy));
-        
+
         MimeMessage secondMsg = receivedMessages[1];
         assertThat(secondMsg, notNullValue());
         MimeMessageParser secondParser = new MimeMessageParser(secondMsg);
@@ -427,7 +383,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(secondParser.getSubject(), is(subject));
         assertThat(secondMsg.getContent(), instanceOf(MimeMultipart.class));
         assertThat(secondParser.getHtmlContent(), is(body));
-    } 
+    }
 
     private Optional<PesHistory> getPesHistoryForStatus(String pesUuid, StatusType status) {
         return getPesHistoryForStatus(pesHistoryRepository.findBypesUuidOrderByDate(pesUuid), status);
