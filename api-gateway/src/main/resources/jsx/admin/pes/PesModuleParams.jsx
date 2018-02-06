@@ -7,7 +7,7 @@ import moment from 'moment'
 
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
-import { Field } from '../../_components/UI'
+import { Field, Page } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class PesModuleParams extends Component {
@@ -87,41 +87,40 @@ class PesModuleParams extends Component {
     }
     render() {
         const { t } = this.context
-      
+
         return (
-            <Segment>
-                <h1>{t('admin.modules.pes.module_settings.title')}</h1>
-                <Form onSubmit={this.submitForm}>
-                    
-                    
-                    <Field htmlFor='heliosAvailable' label={t('admin.modules.pes.module_settings.heliosAvailable')}>
-                        <Checkbox id="heliosAvailable"
-                            toggle checked={this.state.fields.heliosAvailable}
-                            onChange={this.handleCheckboxChange} />
-                    </Field>
-                    <Field htmlFor='unavailabilityHelios' label={t('admin.modules.pes.module_settings.unavailabilityHelios')}>
-                        <Form.Group style={{ marginBottom: 0, flexDirection: 'column' }} className='test'>
-                            <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                <label htmlFor='unavailabilityHeliosStartDate' style={{ marginRight: '0.5em' }}>{t('api-gateway:form.from')}</label>
-                                <InputDatetime id='unavailabilityHeliosStartDate'
-                                    onBlur={this.updateDateValidation}
-                                    value={this.state.fields.unavailabilityHeliosStartDate}
-                                    onChange={date => this.handleFieldChange('unavailabilityHeliosStartDate', date)} />
-                                <label htmlFor='unavailabilityHeliosEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>{t('api-gateway:form.to')}</label>
-                                <InputDatetime id='unavailabilityHeliosEndDate'
-                                    onBlur={this.updateDateValidation}
-                                    value={this.state.fields.unavailabilityHeliosEndDate}
-                                    onChange={date => this.handleFieldChange('unavailabilityHeliosEndDate', date)} />
-                            </div>
-                            {this.state.dateValidation &&
+            <Page title={t('admin.modules.pes.module_settings.title')}>
+                <Segment>
+                    <Form onSubmit={this.submitForm}>
+                        <Field htmlFor='heliosAvailable' label={t('admin.modules.pes.module_settings.heliosAvailable')}>
+                            <Checkbox id="heliosAvailable"
+                                toggle checked={this.state.fields.heliosAvailable}
+                                onChange={this.handleCheckboxChange} />
+                        </Field>
+                        <Field htmlFor='unavailabilityHelios' label={t('admin.modules.pes.module_settings.unavailabilityHelios')}>
+                            <Form.Group style={{ marginBottom: 0, flexDirection: 'column' }} className='test'>
                                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <Label basic color='red' pointing>{this.state.dateValidation}</Label>
-                                </div>}
-                        </Form.Group>
-                    </Field>
-                    <Button disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} primary type='submit'>{t('api-gateway:form.update')}</Button>
-                </Form>
-            </Segment>
+                                    <label htmlFor='unavailabilityHeliosStartDate' style={{ marginRight: '0.5em' }}>{t('api-gateway:form.from')}</label>
+                                    <InputDatetime id='unavailabilityHeliosStartDate'
+                                        onBlur={this.updateDateValidation}
+                                        value={this.state.fields.unavailabilityHeliosStartDate}
+                                        onChange={date => this.handleFieldChange('unavailabilityHeliosStartDate', date)} />
+                                    <label htmlFor='unavailabilityHeliosEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>{t('api-gateway:form.to')}</label>
+                                    <InputDatetime id='unavailabilityHeliosEndDate'
+                                        onBlur={this.updateDateValidation}
+                                        value={this.state.fields.unavailabilityHeliosEndDate}
+                                        onChange={date => this.handleFieldChange('unavailabilityHeliosEndDate', date)} />
+                                </div>
+                                {this.state.dateValidation &&
+                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                        <Label basic color='red' pointing>{this.state.dateValidation}</Label>
+                                    </div>}
+                            </Form.Group>
+                        </Field>
+                        <Button disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} primary type='submit'>{t('api-gateway:form.update')}</Button>
+                    </Form>
+                </Segment>
+            </Page>
         )
     }
 }

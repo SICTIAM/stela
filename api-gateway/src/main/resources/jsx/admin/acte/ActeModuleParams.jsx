@@ -129,7 +129,7 @@ class ActeModuleParams extends Component {
                                 className='simpleInput' />
                         </Field>
                         <Field htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
-                            <div>{listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}</div>
+                            <div style={{ marginBottom: '0.5em' }}>{listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}</div>
                             <input id='additionalEmail'
                                 onKeyPress={this.onkeyPress}
                                 value={this.state.newEmail}
