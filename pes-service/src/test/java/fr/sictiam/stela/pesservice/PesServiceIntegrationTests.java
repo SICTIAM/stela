@@ -22,7 +22,6 @@ import java.util.Optional;
 
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -106,9 +105,6 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private LocalesService localService;
-
-    @Autowired
-    private SenderTask senderTask;
 
     @Autowired
     private ReceiverTask receiverTask;
@@ -229,7 +225,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     public void sendTest() throws IOException {
         PesAller pes = samplePesAller();
 
-        senderTask.send(pes);
+        pesService.send(pes);
     }
 
     @Test

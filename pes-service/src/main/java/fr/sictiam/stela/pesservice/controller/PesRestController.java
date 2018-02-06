@@ -1,35 +1,5 @@
 package fr.sictiam.stela.pesservice.controller;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.pesservice.scheduler.SenderTask;
-import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
-import fr.sictiam.stela.pesservice.service.PesAllerService;
-import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
-import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
-
-import org.apache.commons.compress.utils.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.xml.sax.SAXException;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +10,34 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.compress.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
+import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+
 @RestController
 @RequestMapping("/api/pes")
 public class PesRestController {
@@ -48,16 +46,14 @@ public class PesRestController {
 
     private final PesAllerService pesService;
     private final LocalAuthorityService localAuthorityService;
-    private final SenderTask senderTask;
 
     @Value("application.filenamepattern")
     private String fileNamePattern;
 
     @Autowired
-    public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService, SenderTask senderTask) {
+    public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService) {
         this.pesService = pesService;
         this.localAuthorityService = localAuthorityService;
-        this.senderTask = senderTask;
     }
 
     @GetMapping
@@ -88,15 +84,10 @@ public class PesRestController {
 
     @GetMapping("/resend/{uuid}")
     public ResponseEntity<String> reSendFlux(@PathVariable String uuid) {
-        PesAller pes = pesService.getByUuid(uuid);       
-        try {
-            senderTask.send(pes);
-            StatusType statusType = StatusType.MANUAL_RESENT;
-            pesService.updateStatus(pes.getUuid(), statusType, pes.getAttachment().getFile(),
-                    pes.getAttachment().getFilename());
-        } catch (XPathExpressionException | IOException | SAXException | ParserConfigurationException e) {
-            return new ResponseEntity<>("notifications.pes.sent.error.resend", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        PesAller pes = pesService.getByUuid(uuid);
+        pesService.send(pes);
+        StatusType statusType = StatusType.MANUAL_RESENT;
+        pesService.updateStatus(pes.getUuid(), statusType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
