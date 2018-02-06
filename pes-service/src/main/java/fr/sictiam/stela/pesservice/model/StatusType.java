@@ -10,7 +10,8 @@ public enum StatusType {
     MAX_RETRY_REACH("MAX_RETRY_REACH"),
     FILE_ERROR ("FILE_ERROR"),
     NOTIFICATION_SENT ("NOTIFICATION_SENT"), 
-    RESENT ("RESENT");
+    RESENT ("RESENT"), 
+    MANUAL_RESENT ("MANUAL_RESENT");
 
     final String name;
 
