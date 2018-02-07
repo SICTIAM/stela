@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
@@ -286,6 +287,34 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.RESENT))));
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOTIFICATION_SENT))));
 
+    }
+    
+    @Test
+    public void retryTestMaxReach() throws IOException {
+        PesAller pes = samplePesAller();
+        pesService.updateStatus(pes.getUuid(), StatusType.SENT);
+
+        MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
+        try {
+            synchronized (mockPesEventListener) {
+                mockPesEventListener.wait(4000);
+            }
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+        
+        pesService.updateStatus(pes.getUuid(), StatusType.MAX_RETRY_REACH);
+
+        MockPesEventListener mockPesEventListener2 = new MockPesEventListener(StatusType.MAX_RETRY_REACH);
+        try {
+            synchronized (mockPesEventListener2) {
+                mockPesEventListener2.wait(4000);
+            }
+        } catch (Exception e) {
+            fail("Should not have thrown an exception");
+        }
+        
+        assertThat(pesService.getBlockedFlux(), empty());
     }
 
     @Test

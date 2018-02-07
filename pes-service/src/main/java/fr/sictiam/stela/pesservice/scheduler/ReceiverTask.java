@@ -50,7 +50,7 @@ public class ReceiverTask {
     @Autowired
     private DefaultFtpSessionFactory defaultFtpSessionFactory;
 
-    //@Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 5000)
     public void receive() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();

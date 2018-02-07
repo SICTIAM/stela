@@ -11,11 +11,13 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -217,8 +219,35 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public List<PesAller> getBlockedFlux() {
-        return pesAllerRepository.findAllByPesHistories_statusAndPesHistories_statusNotIn(StatusType.SENT,
-                Arrays.asList(StatusType.ACK_RECEIVED, StatusType.MAX_RETRY_REACH));
+        
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();  
+        CriteriaQuery<PesAller> query = cb.createQuery(PesAller.class); 
+        Root<PesAller> pesTable =  query.from(PesAller.class); 
+        query.select(pesTable);
+        
+        Subquery<PesHistory> subquery = query.subquery(PesHistory.class); 
+        Root<PesHistory> historyTable = subquery.from(PesHistory.class);  
+        subquery.select(historyTable);  
+
+        List<Predicate> subQueryPredicates = new ArrayList<Predicate>(); 
+        subQueryPredicates.add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
+        subquery.where(subQueryPredicates.toArray(new Predicate[]{})); 
+        
+        Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class); 
+        subquery2.select(historyTable);  
+
+        List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>(); 
+        subQueryPredicates2.add(cb.equal(historyTable.get("status"), StatusType.SENT));
+        subquery2.where(subQueryPredicates2.toArray(new Predicate[]{})); 
+        
+        List<Predicate> mainQueryPredicates = new ArrayList<Predicate>(); 
+
+        mainQueryPredicates.add(cb.not(cb.exists(subquery))); 
+        query.where(mainQueryPredicates.toArray(new Predicate[]{})); 
+        TypedQuery<PesAller> typedQuery =  entityManager.createQuery(query); 
+        List<PesAller> resultList = typedQuery.getResultList();
+        
+        return resultList;
     }
 
     public PesHistory getLastSentHistory(String uuid) {
