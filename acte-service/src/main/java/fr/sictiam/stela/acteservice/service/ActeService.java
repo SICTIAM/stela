@@ -1,5 +1,7 @@
 package fr.sictiam.stela.acteservice.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,11 +35,22 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.sictiam.stela.acteservice.model.Acte;
@@ -70,6 +83,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final ArchiveService archiveService;
     private final PdfGeneratorUtil pdfGeneratorUtil;
     private final ZipGeneratorUtil zipGeneratorUtil;
+    
+    @Value("${application.miat.url}")
+    private String acteUrl;   
+
+    @Autowired
+    @Qualifier("miatRestTemplate")
+    private RestTemplate miatRestTemplate;
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
@@ -370,6 +390,44 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public byte[] getActeAttachmentThumbnail(String uuid) throws IOException {
         byte[] pdf = getByUuid(uuid).getActeAttachment().getFile();
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
+    }
+
+    public HttpStatus askNomenclature(LocalAuthority localAuthority) {
+        Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority);
+        try {
+            return send(attachment.getFile(), attachment.getFilename());
+        } catch (Exception e) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+    }
+
+    public HttpStatus send(byte[] file, String fileName) throws Exception {
+
+        System.setProperty("javax.net.debug", "all");
+
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+
+        map.add("name", fileName);
+        map.add("filename", fileName);
+
+        ByteArrayResource contentsAsResource = new ByteArrayResource(file) {
+            @Override
+            public String getFilename() {
+                return fileName; // Filename has to be returned in order to be able to post.
+            }
+        };
+
+        map.add("file", contentsAsResource);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Agent", "stela");
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+                map, headers);
+
+        ResponseEntity<String> result = miatRestTemplate.exchange(acteUrl, HttpMethod.POST, requestEntity,
+                String.class);
+        return result.getStatusCode();
     }
 
     @Override

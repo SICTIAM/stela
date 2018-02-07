@@ -41,9 +41,6 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
 
     @Value("${application.archive.maxSizePerHour}")
     private Integer maxSizePerHour;
-    
-    @Value("${application.miat.url}")
-    private String acteUrl;   
 
     private AtomicInteger currentSizeUsed = new AtomicInteger();
 
@@ -55,10 +52,6 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
 
     @Autowired
     private PendingMessageService pendingMessageService;
-    
-    @Autowired
-    @Qualifier("miatRestTemplate")
-    private RestTemplate miatRestTemplate;
 
     @PostConstruct
     public void initQueue() {
@@ -89,7 +82,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
 
                 HttpStatus sendStatus = null;
                 try {
-                    sendStatus = send(pendingMessage.getFile(), pendingMessage.getFileName());
+                    sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
                 } catch (Exception e) {
                     sendStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 }
@@ -114,26 +107,5 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
         }
     }
     
-    public HttpStatus send(byte[] file, String fileName) throws Exception {
-
-        System.setProperty("javax.net.debug", "all");
-        
-        File outputFile = new File(fileName);
-        FileOutputStream fileOuputStream = new FileOutputStream(outputFile); 
-        fileOuputStream.write(file);
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        
-        map.add("file", outputFile);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Agent", "stela");
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
-                map, headers);
-
-        ResponseEntity<String> result = miatRestTemplate.exchange(acteUrl, HttpMethod.POST,
-                requestEntity, String.class);
-        outputFile.delete();
-        return result.getStatusCode();
-    }
+    
 }

@@ -1,15 +1,24 @@
 package fr.sictiam.stela.acteservice.service;
 
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
-import xyz.capybara.clamav.ClamavClient;
-import xyz.capybara.clamav.commands.scan.result.ScanResult;
-import xyz.capybara.clamav.commands.scan.result.ScanResult.OK;
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.dao.AdminRepository;
-import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
-import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
-import fr.sictiam.stela.acteservice.model.xml.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -25,18 +34,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.JAXBElement;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
+import fr.sictiam.stela.acteservice.dao.AdminRepository;
+import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.Admin;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.EnveloppeCounter;
+import fr.sictiam.stela.acteservice.model.Flux;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.model.xml.Annulation;
+import fr.sictiam.stela.acteservice.model.xml.DemandeClassification;
+import fr.sictiam.stela.acteservice.model.xml.DonneesActe;
+import fr.sictiam.stela.acteservice.model.xml.DonneesEnveloppeCLMISILL;
+import fr.sictiam.stela.acteservice.model.xml.FichierSigne;
+import fr.sictiam.stela.acteservice.model.xml.FormulairesEnvoyes;
+import fr.sictiam.stela.acteservice.model.xml.IDCL;
+import fr.sictiam.stela.acteservice.model.xml.ObjectFactory;
+import fr.sictiam.stela.acteservice.model.xml.Referent;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
+import xyz.capybara.clamav.ClamavClient;
+import xyz.capybara.clamav.commands.scan.result.ScanResult;
+import xyz.capybara.clamav.commands.scan.result.ScanResult.OK;
 
 @Service
 public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
@@ -45,16 +67,13 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     @Value("${application.archive.maxSize}")
     private Integer archiveMaxSize;
-    
+
     @Value("${application.clamav.port}")
     private Integer clamavPort;
-    
+
     @Value("${application.clamav.host}")
     private String clamavHost;
 
-    private String departement = "006";
-    private String arrondissement = "2";
-    private String siren = "210600730";
     private String trigraph = "SIC";
 
     private final ActeRepository acteRepository;
@@ -71,13 +90,14 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         this.jaxb2Marshaller = jaxb2Marshaller;
         this.applicationEventPublisher = applicationEventPublisher;
         this.enveloppeCounterRepository = enveloppeCounterRepository;
-        this.adminRepository = adminRepository;      
+        this.adminRepository = adminRepository;
     }
-    
+
     @PostConstruct
     private void init() {
         clamavClient = new ClamavClient(clamavHost, clamavPort);
     }
+
     private void checkAntivirus(String acteUuid) {
 
         Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
@@ -108,15 +128,19 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             // this is the base filename for the message and attachments
             String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
 
-            String acteFilename = String.format("CO_DE-%s_%d.%s", baseFilename, 1,
-                    StringUtils.getFilenameExtension(acte.getActeAttachment().getFilename()));
+            String acteFilename = String.format("%s-%s_%d.%s",
+                    acte.getActeAttachment().getAttachmentType() != null
+                            ? acte.getActeAttachment().getAttachmentType().getCode()
+                            : "CO_DE",
+                    baseFilename, 1, StringUtils.getFilenameExtension(acte.getActeAttachment().getFilename()));
 
             Map<String, byte[]> annexes = new HashMap<>();
             acte.getAnnexes().forEach(attachment -> {
                 // sequence 1 is taken by the Acte file, so we start at two
                 int sequence = annexes.size() + 2;
-                String tempFilename = String.format("CO_DE-%s_%d.%s", baseFilename, sequence,
-                        StringUtils.getFilenameExtension(attachment.getFilename()));
+                String tempFilename = String.format("%s-%s_%d.%s",
+                        attachment.getAttachmentType() != null ? attachment.getAttachmentType().getCode() : "CO_DE",
+                        baseFilename, sequence, StringUtils.getFilenameExtension(attachment.getFilename()));
                 annexes.put(tempFilename, attachment.getFile());
             });
 
@@ -124,9 +148,10 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             JAXBElement<DonneesActe> donneesActe = generateDonneesActe(acte, acteFilename, annexes.keySet());
             String messageContent = marshalToString(donneesActe);
 
-            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()),
-                    deliveryNumber);
-            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", acte.getLocalAuthority().getSiren(),
+                    getFormattedDate(LocalDate.now()), deliveryNumber);
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(
+                    acte.getLocalAuthority(), messageFilename);
             String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
 
             String archiveName = getArchiveName(enveloppeName);
@@ -158,13 +183,14 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             int deliveryNumber = getNextIncrement();
 
             String baseFilename = getBaseFilename(acte, Flux.ANNULATION_TRANSMISSION);
-            String enveloppeName = String.format("EACT--%s--%s-%d.xml", siren, getFormattedDate(LocalDate.now()),
-                    deliveryNumber);
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", acte.getLocalAuthority().getSiren(),
+                    getFormattedDate(LocalDate.now()), deliveryNumber);
             String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
 
             ObjectFactory objectFactory = new ObjectFactory();
             Annulation annulation = objectFactory.createAnnulation();
-            String idActe = String.format("%s-%s-%s-%s-%s", departement, siren,
+            String idActe = String.format("%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
+                    acte.getLocalAuthority().getSiren(),
                     acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")), acte.getNumber(),
                     acte.getNature().getAbbreviation());
             annulation.setIDActe(idActe);
@@ -174,7 +200,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             String archiveName = getArchiveName(enveloppeName);
 
-            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(acte, messageFilename);
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(
+                    acte.getLocalAuthority(), messageFilename);
             String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
 
             ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
@@ -193,6 +220,39 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                     e.getMessage());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
+    }
+
+    public Attachment createNomenclatureAskMessage(LocalAuthority localAuthority) {
+
+        try {
+            int deliveryNumber = getNextIncrement();
+
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", localAuthority.getSiren(),
+                    getFormattedDate(LocalDate.now()), deliveryNumber);
+
+            DemandeClassification demandeClassification = new DemandeClassification();
+            demandeClassification.setDateClassification(localAuthority.getNomenclatureDate());
+
+            StringWriter sw = new StringWriter();
+            jaxb2Marshaller.marshal(demandeClassification, new StreamResult(sw));
+
+            String archiveName = getArchiveName(enveloppeName);
+
+            String messageFilename = String.format("%s-%s----7-1_%d.xml", localAuthority.getDepartment(),
+                    localAuthority.getSiren(), deliveryNumber);
+
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(localAuthority,
+                    messageFilename);
+            String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
+
+            ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
+                    sw.toString(), null, null, null);
+            Attachment attachment = new Attachment(baos.toByteArray(), archiveName, baos.size());
+            return attachment;
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return null;
     }
 
     private void checkArchiveSize(ActeHistory acteHistory) {
@@ -215,17 +275,19 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     public String getBaseFilename(Acte acte, Flux flux) {
         String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
 
-        return String.format("%s-%s-%s-%s-%s-%s-%s", departement, siren, today, acte.getNumber(),
-                acte.getNature().getAbbreviation(), flux.getTransactionNumber(), flux.getFluxNumber());
+        return String.format("%s-%s-%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
+                acte.getLocalAuthority().getSiren(), today, acte.getNumber(), acte.getNature().getAbbreviation(),
+                flux.getTransactionNumber(), flux.getFluxNumber());
     }
 
-    private JAXBElement<DonneesEnveloppeCLMISILL> generateEnveloppe(Acte acte, String messageFilename) {
+    private JAXBElement<DonneesEnveloppeCLMISILL> generateEnveloppe(LocalAuthority localAuthority,
+            String messageFilename) {
 
         IDCL idcl = new IDCL();
-        idcl.setDepartement(departement);
-        idcl.setArrondissement(arrondissement);
-        idcl.setNature(acte.getNature().getCode());
-        idcl.setSIREN(siren);
+        idcl.setDepartement(localAuthority.getDepartment());
+        idcl.setArrondissement(localAuthority.getDistrict());
+        idcl.setNature(localAuthority.getNature());
+        idcl.setSIREN(localAuthority.getSiren());
 
         Admin admin = adminRepository.findAll().get(0);
         Referent referent = new Referent();

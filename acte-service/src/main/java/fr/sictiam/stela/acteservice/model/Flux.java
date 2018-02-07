@@ -7,7 +7,8 @@ public enum Flux {
     TRANSMISSION_PIECES_COMPLEMENTAIRES("3", "4"),
     REFUS_EXPLICITE_LETTRE_OBSERVATION("4", "3"),
     REPONSE_LETTRE_OBSEVATION("4", "4"),
-    ANNULATION_TRANSMISSION("6", "1");
+    ANNULATION_TRANSMISSION("6", "1"),
+    DEMANDE_CLASSIFICATION("7", "1");
 
     private String transactionNumber;
     private String fluxNumber;
