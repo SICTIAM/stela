@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 import javax.xml.bind.JAXBContext;
@@ -17,8 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import fr.sictiam.stela.acteservice.dao.AttachmentTypeRepository;
 import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
+import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.AttachmentType;
+import fr.sictiam.stela.acteservice.model.AttachmentTypeReferencial;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
@@ -33,11 +38,14 @@ public class LocalAuthorityService {
 
     private final MaterialCodeRepository materialCodeRepository;
 
+    private final AttachmentTypeRepository attachmentTypeRepository;
+
     @Autowired
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
-            MaterialCodeRepository materialCodeRepository) {
+            MaterialCodeRepository materialCodeRepository, AttachmentTypeRepository attachmentTypeRepository) {
         this.localAuthorityRepository = localAuthorityRepository;
         this.materialCodeRepository = materialCodeRepository;
+        this.attachmentTypeRepository = attachmentTypeRepository;
     }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
@@ -67,14 +75,14 @@ public class LocalAuthorityService {
     }
 
     @Transactional
-    public void loadCodesMatieres(String uuid) {
+    public void loadClassification(String uuid) {
 
         try {
             LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
             JAXBContext jaxbContext = JAXBContext.newInstance(RetourClassification.class);
             InputStream is = new ByteArrayInputStream(localAuthority.getNomenclatureFile());
             RetourClassification classification = (RetourClassification) jaxbContext.createUnmarshaller().unmarshal(is);
-            loadCodesMatieres(uuid, classification);
+            loadClassification(uuid, classification);
 
         } catch (JAXBException e) {
             LOGGER.error("Unable to parse classification data !", e);
@@ -82,10 +90,27 @@ public class LocalAuthorityService {
     }
 
     @Transactional
-    public void loadCodesMatieres(String uuid, RetourClassification classification) {
+    public void loadClassification(String uuid, RetourClassification classification) {
+
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
+
+        List<AttachmentTypeReferencial> attachmentTypeReferencials = classification.getNaturesActes().getNatureActe()
+                .stream()
+                .map(nature -> new AttachmentTypeReferencial(ActeNature.code(nature.getCodeNatureActe()),
+                        nature.getTypePJNatureActe().stream()
+                                .map(typePj -> new AttachmentType(typePj.getCodeTypePJ(), typePj.getLibelle()))
+                                .collect(Collectors.toSet()),
+                        localAuthority))
+                .collect(Collectors.toList());
+
+        attachmentTypeReferencials.stream()
+                .forEach(attachmentTypeReferencial -> attachmentTypeReferencial.getAttachmentTypes().stream().forEach(
+                        attachmentType -> attachmentType.setAttachmentTypeReferencial(attachmentTypeReferencial)));
+
+        localAuthority.getAttachmentTypeReferencials().clear();
+        localAuthority.getAttachmentTypeReferencials().addAll(attachmentTypeReferencials);
 
         List<MaterialCode> codes = new ArrayList<>();
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
         materialCodeRepository.deleteAll(localAuthority.getMaterialCodes());
         classification.getMatieres().getMatiere1().forEach(matiere1 -> {
             String key1 = matiere1.getCodeMatiere().toString();
@@ -146,9 +171,15 @@ public class LocalAuthorityService {
 
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid).get();
         if (localAuthority.getMaterialCodes() == null || localAuthority.getMaterialCodes().isEmpty()) {
-            loadCodesMatieres(uuid);
+            loadClassification(uuid);
         }
         return localAuthority.getMaterialCodes();
+    }
+
+    public List<AttachmentType> getAttachmentTypeAvailable(ActeNature acteNature, String uuid) {
+        return attachmentTypeRepository
+                .findByAttachmentTypeReferencial_acteNatureAndAttachmentTypeReferencial_localAuthorityUuid(acteNature,
+                        uuid);
     }
 
     public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {
@@ -159,14 +190,14 @@ public class LocalAuthorityService {
 
         return null;
     }
-    
+
     @Transactional
     public void handleEvent(LocalAuthorityEvent event) throws IOException {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
-        
+
         localAuthority.setActive(event.getActivatedModules().contains("ACTES"));
-       
+
         createOrUpdate(localAuthority);
 
     }

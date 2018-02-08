@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class Attachment {
@@ -17,6 +18,8 @@ public class Attachment {
     private byte[] file;
     private String filename;
     private long size;
+    @ManyToOne
+    private AttachmentType attachmentType;
 
     public Attachment() {
     }
@@ -41,5 +44,13 @@ public class Attachment {
 
     public long getSize() {
         return size;
+    }
+
+    public AttachmentType getAttachmentType() {
+        return attachmentType;
+    }
+
+    public void setAttachmentType(AttachmentType attachmentType) {
+        this.attachmentType = attachmentType;
     }
 }

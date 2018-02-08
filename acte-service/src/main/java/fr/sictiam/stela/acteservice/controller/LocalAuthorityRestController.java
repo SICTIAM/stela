@@ -81,7 +81,7 @@ public class LocalAuthorityRestController {
     @GetMapping("/load-matieres")
     public void loadCodesMatieres(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
                 LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        localAuthorityService.loadCodesMatieres(currentLocalAuthority.getUuid());
+        localAuthorityService.loadClassification(currentLocalAuthority.getUuid());
     }
     
     @GetMapping("/codes-matieres")

@@ -1,6 +1,5 @@
 package fr.sictiam.stela.acteservice;
 
-
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -30,7 +29,6 @@ import java.util.Optional;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
@@ -65,12 +63,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
+import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeMode;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Admin;
 import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.AttachmentType;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.StatusType;
@@ -78,7 +78,6 @@ import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.acteservice.scheduler.SenderTask;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.DraftService;
@@ -89,16 +88,15 @@ import fr.sictiam.stela.acteservice.service.NotificationService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeServiceIntegrationTests.class);
-    
+
     @Value("${application.jwt.secret}")
     String SECRET;
-    
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -118,126 +116,80 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private LocalAuthorityService localAuthorityService;
 
     @Autowired
-    private ActeRepository acteRepository;    
-    
+    private ActeRepository acteRepository;
+
     @Autowired
-    private ActeHistoryRepository acteHistoryRepository; 
-    
+    private ActeHistoryRepository acteHistoryRepository;
+
     @Autowired
     private NotificationService notificationService;
-    
+
     @Autowired
     private LocalesService localService;
-    
+
     @Autowired
     private ExternalRestService externalRestService;
 
     @Rule
     public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
-    
-    @Autowired
-    SenderTask senderTask;
-    
+
     @Before
     public void beforeTests() {
-        
+
         createAdmin();
         createLocalAuthority();
         acteRepository.deleteAll();
- 
+
     }
-    
+
     public void createAdmin() {
         adminRepository.deleteAll();
-        adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", "dev@sictiam.fr", null, true, LocalDateTime.now(), LocalDateTime.now()));
+        adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", "stelasictiam.test@gmail.com", null, true,
+                LocalDateTime.now(), LocalDateTime.now()));
     }
 
     public void createLocalAuthority() {
-        if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
-            LocalAuthority localAuthority =
-                    new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test", "999888777", "999", "1", "31", true, true);
+        if (!localAuthorityService.getByName("SICTIAM TEST").isPresent()) {
+            LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM TEST",
+                    "214400152", "044", "1", "31", true, true);
             try {
-                MultipartFile codesMatieresFile = getMultipartResourceFile("data/exemple_codes_matieres.xml", "application/xml");
-                localAuthority.setNomenclatureDate(LocalDate.now());
+                MultipartFile codesMatieresFile = getMultipartResourceFile("data/exemple_codes_matieres.xml",
+                        "application/xml");
+                localAuthority.setNomenclatureDate(LocalDate.of(2001, 1, 1));
                 localAuthority.setNomenclatureFile(codesMatieresFile.getBytes());
             } catch (IOException e) {
                 LOGGER.error("Unable to add codes matieres file for {} : {}", localAuthority.getName(), e.toString());
             }
-            LocalAuthority localAuthorityCreated =localAuthorityService.createOrUpdate(localAuthority);
-            localAuthorityService.loadCodesMatieres(localAuthorityCreated.getUuid());
-                    
-            localAuthorityService.createOrUpdate(localAuthorityCreated);
-            
-            String profile1 = "{" +
-                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\"," +
-                    "\"localAuthorityNotifications\":[\"ACTES\"]," +
-                    "\"localAuthority\":{" +
-                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
-                        "\"name\":\"SICTIAM-Test\"," +
-                        "\"siren\":\"999888777\"," +
-                        "\"activatedModules\":[\"ACTES\"]" +
-                    "}," +
-                    "\"agent\":{" +
-                        "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
-                        "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
-                        "\"email\":\"john.doe@sictiam.com\"," +
-                        "\"admin\":true," +
-                        "\"family_name\":\"Doe\"," +
-                        "\"given_name\":\"John\"" +
-                    "}," +
-                    "\"email\":\"john.doe@sictiam.com\"," +
-                    "\"admin\":true," +
-                    "\"notificationValues\":[" +
-                        "{" +
-                            "\"name\":\"ACTE_SENT\"," +
-                            "\"active\":true" +
-                        "}," +
-                        "{" +
-                            "\"name\":\"ACTE_CANCELLED\"," +
-                            "\"active\":true" +
-                        "}" +
-                    "]," +
-                    "\"groups\":[" + 
-                       "{" + 
-                           "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + 
-                           "\"name\":\"aa\"," + 
-                           "\"rights\":[\"ACTES_ADMIN\"]" + 
-                       "}" + 
-                    "]" +
-                "}";
+            LocalAuthority localAuthorityCreated = localAuthorityService.createOrUpdate(localAuthority);
+            localAuthorityService.loadClassification(localAuthorityCreated.getUuid());
 
-            String profile2 = "{" +
-                    "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\"," +
-                    "\"localAuthorityNotifications\":[\"ACTES\"]," +
-                    "\"localAuthority\":{" +
-                        "\"uuid\":\"" + localAuthority.getUuid()+ "\"," +
-                        "\"name\":\"SICTIAM-Test\"," +
-                        "\"siren\":\"999888777\"," +
-                        "\"activatedModules\":[\"ACTES\"]" +
-                    "}," +
-                    "\"agent\":{" +
-                        "\"uuid\":\"442087ee-0a32-4acb-b521-8c0ed56ee43d\"," +
-                        "\"sub\":\"4424b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," +
-                        "\"email\":\"Laurent.Rojmeko@gmail.com\"," +
-                        "\"admin\":true," +
-                        "\"family_name\":\"De Rojmeko\"," +
-                        "\"given_name\":\"Laurent\"" +
-                    "}," +
-                    "\"email\":\"Laurent.Rojmeko@sictiam.com\"," +
-                    "\"admin\":true," +
-                    "\"notificationValues\":[" +
-                        "{" +
-                            "\"name\":\"ACTE_SENT\"," +
-                            "\"active\":true" +
-                        "}," +
-                        "{" +
-                            "\"name\":\"ACTE_CANCELLED\"," +
-                            "\"active\":true" +
-                        "}" +
-                "]," +
-                    "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" +
-                "}";
-            String profilesJson = "["+profile1+","+profile2+"]";
+            localAuthorityService.createOrUpdate(localAuthorityCreated);
+
+            String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","
+                    + "\"localAuthorityNotifications\":[\"ACTES\"]," + "\"localAuthority\":{" + "\"uuid\":\""
+                    + localAuthority.getUuid() + "\"," + "\"name\":\"SICTIAM TEST\"," + "\"siren\":\"214400152\","
+                    + "\"activatedModules\":[\"ACTES\"]" + "}," + "\"agent\":{"
+                    + "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\","
+                    + "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," + "\"email\":\"john.doe@sictiam.com\","
+                    + "\"admin\":true," + "\"family_name\":\"Doe\"," + "\"given_name\":\"John\"" + "},"
+                    + "\"email\":\"john.doe@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":[" + "{"
+                    + "\"name\":\"ACTE_SENT\"," + "\"active\":true" + "}," + "{" + "\"name\":\"ACTE_CANCELLED\","
+                    + "\"active\":true" + "}" + "]," + "\"groups\":[" + "{"
+                    + "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + "\"name\":\"aa\","
+                    + "\"rights\":[\"ACTES_ADMIN\"]" + "}" + "]" + "}";
+
+            String profile2 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\","
+                    + "\"localAuthorityNotifications\":[\"ACTES\"]," + "\"localAuthority\":{" + "\"uuid\":\""
+                    + localAuthority.getUuid() + "\"," + "\"name\":\"SICTIAM TEST\"," + "\"siren\":\"214400152\","
+                    + "\"activatedModules\":[\"ACTES\"]" + "}," + "\"agent\":{"
+                    + "\"uuid\":\"442087ee-0a32-4acb-b521-8c0ed56ee43d\","
+                    + "\"sub\":\"4424b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," + "\"email\":\"Laurent.Rojmeko@gmail.com\","
+                    + "\"admin\":true," + "\"family_name\":\"De Rojmeko\"," + "\"given_name\":\"Laurent\"" + "},"
+                    + "\"email\":\"Laurent.Rojmeko@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":["
+                    + "{" + "\"name\":\"ACTE_SENT\"," + "\"active\":true" + "}," + "{" + "\"name\":\"ACTE_CANCELLED\","
+                    + "\"active\":true" + "}" + "],"
+                    + "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" + "}";
+            String profilesJson = "[" + profile1 + "," + profile2 + "]";
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode node = objectMapper.readTree(profile1);
@@ -259,17 +211,17 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
                         return execution.execute(request1, body);
                     }));
-            
+
         }
     }
-    
+
     @Test
     public void testCreateActe() {
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
-        
-        ResponseEntity<String> response =
-                this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+
+        ResponseEntity<String> response = this.restTemplate.exchange("/api/acte", HttpMethod.POST, request,
+                String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
         assertThat(response.getBody(), notNullValue());
 
@@ -280,7 +232,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(acte.getActeAttachment(), notNullValue());
         assertThat(acte.getNumber(), notNullValue());
         assertThat(acte.getActeAttachment().getFilename(), is("Delib.pdf"));
-        assertThat(acte.getCode(), is("1-1-0-0-0"));
+        assertThat(acte.getCode(), is("1-1-1-0-0"));
         assertThat(acte.getObjet(), is("Objet"));
         assertThat(acte.getDecision(), is(LocalDate.now()));
         assertThat(acte.isPublic(), is(true));
@@ -291,7 +243,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void testGetAll() {
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
-        
+
         MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.ARCHIVE_CREATED);
         this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
 
@@ -311,12 +263,12 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     public void testArchiveCreation() {
 
         MultiValueMap<String, Object> params = acteWithAttachments();
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);  
-        
-        ResponseEntity<String> response =
-                this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
+
+        ResponseEntity<String> response = this.restTemplate.exchange("/api/acte", HttpMethod.POST, request,
+                String.class);
         String acteUuid = response.getBody();
-        
+
         MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.NOTIFICATION_SENT);
         try {
             synchronized (mockActeEventListener) {
@@ -325,23 +277,25 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
-  
+
         List<ActeHistory> acteHistories = acteHistoryRepository.findByacteUuidOrderByDate(acteUuid);
-   
+
         assertThat(acteHistories, hasSize(6));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_CREATED))));
-        
+
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteHistories, StatusType.ARCHIVE_CREATED);
         assertThat(acteHistory.get().getFile(), notNullValue());
         assertThat(acteHistory.get().getFileName(), notNullValue());
-        
+
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.CREATED))));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ANTIVIRUS_OK))));
-        assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_SIZE_CHECKED))));
+        assertThat(acteHistories,
+                hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_SIZE_CHECKED))));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.SENT))));
         assertThat(acteHistories.get(5).getStatus(), is(StatusType.NOTIFICATION_SENT));
         // uncomment to see the generated archive
-        // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
+        // printXmlMessage(acteHistory.get().getActeAttachment(),
+        // acteHistory.get().getFileName());
     }
 
     @Test
@@ -353,8 +307,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
 
-        ResponseEntity<String> response =
-                this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+        ResponseEntity<String> response = this.restTemplate.exchange("/api/acte", HttpMethod.POST, request,
+                String.class);
         String acteUuid = response.getBody();
 
         MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.ARCHIVE_TOO_LARGE);
@@ -375,8 +329,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
 
-        ResponseEntity<String> response =
-                this.restTemplate.exchange("/api/acte", HttpMethod.POST, request, String.class);
+        ResponseEntity<String> response = this.restTemplate.exchange("/api/acte", HttpMethod.POST, request,
+                String.class);
         String acteUuid = response.getBody();
 
         MockActeEventListener mockActeEventListener = new MockActeEventListener(StatusType.NOTIFICATION_SENT);
@@ -413,31 +367,34 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(acteHistory.get().getFile(), notNullValue());
         assertThat(acteHistory.get().getFileName(), notNullValue());
 
-        ResponseEntity<String> newResponse = this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null, null, acteUuid);
-        
+        ResponseEntity<String> newResponse = this.restTemplate.postForEntity("/api/acte/{uuid}/status/cancel", null,
+                null, acteUuid);
+
         assertThat(newResponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
 
         // uncomment to see the generated archive
-        // printXmlMessage(acteHistory.get().getActeAttachment(), acteHistory.get().getFileName());
+        // printXmlMessage(acteHistory.get().getActeAttachment(),
+        // acteHistory.get().getFileName());
     }
 
     @Test
     public void handleLocalAuthoriyEvent() throws IOException {
-             
 
-        LocalAuthority localAuthority = new LocalAuthority("d4055204-ce91-48a5-bb53-458bd543bc5a", "New-Test","siren", true);
-        
-        LocalAuthorityEvent localAuthorityEvent =new LocalAuthorityEvent(localAuthority);
+        LocalAuthority localAuthority = new LocalAuthority("d4055204-ce91-48a5-bb53-458bd543bc5a", "New-Test", "siren",
+                true);
+
+        LocalAuthorityEvent localAuthorityEvent = new LocalAuthorityEvent(localAuthority);
         localAuthorityEvent.setActivatedModules(Collections.singleton("ACTES"));
         localAuthorityService.handleEvent(localAuthorityEvent);
         assertThat(localAuthorityService.getByUuid(localAuthority.getUuid()).getName(), is("New-Test"));
-        assertThat(localAuthority.getUuid(), is(localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid()));    
-        
+        assertThat(localAuthority.getUuid(), is(localAuthorityService.getByUuid(localAuthority.getUuid()).getUuid()));
+
     }
 
     @Test
     public void partialLocalAuthorityUpdate() {
-        LocalAuthority localAuthority = new LocalAuthority("f11551be-e83b-47cb-b431-b57704bd7fad","Patch-Test", "999888777", "999", "1", "31");
+        LocalAuthority localAuthority = new LocalAuthority("f11551be-e83b-47cb-b431-b57704bd7fad", "Patch-Test",
+                "214400152", "999", "1", "31");
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
 
         HttpHeaders headers = new HttpHeaders();
@@ -445,7 +402,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         String input = "{\"canPublishRegistre\":\"true\", \"department\":\"006\", \"district\":\"1\", \"nature\":\"29\"}";
         HttpEntity<String> patchData = new HttpEntity<>(input, headers);
 
-        this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class, localAuthority.getUuid());
+        this.restTemplate.patchForObject("/api/acte/localAuthority/{uuid}", patchData, String.class,
+                localAuthority.getUuid());
 
         localAuthority = localAuthorityService.getByUuid(localAuthority.getUuid());
 
@@ -453,19 +411,20 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(localAuthority.getCanPublishWebSite(), is(false));
         assertThat(localAuthority.getDepartment(), is("006"));
         assertThat(localAuthority.getNature(), is("29"));
-        
+
         localAuthorityService.delete(localAuthority);
 
     }
 
     @Test
     public void parseCodesMatieres() {
-        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
         List<MaterialCode> codesMatieres = localAuthorityService.getCodesMatieres(localAuthority.getUuid());
 
-        assertThat(codesMatieres, hasSize(5));
-        assertThat(codesMatieres, hasItem(Matchers.<MaterialCode>hasProperty("code", is("1-1-0-0-0"))));
-        assertThat(codesMatieres, hasItem(Matchers.<MaterialCode>hasProperty("label", is("Commande Publique / Marchés publics"))));
+        assertThat(codesMatieres, hasSize(237));
+        assertThat(codesMatieres, hasItem(Matchers.<MaterialCode>hasProperty("code", is("1-1-1-0-0"))));
+        assertThat(codesMatieres, hasItem(Matchers.<MaterialCode>hasProperty("label",
+                is("Commande Publique / Marchés publics / marchés sur appel d'offres"))));
     }
 
     @Test
@@ -473,7 +432,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(draftService.getDraftUIs(), empty());
         assertThat(draftService.getActeDrafts(), empty());
 
-        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
 
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         DraftUI draft = draftService.getDraftUIs().get(0);
@@ -482,7 +441,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setObjet("Object draft");
         acte = draftService.saveActeDraft(acte, localAuthority);
         assertThat("Object draft", is(acte.getObjet()));
-
 
         acte.setObjet("");
         draftService.leaveActeDraft(acte, localAuthority);
@@ -493,7 +451,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void sendDraft() {
-        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         draftService.leaveActeDraft(setActeValues(acte), localAuthority);
 
@@ -501,17 +459,17 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(draftUIs, hasSize(1));
         assertThat(draftUIs.get(0).getActes(), hasSize(1));
         assertThat(acte.getUuid(), is(draftUIs.get(0).getActes().get(0).getUuid()));
-        assertThat(draftService.getActeDraftByUuid(acte.getUuid()),notNullValue());
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()), notNullValue());
 
         acte = draftService.getActeDraftByUuid(acte.getUuid());
         draftService.submitActeDraft(acte);
         assertThat(draftService.getDraftUIs(), empty());
-        assertThat(acteService.getByUuid(acte.getUuid()),notNullValue());
+        assertThat(acteService.getByUuid(acte.getUuid()), notNullValue());
     }
 
     @Test
     public void deleteDrafts() {
-        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
 
         Acte acte1 = draftService.newDraft(localAuthority, ActeMode.ACTE);
         Acte acte2 = draftService.newDraft(localAuthority, ActeMode.ACTE);
@@ -532,7 +490,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void draftFiles() {
-        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         draftService.leaveActeDraft(setActeValues(acte), localAuthority);
 
@@ -542,10 +500,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         } catch (IOException e) {
             LOGGER.error("Unable to add a file to the draft: {}", e.toString());
         }
-        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment().getFilename(),is("Delib.pdf"));
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment().getFilename(), is("Delib.pdf"));
 
         draftService.deleteActeDraftFile(acte.getUuid());
-        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment(),nullValue());
+        assertThat(draftService.getActeDraftByUuid(acte.getUuid()).getActeAttachment(), nullValue());
 
         try {
             MultipartFile file = getMultipartResourceFile("data/Annexe_delib.pdf", "application/pdf");
@@ -568,7 +526,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void batchedActes() {
-        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM-Test").get();
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
 
         DraftUI draft = draftService.newBatchedDraft(localAuthority);
         assertThat(draftService.getDraftByUuid(draft.getUuid()), notNullValue());
@@ -594,7 +552,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(draftService.getActeDrafts(), empty());
         assertThat(acteRepository.findAll(), hasSize(2));
     }
-    
+
     @Test
     public void testNotification() throws Exception {
 
@@ -607,16 +565,16 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         variables2.put("firstname", "Laurent");
         variables2.put("lastname", "De Rojmeko");
 
-        String bodyCopy = localService.getMessage("fr", "acte_notification", "$.acte.copy." + statusType.name() + ".body",
-                variables2);
-        String subjectCopy = localService.getMessage("fr", "acte_notification", "$.acte.copy." + statusType.name() + ".subject",
-                variables2);
+        String bodyCopy = localService.getMessage("fr", "acte_notification",
+                "$.acte.copy." + statusType.name() + ".body", variables2);
+        String subjectCopy = localService.getMessage("fr", "acte_notification",
+                "$.acte.copy." + statusType.name() + ".subject", variables2);
 
         String body = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".body",
                 variables);
         String subject = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".subject",
                 variables);
-     
+
         MultiValueMap<String, Object> params = acteWithAttachments();
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
 
@@ -638,7 +596,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(parser.getSubject(), is(subjectCopy));
         assertThat(current.getContent(), instanceOf(MimeMultipart.class));
         assertThat(parser.getHtmlContent(), is(bodyCopy));
-        
+
         MimeMessage secondMsg = receivedMessages[1];
         assertThat(secondMsg, notNullValue());
         MimeMessageParser secondParser = new MimeMessageParser(secondMsg);
@@ -646,8 +604,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(secondParser.getSubject(), is(subject));
         assertThat(secondMsg.getContent(), instanceOf(MimeMultipart.class));
         assertThat(secondParser.getHtmlContent(), is(body));
-    } 
-    
+    }
+
     @Test
     public void testSend() throws Exception {
         InputStream in = new ClassPathResource("data/SIC-EACT--210600730--20180115-1.tar.gz").getInputStream();
@@ -655,9 +613,24 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        HttpStatus status = senderTask.send(targetArray,"SIC-EACT--210600730--20180115-1.tar.gz");
+        HttpStatus status = acteService.send(targetArray, "SIC-EACT--210600730--20180115-1.tar.gz");
 
         assertThat(status, is(HttpStatus.OK));
+    }
+
+    @Test
+    public void testAttachmentType() throws Exception {
+        List<AttachmentType> attachmentTypes = localAuthorityService.getAttachmentTypeAvailable(ActeNature.AUTRES,
+                "639fd48c-93b9-4569-a414-3b372c71e0a1");
+        assertThat(attachmentTypes, hasSize(2));
+        assertThat(attachmentTypes, hasItem(Matchers.<AttachmentType>hasProperty("code", is("99_SE"))));
+    }
+
+    @Test
+    public void askNomenclature() throws Exception {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
+        assertThat(acteService.askNomenclature(localAuthority), is(HttpStatus.OK));
+
     }
 
     @Test
@@ -693,8 +666,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     private Acte acte() {
-        Acte acte = new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "1-1-0-0-0",
-                "Objet", true, true);
+        Acte acte = new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS,
+                "1-1-1-0-0", "Objet", true, true);
         acte.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
         return acte;
     }
@@ -703,14 +676,15 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setNumber(RandomStringUtils.randomAlphabetic(15));
         acte.setDecision(LocalDate.now());
         acte.setNature(ActeNature.ARRETES_INDIVIDUELS);
-        acte.setCode("1-1-0-0-0");
+        acte.setCode("1-1-1-0-0");
         acte.setObjet("Objet");
         acte.setPublic(true);
         acte.setPublicWebsite(true);
         acte.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
         try {
             MultipartFile multipartFile = getMultipartResourceFile("data/Delib.pdf", "application/pdf");
-            Attachment attachment = new Attachment(multipartFile.getBytes(), multipartFile.getOriginalFilename(), multipartFile.getSize());
+            Attachment attachment = new Attachment(multipartFile.getBytes(), multipartFile.getOriginalFilename(),
+                    multipartFile.getSize());
             acte.setActeAttachment(attachment);
         } catch (IOException e) {
             LOGGER.error("Error while trying to load an acteAttachment");
@@ -729,10 +703,8 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private Optional<ActeHistory> getActeHistoryForStatus(String acteUuid, StatusType status) {
         return getActeHistoryForStatus(acteHistoryRepository.findByacteUuidOrderByDate(acteUuid), status);
     }
-    
+
     private Optional<ActeHistory> getActeHistoryForStatus(List<ActeHistory> acte, StatusType status) {
-        return acte.stream()
-                .filter(ah -> ah.getStatus().equals(status))
-                .findFirst();
+        return acte.stream().filter(ah -> ah.getStatus().equals(status)).findFirst();
     }
 }

@@ -23,4 +23,23 @@ public enum ActeNature {
 	public String getAbbreviation() {
 		return this.abbreviation;
 	}
+	
+   static public ActeNature code(Integer integer) {
+        switch (integer) {
+        case 1:
+            return ActeNature.DELIBERATIONS;
+        case 2:
+            return ActeNature.ARRETES_REGLEMENTAIRES;
+        case 3:
+            return ActeNature.ARRETES_INDIVIDUELS;
+        case 4:
+            return ActeNature.CONTRATS_ET_CONVENTIONS;
+        case 5:
+            return ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS;
+        case 6:
+            return ActeNature.AUTRES;
+        default:
+            return null;
+        }
+    }
 }

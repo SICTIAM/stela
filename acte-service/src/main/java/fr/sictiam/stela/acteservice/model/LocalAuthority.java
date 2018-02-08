@@ -32,15 +32,19 @@ public class LocalAuthority {
 
     @Embedded
     private StampPosition stampPosition;
-    
-    @OneToMany(mappedBy="localAuthority")
+
+    @OneToMany(mappedBy = "localAuthority")
     private List<MaterialCode> materialCodes;
-    
+
+    @OneToMany(mappedBy = "localAuthority", cascade = CascadeType.ALL)
+    private List<AttachmentTypeReferencial> attachmentTypeReferencials;
+
     public LocalAuthority() {
     }
-    //uiid is generated only once in AdminService
+
+    // uiid is generated only once in AdminService
     public LocalAuthority(String uuid, String name, String siren, String department, String district, String nature) {
-        this.uuid=uuid;
+        this.uuid = uuid;
         this.name = name;
         this.siren = siren;
         this.department = department;
@@ -51,8 +55,8 @@ public class LocalAuthority {
     }
 
     public LocalAuthority(String uuid, String name, String siren, String department, String district, String nature,
-                          Boolean canPublishRegistre, Boolean canPublishWebSite) {
-        this.uuid=uuid;
+            Boolean canPublishRegistre, Boolean canPublishWebSite) {
+        this.uuid = uuid;
         this.name = name;
         this.siren = siren;
         this.department = department;
@@ -61,19 +65,19 @@ public class LocalAuthority {
         this.canPublishRegistre = canPublishRegistre;
         this.canPublishWebSite = canPublishWebSite;
     }
-    
+
     public LocalAuthority(String uuid, String name, String siren, Boolean active) {
         this.uuid = uuid;
         this.name = name;
         this.siren = siren;
         this.active = active;
     }
-    
+
     public LocalAuthority(String uuid, String name, String siren) throws IOException {
         this.uuid = uuid;
         this.name = name;
         this.siren = siren;
-        this.nomenclatureDate = LocalDate.now();
+        this.nomenclatureDate = LocalDate.of(2001, 1, 1);
 
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("examples/exemple_codes_matieres.xml");
 
@@ -84,7 +88,7 @@ public class LocalAuthority {
         this.canPublishWebSite = false;
         this.setStampPosition(new StampPosition(10, 10));
     }
-    
+
     public String getUuid() {
         return uuid;
     }
@@ -156,13 +160,21 @@ public class LocalAuthority {
     public void setCanPublishWebSite(Boolean canPublishWebSite) {
         this.canPublishWebSite = canPublishWebSite;
     }
-    
+
     public List<MaterialCode> getMaterialCodes() {
         return materialCodes;
     }
 
     public void setMaterialCodes(List<MaterialCode> materialCodes) {
         this.materialCodes = materialCodes;
+    }
+
+    public List<AttachmentTypeReferencial> getAttachmentTypeReferencials() {
+        return attachmentTypeReferencials;
+    }
+
+    public void setAttachmentTypeReferencials(List<AttachmentTypeReferencial> attachmentTypeReferencials) {
+        this.attachmentTypeReferencials = attachmentTypeReferencials;
     }
 
     public StampPosition getStampPosition() {
@@ -172,26 +184,20 @@ public class LocalAuthority {
     public void setStampPosition(StampPosition stampPosition) {
         this.stampPosition = stampPosition;
     }
-    
+
     public Boolean isActive() {
         return active;
     }
+
     public void setActive(Boolean active) {
         this.active = active;
     }
-   
+
     @Override
     public String toString() {
-        return "LocalAuthority{" +
-                "uuid='" + uuid + '\'' +
-                ", name='" + name + '\'' +
-                ", siren='" + siren + '\'' +
-                ", department='" + department + '\'' +
-                ", district='" + district + '\'' +
-                ", nature='" + nature + '\'' +
-                ", nomenclatureDate=" + nomenclatureDate +
-                ", canPublishRegistre=" + canPublishRegistre +
-                ", canPublishWebSite=" + canPublishWebSite +
-                '}';
+        return "LocalAuthority{" + "uuid='" + uuid + '\'' + ", name='" + name + '\'' + ", siren='" + siren + '\''
+                + ", department='" + department + '\'' + ", district='" + district + '\'' + ", nature='" + nature + '\''
+                + ", nomenclatureDate=" + nomenclatureDate + ", canPublishRegistre=" + canPublishRegistre
+                + ", canPublishWebSite=" + canPublishWebSite + '}';
     }
 }

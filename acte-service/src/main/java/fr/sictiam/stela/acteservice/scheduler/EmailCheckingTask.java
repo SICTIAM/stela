@@ -172,7 +172,7 @@ public class EmailCheckingTask {
                                 LocalAuthority currentLocalAuthority = localAuthorityService
                                         .getBySiren(enveloppe.getDestinataire().getSIREN()).get();
 
-                                localAuthorityService.loadCodesMatieres(currentLocalAuthority.getUuid(),
+                                localAuthorityService.loadClassification(currentLocalAuthority.getUuid(),
                                         retClassification);
                             } else if ("EnveloppeMISILLCL".equals(rootName)) {
                                 enveloppe = unmarshall(xmlSourc2, EnveloppeMISILLCL.class);
