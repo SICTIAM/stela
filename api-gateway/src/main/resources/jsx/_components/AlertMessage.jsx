@@ -25,7 +25,6 @@ class AlertMessage extends Component {
                 const { alertMessageModulesDismissed } = this.state
                 const alertMessageModulesDismissedStorage = localStorage.getItem('alertMessageModulesDismissed')
                 Object.entries(alertMessageModules).forEach(alertMessageModule => {
-                    console.log(alertMessageModule)
                     alertMessageModulesDismissed[alertMessageModule[0]] = alertMessageModulesDismissedStorage ?
                         JSON.parse(alertMessageModulesDismissedStorage)[alertMessageModule[0]] ?
                             JSON.parse(alertMessageModulesDismissedStorage)[alertMessageModule[0]] : false : false
