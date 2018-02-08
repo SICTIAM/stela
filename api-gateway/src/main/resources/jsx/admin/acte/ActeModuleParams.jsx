@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon, Checkbox } from 'semantic-ui-react'
+import { Form, Button, Segment, Label, Icon, Checkbox, TextArea } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
@@ -27,7 +27,9 @@ class ActeModuleParams extends Component {
             additionalEmails: [],
             miatAvailable: true,
             unavailabilityMiatStartDate: '',
-            unavailabilityMiatEndDate: ''
+            unavailabilityMiatEndDate: '',
+            alertMessageDisplayed: false,
+            alertMessage: ''
         }
     }
     validationRules = {
@@ -70,6 +72,7 @@ class ActeModuleParams extends Component {
         this.setState({ fields: fields })
     }
     handleFieldChange = (field, value) => {
+        if (field === 'alertMessage' && value.length > 250) return
         const fields = this.state.fields
         fields[field] = value
         this.setState({ fields: fields }, this.validateForm)
@@ -161,6 +164,15 @@ class ActeModuleParams extends Component {
                                         <Label basic color='red' pointing>{this.state.dateValidation}</Label>
                                     </div>}
                             </Form.Group>
+                        </Field>
+                        <Field htmlFor='alertMessageDisplayed' label={t('admin.modules.acte.module_settings.alertMessageDisplayed')}>
+                            <Checkbox id='alertMessageDisplayed'
+                                toggle checked={this.state.fields.alertMessageDisplayed}
+                                onChange={this.handleCheckboxChange} />
+                        </Field>
+                        <Field htmlFor='alertMessage' label={t('admin.modules.acte.module_settings.alertMessage')}>
+                            <TextArea value={this.state.fields.alertMessage || ''} onChange={(e, { value }) => this.handleFieldChange('alertMessage', value)} placeholder={`${t('admin.modules.acte.module_settings.alertMessage')}...`} />
+                            <p style={{ fontStyle: 'italic' }}>{t('api-gateway:form.max_string_length', { length: 250, remaining: 250 - (this.state.fields.alertMessage ? this.state.fields.alertMessage.length : 0) })}</p>
                         </Field>
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>{t('api-gateway:form.update')}</Button>

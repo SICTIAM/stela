@@ -1,16 +1,14 @@
 package fr.sictiam.stela.pesservice.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 
 @Entity
 public class Attachment {
@@ -20,6 +18,7 @@ public class Attachment {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
 
+    @JsonIgnore
     private byte[] file;
     private String filename;
     private long size;

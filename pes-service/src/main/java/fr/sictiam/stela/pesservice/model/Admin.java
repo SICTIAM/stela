@@ -1,14 +1,14 @@
 package fr.sictiam.stela.pesservice.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.pesservice.model.ui.Views;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
+import java.time.LocalDateTime;
 
 @Entity
 public class Admin {
@@ -24,17 +24,23 @@ public class Admin {
     private LocalDateTime unavailabilityHeliosStartDate;
     @NotNull
     private LocalDateTime unavailabilityHeliosEndDate;
+    @JsonView(Views.AdminAlertMessageView.class)
+    private boolean alertMessageDisplayed;
+    @JsonView(Views.AdminAlertMessageView.class)
+    private String alertMessage;
 
     public Admin() {
 
     }
 
     public Admin(String uuid, @NotNull boolean heliosAvailable, @NotNull LocalDateTime unavailabilityHeliosStartDate,
-            @NotNull LocalDateTime unavailabilityHeliosEndDate) {
+                 @NotNull LocalDateTime unavailabilityHeliosEndDate, boolean alertMessageDisplayed, String alertMessage) {
         this.uuid = uuid;
         this.heliosAvailable = heliosAvailable;
         this.unavailabilityHeliosStartDate = unavailabilityHeliosStartDate;
         this.unavailabilityHeliosEndDate = unavailabilityHeliosEndDate;
+        this.alertMessageDisplayed = alertMessageDisplayed;
+        this.alertMessage = alertMessage;
     }
 
     public String getUuid() {
@@ -69,4 +75,19 @@ public class Admin {
         this.unavailabilityHeliosEndDate = unavailabilityHeliosEndDate;
     }
 
+    public boolean isAlertMessageDisplayed() {
+        return alertMessageDisplayed;
+    }
+
+    public void setAlertMessageDisplayed(boolean alertMessageDisplayed) {
+        this.alertMessageDisplayed = alertMessageDisplayed;
+    }
+
+    public String getAlertMessage() {
+        return alertMessage;
+    }
+
+    public void setAlertMessage(String alertMessage) {
+        this.alertMessage = alertMessage;
+    }
 }

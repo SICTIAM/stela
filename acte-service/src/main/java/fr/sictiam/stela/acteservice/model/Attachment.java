@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ public class Attachment {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
 
+    @JsonIgnore
     private byte[] file;
     private String filename;
     private long size;

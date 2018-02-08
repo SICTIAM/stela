@@ -104,7 +104,9 @@
           "additional_emails": "Emails additionnels",
           "no_additional_email": "Aucun email additionnel",
           "miatAvailable": "Accessibilité du serveur MIAT",
-          "unavailabilityMiat": "Couper l'accès MIAT"
+          "unavailabilityMiat": "Couper l'accès MIAT",
+          "alertMessageDisplayed": "Affichage du message d'alerte",
+          "alertMessage": "Message d'alerte"
         }
       }
     }
