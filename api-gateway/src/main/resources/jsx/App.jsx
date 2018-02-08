@@ -17,6 +17,7 @@ import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
 import Home from './Home'
+import AlertMessage from './_components/AlertMessage'
 import { UserProfile, AdminProfile } from './Profile'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
@@ -138,6 +139,7 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, ...rest }, { isLog
             <div className='wrapperContainer'>
                 <Menu />
                 <Container className='mainContainer'>
+                    <AlertMessage {...props} />
                     {isLoggedIn
                         ? <Component {...props} {...props.match.params} />
                         : <ErrorPage error={401} />}

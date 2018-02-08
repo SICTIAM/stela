@@ -9,6 +9,7 @@
     },
     "select_localAuthority": "Sélectionner la collectivité",
     "last_localAuthorities": "Dernières collectivités utilisées",
+    "alert": "Alerte",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
@@ -27,6 +28,7 @@
         "configure": "Configurer",
         "confirm": "Confirmer",
         "cancel": "Annuler",
+        "max_string_length": "{{length}} caractères autorisés maximum ({{remaining}} restants)",
         "validation": {
             "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques et des tirets bas (_).",
             "mandatoryfield": "Le champ est obligatoire",
@@ -84,6 +86,7 @@
         }
     },
     "notifications": {
+        "title": "STELA",
         "acte": {
             "title": "Module Acte",
             "sent": {
@@ -129,10 +132,10 @@
             "sent": {
                 "success": "Le dépot PES a bien été effectué",
                 "virus": "Le dépot PES a échoué car il contenait un virus",
-                "error" : {
+                "error": {
                     "bad_file_name": "Le nom de fichier est incorrect",
                     "non_extractable_pes": "Erreur lors du traitement du pes"
-                },                
+                },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             }
         },

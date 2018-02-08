@@ -2,6 +2,8 @@ package fr.sictiam.stela.acteservice.controller;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.acteservice.model.ui.Views;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,4 +35,9 @@ public class AdminRestController {
         return new ResponseEntity<>(adminService.getAdmin(), HttpStatus.OK);
     }
 
+    @GetMapping("/alert-message")
+    @JsonView(Views.AdminAlertMessageView.class)
+    public ResponseEntity<Admin> getAlertMessage() {
+        return new ResponseEntity<>(adminService.getAdmin(), HttpStatus.OK);
+    }
 }

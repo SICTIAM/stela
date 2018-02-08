@@ -127,7 +127,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     public void createAdmin() {
         adminRepository.deleteAll();
         adminService.create(
-                new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", true, LocalDateTime.now(), LocalDateTime.now()));
+                new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", true, LocalDateTime.now(), LocalDateTime.now(), false, ""));
     }
 
     public void createLocalAuthority() {

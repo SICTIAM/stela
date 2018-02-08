@@ -49,7 +49,9 @@
         "module_settings": {
           "title": "Paramètres du module Helios",
           "heliosAvailable": "Accessibilité du serveur Helios",
-          "unavailabilityHelios": "Couper l'accès Helios"
+          "unavailabilityHelios": "Couper l'accès Helios",
+          "alertMessageDisplayed": "Affichage du message d'alerte",
+          "alertMessage": "Message d'alerte"
         }
       }
     }
