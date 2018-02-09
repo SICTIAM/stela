@@ -219,7 +219,9 @@ export default class StelaTable extends Component {
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}
                                             key={index + '-' + row[displayedColumn.property]}>
                                             {displayedColumn.displayComponent ?
-                                                displayedColumn.displayComponent(row[displayedColumn.property]) : row[displayedColumn.property]}
+                                                displayedColumn.property === '_self' ?
+                                                    displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
+                                                : row[displayedColumn.property]}
                                         </Table.Cell>
                                     )}
                                     {select(

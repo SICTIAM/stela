@@ -35,7 +35,7 @@ class MenuBar extends Component {
                             <Menu.Menu>
                                 <Menu.Item as={NavLink} to="/pes/nouveau">{t('menu.pes.submit_a_PES_Aller')}</Menu.Item>
                                 <Menu.Item as={NavLink} to="/pes/liste">{t('menu.pes.PES_Aller_list')}</Menu.Item>
-                                <Menu.Item>{t('menu.pes.PES_Retour_list')}</Menu.Item>
+                                <Menu.Item as={NavLink} to="/pes/retour/liste">{t('menu.pes.PES_Retour_list')}</Menu.Item>
                             </Menu.Menu>
                         </Menu.Item>
                     }

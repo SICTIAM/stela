@@ -24,6 +24,7 @@ import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
 import DraftList from './acte/DraftList'
 import NewActeSwitch from './acte/NewActeSwitch'
+import PesRetourList from './pes/PesRetourList'
 import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
@@ -172,6 +173,7 @@ const AppRoute = () =>
         <Route exact path='/pes'>
             <Redirect to="/pes/liste" />
         </Route>
+        <AuthRoute path='/pes/retour/liste' component={PesRetourList} menu={MenuBar} />
         <AuthRoute path='/pes/liste' component={PesList} menu={MenuBar} />
         <AuthRoute path='/pes/nouveau' component={NewPes} menu={MenuBar} />
         <AuthRoute path='/pes/:uuid' component={Pes} menu={MenuBar} />
