@@ -98,6 +98,11 @@ public class ActeRestController {
         return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
     }
 
+    @GetMapping("/classif/current")
+    public void askCurrentClassif(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid));
+    }
+
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
     public ResponseEntity downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
         try {

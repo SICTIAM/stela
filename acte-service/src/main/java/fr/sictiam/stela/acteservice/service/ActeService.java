@@ -139,21 +139,69 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
         return created;
     }
-    
-    public Acte receiveARActe(String number) {
-        Acte acte = acteRepository.findByNumber(number).get();
+
+    public Acte findByIdActe(String iDActe) {
+        String[] idActeSplit = iDActe.split("-");
+        String siren = idActeSplit[1];
+        String number = idActeSplit[3];
+        return acteRepository.findByNumberAndLocalAuthoritySiren(number, siren).orElseThrow(ActeNotFoundException::new);
+    }
+
+    public Acte receiveARActe(String iDActe) {
+        Acte acte = findByIdActe(iDActe);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         LOGGER.info("Acte {} AR with id {}", acte.getNumber(), acte.getUuid());
         return acte;
     }
     
-    public Acte receiveARActeCancelation(String number) {
-        Acte acte = acteRepository.findByNumber(number).get();
+    public Acte receiveARActeCancelation(String iDActe) {
+        Acte acte = findByIdActe(iDActe);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CANCELLED);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         LOGGER.info("Acte {} cancelation with id {}", acte.getNumber(), acte.getUuid());
         return acte;
+    }
+
+    public void receiveAnomalie(String siren, String number, String detail) {
+        Acte acte = acteRepository.findByNumberAndLocalAuthoritySiren(number, siren).orElseThrow(ActeNotFoundException::new);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, detail);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} anomalie with id {}", acte.getNumber(), acte.getUuid());
+    }
+
+    public void receiveAdditionalPiece(StatusType status, String idActe, Attachment attachment, String message) {
+        Acte acte = findByIdActe(idActe);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now() , attachment.getFile() , attachment.getFilename());
+        if(StringUtils.isNotBlank(message)) {
+            acteHistory.setMessage(message);
+        }
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} addtional piece with id {}", acte.getNumber(), acte.getUuid());
+        
+    }
+
+    public void receiveDefere(StatusType status, String idActe, List<Attachment> attachments, String message)
+            throws IOException {
+        Acte acte = findByIdActe(idActe);
+        byte[] file;
+        String fileName;
+        if (attachments.size() == 1) {
+            file = attachments.get(0).getFile();
+            fileName = attachments.get(0).getFilename();
+        } else {
+            fileName = "DefereTA_" + idActe + ".zip";
+            file = zipGeneratorUtil.createZip(
+                    attachments.stream().collect(Collectors.toMap(Attachment::getFilename, Attachment::getFile)));
+
+        }
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now(), file, fileName);
+        if (StringUtils.isNotBlank(message)) {
+            acteHistory.setMessage(message);
+        }
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} defere with id {}", acte.getNumber(), acte.getUuid());
+
     }
 
     public Long countAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status, String currentLocalAuthUuid) {
@@ -246,7 +294,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
     public boolean isActeACK(Acte acte) {
         // TODO: Improve later when phases will be supported
-        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT, StatusType.NOTIFICATION_SENT);
+        List<StatusType> cancelPendingStatus = Arrays.asList(StatusType.CANCELLATION_ASKED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.ARCHIVE_SIZE_CHECKED, StatusType.SENT);
         SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.CANCELLED))

@@ -1,7 +1,7 @@
 {
   "pes": {
     "status": {
-      "CREATED": "Créé",
+      "CREATED": "Déposé",
       "SENT": "Envoyé",
       "NOT_SENT": "Non envoyé",
       "ACK_RECEIVED": "AR Préfecture",

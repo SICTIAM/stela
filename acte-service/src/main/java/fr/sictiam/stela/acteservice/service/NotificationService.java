@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -75,6 +76,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
         JsonNode profiles = externalRestService.getProfiles(acte.getLocalAuthority().getUuid());
 
+        AtomicInteger notifcationSentNumber = new AtomicInteger(0);
         profiles.forEach(profile -> {
             if (StreamSupport.stream(profile.get("localAuthorityNotifications").spliterator(), false)
                     .anyMatch(value -> value.asText().equals("ACTES"))
@@ -93,13 +95,17 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                                 localesService.getMessage("fr", "acte_notification",
                                         "$.acte.copy." + event.getActeHistory().getStatus().name() + ".body",
                                         getAgentInfo(profile)));
+                        notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
                     }
                 }
             }
         });
-
+        if (notifcationSentNumber.get() > 0) {
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.GROUP_NOTIFICATION_SENT);
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        }
         List<NotificationValue> notifications = getNotificationValues(node);
 
         if (notification.isDeactivatable() || notifications.stream().anyMatch(

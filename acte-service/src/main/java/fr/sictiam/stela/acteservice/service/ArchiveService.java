@@ -167,8 +167,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             LOGGER.info("Archive created : {}", archiveName);
         } catch (Exception e) {
             LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(),
-                    e.getMessage());
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
     }
@@ -216,8 +215,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         } catch (IOException e) {
             LOGGER.error("Error while generating archive for cancellation of acte {} : {}", acte.getNumber(),
                     e.getMessage());
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, LocalDateTime.now(),
-                    e.getMessage());
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
     }
