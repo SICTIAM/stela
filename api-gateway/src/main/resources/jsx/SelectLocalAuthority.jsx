@@ -29,41 +29,27 @@ class SelectLocalAuthority extends Component {
                 })
             })
 
-        var lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths');
+        const lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths')
         if (lastUsedLocalAuths) {
             this.setState({ lastUsedLocalAuths: JSON.parse(lastUsedLocalAuths) })
         }
     }
     submit = () => {
-
-        var lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths')
-
-        var localAuth = this.state.selected;
+        const lastUsedLocalAuthsStorage = localStorage.getItem('lastUsedLocalAuths')
+        const localAuth = this.state.selected
         localAuth.date = new Date().toLocaleDateString()
-        if (lastUsedLocalAuths) {
-            lastUsedLocalAuths = JSON.parse(lastUsedLocalAuths)
-            var index = -1;
-            for (var i = 0; i < lastUsedLocalAuths.length; i++) {
-                if (lastUsedLocalAuths[i].uuid === localAuth.uuid) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index > -1) {
-                lastUsedLocalAuths.splice(index, 1)
-            } else {
-                if (lastUsedLocalAuths.length >= 5) {
-                    lastUsedLocalAuths.pop()
-                }
-            }
-            lastUsedLocalAuths.unshift(localAuth);
+        let lastUsedLocalAuths = {}
+        if (lastUsedLocalAuthsStorage) {
+            lastUsedLocalAuths = JSON.parse(lastUsedLocalAuthsStorage)
+            const index = lastUsedLocalAuths.findIndex(lastUsedLocalAuths => lastUsedLocalAuths.uuid === localAuth.uuid)
+            if (index > -1) lastUsedLocalAuths.splice(index, 1)
+            if (lastUsedLocalAuths.length >= 5) lastUsedLocalAuths.pop()
+            lastUsedLocalAuths.unshift(localAuth)
         } else {
             lastUsedLocalAuths = [localAuth]
         }
-
         localStorage.setItem('lastUsedLocalAuths', JSON.stringify(lastUsedLocalAuths))
         window.location.href = '/api/api-gateway/loginWithSlug/' + this.state.selected.slugName
-
     }
     onChange = (event, { value }) => {
         const selected = this.state.localAuthorities.find(localAuthority => localAuthority.uuid === value)
@@ -85,13 +71,17 @@ class SelectLocalAuthority extends Component {
         )
         return (
             <div style={{ marginTop: '5em' }}>
-                <Header as='h2' textAlign='center'>{t('last_localAuthorities')}</Header>
+                {lastLocalAuthorities.length > 0 &&
+                    <Grid textAlign='center' verticalAlign='middle' >
+                        <Header as='h2'>{t('last_localAuthorities')}</Header>
+                        <Grid.Row >
+                            <Card.Group >
+                                {lastLocalAuthorities}
+                            </Card.Group>
+                        </Grid.Row>
+                    </Grid>
+                }
                 <Grid textAlign='center' verticalAlign='middle' >
-                    <Grid.Row >
-                        <Card.Group >
-                            {lastLocalAuthorities}
-                        </Card.Group>
-                    </Grid.Row>
                     <Grid.Row >
                         <Grid.Column style={{ maxWidth: 450 }}>
                             <Header as='h2' textAlign='center'>{t('select_localAuthority')}</Header>
