@@ -58,6 +58,8 @@ public class LocalAuthorityService {
 
         if (event.getActivatedModules().contains("PES")) {
             localAuthority.setActive(true);
+            // If the new LocalAuthority.siren is present in other LocalAuthority.sirens, we need to remove it so the
+            // siren is present only once in the activated local authorities (needed for the PesRetour assignment)
             List<LocalAuthority> allLocalAuthorities = localAuthorityRepository.findByActiveTrueAndSirens(localAuthority.getSiren());
             allLocalAuthorities.forEach(localAuth -> {
                 localAuth.setSirens(
