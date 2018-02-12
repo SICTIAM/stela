@@ -10,17 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Service
 public class PesRetourService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesRetourService.class);
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     private final PesRetourRepository pesRetourRepository;
 

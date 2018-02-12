@@ -29,12 +29,6 @@ public class LocalAuthorityRestController {
         this.localAuthorityService = localAuthorityService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<LocalAuthority>> getAll() {
-        List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
-        return new ResponseEntity<>(localAuthorities, HttpStatus.OK);
-    }
-
     @GetMapping("/current")
     public ResponseEntity<LocalAuthority> getCurrent(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {

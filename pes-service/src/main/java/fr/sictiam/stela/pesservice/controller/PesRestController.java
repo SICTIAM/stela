@@ -15,17 +15,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,7 +133,7 @@ public class PesRestController {
         return Arrays.asList(StatusType.values());
     }
 
-    @GetMapping("/retour")
+    @GetMapping("/pes-retour")
     public ResponseEntity<SearchResultsUI> getAllPesRetour(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
@@ -141,27 +143,11 @@ public class PesRestController {
         return new ResponseEntity<>(new SearchResultsUI(count, pesRetours), HttpStatus.OK);
     }
 
-    @GetMapping("/retour/{uuid}/file")
+    @GetMapping("/pes-retour/{uuid}/file")
     public ResponseEntity getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
         PesRetour pesRetour = pesRetourService.getByUuid(uuid);
         outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename());
         return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @GetMapping("/pes-retour")
-    public void generatePesRetour() {
-        InputStream ackStream = null;
-        try {
-            ackStream = new ClassPathResource(
-                    "data/PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml").getInputStream();
-        } catch (IOException e) {
-            LOGGER.error("Error getting the ClassPathResource : {}", e);
-        }
-        try {
-            receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml");
-        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException e) {
-            LOGGER.error("Error reading the PesRetour : {}", e);
-        }
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {

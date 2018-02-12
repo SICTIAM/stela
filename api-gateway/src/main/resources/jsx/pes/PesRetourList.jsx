@@ -31,7 +31,7 @@ class PesRetourList extends Component {
     submitForm = () => {
         const headers = { 'Accept': 'application/json' }
         const data = this.getSearchData()
-        fetchWithAuthzHandling({ url: '/api/pes/retour', method: 'GET', query: data, headers: headers })
+        fetchWithAuthzHandling({ url: '/api/pes/pes-retour', method: 'GET', query: data, headers: headers })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ pesRetours: json.results, totalCount: json.totalCount }))
@@ -49,7 +49,7 @@ class PesRetourList extends Component {
     render() {
         const { t, _addNotification } = this.context
         const creationDisplay = (creation) => moment(creation).format('DD/MM/YYYY')
-        const attachmentLink = (pesRetour) => <a id='attachment' target='_blank' href={`/api/pes/retour/${pesRetour.uuid}/file`}>{pesRetour.attachment.filename}</a>
+        const attachmentLink = (pesRetour) => <a id='attachment' target='_blank' href={`/api/pes/pes-retour/${pesRetour.uuid}/file`}>{pesRetour.attachment.filename}</a>
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
             { property: 'creation', displayed: true, displayName: t('pes.fields.creation'), searchable: true, displayComponent: creationDisplay },

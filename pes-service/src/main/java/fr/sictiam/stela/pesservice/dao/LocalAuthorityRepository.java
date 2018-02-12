@@ -16,4 +16,6 @@ public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, 
     List<LocalAuthority> findAllByActiveTrue();
 
     Optional<LocalAuthority> findByActiveTrueAndSirenEqualsOrSirens(String siren1, String siren2);
+
+    List<LocalAuthority> findByActiveTrueAndSirens(String siren);
 }

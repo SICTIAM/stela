@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,18 +35,6 @@ public class LocalAuthorityService {
         localAuthorityRepository.delete(localAuthority);
     }
 
-    public List<LocalAuthority> getAll() {
-        List<LocalAuthority> localAuthorities = localAuthorityRepository.findAll();
-        localAuthorities.sort(Comparator.comparing(LocalAuthority::getName, String.CASE_INSENSITIVE_ORDER));
-        return localAuthorities;
-    }
-
-    public List<LocalAuthority> getAllActive() {
-        List<LocalAuthority> localAuthorities = localAuthorityRepository.findAllByActiveTrue();
-        localAuthorities.sort(Comparator.comparing(LocalAuthority::getName, String.CASE_INSENSITIVE_ORDER));
-        return localAuthorities;
-    }
-
     public LocalAuthority getByUuid(String uuid) {
         return localAuthorityRepository.findByUuid(uuid).get();
     }
@@ -71,16 +58,14 @@ public class LocalAuthorityService {
 
         if (event.getActivatedModules().contains("PES")) {
             localAuthority.setActive(true);
-            List<LocalAuthority> allLocalAuthorities = getAllActive();
+            List<LocalAuthority> allLocalAuthorities = localAuthorityRepository.findByActiveTrueAndSirens(localAuthority.getSiren());
             allLocalAuthorities.forEach(localAuth -> {
-                if (localAuth.getSirens().stream().anyMatch(siren -> localAuthority.getSiren().equals(localAuth.getSiren()))) {
-                    localAuth.setSirens(
-                            localAuth.getSirens().stream()
-                                    .filter(siren -> !localAuthority.getSiren().equals(localAuth.getSiren()))
-                                    .collect(Collectors.toList())
-                    );
-                    createOrUpdate(localAuth);
-                }
+                localAuth.setSirens(
+                        localAuth.getSirens().stream()
+                                .filter(siren -> !localAuthority.getSiren().equals(localAuth.getSiren()))
+                                .collect(Collectors.toList())
+                );
+                createOrUpdate(localAuth);
             });
         }
         createOrUpdate(localAuthority);
