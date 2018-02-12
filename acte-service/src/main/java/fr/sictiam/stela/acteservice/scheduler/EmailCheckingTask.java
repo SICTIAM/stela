@@ -38,16 +38,7 @@ import com.sun.mail.util.MailSSLSocketFactory;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.StatusType;
-import fr.sictiam.stela.acteservice.model.xml.ARActe;
-import fr.sictiam.stela.acteservice.model.xml.ARAnnulation;
-import fr.sictiam.stela.acteservice.model.xml.ARReponseCL;
-import fr.sictiam.stela.acteservice.model.xml.AnomalieActe;
-import fr.sictiam.stela.acteservice.model.xml.CourrierSimple;
-import fr.sictiam.stela.acteservice.model.xml.DefereTA;
-import fr.sictiam.stela.acteservice.model.xml.DemandePieceComplementaire;
-import fr.sictiam.stela.acteservice.model.xml.EnveloppeMISILLCL;
-import fr.sictiam.stela.acteservice.model.xml.LettreObservations;
-import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
+import fr.sictiam.stela.acteservice.model.xml.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.NoEnveloppeException;
@@ -178,11 +169,11 @@ public class EmailCheckingTask {
                                 StreamSource classSource = new StreamSource(bodyPart.getInputStream());
                                 if ("ARActe".equals(rootName)) {
                                     ARActe arActe = unmarshall(classSource, ARActe.class);
-                                    acteService.receiveARActe(arActe.getIDActe());
+                                    acteService.receiveAREvent(arActe.getIDActe(), StatusType.ACK_RECEIVED);
 
                                 } else if ("ARAnnulation".equals(rootName)) {
                                     ARAnnulation arAnnulation = unmarshall(classSource, ARAnnulation.class);
-                                    acteService.receiveARActeCancelation(arAnnulation.getIDActe());
+                                    acteService.receiveAREvent(arAnnulation.getIDActe(), StatusType.CANCELLED);
 
                                 } else if ("AnomalieActe".equals(rootName)) {
                                     if (enveloppe == null) {
@@ -223,14 +214,21 @@ public class EmailCheckingTask {
                                             .map(file -> getFileAttachmentByName(file.getNomFichier(),
                                                     originalMultipart))
                                             .collect(Collectors.toList());
-                                    
-                                    acteService.receiveDefere(StatusType.DEFERE_RECEIVED, defereTA.getIDActe(), attachments, defereTA.getNatureIllegalite());
+
+                                    acteService.receiveDefere(StatusType.DEFERE_RECEIVED, defereTA.getIDActe(),
+                                            attachments, defereTA.getNatureIllegalite());
 
                                 } else if ("ARPieceComplementaire".equals(rootName)) {
-                                    ARReponseCL arPieceComplementaire = unmarshall(classSource, ARReponseCL.class);
+                                    JAXBElement<ARReponseCL> arPieceComplementaire = unmarshallARReponseCL(classSource);
+                                    acteService.receiveAREvent(
+                                            arPieceComplementaire.getValue().getInfosCourrierPref().getIDActe(),
+                                            StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE);
 
                                 } else if ("ARReponseRejetLettreObservations".equals(rootName)) {
-                                    ARReponseCL arLettreObs = unmarshall(classSource, ARReponseCL.class);
+                                    JAXBElement<ARReponseCL> arLettreObs = unmarshallARReponseCL(classSource);
+                                    acteService.receiveAREvent(
+                                            arLettreObs.getValue().getInfosCourrierPref().getIDActe(),
+                                            StatusType.ACK_REPONSE_LETTRE_OBSERVATION);
 
                                 } else if ("RetourClassification".equals(rootName)) {
                                     RetourClassification retClassification = unmarshall(classSource,
@@ -296,5 +294,14 @@ public class EmailCheckingTask {
         Unmarshaller unmarshaller = jc.createUnmarshaller();
         T obj = clazz.cast(unmarshaller.unmarshal(xml));
         return obj;
+    }
+
+    protected static JAXBElement<ARReponseCL> unmarshallARReponseCL(StreamSource xml) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(ARReponseCL.class, ObjectFactory.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        JAXBElement<ARReponseCL> obj = (JAXBElement<ARReponseCL>) unmarshaller.unmarshal(xml);
+        return obj;
+
     }
 }

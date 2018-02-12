@@ -64,16 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeMode;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Admin;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.AttachmentType;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
@@ -280,7 +271,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         List<ActeHistory> acteHistories = acteHistoryRepository.findByacteUuidOrderByDate(acteUuid);
 
-        assertThat(acteHistories, hasSize(6));
+        assertThat(acteHistories, hasSize(7));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_CREATED))));
 
         Optional<ActeHistory> acteHistory = getActeHistoryForStatus(acteHistories, StatusType.ARCHIVE_CREATED);
@@ -292,7 +283,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(acteHistories,
                 hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.ARCHIVE_SIZE_CHECKED))));
         assertThat(acteHistories, hasItem(Matchers.<ActeHistory>hasProperty("status", is(StatusType.SENT))));
-        assertThat(acteHistories.get(5).getStatus(), is(StatusType.NOTIFICATION_SENT));
+        assertThat(acteHistories.get(6).getStatus(), is(StatusType.NOTIFICATION_SENT));
         // uncomment to see the generated archive
         // printXmlMessage(acteHistory.get().getActeAttachment(),
         // acteHistory.get().getFileName());

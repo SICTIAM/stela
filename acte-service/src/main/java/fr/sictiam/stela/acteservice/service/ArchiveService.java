@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -46,15 +47,7 @@ import fr.sictiam.stela.acteservice.model.Flux;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
-import fr.sictiam.stela.acteservice.model.xml.Annulation;
-import fr.sictiam.stela.acteservice.model.xml.DemandeClassification;
-import fr.sictiam.stela.acteservice.model.xml.DonneesActe;
-import fr.sictiam.stela.acteservice.model.xml.DonneesEnveloppeCLMISILL;
-import fr.sictiam.stela.acteservice.model.xml.FichierSigne;
-import fr.sictiam.stela.acteservice.model.xml.FormulairesEnvoyes;
-import fr.sictiam.stela.acteservice.model.xml.IDCL;
-import fr.sictiam.stela.acteservice.model.xml.ObjectFactory;
-import fr.sictiam.stela.acteservice.model.xml.Referent;
+import fr.sictiam.stela.acteservice.model.xml.*;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import xyz.capybara.clamav.ClamavClient;
 import xyz.capybara.clamav.commands.scan.result.ScanResult;
@@ -172,8 +165,13 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         }
     }
 
-    private void createCancellationMessage(String acteUuid) {
+    private String generateIdActe(Acte acte) {
+        return String.format("%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
+                acte.getLocalAuthority().getSiren(), acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")),
+                acte.getNumber(), acte.getNature().getAbbreviation());
+    }
 
+    private void createMessageArchive(String acteUuid, Flux flux, StatusType generatedStatus) {
         Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
@@ -181,21 +179,27 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             int deliveryNumber = getNextIncrement();
 
-            String baseFilename = getBaseFilename(acte, Flux.ANNULATION_TRANSMISSION);
+            String baseFilename = getBaseFilename(acte, flux);
             String enveloppeName = String.format("EACT--%s--%s-%d.xml", acte.getLocalAuthority().getSiren(),
                     getFormattedDate(LocalDate.now()), deliveryNumber);
             String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
 
+            Object reponse = null;
             ObjectFactory objectFactory = new ObjectFactory();
-            Annulation annulation = objectFactory.createAnnulation();
-            String idActe = String.format("%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
-                    acte.getLocalAuthority().getSiren(),
-                    acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")), acte.getNumber(),
-                    acte.getNature().getAbbreviation());
-            annulation.setIDActe(idActe);
+
+            if (Flux.ANNULATION_TRANSMISSION.equals(flux)) {
+                Annulation annulation = objectFactory.createAnnulation();
+                String idActe = generateIdActe(acte);
+                annulation.setIDActe(idActe);
+                reponse = annulation;
+            } else if (Flux.AR_LETTRE_OBSERVATION.equals(flux)) {
+                reponse = objectFactory.createARLettreObservations(generateDonneesCourrierPref(acte));
+            } else if (Flux.AR_PIECE_COMPLEMENTAIRE.equals(flux)) {
+                reponse = objectFactory.createARDemandePieceComplementaire(generateDonneesCourrierPref(acte));
+            }
 
             StringWriter sw = new StringWriter();
-            jaxb2Marshaller.marshal(annulation, new StreamResult(sw));
+            jaxb2Marshaller.marshal(reponse, new StreamResult(sw));
 
             String archiveName = getArchiveName(enveloppeName);
 
@@ -206,8 +210,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
                     sw.toString(), null, null, null);
 
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CANCELLATION_ARCHIVE_CREATED,
-                    LocalDateTime.now(), baos.toByteArray(), archiveName);
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), generatedStatus, LocalDateTime.now(),
+                    baos.toByteArray(), archiveName);
 
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
@@ -217,6 +221,58 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                     e.getMessage());
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        }
+    }
+
+    private void createMessageArchiveWithAttachment(String acteUuid, Flux flux, StatusType generatedStatus,
+            Attachment attachment) {
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
+
+        try {
+            int deliveryNumber = getNextIncrement();
+
+            String baseFilename = getBaseFilename(acte, flux);
+
+            String repFilename = String.format("%s_%d.%s", baseFilename, 1,
+                    StringUtils.getFilenameExtension(attachment.getFilename()));
+
+            String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
+            Object reponse = null;
+            if (Flux.REPONSE_COURRIER_SIMPLE.equals(flux)) {
+                reponse = generateReponseCourrierSimple(acte, repFilename);
+            } else if (Flux.REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES.equals(flux)) {
+                reponse = generateRefusPieceComplementaire(acte, repFilename);
+            } else if (Flux.REFUS_EXPLICITE_LETTRE_OBSERVATION.equals(flux)) {
+                reponse = generateRejetLettreObservations(acte, repFilename);
+            } else if (Flux.REPONSE_LETTRE_OBSEVATION.equals(flux)) {
+                reponse = generateReponseLettreObservations(acte, repFilename);
+            }
+
+            StringWriter sw = new StringWriter();
+            jaxb2Marshaller.marshal(reponse, new StreamResult(sw));
+            String messageContent = sw.toString();
+
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", acte.getLocalAuthority().getSiren(),
+                    getFormattedDate(LocalDate.now()), deliveryNumber);
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(
+                    acte.getLocalAuthority(), messageFilename);
+            String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
+
+            String archiveName = getArchiveName(enveloppeName);
+
+            ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
+                    messageContent, attachment.getFile(), repFilename);
+
+            ActeHistory acteHistoryCreated = new ActeHistory(acte.getUuid(), generatedStatus, LocalDateTime.now(),
+                    baos.toByteArray(), archiveName);
+
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryCreated));
+
+            LOGGER.info("Archive created : {}", archiveName);
+        } catch (Exception e) {
+            LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
+            ActeHistory acteHistoryError = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryError));
         }
     }
 
@@ -251,6 +307,120 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             LOGGER.error(e.getMessage());
         }
         return null;
+    }
+
+    private void createArchivePieceComplementaire(String acteUuid, List<Attachment> pieces) {
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
+
+        try {
+            int deliveryNumber = getNextIncrement();
+
+            String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES);
+
+            String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
+            Map<String, byte[]> annexes = new HashMap<>();
+            acte.getAnnexes().forEach(attachment -> {
+                int sequence = annexes.size() + 1;
+                String tempFilename = String.format("%s_%d.%s", baseFilename, sequence,
+                        StringUtils.getFilenameExtension(attachment.getFilename()));
+                annexes.put(tempFilename, attachment.getFile());
+            });
+            PieceComplementaire reponse = generatePieceComplementaire(acte, annexes.keySet());
+            StringWriter sw = new StringWriter();
+            jaxb2Marshaller.marshal(reponse, new StreamResult(sw));
+            String messageContent = sw.toString();
+
+            String enveloppeName = String.format("EACT--%s--%s-%d.xml", acte.getLocalAuthority().getSiren(),
+                    getFormattedDate(LocalDate.now()), deliveryNumber);
+            JAXBElement<DonneesEnveloppeCLMISILL> donneesEnveloppeCLMISILL1 = generateEnveloppe(
+                    acte.getLocalAuthority(), messageFilename);
+            String enveloppeContent = marshalToString(donneesEnveloppeCLMISILL1);
+
+            String archiveName = getArchiveName(enveloppeName);
+
+            ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
+                    messageContent, null, null, annexes);
+
+            ActeHistory acteHistoryCreated = new ActeHistory(acte.getUuid(),
+                    StatusType.PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED, LocalDateTime.now(), baos.toByteArray(),
+                    archiveName);
+
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryCreated));
+
+            LOGGER.info("Archive created : {}", archiveName);
+        } catch (Exception e) {
+            LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
+            ActeHistory acteHistoryError = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryError));
+        }
+    }
+
+    private RefusPieceComplementaire generateRefusPieceComplementaire(Acte acte, String repFilename) {
+        RefusPieceComplementaire refusPieceComplementaire = new RefusPieceComplementaire();
+        refusPieceComplementaire.setIDActe(generateIdActe(acte));
+        refusPieceComplementaire.setDateCourrierPref(LocalDate.now());
+
+        FichierSigne fichierSigne = new FichierSigne();
+        fichierSigne.setNomFichier(repFilename);
+        refusPieceComplementaire.setDocument(fichierSigne);
+        return refusPieceComplementaire;
+    }
+
+    private PieceComplementaire generatePieceComplementaire(Acte acte, Set<String> annexesFilenames) {
+        PieceComplementaire pieceComplementaire = new PieceComplementaire();
+        pieceComplementaire.setIDActe(generateIdActe(acte));
+        pieceComplementaire.setDateCourrierPref(LocalDate.now());
+
+        FichiersSignes fichiersSignes = new FichiersSignes();
+        annexesFilenames.forEach(annexeFilename -> {
+            FichierSigne fichierSigne = new FichierSigne();
+            fichierSigne.setNomFichier(annexeFilename);
+            fichiersSignes.getDocument().add(fichierSigne);
+        });
+
+        pieceComplementaire.setDocuments(fichiersSignes);
+        return pieceComplementaire;
+    }
+
+    private RejetLettreObservations generateRejetLettreObservations(Acte acte, String repFilename) {
+        RejetLettreObservations rejetLettreObservations = new RejetLettreObservations();
+        rejetLettreObservations.setIDActe(generateIdActe(acte));
+        rejetLettreObservations.setDateCourrierPref(LocalDate.now());
+
+        FichierSigne fichierSigne = new FichierSigne();
+        fichierSigne.setNomFichier(repFilename);
+        rejetLettreObservations.setDocument(fichierSigne);
+        return rejetLettreObservations;
+    }
+
+    private ReponseLettreObservations generateReponseLettreObservations(Acte acte, String repFilename) {
+        ReponseLettreObservations reponseLettreObservations = new ReponseLettreObservations();
+        reponseLettreObservations.setIDActe(generateIdActe(acte));
+        reponseLettreObservations.setDateCourrierPref(LocalDate.now());
+
+        FichierSigne fichierSigne = new FichierSigne();
+        fichierSigne.setNomFichier(repFilename);
+        reponseLettreObservations.setDocument(fichierSigne);
+        return reponseLettreObservations;
+    }
+
+    private ReponseCourrierSimple generateReponseCourrierSimple(Acte acte, String fileName) {
+        ReponseCourrierSimple reponseCourrierSimple = new ReponseCourrierSimple();
+        reponseCourrierSimple.setIDActe(generateIdActe(acte));
+        reponseCourrierSimple.setDateCourrierPref(LocalDate.now());
+
+        FichierSigne fichierSigne = new FichierSigne();
+        fichierSigne.setNomFichier(fileName);
+        reponseCourrierSimple.setDocument(fichierSigne);
+
+        return reponseCourrierSimple;
+    }
+
+    private DonneesCourrierPref generateDonneesCourrierPref(Acte acte) {
+        DonneesCourrierPref donneesCourrierPref = new DonneesCourrierPref();
+        donneesCourrierPref.setIDActe(generateIdActe(acte));
+        donneesCourrierPref.setDateCourrierPref(LocalDate.now());
+        return donneesCourrierPref;
     }
 
     private void checkArchiveSize(ActeHistory acteHistory) {
@@ -359,6 +529,12 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     private ByteArrayOutputStream createArchiveAndCompress(String enveloppeName, String enveloppeContent,
+            String messageFilename, String messageContent, byte[] acteFile, String acteFilename) throws IOException {
+        return createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename, messageContent, acteFile,
+                acteFilename, null);
+    }
+
+    private ByteArrayOutputStream createArchiveAndCompress(String enveloppeName, String enveloppeContent,
             String messageFilename, String messageContent, byte[] acteFile, String acteFilename,
             Map<String, byte[]> annexes) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -435,13 +611,48 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             createArchive(event.getActeHistory().getActeUuid());
             break;
         case ARCHIVE_CREATED:
+        case CANCELLATION_ARCHIVE_CREATED:
+        case REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED:
+        case REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED:
+        case REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED:
+        case PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
+        case REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED:
+        case ACK_LETTRE_OBSERVATION_ARCHIVE_CREATED:
+        case ACK_PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
             checkArchiveSize(event.getActeHistory());
             break;
         case CANCELLATION_ASKED:
-            createCancellationMessage(event.getActeHistory().getActeUuid());
+            createMessageArchive(event.getActeHistory().getActeUuid(), Flux.ANNULATION_TRANSMISSION,
+                    StatusType.CANCELLATION_ARCHIVE_CREATED);
             break;
-        case CANCELLATION_ARCHIVE_CREATED:
-            checkArchiveSize(event.getActeHistory());
+        case LETTRE_OBSERVATION_RECEIVED:
+            createMessageArchive(event.getActeHistory().getActeUuid(), Flux.AR_LETTRE_OBSERVATION,
+                    StatusType.ARCHIVE_CREATED);
+            break;
+        case DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED:
+            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.AR_PIECE_COMPLEMENTAIRE,
+                    StatusType.ARCHIVE_CREATED, event.getAttachments().get(0));
+            break;
+        case REPONSE_COURRIER_SIMPLE_ASKED:
+            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_COURRIER_SIMPLE,
+                    StatusType.REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED, event.getAttachments().get(0));
+            break;
+        case PIECE_COMPLEMENTAIRE_ASKED:
+            createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
+            break;
+        case REFUS_PIECES_COMPLEMENTAIRE_ASKED:
+            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
+                    Flux.REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES,
+                    StatusType.REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED, event.getAttachments().get(0));
+            break;
+        case REPONSE_LETTRE_OBSEVATION_ASKED:
+            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_LETTRE_OBSEVATION,
+                    StatusType.REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED, event.getAttachments().get(0));
+            break;
+        case REJET_LETTRE_OBSERVATION_ASKED:
+            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
+                    Flux.REFUS_EXPLICITE_LETTRE_OBSERVATION, StatusType.REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED,
+                    event.getAttachments().get(0));
             break;
         }
     }

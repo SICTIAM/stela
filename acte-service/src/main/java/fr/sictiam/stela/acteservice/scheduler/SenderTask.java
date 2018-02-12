@@ -1,7 +1,5 @@
 package fr.sictiam.stela.acteservice.scheduler;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,27 +7,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 
-import fr.sictiam.stela.acteservice.service.AdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import fr.sictiam.stela.acteservice.model.PendingMessage;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.AdminService;
 import fr.sictiam.stela.acteservice.service.PendingMessageService;
 
 @Component
@@ -61,13 +51,13 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
-            case ARCHIVE_SIZE_CHECKED:
-                pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
-                break;
+        case ARCHIVE_SIZE_CHECKED:
+            pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
+            break;
         }
     }
-    
-    //reset limitation every hour
+
+    // reset limitation every hour
     @Scheduled(cron = "0 0 0/1 * * ?")
     public void resetLimitation() {
         currentSizeUsed.set(0);
@@ -97,7 +87,8 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                 } else if (HttpStatus.BAD_REQUEST.equals(sendStatus)
                         || HttpStatus.INTERNAL_SERVER_ERROR.equals(sendStatus)) {
                     // something wrong in what we send
-                    // TODO when prefecture sending is "plugged", look if we can extract some useful info about the error
+                    // TODO when prefecture sending is "plugged", look if we can extract some useful
+                    // info about the error
                     acteService.notSent(pendingMessage.getActeUuid());
                     pendingMessageService.remove(pendingQueue.poll());
                 }
@@ -106,6 +97,5 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
             }
         }
     }
-    
-    
+
 }
