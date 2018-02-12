@@ -32,6 +32,12 @@
     "list": {
       "title": "Liste des PES",
       "empty": "Aucun PES"
+    },
+    "retour": {
+      "list": {
+        "title": "Liste des PES Retour",
+        "empty": "Aucun PES Retour"
+      }
     }
   },
   "admin": {

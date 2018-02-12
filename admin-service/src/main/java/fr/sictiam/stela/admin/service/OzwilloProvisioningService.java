@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -99,12 +102,12 @@ public class OzwilloProvisioningService {
     public void createNewInstance(ProvisioningRequest provisioningRequest) {
 
         String dcId = provisioningRequest.getOrganization().getDcId();
-        // SIRET is the last part of an organization URI
-        String siret = dcId.substring(dcId.lastIndexOf('/') + 1);
-        if (localAuthorityService.findBySiren(siret).isPresent())
-            throw new EntityExistsException("There already exists a local authority with SIRET " + siret);
+        // SIRET is the last part of an organization URI, we take only the first 9 characters to get the SIREN
+        String siren = dcId.substring(dcId.lastIndexOf('/') + 1).substring(0, 9);
+        if (localAuthorityService.findBySiren(siren).isPresent())
+            throw new EntityExistsException("There already exists a local authority with SIREN " + siren);
         String slugName = new Slugify().slugify(provisioningRequest.getOrganization().getName());
-        LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siret, slugName);
+        LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siren, slugName);
         OzwilloInstanceInfo ozwilloInstanceInfo = new OzwilloInstanceInfo(provisioningRequest.getInstanceId(),
                 provisioningRequest.getClientId(), provisioningRequest.getClientSecret(),
                 provisioningRequest.getInstanceRegistrationUri(), provisioningRequest.getUser().getId(),

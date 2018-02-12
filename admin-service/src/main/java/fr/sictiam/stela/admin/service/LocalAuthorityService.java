@@ -1,8 +1,12 @@
 package fr.sictiam.stela.admin.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
+import fr.sictiam.stela.admin.model.LocalAuthority;
+import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import fr.sictiam.stela.admin.service.util.OffsetBasedPageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +20,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
-import fr.sictiam.stela.admin.model.LocalAuthority;
-import fr.sictiam.stela.admin.model.Module;
-import fr.sictiam.stela.admin.model.UI.Views;
-import fr.sictiam.stela.admin.model.event.LocalAuthorityEvent;
-import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
 public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
     @Autowired
@@ -51,35 +48,35 @@ public class LocalAuthorityService {
         localAuthority = localAuthorityRepository.saveAndFlush(localAuthority);
 
         LocalAuthorityEvent localAutorityCreation = new LocalAuthorityEvent(localAuthority);
-        
-        try { 
-            ObjectMapper mapper = new ObjectMapper(); 
-            String body = mapper.writerWithView(Views.LocalAuthorityView.class).writeValueAsString(localAutorityCreation); 
-            MessageProperties messageProperties =new MessageProperties(); 
-            messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON); 
-            Message amMessage=new Message(body.getBytes(), messageProperties); 
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String body = mapper.writerWithView(Views.LocalAuthorityView.class).writeValueAsString(localAutorityCreation);
+            MessageProperties messageProperties = new MessageProperties();
+            messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+            Message amMessage = new Message(body.getBytes(), messageProperties);
             amqpTemplate.send(exchange, "", amMessage);
-        } catch (Exception e) { 
+        } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }
-        
+
         return localAuthority;
     }
-    
+
     public LocalAuthority modify(LocalAuthority localAuthority) {
-        return localAuthorityRepository.save(localAuthority);
+        return createOrUpdate(localAuthority);
     }
 
     public void addModule(String uuid, Module module) {
         LocalAuthority localAuthority = localAuthorityRepository.getOne(uuid);
         localAuthority.addModule(module);
-        localAuthorityRepository.save(localAuthority);
+        createOrUpdate(localAuthority);
     }
 
     public void removeModule(String uuid, Module module) {
         LocalAuthority localAuthority = localAuthorityRepository.getOne(uuid);
         localAuthority.removeModule(module);
-        localAuthorityRepository.save(localAuthority);
+        createOrUpdate(localAuthority);
     }
 
     public List<LocalAuthority> getAll() {

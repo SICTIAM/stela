@@ -1,17 +1,15 @@
 package fr.sictiam.stela.pesservice.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLConnection;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletResponse;
-
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.PesRetour;
+import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
+import fr.sictiam.stela.pesservice.service.PesRetourService;
+import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +27,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
-import fr.sictiam.stela.pesservice.service.PesAllerService;
-import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/pes")
@@ -44,20 +44,24 @@ public class PesRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesRestController.class);
 
-    private final PesAllerService pesService;
-    private final LocalAuthorityService localAuthorityService;
+    private final PesAllerService pesAllerService;
+    private final PesRetourService pesRetourService;
 
     @Value("application.filenamepattern")
     private String fileNamePattern;
 
     @Autowired
-    public PesRestController(PesAllerService pesService, LocalAuthorityService localAuthorityService) {
-        this.pesService = pesService;
-        this.localAuthorityService = localAuthorityService;
+    private ReceiverTask receiverTask;
+
+    @Autowired
+    public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService) {
+        this.pesAllerService = pesAllerService;
+        this.pesRetourService = pesRetourService;
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
+    public ResponseEntity<SearchResultsUI> getAll(
+            @RequestParam(value = "objet", required = false) String objet,
             @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
             @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
             @RequestParam(value = "status", required = false) StatusType status,
@@ -67,9 +71,9 @@ public class PesRestController {
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        List<PesAller> pesList = pesService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset,
+        List<PesAller> pesList = pesAllerService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset,
                 column, direction, currentLocalAuthUuid);
-        Long count = pesService.countAllWithQuery(objet, creationFrom, creationTo, status, currentLocalAuthUuid);
+        Long count = pesAllerService.countAllWithQuery(objet, creationFrom, creationTo, status, currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, pesList), HttpStatus.OK);
     }
 
@@ -77,29 +81,29 @@ public class PesRestController {
     public ResponseEntity<PesAller> getByUuid(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String uuid) {
-        PesAller pes = pesService.getByUuid(uuid);
+        PesAller pes = pesAllerService.getByUuid(uuid);
 
         return new ResponseEntity<>(pes, HttpStatus.OK);
     }
 
     @GetMapping("/resend/{uuid}")
     public ResponseEntity<String> reSendFlux(@PathVariable String uuid) {
-        PesAller pes = pesService.getByUuid(uuid);
-        pesService.send(pes);
+        PesAller pes = pesAllerService.getByUuid(uuid);
+        pesAllerService.send(pes);
         StatusType statusType = StatusType.MANUAL_RESENT;
-        pesService.updateStatus(pes.getUuid(), statusType);
+        pesAllerService.updateStatus(pes.getUuid(), statusType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file)
+                                         @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+                                         @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file)
             throws PesCreationException {
         Pattern pattern = Pattern.compile(fileNamePattern);
         Matcher matcher = pattern.matcher(file.getOriginalFilename());
         if (matcher.matches()) {
-            PesAller result = pesService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson, file);
+            PesAller result = pesAllerService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson, file);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
 
         } else {
@@ -109,14 +113,14 @@ public class PesRestController {
 
     @GetMapping("/{uuid}/file")
     public ResponseEntity getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
-        PesAller pesAller = pesService.getByUuid(uuid);
+        PesAller pesAller = pesAllerService.getByUuid(uuid);
         outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename());
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
     public ResponseEntity getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
-        PesHistory pesHistory = pesService.getHistoryByUuid(historyUuid);
+        PesHistory pesHistory = pesAllerService.getHistoryByUuid(historyUuid);
         if (pesHistory.getFile() != null) {
             outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
             return new ResponseEntity(HttpStatus.OK);
@@ -127,6 +131,23 @@ public class PesRestController {
     @GetMapping("/statuses")
     public List<StatusType> getStatuses() {
         return Arrays.asList(StatusType.values());
+    }
+
+    @GetMapping("/pes-retour")
+    public ResponseEntity<SearchResultsUI> getAllPesRetour(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset) {
+        List<PesRetour> pesRetours = pesRetourService.getAllByLocalAuthority(currentLocalAuthUuid, limit, offset);
+        Long count = pesRetourService.countAllByLocalAuthority(currentLocalAuthUuid);
+        return new ResponseEntity<>(new SearchResultsUI(count, pesRetours), HttpStatus.OK);
+    }
+
+    @GetMapping("/pes-retour/{uuid}/file")
+    public ResponseEntity getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
+        PesRetour pesRetour = pesRetourService.getByUuid(uuid);
+        outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {

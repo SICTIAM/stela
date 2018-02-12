@@ -10,7 +10,6 @@ public class LocalAuthority {
     private String uuid;
     private String name;
     private String siren;
-    private String siret;
     @Enumerated(EnumType.STRING)
     private ServerCode serverCode;
     private Boolean active;
@@ -52,14 +51,6 @@ public class LocalAuthority {
         this.siren = siren;
     }
 
-    public String getSiret() {
-        return siret;
-    }
-
-    public void setSiret(String siret) {
-        this.siret = siret;
-    }
-
     public ServerCode getServerCode() {
         return serverCode;
     }
@@ -86,7 +77,7 @@ public class LocalAuthority {
 
     @Override
     public String toString() {
-        return "LocalAuthority [uuid=" + uuid + ", name=" + name + ", siren=" + siren + ", siret=" + siret
-                + ", serverCode=" + serverCode + ", active=" + active + ", sirens=" + sirens + "]";
+        return "LocalAuthority [uuid=" + uuid + ", name=" + name + ", siren=" + siren + ", serverCode=" + serverCode
+                + ", active=" + active + ", sirens=" + sirens + "]";
     }
 }

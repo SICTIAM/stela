@@ -102,7 +102,7 @@ public class ReceiverTask {
         XPath path = xpf.newXPath();
         Document document = builder.parse(byteArrayInputStream);
         String siret = path.evaluate("/PES_Retour/EnTetePES/IdColl/@V", document);
-        Optional<LocalAuthority> localAuthorityOpt = localAuthorityService.getBySiret(siret);
+        Optional<LocalAuthority> localAuthorityOpt = localAuthorityService.getBySirenOrSirens(siret.substring(0, 9));
         if (localAuthorityOpt.isPresent()) {
             LocalAuthority localAuthority = localAuthorityOpt.get();
             Attachment attachment = new Attachment(targetArray, pesRetourName, targetArray.length);

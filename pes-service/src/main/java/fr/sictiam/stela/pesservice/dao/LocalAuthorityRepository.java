@@ -1,9 +1,9 @@
 package fr.sictiam.stela.pesservice.dao;
 
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-
+import java.util.List;
 import java.util.Optional;
 
 public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, String> {
@@ -13,5 +13,9 @@ public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, 
 
     Optional<LocalAuthority> findBySiren(String siren);
 
-    Optional<LocalAuthority> findBySiret(String siret);
+    List<LocalAuthority> findAllByActiveTrue();
+
+    Optional<LocalAuthority> findByActiveTrueAndSirenEqualsOrSirens(String siren1, String siren2);
+
+    List<LocalAuthority> findByActiveTrueAndSirens(String siren);
 }
