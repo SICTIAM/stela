@@ -34,7 +34,7 @@ class PesRetourList extends Component {
         const data = { limit, offset }
         Object.keys(this.state.search)
             .filter(k => this.state.search[k] !== '')
-            .map(k => data[k] = this.state.search[k])
+            .forEach(k => data[k] = this.state.search[k])
         return data
     }
     handleFieldChange = (field, value) => {
