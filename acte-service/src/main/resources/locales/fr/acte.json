@@ -1,7 +1,7 @@
 {
   "acte": {
     "status": {
-      "CREATED": "Créé",
+      "CREATED": "Déposé",
       "ARCHIVE_CREATED": "Archive préparée",
       "ANTIVIRUS_OK": "Antivirus OK",
       "ANTIVIRUS_KO": "Antivirus KO",
@@ -13,6 +13,8 @@
       "CANCELLATION_ARCHIVE_CREATED": "Archive d'annulation préparée",
       "ARCHIVE_TOO_LARGE": "Archive trop large",
       "ARCHIVE_SIZE_CHECKED": "Taille d'archive vérifiée",
+      "GROUP_NOTIFICATION_SENT": "Notification envoyée aux abonnés",
+      "NOTIFICATION_SENT": "Notification envoyée au déposant",
       "FILE_ERROR": "Erreur sur les fichiers de l'acte"
     },
     "nature": {

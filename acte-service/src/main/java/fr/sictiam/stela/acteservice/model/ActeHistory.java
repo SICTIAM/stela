@@ -34,10 +34,10 @@ public class ActeHistory implements Comparable<ActeHistory> {
         this.date = LocalDateTime.now();
     }
 
-    public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, String message) {
+    public ActeHistory(String acteUuid, StatusType status, String message) {
         this.acteUuid = acteUuid;
         this.status = status;
-        this.date = date;
+        this.date = LocalDateTime.now();
         this.message = message;
     }
 
