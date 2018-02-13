@@ -136,10 +136,13 @@ public class PesRestController {
     @GetMapping("/pes-retour")
     public ResponseEntity<SearchResultsUI> getAllPesRetour(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "filename", required = false) String filename,
+            @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
+            @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset) {
-        List<PesRetour> pesRetours = pesRetourService.getAllByLocalAuthority(currentLocalAuthUuid, limit, offset);
-        Long count = pesRetourService.countAllByLocalAuthority(currentLocalAuthUuid);
+        List<PesRetour> pesRetours = pesRetourService.getAllWithQuery(filename, creationFrom, creationTo, currentLocalAuthUuid, limit, offset);
+        Long count = pesRetourService.countAllWithQuery(filename, creationFrom, creationTo, currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, pesRetours), HttpStatus.OK);
     }
 
