@@ -28,7 +28,7 @@ public class LocalesServiceTest {
     @Test
     public void testGetSimpleMessage() {
         String message = localService.getMessage("fr", "pes", "$.pes.status.CREATED");
-        assertThat(message, is("Créé"));
+        assertThat(message, is("Déposé"));
     }
 
     @Test
@@ -44,6 +44,7 @@ public class LocalesServiceTest {
         String text = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
                 variables);
 
-        assertThat(text, is("Bonjour John Doe, <br/> Votre pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"));
+        assertThat(text, is(
+                "Bonjour John Doe, <br/> Votre pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"));
     }
 }
