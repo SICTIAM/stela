@@ -23,7 +23,7 @@ public class OzwilloInstanceInfo {
     }
 
     public OzwilloInstanceInfo(String instanceId, String clientId, String clientSecret, String instanceRegistrationUri,
-                               String creatorId, String creatorName, String dcId) {
+            String creatorId, String creatorName, String dcId) {
         this.instanceId = instanceId;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -89,15 +89,9 @@ public class OzwilloInstanceInfo {
 
     @Override
     public String toString() {
-        return "OzwilloInstanceInfo{" +
-                "instanceId='" + instanceId + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
-                ", instanceRegistrationUri='" + instanceRegistrationUri + '\'' +
-                ", creatorId='" + creatorId + '\'' +
-                ", creatorName='" + creatorName + '\'' +
-                ", dcId='" + dcId + '\'' +
-                ", notifiedToKernel=" + notifiedToKernel +
-                '}';
+        return "OzwilloInstanceInfo{" + "instanceId='" + instanceId + '\'' + ", clientId='" + clientId + '\''
+                + ", clientSecret='" + clientSecret + '\'' + ", instanceRegistrationUri='" + instanceRegistrationUri
+                + '\'' + ", creatorId='" + creatorId + '\'' + ", creatorName='" + creatorName + '\'' + ", dcId='" + dcId
+                + '\'' + ", notifiedToKernel=" + notifiedToKernel + '}';
     }
 }

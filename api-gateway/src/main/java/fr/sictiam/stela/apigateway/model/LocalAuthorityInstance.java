@@ -5,7 +5,8 @@ public class LocalAuthorityInstance {
     private String clientId;
     private String clientSecret;
 
-    protected LocalAuthorityInstance() {}
+    protected LocalAuthorityInstance() {
+    }
 
     public String getClientId() {
         return clientId;

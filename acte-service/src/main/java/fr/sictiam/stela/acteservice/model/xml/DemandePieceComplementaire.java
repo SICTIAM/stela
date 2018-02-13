@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,11 +13,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -36,14 +37,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "descriptionPieces",
-    "document"
-})
+@XmlType(name = "", propOrder = { "descriptionPieces", "document" })
 @XmlRootElement(name = "DemandePieceComplementaire")
-public class DemandePieceComplementaire
-    extends DonneesCourrierPref
-{
+public class DemandePieceComplementaire extends DonneesCourrierPref {
 
     @XmlElement(name = "DescriptionPieces", required = true)
     protected String descriptionPieces;
@@ -53,10 +49,8 @@ public class DemandePieceComplementaire
     /**
      * Gets the value of the descriptionPieces property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getDescriptionPieces() {
         return descriptionPieces;
@@ -66,9 +60,8 @@ public class DemandePieceComplementaire
      * Sets the value of the descriptionPieces property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDescriptionPieces(String value) {
         this.descriptionPieces = value;
@@ -77,10 +70,8 @@ public class DemandePieceComplementaire
     /**
      * Gets the value of the document property.
      * 
-     * @return
-     *     possible object is
-     *     {@link FichierSigne }
-     *     
+     * @return possible object is {@link FichierSigne }
+     * 
      */
     public FichierSigne getDocument() {
         return document;
@@ -90,9 +81,8 @@ public class DemandePieceComplementaire
      * Sets the value of the document property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link FichierSigne }
-     *     
+     *            allowed object is {@link FichierSigne }
+     * 
      */
     public void setDocument(FichierSigne value) {
         this.document = value;

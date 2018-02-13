@@ -11,11 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.*;
+import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.acteServiceUrl;
+import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
+import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.pesServiceUrl;
 
 @RestController
 @RequestMapping("/api/api-gateway")
@@ -29,11 +36,11 @@ public class ProfileController {
 
     @GetMapping(value = "/switch/{profileUuid}")
     public void switchProfile(@PathVariable String profileUuid, HttpServletResponse response,
-                              HttpServletRequest request) throws IOException {
+            HttpServletRequest request) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String slugForProfile =
-                restTemplate.getForObject(adminServiceUrl() + "/api/admin/profile/{uuid}/slug", String.class, profileUuid);
+        String slugForProfile = restTemplate.getForObject(adminServiceUrl() + "/api/admin/profile/{uuid}/slug",
+                String.class, profileUuid);
 
         request.getSession().invalidate();
 
@@ -77,9 +84,11 @@ public class ProfileController {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, AlertMessage> alertMessageModules = new HashMap<>();
-        AlertMessage alertMessageActe = restTemplate.getForObject(acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
+        AlertMessage alertMessageActe = restTemplate.getForObject(acteServiceUrl() + "/api/acte/admin/alert-message",
+                AlertMessage.class);
         alertMessageModules.put("actes", alertMessageActe);
-        AlertMessage alertMessagePes = restTemplate.getForObject(pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
+        AlertMessage alertMessagePes = restTemplate.getForObject(pesServiceUrl() + "/api/pes/admin/alert-message",
+                AlertMessage.class);
         alertMessageModules.put("pes", alertMessagePes);
 
         return alertMessageModules;

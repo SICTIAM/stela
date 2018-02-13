@@ -1,7 +1,6 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import fr.sictiam.stela.acteservice.model.Notification;
-import fr.sictiam.stela.acteservice.service.NotificationService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

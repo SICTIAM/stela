@@ -1,12 +1,20 @@
 package fr.sictiam.stela.acteservice.scheduler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
+import com.sun.mail.util.MailSSLSocketFactory;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.xml.*;
+import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.exceptions.NoEnveloppeException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -25,23 +33,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import com.sun.mail.util.MailSSLSocketFactory;
-
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.StatusType;
-import fr.sictiam.stela.acteservice.model.xml.*;
-import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
-import fr.sictiam.stela.acteservice.service.exceptions.NoEnveloppeException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Component
 public class EmailCheckingTask {

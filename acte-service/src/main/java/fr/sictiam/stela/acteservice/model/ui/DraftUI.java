@@ -19,7 +19,8 @@ public class DraftUI {
     public DraftUI() {
     }
 
-    public DraftUI(String uuid, List<ActeDraftUI> actes, LocalDateTime lastModified, ActeMode mode, LocalDate decision, ActeNature nature) {
+    public DraftUI(String uuid, List<ActeDraftUI> actes, LocalDateTime lastModified, ActeMode mode, LocalDate decision,
+            ActeNature nature) {
         this.uuid = uuid;
         this.actes = actes;
         this.lastModified = lastModified;

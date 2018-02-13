@@ -10,7 +10,7 @@ import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,8 +61,7 @@ public class PesRestController {
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(
-            @RequestParam(value = "objet", required = false) String objet,
+    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
             @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
             @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
             @RequestParam(value = "status", required = false) StatusType status,
@@ -97,13 +97,14 @@ public class PesRestController {
 
     @PostMapping
     public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
-                                         @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-                                         @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file)
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file)
             throws PesCreationException {
         Pattern pattern = Pattern.compile(fileNamePattern);
         Matcher matcher = pattern.matcher(file.getOriginalFilename());
         if (matcher.matches()) {
-            PesAller result = pesAllerService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson, file);
+            PesAller result = pesAllerService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson,
+                    file);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
 
         } else {
@@ -141,7 +142,8 @@ public class PesRestController {
             @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset) {
-        List<PesRetour> pesRetours = pesRetourService.getAllWithQuery(filename, creationFrom, creationTo, currentLocalAuthUuid, limit, offset);
+        List<PesRetour> pesRetours = pesRetourService.getAllWithQuery(filename, creationFrom, creationTo,
+                currentLocalAuthUuid, limit, offset);
         Long count = pesRetourService.countAllWithQuery(filename, creationFrom, creationTo, currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, pesRetours), HttpStatus.OK);
     }

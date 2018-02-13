@@ -1,27 +1,18 @@
 package fr.sictiam.stela.pesservice.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.SortedSet;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
+import java.time.LocalDateTime;
 
 @Entity
 public class PesRetour {
@@ -34,13 +25,13 @@ public class PesRetour {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    
+
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDateTime creation;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Attachment attachment;  
-   
+    private Attachment attachment;
+
     @ManyToOne
     private LocalAuthority localAuthority;
 
@@ -72,7 +63,7 @@ public class PesRetour {
     public void setLocalAuthority(LocalAuthority localAuthority) {
         this.localAuthority = localAuthority;
     }
-   
+
     public Attachment getAttachment() {
         return attachment;
     }

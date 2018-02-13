@@ -1,32 +1,28 @@
 package fr.sictiam.stela.pesservice;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import fr.sictiam.stela.pesservice.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.pesservice.dao.AdminRepository;
+import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
+import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
+import fr.sictiam.stela.pesservice.model.Admin;
+import fr.sictiam.stela.pesservice.model.Attachment;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.ServerCode;
+import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
+import fr.sictiam.stela.pesservice.scheduler.RetryTask;
+import fr.sictiam.stela.pesservice.service.AdminService;
+import fr.sictiam.stela.pesservice.service.ExternalRestService;
+import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.LocalesService;
+import fr.sictiam.stela.pesservice.service.NotificationService;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -44,24 +40,31 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
-import fr.sictiam.stela.pesservice.dao.AdminRepository;
-import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
-import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
-import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
-import fr.sictiam.stela.pesservice.scheduler.RetryTask;
-import fr.sictiam.stela.pesservice.scheduler.SenderTask;
-import fr.sictiam.stela.pesservice.service.AdminService;
-import fr.sictiam.stela.pesservice.service.ExternalRestService;
-import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
-import fr.sictiam.stela.pesservice.service.LocalesService;
-import fr.sictiam.stela.pesservice.service.NotificationService;
-import fr.sictiam.stela.pesservice.service.PesAllerService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -126,8 +129,8 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     public void createAdmin() {
         adminRepository.deleteAll();
-        adminService.create(
-                new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", true, LocalDateTime.now(), LocalDateTime.now(), false, ""));
+        adminService.create(new Admin("7afb264b-759c-49af-a564-0d4851b1e6a8", true, LocalDateTime.now(),
+                LocalDateTime.now(), false, ""));
     }
 
     public void createLocalAuthority() {
@@ -135,6 +138,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test",
                     "999888777", true);
             localAuthority.setServerCode(ServerCode.VHICE21);
+            localAuthority.setSirens(Collections.singletonList("200035319"));
             localAuthorityService.createOrUpdate(localAuthority);
 
             String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","
@@ -287,7 +291,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.NOTIFICATION_SENT))));
 
     }
-    
+
     @Test
     public void retryTestMaxReach() throws IOException {
         PesAller pes = samplePesAller();
@@ -301,7 +305,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
-        
+
         pesService.updateStatus(pes.getUuid(), StatusType.MAX_RETRY_REACH);
 
         MockPesEventListener mockPesEventListener2 = new MockPesEventListener(StatusType.MAX_RETRY_REACH);
@@ -312,7 +316,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         } catch (Exception e) {
             fail("Should not have thrown an exception");
         }
-        
+
         assertThat(pesService.getBlockedFlux(), empty());
     }
 

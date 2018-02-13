@@ -1,11 +1,11 @@
 package fr.sictiam.stela.acteservice.validation;
 
-import java.util.Collection;
+import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+import java.util.Collection;
 
 public class EmailCollectionValidator implements ConstraintValidator<EmailCollection, Collection<String>> {
 
@@ -16,15 +16,15 @@ public class EmailCollectionValidator implements ConstraintValidator<EmailCollec
 
     @Override
     public boolean isValid(Collection<String> value, ConstraintValidatorContext context) {
-	if (value == null) {
-	    return true;
-	}
-	EmailValidator validator = new EmailValidator();
-	for (String s : value) {
-	    if (!validator.isValid(s, context)) {
-		return false;
-	    }
-	}
-	return true;
+        if (value == null) {
+            return true;
+        }
+        EmailValidator validator = new EmailValidator();
+        for (String s : value) {
+            if (!validator.isValid(s, context)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

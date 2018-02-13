@@ -1,11 +1,10 @@
 package fr.sictiam.stela.apigateway.model;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.oasis_eu.spring.kernel.model.UserInfo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 public class Agent {
 
@@ -26,7 +25,7 @@ public class Agent {
     @NotEmpty
     @JsonProperty(value = "slug_name")
     private String slugName;
-  
+
     protected Agent() {
     }
 

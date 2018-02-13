@@ -16,14 +16,14 @@ public class PesRestResponseEntityExceptionHandler extends ResponseEntityExcepti
 
     @ExceptionHandler({ PesCreationException.class })
     protected ResponseEntity<Object> handlePesCreationException(Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, "Pes creation error.", new HttpHeaders(),
-                HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return handleExceptionInternal(ex, "Pes creation error.", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR,
+                request);
     }
-    
+
     @ExceptionHandler({ PesSendException.class })
     protected ResponseEntity<Object> handlePesPesSendException(Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, "Pes creation error.", new HttpHeaders(),
-                HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return handleExceptionInternal(ex, "Pes creation error.", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR,
+                request);
     }
-    
+
 }

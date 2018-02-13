@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,11 +15,13 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-
 /**
- * <p>Java class for SIRET_ctype complex type.
+ * <p>
+ * Java class for SIRET_ctype complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="SIRET_ctype">
@@ -38,10 +39,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIRET_ctype", namespace = "http://xml.insee.fr/schema", propOrder = {
-    "siren",
-    "nic"
-})
+@XmlType(name = "SIRET_ctype", namespace = "http://xml.insee.fr/schema", propOrder = { "siren", "nic" })
 public class SIRETCtype {
 
     @XmlElement(name = "SIREN", required = true)
@@ -56,10 +54,8 @@ public class SIRETCtype {
     /**
      * Gets the value of the siren property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getSIREN() {
         return siren;
@@ -69,9 +65,8 @@ public class SIRETCtype {
      * Sets the value of the siren property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setSIREN(String value) {
         this.siren = value;
@@ -80,10 +75,8 @@ public class SIRETCtype {
     /**
      * Gets the value of the nic property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getNIC() {
         return nic;
@@ -93,9 +86,8 @@ public class SIRETCtype {
      * Sets the value of the nic property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setNIC(String value) {
         this.nic = value;

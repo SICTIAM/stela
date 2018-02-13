@@ -15,8 +15,12 @@ public class ZuulConfig {
     }
 
     @Bean
-    public PreLoggingFilter preLoggingFilter() { return new PreLoggingFilter(); }
+    public PreLoggingFilter preLoggingFilter() {
+        return new PreLoggingFilter();
+    }
 
     @Bean
-    public AuthorizationHeaderFilter authorizationHeaderFilter() { return new AuthorizationHeaderFilter(); }
+    public AuthorizationHeaderFilter authorizationHeaderFilter() {
+        return new AuthorizationHeaderFilter();
+    }
 }

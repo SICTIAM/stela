@@ -7,7 +7,8 @@ public class ActeNotSentException extends RuntimeException {
     public ActeNotSentException(String message) {
         super(message);
     }
-    public ActeNotSentException(String message, Throwable cause){
+
+    public ActeNotSentException(String message, Throwable cause) {
         super(message, cause);
     }
 }

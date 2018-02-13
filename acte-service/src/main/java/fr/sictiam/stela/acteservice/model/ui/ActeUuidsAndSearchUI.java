@@ -13,9 +13,9 @@ public class ActeUuidsAndSearchUI {
     private String number;
     private String objet;
     private ActeNature nature;
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate decisionFrom;
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate decisionTo;
     private StatusType status;
 

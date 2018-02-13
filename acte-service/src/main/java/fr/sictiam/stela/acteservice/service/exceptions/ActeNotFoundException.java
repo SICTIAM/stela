@@ -11,7 +11,8 @@ public class ActeNotFoundException extends RuntimeException {
     public ActeNotFoundException() {
         super("notifications.acte.not_found");
     }
-    public ActeNotFoundException(String message, Throwable cause){
+
+    public ActeNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -1,23 +1,5 @@
 package fr.sictiam.stela.acteservice.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import fr.sictiam.stela.acteservice.dao.AttachmentTypeRepository;
 import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
@@ -28,6 +10,23 @@ import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LocalAuthorityService {

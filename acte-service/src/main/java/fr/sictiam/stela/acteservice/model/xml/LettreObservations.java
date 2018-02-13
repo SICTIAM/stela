@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,11 +13,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -36,14 +37,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "motif",
-    "document"
-})
+@XmlType(name = "", propOrder = { "motif", "document" })
 @XmlRootElement(name = "LettreObservations")
-public class LettreObservations
-    extends DonneesCourrierPref
-{
+public class LettreObservations extends DonneesCourrierPref {
 
     @XmlElement(name = "Motif", required = true)
     protected String motif;
@@ -53,10 +49,8 @@ public class LettreObservations
     /**
      * Gets the value of the motif property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getMotif() {
         return motif;
@@ -66,9 +60,8 @@ public class LettreObservations
      * Sets the value of the motif property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setMotif(String value) {
         this.motif = value;
@@ -77,10 +70,8 @@ public class LettreObservations
     /**
      * Gets the value of the document property.
      * 
-     * @return
-     *     possible object is
-     *     {@link FichierSigne }
-     *     
+     * @return possible object is {@link FichierSigne }
+     * 
      */
     public FichierSigne getDocument() {
         return document;
@@ -90,9 +81,8 @@ public class LettreObservations
      * Sets the value of the document property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link FichierSigne }
-     *     
+     *            allowed object is {@link FichierSigne }
+     * 
      */
     public void setDocument(FichierSigne value) {
         this.document = value;

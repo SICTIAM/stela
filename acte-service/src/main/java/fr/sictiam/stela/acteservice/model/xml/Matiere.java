@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,13 +14,15 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-
 /**
  * Matiere d'un acte (Code et libellé)
  * 
- * <p>Java class for Matiere complex type.
+ * <p>
+ * Java class for Matiere complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="Matiere">
@@ -39,15 +40,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Matiere")
 @XmlSeeAlso({
-    fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4 .class,
-    fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .class,
-    fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1 .Matiere2 .class,
-    fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1 .class
-})
+        fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.Matiere4.class,
+        fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.class,
+        fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1.Matiere2.class,
+        fr.sictiam.stela.acteservice.model.xml.RetourClassification.Matieres.Matiere1.class })
 public class Matiere {
 
     @XmlAttribute(name = "CodeMatiere", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-    @XmlJavaTypeAdapter(Adapter3 .class)
+    @XmlJavaTypeAdapter(Adapter3.class)
     protected Integer codeMatiere;
     @XmlAttribute(name = "Libelle", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
     protected String libelle;
@@ -55,10 +55,8 @@ public class Matiere {
     /**
      * Gets the value of the codeMatiere property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public Integer getCodeMatiere() {
         return codeMatiere;
@@ -68,9 +66,8 @@ public class Matiere {
      * Sets the value of the codeMatiere property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setCodeMatiere(Integer value) {
         this.codeMatiere = value;
@@ -79,10 +76,8 @@ public class Matiere {
     /**
      * Gets the value of the libelle property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getLibelle() {
         return libelle;
@@ -92,9 +87,8 @@ public class Matiere {
      * Sets the value of the libelle property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setLibelle(String value) {
         this.libelle = value;

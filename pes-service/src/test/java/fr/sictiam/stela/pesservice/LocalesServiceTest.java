@@ -1,16 +1,15 @@
 package fr.sictiam.stela.pesservice;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.service.LocalesService;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
-import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.service.LocalesService;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 public class LocalesServiceTest {
 

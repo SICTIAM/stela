@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,6 @@ public class LocalAuthorityService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
     private final LocalAuthorityRepository localAuthorityRepository;
-
 
     @Autowired
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
@@ -58,15 +58,16 @@ public class LocalAuthorityService {
 
         if (event.getActivatedModules().contains("PES")) {
             localAuthority.setActive(true);
-            // If the new LocalAuthority.siren is present in other LocalAuthority.sirens, we need to remove it so the
-            // siren is present only once in the activated local authorities (needed for the PesRetour assignment)
-            List<LocalAuthority> allLocalAuthorities = localAuthorityRepository.findByActiveTrueAndSirens(localAuthority.getSiren());
+            // If the new LocalAuthority.siren is present in other LocalAuthority.sirens, we
+            // need to remove it so the
+            // siren is present only once in the activated local authorities (needed for the
+            // PesRetour assignment)
+            List<LocalAuthority> allLocalAuthorities = localAuthorityRepository
+                    .findByActiveTrueAndSirens(localAuthority.getSiren());
             allLocalAuthorities.forEach(localAuth -> {
-                localAuth.setSirens(
-                        localAuth.getSirens().stream()
-                                .filter(siren -> !localAuthority.getSiren().equals(localAuth.getSiren()))
-                                .collect(Collectors.toList())
-                );
+                localAuth.setSirens(localAuth.getSirens().stream()
+                        .filter(siren -> !localAuthority.getSiren().equals(localAuth.getSiren()))
+                        .collect(Collectors.toList()));
                 createOrUpdate(localAuth);
             });
         }

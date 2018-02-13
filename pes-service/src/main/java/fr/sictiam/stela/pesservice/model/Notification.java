@@ -3,7 +3,8 @@ package fr.sictiam.stela.pesservice.model;
 import java.util.Arrays;
 import java.util.List;
 
-import static fr.sictiam.stela.pesservice.model.StatusType.*;
+import static fr.sictiam.stela.pesservice.model.StatusType.ACK_RECEIVED;
+import static fr.sictiam.stela.pesservice.model.StatusType.SENT;
 
 public class Notification {
 
@@ -11,11 +12,10 @@ public class Notification {
     private boolean deactivatable;
     private boolean defaultValue;
 
-    public static List<Notification> notifications = Arrays.asList(
-            new Notification(SENT , true, false),
-            new Notification(ACK_RECEIVED , true, true));
+    public static List<Notification> notifications = Arrays.asList(new Notification(SENT, true, false),
+            new Notification(ACK_RECEIVED, true, true));
 
-    private Notification(StatusType statusType, boolean deactivatable, boolean defaultValue){
+    private Notification(StatusType statusType, boolean deactivatable, boolean defaultValue) {
         this.statusType = statusType;
         this.deactivatable = deactivatable;
         this.defaultValue = defaultValue;

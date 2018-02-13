@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,7 +35,7 @@ public class Admin {
     }
 
     public Admin(String uuid, @NotNull boolean heliosAvailable, @NotNull LocalDateTime unavailabilityHeliosStartDate,
-                 @NotNull LocalDateTime unavailabilityHeliosEndDate, boolean alertMessageDisplayed, String alertMessage) {
+            @NotNull LocalDateTime unavailabilityHeliosEndDate, boolean alertMessageDisplayed, String alertMessage) {
         this.uuid = uuid;
         this.heliosAvailable = heliosAvailable;
         this.unavailabilityHeliosStartDate = unavailabilityHeliosStartDate;

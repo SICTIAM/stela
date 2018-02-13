@@ -9,7 +9,8 @@ public class NoContentException extends RuntimeException {
     public NoContentException() {
         super("notifications.acte.no_content");
     }
-    public NoContentException(String message, Throwable cause){
+
+    public NoContentException(String message, Throwable cause) {
         super(message, cause);
     }
 }

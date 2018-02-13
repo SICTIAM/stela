@@ -1,38 +1,36 @@
 package fr.sictiam.stela.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.admin.model.UI.Views;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
-
-import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.annotation.JsonView;
-
-import fr.sictiam.stela.admin.model.UI.Views;
-
 @Entity
 public class Profile {
-    
+
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @JsonView(Views.ProfileViewPublic.class)
     private String uuid;
-    
-    @ManyToOne(fetch=FetchType.EAGER)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonView(Views.ProfileViewPrivate.class)
     private LocalAuthority localAuthority;
-    
+
     @ManyToOne
     @JsonView(Views.ProfileViewChain.class)
     private Agent agent;
-    
+
     @JsonView(Views.ProfileViewPublic.class)
     private Boolean admin;
-    
-    @ManyToMany(mappedBy="profiles")
+
+    @ManyToMany(mappedBy = "profiles")
     @JsonView(Views.ProfileViewPrivate.class)
     private Set<WorkGroup> groups;
 
@@ -43,16 +41,15 @@ public class Profile {
     @JoinColumn(name = "profile_uuid")
     @JsonView(Views.ProfileViewPublic.class)
     private List<NotificationValue> notificationValues;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @JsonView(Views.ProfileViewPublic.class)
-    private Set<Module> localAuthorityNotifications; 
+    private Set<Module> localAuthorityNotifications;
 
     public Profile() {
     }
-    
-    
+
     public Profile(LocalAuthority localAuthority, Agent agent, Boolean admin) {
         super();
         this.localAuthority = localAuthority;
@@ -116,7 +113,6 @@ public class Profile {
     public Set<Module> getLocalAuthorityNotifications() {
         return localAuthorityNotifications;
     }
-
 
     public void setLocalAuthorityNotifications(Set<Module> localAuthorityNotifications) {
         this.localAuthorityNotifications = localAuthorityNotifications;

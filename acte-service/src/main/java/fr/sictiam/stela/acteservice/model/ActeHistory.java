@@ -5,6 +5,7 @@ import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -88,13 +89,7 @@ public class ActeHistory implements Comparable<ActeHistory> {
 
     @Override
     public String toString() {
-        return "ActeHistory{" +
-                "uuid='" + uuid + '\'' +
-                ", acteUuid='" + acteUuid + '\'' +
-                ", status=" + status +
-                ", date=" + date +
-                ", message='" + message + '\'' +
-                ", fileName='" + fileName + '\'' +
-                '}';
+        return "ActeHistory{" + "uuid='" + uuid + '\'' + ", acteUuid='" + acteUuid + '\'' + ", status=" + status
+                + ", date=" + date + ", message='" + message + '\'' + ", fileName='" + fileName + '\'' + '}';
     }
 }

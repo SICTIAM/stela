@@ -1,5 +1,8 @@
 package fr.sictiam.stela.acteservice.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.model.event.Event;
+import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -14,11 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fr.sictiam.stela.acteservice.model.event.Event;
-import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
-
 @Service
 @ConditionalOnProperty(value = "application.rabbit.enabled")
 public class ReceiverService {
@@ -30,31 +28,27 @@ public class ReceiverService {
 
     @Value("${application.amqp.acte.exchange}")
     private String exchange;
-    
+
     @Autowired
-    private  AmqpTemplate amqpTemplate;
-    
+    private AmqpTemplate amqpTemplate;
+
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
-    @RabbitListener(bindings = @QueueBinding(           
-            value = @Queue(name="acteQueue", durable= "true"),
-            exchange = @Exchange(value = "#{'${application.amqp.acte.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"),
-            key = "#{'${application.amqp.acte.adminKey}'}")
-    )
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = "acteQueue", durable = "true"), exchange = @Exchange(value = "#{'${application.amqp.acte.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"), key = "#{'${application.amqp.acte.adminKey}'}"))
     public void fromAdminService(Message message) {
         LOGGER.debug("Received a message {}", message);
-        
+
         ObjectMapper objectMapper = new ObjectMapper();
-        
+
         try {
-            Event event =objectMapper.readValue(message.getBody(), Event.class);
+            Event event = objectMapper.readValue(message.getBody(), Event.class);
             LOGGER.debug(event.getOrigin());
-            
-            if(event instanceof LocalAuthorityEvent) {
-                localAuthorityService.handleEvent((LocalAuthorityEvent)event);
+
+            if (event instanceof LocalAuthorityEvent) {
+                localAuthorityService.handleEvent((LocalAuthorityEvent) event);
             }
-            
+
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }

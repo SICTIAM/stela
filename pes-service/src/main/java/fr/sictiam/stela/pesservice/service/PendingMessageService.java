@@ -1,13 +1,12 @@
 package fr.sictiam.stela.pesservice.service;
 
-import java.util.List;
+import fr.sictiam.stela.pesservice.dao.PendingMessageRepository;
+import fr.sictiam.stela.pesservice.model.PendingMessage;
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-import org.springframework.stereotype.Service;
-
-import fr.sictiam.stela.pesservice.dao.PendingMessageRepository;
-import fr.sictiam.stela.pesservice.model.PendingMessage;
+import java.util.List;
 
 @Service
 public class PendingMessageService {

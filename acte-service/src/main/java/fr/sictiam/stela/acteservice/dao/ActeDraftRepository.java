@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface ActeDraftRepository extends JpaRepository<Draft, String> {
     Draft findByUuid(String uuid);
+
     List<Draft> findAllByOrderByLastModifiedDesc();
+
     List<Draft> findAllByLastModifiedBefore(LocalDateTime date);
 }

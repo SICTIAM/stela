@@ -9,7 +9,8 @@ public class HistoryNotFoundException extends RuntimeException {
     public HistoryNotFoundException() {
         super("notifications.pes.history_not_found");
     }
-    public HistoryNotFoundException(String message, Throwable cause){
+
+    public HistoryNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

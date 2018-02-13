@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pesservice.model;
 
 import javax.persistence.*;
+
 import java.util.List;
 
 @Entity
@@ -13,12 +14,12 @@ public class LocalAuthority {
     @Enumerated(EnumType.STRING)
     private ServerCode serverCode;
     private Boolean active;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "sirens", joinColumns = @JoinColumn(name = "local_authority_uuid"))
     @Column(name = "siren")
     private List<String> sirens;
-    
+
     public LocalAuthority() {
     }
 
@@ -66,7 +67,7 @@ public class LocalAuthority {
     public void setActive(Boolean active) {
         this.active = active;
     }
-    
+
     public List<String> getSirens() {
         return sirens;
     }

@@ -1,8 +1,8 @@
 package fr.sictiam.stela.acteservice.model.event;
 
-import java.util.Set;
-
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+
+import java.util.Set;
 
 public class LocalAuthorityEvent extends Event {
 
@@ -11,11 +11,11 @@ public class LocalAuthorityEvent extends Event {
     private String siren;
 
     private Set<String> activatedModules;
-        
+
     public LocalAuthorityEvent() {
         super(LocalAuthorityEvent.class.getName());
     }
-    
+
     public LocalAuthorityEvent(LocalAuthority localAuthority) {
         super(LocalAuthorityEvent.class.getName());
         this.uuid = localAuthority.getUuid();
@@ -46,13 +46,13 @@ public class LocalAuthorityEvent extends Event {
     public void setSiren(String siren) {
         this.siren = siren;
     }
-    
+
     public Set<String> getActivatedModules() {
         return activatedModules;
     }
 
     public void setActivatedModules(Set<String> activatedModules) {
         this.activatedModules = activatedModules;
-    }    
-    
+    }
+
 }

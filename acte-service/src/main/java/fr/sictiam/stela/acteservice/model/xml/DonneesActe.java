@@ -5,12 +5,8 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -19,13 +15,19 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Donnees associees a un acte
  * 
- * <p>Java class for DonneesActe complex type.
+ * <p>
+ * Java class for DonneesActe complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="DonneesActe">
@@ -126,19 +128,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "DonneesActe", propOrder = {
-    "codeMatiere1",
-    "codeMatiere2",
-    "codeMatiere3",
-    "codeMatiere4",
-    "codeMatiere5",
-    "objet",
-    "precedentIdentifiantActe",
-    "classificationDateVersion",
-    "document",
-    "annexes",
-    "documentPapier"
-})
+@XmlType(name = "DonneesActe", propOrder = { "codeMatiere1", "codeMatiere2", "codeMatiere3", "codeMatiere4",
+        "codeMatiere5", "objet", "precedentIdentifiantActe", "classificationDateVersion", "document", "annexes",
+        "documentPapier" })
 public class DonneesActe {
 
     @XmlElement(name = "CodeMatiere1", required = true)
@@ -156,7 +148,7 @@ public class DonneesActe {
     @XmlElement(name = "PrecedentIdentifiantActe")
     protected DonneesActe.PrecedentIdentifiantActe precedentIdentifiantActe;
     @XmlElement(name = "ClassificationDateVersion", required = true, type = String.class)
-    @XmlJavaTypeAdapter(Adapter1 .class)
+    @XmlJavaTypeAdapter(Adapter1.class)
     @XmlSchemaType(name = "date")
     protected LocalDate classificationDateVersion;
     @XmlElement(name = "Document", required = true)
@@ -166,22 +158,20 @@ public class DonneesActe {
     @XmlElement(name = "DocumentPapier", required = true, nillable = true)
     protected String documentPapier;
     @XmlAttribute(name = "Date", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-    @XmlJavaTypeAdapter(Adapter1 .class)
+    @XmlJavaTypeAdapter(Adapter1.class)
     @XmlSchemaType(name = "date")
     protected LocalDate date;
     @XmlAttribute(name = "NumeroInterne", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
     protected String numeroInterne;
     @XmlAttribute(name = "CodeNatureActe", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-    @XmlJavaTypeAdapter(Adapter3 .class)
+    @XmlJavaTypeAdapter(Adapter3.class)
     protected Integer codeNatureActe;
 
     /**
      * Gets the value of the codeMatiere1 property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.CodeMatiere1 }
-     *     
+     * @return possible object is {@link DonneesActe.CodeMatiere1 }
+     * 
      */
     public DonneesActe.CodeMatiere1 getCodeMatiere1() {
         return codeMatiere1;
@@ -191,9 +181,8 @@ public class DonneesActe {
      * Sets the value of the codeMatiere1 property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.CodeMatiere1 }
-     *     
+     *            allowed object is {@link DonneesActe.CodeMatiere1 }
+     * 
      */
     public void setCodeMatiere1(DonneesActe.CodeMatiere1 value) {
         this.codeMatiere1 = value;
@@ -202,10 +191,8 @@ public class DonneesActe {
     /**
      * Gets the value of the codeMatiere2 property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.CodeMatiere2 }
-     *     
+     * @return possible object is {@link DonneesActe.CodeMatiere2 }
+     * 
      */
     public DonneesActe.CodeMatiere2 getCodeMatiere2() {
         return codeMatiere2;
@@ -215,9 +202,8 @@ public class DonneesActe {
      * Sets the value of the codeMatiere2 property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.CodeMatiere2 }
-     *     
+     *            allowed object is {@link DonneesActe.CodeMatiere2 }
+     * 
      */
     public void setCodeMatiere2(DonneesActe.CodeMatiere2 value) {
         this.codeMatiere2 = value;
@@ -226,10 +212,8 @@ public class DonneesActe {
     /**
      * Gets the value of the codeMatiere3 property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.CodeMatiere3 }
-     *     
+     * @return possible object is {@link DonneesActe.CodeMatiere3 }
+     * 
      */
     public DonneesActe.CodeMatiere3 getCodeMatiere3() {
         return codeMatiere3;
@@ -239,9 +223,8 @@ public class DonneesActe {
      * Sets the value of the codeMatiere3 property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.CodeMatiere3 }
-     *     
+     *            allowed object is {@link DonneesActe.CodeMatiere3 }
+     * 
      */
     public void setCodeMatiere3(DonneesActe.CodeMatiere3 value) {
         this.codeMatiere3 = value;
@@ -250,10 +233,8 @@ public class DonneesActe {
     /**
      * Gets the value of the codeMatiere4 property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.CodeMatiere4 }
-     *     
+     * @return possible object is {@link DonneesActe.CodeMatiere4 }
+     * 
      */
     public DonneesActe.CodeMatiere4 getCodeMatiere4() {
         return codeMatiere4;
@@ -263,9 +244,8 @@ public class DonneesActe {
      * Sets the value of the codeMatiere4 property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.CodeMatiere4 }
-     *     
+     *            allowed object is {@link DonneesActe.CodeMatiere4 }
+     * 
      */
     public void setCodeMatiere4(DonneesActe.CodeMatiere4 value) {
         this.codeMatiere4 = value;
@@ -274,10 +254,8 @@ public class DonneesActe {
     /**
      * Gets the value of the codeMatiere5 property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.CodeMatiere5 }
-     *     
+     * @return possible object is {@link DonneesActe.CodeMatiere5 }
+     * 
      */
     public DonneesActe.CodeMatiere5 getCodeMatiere5() {
         return codeMatiere5;
@@ -287,9 +265,8 @@ public class DonneesActe {
      * Sets the value of the codeMatiere5 property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.CodeMatiere5 }
-     *     
+     *            allowed object is {@link DonneesActe.CodeMatiere5 }
+     * 
      */
     public void setCodeMatiere5(DonneesActe.CodeMatiere5 value) {
         this.codeMatiere5 = value;
@@ -298,10 +275,8 @@ public class DonneesActe {
     /**
      * Gets the value of the objet property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getObjet() {
         return objet;
@@ -311,9 +286,8 @@ public class DonneesActe {
      * Sets the value of the objet property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setObjet(String value) {
         this.objet = value;
@@ -322,10 +296,8 @@ public class DonneesActe {
     /**
      * Gets the value of the precedentIdentifiantActe property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.PrecedentIdentifiantActe }
-     *     
+     * @return possible object is {@link DonneesActe.PrecedentIdentifiantActe }
+     * 
      */
     public DonneesActe.PrecedentIdentifiantActe getPrecedentIdentifiantActe() {
         return precedentIdentifiantActe;
@@ -335,9 +307,8 @@ public class DonneesActe {
      * Sets the value of the precedentIdentifiantActe property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.PrecedentIdentifiantActe }
-     *     
+     *            allowed object is {@link DonneesActe.PrecedentIdentifiantActe }
+     * 
      */
     public void setPrecedentIdentifiantActe(DonneesActe.PrecedentIdentifiantActe value) {
         this.precedentIdentifiantActe = value;
@@ -346,10 +317,8 @@ public class DonneesActe {
     /**
      * Gets the value of the classificationDateVersion property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public LocalDate getClassificationDateVersion() {
         return classificationDateVersion;
@@ -359,9 +328,8 @@ public class DonneesActe {
      * Sets the value of the classificationDateVersion property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setClassificationDateVersion(LocalDate value) {
         this.classificationDateVersion = value;
@@ -370,10 +338,8 @@ public class DonneesActe {
     /**
      * Gets the value of the document property.
      * 
-     * @return
-     *     possible object is
-     *     {@link FichierSigne }
-     *     
+     * @return possible object is {@link FichierSigne }
+     * 
      */
     public FichierSigne getDocument() {
         return document;
@@ -383,9 +349,8 @@ public class DonneesActe {
      * Sets the value of the document property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link FichierSigne }
-     *     
+     *            allowed object is {@link FichierSigne }
+     * 
      */
     public void setDocument(FichierSigne value) {
         this.document = value;
@@ -394,10 +359,8 @@ public class DonneesActe {
     /**
      * Gets the value of the annexes property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesActe.Annexes }
-     *     
+     * @return possible object is {@link DonneesActe.Annexes }
+     * 
      */
     public DonneesActe.Annexes getAnnexes() {
         return annexes;
@@ -407,9 +370,8 @@ public class DonneesActe {
      * Sets the value of the annexes property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesActe.Annexes }
-     *     
+     *            allowed object is {@link DonneesActe.Annexes }
+     * 
      */
     public void setAnnexes(DonneesActe.Annexes value) {
         this.annexes = value;
@@ -418,10 +380,8 @@ public class DonneesActe {
     /**
      * Gets the value of the documentPapier property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getDocumentPapier() {
         return documentPapier;
@@ -431,9 +391,8 @@ public class DonneesActe {
      * Sets the value of the documentPapier property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDocumentPapier(String value) {
         this.documentPapier = value;
@@ -442,10 +401,8 @@ public class DonneesActe {
     /**
      * Gets the value of the date property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public LocalDate getDate() {
         return date;
@@ -455,9 +412,8 @@ public class DonneesActe {
      * Sets the value of the date property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDate(LocalDate value) {
         this.date = value;
@@ -466,10 +422,8 @@ public class DonneesActe {
     /**
      * Gets the value of the numeroInterne property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getNumeroInterne() {
         return numeroInterne;
@@ -479,9 +433,8 @@ public class DonneesActe {
      * Sets the value of the numeroInterne property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setNumeroInterne(String value) {
         this.numeroInterne = value;
@@ -490,10 +443,8 @@ public class DonneesActe {
     /**
      * Gets the value of the codeNatureActe property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public Integer getCodeNatureActe() {
         return codeNatureActe;
@@ -503,19 +454,20 @@ public class DonneesActe {
      * Sets the value of the codeNatureActe property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setCodeNatureActe(Integer value) {
         this.codeNatureActe = value;
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -533,15 +485,13 @@ public class DonneesActe {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "annexe"
-    })
+    @XmlType(name = "", propOrder = { "annexe" })
     public static class Annexes {
 
         @XmlElement(name = "Annexe")
         protected List<FichierSigne> annexe;
         @XmlAttribute(name = "Nombre", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-        @XmlJavaTypeAdapter(Adapter2 .class)
+        @XmlJavaTypeAdapter(Adapter2.class)
         @XmlSchemaType(name = "nonNegativeInteger")
         protected String nombre;
 
@@ -549,21 +499,22 @@ public class DonneesActe {
          * Gets the value of the annexe property.
          * 
          * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the annexe property.
+         * This accessor method returns a reference to the live list, not a snapshot.
+         * Therefore any modification you make to the returned list will be present
+         * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+         * for the annexe property.
          * 
          * <p>
          * For example, to add a new item, do as follows:
+         * 
          * <pre>
-         *    getAnnexe().add(newItem);
+         * getAnnexe().add(newItem);
          * </pre>
          * 
          * 
          * <p>
-         * Objects of the following type(s) are allowed in the list
-         * {@link FichierSigne }
+         * Objects of the following type(s) are allowed in the list {@link FichierSigne
+         * }
          * 
          * 
          */
@@ -577,10 +528,8 @@ public class DonneesActe {
         /**
          * Gets the value of the nombre property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public String getNombre() {
             return nombre;
@@ -590,9 +539,8 @@ public class DonneesActe {
          * Sets the value of the nombre property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setNombre(String value) {
             this.nombre = value;
@@ -600,11 +548,13 @@ public class DonneesActe {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -623,16 +573,14 @@ public class DonneesActe {
     public static class CodeMatiere1 {
 
         @XmlAttribute(name = "CodeMatiere", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-        @XmlJavaTypeAdapter(Adapter3 .class)
+        @XmlJavaTypeAdapter(Adapter3.class)
         protected Integer codeMatiere;
 
         /**
          * Gets the value of the codeMatiere property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public Integer getCodeMatiere() {
             return codeMatiere;
@@ -642,9 +590,8 @@ public class DonneesActe {
          * Sets the value of the codeMatiere property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setCodeMatiere(Integer value) {
             this.codeMatiere = value;
@@ -652,11 +599,13 @@ public class DonneesActe {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -675,16 +624,14 @@ public class DonneesActe {
     public static class CodeMatiere2 {
 
         @XmlAttribute(name = "CodeMatiere", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-        @XmlJavaTypeAdapter(Adapter3 .class)
+        @XmlJavaTypeAdapter(Adapter3.class)
         protected Integer codeMatiere;
 
         /**
          * Gets the value of the codeMatiere property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public Integer getCodeMatiere() {
             return codeMatiere;
@@ -694,9 +641,8 @@ public class DonneesActe {
          * Sets the value of the codeMatiere property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setCodeMatiere(Integer value) {
             this.codeMatiere = value;
@@ -704,11 +650,13 @@ public class DonneesActe {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -727,16 +675,14 @@ public class DonneesActe {
     public static class CodeMatiere3 {
 
         @XmlAttribute(name = "CodeMatiere", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-        @XmlJavaTypeAdapter(Adapter3 .class)
+        @XmlJavaTypeAdapter(Adapter3.class)
         protected Integer codeMatiere;
 
         /**
          * Gets the value of the codeMatiere property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public Integer getCodeMatiere() {
             return codeMatiere;
@@ -746,9 +692,8 @@ public class DonneesActe {
          * Sets the value of the codeMatiere property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setCodeMatiere(Integer value) {
             this.codeMatiere = value;
@@ -756,11 +701,13 @@ public class DonneesActe {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -779,16 +726,14 @@ public class DonneesActe {
     public static class CodeMatiere4 {
 
         @XmlAttribute(name = "CodeMatiere", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-        @XmlJavaTypeAdapter(Adapter3 .class)
+        @XmlJavaTypeAdapter(Adapter3.class)
         protected Integer codeMatiere;
 
         /**
          * Gets the value of the codeMatiere property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public Integer getCodeMatiere() {
             return codeMatiere;
@@ -798,9 +743,8 @@ public class DonneesActe {
          * Sets the value of the codeMatiere property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setCodeMatiere(Integer value) {
             this.codeMatiere = value;
@@ -808,11 +752,13 @@ public class DonneesActe {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -831,16 +777,14 @@ public class DonneesActe {
     public static class CodeMatiere5 {
 
         @XmlAttribute(name = "CodeMatiere", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-        @XmlJavaTypeAdapter(Adapter3 .class)
+        @XmlJavaTypeAdapter(Adapter3.class)
         protected Integer codeMatiere;
 
         /**
          * Gets the value of the codeMatiere property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public Integer getCodeMatiere() {
             return codeMatiere;
@@ -850,9 +794,8 @@ public class DonneesActe {
          * Sets the value of the codeMatiere property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setCodeMatiere(Integer value) {
             this.codeMatiere = value;
@@ -860,11 +803,13 @@ public class DonneesActe {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -888,10 +833,8 @@ public class DonneesActe {
         /**
          * Gets the value of the idActe property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public String getIDActe() {
             return idActe;
@@ -901,9 +844,8 @@ public class DonneesActe {
          * Sets the value of the idActe property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setIDActe(String value) {
             this.idActe = value;

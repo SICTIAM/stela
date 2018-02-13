@@ -1,20 +1,5 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import fr.sictiam.stela.pesservice.dao.PendingMessageRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.PendingMessage;
@@ -24,6 +9,20 @@ import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.AdminService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
+
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class SenderTask implements ApplicationListener<PesHistoryEvent> {

@@ -10,7 +10,7 @@ public class Views {
 
     }
 
-    public interface LocalAuthorityViewPublic extends LocalAuthorityViewBasic{
+    public interface LocalAuthorityViewPublic extends LocalAuthorityViewBasic {
 
     }
 

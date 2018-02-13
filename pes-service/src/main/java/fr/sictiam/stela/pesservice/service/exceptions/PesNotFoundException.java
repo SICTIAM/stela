@@ -11,7 +11,8 @@ public class PesNotFoundException extends RuntimeException {
     public PesNotFoundException() {
         super("notifications.pes.not_found");
     }
-    public PesNotFoundException(String message, Throwable cause){
+
+    public PesNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

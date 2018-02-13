@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,11 +13,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -35,13 +36,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "documents"
-})
+@XmlType(name = "", propOrder = { "documents" })
 @XmlRootElement(name = "PieceComplementaire")
-public class PieceComplementaire
-    extends DonneesCourrierPref
-{
+public class PieceComplementaire extends DonneesCourrierPref {
 
     @XmlElement(name = "Documents", required = true)
     protected FichiersSignes documents;
@@ -49,10 +46,8 @@ public class PieceComplementaire
     /**
      * Gets the value of the documents property.
      * 
-     * @return
-     *     possible object is
-     *     {@link FichiersSignes }
-     *     
+     * @return possible object is {@link FichiersSignes }
+     * 
      */
     public FichiersSignes getDocuments() {
         return documents;
@@ -62,9 +57,8 @@ public class PieceComplementaire
      * Sets the value of the documents property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link FichiersSignes }
-     *     
+     *            allowed object is {@link FichiersSignes }
+     * 
      */
     public void setDocuments(FichiersSignes value) {
         this.documents = value;

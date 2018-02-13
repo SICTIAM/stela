@@ -2,6 +2,7 @@ package fr.sictiam.stela.pesservice.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
 import java.util.Collection;
 
 public class SirenCollectionValidator implements ConstraintValidator<SirenCollection, Collection<String>> {

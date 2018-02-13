@@ -1,19 +1,13 @@
 package fr.sictiam.stela.acteservice.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang.StringUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.Notification;
+import fr.sictiam.stela.acteservice.model.NotificationValue;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +17,18 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import javax.validation.constraints.NotNull;
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.Notification;
-import fr.sictiam.stela.acteservice.model.NotificationValue;
-import fr.sictiam.stela.acteservice.model.StatusType;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class NotificationService implements ApplicationListener<ActeHistoryEvent> {

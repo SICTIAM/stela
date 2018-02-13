@@ -1,11 +1,9 @@
 package fr.sictiam.stela.acteservice.dao;
 
-import java.util.Optional;
-
+import fr.sictiam.stela.acteservice.model.MaterialCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.MaterialCode;
+import java.util.Optional;
 
 public interface MaterialCodeRepository extends JpaRepository<MaterialCode, String> {
     Optional<MaterialCode> findByCodeAndLocalAuthorityUuid(String code, String uuid);

@@ -5,10 +5,8 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
-import java.time.LocalDate;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -17,11 +15,15 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.LocalDate;
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -44,17 +46,15 @@ public class ARAnnulation {
     @XmlAttribute(name = "IDActe", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
     protected String idActe;
     @XmlAttribute(name = "DateReception", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-    @XmlJavaTypeAdapter(Adapter1 .class)
+    @XmlJavaTypeAdapter(Adapter1.class)
     @XmlSchemaType(name = "date")
     protected LocalDate dateReception;
 
     /**
      * Gets the value of the idActe property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getIDActe() {
         return idActe;
@@ -64,9 +64,8 @@ public class ARAnnulation {
      * Sets the value of the idActe property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setIDActe(String value) {
         this.idActe = value;
@@ -75,10 +74,8 @@ public class ARAnnulation {
     /**
      * Gets the value of the dateReception property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public LocalDate getDateReception() {
         return dateReception;
@@ -88,9 +85,8 @@ public class ARAnnulation {
      * Sets the value of the dateReception property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDateReception(LocalDate value) {
         this.dateReception = value;

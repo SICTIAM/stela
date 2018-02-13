@@ -1,6 +1,6 @@
 package fr.sictiam.stela.admin.model;
 
-import java.time.LocalDateTime;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,19 +8,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-import org.hibernate.annotations.GenericGenerator;
+import java.time.LocalDateTime;
 
 @Entity
 public class AgentConnection {
-    
+
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    
+
     private LocalDateTime connectionDate;
-    
-    @ManyToOne(fetch=FetchType.EAGER)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     private Profile profile;
 
     public AgentConnection(Profile profile) {
@@ -47,5 +47,5 @@ public class AgentConnection {
     public void setProfile(Profile profile) {
         this.profile = profile;
     }
-   
+
 }

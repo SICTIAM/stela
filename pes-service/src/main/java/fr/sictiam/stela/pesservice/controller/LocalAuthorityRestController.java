@@ -10,9 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,7 +50,8 @@ public class LocalAuthorityRestController {
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity updateParams(@PathVariable String uuid, @RequestBody @Valid LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+    public ResponseEntity updateParams(@PathVariable String uuid,
+            @RequestBody @Valid LocalAuthorityUpdateUI localAuthorityUpdateUI) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);

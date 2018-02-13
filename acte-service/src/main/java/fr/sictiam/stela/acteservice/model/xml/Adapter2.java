@@ -5,15 +5,11 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class Adapter2
-    extends XmlAdapter<String, String>
-{
-
+public class Adapter2 extends XmlAdapter<String, String> {
 
     public String unmarshal(String value) {
         return new String(value);

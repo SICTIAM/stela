@@ -23,7 +23,7 @@ public class ProvisioningRequest {
     }
 
     public ProvisioningRequest(String instanceId, String clientId, String clientSecret, User user,
-                               Organization organization, String instanceRegistrationUri, AuthorizationGrant authorizationGrant) {
+            Organization organization, String instanceRegistrationUri, AuthorizationGrant authorizationGrant) {
         this.instanceId = instanceId;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -63,15 +63,10 @@ public class ProvisioningRequest {
 
     @Override
     public String toString() {
-        return "ProvisioningRequest{" +
-                "instanceId='" + instanceId + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
-                ", user=" + user +
-                ", organization=" + organization +
-                ", instanceRegistrationUri='" + instanceRegistrationUri + '\'' +
-                ", authorizationGrant=" + authorizationGrant +
-                '}';
+        return "ProvisioningRequest{" + "instanceId='" + instanceId + '\'' + ", clientId='" + clientId + '\''
+                + ", clientSecret='" + clientSecret + '\'' + ", user=" + user + ", organization=" + organization
+                + ", instanceRegistrationUri='" + instanceRegistrationUri + '\'' + ", authorizationGrant="
+                + authorizationGrant + '}';
     }
 
     public static class User {
@@ -97,10 +92,7 @@ public class ProvisioningRequest {
 
         @Override
         public String toString() {
-            return "User{" +
-                    "id='" + id + '\'' +
-                    ", name='" + name + '\'' +
-                    '}';
+            return "User{" + "id='" + id + '\'' + ", name='" + name + '\'' + '}';
         }
     }
 
@@ -140,12 +132,8 @@ public class ProvisioningRequest {
 
         @Override
         public String toString() {
-            return "Organization{" +
-                    "id='" + id + '\'' +
-                    ", name='" + name + '\'' +
-                    ", type='" + type + '\'' +
-                    ", dcId='" + dcId + '\'' +
-                    '}';
+            return "Organization{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", type='" + type + '\''
+                    + ", dcId='" + dcId + '\'' + '}';
         }
     }
 
@@ -173,11 +161,8 @@ public class ProvisioningRequest {
 
         @Override
         public String toString() {
-            return "AuthorizationGrant{" +
-                    "grantType='" + grantType + '\'' +
-                    ", assertion='" + assertion + '\'' +
-                    ", scope='" + scope + '\'' +
-                    '}';
+            return "AuthorizationGrant{" + "grantType='" + grantType + '\'' + ", assertion='" + assertion + '\''
+                    + ", scope='" + scope + '\'' + '}';
         }
     }
 }

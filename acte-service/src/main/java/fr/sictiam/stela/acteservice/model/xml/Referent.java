@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,11 +13,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -37,11 +38,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "nom",
-    "telephone",
-    "email"
-})
+@XmlType(name = "", propOrder = { "nom", "telephone", "email" })
 @XmlRootElement(name = "Referent")
 public class Referent {
 
@@ -55,10 +52,8 @@ public class Referent {
     /**
      * Gets the value of the nom property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getNom() {
         return nom;
@@ -68,9 +63,8 @@ public class Referent {
      * Sets the value of the nom property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setNom(String value) {
         this.nom = value;
@@ -79,10 +73,8 @@ public class Referent {
     /**
      * Gets the value of the telephone property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getTelephone() {
         return telephone;
@@ -92,9 +84,8 @@ public class Referent {
      * Sets the value of the telephone property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setTelephone(String value) {
         this.telephone = value;
@@ -103,10 +94,8 @@ public class Referent {
     /**
      * Gets the value of the email property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getEmail() {
         return email;
@@ -116,9 +105,8 @@ public class Referent {
      * Sets the value of the email property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setEmail(String value) {
         this.email = value;

@@ -10,7 +10,6 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Optional;
 
 import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
 
@@ -30,7 +29,8 @@ public class LocalAuthorityInstanceService {
         }
 
         LocalAuthorityInstance localAuthorityInstance = findLocalAuthorityInstanceFromRequest();
-        if (localAuthorityInstance != null) session.setAttribute(INSTANCE_KEY, localAuthorityInstance);
+        if (localAuthorityInstance != null)
+            session.setAttribute(INSTANCE_KEY, localAuthorityInstance);
         return localAuthorityInstance;
     }
 
@@ -39,8 +39,7 @@ public class LocalAuthorityInstanceService {
 
         WebClient webClient = WebClient.create(adminServiceUrl());
         Mono<LocalAuthorityInstance> localAuthorityInstanceMono = webClient.get()
-                .uri("/api/admin/local-authority/instance/{slugName}", slugName)
-                .retrieve()
+                .uri("/api/admin/local-authority/instance/{slugName}", slugName).retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.empty())
                 .bodyToMono(LocalAuthorityInstance.class);
 

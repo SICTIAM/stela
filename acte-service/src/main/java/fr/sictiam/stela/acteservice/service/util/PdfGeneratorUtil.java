@@ -1,11 +1,22 @@
 package fr.sictiam.stela.acteservice.service.util;
 
-import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.html.simpleparser.HTMLWorker;
-import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfCopy;
 import com.lowagie.text.pdf.PdfCopy.PageStamp;
+import com.lowagie.text.pdf.PdfImportedPage;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfSmartCopy;
+import com.lowagie.text.pdf.PdfStamper;
+import com.lowagie.text.pdf.PdfWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -18,7 +29,7 @@ import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -52,7 +63,8 @@ public class PdfGeneratorUtil {
     }
 
     public String getContentPage(String templateName, Map map) {
-        if (StringUtils.isEmpty(templateName)) throw new IllegalArgumentException("The templateName can not be empty/null");
+        if (StringUtils.isEmpty(templateName))
+            throw new IllegalArgumentException("The templateName can not be empty/null");
         Context ctx = new Context();
         if (map != null) {
             Iterator itMap = map.entrySet().iterator();
@@ -82,7 +94,7 @@ public class PdfGeneratorUtil {
         PageStamp stamp;
         PdfImportedPage page;
         PdfReader reader;
-        for(byte[] pdf : pdfs) {
+        for (byte[] pdf : pdfs) {
             reader = new PdfReader(pdf);
             int pageNumber = reader.getNumberOfPages();
             for (int i = 1; i <= pageNumber; i++) {
@@ -98,7 +110,8 @@ public class PdfGeneratorUtil {
         return baos.toByteArray();
     }
 
-    public byte[] stampPDF(String ARUuid, String ARDate, byte[] pdf, Integer percentPositionX, Integer percentPositionY) throws IOException, DocumentException {
+    public byte[] stampPDF(String ARUuid, String ARDate, byte[] pdf, Integer percentPositionX, Integer percentPositionY)
+            throws IOException, DocumentException {
         PdfReader reader = new PdfReader(pdf);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfStamper stamp = new PdfStamper(reader, baos, '\0', true);
@@ -106,7 +119,8 @@ public class PdfGeneratorUtil {
         Color color = new Color(43, 43, 43);
         Rectangle mediabox = reader.getBoxSize(1, "media");
         int pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
-        // Hack because the iTextPDF origin is at the lower-left, but the front is at the top-left
+        // Hack because the iTextPDF origin is at the lower-left, but the front is at
+        // the top-left
         int pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
 
         int pageNumber = reader.getNumberOfPages();
@@ -121,7 +135,8 @@ public class PdfGeneratorUtil {
         return baos.toByteArray();
     }
 
-    private void drawStampTitle(PdfContentByte canvas, Color color, int pixelPositionX, int pixelPositionY) throws DocumentException {
+    private void drawStampTitle(PdfContentByte canvas, Color color, int pixelPositionX, int pixelPositionY)
+            throws DocumentException {
         ColumnText ct = new ColumnText(canvas);
         ct.setSimpleColumn(pixelPositionX + 65f, pixelPositionY + 20f, pixelPositionX + 200f, pixelPositionY + 45f);
 
@@ -134,7 +149,8 @@ public class PdfGeneratorUtil {
         ct.go();
     }
 
-    private void drawStampDetails(String ARUuid, String ARDate, PdfContentByte canvas, Color color, int pixelPositionX, int pixelPositionY) throws DocumentException {
+    private void drawStampDetails(String ARUuid, String ARDate, PdfContentByte canvas, Color color, int pixelPositionX,
+            int pixelPositionY) throws DocumentException {
         ColumnText ct = new ColumnText(canvas);
         ct.setSimpleColumn(pixelPositionX + 8f, pixelPositionY + 8f, pixelPositionX + 238f, pixelPositionY + 27f);
 
@@ -143,7 +159,7 @@ public class PdfGeneratorUtil {
         Font font = FontFactory.getFont(FontFactory.COURIER, fntSize, color);
 
         Paragraph p1 = new Paragraph(new Phrase(lineSpacing, ARUuid, font));
-        Paragraph p2 = new Paragraph(new Phrase(lineSpacing,"Reçu le " + ARDate, font));
+        Paragraph p2 = new Paragraph(new Phrase(lineSpacing, "Reçu le " + ARDate, font));
         ct.addElement(p1);
         ct.addElement(p2);
         ct.go();

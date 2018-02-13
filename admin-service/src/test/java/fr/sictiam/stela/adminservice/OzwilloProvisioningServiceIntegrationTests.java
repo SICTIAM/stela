@@ -38,8 +38,7 @@ public class OzwilloProvisioningServiceIntegrationTests extends BaseIntegrationT
     @Test
     public void testExistingLocalAuthority() {
 
-        MockRestServiceServer mockServer =
-                MockRestServiceServer.bindTo(restTemplate).build();
+        MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
         mockServer.expect(requestTo("http://localhost/registration"))
                 .andRespond(withSuccess("{ \"back-office\": \"567890\" } ", MediaType.APPLICATION_JSON_UTF8));
 
@@ -52,7 +51,8 @@ public class OzwilloProvisioningServiceIntegrationTests extends BaseIntegrationT
         Assert.assertTrue(optLocalAuthority.isPresent());
         LocalAuthority localAuthority = optLocalAuthority.get();
         Assert.assertEquals("25060187900027", localAuthority.getSiren());
-        Assert.assertEquals("http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/25060187900027", localAuthority.getOzwilloInstanceInfo().getDcId());
+        Assert.assertEquals("http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/25060187900027",
+                localAuthority.getOzwilloInstanceInfo().getDcId());
         Assert.assertEquals("54321", localAuthority.getOzwilloInstanceInfo().getCreatorId());
         Assert.assertTrue(localAuthority.getOzwilloInstanceInfo().isNotifiedToKernel());
         Assert.assertEquals("567890", localAuthority.getOzwilloInstanceInfo().getServiceId());
@@ -61,11 +61,10 @@ public class OzwilloProvisioningServiceIntegrationTests extends BaseIntegrationT
     }
 
     private ProvisioningRequest provisioningRequest() {
-        ProvisioningRequest.Organization organization =
-                new ProvisioningRequest.Organization("12345", "Valbonne", "PUBLIC_BODY",
-                        "http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/25060187900027");
+        ProvisioningRequest.Organization organization = new ProvisioningRequest.Organization("12345", "Valbonne",
+                "PUBLIC_BODY", "http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/25060187900027");
         ProvisioningRequest.User user = new ProvisioningRequest.User("54321", "Jean Dupont");
-        return new ProvisioningRequest("instance-id", "client-id", "client-secret",
-                user, organization, "http://localhost/registration", null);
+        return new ProvisioningRequest("instance-id", "client-id", "client-secret", user, organization,
+                "http://localhost/registration", null);
     }
 }

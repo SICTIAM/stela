@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,11 +15,13 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -54,19 +55,17 @@ public class IDCL {
     @XmlAttribute(name = "Departement", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
     protected String departement;
     @XmlAttribute(name = "Arrondissement", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-    @XmlJavaTypeAdapter(Adapter2 .class)
+    @XmlJavaTypeAdapter(Adapter2.class)
     protected String arrondissement;
     @XmlAttribute(name = "Nature", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
-    @XmlJavaTypeAdapter(Adapter2 .class)
+    @XmlJavaTypeAdapter(Adapter2.class)
     protected String nature;
 
     /**
      * Gets the value of the siren property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getSIREN() {
         return siren;
@@ -76,9 +75,8 @@ public class IDCL {
      * Sets the value of the siren property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setSIREN(String value) {
         this.siren = value;
@@ -87,10 +85,8 @@ public class IDCL {
     /**
      * Gets the value of the departement property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getDepartement() {
         return departement;
@@ -100,9 +96,8 @@ public class IDCL {
      * Sets the value of the departement property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDepartement(String value) {
         this.departement = value;
@@ -111,10 +106,8 @@ public class IDCL {
     /**
      * Gets the value of the arrondissement property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getArrondissement() {
         return arrondissement;
@@ -124,9 +117,8 @@ public class IDCL {
      * Sets the value of the arrondissement property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setArrondissement(String value) {
         this.arrondissement = value;
@@ -135,10 +127,8 @@ public class IDCL {
     /**
      * Gets the value of the nature property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getNature() {
         return nature;
@@ -148,9 +138,8 @@ public class IDCL {
      * Sets the value of the nature property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setNature(String value) {
         this.nature = value;

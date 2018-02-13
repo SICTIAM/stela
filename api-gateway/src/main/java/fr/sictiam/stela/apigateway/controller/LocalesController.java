@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 
 @RestController
@@ -18,7 +19,7 @@ public class LocalesController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalesController.class);
 
-    @GetMapping(value="/{lng}/{ns}.json", produces = "application/json")
+    @GetMapping(value = "/{lng}/{ns}.json", produces = "application/json")
     public String getJsonTranslation(HttpServletResponse response, @PathVariable String lng, @PathVariable String ns) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
@@ -31,4 +32,3 @@ public class LocalesController {
     }
 
 }
-

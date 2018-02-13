@@ -1,7 +1,9 @@
 package fr.sictiam.stela.admin.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.admin.model.UI.Views;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,12 +15,8 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-
-import fr.sictiam.stela.admin.model.UI.Views;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Agent {
@@ -111,7 +109,7 @@ public class Agent {
     public String getSlugName() {
         return slugName;
     }
-    
+
     public void setSlugName(String slugName) {
         this.slugName = slugName;
     }

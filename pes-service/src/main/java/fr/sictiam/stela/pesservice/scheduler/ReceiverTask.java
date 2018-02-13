@@ -1,17 +1,13 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
+import fr.sictiam.stela.pesservice.model.Attachment;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesRetour;
+import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
@@ -24,14 +20,17 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
-import fr.sictiam.stela.pesservice.model.Attachment;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesRetour;
-import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
-import fr.sictiam.stela.pesservice.service.PesAllerService;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
 
 @Component
 public class ReceiverTask {
@@ -40,10 +39,10 @@ public class ReceiverTask {
 
     @Autowired
     private PesAllerService pesService;
-    
+
     @Autowired
     private PesRetourRepository pesRetourRepository;
-    
+
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
@@ -74,7 +73,7 @@ public class ReceiverTask {
 
     public void readACK(InputStream inputStream, String ackName)
             throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
-        
+
         LOGGER.debug("ACK RECEIVED : " + ackName);
         byte[] targetArray = new byte[inputStream.available()];
         inputStream.read(targetArray);
@@ -91,11 +90,12 @@ public class ReceiverTask {
         pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
     }
 
-    public void readPesRetour(InputStream inputStream, String pesRetourName) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+    public void readPesRetour(InputStream inputStream, String pesRetourName)
+            throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         byte[] targetArray = new byte[inputStream.available()];
         inputStream.read(targetArray);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(targetArray);
-        
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         XPathFactory xpf = XPathFactory.newInstance();
@@ -110,7 +110,7 @@ public class ReceiverTask {
             pesRetourRepository.save(pesRetour);
         } else {
             String idPost = path.evaluate("/PES_Retour/EnTetePES/IdPost/@V", document);
-            // TODO send mail to user of this idpost CF  redmine issue #3140
+            // TODO send mail to user of this idpost CF redmine issue #3140
 
         }
 

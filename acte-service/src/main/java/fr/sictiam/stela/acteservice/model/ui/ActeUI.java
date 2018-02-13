@@ -1,10 +1,7 @@
 package fr.sictiam.stela.acteservice.model.ui;
 
 import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.StampPosition;
-
-import java.util.List;
 
 public class ActeUI {
 

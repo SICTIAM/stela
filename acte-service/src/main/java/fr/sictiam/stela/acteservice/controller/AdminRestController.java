@@ -1,9 +1,9 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import javax.validation.Valid;
-
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.acteservice.model.Admin;
 import fr.sictiam.stela.acteservice.model.ui.Views;
+import fr.sictiam.stela.acteservice.service.AdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.sictiam.stela.acteservice.model.Admin;
-import fr.sictiam.stela.acteservice.service.AdminService;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/acte/admin")

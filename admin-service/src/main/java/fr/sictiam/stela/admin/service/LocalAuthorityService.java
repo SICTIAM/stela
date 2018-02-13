@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class LocalAuthorityService {
 
@@ -51,7 +50,8 @@ public class LocalAuthorityService {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            String body = mapper.writerWithView(Views.LocalAuthorityView.class).writeValueAsString(localAutorityCreation);
+            String body = mapper.writerWithView(Views.LocalAuthorityView.class)
+                    .writeValueAsString(localAutorityCreation);
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
             Message amMessage = new Message(body.getBytes(), messageProperties);
@@ -83,7 +83,8 @@ public class LocalAuthorityService {
         return localAuthorityRepository.findAll();
     }
 
-    public List<LocalAuthority> getAllWithPagination(Integer limit, Integer offset, String column, Sort.Direction direction) {
+    public List<LocalAuthority> getAllWithPagination(Integer limit, Integer offset, String column,
+            Sort.Direction direction) {
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, new Sort(direction, column));
         Page page = localAuthorityRepository.findAll(pageable);
         return page.getContent();
@@ -94,7 +95,8 @@ public class LocalAuthorityService {
     }
 
     public LocalAuthority getByUuid(String uuid) {
-        return localAuthorityRepository.findByUuid(uuid).orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_not_found"));
+        return localAuthorityRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_not_found"));
     }
 
     public Optional<LocalAuthority> getBySlugName(String slugName) {

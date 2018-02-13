@@ -27,10 +27,10 @@ public class DraftCleaningTask {
     @Scheduled(cron = "${application.drafts.deleteExpiredCron}")
     public void cleanDrafts() {
         List<Draft> drafts = draftService.getAllLastModifiedBefore(LocalDateTime.now().minusDays(maxDaysDraftLifetime));
-    	List<String> uuids = drafts.stream().map(Draft::getUuid).collect(Collectors.toList());
-    	if(uuids.size() > 0) {
-    	    LOGGER.debug("Cleaning {} old drafts.", uuids.size());
-    	    draftService.deleteDrafts(uuids);
+        List<String> uuids = drafts.stream().map(Draft::getUuid).collect(Collectors.toList());
+        if (uuids.size() > 0) {
+            LOGGER.debug("Cleaning {} old drafts.", uuids.size());
+            draftService.deleteDrafts(uuids);
         }
     }
 }

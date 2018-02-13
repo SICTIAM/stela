@@ -4,10 +4,18 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.acteservice.model.ui.Views;
 import fr.sictiam.stela.acteservice.validation.EmailCollection;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.Email;
 
-import javax.persistence.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,7 +52,9 @@ public class Admin {
 
     }
 
-    public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAvailable, LocalDateTime unavailabilityMiatStartDate, LocalDateTime unavailabilityMiatEndDate, boolean alertMessageDisplayed, String alertMessage) {
+    public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAvailable,
+            LocalDateTime unavailabilityMiatStartDate, LocalDateTime unavailabilityMiatEndDate,
+            boolean alertMessageDisplayed, String alertMessage) {
         this.uuid = uuid;
         this.mainEmail = mainEmail;
         this.additionalEmails = additionalEmails;

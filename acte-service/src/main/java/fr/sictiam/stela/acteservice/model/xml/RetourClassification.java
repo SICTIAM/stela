@@ -5,12 +5,8 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -20,11 +16,17 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -122,16 +124,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "dateClassification",
-    "naturesActes",
-    "matieres"
-})
+@XmlType(name = "", propOrder = { "dateClassification", "naturesActes", "matieres" })
 @XmlRootElement(name = "RetourClassification")
 public class RetourClassification {
 
     @XmlElement(name = "DateClassification", required = true, type = String.class)
-    @XmlJavaTypeAdapter(Adapter1 .class)
+    @XmlJavaTypeAdapter(Adapter1.class)
     @XmlSchemaType(name = "date")
     protected LocalDate dateClassification;
     @XmlElement(name = "NaturesActes", required = true)
@@ -142,10 +140,8 @@ public class RetourClassification {
     /**
      * Gets the value of the dateClassification property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public LocalDate getDateClassification() {
         return dateClassification;
@@ -155,9 +151,8 @@ public class RetourClassification {
      * Sets the value of the dateClassification property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDateClassification(LocalDate value) {
         this.dateClassification = value;
@@ -166,10 +161,8 @@ public class RetourClassification {
     /**
      * Gets the value of the naturesActes property.
      * 
-     * @return
-     *     possible object is
-     *     {@link RetourClassification.NaturesActes }
-     *     
+     * @return possible object is {@link RetourClassification.NaturesActes }
+     * 
      */
     public RetourClassification.NaturesActes getNaturesActes() {
         return naturesActes;
@@ -179,9 +172,8 @@ public class RetourClassification {
      * Sets the value of the naturesActes property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link RetourClassification.NaturesActes }
-     *     
+     *            allowed object is {@link RetourClassification.NaturesActes }
+     * 
      */
     public void setNaturesActes(RetourClassification.NaturesActes value) {
         this.naturesActes = value;
@@ -190,10 +182,8 @@ public class RetourClassification {
     /**
      * Gets the value of the matieres property.
      * 
-     * @return
-     *     possible object is
-     *     {@link RetourClassification.Matieres }
-     *     
+     * @return possible object is {@link RetourClassification.Matieres }
+     * 
      */
     public RetourClassification.Matieres getMatieres() {
         return matieres;
@@ -203,19 +193,20 @@ public class RetourClassification {
      * Sets the value of the matieres property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link RetourClassification.Matieres }
-     *     
+     *            allowed object is {@link RetourClassification.Matieres }
+     * 
      */
     public void setMatieres(RetourClassification.Matieres value) {
         this.matieres = value;
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -272,9 +263,7 @@ public class RetourClassification {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "matiere1"
-    })
+    @XmlType(name = "", propOrder = { "matiere1" })
     public static class Matieres {
 
         @XmlElement(name = "Matiere1", required = true)
@@ -284,15 +273,16 @@ public class RetourClassification {
          * Gets the value of the matiere1 property.
          * 
          * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the matiere1 property.
+         * This accessor method returns a reference to the live list, not a snapshot.
+         * Therefore any modification you make to the returned list will be present
+         * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+         * for the matiere1 property.
          * 
          * <p>
          * For example, to add a new item, do as follows:
+         * 
          * <pre>
-         *    getMatiere1().add(newItem);
+         * getMatiere1().add(newItem);
          * </pre>
          * 
          * 
@@ -309,11 +299,13 @@ public class RetourClassification {
             return this.matiere1;
         }
 
-
         /**
-         * <p>Java class for anonymous complex type.
+         * <p>
+         * Java class for anonymous complex type.
          * 
-         * <p>The following schema fragment specifies the expected content contained within this class.
+         * <p>
+         * The following schema fragment specifies the expected content contained within
+         * this class.
          * 
          * <pre>
          * &lt;complexType>
@@ -360,29 +352,26 @@ public class RetourClassification {
          * 
          */
         @XmlAccessorType(XmlAccessType.FIELD)
-        @XmlType(name = "", propOrder = {
-            "matiere2"
-        })
-        public static class Matiere1
-            extends Matiere
-        {
+        @XmlType(name = "", propOrder = { "matiere2" })
+        public static class Matiere1 extends Matiere {
 
             @XmlElement(name = "Matiere2", required = true)
-            protected List<RetourClassification.Matieres.Matiere1 .Matiere2> matiere2;
+            protected List<RetourClassification.Matieres.Matiere1.Matiere2> matiere2;
 
             /**
              * Gets the value of the matiere2 property.
              * 
              * <p>
-             * This accessor method returns a reference to the live list,
-             * not a snapshot. Therefore any modification you make to the
-             * returned list will be present inside the JAXB object.
-             * This is why there is not a <CODE>set</CODE> method for the matiere2 property.
+             * This accessor method returns a reference to the live list, not a snapshot.
+             * Therefore any modification you make to the returned list will be present
+             * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+             * for the matiere2 property.
              * 
              * <p>
              * For example, to add a new item, do as follows:
+             * 
              * <pre>
-             *    getMatiere2().add(newItem);
+             * getMatiere2().add(newItem);
              * </pre>
              * 
              * 
@@ -392,18 +381,20 @@ public class RetourClassification {
              * 
              * 
              */
-            public List<RetourClassification.Matieres.Matiere1 .Matiere2> getMatiere2() {
+            public List<RetourClassification.Matieres.Matiere1.Matiere2> getMatiere2() {
                 if (matiere2 == null) {
-                    matiere2 = new ArrayList<RetourClassification.Matieres.Matiere1 .Matiere2>();
+                    matiere2 = new ArrayList<RetourClassification.Matieres.Matiere1.Matiere2>();
                 }
                 return this.matiere2;
             }
 
-
             /**
-             * <p>Java class for anonymous complex type.
+             * <p>
+             * Java class for anonymous complex type.
              * 
-             * <p>The following schema fragment specifies the expected content contained within this class.
+             * <p>
+             * The following schema fragment specifies the expected content contained within
+             * this class.
              * 
              * <pre>
              * &lt;complexType>
@@ -440,29 +431,26 @@ public class RetourClassification {
              * 
              */
             @XmlAccessorType(XmlAccessType.FIELD)
-            @XmlType(name = "", propOrder = {
-                "matiere3"
-            })
-            public static class Matiere2
-                extends Matiere
-            {
+            @XmlType(name = "", propOrder = { "matiere3" })
+            public static class Matiere2 extends Matiere {
 
                 @XmlElement(name = "Matiere3")
-                protected List<RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3> matiere3;
+                protected List<RetourClassification.Matieres.Matiere1.Matiere2.Matiere3> matiere3;
 
                 /**
                  * Gets the value of the matiere3 property.
                  * 
                  * <p>
-                 * This accessor method returns a reference to the live list,
-                 * not a snapshot. Therefore any modification you make to the
-                 * returned list will be present inside the JAXB object.
-                 * This is why there is not a <CODE>set</CODE> method for the matiere3 property.
+                 * This accessor method returns a reference to the live list, not a snapshot.
+                 * Therefore any modification you make to the returned list will be present
+                 * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+                 * for the matiere3 property.
                  * 
                  * <p>
                  * For example, to add a new item, do as follows:
+                 * 
                  * <pre>
-                 *    getMatiere3().add(newItem);
+                 * getMatiere3().add(newItem);
                  * </pre>
                  * 
                  * 
@@ -472,18 +460,20 @@ public class RetourClassification {
                  * 
                  * 
                  */
-                public List<RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3> getMatiere3() {
+                public List<RetourClassification.Matieres.Matiere1.Matiere2.Matiere3> getMatiere3() {
                     if (matiere3 == null) {
-                        matiere3 = new ArrayList<RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3>();
+                        matiere3 = new ArrayList<RetourClassification.Matieres.Matiere1.Matiere2.Matiere3>();
                     }
                     return this.matiere3;
                 }
 
-
                 /**
-                 * <p>Java class for anonymous complex type.
+                 * <p>
+                 * Java class for anonymous complex type.
                  * 
-                 * <p>The following schema fragment specifies the expected content contained within this class.
+                 * <p>
+                 * The following schema fragment specifies the expected content contained within
+                 * this class.
                  * 
                  * <pre>
                  * &lt;complexType>
@@ -510,29 +500,26 @@ public class RetourClassification {
                  * 
                  */
                 @XmlAccessorType(XmlAccessType.FIELD)
-                @XmlType(name = "", propOrder = {
-                    "matiere4"
-                })
-                public static class Matiere3
-                    extends Matiere
-                {
+                @XmlType(name = "", propOrder = { "matiere4" })
+                public static class Matiere3 extends Matiere {
 
                     @XmlElement(name = "Matiere4")
-                    protected List<RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4> matiere4;
+                    protected List<RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.Matiere4> matiere4;
 
                     /**
                      * Gets the value of the matiere4 property.
                      * 
                      * <p>
-                     * This accessor method returns a reference to the live list,
-                     * not a snapshot. Therefore any modification you make to the
-                     * returned list will be present inside the JAXB object.
-                     * This is why there is not a <CODE>set</CODE> method for the matiere4 property.
+                     * This accessor method returns a reference to the live list, not a snapshot.
+                     * Therefore any modification you make to the returned list will be present
+                     * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+                     * for the matiere4 property.
                      * 
                      * <p>
                      * For example, to add a new item, do as follows:
+                     * 
                      * <pre>
-                     *    getMatiere4().add(newItem);
+                     * getMatiere4().add(newItem);
                      * </pre>
                      * 
                      * 
@@ -542,18 +529,20 @@ public class RetourClassification {
                      * 
                      * 
                      */
-                    public List<RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4> getMatiere4() {
+                    public List<RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.Matiere4> getMatiere4() {
                         if (matiere4 == null) {
-                            matiere4 = new ArrayList<RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4>();
+                            matiere4 = new ArrayList<RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.Matiere4>();
                         }
                         return this.matiere4;
                     }
 
-
                     /**
-                     * <p>Java class for anonymous complex type.
+                     * <p>
+                     * Java class for anonymous complex type.
                      * 
-                     * <p>The following schema fragment specifies the expected content contained within this class.
+                     * <p>
+                     * The following schema fragment specifies the expected content contained within
+                     * this class.
                      * 
                      * <pre>
                      * &lt;complexType>
@@ -570,12 +559,8 @@ public class RetourClassification {
                      * 
                      */
                     @XmlAccessorType(XmlAccessType.FIELD)
-                    @XmlType(name = "", propOrder = {
-                        "matiere5"
-                    })
-                    public static class Matiere4
-                        extends Matiere
-                    {
+                    @XmlType(name = "", propOrder = { "matiere5" })
+                    public static class Matiere4 extends Matiere {
 
                         @XmlElement(name = "Matiere5")
                         protected List<Matiere> matiere5;
@@ -584,21 +569,21 @@ public class RetourClassification {
                          * Gets the value of the matiere5 property.
                          * 
                          * <p>
-                         * This accessor method returns a reference to the live list,
-                         * not a snapshot. Therefore any modification you make to the
-                         * returned list will be present inside the JAXB object.
-                         * This is why there is not a <CODE>set</CODE> method for the matiere5 property.
+                         * This accessor method returns a reference to the live list, not a snapshot.
+                         * Therefore any modification you make to the returned list will be present
+                         * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+                         * for the matiere5 property.
                          * 
                          * <p>
                          * For example, to add a new item, do as follows:
+                         * 
                          * <pre>
-                         *    getMatiere5().add(newItem);
+                         * getMatiere5().add(newItem);
                          * </pre>
                          * 
                          * 
                          * <p>
-                         * Objects of the following type(s) are allowed in the list
-                         * {@link Matiere }
+                         * Objects of the following type(s) are allowed in the list {@link Matiere }
                          * 
                          * 
                          */
@@ -619,11 +604,13 @@ public class RetourClassification {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -659,9 +646,7 @@ public class RetourClassification {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "natureActe"
-    })
+    @XmlType(name = "", propOrder = { "natureActe" })
     public static class NaturesActes {
 
         @XmlElement(name = "NatureActe", required = true)
@@ -671,15 +656,16 @@ public class RetourClassification {
          * Gets the value of the natureActe property.
          * 
          * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the natureActe property.
+         * This accessor method returns a reference to the live list, not a snapshot.
+         * Therefore any modification you make to the returned list will be present
+         * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+         * for the natureActe property.
          * 
          * <p>
          * For example, to add a new item, do as follows:
+         * 
          * <pre>
-         *    getNatureActe().add(newItem);
+         * getNatureActe().add(newItem);
          * </pre>
          * 
          * 
@@ -696,11 +682,13 @@ public class RetourClassification {
             return this.natureActe;
         }
 
-
         /**
-         * <p>Java class for anonymous complex type.
+         * <p>
+         * Java class for anonymous complex type.
          * 
-         * <p>The following schema fragment specifies the expected content contained within this class.
+         * <p>
+         * The following schema fragment specifies the expected content contained within
+         * this class.
          * 
          * <pre>
          * &lt;complexType>
@@ -726,15 +714,13 @@ public class RetourClassification {
          * 
          */
         @XmlAccessorType(XmlAccessType.FIELD)
-        @XmlType(name = "", propOrder = {
-            "typePJNatureActe"
-        })
+        @XmlType(name = "", propOrder = { "typePJNatureActe" })
         public static class NatureActe {
 
             @XmlElement(name = "TypePJNatureActe", required = true)
             protected List<TypePieceJointe> typePJNatureActe;
             @XmlAttribute(name = "CodeNatureActe", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216")
-            @XmlJavaTypeAdapter(Adapter3 .class)
+            @XmlJavaTypeAdapter(Adapter3.class)
             protected Integer codeNatureActe;
             @XmlAttribute(name = "Libelle", namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", required = true)
             protected String libelle;
@@ -745,15 +731,16 @@ public class RetourClassification {
              * Gets the value of the typePJNatureActe property.
              * 
              * <p>
-             * This accessor method returns a reference to the live list,
-             * not a snapshot. Therefore any modification you make to the
-             * returned list will be present inside the JAXB object.
-             * This is why there is not a <CODE>set</CODE> method for the typePJNatureActe property.
+             * This accessor method returns a reference to the live list, not a snapshot.
+             * Therefore any modification you make to the returned list will be present
+             * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+             * for the typePJNatureActe property.
              * 
              * <p>
              * For example, to add a new item, do as follows:
+             * 
              * <pre>
-             *    getTypePJNatureActe().add(newItem);
+             * getTypePJNatureActe().add(newItem);
              * </pre>
              * 
              * 
@@ -773,10 +760,8 @@ public class RetourClassification {
             /**
              * Gets the value of the codeNatureActe property.
              * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
+             * @return possible object is {@link String }
+             * 
              */
             public Integer getCodeNatureActe() {
                 return codeNatureActe;
@@ -786,9 +771,8 @@ public class RetourClassification {
              * Sets the value of the codeNatureActe property.
              * 
              * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             *            allowed object is {@link String }
+             * 
              */
             public void setCodeNatureActe(Integer value) {
                 this.codeNatureActe = value;
@@ -797,10 +781,8 @@ public class RetourClassification {
             /**
              * Gets the value of the libelle property.
              * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
+             * @return possible object is {@link String }
+             * 
              */
             public String getLibelle() {
                 return libelle;
@@ -810,9 +792,8 @@ public class RetourClassification {
              * Sets the value of the libelle property.
              * 
              * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             *            allowed object is {@link String }
+             * 
              */
             public void setLibelle(String value) {
                 this.libelle = value;
@@ -821,10 +802,8 @@ public class RetourClassification {
             /**
              * Gets the value of the typeAbrege property.
              * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
+             * @return possible object is {@link String }
+             * 
              */
             public String getTypeAbrege() {
                 return typeAbrege;
@@ -834,9 +813,8 @@ public class RetourClassification {
              * Sets the value of the typeAbrege property.
              * 
              * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             *            allowed object is {@link String }
+             * 
              */
             public void setTypeAbrege(String value) {
                 this.typeAbrege = value;

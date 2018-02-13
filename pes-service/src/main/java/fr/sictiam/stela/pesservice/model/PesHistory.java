@@ -1,12 +1,11 @@
 package fr.sictiam.stela.pesservice.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
-
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -90,13 +89,7 @@ public class PesHistory implements Comparable<PesHistory> {
 
     @Override
     public String toString() {
-        return "ActeHistory{" +
-                "uuid='" + uuid + '\'' +
-                ", pesUuid='" + pesUuid + '\'' +
-                ", status=" + status +
-                ", date=" + date +
-                ", message='" + message + '\'' +
-                ", fileName='" + fileName + '\'' +
-                '}';
+        return "ActeHistory{" + "uuid='" + uuid + '\'' + ", pesUuid='" + pesUuid + '\'' + ", status=" + status
+                + ", date=" + date + ", message='" + message + '\'' + ", fileName='" + fileName + '\'' + '}';
     }
 }

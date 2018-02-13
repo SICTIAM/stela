@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
 
     @Override
-    public LocalDateTime deserialize(JsonParser arg0, DeserializationContext arg1) throws IOException, JsonProcessingException {
+    public LocalDateTime deserialize(JsonParser arg0, DeserializationContext arg1)
+            throws IOException, JsonProcessingException {
         return LocalDateTime.parse(arg0.getText());
     }
 }

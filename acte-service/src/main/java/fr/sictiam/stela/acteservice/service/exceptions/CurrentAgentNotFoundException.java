@@ -11,7 +11,8 @@ public class CurrentAgentNotFoundException extends RuntimeException {
     public CurrentAgentNotFoundException() {
         super("notifications.agent.not_found");
     }
-    public CurrentAgentNotFoundException(String message, Throwable cause){
+
+    public CurrentAgentNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -1,9 +1,8 @@
 package fr.sictiam.stela.acteservice.service;
 
-import org.springframework.stereotype.Service;
-
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.model.Admin;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +12,8 @@ public class AdminService {
     private final AdminRepository adminRepository;
 
     public AdminService(AdminRepository adminRepository) {
-		this.adminRepository = adminRepository;
-	}
+        this.adminRepository = adminRepository;
+    }
 
     public Admin create(Admin adminModule) {
         return adminRepository.save(adminModule);
@@ -30,8 +29,10 @@ public class AdminService {
 
     public boolean isMiatAvailable() {
         Admin admin = getAdmin();
-        if(!admin.isMiatAvailable()) return false;
+        if (!admin.isMiatAvailable())
+            return false;
         LocalDateTime today = LocalDateTime.now();
-        return today.isBefore(admin.getUnavailabilityMiatStartDate()) || today.isAfter(admin.getUnavailabilityMiatEndDate());
-	}
+        return today.isBefore(admin.getUnavailabilityMiatStartDate())
+                || today.isAfter(admin.getUnavailabilityMiatEndDate());
+    }
 }

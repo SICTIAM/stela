@@ -1,27 +1,23 @@
 package fr.sictiam.stela.admin.config.filter;
 
-import java.io.IOException;
-import java.util.Optional;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.service.AgentService;
+import fr.sictiam.stela.admin.service.ProfileService;
+import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import fr.sictiam.stela.admin.model.Agent;
-import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.service.AgentService;
-import fr.sictiam.stela.admin.service.ProfileService;
-import io.jsonwebtoken.Jwts;
+import java.io.IOException;
 
 @Component
 public class AuthFilter extends OncePerRequestFilter {
@@ -31,7 +27,7 @@ public class AuthFilter extends OncePerRequestFilter {
 
     @Autowired
     ProfileService profileService;
-    
+
     @Value("${application.jwt.secret}")
     String SECRET;
 
@@ -39,14 +35,14 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        JsonNode token =getToken(request);
-                
+        JsonNode token = getToken(request);
+
         Profile profile = null;
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
             profile = profileService.getByUuid(token.get("uuid").asText());
         }
-        
+
         if (profile != null) {
             request.setAttribute("STELA-Current-Profile-UUID", profile.getUuid());
             request.setAttribute("STELA-Sub", profile.getAgent().getSub());
@@ -56,7 +52,6 @@ public class AuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    
     JsonNode getToken(HttpServletRequest request) throws IOException {
         String token = request.getHeader("STELA-Active-Token");
         if (token != null) {

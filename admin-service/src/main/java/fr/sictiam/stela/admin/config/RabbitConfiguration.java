@@ -32,7 +32,7 @@ public class RabbitConfiguration {
     Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
-    
+
     @Bean
     FanoutExchange fanoutExchange() {
         return new FanoutExchange(exchangeName, true, false);

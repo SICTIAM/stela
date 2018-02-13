@@ -10,7 +10,7 @@ public enum Flux {
     REFUS_EXPLICITE_LETTRE_OBSERVATION("4", "3"),
     REPONSE_LETTRE_OBSEVATION("4", "4"),
     ANNULATION_TRANSMISSION("6", "1"),
-    DEMANDE_CLASSIFICATION("7", "1"), ;
+    DEMANDE_CLASSIFICATION("7", "1"),;
 
     private String transactionNumber;
     private String fluxNumber;
@@ -20,11 +20,11 @@ public enum Flux {
         this.fluxNumber = fluxNumber;
     }
 
-    public String getTransactionNumber(){
+    public String getTransactionNumber() {
         return this.transactionNumber;
     }
 
-    public String getFluxNumber(){
+    public String getFluxNumber() {
         return this.fluxNumber;
     }
 }

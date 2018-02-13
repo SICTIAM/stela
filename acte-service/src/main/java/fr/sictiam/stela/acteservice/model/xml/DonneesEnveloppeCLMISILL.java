@@ -5,23 +5,25 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Donnees contenues dans une enveloppe de transmission collectivité vers MISILL
  * 
- * <p>Java class for DonneesEnveloppeCLMISILL complex type.
+ * <p>
+ * Java class for DonneesEnveloppeCLMISILL complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="DonneesEnveloppeCLMISILL">
@@ -61,11 +63,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "DonneesEnveloppeCLMISILL", propOrder = {
-    "emetteur",
-    "adressesRetour",
-    "formulairesEnvoyes"
-})
+@XmlType(name = "DonneesEnveloppeCLMISILL", propOrder = { "emetteur", "adressesRetour", "formulairesEnvoyes" })
 public class DonneesEnveloppeCLMISILL {
 
     @XmlElement(name = "Emetteur", required = true)
@@ -78,10 +76,8 @@ public class DonneesEnveloppeCLMISILL {
     /**
      * Gets the value of the emetteur property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesEnveloppeCLMISILL.Emetteur }
-     *     
+     * @return possible object is {@link DonneesEnveloppeCLMISILL.Emetteur }
+     * 
      */
     public DonneesEnveloppeCLMISILL.Emetteur getEmetteur() {
         return emetteur;
@@ -91,9 +87,8 @@ public class DonneesEnveloppeCLMISILL {
      * Sets the value of the emetteur property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesEnveloppeCLMISILL.Emetteur }
-     *     
+     *            allowed object is {@link DonneesEnveloppeCLMISILL.Emetteur }
+     * 
      */
     public void setEmetteur(DonneesEnveloppeCLMISILL.Emetteur value) {
         this.emetteur = value;
@@ -102,10 +97,8 @@ public class DonneesEnveloppeCLMISILL {
     /**
      * Gets the value of the adressesRetour property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesEnveloppeCLMISILL.AdressesRetour }
-     *     
+     * @return possible object is {@link DonneesEnveloppeCLMISILL.AdressesRetour }
+     * 
      */
     public DonneesEnveloppeCLMISILL.AdressesRetour getAdressesRetour() {
         return adressesRetour;
@@ -115,9 +108,8 @@ public class DonneesEnveloppeCLMISILL {
      * Sets the value of the adressesRetour property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesEnveloppeCLMISILL.AdressesRetour }
-     *     
+     *            allowed object is {@link DonneesEnveloppeCLMISILL.AdressesRetour }
+     * 
      */
     public void setAdressesRetour(DonneesEnveloppeCLMISILL.AdressesRetour value) {
         this.adressesRetour = value;
@@ -126,10 +118,8 @@ public class DonneesEnveloppeCLMISILL {
     /**
      * Liste des fichiers XML envoyés
      * 
-     * @return
-     *     possible object is
-     *     {@link FormulairesEnvoyes }
-     *     
+     * @return possible object is {@link FormulairesEnvoyes }
+     * 
      */
     public FormulairesEnvoyes getFormulairesEnvoyes() {
         return formulairesEnvoyes;
@@ -139,19 +129,20 @@ public class DonneesEnveloppeCLMISILL {
      * Sets the value of the formulairesEnvoyes property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link FormulairesEnvoyes }
-     *     
+     *            allowed object is {@link FormulairesEnvoyes }
+     * 
      */
     public void setFormulairesEnvoyes(FormulairesEnvoyes value) {
         this.formulairesEnvoyes = value;
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -168,9 +159,7 @@ public class DonneesEnveloppeCLMISILL {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "email"
-    })
+    @XmlType(name = "", propOrder = { "email" })
     public static class AdressesRetour {
 
         @XmlElement(name = "Email", required = true)
@@ -180,21 +169,21 @@ public class DonneesEnveloppeCLMISILL {
          * Gets the value of the email property.
          * 
          * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the email property.
+         * This accessor method returns a reference to the live list, not a snapshot.
+         * Therefore any modification you make to the returned list will be present
+         * inside the JAXB object. This is why there is not a <CODE>set</CODE> method
+         * for the email property.
          * 
          * <p>
          * For example, to add a new item, do as follows:
+         * 
          * <pre>
-         *    getEmail().add(newItem);
+         * getEmail().add(newItem);
          * </pre>
          * 
          * 
          * <p>
-         * Objects of the following type(s) are allowed in the list
-         * {@link String }
+         * Objects of the following type(s) are allowed in the list {@link String }
          * 
          * 
          */
@@ -207,11 +196,13 @@ public class DonneesEnveloppeCLMISILL {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -229,10 +220,7 @@ public class DonneesEnveloppeCLMISILL {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "idcl",
-        "referent"
-    })
+    @XmlType(name = "", propOrder = { "idcl", "referent" })
     public static class Emetteur {
 
         @XmlElement(name = "IDCL", required = true)
@@ -243,10 +231,8 @@ public class DonneesEnveloppeCLMISILL {
         /**
          * Gets the value of the idcl property.
          * 
-         * @return
-         *     possible object is
-         *     {@link IDCL }
-         *     
+         * @return possible object is {@link IDCL }
+         * 
          */
         public IDCL getIDCL() {
             return idcl;
@@ -256,9 +242,8 @@ public class DonneesEnveloppeCLMISILL {
          * Sets the value of the idcl property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link IDCL }
-         *     
+         *            allowed object is {@link IDCL }
+         * 
          */
         public void setIDCL(IDCL value) {
             this.idcl = value;
@@ -267,10 +252,8 @@ public class DonneesEnveloppeCLMISILL {
         /**
          * Gets the value of the referent property.
          * 
-         * @return
-         *     possible object is
-         *     {@link Referent }
-         *     
+         * @return possible object is {@link Referent }
+         * 
          */
         public Referent getReferent() {
             return referent;
@@ -280,9 +263,8 @@ public class DonneesEnveloppeCLMISILL {
          * Sets the value of the referent property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link Referent }
-         *     
+         *            allowed object is {@link Referent }
+         * 
          */
         public void setReferent(Referent value) {
             this.referent = value;

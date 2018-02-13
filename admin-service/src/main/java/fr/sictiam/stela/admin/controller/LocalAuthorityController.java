@@ -1,30 +1,31 @@
 package fr.sictiam.stela.admin.controller;
 
-import java.util.List;
-
-import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.*;
-
 import com.fasterxml.jackson.annotation.JsonView;
-
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.WorkGroup;
+import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
-
-import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
-
-
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/local-authority")
@@ -36,16 +37,17 @@ public class LocalAuthorityController {
     private final ProfileService profileService;
     private final WorkGroupService workGroupService;
 
-    public LocalAuthorityController(LocalAuthorityService localAuthorityService,
-                                    ProfileService profileService, WorkGroupService workGroupService) {
+    public LocalAuthorityController(LocalAuthorityService localAuthorityService, ProfileService profileService,
+            WorkGroupService workGroupService) {
         this.localAuthorityService = localAuthorityService;
         this.profileService = profileService;
         this.workGroupService = workGroupService;
     }
-    
+
     @GetMapping("/current")
     @JsonView(Views.LocalAuthorityView.class)
-    public LocalAuthority getCurrentLocalAuthority(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+    public LocalAuthority getCurrentLocalAuthority(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
         return localAuthorityService.getByUuid(currentLocalAuthUuid);
     }
 
@@ -56,7 +58,8 @@ public class LocalAuthorityController {
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "name") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") Sort.Direction direction) {
-        List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset, column, direction);
+        List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset, column,
+                direction);
         Long count = localAuthorityService.countAll();
         return new LocalAuthorityResultsUI(count, localAuthorities);
     }
@@ -76,7 +79,8 @@ public class LocalAuthorityController {
     @GetMapping("/instance/{slugName}")
     public OzwilloInstanceInfo getInstanceInfoBySlugName(@PathVariable String slugName) {
         // as soon as an instance is stopped, consider it does no longer exist
-        // even if it seems that, for a STOPPED instance, we don't even get to this point
+        // even if it seems that, for a STOPPED instance, we don't even get to this
+        // point
         // as the client_id is rejected by the kernel when trying to authenticate
         return localAuthorityService.getBySlugName(slugName)
                 .filter(localAuthority -> localAuthority.getStatus().equals(LocalAuthority.Status.RUNNING))
@@ -85,15 +89,17 @@ public class LocalAuthorityController {
     }
 
     @PostMapping("/current/{module}")
-    public void addModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable Module module) {
+    public void addModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable Module module) {
         localAuthorityService.addModule(currentLocalAuthUuid, module);
     }
 
     @DeleteMapping("/current/{module}")
-    public void removeModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable Module module) {
+    public void removeModule(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable Module module) {
         localAuthorityService.removeModule(currentLocalAuthUuid, module);
     }
-    
+
     @GetMapping("/{uuid}/agent/{agentUuid}")
     @JsonView(Views.ProfileView.class)
     public Profile getProfile(@PathVariable String uuid, @PathVariable String agentUuid) {
@@ -127,8 +133,7 @@ public class LocalAuthorityController {
     public void removeModuleByUuid(@PathVariable String uuid, @PathVariable Module module) {
         localAuthorityService.removeModule(uuid, module);
     }
-    
-    
+
     @GetMapping("/{uuid}/profiles")
     @JsonView(Views.ProfileView.class)
     public List<Profile> getProfiles(@PathVariable String uuid) {

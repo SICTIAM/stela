@@ -11,10 +11,10 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableZuulProxy
 @EnableDiscoveryClient
 @EnableCircuitBreaker
-@ComponentScan(basePackages = {"org.oasis_eu.spring", "fr.sictiam.stela.apigateway"})
+@ComponentScan(basePackages = { "org.oasis_eu.spring", "fr.sictiam.stela.apigateway" })
 public class StelaApiGatewayApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(StelaApiGatewayApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(StelaApiGatewayApplication.class, args);
+    }
 }

@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.JAXBElement;
@@ -15,37 +14,40 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 
-
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the fr.sictiam.stela.acteservice.model.xml package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
- * provided in this class.
+ * This object contains factory methods for each Java content interface and Java
+ * element interface generated in the fr.sictiam.stela.acteservice.model.xml
+ * package.
+ * <p>
+ * An ObjectFactory allows you to programatically construct new instances of the
+ * Java representation for XML content. The Java representation of XML content
+ * can consist of schema derived interfaces and classes representing the binding
+ * of schema type definitions, element declarations and model groups. Factory
+ * methods for each of these are provided in this class.
  * 
  */
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _ARLettreObservations_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARLettreObservations");
+    private final static QName _ARLettreObservations_QNAME = new QName(
+            "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARLettreObservations");
     private final static QName _NIC_QNAME = new QName("http://xml.insee.fr/schema", "NIC");
     private final static QName _SIRET_QNAME = new QName("http://xml.insee.fr/schema", "SIRET");
     private final static QName _Acte_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "Acte");
-    private final static QName _ARPieceComplementaire_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARPieceComplementaire");
-    private final static QName _ARReponseRejetLettreObservations_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARReponseRejetLettreObservations");
+    private final static QName _ARPieceComplementaire_QNAME = new QName(
+            "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARPieceComplementaire");
+    private final static QName _ARReponseRejetLettreObservations_QNAME = new QName(
+            "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARReponseRejetLettreObservations");
     private final static QName _SIRETStructure_QNAME = new QName("http://xml.insee.fr/schema", "SIRETStructure");
     private final static QName _SIREN_QNAME = new QName("http://xml.insee.fr/schema", "SIREN");
-    private final static QName _EnveloppeCLMISILL_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "EnveloppeCLMISILL");
-    private final static QName _ARDemandePieceComplementaire_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARDemandePieceComplementaire");
+    private final static QName _EnveloppeCLMISILL_QNAME = new QName("http://www.interieur.gouv.fr/ACTES#v1.1-20040216",
+            "EnveloppeCLMISILL");
+    private final static QName _ARDemandePieceComplementaire_QNAME = new QName(
+            "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", "ARDemandePieceComplementaire");
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: fr.sictiam.stela.acteservice.model.xml
+     * Create a new ObjectFactory that can be used to create new instances of schema
+     * derived classes for package: fr.sictiam.stela.acteservice.model.xml
      * 
      */
     public ObjectFactory() {
@@ -92,19 +94,21 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link RetourClassification.Matieres.Matiere1 .Matiere2 }
+     * Create an instance of
+     * {@link RetourClassification.Matieres.Matiere1 .Matiere2 }
      * 
      */
-    public RetourClassification.Matieres.Matiere1 .Matiere2 createRetourClassificationMatieresMatiere1Matiere2() {
-        return new RetourClassification.Matieres.Matiere1 .Matiere2();
+    public RetourClassification.Matieres.Matiere1.Matiere2 createRetourClassificationMatieresMatiere1Matiere2() {
+        return new RetourClassification.Matieres.Matiere1.Matiere2();
     }
 
     /**
-     * Create an instance of {@link RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 }
+     * Create an instance of
+     * {@link RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 }
      * 
      */
-    public RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 createRetourClassificationMatieresMatiere1Matiere2Matiere3() {
-        return new RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3();
+    public RetourClassification.Matieres.Matiere1.Matiere2.Matiere3 createRetourClassificationMatieresMatiere1Matiere2Matiere3() {
+        return new RetourClassification.Matieres.Matiere1.Matiere2.Matiere3();
     }
 
     /**
@@ -388,11 +392,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4 }
+     * Create an instance of
+     * {@link RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4 }
      * 
      */
-    public RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4 createRetourClassificationMatieresMatiere1Matiere2Matiere3Matiere4() {
-        return new RetourClassification.Matieres.Matiere1 .Matiere2 .Matiere3 .Matiere4();
+    public RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.Matiere4 createRetourClassificationMatieresMatiere1Matiere2Matiere3Matiere4() {
+        return new RetourClassification.Matieres.Matiere1.Matiere2.Matiere3.Matiere4();
     }
 
     /**
@@ -476,12 +481,14 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesCourrierPref }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesCourrierPref
+     * }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", name = "ARLettreObservations")
     public JAXBElement<DonneesCourrierPref> createARLettreObservations(DonneesCourrierPref value) {
-        return new JAXBElement<DonneesCourrierPref>(_ARLettreObservations_QNAME, DonneesCourrierPref.class, null, value);
+        return new JAXBElement<DonneesCourrierPref>(_ARLettreObservations_QNAME, DonneesCourrierPref.class, null,
+                value);
     }
 
     /**
@@ -505,7 +512,8 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesActe }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesActe
+     * }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", name = "Acte")
@@ -514,7 +522,8 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ARReponseCL }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ARReponseCL
+     * }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", name = "ARPieceComplementaire")
@@ -523,7 +532,8 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ARReponseCL }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ARReponseCL
+     * }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", name = "ARReponseRejetLettreObservations")
@@ -532,7 +542,8 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link SIRETStructureType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link SIRETStructureType
+     * }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://xml.insee.fr/schema", name = "SIRETStructure")
@@ -551,21 +562,25 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesEnveloppeCLMISILL }{@code >}}
+     * Create an instance of {@link JAXBElement
+     * }{@code <}{@link DonneesEnveloppeCLMISILL }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", name = "EnveloppeCLMISILL")
     public JAXBElement<DonneesEnveloppeCLMISILL> createEnveloppeCLMISILL(DonneesEnveloppeCLMISILL value) {
-        return new JAXBElement<DonneesEnveloppeCLMISILL>(_EnveloppeCLMISILL_QNAME, DonneesEnveloppeCLMISILL.class, null, value);
+        return new JAXBElement<DonneesEnveloppeCLMISILL>(_EnveloppeCLMISILL_QNAME, DonneesEnveloppeCLMISILL.class, null,
+                value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesCourrierPref }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link DonneesCourrierPref
+     * }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.interieur.gouv.fr/ACTES#v1.1-20040216", name = "ARDemandePieceComplementaire")
     public JAXBElement<DonneesCourrierPref> createARDemandePieceComplementaire(DonneesCourrierPref value) {
-        return new JAXBElement<DonneesCourrierPref>(_ARDemandePieceComplementaire_QNAME, DonneesCourrierPref.class, null, value);
+        return new JAXBElement<DonneesCourrierPref>(_ARDemandePieceComplementaire_QNAME, DonneesCourrierPref.class,
+                null, value);
     }
 
 }

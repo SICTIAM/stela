@@ -11,7 +11,7 @@ public class ProfileUI {
     private String uuid;
     private String email;
     private List<NotificationValue> notificationValues;
-    private Set<Module> localAuthorityNotifications; 
+    private Set<Module> localAuthorityNotifications;
 
     public ProfileUI() {
     }

@@ -1,18 +1,15 @@
 package fr.sictiam.stela.acteservice.model;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class LocalAuthority {

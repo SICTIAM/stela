@@ -1,9 +1,8 @@
 package fr.sictiam.stela.acteservice;
 
-import org.springframework.context.ApplicationListener;
-
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import org.springframework.context.ApplicationListener;
 
 class MockActeEventListener implements ApplicationListener<ActeHistoryEvent> {
 

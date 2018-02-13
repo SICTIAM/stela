@@ -1,35 +1,25 @@
 package fr.sictiam.stela.acteservice;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
-import org.apache.commons.compress.utils.IOUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
+import fr.sictiam.stela.acteservice.dao.ActeRepository;
+import fr.sictiam.stela.acteservice.dao.AdminRepository;
+import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.acteservice.model.ui.DraftUI;
+import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.AdminService;
+import fr.sictiam.stela.acteservice.service.DraftService;
+import fr.sictiam.stela.acteservice.service.ExternalRestService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.LocalesService;
+import fr.sictiam.stela.acteservice.service.NotificationService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.hamcrest.Matchers;
@@ -58,26 +48,34 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
-import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
-import fr.sictiam.stela.acteservice.dao.ActeRepository;
-import fr.sictiam.stela.acteservice.dao.AdminRepository;
-import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
-import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
-import fr.sictiam.stela.acteservice.model.ui.DraftUI;
-import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.AdminService;
-import fr.sictiam.stela.acteservice.service.DraftService;
-import fr.sictiam.stela.acteservice.service.ExternalRestService;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
-import fr.sictiam.stela.acteservice.service.LocalesService;
-import fr.sictiam.stela.acteservice.service.NotificationService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

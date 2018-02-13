@@ -2,12 +2,11 @@ package fr.sictiam.stela.admin.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-
 import fr.sictiam.stela.admin.model.UI.Views;
-
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,19 +33,19 @@ public class LocalAuthority {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @JsonView(Views.LocalAuthorityViewPublic.class)
-    private Set<Module> activatedModules;   
+    private Set<Module> activatedModules;
 
     @JsonIgnore
     private OzwilloInstanceInfo ozwilloInstanceInfo;
-    
+
     @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)
     @JsonView(Views.LocalAuthorityViewPrivate.class)
     private Set<WorkGroup> groups;
-    
+
     @OneToMany(mappedBy = "localAuthority", fetch = FetchType.EAGER)
     @JsonView(Views.LocalAuthorityViewPrivate.class)
     private Set<Profile> profiles;
-    
+
     protected LocalAuthority() {
         this.activatedModules = new HashSet<>();
     }
@@ -114,7 +113,7 @@ public class LocalAuthority {
     public void setOzwilloInstanceInfo(OzwilloInstanceInfo ozwilloInstanceInfo) {
         this.ozwilloInstanceInfo = ozwilloInstanceInfo;
     }
-    
+
     public Set<WorkGroup> getGroups() {
         return groups == null ? new HashSet<>() : groups;
     }
@@ -130,18 +129,13 @@ public class LocalAuthority {
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
     }
-    
+
     @Override
     public String toString() {
-        return "LocalAuthority{" +
-                "uuid='" + uuid + '\'' +
-                ", name='" + name + '\'' +
-                ", siren='" + siren + '\'' +
-                '}';
+        return "LocalAuthority{" + "uuid='" + uuid + '\'' + ", name='" + name + '\'' + ", siren='" + siren + '\'' + '}';
     }
 
     public enum Status {
-        RUNNING,
-        STOPPED
+        RUNNING, STOPPED
     }
 }

@@ -1,22 +1,27 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLConnection;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
-import fr.sictiam.stela.acteservice.model.ui.*;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lowagie.text.DocumentException;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.Right;
+import fr.sictiam.stela.acteservice.model.StampPosition;
+import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUI;
+import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
+import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
+import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
+import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.acteservice.validation.ValidationUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,23 +42,18 @@ import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lowagie.text.DocumentException;
+import javax.servlet.http.HttpServletResponse;
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.Right;
-import fr.sictiam.stela.acteservice.model.StampPosition;
-import fr.sictiam.stela.acteservice.model.StatusType;
-import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
-import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.service.util.RightUtils;
-import fr.sictiam.stela.acteservice.validation.ValidationUtil;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -65,32 +65,35 @@ public class ActeRestController {
     private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService){
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(
-            @RequestParam(value= "number", required = false) String number,
-            @RequestParam(value= "objet", required = false) String objet,
-            @RequestParam(value= "nature", required = false) ActeNature nature,
-            @RequestParam(value= "decisionFrom", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionFrom,
-            @RequestParam(value= "decisionTo", required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate decisionTo,
-            @RequestParam(value= "status", required = false) StatusType status,
+    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "number", required = false) String number,
+            @RequestParam(value = "objet", required = false) String objet,
+            @RequestParam(value = "nature", required = false) ActeNature nature,
+            @RequestParam(value = "decisionFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate decisionFrom,
+            @RequestParam(value = "decisionTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate decisionTo,
+            @RequestParam(value = "status", required = false) StatusType status,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, limit, offset, column, direction, currentLocalAuthUuid);
-        Long count = acteService.countAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, currentLocalAuthUuid);
+        List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, limit,
+                offset, column, direction, currentLocalAuthUuid);
+        Long count = acteService.countAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status,
+                currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, actes), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<ActeUI> getByUuid(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String uuid) {
+    public ResponseEntity<ActeUI> getByUuid(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         boolean isActeACK = acteService.isActeACK(uuid);
         // TODO Retrieve current local authority
@@ -104,12 +107,13 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
-    public ResponseEntity downloadACKPdf(HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
+    public ResponseEntity downloadACKPdf(HttpServletResponse response, @PathVariable String uuid,
+            @RequestParam(required = false) String lng) {
         try {
             byte[] pdf = acteService.getACKPdfs(new ActeUuidsAndSearchUI(Collections.singletonList(uuid)), lng);
             outputFile(response, pdf, "AR_" + uuid + ".pdf");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (IOException|DocumentException e) {
+        } catch (IOException | DocumentException e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -117,13 +121,16 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/actes.pdf")
-    public ResponseEntity downloadMergedStampedAttachments(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+    public ResponseEntity downloadMergedStampedAttachments(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
             byte[] pdf = acteService.getMergedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
-            outputFile(response, pdf, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
+            outputFile(response, pdf,
+                    "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (IOException|DocumentException e) {
+        } catch (IOException | DocumentException e) {
             LOGGER.error("Error while merging PDFs: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -131,14 +138,17 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/actes.zip")
-    public ResponseEntity downloadZipedStampedAttachments(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
+    public ResponseEntity downloadZipedStampedAttachments(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         // TODO Retrieve current local authority
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
             byte[] zip = acteService.getZipedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
-            outputFile(response, zip, "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip");
+            outputFile(response, zip,
+                    "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (IOException|DocumentException e) {
+        } catch (IOException | DocumentException e) {
             LOGGER.error("Error while creating zip file: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -146,23 +156,27 @@ public class ActeRestController {
 
     // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/ARs.pdf")
-    public ResponseEntity downloadACKsPdf(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
+    public ResponseEntity downloadACKsPdf(HttpServletResponse response,
+            @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         try {
             byte[] pdf = acteService.getACKPdfs(acteUuidsAndSearchUI, lng);
-            outputFile(response, pdf, "ARs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
+            outputFile(response, pdf,
+                    "ARs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
             return new ResponseEntity(HttpStatus.OK);
-        } catch (DocumentException|IOException e) {
+        } catch (DocumentException | IOException e) {
             LOGGER.error("Error while generating the ACKs PDF: {}", e);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Hack: Not possible to have an infinite UUID list in a GET request with params 
+    // Hack: Not possible to have an infinite UUID list in a GET request with params
     @PostMapping("/actes.csv")
-    public ResponseEntity getCSVFromList(HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
+    public ResponseEntity getCSVFromList(HttpServletResponse response,
+            @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI, @RequestParam(required = false) String lng) {
         List<String> fields = ActeCSVUI.getFields();
         List<String> translatedFields = acteService.getTranslatedCSVFields(fields, lng);
-        outputCSV(response, acteService.getActesCSV(acteUuidsAndSearchUI, lng).toArray(), fields, translatedFields, "actes.csv");
+        outputCSV(response, acteService.getActesCSV(acteUuidsAndSearchUI, lng).toArray(), fields, translatedFields,
+                "actes.csv");
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -175,7 +189,7 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/file/thumbnail")
     public ResponseEntity getActeAttachmentThumbnail(HttpServletResponse response, @PathVariable String uuid) {
-        if(StringUtils.isNotBlank(uuid)) {
+        if (StringUtils.isNotBlank(uuid)) {
             try {
                 byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
                 outputFile(response, thumbnail, "thumbnail-" + uuid + ".png");
@@ -184,19 +198,20 @@ public class ActeRestController {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
                 return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        }
-        else {
+        } else {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }
 
     @GetMapping("/{uuid}/file/stamped")
-    public ResponseEntity getStampedActeAttachment(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, HttpServletResponse response, @PathVariable String uuid,
-                                         @RequestParam(required = false) Integer x, @RequestParam(required = false) Integer y) {
+    public ResponseEntity getStampedActeAttachment(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) Integer x,
+            @RequestParam(required = false) Integer y) {
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         Acte acte = acteService.getByUuid(uuid);
         byte[] pdf = new byte[0];
-        if(!acteService.isActeACK(uuid)) {
+        if (!acteService.isActeACK(uuid)) {
             pdf = acte.getActeAttachment().getFile();
         } else {
             try {
@@ -216,11 +231,11 @@ public class ActeRestController {
     @GetMapping("/{uuid}/history/{historyUuid}/file")
     public ResponseEntity getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
         ActeHistory acteHistory = acteService.getHistoryByUuid(historyUuid);
-        if(acteHistory.getFile() != null) {
+        if (acteHistory.getFile() != null) {
             outputFile(response, acteHistory.getFile(), acteHistory.getFileName());
             return new ResponseEntity(HttpStatus.OK);
-        }
-        else throw new FileNotFoundException();
+        } else
+            throw new FileNotFoundException();
     }
 
     @GetMapping("/{uuid}/annexes")
@@ -246,10 +261,11 @@ public class ActeRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
             @RequestParam("annexes") MultipartFile... annexes) {
-          //TODO REACTIVE WHEN WE HAVE THE FRONT 
-//        if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_ADMIN, Right.ACTES_DEPOSIT))) {
-//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-//        }
+        // TODO REACTIVE WHEN WE HAVE THE FRONT
+        // if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_ADMIN,
+        // Right.ACTES_DEPOSIT))) {
+        // return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        // }
 
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         ObjectMapper mapper = new ObjectMapper();
@@ -258,21 +274,23 @@ public class ActeRestController {
 
             LOGGER.debug("Received acte : {}", acte.getObjet());
             LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
-    		List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte,file,annexes);
-    		if(!errors.isEmpty()) {
-				CustomValidationUI customValidationUI=new CustomValidationUI(errors, "has failed");
-				return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
-			}else {
-    			 Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);
-    	         return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-    		}
-           
+            List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
+            if (!errors.isEmpty()) {
+                CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
+                return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
+            } else {
+                Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);
+                return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+            }
+
         } catch (IOException e) {
             LOGGER.error("IOException: Could not convert JSON to Acte: {}", e);
-            return new ResponseEntity<>("notifications.acte.sent.error.non_extractable_acte", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ActeNotSentException ns){
+            return new ResponseEntity<>("notifications.acte.sent.error.non_extractable_acte",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ActeNotSentException ns) {
             LOGGER.error("ActeNotSentException: {}", ns);
-            return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -280,7 +298,8 @@ public class ActeRestController {
     /* ----- FILE OPERATIONS ----- */
     /* --------------------------- */
 
-    private void outputCSV(HttpServletResponse response, Object[] beans, List<String> header, List<String> translatedHeader, String filename) {
+    private void outputCSV(HttpServletResponse response, Object[] beans, List<String> header,
+            List<String> translatedHeader, String filename) {
         response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
         response.addHeader("Content-Type", getContentType(filename) + "; charset=UTF-8");
         ICsvBeanWriter csvWriter = null;
@@ -293,7 +312,8 @@ public class ActeRestController {
             header.toArray(arrayHeader);
 
             csvWriter.writeHeader(arrayTranslatedHeader);
-            for (Object bean : beans) csvWriter.write(bean, arrayHeader);
+            for (Object bean : beans)
+                csvWriter.write(bean, arrayHeader);
             csvWriter.close();
         } catch (Exception e) {
             LOGGER.error("Error while trying to output CSV: {}", e);
@@ -315,8 +335,8 @@ public class ActeRestController {
     }
 
     private String getContentType(String filename) {
-        String mimeType= URLConnection.guessContentTypeFromName(filename);
-        if(mimeType==null){
+        String mimeType = URLConnection.guessContentTypeFromName(filename);
+        if (mimeType == null) {
             LOGGER.info("Mimetype is not detectable, will take default");
             mimeType = "application/octet-stream";
         }

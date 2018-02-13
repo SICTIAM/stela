@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property="type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({ @JsonSubTypes.Type(value = LocalAuthorityEvent.class, name = "LocalAutorityCreation") })
 public abstract class Event {
-    
+
     private String type;
-    
+
     public String type() {
         return type;
     }
@@ -18,11 +18,11 @@ public abstract class Event {
     public void setType(String type) {
         this.type = type;
     }
-    
+
     private String origin;
 
     public Event(String type) {
-        this.type= type;
+        this.type = type;
         this.origin = "acte-service";
     }
 

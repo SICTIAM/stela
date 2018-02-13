@@ -22,7 +22,7 @@ public class DiscoveryUtils {
         InstanceInfo instance = discoveryClient.getNextServerFromEureka("admin-service", false);
         return instance.getHomePageUrl();
     }
-    
+
     public static String pesServiceUrl() {
         InstanceInfo instance = discoveryClient.getNextServerFromEureka("pes-service", false);
         return instance.getHomePageUrl();

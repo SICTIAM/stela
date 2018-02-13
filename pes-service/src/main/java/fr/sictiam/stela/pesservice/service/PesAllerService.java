@@ -1,12 +1,31 @@
 package fr.sictiam.stela.pesservice.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
+import fr.sictiam.stela.pesservice.model.Attachment;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
+import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
+import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.ftp.FTPClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
+import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
+import org.springframework.integration.ftp.session.FtpSession;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,34 +45,13 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.net.ftp.FTPClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
-import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
-import org.springframework.integration.ftp.session.FtpSession;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
-import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.model.Attachment;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
-import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
-import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
-import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
-import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
@@ -219,34 +217,35 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public List<PesAller> getBlockedFlux() {
-        
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();  
-        CriteriaQuery<PesAller> query = cb.createQuery(PesAller.class); 
-        Root<PesAller> pesTable =  query.from(PesAller.class); 
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<PesAller> query = cb.createQuery(PesAller.class);
+        Root<PesAller> pesTable = query.from(PesAller.class);
         query.select(pesTable);
-        
-        Subquery<PesHistory> subquery = query.subquery(PesHistory.class); 
-        Root<PesHistory> historyTable = subquery.from(PesHistory.class);  
-        subquery.select(historyTable);  
 
-        List<Predicate> subQueryPredicates = new ArrayList<Predicate>(); 
-        subQueryPredicates.add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
-        subquery.where(subQueryPredicates.toArray(new Predicate[]{})); 
-        
-        Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class); 
-        subquery2.select(historyTable);  
+        Subquery<PesHistory> subquery = query.subquery(PesHistory.class);
+        Root<PesHistory> historyTable = subquery.from(PesHistory.class);
+        subquery.select(historyTable);
 
-        List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>(); 
+        List<Predicate> subQueryPredicates = new ArrayList<Predicate>();
+        subQueryPredicates
+                .add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
+        subquery.where(subQueryPredicates.toArray(new Predicate[] {}));
+
+        Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
+        subquery2.select(historyTable);
+
+        List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
         subQueryPredicates2.add(cb.equal(historyTable.get("status"), StatusType.SENT));
-        subquery2.where(subQueryPredicates2.toArray(new Predicate[]{})); 
-        
-        List<Predicate> mainQueryPredicates = new ArrayList<Predicate>(); 
+        subquery2.where(subQueryPredicates2.toArray(new Predicate[] {}));
 
-        mainQueryPredicates.add(cb.not(cb.exists(subquery))); 
-        query.where(mainQueryPredicates.toArray(new Predicate[]{})); 
-        TypedQuery<PesAller> typedQuery =  entityManager.createQuery(query); 
+        List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
+
+        mainQueryPredicates.add(cb.not(cb.exists(subquery)));
+        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
+        TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
         List<PesAller> resultList = typedQuery.getResultList();
-        
+
         return resultList;
     }
 

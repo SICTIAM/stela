@@ -3,14 +3,20 @@ package fr.sictiam.stela.acteservice.service;
 import fr.sictiam.stela.acteservice.dao.ActeDraftRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
-import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.ActeMode;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.Draft;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
-import fr.sictiam.stela.acteservice.service.exceptions.*;
+import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
 import fr.sictiam.stela.acteservice.validation.ValidationUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,8 +47,8 @@ public class DraftService {
 
     @Autowired
     public DraftService(ActeRepository acteRepository, ActeDraftRepository acteDraftRepository,
-                        AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-                        LocalAuthorityService localAuthorityService) {
+            AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
+            LocalAuthorityService localAuthorityService) {
         this.acteRepository = acteRepository;
         this.acteDraftRepository = acteDraftRepository;
         this.attachmentRepository = attachmentRepository;
@@ -66,7 +75,7 @@ public class DraftService {
         Draft draft = getDraftByUuid(uuid);
 
         CustomValidationUI customValidationUI = null;
-        for (Acte acte:actes) {
+        for (Acte acte : actes) {
             List<ObjectError> errors = ValidationUtil.validateActe(acte);
             if (!errors.isEmpty()) {
                 if (customValidationUI == null) {
@@ -76,7 +85,8 @@ public class DraftService {
                 }
             }
         }
-        if(customValidationUI != null) return Optional.of(customValidationUI);
+        if (customValidationUI != null)
+            return Optional.of(customValidationUI);
 
         actes.forEach(acte -> {
             acte.setDraft(null);
@@ -104,8 +114,10 @@ public class DraftService {
         Acte acte = new Acte();
         acte.setLocalAuthority(currentLocalAuthority);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
-        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
+        if (!currentLocalAuthority.getCanPublishWebSite())
+            acte.setPublicWebsite(false);
+        if (!currentLocalAuthority.getCanPublishRegistre())
+            acte.setPublic(false);
         return acte;
     }
 
@@ -119,7 +131,8 @@ public class DraftService {
         Acte acte = newDraft(currentLocalAuthority, ActeMode.ACTE_BATCH);
         Draft draft = acte.getDraft();
         ActeDraftUI acteDraftUI = new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature());
-        return new DraftUI(draft.getUuid(), Collections.singletonList(acteDraftUI), draft.getLastModified(), draft.getMode(), draft.getDecision(), draft.getNature());
+        return new DraftUI(draft.getUuid(), Collections.singletonList(acteDraftUI), draft.getLastModified(),
+                draft.getMode(), draft.getDecision(), draft.getNature());
     }
 
     @Transactional
@@ -134,8 +147,10 @@ public class DraftService {
     public Acte saveActeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
         acte.setLocalAuthority(currentLocalAuthority);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-        if(!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
-        if(!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
+        if (!currentLocalAuthority.getCanPublishWebSite())
+            acte.setPublicWebsite(false);
+        if (!currentLocalAuthority.getCanPublishRegistre())
+            acte.setPublic(false);
 
         updateLastModifiedDraft(acte.getDraft().getUuid());
         return acteRepository.save(acte);
@@ -143,18 +158,23 @@ public class DraftService {
 
     public void leaveActeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
         // Nothing to save or delete if the acte does not exist anymore
-        if(!acteRepository.findByUuidAndDraftNotNull(acte.getUuid()).isPresent()) return;
-        if(acte.empty()) acteRepository.delete(acte);
-        else saveActeDraft(acte, currentLocalAuthority);
+        if (!acteRepository.findByUuidAndDraftNotNull(acte.getUuid()).isPresent())
+            return;
+        if (acte.empty())
+            acteRepository.delete(acte);
+        else
+            saveActeDraft(acte, currentLocalAuthority);
     }
 
-    public Acte saveActeDraftFile(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
+    public Acte saveActeDraftFile(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority)
+            throws IOException {
         Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getActeDraftByUuid(uuid);
         acte.setActeAttachment(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
         return saveActeDraft(acte, currentLocalAuthority);
     }
 
-    public Acte saveActeDraftAnnexe(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority) throws IOException {
+    public Acte saveActeDraftAnnexe(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority)
+            throws IOException {
         Acte acte = StringUtils.isBlank(uuid) ? new Acte() : getActeDraftByUuid(uuid);
         List<Attachment> annexes = acte.getAnnexes();
         annexes.add(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
@@ -164,8 +184,9 @@ public class DraftService {
 
     public void deleteActeDraftAnnexe(String acteUuid, String uuid) {
         Acte acte = getActeDraftByUuid(acteUuid);
-        if(acte.getAnnexes().stream().anyMatch( attachment -> attachment.getUuid().equals(uuid))) {
-            List<Attachment> annexes = acte.getAnnexes().stream().filter(attachment -> !attachment.getUuid().equals(uuid)).collect(Collectors.toList());
+        if (acte.getAnnexes().stream().anyMatch(attachment -> attachment.getUuid().equals(uuid))) {
+            List<Attachment> annexes = acte.getAnnexes().stream()
+                    .filter(attachment -> !attachment.getUuid().equals(uuid)).collect(Collectors.toList());
             acte.setAnnexes(annexes);
             acteRepository.save(acte);
             attachmentRepository.delete(attachmentRepository.findByUuid(uuid).get());
@@ -176,7 +197,7 @@ public class DraftService {
     public void deleteActeDraftFile(String uuid) {
         Acte acte = getActeDraftByUuid(uuid);
         Attachment file = acte.getActeAttachment();
-        if(file != null) {
+        if (file != null) {
             acte.setActeAttachment(null);
             acteRepository.save(acte);
             attachmentRepository.delete(file);
@@ -201,26 +222,30 @@ public class DraftService {
     public List<DraftUI> getDraftUIs() {
         List<Draft> drafts = acteDraftRepository.findAllByOrderByLastModifiedDesc();
         List<DraftUI> draftUIs = new ArrayList<>();
-        for(Draft draft : drafts) {
-            List<ActeDraftUI> acteUuids = getActeDrafts(draft.getUuid()).stream().map(acte ->
-                    new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature())
-            ).collect(Collectors.toList());
-            if(acteUuids.size() > 0) draftUIs.add(new DraftUI(draft.getUuid(), acteUuids, draft.getLastModified(), draft.getMode(), draft.getDecision(), draft.getNature()));
+        for (Draft draft : drafts) {
+            List<ActeDraftUI> acteUuids = getActeDrafts(draft.getUuid()).stream()
+                    .map(acte -> new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature()))
+                    .collect(Collectors.toList());
+            if (acteUuids.size() > 0)
+                draftUIs.add(new DraftUI(draft.getUuid(), acteUuids, draft.getLastModified(), draft.getMode(),
+                        draft.getDecision(), draft.getNature()));
         }
         return draftUIs;
     }
 
     public DraftUI getDraftActesUI(String uuid) {
         Draft draft = getDraftByUuid(uuid);
-        List<ActeDraftUI> acteUuids = getActeDrafts(uuid).stream().map(acte ->
-                new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature())
-        ).collect(Collectors.toList());
-        return new DraftUI(uuid, acteUuids, draft.getLastModified(), draft.getMode(), draft.getDecision(), draft.getNature());
+        List<ActeDraftUI> acteUuids = getActeDrafts(uuid).stream()
+                .map(acte -> new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature()))
+                .collect(Collectors.toList());
+        return new DraftUI(uuid, acteUuids, draft.getLastModified(), draft.getMode(), draft.getDecision(),
+                draft.getNature());
     }
 
     public void deleteDrafts(List<String> uuids) {
         // TODO : filter by current USER
-        if(uuids.size() == 0) uuids = acteDraftRepository.findAll().stream().map(Draft::getUuid).collect(Collectors.toList());
+        if (uuids.size() == 0)
+            uuids = acteDraftRepository.findAll().stream().map(Draft::getUuid).collect(Collectors.toList());
         uuids.forEach(uuid -> {
             List<Acte> actes = getActeDrafts(uuid);
             actes.forEach(acteRepository::delete);
@@ -235,6 +260,7 @@ public class DraftService {
     public Acte getActeDraftByUuid(String uuid) {
         return acteRepository.findByUuidAndDraftNotNull(uuid).orElseThrow(ActeNotFoundException::new);
     }
+
     public List<Acte> getActeDrafts(String uuid) {
         return acteRepository.findAllByDraftNotNullAndDraft_Uuid(uuid);
     }

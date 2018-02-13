@@ -1,23 +1,21 @@
 package fr.sictiam.stela.apigateway.config.filter;
 
-import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_DECORATION_FILTER_ORDER;
-import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
-
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
+import fr.sictiam.stela.apigateway.model.StelaUserInfo;
 import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.netflix.zuul.ZuulFilter;
-import com.netflix.zuul.context.RequestContext;
-
-import fr.sictiam.stela.apigateway.model.StelaUserInfo;
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_DECORATION_FILTER_ORDER;
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
 public class AuthorizationHeaderFilter extends ZuulFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationHeaderFilter.class);
-     
+
     @Override
     public String filterType() {
         return PRE_TYPE;
@@ -40,9 +38,10 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
         RequestContext ctx = RequestContext.getCurrentContext();
-        
+
         ctx.addZuulRequestHeader("Authorization", "Bearer " + authenticationOpen.getAccessToken());
-        ctx.addZuulRequestHeader("STELA-Active-Token",((StelaUserInfo) authenticationOpen.getUserInfo()).getStelaToken());
+        ctx.addZuulRequestHeader("STELA-Active-Token",
+                ((StelaUserInfo) authenticationOpen.getUserInfo()).getStelaToken());
         return null;
     }
 }

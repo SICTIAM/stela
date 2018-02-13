@@ -8,7 +8,9 @@ import java.util.Optional;
 
 public interface AgentRepository extends JpaRepository<Agent, String> {
     Optional<Agent> findBySub(String sub);
+
     Optional<Agent> findByUuid(String uuid);
+
     @Query("SELECT COUNT (a.uuid) FROM Agent a")
     Long countAll();
 }

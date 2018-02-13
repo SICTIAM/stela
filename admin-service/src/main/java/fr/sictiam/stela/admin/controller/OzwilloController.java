@@ -8,16 +8,22 @@ import fr.sictiam.stela.admin.model.StatusChangeRequest;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.OzwilloProvisioningService;
 import org.apache.commons.codec.binary.Hex;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +43,8 @@ public class OzwilloController {
     private final OzwilloProvisioningService ozwilloProvisioningService;
     private final LocalAuthorityService localAuthorityService;
 
-    public OzwilloController(OzwilloProvisioningService ozwilloProvisioningService, LocalAuthorityService localAuthorityService) {
+    public OzwilloController(OzwilloProvisioningService ozwilloProvisioningService,
+            LocalAuthorityService localAuthorityService) {
         this.ozwilloProvisioningService = ozwilloProvisioningService;
         this.localAuthorityService = localAuthorityService;
     }
@@ -45,11 +52,12 @@ public class OzwilloController {
     @PostMapping("/instance")
     @ResponseBody
     public ResponseEntity<String> create(@RequestBody String requestBody,
-                                 @RequestHeader(name = "X-Hub-Signature") String xHubSignature) {
+            @RequestHeader(name = "X-Hub-Signature") String xHubSignature) {
         LOGGER.debug("Got a provisioning request : {}", requestBody);
 
         ResponseEntity<String> responseEntity = checkSignature(requestBody, xHubSignature, instanciationSecret);
-        if (responseEntity != null) return responseEntity;
+        if (responseEntity != null)
+            return responseEntity;
 
         ObjectMapper objectMapper = new ObjectMapper();
         ProvisioningRequest provisioningRequest;
@@ -68,22 +76,25 @@ public class OzwilloController {
     @PostMapping("/status")
     @ResponseBody
     public ResponseEntity<String> status(@RequestBody String requestBody,
-                                 @RequestHeader(name = "X-Hub-Signature") String xHubSignature) {
+            @RequestHeader(name = "X-Hub-Signature") String xHubSignature) {
         LOGGER.debug("Got a status change request : {}", requestBody);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             // we have to first read the body to get the instance id
-            // to then get the status changed secret required to check the signature of the call
+            // to then get the status changed secret required to check the signature of the
+            // call
             StatusChangeRequest statusChangeRequest = objectMapper.readValue(requestBody, StatusChangeRequest.class);
-            Optional<LocalAuthority> optionalLocalAuthority =
-                    localAuthorityService.getByInstanceId(statusChangeRequest.getInstanceId());
+            Optional<LocalAuthority> optionalLocalAuthority = localAuthorityService
+                    .getByInstanceId(statusChangeRequest.getInstanceId());
             if (!optionalLocalAuthority.isPresent())
-                return new ResponseEntity<>("No local authority found with instance id " + statusChangeRequest.getInstanceId(),
+                return new ResponseEntity<>(
+                        "No local authority found with instance id " + statusChangeRequest.getInstanceId(),
                         HttpStatus.BAD_REQUEST);
             ResponseEntity<String> responseEntity = checkSignature(requestBody, xHubSignature,
                     optionalLocalAuthority.get().getOzwilloInstanceInfo().getStatusChangedSecret());
-            if (responseEntity != null) return responseEntity;
+            if (responseEntity != null)
+                return responseEntity;
             ozwilloProvisioningService.changeInstanceStatus(statusChangeRequest);
         } catch (IOException e) {
             LOGGER.error("Unable to parse status change request", e);
@@ -120,9 +131,11 @@ public class OzwilloController {
 
         LOGGER.debug("Computed HMAC : {}", computedHmac);
         if (!receivedHmac.equals(computedHmac)) {
-            // throw new BadCredentialsException("Provided HMAC does not conform to what was expected : " + receivedHmac);
+            // throw new BadCredentialsException("Provided HMAC does not conform to what was
+            // expected : " + receivedHmac);
             LOGGER.error("Provided HMAC does not conform to what was expected : " + receivedHmac);
-            return new ResponseEntity<>("Provided HMAC does not conform to what was expected : \" + receivedHmac", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Provided HMAC does not conform to what was expected : \" + receivedHmac",
+                    HttpStatus.FORBIDDEN);
         }
 
         return null;

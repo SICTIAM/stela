@@ -1,26 +1,15 @@
 package fr.sictiam.stela.pesservice.model;
 
-import java.time.LocalDateTime;
-import java.util.SortedSet;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
+import java.time.LocalDateTime;
+import java.util.SortedSet;
 
 @Entity
 public class PesAller {

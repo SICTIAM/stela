@@ -1,11 +1,10 @@
 package fr.sictiam.stela.acteservice.model.event;
 
-import java.util.List;
-
-import org.springframework.context.ApplicationEvent;
-
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Attachment;
+import org.springframework.context.ApplicationEvent;
+
+import java.util.List;
 
 public class ActeHistoryEvent extends ApplicationEvent {
 

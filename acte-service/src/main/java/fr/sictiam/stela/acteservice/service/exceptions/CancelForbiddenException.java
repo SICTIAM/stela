@@ -9,7 +9,8 @@ public class CancelForbiddenException extends RuntimeException {
     public CancelForbiddenException() {
         super("notifications.acte.cancelled.forbidden");
     }
-    public CancelForbiddenException(String message, Throwable cause){
+
+    public CancelForbiddenException(String message, Throwable cause) {
         super(message, cause);
     }
 }

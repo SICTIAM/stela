@@ -1,9 +1,8 @@
 package fr.sictiam.stela.admin.service;
 
-import org.springframework.stereotype.Service;
-
 import fr.sictiam.stela.admin.dao.AgentConnectionRepository;
 import fr.sictiam.stela.admin.model.AgentConnection;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AgentConnectionService {

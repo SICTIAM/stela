@@ -1,17 +1,15 @@
 package fr.sictiam.stela.pesservice.model;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
+import java.time.LocalDateTime;
 
 @Entity
 public class PendingMessage {

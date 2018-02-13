@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,11 +16,13 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -63,11 +64,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "emetteur",
-    "formulairesEnvoyes",
-    "destinataire"
-})
+@XmlType(name = "", propOrder = { "emetteur", "formulairesEnvoyes", "destinataire" })
 @XmlRootElement(name = "EnveloppeMISILLCL")
 public class EnveloppeMISILLCL {
 
@@ -81,10 +78,8 @@ public class EnveloppeMISILLCL {
     /**
      * Gets the value of the emetteur property.
      * 
-     * @return
-     *     possible object is
-     *     {@link EnveloppeMISILLCL.Emetteur }
-     *     
+     * @return possible object is {@link EnveloppeMISILLCL.Emetteur }
+     * 
      */
     public EnveloppeMISILLCL.Emetteur getEmetteur() {
         return emetteur;
@@ -94,9 +89,8 @@ public class EnveloppeMISILLCL {
      * Sets the value of the emetteur property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link EnveloppeMISILLCL.Emetteur }
-     *     
+     *            allowed object is {@link EnveloppeMISILLCL.Emetteur }
+     * 
      */
     public void setEmetteur(EnveloppeMISILLCL.Emetteur value) {
         this.emetteur = value;
@@ -105,10 +99,8 @@ public class EnveloppeMISILLCL {
     /**
      * Liste des fichiers XML envoyés
      * 
-     * @return
-     *     possible object is
-     *     {@link FormulairesEnvoyes }
-     *     
+     * @return possible object is {@link FormulairesEnvoyes }
+     * 
      */
     public FormulairesEnvoyes getFormulairesEnvoyes() {
         return formulairesEnvoyes;
@@ -118,9 +110,8 @@ public class EnveloppeMISILLCL {
      * Sets the value of the formulairesEnvoyes property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link FormulairesEnvoyes }
-     *     
+     *            allowed object is {@link FormulairesEnvoyes }
+     * 
      */
     public void setFormulairesEnvoyes(FormulairesEnvoyes value) {
         this.formulairesEnvoyes = value;
@@ -129,10 +120,8 @@ public class EnveloppeMISILLCL {
     /**
      * Gets the value of the destinataire property.
      * 
-     * @return
-     *     possible object is
-     *     {@link EnveloppeMISILLCL.Destinataire }
-     *     
+     * @return possible object is {@link EnveloppeMISILLCL.Destinataire }
+     * 
      */
     public EnveloppeMISILLCL.Destinataire getDestinataire() {
         return destinataire;
@@ -142,19 +131,20 @@ public class EnveloppeMISILLCL {
      * Sets the value of the destinataire property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link EnveloppeMISILLCL.Destinataire }
-     *     
+     *            allowed object is {@link EnveloppeMISILLCL.Destinataire }
+     * 
      */
     public void setDestinataire(EnveloppeMISILLCL.Destinataire value) {
         this.destinataire = value;
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -179,10 +169,8 @@ public class EnveloppeMISILLCL {
         /**
          * Gets the value of the siren property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public String getSIREN() {
             return siren;
@@ -192,9 +180,8 @@ public class EnveloppeMISILLCL {
          * Sets the value of the siren property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setSIREN(String value) {
             this.siren = value;
@@ -202,11 +189,13 @@ public class EnveloppeMISILLCL {
 
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within
+     * this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -228,12 +217,7 @@ public class EnveloppeMISILLCL {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "idsgar",
-        "idPref",
-        "idSousPref",
-        "referent"
-    })
+    @XmlType(name = "", propOrder = { "idsgar", "idPref", "idSousPref", "referent" })
     public static class Emetteur {
 
         @XmlElement(name = "IDSGAR")
@@ -248,10 +232,8 @@ public class EnveloppeMISILLCL {
         /**
          * Gets the value of the idsgar property.
          * 
-         * @return
-         *     possible object is
-         *     {@link IDSGAR }
-         *     
+         * @return possible object is {@link IDSGAR }
+         * 
          */
         public IDSGAR getIDSGAR() {
             return idsgar;
@@ -261,9 +243,8 @@ public class EnveloppeMISILLCL {
          * Sets the value of the idsgar property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link IDSGAR }
-         *     
+         *            allowed object is {@link IDSGAR }
+         * 
          */
         public void setIDSGAR(IDSGAR value) {
             this.idsgar = value;
@@ -272,10 +253,8 @@ public class EnveloppeMISILLCL {
         /**
          * Gets the value of the idPref property.
          * 
-         * @return
-         *     possible object is
-         *     {@link IDPref }
-         *     
+         * @return possible object is {@link IDPref }
+         * 
          */
         public IDPref getIDPref() {
             return idPref;
@@ -285,9 +264,8 @@ public class EnveloppeMISILLCL {
          * Sets the value of the idPref property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link IDPref }
-         *     
+         *            allowed object is {@link IDPref }
+         * 
          */
         public void setIDPref(IDPref value) {
             this.idPref = value;
@@ -296,10 +274,8 @@ public class EnveloppeMISILLCL {
         /**
          * Gets the value of the idSousPref property.
          * 
-         * @return
-         *     possible object is
-         *     {@link IDSousPref }
-         *     
+         * @return possible object is {@link IDSousPref }
+         * 
          */
         public IDSousPref getIDSousPref() {
             return idSousPref;
@@ -309,9 +285,8 @@ public class EnveloppeMISILLCL {
          * Sets the value of the idSousPref property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link IDSousPref }
-         *     
+         *            allowed object is {@link IDSousPref }
+         * 
          */
         public void setIDSousPref(IDSousPref value) {
             this.idSousPref = value;
@@ -320,10 +295,8 @@ public class EnveloppeMISILLCL {
         /**
          * Gets the value of the referent property.
          * 
-         * @return
-         *     possible object is
-         *     {@link Referent }
-         *     
+         * @return possible object is {@link Referent }
+         * 
          */
         public Referent getReferent() {
             return referent;
@@ -333,9 +306,8 @@ public class EnveloppeMISILLCL {
          * Sets the value of the referent property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link Referent }
-         *     
+         *            allowed object is {@link Referent }
+         * 
          */
         public void setReferent(Referent value) {
             this.referent = value;

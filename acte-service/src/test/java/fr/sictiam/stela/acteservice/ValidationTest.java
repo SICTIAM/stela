@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ public class ValidationTest {
 
     @Test
     public void testEmailValidation() {
-        Admin admin = new Admin("test", "fail@gmail.com", null, true, LocalDateTime.now(), LocalDateTime.now(), false, "");
+        Admin admin = new Admin("test", "fail@gmail.com", null, true, LocalDateTime.now(), LocalDateTime.now(), false,
+                "");
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
         assertThat(validation, empty());
@@ -40,7 +42,8 @@ public class ValidationTest {
         List<String> array = new ArrayList<String>();
         array.add("fail");
 
-        Admin admin = new Admin("test", "rapderivas@gmail.com", array, true, LocalDateTime.now(), LocalDateTime.now(), false, "");
+        Admin admin = new Admin("test", "rapderivas@gmail.com", array, true, LocalDateTime.now(), LocalDateTime.now(),
+                false, "");
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
         assertThat(validation, not(empty()));
@@ -51,7 +54,8 @@ public class ValidationTest {
     public void testOk() {
         List<String> array = new ArrayList<String>();
         array.add("dev@sictiam.fr");
-        Admin admin = new Admin("test", "rapderivas@gmail.com", array, true, LocalDateTime.now(), LocalDateTime.now(), false, "");
+        Admin admin = new Admin("test", "rapderivas@gmail.com", array, true, LocalDateTime.now(), LocalDateTime.now(),
+                false, "");
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<Admin>> validation = validator.validate(admin);
         assertThat(validation, empty());
@@ -70,7 +74,7 @@ public class ValidationTest {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
 
         MultipartFile file = new MockMultipartFile("file.csv", "file.csv", "application/test", new byte[0]);
-        MultipartFile[] annexes = new MultipartFile[]{};
+        MultipartFile[] annexes = new MultipartFile[] {};
         List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(1));
@@ -82,7 +86,7 @@ public class ValidationTest {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
 
         MultipartFile file = new MockMultipartFile("file.csv", "file.csv", "application/test", new byte[256]);
-        MultipartFile[] annexes = new MultipartFile[]{};
+        MultipartFile[] annexes = new MultipartFile[] {};
         List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(1));
@@ -94,7 +98,7 @@ public class ValidationTest {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
 
         MultipartFile file = new MockMultipartFile("file.pdf", "file.pdf", "application/test", new byte[256]);
-        MultipartFile[] annexes = new MultipartFile[]{new MockMultipartFile("file.csv", new byte[256])};
+        MultipartFile[] annexes = new MultipartFile[] { new MockMultipartFile("file.csv", new byte[256]) };
         List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(1));
@@ -108,7 +112,7 @@ public class ValidationTest {
 
         MultipartFile file = new MockMultipartFile("file.pdf", "file.pdf", "application/test", new byte[256]);
 
-        MultipartFile[] annexes = new MultipartFile[]{};
+        MultipartFile[] annexes = new MultipartFile[] {};
         List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
         assertThat(errors, empty());
 

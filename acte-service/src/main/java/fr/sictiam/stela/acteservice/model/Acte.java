@@ -1,30 +1,19 @@
 package fr.sictiam.stela.acteservice.model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.SortedSet;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.SortedSet;
 
 @Entity
 public class Acte {
@@ -67,15 +56,16 @@ public class Acte {
     private LocalAuthority localAuthority;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Draft draft;
-    
+
     private String profileUuid;
-    
+
     private String groupUuid;
 
     public Acte() {
     }
 
-    public Acte(String number, LocalDate decision, ActeNature nature, String code, String objet, boolean isPublic, boolean isPublicWebsite) {
+    public Acte(String number, LocalDate decision, ActeNature nature, String code, String objet, boolean isPublic,
+            boolean isPublicWebsite) {
         this.number = number;
         this.decision = decision;
         this.nature = nature;
@@ -161,11 +151,11 @@ public class Acte {
         this.creation = creation;
     }
 
-    public Attachment getActeAttachment(){
+    public Attachment getActeAttachment() {
         return this.acteAttachment;
     }
 
-    public void setActeAttachment(Attachment acteAttachment){
+    public void setActeAttachment(Attachment acteAttachment) {
         this.acteAttachment = acteAttachment;
     }
 
@@ -200,7 +190,7 @@ public class Acte {
     public void setDraft(Draft draft) {
         this.draft = draft;
     }
-    
+
     public String getProfileUuid() {
         return profileUuid;
     }
@@ -218,31 +208,17 @@ public class Acte {
     }
 
     public boolean empty() {
-        return StringUtils.isEmpty(number)
-                && decision == null
-                && nature == null
-                && StringUtils.isEmpty(code)
-                && StringUtils.isEmpty(codeLabel)
-                && StringUtils.isEmpty(objet)
-                && acteAttachment == null
-                && (annexes == null || annexes.size() == 0)
-                && (acteHistories == null || acteHistories.size() == 0);
+        return StringUtils.isEmpty(number) && decision == null && nature == null && StringUtils.isEmpty(code)
+                && StringUtils.isEmpty(codeLabel) && StringUtils.isEmpty(objet) && acteAttachment == null
+                && (annexes == null || annexes.size() == 0) && (acteHistories == null || acteHistories.size() == 0);
 
     }
 
     @Override
     public String toString() {
-        return "Acte{" +
-                "uuid:" + uuid +
-                ", number:" + number + '\'' +
-                ", decision:" + decision +
-                ", nature:" + nature +
-                ", code:'" + code + '\'' +
-                ", objet:'" + objet + '\'' +
-                ", isPublic:" + isPublic +
-                ", isPublicWebsite:" + isPublicWebsite +
-                ", creation:" + creation +
-                ", localAuthority:" + localAuthority +
-                '}';
+        return "Acte{" + "uuid:" + uuid + ", number:" + number + '\'' + ", decision:" + decision + ", nature:" + nature
+                + ", code:'" + code + '\'' + ", objet:'" + objet + '\'' + ", isPublic:" + isPublic
+                + ", isPublicWebsite:" + isPublicWebsite + ", creation:" + creation + ", localAuthority:"
+                + localAuthority + '}';
     }
 }

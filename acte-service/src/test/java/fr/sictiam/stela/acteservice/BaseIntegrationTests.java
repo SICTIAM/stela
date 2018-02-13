@@ -17,9 +17,6 @@ public abstract class BaseIntegrationTests {
 
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder()
-            .file("src/test/resources/docker-compose-test.yml")
-            .projectName(ProjectName.random())
-            .waitingForHostNetworkedPort(5432, toBeOpen())
-            .saveLogsTo("build/dockerLogs/integrationTests")
-            .build();
+            .file("src/test/resources/docker-compose-test.yml").projectName(ProjectName.random())
+            .waitingForHostNetworkedPort(5432, toBeOpen()).saveLogsTo("build/dockerLogs/integrationTests").build();
 }

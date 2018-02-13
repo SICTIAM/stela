@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 

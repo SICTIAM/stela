@@ -5,16 +5,13 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
-import java.time.LocalDate;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class Adapter1
-    extends XmlAdapter<String, LocalDate>
-{
+import java.time.LocalDate;
 
+public class Adapter1 extends XmlAdapter<String, LocalDate> {
 
     public LocalDate unmarshal(String value) {
         return LocalDate.parse(value);

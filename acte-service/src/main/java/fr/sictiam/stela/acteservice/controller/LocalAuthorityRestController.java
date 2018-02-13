@@ -1,9 +1,10 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
+import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
+import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.MaterialCode;
-import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
-import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
-import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import javax.validation.Valid;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/acte/localAuthority")
@@ -33,7 +32,7 @@ public class LocalAuthorityRestController {
     private final LocalAuthorityService localAuthorityService;
 
     @Autowired
-    public LocalAuthorityRestController(LocalAuthorityService localAuthorityService){
+    public LocalAuthorityRestController(LocalAuthorityService localAuthorityService) {
         this.localAuthorityService = localAuthorityService;
     }
 
@@ -44,7 +43,8 @@ public class LocalAuthorityRestController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity<LocalAuthority> getCurrent(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+    public ResponseEntity<LocalAuthority> getCurrent(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(currentLocalAuthority, HttpStatus.OK);
     }
@@ -56,7 +56,8 @@ public class LocalAuthorityRestController {
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity<LocalAuthority> update(@PathVariable String uuid, @Valid @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+    public ResponseEntity<LocalAuthority> update(@PathVariable String uuid,
+            @Valid @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
@@ -72,27 +73,32 @@ public class LocalAuthorityRestController {
     public ResponseEntity<ActeDepositFieldsUI> getActeDepositFields(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        
+
         LOGGER.info("currentLocalAuthority: {}", currentLocalAuthority.getName());
         return new ResponseEntity<>(new ActeDepositFieldsUI(currentLocalAuthority.getCanPublishRegistre(),
                 currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }
-    
+
     @GetMapping("/load-matieres")
     public void loadCodesMatieres(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-                LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         localAuthorityService.loadClassification(currentLocalAuthority.getUuid());
     }
-    
+
     @GetMapping("/codes-matieres")
-    public ResponseEntity<List<MaterialCode>> getCodesMatieres(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-                LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        return new ResponseEntity<>(localAuthorityService.getCodesMatieres(currentLocalAuthority.getUuid()), HttpStatus.OK);
-    }
-    
-    @GetMapping("/codes-matiere/{code}")
-    public ResponseEntity< String> getCodeMatiereLabel(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid, @PathVariable String code) {
+    public ResponseEntity<List<MaterialCode>> getCodesMatieres(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        return new ResponseEntity<>(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), code), HttpStatus.OK);
+        return new ResponseEntity<>(localAuthorityService.getCodesMatieres(currentLocalAuthority.getUuid()),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/codes-matiere/{code}")
+    public ResponseEntity<String> getCodeMatiereLabel(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String code) {
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
+        return new ResponseEntity<>(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), code),
+                HttpStatus.OK);
     }
 }

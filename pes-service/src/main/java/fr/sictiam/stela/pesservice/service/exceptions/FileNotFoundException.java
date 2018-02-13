@@ -9,7 +9,8 @@ public class FileNotFoundException extends RuntimeException {
     public FileNotFoundException() {
         super("notifications.pes.file_not_found");
     }
-    public FileNotFoundException(String message, Throwable cause){
+
+    public FileNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

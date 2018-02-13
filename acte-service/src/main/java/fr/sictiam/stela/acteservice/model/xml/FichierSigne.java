@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,13 +12,15 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
  * Nom du fichier et éventuellement la signature du fichier
  * 
- * <p>Java class for FichierSigne complex type.
+ * <p>
+ * Java class for FichierSigne complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="FichierSigne">
@@ -37,10 +38,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "FichierSigne", propOrder = {
-    "nomFichier",
-    "signature"
-})
+@XmlType(name = "FichierSigne", propOrder = { "nomFichier", "signature" })
 public class FichierSigne {
 
     @XmlElement(name = "NomFichier", required = true)
@@ -51,10 +49,8 @@ public class FichierSigne {
     /**
      * Gets the value of the nomFichier property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getNomFichier() {
         return nomFichier;
@@ -64,9 +60,8 @@ public class FichierSigne {
      * Sets the value of the nomFichier property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setNomFichier(String value) {
         this.nomFichier = value;
@@ -75,10 +70,8 @@ public class FichierSigne {
     /**
      * Gets the value of the signature property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Object }
-     *     
+     * @return possible object is {@link Object }
+     * 
      */
     public Object getSignature() {
         return signature;
@@ -88,9 +81,8 @@ public class FichierSigne {
      * Sets the value of the signature property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link Object }
-     *     
+     *            allowed object is {@link Object }
+     * 
      */
     public void setSignature(Object value) {
         this.signature = value;

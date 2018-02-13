@@ -2,9 +2,7 @@ package fr.sictiam.stela.pesservice.service.util;
 
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
-
 import fr.sictiam.stela.pesservice.config.NotTestCondition;
-
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 

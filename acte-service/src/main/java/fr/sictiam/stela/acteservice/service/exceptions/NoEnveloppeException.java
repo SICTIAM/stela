@@ -5,8 +5,8 @@ public class NoEnveloppeException extends RuntimeException {
     public NoEnveloppeException() {
         super("notifications.acte.no_enveloppe");
     }
-    public NoEnveloppeException(String message, Throwable cause){
+
+    public NoEnveloppeException(String message, Throwable cause) {
         super(message, cause);
     }
 }
-

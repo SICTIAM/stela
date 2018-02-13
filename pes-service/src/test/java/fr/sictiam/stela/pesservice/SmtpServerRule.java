@@ -3,6 +3,7 @@ package fr.sictiam.stela.pesservice;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import org.junit.rules.ExternalResource;
+
 import javax.mail.internet.MimeMessage;
 
 public class SmtpServerRule extends ExternalResource {

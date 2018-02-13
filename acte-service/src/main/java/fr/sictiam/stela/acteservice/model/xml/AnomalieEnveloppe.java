@@ -5,10 +5,8 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
-import java.time.LocalDate;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -17,11 +15,15 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.LocalDate;
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -52,21 +54,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "date",
-    "nature",
-    "detail",
-    "enveloppeRecue"
-})
+@XmlType(name = "", propOrder = { "date", "nature", "detail", "enveloppeRecue" })
 @XmlRootElement(name = "AnomalieEnveloppe")
 public class AnomalieEnveloppe {
 
     @XmlElement(name = "Date", required = true, type = String.class)
-    @XmlJavaTypeAdapter(Adapter1 .class)
+    @XmlJavaTypeAdapter(Adapter1.class)
     @XmlSchemaType(name = "date")
     protected LocalDate date;
     @XmlElement(name = "Nature", required = true, type = String.class)
-    @XmlJavaTypeAdapter(Adapter3 .class)
+    @XmlJavaTypeAdapter(Adapter3.class)
     protected Integer nature;
     @XmlElement(name = "Detail")
     protected String detail;
@@ -76,10 +73,8 @@ public class AnomalieEnveloppe {
     /**
      * Gets the value of the date property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public LocalDate getDate() {
         return date;
@@ -89,9 +84,8 @@ public class AnomalieEnveloppe {
      * Sets the value of the date property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDate(LocalDate value) {
         this.date = value;
@@ -100,10 +94,8 @@ public class AnomalieEnveloppe {
     /**
      * Gets the value of the nature property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public Integer getNature() {
         return nature;
@@ -113,9 +105,8 @@ public class AnomalieEnveloppe {
      * Sets the value of the nature property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setNature(Integer value) {
         this.nature = value;
@@ -124,10 +115,8 @@ public class AnomalieEnveloppe {
     /**
      * Gets the value of the detail property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getDetail() {
         return detail;
@@ -137,9 +126,8 @@ public class AnomalieEnveloppe {
      * Sets the value of the detail property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setDetail(String value) {
         this.detail = value;
@@ -148,10 +136,8 @@ public class AnomalieEnveloppe {
     /**
      * Gets the value of the enveloppeRecue property.
      * 
-     * @return
-     *     possible object is
-     *     {@link DonneesEnveloppeCLMISILL }
-     *     
+     * @return possible object is {@link DonneesEnveloppeCLMISILL }
+     * 
      */
     public DonneesEnveloppeCLMISILL getEnveloppeRecue() {
         return enveloppeRecue;
@@ -161,9 +147,8 @@ public class AnomalieEnveloppe {
      * Sets the value of the enveloppeRecue property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link DonneesEnveloppeCLMISILL }
-     *     
+     *            allowed object is {@link DonneesEnveloppeCLMISILL }
+     * 
      */
     public void setEnveloppeRecue(DonneesEnveloppeCLMISILL value) {
         this.enveloppeRecue = value;

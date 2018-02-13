@@ -4,22 +4,22 @@ import javax.persistence.*;
 
 @Embeddable
 public class StampPosition {
-	private int x;
-	private int y;
+    private int x;
+    private int y;
 
-	public StampPosition() {
-	}
+    public StampPosition() {
+    }
 
-	public StampPosition(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
+    public StampPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 
-	public int getX() {
-		return x;
-	}
+    public int getX() {
+        return x;
+    }
 
-	public int getY() {
-		return y;
-	}
+    public int getY() {
+        return y;
+    }
 }

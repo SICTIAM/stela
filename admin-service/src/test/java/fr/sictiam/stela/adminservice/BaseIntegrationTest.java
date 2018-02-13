@@ -17,9 +17,7 @@ public class BaseIntegrationTest {
 
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder()
-            .file("src/test/resources/docker-compose-test.yml")
-            .projectName(ProjectName.random())
+            .file("src/test/resources/docker-compose-test.yml").projectName(ProjectName.random())
             .waitingForHostNetworkedPort(5432, toBeOpen())
-            .saveLogsTo("build/dockerLogs/ozwilloProvisioningIntegrationTest")
-            .build();
+            .saveLogsTo("build/dockerLogs/ozwilloProvisioningIntegrationTest").build();
 }

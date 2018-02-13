@@ -1,12 +1,11 @@
 package fr.sictiam.stela.pesservice.config;
 
+import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-
-import fr.sictiam.stela.pesservice.service.ExternalRestService;
 
 @Profile("test")
 @Configuration

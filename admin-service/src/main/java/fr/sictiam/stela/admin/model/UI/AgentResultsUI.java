@@ -2,7 +2,6 @@ package fr.sictiam.stela.admin.model.UI;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.Agent;
-import fr.sictiam.stela.admin.model.LocalAuthority;
 
 import java.util.List;
 

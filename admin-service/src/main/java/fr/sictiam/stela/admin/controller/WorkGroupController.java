@@ -1,5 +1,8 @@
 package fr.sictiam.stela.admin.controller;
 
+import fr.sictiam.stela.admin.model.WorkGroup;
+import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
+import fr.sictiam.stela.admin.service.WorkGroupService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import fr.sictiam.stela.admin.model.WorkGroup;
-import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
-import fr.sictiam.stela.admin.service.WorkGroupService;
 
 @RestController
 @RequestMapping("/api/admin/group")
@@ -26,7 +25,6 @@ public class WorkGroupController {
     public WorkGroupController(WorkGroupService workGroupService) {
         this.workGroupService = workGroupService;
     }
-
 
     @PatchMapping("/{uuid}")
     public ResponseEntity<?> updateProfile(@PathVariable String uuid, @RequestBody WorkGroupUI workGroupUI) {

@@ -1,12 +1,10 @@
 package fr.sictiam.stela.acteservice.scheduler;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-
+import fr.sictiam.stela.acteservice.model.PendingMessage;
+import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
+import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.AdminService;
+import fr.sictiam.stela.acteservice.service.PendingMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import fr.sictiam.stela.acteservice.model.PendingMessage;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
-import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.AdminService;
-import fr.sictiam.stela.acteservice.service.PendingMessageService;
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
+
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class SenderTask implements ApplicationListener<ActeHistoryEvent> {

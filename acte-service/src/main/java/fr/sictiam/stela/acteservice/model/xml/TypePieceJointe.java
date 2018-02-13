@@ -5,7 +5,6 @@
 // Generated on: 2017.08.08 at 03:18:09 PM CEST 
 //
 
-
 package fr.sictiam.stela.acteservice.model.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,13 +12,15 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
  * Type de pièce jointe (Code et libellé)
  * 
- * <p>Java class for TypePieceJointe complex type.
+ * <p>
+ * Java class for TypePieceJointe complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="TypePieceJointe">
@@ -46,10 +47,8 @@ public class TypePieceJointe {
     /**
      * Gets the value of the codeTypePJ property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getCodeTypePJ() {
         return codeTypePJ;
@@ -59,9 +58,8 @@ public class TypePieceJointe {
      * Sets the value of the codeTypePJ property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setCodeTypePJ(String value) {
         this.codeTypePJ = value;
@@ -70,10 +68,8 @@ public class TypePieceJointe {
     /**
      * Gets the value of the libelle property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getLibelle() {
         return libelle;
@@ -83,9 +79,8 @@ public class TypePieceJointe {
      * Sets the value of the libelle property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setLibelle(String value) {
         this.libelle = value;
