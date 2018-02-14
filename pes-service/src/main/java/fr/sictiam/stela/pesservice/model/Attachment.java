@@ -45,6 +45,10 @@ public class Attachment {
         return file;
     }
 
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
     public String getFilename() {
         return filename;
     }

@@ -1,4 +1,4 @@
-package fr.sictiam.stela.pesservice.model.ui;
+package fr.sictiam.stela.pesservice.model.sesile;
 
 public enum ClasseurStatus {
     REFUSED(0), IN_PROGRESS(1), FINALIZED(2), WITHDRAWN(3),;

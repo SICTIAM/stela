@@ -1,6 +1,6 @@
-package fr.sictiam.stela.pesservice.model.ui;
+package fr.sictiam.stela.pesservice.model.sesile;
 
-public class SesileClasseurRequest {
+public class ClasseurRequest {
 
     private String name;
 
@@ -16,7 +16,7 @@ public class SesileClasseurRequest {
 
     private String email;
 
-    public SesileClasseurRequest(String name, String desc, String validation, int type, int groupe, int visibilite,
+    public ClasseurRequest(String name, String desc, String validation, int type, int groupe, int visibilite,
             String email) {
         this.name = name;
         this.desc = desc;

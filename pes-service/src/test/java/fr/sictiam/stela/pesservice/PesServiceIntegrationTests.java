@@ -203,7 +203,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     public void testSenderTask() throws IOException {
         PesAller pes = samplePesAller();
 
-        pesService.updateStatus(pes.getUuid(), StatusType.CREATED);
+        pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
 
         MockPesEventListener mockActeEventListener = new MockPesEventListener(StatusType.SENT);
         try {

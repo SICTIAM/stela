@@ -1,8 +1,8 @@
-package fr.sictiam.stela.pesservice.model.ui;
+package fr.sictiam.stela.pesservice.model.sesile;
 
 import java.util.List;
 
-public class SesileServiceOrganisation {
+public class ServiceOrganisation {
 
     private String id;
 
