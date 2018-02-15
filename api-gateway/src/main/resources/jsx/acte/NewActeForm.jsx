@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Button, Form, Checkbox, Card } from 'semantic-ui-react'
+import { Button, Form, Checkbox, Card, Dropdown } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 
@@ -47,6 +47,7 @@ class NewActeForm extends Component {
             publicField: false,
             publicWebsiteField: false
         },
+        attachmentTypes: [],
         codesMatieres: [],
         isFormValid: false,
         acteFetched: false
@@ -57,7 +58,7 @@ class NewActeForm extends Component {
         nature: 'required',
         code: 'required',
         decision: ['required', 'date'],
-        acteAttachment: 'required'
+        acteAttachment: 'required|acteAttachmentType'
     }
     customErrorMessages = {
         regex: this.context.t('api-gateway:form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
@@ -93,6 +94,7 @@ class NewActeForm extends Component {
         if (nextProps.mode === 'ACTE_BATCH' && (fields.nature !== nextProps.nature || fields.decision !== nextProps.decision)) {
             fields.nature = nextProps.nature
             fields.decision = nextProps.decision
+            if (fields.nature !== nextProps.nature) this.removeAttachmentTypes()
             this.setState({ fields }, this.validateForm)
         }
     }
@@ -114,12 +116,29 @@ class NewActeForm extends Component {
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
-                this.loadActe(json, this.validateForm)
+                this.loadActe(json, () => {
+                    if (json.nature && this.props.mode !== 'ACTE_BATCH') {
+                        this.fetchAttachmentTypes()
+                        this.fetchRemoveAttachmentTypes()
+                    }
+                    this.validateForm()
+                })
             })
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
+            })
+    }
+    fetchAttachmentTypes = () => {
+        const nature = this.state.fields.nature
+        const headers = { 'Content-Type': 'application/json' }
+        fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}`, headers: headers, context: this.context })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => this.setState({ attachmentTypes: json }))
+            .catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     loadActe = (acte, callback) => {
@@ -153,7 +172,19 @@ class NewActeForm extends Component {
         this.setState({ fields: fields }, () => {
             this.validateForm()
             this.saveDraft()
+            if (field === 'nature' && this.props.mode !== 'ACTE_BATCH') {
+                this.fetchAttachmentTypes()
+                this.fetchRemoveAttachmentTypes()
+            }
         })
+    }
+    validateActeAttachmentType = () => {
+        const { annexes, acteAttachment } = this.state.fields
+        let annexesValidation = true
+        annexes.forEach(annexe => {
+            if (!annexe.attachmentTypeCode) annexesValidation = false
+        })
+        return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
     }
     validateForm = debounce(() => {
         const data = {
@@ -164,6 +195,7 @@ class NewActeForm extends Component {
             acteAttachment: this.state.fields.acteAttachment,
             code: this.state.fields.code
         }
+        Validator.register('acteAttachmentType', this.validateActeAttachmentType, this.context.t('acte.new.PJ_types_validation'))
         const validation = new Validator(data, this.validationRules)
         const isFormValid = validation.passes()
         this.setState({ isFormValid })
@@ -231,6 +263,45 @@ class NewActeForm extends Component {
                 this.props.setStatus('', this.state.fields.uuid)
             })
     }
+    onFileAttachmentTypeChange = (code) => this.onAttachmentTypeChange(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file/type/${code}`, code)
+    onAnnexeAttachmentTypeChange = (code, annexeUuid) => this.onAttachmentTypeChange(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexeUuid}/type/${code}`, code, annexeUuid)
+    onAttachmentTypeChange = (url, code, annexeUuid) => {
+        fetchWithAuthzHandling({ url, method: 'PUT', context: this.context })
+            .then(checkStatus)
+            .then(() => {
+                const fields = this.state.fields
+                if (annexeUuid) {
+                    const annexe = this.state.fields.annexes.find(annexe => annexe.uuid === annexeUuid)
+                    annexe.attachmentTypeCode = code
+                } else {
+                    fields.acteAttachment.attachmentTypeCode = code
+                }
+                this.setState({ fields }, this.validateForm)
+                this.props.setStatus('saved', this.state.fields.uuid)
+            })
+            .catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                this.props.setStatus('', this.state.fields.uuid)
+                this.validateForm()
+            })
+    }
+    removeAttachmentTypes = () => {
+        const fields = this.state.fields
+        if (fields.acteAttachment) fields.acteAttachment.attachmentTypeCode = ''
+        fields.annexes.forEach(annexe => annexe.attachmentTypeCode = '')
+        this.setState({ fields }, this.validateForm)
+        this.props.setStatus('saved', this.state.fields.uuid)
+    }
+    fetchRemoveAttachmentTypes = () => {
+        fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.draft.uuid}/types`, method: 'DELETE', context: this.context })
+            .then(checkStatus)
+            .then(this.removeAttachmentTypes)
+            .catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                this.props.setStatus('', this.state.fields.uuid)
+                this.validateForm()
+            })
+    }
     deteleDraft = (event) => {
         event.preventDefault()
         const draftUuid = this.state.fields.draft.uuid
@@ -279,9 +350,31 @@ class NewActeForm extends Component {
             const object = { key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label }
             return object
         })
-        const annexes = this.state.fields.annexes.map(annexe =>
-            <File key={`${this.state.fields.uuid}_${annexe.uuid}`} attachment={annexe} onDelete={this.deleteDraftAnnexe} />
-        )
+        const attachmentTypeSource = this.props.mode === 'ACTE_BATCH' ? this.props.attachmentTypes : this.state.attachmentTypes
+        const attachmentTypes = attachmentTypeSource.map(attachmentType => {
+            return { key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.label }
+        })
+        const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) &&
+            <Dropdown fluid selection
+                placeholder={t('acte.new.PJ_types')}
+                options={attachmentTypes}
+                value={this.state.fields.acteAttachment.attachmentTypeCode}
+                onChange={(e, { value }) => this.onFileAttachmentTypeChange(value)} />
+        const annexes = this.state.fields.annexes.map(annexe => {
+            const extraContent = attachmentTypes.length > 0 &&
+                <Dropdown fluid selection
+                    placeholder={t('acte.new.PJ_types')}
+                    options={attachmentTypes}
+                    value={annexe.attachmentTypeCode}
+                    onChange={(e, { value }) => this.onAnnexeAttachmentTypeChange(value, annexe.uuid)} />
+            return (
+                <File
+                    key={`${this.state.fields.uuid}_${annexe.uuid}`}
+                    attachment={annexe}
+                    onDelete={this.deleteDraftAnnexe}
+                    extraContent={extraContent && extraContent} />
+            )
+        })
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".xml" : ".pdf, .jpg, .png"
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".pdf, .jpg, .png" : ".pdf, .xml, .jpg, .png"
         return (
@@ -348,7 +441,11 @@ class NewActeForm extends Component {
                             fieldName={t('acte.fields.acteAttachment')} />
                     </FormField>
                     {renderIf(this.state.fields.acteAttachment)(
-                        <File key={`${this.state.fields.uuid}_acteAttachment`} attachment={this.state.fields.acteAttachment} onDelete={this.deleteDraftFile} />
+                        <File
+                            key={`${this.state.fields.uuid}_acteAttachment`}
+                            attachment={this.state.fields.acteAttachment}
+                            onDelete={this.deleteDraftFile}
+                            extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
                     )}
                     <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}>
                         <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>

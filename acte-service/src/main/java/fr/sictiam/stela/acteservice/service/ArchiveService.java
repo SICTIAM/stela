@@ -121,8 +121,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
 
             String acteFilename = String.format("%s-%s_%d.%s",
-                    acte.getActeAttachment().getAttachmentType() != null
-                            ? acte.getActeAttachment().getAttachmentType().getCode()
+                    !StringUtils.isEmpty(acte.getActeAttachment().getAttachmentTypeCode())
+                            ? acte.getActeAttachment().getAttachmentTypeCode()
                             : "CO_DE",
                     baseFilename, 1, StringUtils.getFilenameExtension(acte.getActeAttachment().getFilename()));
 
@@ -131,7 +131,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                 // sequence 1 is taken by the Acte file, so we start at two
                 int sequence = annexes.size() + 2;
                 String tempFilename = String.format("%s-%s_%d.%s",
-                        attachment.getAttachmentType() != null ? attachment.getAttachmentType().getCode() : "CO_DE",
+                        !StringUtils.isEmpty(attachment.getAttachmentTypeCode()) ? attachment.getAttachmentTypeCode() : "CO_DE",
                         baseFilename, sequence, StringUtils.getFilenameExtension(attachment.getFilename()));
                 annexes.put(tempFilename, attachment.getFile());
             });
@@ -603,56 +603,56 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
-        case CREATED:
-            checkAntivirus(event.getActeHistory().getActeUuid());
-            break;
-        case ANTIVIRUS_OK:
-            createArchive(event.getActeHistory().getActeUuid());
-            break;
-        case ARCHIVE_CREATED:
-        case CANCELLATION_ARCHIVE_CREATED:
-        case REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED:
-        case REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED:
-        case REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED:
-        case PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
-        case REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED:
-        case ACK_LETTRE_OBSERVATION_ARCHIVE_CREATED:
-        case ACK_PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
-            checkArchiveSize(event.getActeHistory());
-            break;
-        case CANCELLATION_ASKED:
-            createMessageArchive(event.getActeHistory().getActeUuid(), Flux.ANNULATION_TRANSMISSION,
-                    StatusType.CANCELLATION_ARCHIVE_CREATED);
-            break;
-        case LETTRE_OBSERVATION_RECEIVED:
-            createMessageArchive(event.getActeHistory().getActeUuid(), Flux.AR_LETTRE_OBSERVATION,
-                    StatusType.ARCHIVE_CREATED);
-            break;
-        case DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED:
-            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.AR_PIECE_COMPLEMENTAIRE,
-                    StatusType.ARCHIVE_CREATED, event.getAttachments().get(0));
-            break;
-        case REPONSE_COURRIER_SIMPLE_ASKED:
-            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_COURRIER_SIMPLE,
-                    StatusType.REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED, event.getAttachments().get(0));
-            break;
-        case PIECE_COMPLEMENTAIRE_ASKED:
-            createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
-            break;
-        case REFUS_PIECES_COMPLEMENTAIRE_ASKED:
-            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
-                    Flux.REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES,
-                    StatusType.REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED, event.getAttachments().get(0));
-            break;
-        case REPONSE_LETTRE_OBSEVATION_ASKED:
-            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_LETTRE_OBSEVATION,
-                    StatusType.REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED, event.getAttachments().get(0));
-            break;
-        case REJET_LETTRE_OBSERVATION_ASKED:
-            createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
-                    Flux.REFUS_EXPLICITE_LETTRE_OBSERVATION, StatusType.REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED,
-                    event.getAttachments().get(0));
-            break;
+            case CREATED:
+                checkAntivirus(event.getActeHistory().getActeUuid());
+                break;
+            case ANTIVIRUS_OK:
+                createArchive(event.getActeHistory().getActeUuid());
+                break;
+            case ARCHIVE_CREATED:
+            case CANCELLATION_ARCHIVE_CREATED:
+            case REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED:
+            case REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED:
+            case REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED:
+            case PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
+            case REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED:
+            case ACK_LETTRE_OBSERVATION_ARCHIVE_CREATED:
+            case ACK_PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
+                checkArchiveSize(event.getActeHistory());
+                break;
+            case CANCELLATION_ASKED:
+                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.ANNULATION_TRANSMISSION,
+                        StatusType.CANCELLATION_ARCHIVE_CREATED);
+                break;
+            case LETTRE_OBSERVATION_RECEIVED:
+                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.AR_LETTRE_OBSERVATION,
+                        StatusType.ARCHIVE_CREATED);
+                break;
+            case DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED:
+                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.AR_PIECE_COMPLEMENTAIRE,
+                        StatusType.ARCHIVE_CREATED, event.getAttachments().get(0));
+                break;
+            case REPONSE_COURRIER_SIMPLE_ASKED:
+                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_COURRIER_SIMPLE,
+                        StatusType.REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED, event.getAttachments().get(0));
+                break;
+            case PIECE_COMPLEMENTAIRE_ASKED:
+                createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
+                break;
+            case REFUS_PIECES_COMPLEMENTAIRE_ASKED:
+                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
+                        Flux.REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES,
+                        StatusType.REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED, event.getAttachments().get(0));
+                break;
+            case REPONSE_LETTRE_OBSEVATION_ASKED:
+                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_LETTRE_OBSEVATION,
+                        StatusType.REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED, event.getAttachments().get(0));
+                break;
+            case REJET_LETTRE_OBSERVATION_ASKED:
+                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
+                        Flux.REFUS_EXPLICITE_LETTRE_OBSERVATION, StatusType.REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED,
+                        event.getAttachments().get(0));
+                break;
         }
     }
 }

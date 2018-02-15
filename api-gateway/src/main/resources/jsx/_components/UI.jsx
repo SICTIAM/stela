@@ -23,7 +23,7 @@ const Field = ({ htmlFor, label, children }) =>
         <Grid.Column width={12}><strong>{children}</strong></Grid.Column>
     </Grid>
 
-const File = ({ attachment, onDelete }) =>
+const File = ({ attachment, onDelete, extraContent }) =>
     <Card>
         <Card.Content>
             <Icon style={{ float: 'left' }} name='file outline' size='big' />
@@ -33,6 +33,9 @@ const File = ({ attachment, onDelete }) =>
                 <Card.Meta>{bytesToSize(attachment.size)}</Card.Meta>
             }
         </Card.Content>
+        {extraContent &&
+            <Card.Content extra>{extraContent}</Card.Content>
+        }
     </Card>
 
 const InputFile = ({ htmlFor, label, children }) =>

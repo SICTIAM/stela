@@ -178,6 +178,24 @@ public class ActeDraftRestController {
         }
     }
 
+    @PutMapping("/drafts/{draftUuid}/{acteUuid}/file/type/{uuid}")
+    public ResponseEntity updateFileAttachmentType(@PathVariable String acteUuid, @PathVariable String uuid) {
+        draftService.updateActeFileAttachmentType(acteUuid, uuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/drafts/{draftUuid}/{acteUuid}/annexe/{annexeUuid}/type/{uuid}")
+    public ResponseEntity updateAnnexeAttachmentType(@PathVariable String annexeUuid, @PathVariable String uuid) {
+        draftService.updateAttachmentType(annexeUuid, uuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/drafts/{draftUuid}/types")
+    public ResponseEntity removeAttachmentTypes(@PathVariable String draftUuid) {
+        draftService.removeAttachmentTypes(draftUuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @DeleteMapping("/drafts/{draftUuid}/{uuid}/file")
     public ResponseEntity<?> deleteActeDraftFile(@PathVariable String uuid) {
         draftService.deleteActeDraftFile(uuid);

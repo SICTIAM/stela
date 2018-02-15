@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.service;
 import fr.sictiam.stela.acteservice.dao.ActeDraftRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
+import fr.sictiam.stela.acteservice.dao.AttachmentTypeRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeMode;
@@ -42,16 +43,18 @@ public class DraftService {
     private final ActeRepository acteRepository;
     private final ActeDraftRepository acteDraftRepository;
     private final AttachmentRepository attachmentRepository;
+    private final AttachmentTypeRepository attachmentTypeRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
 
     @Autowired
     public DraftService(ActeRepository acteRepository, ActeDraftRepository acteDraftRepository,
-            AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-            LocalAuthorityService localAuthorityService) {
+            AttachmentRepository attachmentRepository, AttachmentTypeRepository attachmentTypeRepository,
+            ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService) {
         this.acteRepository = acteRepository;
         this.acteDraftRepository = acteDraftRepository;
         this.attachmentRepository = attachmentRepository;
+        this.attachmentTypeRepository = attachmentTypeRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
     }
@@ -180,6 +183,26 @@ public class DraftService {
         annexes.add(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
         acte.setAnnexes(annexes);
         return saveActeDraft(acte, currentLocalAuthority);
+    }
+
+    public void updateActeFileAttachmentType(String acteUuid, String code) {
+        Attachment attachment = getActeDraftByUuid(acteUuid).getActeAttachment();
+        updateAttachmentType(attachment.getUuid(), code);
+    }
+
+    public void updateAttachmentType(String attachmentUuid, String code) {
+        Attachment attachment = attachmentRepository.findByUuid(attachmentUuid).get();
+        attachment.setAttachmentTypeCode(code);
+        attachmentRepository.save(attachment);
+    }
+
+    public void removeAttachmentTypes(String draftUuid) {
+        List<Acte> acteDrafts = getActeDrafts(draftUuid);
+        acteDrafts.forEach(acteDraft -> {
+            if (acteDraft.getActeAttachment() != null)
+                updateAttachmentType(acteDraft.getActeAttachment().getUuid(), "");
+            acteDraft.getAnnexes().forEach(attachment -> updateAttachmentType(attachment.getUuid(), ""));
+        });
     }
 
     public void deleteActeDraftAnnexe(String acteUuid, String uuid) {
