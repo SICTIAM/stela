@@ -4,9 +4,9 @@ import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.AttachmentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.util.Set;
 
 public interface AttachmentTypeRepository extends JpaRepository<AttachmentType, String> {
-    List<AttachmentType> findByAttachmentTypeReferencial_acteNatureAndAttachmentTypeReferencial_localAuthorityUuid(
+    Set<AttachmentType> findByAttachmentTypeReferencial_acteNatureAndAttachmentTypeReferencial_localAuthorityUuidOrderByLabel(
             ActeNature acteNature, String uuid);
 }

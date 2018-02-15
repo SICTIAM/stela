@@ -31,6 +31,7 @@ class NewActeBatchedForm extends Component {
             decision: '',
             nature: ''
         },
+        attachmentTypes: [],
         draftStatus: null,
         draftValid: false,
         statuses: {},
@@ -50,6 +51,7 @@ class NewActeBatchedForm extends Component {
             .then(json =>
                 this.loadDraft(json, () => {
                     this.validateForm()
+                    if (json.nature) this.fetchAttachmentTypes()
                     this.setState({ active: this.state.fields.actes[0].uuid })
                 })
             )
@@ -107,6 +109,28 @@ class NewActeBatchedForm extends Component {
                 })
             })
     }
+    fetchAttachmentTypes = () => {
+        const headers = { 'Content-Type': 'application/json' }
+        fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${this.state.fields.nature}`, headers: headers, context: this.context })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => this.setState({ attachmentTypes: json }))
+            .catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+            })
+    }
+    removeAttachmentTypes = () => {
+        fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/types`, method: 'DELETE', context: this.context })
+            .then(checkStatus)
+            .then(() => {
+                this.setState({ draftStatus: 'saved' }, this.updateStatus())
+            })
+            .catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                this.setState({ draftStatus: '' }, this.updateStatus)
+                this.validateForm()
+            })
+    }
     handleClick = (uuid) => {
         const newActive = this.state.active !== uuid ? uuid : 0
         this.setState({ active: newActive })
@@ -118,6 +142,10 @@ class NewActeBatchedForm extends Component {
             this.updateStatus()
             this.validateForm()
             this.saveDraft()
+            if (field === 'nature') {
+                this.fetchAttachmentTypes()
+                this.removeAttachmentTypes()
+            }
         })
     }
     validateForm = debounce(() => {
@@ -229,6 +257,7 @@ class NewActeBatchedForm extends Component {
                     setFormValidForId={this.setFormValidForId}
                     setField={this.setField}
                     shouldUnmount={this.shouldUnmount}
+                    attachmentTypes={this.state.attachmentTypes}
                 />
             </WrappedActeForm>
         )
@@ -318,7 +347,7 @@ const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedA
                 </Grid.Column>
             </Grid>
         </Accordion.Title>
-        <Accordion.Content active={isActive}>
+        <Accordion.Content style={{ marginBottom: '1em' }} active={isActive}>
             {children}
         </Accordion.Content>
     </Segment>

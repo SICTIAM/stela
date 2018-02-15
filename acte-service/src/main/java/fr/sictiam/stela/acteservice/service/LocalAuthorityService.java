@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -175,10 +176,10 @@ public class LocalAuthorityService {
         return localAuthority.getMaterialCodes();
     }
 
-    public List<AttachmentType> getAttachmentTypeAvailable(ActeNature acteNature, String uuid) {
+    public Set<AttachmentType> getAttachmentTypeAvailable(ActeNature acteNature, String uuid) {
         return attachmentTypeRepository
-                .findByAttachmentTypeReferencial_acteNatureAndAttachmentTypeReferencial_localAuthorityUuid(acteNature,
-                        uuid);
+                .findByAttachmentTypeReferencial_acteNatureAndAttachmentTypeReferencial_localAuthorityUuidOrderByLabel(
+                        acteNature, uuid);
     }
 
     public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {

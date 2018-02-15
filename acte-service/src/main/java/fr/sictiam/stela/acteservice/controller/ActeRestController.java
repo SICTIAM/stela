@@ -6,6 +6,7 @@ import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.AttachmentType;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.StampPosition;
@@ -292,6 +293,13 @@ public class ActeRestController {
             return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent",
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/attachment-types/{acteNature}")
+    public ResponseEntity<Set<AttachmentType>> getAttachmentTypesForNature(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable ActeNature acteNature) {
+        return new ResponseEntity<>(localAuthorityService.getAttachmentTypeAvailable(acteNature, currentLocalAuthUuid), HttpStatus.OK);
     }
 
     /* --------------------------- */
