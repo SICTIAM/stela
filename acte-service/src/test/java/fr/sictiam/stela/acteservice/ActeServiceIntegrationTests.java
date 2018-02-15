@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -609,7 +610,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void testAttachmentType() throws Exception {
-        List<AttachmentType> attachmentTypes = localAuthorityService.getAttachmentTypeAvailable(ActeNature.AUTRES,
+        Set<AttachmentType> attachmentTypes = localAuthorityService.getAttachmentTypeAvailable(ActeNature.AUTRES,
                 "639fd48c-93b9-4569-a414-3b372c71e0a1");
         assertThat(attachmentTypes, hasSize(2));
         assertThat(attachmentTypes, hasItem(Matchers.<AttachmentType>hasProperty("code", is("99_SE"))));

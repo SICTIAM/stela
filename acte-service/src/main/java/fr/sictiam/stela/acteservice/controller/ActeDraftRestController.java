@@ -178,13 +178,13 @@ public class ActeDraftRestController {
         }
     }
 
-    @PutMapping("/drafts/{draftUuid}/{actUuid}/file/type/{uuid}")
-    public ResponseEntity updateFileAttachmentType(@PathVariable String actUuid, @PathVariable String uuid) {
-        draftService.updateActeFileAttachmentType(actUuid, uuid);
+    @PutMapping("/drafts/{draftUuid}/{acteUuid}/file/type/{uuid}")
+    public ResponseEntity updateFileAttachmentType(@PathVariable String acteUuid, @PathVariable String uuid) {
+        draftService.updateActeFileAttachmentType(acteUuid, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/drafts/{draftUuid}/{actUuid}/annexe/{annexeUuid}/type/{uuid}")
+    @PutMapping("/drafts/{draftUuid}/{acteUuid}/annexe/{annexeUuid}/type/{uuid}")
     public ResponseEntity updateAnnexeAttachmentType(@PathVariable String annexeUuid, @PathVariable String uuid) {
         draftService.updateAttachmentType(annexeUuid, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
