@@ -29,9 +29,11 @@ class NewActeBatchedForm extends Component {
             actes: [],
             lastModified: null,
             decision: '',
-            nature: ''
+            nature: '',
+            groupUuid: ''
         },
         attachmentTypes: [],
+        groups: [],
         draftStatus: null,
         draftValid: false,
         statuses: {},
@@ -60,6 +62,13 @@ class NewActeBatchedForm extends Component {
                     this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
+        fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => this.setState({ groups: json }))
+            .catch(response => {
+                response.json().then(json => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message))
+            })
     }
     componentWillUnmount() {
         this.validateForm.clear()
@@ -69,6 +78,7 @@ class NewActeBatchedForm extends Component {
         // Hacks to prevent affecting `null` values
         if (!draft.nature) draft.nature = ''
         if (!draft.decision) draft.decision = ''
+        if (!draft.groupUuid) draft.groupUuid = ''
         this.setState({ fields: draft }, callback)
     }
     getDraftData = () => {
@@ -236,6 +246,9 @@ class NewActeBatchedForm extends Component {
         const natureOptions = natures.map(nature =>
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
         )
+        const groupOptions = this.state.groups.map(group =>
+            <option key={group.uuid} value={group.uuid}>{group.name}</option>
+        )
         const wrappedActes = this.state.fields.actes.map(acte =>
             <WrappedActeForm
                 key={acte.uuid}
@@ -251,6 +264,7 @@ class NewActeBatchedForm extends Component {
                     mode='ACTE_BATCH'
                     nature={this.state.fields.nature}
                     decision={this.state.fields.decision}
+                    groupeUuid={this.state.fields.groupeUuid}
                     active={this.state.active}
                     setStatus={this.setStatusForId}
                     status={this.state.status}
@@ -266,6 +280,12 @@ class NewActeBatchedForm extends Component {
                 <Segment>
                     <Header size='medium'>{t('acte.new.common_fields')}</Header>
                     <Form>
+                        <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')}>
+                            <select id='groupUuid' value={this.state.fields.groupUuid} onChange={e => this.handleFieldChange('groupUuid', e.target.value)}>
+                                <option value=''>{t('acte.new.every_group')}</option>
+                                {groupOptions}
+                            </select>
+                        </FormField>
                         <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
                             <InputValidation id={'decision'}
                                 type='date'

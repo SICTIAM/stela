@@ -5,6 +5,7 @@ import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.ProfileService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -38,6 +39,12 @@ public class ProfileController {
     @PutMapping("/{uuid}/group")
     public void updateGroups(@PathVariable String uuid, @RequestBody List<String> groupUuids) {
         profileService.updateGroups(uuid, groupUuids);
+    }
+
+    @JsonView(Views.WorkGroupViewPublic.class)
+    @GetMapping("/groups")
+    public Set<WorkGroup> getProfileGroups(@RequestAttribute("STELA-Current-Profile-UUID") String profile) {
+        return profileService.getByUuid(profile).getGroups();
     }
 
     @GetMapping

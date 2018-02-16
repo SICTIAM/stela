@@ -37,6 +37,9 @@ public class AuthFilter extends OncePerRequestFilter {
                     rights.add(Right.valueOf(right.asText()));
                 }
             }));
+            Set<String> groups = new HashSet<>();
+            token.get("groups").forEach(group -> groups.add(group.get("uuid").asText()));
+            request.setAttribute("STELA-Current-Profile-Groups", groups);
             request.setAttribute("STELA-Current-Profile-Rights", rights);
             request.setAttribute("STELA-Current-Profile-UUID", token.get("uuid").asText());
             request.setAttribute("STELA-Current-Local-Authority-UUID",

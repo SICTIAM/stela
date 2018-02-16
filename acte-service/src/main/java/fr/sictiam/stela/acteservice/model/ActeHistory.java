@@ -1,10 +1,16 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import java.time.LocalDateTime;
 
@@ -23,6 +29,7 @@ public class ActeHistory implements Comparable<ActeHistory> {
     // Error messages can be quite lengthy
     @Column(length = 1024)
     private String message;
+    @JsonIgnore
     private byte[] file;
     private String fileName;
 

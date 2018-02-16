@@ -82,12 +82,13 @@ public class ActeRestController {
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Groups") Set<String> groups) {
 
         List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, limit,
-                offset, column, direction, currentLocalAuthUuid);
+                offset, column, direction, currentLocalAuthUuid, groups);
         Long count = acteService.countAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status,
-                currentLocalAuthUuid);
+                currentLocalAuthUuid, groups);
         return new ResponseEntity<>(new SearchResultsUI(count, actes), HttpStatus.OK);
     }
 
