@@ -107,15 +107,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         this.zipGeneratorUtil = zipGeneratorUtil;
     }
 
-    /**
-     * Create new Acte entity in databaseFilename, compress the files to a tar.gz
-     * archive and delivers it to minister.
-     *
-     * @param acte    Acte's data used to create Acte entity.
-     * @param file    Acte's file.
-     * @param annexes Acte's annexes.
-     * @return The newly created Acte entity.
-     */
     public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
             throws ActeNotSentException, IOException {
         acte.setActeAttachment(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));

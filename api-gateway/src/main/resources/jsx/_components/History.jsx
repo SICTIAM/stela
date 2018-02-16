@@ -30,7 +30,7 @@ class History extends Component {
                     {renderIf(status.message)(
                         <Feed.Extra>{status.message}</Feed.Extra>
                     )}
-                    {renderIf(status.fileName && status.file)(
+                    {renderIf(status.fileName)(
                         <Feed.Extra>
                             {t(`${moduleName}.page.linked_file`)}: <a target='_blank' href={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`}>{status.fileName}</a>
                         </Feed.Extra>
