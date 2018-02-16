@@ -40,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -239,12 +240,18 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             Join<LocalAuthority, Acte> LocalAuthorityJoin = acteRoot.join("localAuthority");
             LocalAuthorityJoin.on(builder.equal(LocalAuthorityJoin.get("uuid"), currentLocalAuthUuid));
         }
-        if (groups != null)
+        if (!CollectionUtils.isEmpty(groups)) {
             predicates.add(builder.or(
                     acteRoot.get("groupUuid").in(groups),
                     builder.equal(acteRoot.get("groupUuid"), ""),
                     builder.isNull(acteRoot.get("groupUuid"))
             ));
+        } else {
+            predicates.add(builder.or(
+                    builder.equal(acteRoot.get("groupUuid"), ""),
+                    builder.isNull(acteRoot.get("groupUuid"))
+            ));
+        }
 
         if (nature != null)
             predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
