@@ -10,7 +10,9 @@
       "MAX_RETRY_REACH": "Nombre de tentative de renvoi automatique excédé",
       "FILE_ERROR": "Erreur sur le fichier PES",
       "NOTIFICATION_SENT": "Notification envoyée",
-      "RESENT": "Renvoyé"
+      "RESENT": "Renvoyé",
+      "PENDING_SIGNATURE": "en attente de signature",
+      "PENDING_SEND": "en attente d'envoi'"
     },
     "fields": {
       "objet": "Objet",

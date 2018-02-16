@@ -24,6 +24,12 @@ public class SesileConfiguration {
     public SesileConfiguration() {
     }
 
+    public SesileConfiguration(String token, String secret) {
+        super();
+        this.token = token;
+        this.secret = secret;
+    }
+
     public String getProfileUuid() {
         return profileUuid;
     }
@@ -36,7 +42,7 @@ public class SesileConfiguration {
         return visibility;
     }
 
-    public void setVisibility(int visibility) {
+    public void setVisibility(Integer visibility) {
         this.visibility = visibility;
     }
 
@@ -44,7 +50,7 @@ public class SesileConfiguration {
         return validationLimit;
     }
 
-    public void setValidationLimit(int validationLimit) {
+    public void setValidationLimit(Integer validationLimit) {
         this.validationLimit = validationLimit;
     }
 
@@ -52,7 +58,7 @@ public class SesileConfiguration {
         return serviceOrganisationNumber;
     }
 
-    public void setServiceOrganisationNumber(int serviceOrganisationNumber) {
+    public void setServiceOrganisationNumber(Integer serviceOrganisationNumber) {
         this.serviceOrganisationNumber = serviceOrganisationNumber;
     }
 
@@ -60,7 +66,7 @@ public class SesileConfiguration {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 

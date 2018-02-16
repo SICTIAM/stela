@@ -4,6 +4,7 @@ import fr.sictiam.stela.pesservice.model.SesileConfiguration;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,12 +25,22 @@ public class SesileController {
 
     @GetMapping("/organisations")
     public List<ServiceOrganisation> getCurrentOrganisations(
-            @RequestAttribute("STELA-Current-Profile-UUID") String profile) throws Exception {
-        return sesileService.getServiceOrganisations(profile);
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) throws Exception {
+        return sesileService.getServiceOrganisations(profileUuid);
+    }
+
+    @GetMapping("/organisations/{uuid}")
+    public List<ServiceOrganisation> getCurrentOrganisationsByProfileUuid(@PathVariable String uuid) throws Exception {
+        return sesileService.getServiceOrganisations(uuid);
     }
 
     @PostMapping("/configuration")
     public SesileConfiguration createOrUpdateConfiguration(@RequestBody SesileConfiguration sesileConfiguration) {
         return sesileService.createOrUpdate(sesileConfiguration);
+    }
+
+    @GetMapping("/configuration/{uuid}")
+    public SesileConfiguration getConfigurationByUuid(@PathVariable String uuid) {
+        return sesileService.getConfigurationByUuid(uuid);
     }
 }

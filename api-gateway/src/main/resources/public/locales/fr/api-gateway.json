@@ -83,7 +83,22 @@
             "ACTES_NACK_RECEIVED": "Réception d'une anomalie d'un acte",
             "PES_ACK_RECEIVED": "Reception de l'AR d'un PES",
             "PES_SENT": "Envoi réussi d'un PES"
+        },
+        "sesile": {
+        	"title": "Connection Sesile",
+        	"serviceOrganisationNumber": "Service Organisationel",
+        	"type": "Type de classeur",
+        	"visibility": "Visibilité",
+        	"visibilities": {
+              "0":"Privé",
+              "1":"Public",
+              "3":"Service Organisationel"
+        	},
+            "validationLimit": "Delai de validation (jours)",
+        	"secret": "Secret",
+        	"token": "Token"
         }
+        
     },
     "notifications": {
         "title": "STELA",

@@ -54,7 +54,7 @@ public class PesAller {
 
     private boolean signed;
 
-    private int sesileDocumentId;
+    private Integer sesileDocumentId;
 
     public PesAller() {
     }
@@ -167,11 +167,11 @@ public class PesAller {
         this.signed = signed;
     }
 
-    public int getSesileDocumentId() {
+    public Integer getSesileDocumentId() {
         return sesileDocumentId;
     }
 
-    public void setSesileDocumentId(int sesileDocumentId) {
+    public void setSesileDocumentId(Integer sesileDocumentId) {
         this.sesileDocumentId = sesileDocumentId;
     }
 }

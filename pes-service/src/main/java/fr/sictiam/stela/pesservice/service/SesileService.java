@@ -8,9 +8,11 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
+import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.exceptions.ProfileNotConfiguredForSesileException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +32,11 @@ import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SesileService implements ApplicationListener<PesHistoryEvent> {
@@ -60,6 +65,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return sesileConfigurationRepository.save(sesileConfiguration);
     }
 
+    public SesileConfiguration getConfigurationByUuid(String uuid) {
+        Optional<SesileConfiguration> sesileConfigurationOpt = sesileConfigurationRepository.findById(uuid);
+        SesileConfiguration sesileConfiguration = sesileConfigurationOpt.isPresent() ? sesileConfigurationOpt.get()
+                : new SesileConfiguration();
+        return sesileConfiguration;
+    }
+
     public void submitToSignature(PesAller pes) {
 
         try {
@@ -80,11 +92,10 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
             pes.setSesileDocumentId(document.getId());
             pesService.save(pes);
-
+            pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }
-        pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
     }
 
     public void checkPesSigned() {
@@ -135,15 +146,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public List<ServiceOrganisation> getServiceOrganisations(String profileUuid) throws Exception {
-        SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(profileUuid)
-                .orElseThrow(ProfileNotConfiguredForSesileException::new);
+        SesileConfiguration sesileConfiguration = getConfigurationByUuid(profileUuid);
+        if (StringUtils.isBlank(sesileConfiguration.getToken()))
+            return new ArrayList<>();
         JsonNode profile = externalRestService.getProfile(profileUuid);
-
+        String email = profile.get("agent").get("email").asText();
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 getHeaders(sesileConfiguration));
         List<ServiceOrganisation> organisations = Arrays
                 .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
-                        ServiceOrganisation[].class, profile.get("agent").get("email").asText()).getBody());
+                        ServiceOrganisation[].class, email).getBody());
+        List<ClasseurType> types = Arrays.asList(getTypes(sesileConfiguration).getBody());
+        organisations.forEach(organisation -> {
+            organisation.setTypes(types.stream().filter(type -> organisation.getType_classeur().contains(type.getId()))
+                    .collect(Collectors.toList()));
+        });
         return organisations;
 
     }
@@ -177,6 +194,14 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 getHeaders(sesileConfiguration)) {
         };
         return restTemplate.exchange(sesileUrl + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
+    }
+
+    public ResponseEntity<ClasseurType[]> getTypes(SesileConfiguration sesileConfiguration) throws Exception {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+                getHeaders(sesileConfiguration)) {
+        };
+        return restTemplate.exchange(sesileUrl + "/api/classeur/types/", HttpMethod.GET, requestEntity,
+                ClasseurType[].class);
     }
 
     @Override

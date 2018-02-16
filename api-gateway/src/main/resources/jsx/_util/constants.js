@@ -37,4 +37,6 @@ const anomalies = [
     "FILE_ERROR"
 ]
 
-module.exports = { modules, natures, status, anomalies }
+const sesileVisibility = [0, 1, 3]
+
+module.exports = { modules, natures, status, anomalies, sesileVisibility }

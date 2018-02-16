@@ -4,15 +4,27 @@ import java.util.List;
 
 public class ServiceOrganisation {
 
-    private String id;
+    private Integer id;
 
     private String nom;
 
-    public String getId() {
+    private List<Integer> type_classeur;
+
+    private List<ClasseurType> types;
+
+    public List<ClasseurType> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<ClasseurType> types) {
+        this.types = types;
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -32,5 +44,4 @@ public class ServiceOrganisation {
         this.type_classeur = type_classeur;
     }
 
-    private List<Integer> type_classeur;
 }
