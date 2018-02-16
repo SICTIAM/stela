@@ -15,18 +15,20 @@ public class DraftUI {
     private ActeMode mode;
     private LocalDate decision;
     private ActeNature nature;
+    private String groupUuid;
 
     public DraftUI() {
     }
 
     public DraftUI(String uuid, List<ActeDraftUI> actes, LocalDateTime lastModified, ActeMode mode, LocalDate decision,
-            ActeNature nature) {
+            ActeNature nature, String groupUuid) {
         this.uuid = uuid;
         this.actes = actes;
         this.lastModified = lastModified;
         this.mode = mode;
         this.decision = decision;
         this.nature = nature;
+        this.groupUuid = groupUuid;
     }
 
     public String getUuid() {
@@ -51,5 +53,9 @@ public class DraftUI {
 
     public ActeNature getNature() {
         return nature;
+    }
+
+    public String getGroupUuid() {
+        return groupUuid;
     }
 }

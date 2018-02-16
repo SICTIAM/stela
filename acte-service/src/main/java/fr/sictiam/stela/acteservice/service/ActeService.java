@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
@@ -110,13 +111,9 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
      * Create new Acte entity in databaseFilename, compress the files to a tar.gz
      * archive and delivers it to minister.
      *
-     * @param acte
-     *            Acte's data used to create Acte entity.
-     * @param file
-     *            Acte's file.
-     * @param annexes
-     *            Acte's annexes.
-     *
+     * @param acte    Acte's data used to create Acte entity.
+     * @param file    Acte's file.
+     * @param annexes Acte's annexes.
      * @return The newly created Acte entity.
      */
     public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
@@ -205,13 +202,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public Long countAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom,
-            LocalDate decisionTo, StatusType status, String currentLocalAuthUuid) {
+            LocalDate decisionTo, StatusType status, String currentLocalAuthUuid, Set<String> groups) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
         List<Predicate> predicates = getQueryPredicates(builder, acteRoot, number, objet, nature, decisionFrom,
-                decisionTo, status, currentLocalAuthUuid);
+                decisionTo, status, currentLocalAuthUuid, groups);
         query.select(builder.count(acteRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -220,14 +217,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom,
             LocalDate decisionTo, StatusType status, Integer limit, Integer offset, String column, String direction,
-            String currentLocalAuthUuid) {
+            String currentLocalAuthUuid, Set<String> groups) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
         List<Predicate> predicates = getQueryPredicates(builder, acteRoot, number, objet, nature, decisionFrom,
-                decisionTo, status, currentLocalAuthUuid);
+                decisionTo, status, currentLocalAuthUuid, groups);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
                         ? builder.asc(acteRoot.get(columnAttribute))
@@ -238,7 +235,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<Acte> acteRoot, String number,
             String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status,
-            String currentLocalAuthUuid) {
+            String currentLocalAuthUuid, Set<String> groups) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(builder.and(builder.isNull(acteRoot.get("draft"))));
         if (StringUtils.isNotBlank(number))
@@ -251,6 +248,12 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             Join<LocalAuthority, Acte> LocalAuthorityJoin = acteRoot.join("localAuthority");
             LocalAuthorityJoin.on(builder.equal(LocalAuthorityJoin.get("uuid"), currentLocalAuthUuid));
         }
+        if (groups != null)
+            predicates.add(builder.or(
+                    acteRoot.get("groupUuid").in(groups),
+                    builder.equal(acteRoot.get("groupUuid"), ""),
+                    builder.isNull(acteRoot.get("groupUuid"))
+            ));
 
         if (nature != null)
             predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
@@ -367,7 +370,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ? ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList())
                 : getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(),
-                        ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null);
+                ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
     }
 
     public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {

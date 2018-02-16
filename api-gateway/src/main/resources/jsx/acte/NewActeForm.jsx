@@ -33,6 +33,7 @@ class NewActeForm extends Component {
             number: '',
             decision: '',
             nature: '',
+            groupUuid: '',
             code: '',
             objet: '',
             acteAttachment: null,
@@ -48,6 +49,7 @@ class NewActeForm extends Component {
             publicWebsiteField: false
         },
         attachmentTypes: [],
+        groups: [],
         codesMatieres: [],
         isFormValid: false,
         acteFetched: false
@@ -65,7 +67,6 @@ class NewActeForm extends Component {
     }
     componentDidMount() {
         if (!this.props.draftUuid && !this.props.uuid) this.fetchActe(`/api/acte/draft/${this.props.mode}`)
-
         fetchWithAuthzHandling({ url: '/api/acte/localAuthority/depositFields' })
             .then(checkStatus)
             .then(response => response.json())
@@ -75,7 +76,6 @@ class NewActeForm extends Component {
                     this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
-
         fetchWithAuthzHandling({ url: '/api/acte/localAuthority/codes-matieres' })
             .then(checkStatus)
             .then(response => response.json())
@@ -85,6 +85,15 @@ class NewActeForm extends Component {
                     this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
+        if (this.props.mode !== 'ACTE_BATCH') {
+            fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(json => this.setState({ groups: json }))
+                .catch(response => {
+                    response.json().then(json => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message))
+                })
+        }
     }
     componentWillReceiveProps(nextProps) {
         const { fields, acteFetched } = this.state
@@ -147,6 +156,7 @@ class NewActeForm extends Component {
         if (!acte.code) acte.code = ''
         if (!acte.codeLabel) acte.codeLabel = ''
         if (!acte.decision) acte.decision = ''
+        if (!acte.groupUuid) acte.groupUuid = ''
         if (!acte.objet) acte.objet = ''
         if (!acte.number) acte.number = ''
         if (!acte.annexes) acte.annexes = []
@@ -354,6 +364,9 @@ class NewActeForm extends Component {
         const attachmentTypes = attachmentTypeSource.map(attachmentType => {
             return { key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.label }
         })
+        const groupOptions = this.state.groups.map(group =>
+            <option key={group.uuid} value={group.uuid}>{group.name}</option>
+        )
         const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) &&
             <Dropdown fluid selection
                 placeholder={t('acte.new.PJ_types')}
@@ -406,6 +419,14 @@ class NewActeForm extends Component {
                                 validationRule={this.validationRules.decision}
                                 fieldName={t('acte.fields.decision')}
                                 max={moment().format('YYYY-MM-DD')} />
+                        </FormField>
+                    )}
+                    {renderIf(this.props.mode !== 'ACTE_BATCH')(
+                        <FormField htmlFor={`${this.state.fields.uuid}_group`} label={t('acte.fields.group')}>
+                            <select id='groupUuid' value={this.state.fields.groupUuid} onChange={e => this.handleFieldChange('groupUuid', e.target.value)}>
+                                <option value=''>{t('acte.new.every_group')}</option>
+                                {groupOptions}
+                            </select>
                         </FormField>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH')(

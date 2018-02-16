@@ -76,6 +76,11 @@ public class DraftService {
     public Optional<CustomValidationUI> sumitDraft(String uuid, String profileUuid) {
         List<Acte> actes = getActeDrafts(uuid);
         Draft draft = getDraftByUuid(uuid);
+        actes.forEach(acte -> {
+            acte.setNature(draft.getNature());
+            acte.setDecision(draft.getDecision());
+            acte.setGroupUuid(draft.getGroupUuid());
+        });
 
         CustomValidationUI customValidationUI = null;
         for (Acte acte : actes) {
@@ -109,6 +114,7 @@ public class DraftService {
         Draft draft = getDraftByUuid(draftUI.getUuid());
         draft.setDecision(draftUI.getDecision());
         draft.setNature(draftUI.getNature());
+        draft.setGroupUuid(draftUI.getGroupUuid());
         updateLastModifiedDraft(draft.getUuid());
         acteDraftRepository.save(draft);
     }
@@ -135,7 +141,7 @@ public class DraftService {
         Draft draft = acte.getDraft();
         ActeDraftUI acteDraftUI = new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature());
         return new DraftUI(draft.getUuid(), Collections.singletonList(acteDraftUI), draft.getLastModified(),
-                draft.getMode(), draft.getDecision(), draft.getNature());
+                draft.getMode(), draft.getDecision(), draft.getNature(), draft.getGroupUuid());
     }
 
     @Transactional
@@ -251,7 +257,7 @@ public class DraftService {
                     .collect(Collectors.toList());
             if (acteUuids.size() > 0)
                 draftUIs.add(new DraftUI(draft.getUuid(), acteUuids, draft.getLastModified(), draft.getMode(),
-                        draft.getDecision(), draft.getNature()));
+                        draft.getDecision(), draft.getNature(), draft.getGroupUuid()));
         }
         return draftUIs;
     }
@@ -262,7 +268,7 @@ public class DraftService {
                 .map(acte -> new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature()))
                 .collect(Collectors.toList());
         return new DraftUI(uuid, acteUuids, draft.getLastModified(), draft.getMode(), draft.getDecision(),
-                draft.getNature());
+                draft.getNature(), draft.getGroupUuid());
     }
 
     public void deleteDrafts(List<String> uuids) {

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ public class Draft {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate decision;
     private ActeNature nature;
+    private String groupUuid;
 
     public Draft() {
     }
@@ -60,5 +63,13 @@ public class Draft {
 
     public void setNature(ActeNature nature) {
         this.nature = nature;
+    }
+
+    public String getGroupUuid() {
+        return groupUuid;
+    }
+
+    public void setGroupUuid(String groupUuid) {
+        this.groupUuid = groupUuid;
     }
 }
