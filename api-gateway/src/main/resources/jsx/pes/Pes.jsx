@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Button ,Segment, Label } from 'semantic-ui-react'
+import { Button, Segment, Label } from 'semantic-ui-react'
 import moment from 'moment'
 
 import History from '../_components/History'
@@ -54,10 +54,10 @@ class Pes extends Component {
         fetchWithAuthzHandling({ url: '/api/pes/resend/' + this.props.uuid, context: this.context })
             .then(checkStatus)
             .then(response => {
-                    this.context._addNotification(notifications.pes.sent)
-                    history.push('/pes/' + this.props.uuid,)
-                })
-            .catch( response => {
+                this.context._addNotification(notifications.pes.sent)
+                history.push('/pes/' + this.props.uuid, )
+            })
+            .catch(response => {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
@@ -72,7 +72,7 @@ class Pes extends Component {
                         <Anomaly header={t('pes.page.title_anomaly')} lastHistory={lastHistory} />
                         <Segment>
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`pes.status.${lastHistory.status}`)}</Label>
-                             <div style={{ textAlign: 'right' }}>
+                            <div style={{ textAlign: 'right' }}>
                                 {(lastHistory && lastHistory.status === 'MAX_RETRY_REACH') &&
                                     <Button type='submit' primary basic onClick={this.reSendFlux}>{t('pes.page.re_send')}</Button>
                                 }
@@ -86,7 +86,7 @@ class Pes extends Component {
                             <Field htmlFor='creation' label={t('pes.fields.creation')}>
                                 <span id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</span>
                             </Field>
-                            <Field htmlFor='attachment' label={t('pes.fields.objet')}>
+                            <Field htmlFor='attachment' label={t('pes.fields.attachment')}>
                                 <a id='attachment' target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a>
                             </Field>
                         </Segment>

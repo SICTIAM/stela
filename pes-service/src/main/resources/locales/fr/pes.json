@@ -28,6 +28,7 @@
       "non_existing_pes": "PES non existant",
       "title_anomaly": "Anomalie envoyée par la Préfecture",
       "historic": "Historique",
+      "linked_file": "Fichier joint",
       "no_history": "Aucun historique pour ce PES",
       "re_send": "Renvoyer le flux manuellement"
     },
