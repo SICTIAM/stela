@@ -29,7 +29,7 @@ public class RetryTask {
     @Value("${application.retry.frequency}")
     private Integer frequency;
 
-    @Scheduled(cron = "0 0 0/1 * * ?")
+    @Scheduled(cron = "${application.retry.cron}")
     public void resendBlockedFlux() {
         List<PesAller> pesList = pesAllerService.getBlockedFlux();
         pesList.forEach(pes -> {

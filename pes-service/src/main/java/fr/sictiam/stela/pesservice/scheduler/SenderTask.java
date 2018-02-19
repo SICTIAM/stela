@@ -52,10 +52,8 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        switch (event.getPesHistory().getStatus()) {
-        case CREATED:
+        if (StatusType.PENDING_SEND.equals(event.getPesHistory().getStatus())) {
             pendingQueue.add(pendingMessageRepository.save(new PendingMessage(event.getPesHistory())));
-            break;
         }
     }
 
@@ -65,7 +63,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         currentSizeUsed.set(0);
     }
 
-    @Scheduled(fixedRate = 100)
+    @Scheduled(fixedRate = 1000)
     public void senderTask() {
 
         if (!pendingQueue.isEmpty() && adminService.isHeliosAvailable()) {

@@ -48,7 +48,7 @@ public class PesRestController {
     private final PesAllerService pesAllerService;
     private final PesRetourService pesRetourService;
 
-    @Value("application.filenamepattern")
+    @Value("${application.filenamepattern}")
     private String fileNamePattern;
 
     @Autowired

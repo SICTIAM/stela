@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Button, Segment, Label, Input, Header, Checkbox } from 'semantic-ui-react'
+import { Button, Segment, Label, Input, Header, Checkbox, Dropdown } from 'semantic-ui-react'
 
 import { Field, Page } from './_components/UI'
 import { notifications } from './_util/Notifications'
 import AccordionSegment from './_components/AccordionSegment'
 import { fetchWithAuthzHandling, checkStatus } from './_util/utils'
-import { modules } from './_util/constants'
+import { modules, sesileVisibility } from './_util/constants'
 
 class Profile extends Component {
     static contextTypes = {
@@ -53,11 +53,11 @@ class Profile extends Component {
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
     }
-    onChange = (uuidProfile, id, value) => {
+    onChange = (uuidProfile, id, value, callback) => {
         const { agent } = this.state
         const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
         profile[id] = value
-        this.setState({ agent })
+        this.setState({ agent }, callback)
     }
     onLocalAuthorityNotificationsChange = (uuidProfile, module , checked) => {
         const { agent } = this.state
@@ -87,6 +87,7 @@ class Profile extends Component {
             .catch(response => {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
+            
     }
     render() {
         const { t, user } = this.context
@@ -147,7 +148,9 @@ class Profile extends Component {
 
 class LocalAuthorityProfile extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        t: PropTypes.func,
+        csrfToken: PropTypes.string,
+        csrfTokenHeaderName: PropTypes.string
     }
     static propTypes = {
         profile: PropTypes.object.isRequired,
@@ -170,9 +173,61 @@ class LocalAuthorityProfile extends Component {
                 slugName: '',
                 siren: '',
                 activatedModules: []
-            }
+            }            
         },
+        
         isDefaultOpen: true
+    }
+
+    state = {
+        sesileConfiguration: {
+            profileUuid: '',
+            serviceOrganisationNumber: 1,
+            type: 2,
+            visibility: 3,
+            secret: '',
+            token: '',
+            daysToValidated: 15
+        },
+        serviceOrganisationAvailable: []
+    }
+    sesileConfigurationChange = (e, {id, value }) => {
+        const sesileConf = this.state.sesileConfiguration
+        sesileConf[id] = value
+        this.setState({sesileConfiguration: sesileConf})
+    }
+    updateSesileConfiguration = () => {
+        const { profile } = this.props
+        if(profile.uuid && profile.localAuthority.activatedModules.includes('PES')) {
+            const headers = { 'Content-Type': 'application/json' }
+            const sesileConf = this.state.sesileConfiguration
+            sesileConf.profileUuid = profile.uuid;
+            fetchWithAuthzHandling({ url: `/api/pes/sesile/configuration`, body: JSON.stringify(sesileConf), headers: headers, method: 'POST', context: this.context })
+                .then(checkStatus)
+                .catch(response => {
+                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                })
+        }
+
+    }
+    componentDidMount() {
+        const { profile } = this.props
+        if(profile.uuid && profile.localAuthority.activatedModules.includes('PES')) {
+            fetchWithAuthzHandling({ url: `/api/pes/sesile/organisations/${profile.uuid}` })
+                .then(response => response.json())
+                .then(json => {
+                    this.setState({ serviceOrganisationAvailable: json })
+                }).catch(response => {
+                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                })
+            fetchWithAuthzHandling({ url: `/api/pes/sesile/configuration/${profile.uuid}` })
+                .then(response => response.json())
+                .then(json => {
+                    this.setState({ sesileConfiguration: json })
+                }).catch(response => {
+                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                })
+        }
     }
     render() {
         const { t } = this.context
@@ -180,6 +235,74 @@ class LocalAuthorityProfile extends Component {
         const modulesRows = modules.map(moduleName =>
             <Label key={moduleName} style={{ marginRight: '1em' }} color={profile.localAuthority.activatedModules.includes(moduleName) ? 'green' : 'red'}>{t(`modules.${moduleName}`)}</Label>
         )
+        
+        const visibilities = sesileVisibility.map(visibility => { 
+            return { key: visibility, value: visibility, text: t(`profile.sesile.visibilities.${visibility}`)}
+        })
+
+        const serviceOrganisations = this.state.serviceOrganisationAvailable.map(service => { 
+            return { key: service.id, value: parseInt(service.id, 10), text: service.nom } 
+        })
+
+        const currentService = this.state.sesileConfiguration.serviceOrganisationNumber ?
+                this.state.serviceOrganisationAvailable.find(service => parseInt(service.id, 10) === this.state.sesileConfiguration.serviceOrganisationNumber) : undefined
+
+        const typesAvailable = currentService ? currentService.types.map(type => { return { key: type.id, value: type.id, text: type.nom } }) : []
+
+        const sesileConnection = profile.localAuthority.activatedModules.map(activatedModule =>
+              (activatedModule === 'PES' && this.state.sesileConfiguration) &&
+ 
+                <div key={activatedModule} style={{ marginTop: '1em' }}>
+                    <Header size='small'>{t('profile.sesile.title')}</Header>
+                    <Field htmlFor='serviceOrganisationNumber' label={t('profile.sesile.serviceOrganisationNumber')}>
+                        <Dropdown compact search selection
+                            id='serviceOrganisationNumber'
+                            className='simpleInput'
+                            placeholder={t('profile.sesile.serviceOrganisationNumber')}
+                            options={serviceOrganisations}
+                            value={this.state.sesileConfiguration.serviceOrganisationNumber}
+                            onChange={this.sesileConfigurationChange} />
+                    </Field>  
+                    <Field htmlFor='type' label={t('profile.sesile.type')}>
+                        <Dropdown compact search selection
+                            id='type'
+                            placeholder={t('profile.sesile.type')}
+                            className='simpleInput'
+                            options={typesAvailable}
+                            value={this.state.sesileConfiguration.type}
+                            onChange={this.sesileConfigurationChange} />
+                    </Field>
+                    <Field htmlFor='visibility' label={t('profile.sesile.visibility')}>
+                        <Dropdown compact search selection
+                            id='visibility'
+                            placeholder={t('profile.sesile.visibility')}
+                            className='simpleInput'
+                            options={visibilities}
+                            value={this.state.sesileConfiguration.visibility}
+                            onChange={this.sesileConfigurationChange} />
+                    </Field>
+                    <Field htmlFor='daysToValidated' label={t('profile.sesile.daysToValidated')}>
+                        <Input id='daysToValidated'
+                            type='number'
+                            placeholder={t('profile.sesile.daysToValidated')}
+                            value={this.state.sesileConfiguration.daysToValidated}
+                            onChange={this.sesileConfigurationChange} />
+                    </Field>
+                    <Field htmlFor='token' label={t('profile.sesile.token')}>
+                        <Input id='token' style={{ width: '25em' }}
+                            placeholder={t('profile.sesile.token')}
+                            value={this.state.sesileConfiguration.token}
+                            onChange={this.sesileConfigurationChange} />
+                    </Field>
+                    <Field htmlFor='secret' label={t('profile.sesile.secret')}>
+                        <Input id='secret' style={{ width: '25em' }}
+                            placeholder={t('profile.sesile.secret')}
+                            value={this.state.sesileConfiguration.secret}
+                            onChange={this.sesileConfigurationChange} />
+                    </Field>
+                </div>
+
+        );
         const profileNotifications = profile.localAuthority.activatedModules.map(activatedModule =>
             <div style={{ marginTop: '2em' }} key={activatedModule}>
                 <Header size='small'>{t('profile.notifications_title')} {activatedModule}</Header>
@@ -203,6 +326,7 @@ class LocalAuthorityProfile extends Component {
                             </Field>
                         )
                     })}
+
             </div>
         )
         const content = (
@@ -214,9 +338,15 @@ class LocalAuthorityProfile extends Component {
                     <Input id='email' value={profile.email || ''} placeholder={t('profile.no_email')}
                         onChange={(e, { id, value }) => onChange(profile.uuid, id, value)} />
                 </Field>
+                {sesileConnection }      
                 {profile.localAuthority.activatedModules.length > 0 && profileNotifications}
                 <div style={{ textAlign: 'right' }}>
-                    <Button basic primary onClick={() => updateProfile(profile.uuid)}>{t('form.update')}</Button>
+                    <Button basic primary onClick={() => {
+                        this.updateSesileConfiguration()
+                        updateProfile(profile.uuid)
+                    }}>
+                        {t('form.update')}
+                    </Button>
                 </div>
             </div >
         )
