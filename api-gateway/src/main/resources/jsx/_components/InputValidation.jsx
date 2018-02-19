@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Label, Dropdown } from 'semantic-ui-react'
 import renderIf from 'render-if'
 import Validator from 'validatorjs'
-import moment from 'moment'
 
 import { InputFile } from './UI'
 
@@ -19,8 +18,7 @@ export default class InputValidation extends Component {
         style: {}
     }
     validateValue = () => {
-        const value = this.props.type === 'date' ? moment(this.props.value).format('MM.DD.YYYY') : this.props.value
-        const validation = new Validator({ field: value }, { field: this.props.validationRule }, this.props.customErrorMessages)
+        const validation = new Validator({ field: this.props.value }, { field: this.props.validationRule }, this.props.customErrorMessages)
         validation.setAttributeNames({ field: this.props.fieldName });
         const isValid = validation.passes()
         const errorMessage = validation.errors.first('field') || ''

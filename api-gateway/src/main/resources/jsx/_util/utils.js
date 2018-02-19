@@ -41,10 +41,10 @@ const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) 
     })
 }
 
-const handleFieldCheckboxChange = (that, field) => {
+const handleFieldCheckboxChange = (that, field, callback) => {
     const fields = that.state.fields
     fields[field] = !fields[field]
-    that.setState({ fields: fields })
+    that.setState({ fields: fields }, callback)
 }
 
 const handleFieldChange = (that, e, callback) => {
