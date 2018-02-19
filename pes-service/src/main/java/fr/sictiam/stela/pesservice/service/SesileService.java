@@ -100,7 +100,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         pesAllers.forEach(pes -> {
             SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
                     .orElseThrow(ProfileNotConfiguredForSesileException::new);
-            if (checkDocumentSigned(sesileConfiguration, pes.getSesileDocumentId())) {
+            if (pes.getSesileDocumentId() != null
+                    && checkDocumentSigned(sesileConfiguration, pes.getSesileDocumentId())) {
                 pes.getAttachment().setFile(getDocumentBody(sesileConfiguration, pes.getSesileDocumentId()));
                 pes.setSigned(true);
                 pesService.save(pes);
