@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
@@ -146,19 +145,6 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         PesAller pes = getByUuid(event.getPesHistory().getPesUuid());
         pes.getPesHistories().add(event.getPesHistory());
         pesAllerRepository.save(pes);
-    }
-
-    public PesAller createFromJson(String currentProfileUuid, String currentLocalAuthUuid, String pesAllerJson,
-            MultipartFile file) {
-        ObjectMapper mapper = new ObjectMapper();
-        PesAller pesAller;
-        try {
-            pesAller = mapper.readValue(pesAllerJson, PesAller.class);
-        } catch (IOException e) {
-            throw new PesCreationException();
-        }
-        return create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
-
     }
 
     public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller,

@@ -28,9 +28,11 @@ class NewPes extends Component {
     }
     validationRules = {
         objet: 'required|max:500',
+        comment: 'max:250',
         attachment: 'required'
     }
     handleFieldChange = (field, value) => {
+        if (field === 'comment' && value.length > 250) return
         const { fields } = this.state
         fields[field] = value
         this.setState({ fields: fields }, this.validateForm)
@@ -42,6 +44,7 @@ class NewPes extends Component {
     validateForm = debounce(() => {
         const data = {
             objet: this.state.fields.objet,
+            comment: this.state.fields.comment,
             attachment: this.state.attachment
         }
         const validation = new Validator(data, this.validationRules)
@@ -98,6 +101,7 @@ class NewPes extends Component {
                                 placeholder={t('pes.fields.comment') + '...'}
                                 value={this.state.fields.comment}
                                 onChange={e => this.handleFieldChange('comment', e.target.value)} />
+                            <p style={{ fontStyle: 'italic' }}>{t('api-gateway:form.max_string_length', { length: 250, remaining: 250 - (this.state.fields.comment ? this.state.fields.comment.length : 0) })}</p>
                         </FormField>
                         <div style={{ textAlign: 'right' }}>
                             <Button type='submit' primary basic disabled={!this.state.isFormValid}>{t('api-gateway:form.submit')}</Button>
