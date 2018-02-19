@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -35,7 +36,7 @@ public class SesileTest {
     }
 
     @Test
-    public void testPostClasseur() throws Exception {
+    public void testPostClasseur() throws IOException {
         ResponseEntity<Classeur> classeur = sesileService.postClasseur(sesileConfiguration,
                 new ClasseurRequest("test", "test", "20/02/2018", 2, 1, 3, "f.laussinot@sictiam.fr"));
         assertThat(classeur, notNullValue());

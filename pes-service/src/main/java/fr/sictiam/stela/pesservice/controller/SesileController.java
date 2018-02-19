@@ -29,9 +29,10 @@ public class SesileController {
         return sesileService.getServiceOrganisations(profileUuid);
     }
 
-    @GetMapping("/organisations/{uuid}")
-    public List<ServiceOrganisation> getCurrentOrganisationsByProfileUuid(@PathVariable String uuid) throws Exception {
-        return sesileService.getServiceOrganisations(uuid);
+    @GetMapping("/organisations/{profileUuid}")
+    public List<ServiceOrganisation> getCurrentOrganisationsByProfileUuid(@PathVariable String profileUuid)
+            throws Exception {
+        return sesileService.getServiceOrganisations(profileUuid);
     }
 
     @PostMapping("/configuration")

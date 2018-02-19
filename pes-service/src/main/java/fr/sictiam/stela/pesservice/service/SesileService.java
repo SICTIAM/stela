@@ -30,12 +30,12 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,10 +66,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public SesileConfiguration getConfigurationByUuid(String uuid) {
-        Optional<SesileConfiguration> sesileConfigurationOpt = sesileConfigurationRepository.findById(uuid);
-        SesileConfiguration sesileConfiguration = sesileConfigurationOpt.isPresent() ? sesileConfigurationOpt.get()
-                : new SesileConfiguration();
-        return sesileConfiguration;
+        return sesileConfigurationRepository.findById(uuid).orElseGet(SesileConfiguration::new);
     }
 
     public void submitToSignature(PesAller pes) {
@@ -79,7 +76,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     .orElseThrow(ProfileNotConfiguredForSesileException::new);
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
-            LocalDate localDate = LocalDate.now().plusDays(sesileConfiguration.getValidationLimit());
+            LocalDate localDate = LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             ResponseEntity<Classeur> classeur = postClasseur(sesileConfiguration,
@@ -113,7 +110,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public ResponseEntity<Document> addFileToclasseur(SesileConfiguration sesileConfiguration, byte[] file,
-            String fileName, int classeur) throws Exception {
+            String fileName, int classeur) {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
 
@@ -132,8 +129,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         headers.addAll(getHeaders(sesileConfiguration));
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
-                map, headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         return restTemplate.exchange(sesileUrl + "/api/classeur/{classeur}/newDocuments", HttpMethod.POST,
                 requestEntity, Document.class, classeur);
     }
@@ -145,13 +141,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return headers;
     }
 
-    public List<ServiceOrganisation> getServiceOrganisations(String profileUuid) throws Exception {
+    public List<ServiceOrganisation> getServiceOrganisations(String profileUuid) throws IOException {
         SesileConfiguration sesileConfiguration = getConfigurationByUuid(profileUuid);
         if (StringUtils.isBlank(sesileConfiguration.getToken()))
             return new ArrayList<>();
         JsonNode profile = externalRestService.getProfile(profileUuid);
         String email = profile.get("agent").get("email").asText();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
                 getHeaders(sesileConfiguration));
         List<ServiceOrganisation> organisations = Arrays
                 .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
@@ -166,14 +162,14 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public ResponseEntity<Classeur> checkClasseurStatus(SesileConfiguration sesileConfiguration, int classeur) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
                 getHeaders(sesileConfiguration));
         return restTemplate.exchange(sesileUrl + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                 classeur);
     }
 
     public boolean checkDocumentSigned(SesileConfiguration sesileConfiguration, int document) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
                 getHeaders(sesileConfiguration));
         return restTemplate
                 .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
@@ -181,25 +177,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public byte[] getDocumentBody(SesileConfiguration sesileConfiguration, int document) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
                 getHeaders(sesileConfiguration));
 
         return restTemplate.exchange(sesileUrl + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
                 String.class, document).getBody().getBytes();
     }
 
-    public ResponseEntity<Classeur> postClasseur(SesileConfiguration sesileConfiguration, ClasseurRequest classeur)
-            throws Exception {
-        HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<ClasseurRequest>(classeur,
-                getHeaders(sesileConfiguration)) {
-        };
+    public ResponseEntity<Classeur> postClasseur(SesileConfiguration sesileConfiguration, ClasseurRequest classeur) {
+        HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(sesileConfiguration));
         return restTemplate.exchange(sesileUrl + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
     }
 
-    public ResponseEntity<ClasseurType[]> getTypes(SesileConfiguration sesileConfiguration) throws Exception {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
-                getHeaders(sesileConfiguration)) {
-        };
+    public ResponseEntity<ClasseurType[]> getTypes(SesileConfiguration sesileConfiguration) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
+                getHeaders(sesileConfiguration));
         return restTemplate.exchange(sesileUrl + "/api/classeur/types/", HttpMethod.GET, requestEntity,
                 ClasseurType[].class);
     }

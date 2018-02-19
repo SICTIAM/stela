@@ -12,7 +12,7 @@
       "NOTIFICATION_SENT": "Notification envoyée",
       "RESENT": "Renvoyé",
       "PENDING_SIGNATURE": "en attente de signature",
-      "PENDING_SEND": "en attente d'envoi'"
+      "PENDING_SEND": "en attente d'envoi"
     },
     "fields": {
       "objet": "Objet",

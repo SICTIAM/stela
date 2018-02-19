@@ -10,8 +10,8 @@ public class SesileConfiguration {
     private String profileUuid;
 
     private int visibility;
-    // in day
-    private int validationLimit;
+
+    private int daysToValidated;
 
     private int serviceOrganisationNumber;
 
@@ -46,12 +46,12 @@ public class SesileConfiguration {
         this.visibility = visibility;
     }
 
-    public int getValidationLimit() {
-        return validationLimit;
+    public int getDaysToValidated() {
+        return daysToValidated;
     }
 
-    public void setValidationLimit(Integer validationLimit) {
-        this.validationLimit = validationLimit;
+    public void setDaysToValidated(Integer daysToValidated) {
+        this.daysToValidated = daysToValidated;
     }
 
     public int getServiceOrganisationNumber() {
