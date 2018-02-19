@@ -200,7 +200,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
-            if (pes.isPj()) {
+            // TODO remove
+            boolean sendtest = true;
+            if (sendtest || pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
             } else {
                 submitToSignature(pes);
