@@ -135,7 +135,7 @@ public class Acte {
         this.isPublic = isPublic;
     }
 
-    public boolean getIsPublicWebsite() {
+    public boolean isPublicWebsite() {
         return isPublicWebsite;
     }
 
