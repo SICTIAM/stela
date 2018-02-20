@@ -1,5 +1,7 @@
 package fr.sictiam.stela.pesservice.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.pesservice.model.CustomValidationUI;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.PesRetour;
@@ -10,6 +12,7 @@ import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -96,17 +100,25 @@ public class PesRestController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+    public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file)
-            throws PesCreationException {
+            @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
         Pattern pattern = Pattern.compile(fileNamePattern);
         Matcher matcher = pattern.matcher(file.getOriginalFilename());
         if (matcher.matches()) {
-            PesAller result = pesAllerService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson,
-                    file);
-            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
+                List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
+                if (!errors.isEmpty()) {
+                    CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
+                    return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
+                }
+                PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
+                return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+            } catch (IOException e) {
+                throw new PesCreationException();
+            }
         } else {
             return new ResponseEntity<>("notifications.pes.sent.error.bad_file_name", HttpStatus.BAD_REQUEST);
         }
