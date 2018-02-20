@@ -18,9 +18,6 @@ body, html {
     overflow-y: auto;
     padding-right: 0.5em;
 }
-.ui.vertical.menu.mainMenu.admin {
-    background-color: #d24d57
-}
 @media (min-height:550px){
     .mainMenus {
         height: 100%;
@@ -60,11 +57,19 @@ fieldset {
     height: 4.5em;
     box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
 }
-.ui.menu.mainMenu .item {
-    color:#16a085;
+.menu.secondary.topBar.anatra {
+    border-bottom: 2px solid #009999;
 }
-.ui.menu.mainMenu.admin .item {
-    color: white;
+.menu.secondary.topBar.rosso {
+    border-bottom: 2px solid #CC0066;
+}
+.ui.menu.mainMenu.anatra .header,
+.ui.menu.mainMenu.anatra .icon {
+    color:#009999;
+}
+.ui.menu.mainMenu.rosso .header,
+.ui.menu.mainMenu.rosso .icon {
+    color:#CC0066;
 }
 footer {
     position: absolute;
@@ -112,20 +117,24 @@ ul.pagination li a.item:focus {
 .ui.segment h2:after {
     content:' ';
     display:block;
-    border:1px solid #d24d57;
+    border:1px solid #CC0066;
 }
 .ui.table.sortable thead tr th,
 .ui.table.sortable thead tr th:hover,
 .ui.table.sortable thead tr th.sorted,
 .ui.table.sortable thead tr th.sorted:hover  {
     color: white;
-    background-color: #16a085;
+    background-color: #009999;
+}
+.ui.button.basic.anatra, .ui.basic.blue.buttons .button {
+    box-shadow: 0 0 0 1px #009999 inset!important;
+    color: #009999!important;
 }
 .ui.button.basic.rosso, .ui.basic.blue.buttons .button {
-    box-shadow: 0 0 0 1px #d24d57 inset!important;
-    color: #d24d57!important;
+    box-shadow: 0 0 0 1px #CC0066 inset!important;
+    color: #CC0066!important;
 }
 .ui.tabular.menu,
 .ui.tabular.menu .active.item {
-    border-color: #16a085;
+    border-color: #009999;
 }

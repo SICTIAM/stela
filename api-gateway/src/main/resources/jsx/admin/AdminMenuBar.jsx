@@ -11,7 +11,7 @@ class AdminMenuBar extends Component {
     render() {
         const { t } = this.context
         return (
-            <Menu fixed='left' className='mainMenu admin' inverted secondary vertical>
+            <Menu style={{ backgroundColor: 'white' }} fixed='left' className='mainMenu rosso' secondary vertical>
                 <div className='mainMenus'>
 
                     <Menu.Item style={{ width: '100%' }}>
@@ -44,7 +44,7 @@ class AdminMenuBar extends Component {
 
                 <div>
                     <Menu.Item style={{ width: '100%' }} >
-                        <img style={{ width: '100%', padding: '2em' }} src={process.env.PUBLIC_URL + '/img/logo_sictiam_white.png'} alt="SICTIAM" />
+                        <img style={{ width: '100%', padding: '2em' }} src={process.env.PUBLIC_URL + '/img/logo_sictiam.jpg'} alt="SICTIAM" />
                     </Menu.Item>
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
                         Créé avec ❤ par le SICTIAM
