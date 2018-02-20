@@ -25,7 +25,7 @@ class History extends Component {
             <Feed.Event key={status.uuid}>
                 <Feed.Label icon='check' />
                 <Feed.Content>
-                    <Feed.Date>{moment(status.date).format('DD/MM/YYYY hh:mm')}</Feed.Date>
+                    <Feed.Date>{moment(status.date).format(`DD/MM/YYYY ${t('api-gateway:at')} HH:mm`)}</Feed.Date>
                     <Feed.Summary>{t(`${moduleName}:${moduleName}.status.${status.status}`)}</Feed.Summary>
                     {renderIf(status.message)(
                         <Feed.Extra>{status.message}</Feed.Extra>
@@ -54,4 +54,4 @@ class History extends Component {
     }
 }
 
-export default translate(['acte', 'pes'])(History)
+export default translate(['acte', 'pes', 'api-gateway'])(History)
