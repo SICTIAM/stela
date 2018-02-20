@@ -32,7 +32,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     private Queue<PendingMessage> pendingQueue = new ConcurrentLinkedQueue<>();
 
     @Value("${application.archive.maxSizePerHour}")
-    private Integer maxSizePerHour;
+    private Long maxSizePerHour;
 
     private AtomicInteger currentSizeUsed = new AtomicInteger();
 

@@ -29,7 +29,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     private Queue<PendingMessage> pendingQueue = new ConcurrentLinkedQueue<>();
 
     @Value("${application.archive.maxSizePerHour}")
-    private Integer maxSizePerHour;
+    private Long maxSizePerHour;
 
     private AtomicInteger currentSizeUsed = new AtomicInteger();
 
@@ -50,9 +50,9 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
-        case ARCHIVE_SIZE_CHECKED:
-            pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
-            break;
+            case ARCHIVE_SIZE_CHECKED:
+                pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
+                break;
         }
     }
 
