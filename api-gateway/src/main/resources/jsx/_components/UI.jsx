@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Form, Grid, Card, Icon, List, Header } from 'semantic-ui-react'
 
 import { bytesToSize } from '../_util/utils'
@@ -63,4 +64,14 @@ const Page = ({ children, title, subtitle }) =>
         {children}
     </div>
 
-module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem, Page }
+const InputTextControlled = ({ component: Component, onChange, value, maxLength, ...props }, { t }) =>
+    <div>
+        <Component value={value} onChange={(e, { id, value }) => value.length <= maxLength && onChange(id, value)} {...props} />
+        <p style={{ fontStyle: 'italic' }}>{t('api-gateway:form.max_string_length', { length: maxLength, remaining: maxLength - (value ? value.length : 0) })}</p>
+    </div>
+
+InputTextControlled.contextTypes = {
+    t: PropTypes.func
+}
+
+module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem, Page, InputTextControlled }
