@@ -5,7 +5,7 @@ import { Segment, Form, TextArea, Button } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 
-import { Page, FormField, File } from '../_components/UI'
+import { Page, FormField, File, InputTextControlled } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
@@ -28,6 +28,7 @@ class NewPes extends Component {
     }
     validationRules = {
         objet: 'required|max:500',
+        comment: 'max:250',
         attachment: 'required'
     }
     handleFieldChange = (field, value) => {
@@ -42,6 +43,7 @@ class NewPes extends Component {
     validateForm = debounce(() => {
         const data = {
             objet: this.state.fields.objet,
+            comment: this.state.fields.comment,
             attachment: this.state.attachment
         }
         const validation = new Validator(data, this.validationRules)
@@ -93,11 +95,13 @@ class NewPes extends Component {
                             <File attachment={{ filename: this.state.attachment.name }} onDelete={this.deleteFile} />
                         }
                         <FormField htmlFor='comment' label={t('pes.fields.comment')}>
-                            <TextArea id='comment'
+                            <InputTextControlled component={TextArea}
+                                id='comment'
+                                maxLength={250}
                                 style={{ minHeight: '3em' }}
                                 placeholder={t('pes.fields.comment') + '...'}
                                 value={this.state.fields.comment}
-                                onChange={e => this.handleFieldChange('comment', e.target.value)} />
+                                onChange={this.handleFieldChange} />
                         </FormField>
                         <div style={{ textAlign: 'right' }}>
                             <Button type='submit' primary basic disabled={!this.state.isFormValid}>{t('api-gateway:form.submit')}</Button>

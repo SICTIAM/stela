@@ -27,8 +27,8 @@ public class PesAller {
     private LocalDateTime creation;
 
     @Column(length = 512)
-    @NotNull(groups = { RestValidation.class })
-    @Size(max = 500)
+    @NotNull(groups = {RestValidation.class})
+    @Size(max = 500, groups = {RestValidation.class})
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -43,6 +43,7 @@ public class PesAller {
 
     private String profileUuid;
 
+    @Size(max = 250, groups = {RestValidation.class})
     private String comment;
 
     private String fileType;
