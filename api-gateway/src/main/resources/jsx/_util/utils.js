@@ -55,4 +55,16 @@ const handleFieldChange = (that, e, callback) => {
     that.setState({ fields: fields }, callback)
 }
 
-module.exports = { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, handleFieldChange, bytesToSize, capitalizeFirstLetter }
+const getHistoryStatusTranslationKey = (moduleName, history) => {
+    return `${moduleName}:${moduleName}.${history.status === 'SENT' && history.flux !== 'TRANSMISSION_ACTE' && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
+}
+
+module.exports = {
+    checkStatus,
+    fetchWithAuthzHandling,
+    handleFieldCheckboxChange,
+    handleFieldChange,
+    bytesToSize,
+    capitalizeFirstLetter,
+    getHistoryStatusTranslationKey
+}

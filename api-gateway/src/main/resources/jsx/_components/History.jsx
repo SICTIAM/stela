@@ -5,6 +5,8 @@ import renderIf from 'render-if'
 import moment from 'moment'
 import { Feed, Segment } from 'semantic-ui-react'
 
+import { getHistoryStatusTranslationKey } from '../_util/utils'
+
 class History extends Component {
     static contextTypes = {
         t: PropTypes.func
@@ -26,7 +28,9 @@ class History extends Component {
                 <Feed.Label icon='check' />
                 <Feed.Content>
                     <Feed.Date>{moment(status.date).format(`DD/MM/YYYY ${t('api-gateway:at')} HH:mm`)}</Feed.Date>
-                    <Feed.Summary>{t(`${moduleName}:${moduleName}.status.${status.status}`)}</Feed.Summary>
+                    <Feed.Summary>
+                        {t(getHistoryStatusTranslationKey(moduleName, status))}
+                    </Feed.Summary>
                     {renderIf(status.message)(
                         <Feed.Extra>{status.message}</Feed.Extra>
                     )}

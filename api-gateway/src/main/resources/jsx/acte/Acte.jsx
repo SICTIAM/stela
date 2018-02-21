@@ -5,12 +5,16 @@ import renderIf from 'render-if'
 import moment from 'moment'
 import { Grid, Segment, List, Checkbox, Label, Dropdown, Button, Popup } from 'semantic-ui-react'
 
+import CourrierSimple from './CourrierSimple'
+import Defere from './Defere'
+import LettreObservation from './LettreObservation'
+import DemandePiecesComplementaires from './DemandePiecesComplementaires'
 import DraggablePosition from '../_components/DraggablePosition'
 import { Field, Page } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
 import { anomalies } from '../_util/constants'
 import ActeCancelButton from './ActeCancelButton'
 
@@ -27,6 +31,10 @@ class Acte extends Component {
                 acteHistories: []
             },
             acteACK: false,
+            lastMetierHistory: {
+                status: '',
+                flux: ''
+            },
             stampPosition: {
                 x: 10,
                 y: 10
@@ -60,7 +68,7 @@ class Acte extends Component {
     }
     render() {
         const { t } = this.context
-        const { acteACK } = this.state.acteUI
+        const { acteACK, lastMetierHistory } = this.state.acteUI
         const acteFetched = renderIf(this.state.acteFetched)
         const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
@@ -90,36 +98,55 @@ class Acte extends Component {
             </div >
         )
         // TODO: Find a way to have a LEFT submenu instead of the popup
+        const isCourrierSimple = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.flux === 'COURRIER_SIMPLE')
+        const isDefere = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEFERE_RECEIVED')
+        const isLettreObservation = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'LETTRE_OBSERVATION_RECEIVED')
+        const isDemandePiecesComplementaires = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED')
         return (
             <Page title={acte.objet}>
                 {acteFetched(
                     <div>
                         <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
+
+                        {isDefere &&
+                            <Defere acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                        }
+                        {isDemandePiecesComplementaires &&
+                            <DemandePiecesComplementaires acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                        }
+                        {isLettreObservation &&
+                            <LettreObservation acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                        }
+                        {isCourrierSimple &&
+                            <CourrierSimple acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                        }
+
                         <Segment>
-                            <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`acte.status.${lastHistory.status}`)}</Label>
+                            <Label className='labelStatus' color={lastMetierHistory ? this.getStatusColor(lastMetierHistory.status) : 'blue'} ribbon>
+                                {lastMetierHistory && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
+                            </Label>
                             <div style={{ textAlign: 'right' }}>
-                                
-                                    <Dropdown basic trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
-                                        <Dropdown.Menu>
-                                            <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
-                                                {t('acte.page.download_original')}
+                                <Dropdown basic trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
+                                    <Dropdown.Menu>
+                                        <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
+                                            {t('acte.page.download_original')}
+                                        </a>
+
+                                        {(acteACK) &&
+                                            <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
+                                                {t('acte.page.download_justificative')}
                                             </a>
-                                            
-                                            {(acteACK) &&
-                                                <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
-                                                    {t('acte.page.download_justificative')}
-                                                </a>    
-                                            }
-                                            {(acteACK) &&
-                                                <Dropdown.Item>
-                                                    <Popup content={stampPosition} on='click' position='left center'
-                                                        trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
-                                                    />
-                                                </Dropdown.Item>
-                                            }
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                
+                                        }
+                                        {(acteACK) &&
+                                            <Dropdown.Item>
+                                                <Popup content={stampPosition} on='click' position='left center'
+                                                    trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
+                                                />
+                                            </Dropdown.Item>
+                                        }
+                                    </Dropdown.Menu>
+                                </Dropdown>
+
                                 <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
                             </div>
 

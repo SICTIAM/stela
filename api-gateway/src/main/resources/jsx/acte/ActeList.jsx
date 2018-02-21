@@ -7,7 +7,7 @@ import FileSaver from 'file-saver'
 
 import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page } from '../_components/UI'
 import { natures, status } from '../_util/constants'
@@ -103,7 +103,7 @@ class ActeList extends Component {
         const { t } = this.context
         const statusDisplay = (histories) => {
             const lastHistory = histories[histories.length - 1]
-            return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(`acte.status.${lastHistory.status}`)}</span>
+            return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(getHistoryStatusTranslationKey('acte', lastHistory))}</span>
         }
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
