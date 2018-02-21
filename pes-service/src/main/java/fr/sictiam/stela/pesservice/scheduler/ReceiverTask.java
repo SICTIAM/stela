@@ -55,9 +55,9 @@ public class ReceiverTask {
         FTPClient ftpClient = ftpSession.getClientInstance();
 
         FTPFile[] files = ftpClient.listFiles();
-
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
+		LOGGER.debug("file RECEIVED : " + ftpFile.getName());
                 InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                 if (ftpFile.getName().contains("ACK")) {
                     readACK(inputStream, ftpFile.getName());

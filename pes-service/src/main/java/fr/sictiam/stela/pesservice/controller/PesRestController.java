@@ -102,7 +102,7 @@ public class PesRestController {
             throws PesCreationException {
         Pattern pattern = Pattern.compile(fileNamePattern);
         Matcher matcher = pattern.matcher(file.getOriginalFilename());
-        if (matcher.matches()) {
+        if (matcher.matches()||file.getOriginalFilename().contains("depense")) {
             PesAller result = pesAllerService.createFromJson(currentProfileUuid, currentLocalAuthUuid, pesAllerJson,
                     file);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
