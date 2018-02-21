@@ -70,6 +70,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        classificationAsked: {
+            title: 'notifications.acte.admin.title',
+            message: 'notifications.acte.admin.local_authority.classificationAsked',
+            level: 'success',
+            position: 'br'
+        },
         moduleUpdated: {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.admin_module.update.success',

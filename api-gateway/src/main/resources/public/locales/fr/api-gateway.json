@@ -126,6 +126,7 @@
             "admin": {
                 "title": "Admin module Acte",
                 "local_authority": {
+                    "classificationAsked": "Demande de classfication envoyée",
                     "update": {
                         "success": "La mise à jour de la collectivité a bien été prise en compte"
                     }

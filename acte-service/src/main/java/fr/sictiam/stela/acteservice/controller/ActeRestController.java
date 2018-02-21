@@ -55,6 +55,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -103,9 +104,20 @@ public class ActeRestController {
         return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
     }
 
-    @GetMapping("/classif/current")
-    public void askCurrentClassif(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid));
+    @PostMapping("/ask-classification/current")
+    public ResponseEntity askCurrentClassification(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        return new ResponseEntity(acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
+    }
+
+    @PostMapping("/ask-classification/{uuid}")
+    public ResponseEntity askClassificationByUuid(@PathVariable String uuid) {
+        return new ResponseEntity(acteService.askNomenclature(localAuthorityService.getByUuid(uuid)));
+    }
+
+    @PostMapping("/ask-classification/all")
+    public ResponseEntity askAllClassification() {
+        CompletableFuture.runAsync(acteService::askAllNomenclature);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")

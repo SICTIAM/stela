@@ -102,7 +102,9 @@
         "local_authority_settings": {
           "title": "Paramétrage des collectivités",
           "general_informations": "Informations générales",
-          "MIAT_transmission": "Transmission MIAT"
+          "MIAT_transmission": "Transmission MIAT",
+          "askClassification": "Demander une mise à jour",
+          "askClassifications": "Demander la mise à jour des nomenclatures"
         },
         "module_settings": {
           "title": "Paramètres du module Acte",

@@ -1,17 +1,21 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Icon } from 'semantic-ui-react'
+import { Segment, Icon, Button } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
 import Pagination from '../../_components/Pagination'
 import { modules } from '../../_util/constants'
 import { Page } from '../../_components/UI'
+import { notifications } from '../../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthorityList extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        csrfToken: PropTypes.string,
+        csrfTokenHeaderName: PropTypes.string,
+        t: PropTypes.func,
+        _addNotification: PropTypes.func
     }
     state = {
         localAuthorities: [],
@@ -36,6 +40,17 @@ class LocalAuthorityList extends Component {
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ localAuthorities: json.results, totalCount: json.totalCount }))
+    }
+    askAllClassificationUpdate = () => {
+        const url = '/api/acte/ask-classification/all'
+        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+            .then(checkStatus)
+            .then(() => this.context._addNotification(notifications.admin.classificationAsked))
+            .catch((response) => {
+                response.json().then(json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                })
+            })
     }
     sort = (clickedColumn) => {
         const { column, direction } = this.state
@@ -80,6 +95,11 @@ class LocalAuthorityList extends Component {
         return (
             <Page title={t('admin.modules.local_authority_settings')}>
                 <Segment>
+                    <div style={{ textAlign: 'right', marginBottom: '1em' }}>
+                        <Button basic primary onClick={this.askAllClassificationUpdate}>
+                            {t('acte:admin.modules.acte.local_authority_settings.askClassifications')}
+                        </Button>
+                    </div>
                     <StelaTable
                         data={this.state.localAuthorities}
                         metaData={metaData}
@@ -99,4 +119,4 @@ class LocalAuthorityList extends Component {
     }
 }
 
-export default translate(['api-gateway'])(LocalAuthorityList)
+export default translate(['api-gateway', 'acte'])(LocalAuthorityList)

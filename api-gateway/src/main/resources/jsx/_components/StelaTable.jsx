@@ -190,7 +190,7 @@ export default class StelaTable extends Component {
                                     renderIf(!undisplayedColumnsProperties.includes(metaData.property))(
                                         <Table.HeaderCell key={index + '-' + metaData.displayName}
                                             sorted={column === metaData.property ? direction : null}
-                                            onClick={metaData.sortable && this.handleSort(metaData.property)}>
+                                            onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
                                             {metaData.displayName}
                                         </Table.HeaderCell>
                                     )

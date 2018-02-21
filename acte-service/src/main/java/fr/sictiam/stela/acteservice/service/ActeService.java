@@ -480,6 +480,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
     }
 
+    public void askAllNomenclature() {
+        List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
+        localAuthorities.forEach(this::askNomenclature);
+    }
+
     public HttpStatus askNomenclature(LocalAuthority localAuthority) {
         Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority);
         try {
