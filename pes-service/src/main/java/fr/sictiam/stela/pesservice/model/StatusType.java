@@ -3,6 +3,8 @@ package fr.sictiam.stela.pesservice.model;
 public enum StatusType {
     CREATED("CREATED"),
     PENDING_SIGNATURE("PENDING_SIGNATURE"),
+    SIGNATURE_INVALID("SIGNATURE_INVALID"),
+    SIGNATURE_MISSING("SIGNATURE_MISSING"),
     PENDING_SEND("PENDING_SEND"),
     SENT("SENT"),
     NOT_SENT("NOT_SENT"),

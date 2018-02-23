@@ -1,6 +1,17 @@
 package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
+import fr.sictiam.signature.pes.verifier.CertificateProcessor.CertificatInformation1;
+import fr.sictiam.signature.pes.verifier.PesAllerAnalyser;
+import fr.sictiam.signature.pes.verifier.PesAllerAnalyser.InvalidPesAllerFileException;
+import fr.sictiam.signature.pes.verifier.SignatureValidation;
+import fr.sictiam.signature.pes.verifier.SignatureValidationError;
+import fr.sictiam.signature.pes.verifier.SignatureVerifierResult;
+import fr.sictiam.signature.pes.verifier.SimplePesInformation;
+import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1;
+import fr.sictiam.signature.pes.verifier.XadesInfoProcessor.XadesInfoProcessResult1;
+import fr.sictiam.signature.utils.DateUtils;
 import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.SesileConfiguration;
@@ -27,14 +38,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Element;
 
 import javax.validation.constraints.NotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,11 +70,14 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private final SesileConfigurationRepository sesileConfigurationRepository;
 
+    private final LocalesService localesService;
+
     public SesileService(PesAllerService pesService, ExternalRestService externalRestService,
-            SesileConfigurationRepository sesileConfigurationRepository) {
+            SesileConfigurationRepository sesileConfigurationRepository, LocalesService localesService) {
         this.pesService = pesService;
         this.externalRestService = externalRestService;
         this.sesileConfigurationRepository = sesileConfigurationRepository;
+        this.localesService = localesService;
     }
 
     public SesileConfiguration createOrUpdate(SesileConfiguration sesileConfiguration) {
@@ -102,12 +121,261 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     .orElseThrow(ProfileNotConfiguredForSesileException::new);
             if (pes.getSesileDocumentId() != null
                     && checkDocumentSigned(sesileConfiguration, pes.getSesileDocumentId())) {
-                pes.getAttachment().setFile(getDocumentBody(sesileConfiguration, pes.getSesileDocumentId()));
-                pes.setSigned(true);
+
+                byte[] file = getDocumentBody(sesileConfiguration, pes.getSesileDocumentId());
+                StatusType status = StatusType.PENDING_SEND;
+                String errorMessage = "";
+                try {
+                    SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
+                    if (isSigned(simplePesInformation)) {
+                        SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
+                        if (!signatureValidation.isValid()) {
+                            status = StatusType.SIGNATURE_INVALID;
+                            errorMessage = signatureValidation
+                                    .getSignatureValidationErrors().stream().map(error -> localesService
+                                            .getMessage("fr", "pes", "pes.signature_errors." + error.name()))
+                                    .collect(Collectors.joining("\n"));
+                        }
+                    } else {
+                        status = StatusType.SIGNATURE_MISSING;
+                    }
+                } catch (InvalidPesAllerFileException e) {
+                    LOGGER.error(e.getMessage());
+                }
+                pes.getAttachment().setFile(file);
+
+                pes.setSigned(status.equals(StatusType.PENDING_SEND));
                 pesService.save(pes);
-                pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
+                pesService.updateStatus(pes.getUuid(), status, errorMessage);
             }
         });
+    }
+
+    public SimplePesInformation computeSimplePesInformation(byte[] file) throws InvalidPesAllerFileException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(file);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        PesAllerAnalyser pesAllerAnalyser = new PesAllerAnalyser(bais, stream);
+
+        pesAllerAnalyser.setDoSchemaValidation(true);
+        pesAllerAnalyser.computeSimpleInformation();
+        return pesAllerAnalyser.getSimplePesInformation();
+    }
+
+    public boolean isSigned(SimplePesInformation simplePesInformation) {
+        return simplePesInformation.isSigned();
+    }
+
+    public SignatureValidation isValidSignature(SimplePesInformation simplePesInformation)
+            throws InvalidPesAllerFileException {
+        PesAllerAnalyser pesAllerAnalyser = new PesAllerAnalyser(simplePesInformation.getPesSourceFile());
+        pesAllerAnalyser.computeSignaturesVerificationResults();
+        pesAllerAnalyser.computeSignaturesTypeVerification();
+
+        SignatureValidation signatureValidation = new SignatureValidation();
+        List<SignatureValidationError> signatureValidationErrors = new ArrayList<>();
+        signatureValidation.setSignatureValidationErrors(signatureValidationErrors);
+        signatureValidation.setValid(true);
+        if ((pesAllerAnalyser.isDoSchemaValidation()) && (!pesAllerAnalyser.isSchemaOK())) {
+            signatureValidation.setValid(false);
+            signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.INVALID_SCHEMA);
+        }
+        if (!signatureValidation.isValid()) {
+            return signatureValidation;
+        }
+
+        for (Element element : simplePesInformation.getSignatureElements()) {
+            SignatureVerifierResult verificationResult = pesAllerAnalyser.getSignaturesVerificationResults()
+                    .get(element);
+            if ((!verificationResult.isSignatureGlobalePresente())
+                    && (verificationResult.getListeBordereauxNonSignes() != null)) {
+                signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.NOT_SIGNED_CONTENT);
+            }
+            if (verificationResult.getUnverifiableSignatureException() != null) {
+                signatureValidationErrors.add(SignatureValidationError.UNVERIFIABLE_SIGNATURE);
+            } else {
+                int verificationResultHash = verificationResult.hashCode();
+
+                XadesInfoProcessResult1 xadesInfoProcessResult = verificationResult.getXadesInfoProcessResult();
+                List<XMLDsigReference1> listRef = verificationResult.getSignatureAndRefsVerificationResult()
+                        .getReferencesInfo();
+
+                boolean isSomeSignedPropertyReference = false;
+                for (XMLDsigReference1 ref : listRef) {
+                    if (ref.isSignedPropertiesReferenceLookup(simplePesInformation.getPesDocument())) {
+                        isSomeSignedPropertyReference = true;
+                    }
+                }
+
+                boolean signatureVerifiedOk = verificationResult.getSignatureAndRefsVerificationResult()
+                        .isSignatureVerified();
+
+                boolean certificatProcessOk = verificationResult.getCertificateProcessException() == null;
+                boolean certificatHashOk = (xadesInfoProcessResult.getSigCertExpectedHash() == null)
+                        || (xadesInfoProcessResult.getSigCertExpectedHash()
+                                .equals(xadesInfoProcessResult.getSigCertcalculatedHash()));
+
+                boolean mainC14Ok = verificationResult.getSignatureAndRefsVerificationResult().isMainC14Accepted();
+                boolean allrefsC14Ok = verificationResult.getSignatureAndRefsVerificationResult()
+                        .isAllrefsC14Accepted();
+
+                boolean certificateConfianceOk = false;
+                CertificatInformation1 certificatInformation = null;
+                if (certificatProcessOk) {
+                    certificatInformation = verificationResult.getCertificatInformation();
+                    certificateConfianceOk = (certificatInformation.getValidatedCertPath() != null)
+                            && (!certificatInformation.getValidatedCertPath().isEmpty());
+                }
+
+                boolean certificatSerialNumberOk = (xadesInfoProcessResult.getSigCertExpectedSerialNumber() == null)
+                        || (xadesInfoProcessResult.getSigCertExpectedSerialNumber()
+                                .equals(xadesInfoProcessResult.getSigCertSerialNumber()));
+                boolean certificateIssuerOk = (xadesInfoProcessResult.getSigCertExpectedIssuerName() == null)
+                        || (xadesInfoProcessResult.getSigCertExpectedIssuerName().replaceAll(" ", "")
+                                .equals(xadesInfoProcessResult.getSigCertIssuerName().replaceAll(" ", "")));
+                boolean certificatdigitalSignatureOk = certificatInformation.getSigningCertificate()
+                        .getKeyUsage() != null ? certificatInformation.getSigningCertificate().getKeyUsage()[1] : false;
+                boolean certificatChainOk = certificatInformation.isSignCertAuthorized();
+                boolean certificatChainAutoriseOk = certificatInformation.isAuthorizedCertPath();
+
+                if (!certificateIssuerOk) {
+                    certificateIssuerOk = (xadesInfoProcessResult.getSigCertExpectedIssuerName() == null)
+                            || (xadesInfoProcessResult.getSigCertExpectedIssuerName().replaceAll(" ", "")
+                                    .equals(xadesInfoProcessResult.getSigCertIssuerNameRFC2253().replaceAll(" ", "")));
+                }
+
+                boolean certificatBasicConstraintsCritical = certificatInformation.isBasicConstraintCritical();
+
+                boolean xadesProcessOk = verificationResult.getXadesExtractionException() == null;
+                boolean xadesSigPolicyHashOk = (xadesInfoProcessResult.getSigExpectedSecurityPolicyIdHash() == null)
+                        || (xadesInfoProcessResult.getSigSecurityPolicyIdHash() == null)
+                        || (xadesInfoProcessResult.getSigExpectedSecurityPolicyIdHash()
+                                .equals(xadesInfoProcessResult.getSigSecurityPolicyIdHash()));
+                boolean problemRef = false;
+                boolean problemSignedPropertyRef = false;
+                for (XMLDsigReference1 ref : listRef) {
+                    if (!ref.isVerified()) {
+                        problemRef = true;
+                    }
+
+                    if (ref.isSignedPropertiesReferenceLookup(simplePesInformation.getPesDocument())) {
+                        isSomeSignedPropertyReference = true;
+                        if (!ref.isVerified()) {
+                            problemSignedPropertyRef = true;
+                        }
+                    }
+                }
+
+                if (!((signatureVerifiedOk) && (isSomeSignedPropertyReference) && (certificatProcessOk)
+                        && (certificatSerialNumberOk) && (certificateIssuerOk) && (certificateConfianceOk)
+                        && ((certificatdigitalSignatureOk) || (!certificatBasicConstraintsCritical))
+                        && (certificatHashOk) && (certificatChainOk) && (certificatChainAutoriseOk) && (mainC14Ok)
+                        && (allrefsC14Ok))) {
+                    signatureValidation.setValid(false);
+                    signatureValidation.getSignatureValidationErrors()
+                            .add(SignatureValidationError.SIGNATURE_CONTROL_ERRORS);
+                }
+
+                if (certificatProcessOk) {
+                    if ((certificateConfianceOk)
+                            && ((certificatdigitalSignatureOk) || (!certificatBasicConstraintsCritical))
+                            && (certificatChainOk) && (certificatChainAutoriseOk)) {
+                        if ((!certificatdigitalSignatureOk) && (!certificatBasicConstraintsCritical)) {
+                            signatureValidation.getSignatureValidationErrors()
+                                    .add(SignatureValidationError.WRONG_CERTIFICATE);
+                        }
+                    } else {
+                        signatureValidation.getSignatureValidationErrors()
+                                .add(SignatureValidationError.UNTRUSTED_CERTIFICATE);
+                    }
+
+                } else {
+                    signatureValidation.getSignatureValidationErrors()
+                            .add(SignatureValidationError.CERTIFICAT_RECOGNITION_ERROR);
+
+                }
+
+                if ((!mainC14Ok) || (!allrefsC14Ok)) {
+                    signatureValidation.getSignatureValidationErrors()
+                            .add(SignatureValidationError.RECOMMENDATION_NOT_RESPECTED);
+
+                }
+
+                if (xadesProcessOk) {
+                    if (!isSomeSignedPropertyReference) {
+                        signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.XADES_UNSIGNED);
+                    }
+
+                    if (problemSignedPropertyRef) {
+                        signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.XADES_UPDATED);
+                    }
+
+                    if (!((xadesSigPolicyHashOk) && (certificatSerialNumberOk) && (certificateIssuerOk)
+                            && (certificatHashOk))) {
+                        signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.XADES_ERROR);
+                    }
+
+                    Date date = verificationResult.getXadesInfo().getSigningTime().getTime();
+                    String tmp;
+                    if (date != null) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        tmp = sdf.format(date);
+                    } else {
+                        tmp = null;
+                    }
+
+                    if (tmp != null) {
+                        if (!DateUtils.isStrictUtcFormat(verificationResult.getXadesInfo().getSigningTimeAsString())) {
+                            signatureValidation.getSignatureValidationErrors()
+                                    .add(SignatureValidationError.DATE_FORMAT_ERROR);
+                        }
+                    } else {
+                        signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.DATE_BLANK);
+                    }
+
+                    if (verificationResult.getXadesInfo().getSigClaimedRole() == null) {
+                        signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.ROLE_BLANK);
+
+                    }
+
+                    String tmp1 = verificationResult.getXadesInfo().getSigPolicyId();
+
+                    SigningPolicy1 signingPolicy = verificationResult.getXadesInfoProcessResult().getSigningPolicy();
+                    if (signingPolicy != null) {
+
+                        if ((tmp1 == null) || (tmp1.isEmpty())) {
+                            signatureValidation.getSignatureValidationErrors()
+                                    .add(SignatureValidationError.POLICY_ID_MISSING);
+
+                        }
+
+                        String hv = verificationResult.getXadesInfo().getSigPolicyHashDigestValue();
+                        if (hv == null) {
+                            signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.NO_POLICY);
+
+                        }
+
+                        String spq = verificationResult.getXadesInfo().getSigPolicyQualifier();
+                        if (spq == null) {
+                            signatureValidation.getSignatureValidationErrors()
+                                    .add(SignatureValidationError.POLICY_QUALIFIER_MISSING);
+                        }
+
+                    }
+                } else {
+                    if (verificationResult.getXadesExtractionException() != null) {
+
+                        signatureValidation.getSignatureValidationErrors()
+                                .add(SignatureValidationError.XADES_EXCEPTION);
+
+                    }
+                    if (!isSomeSignedPropertyReference) {
+                        signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.XADES_UNSIGNED);
+                    }
+                }
+
+            }
+        }
+        return signatureValidation;
     }
 
     public ResponseEntity<Document> addFileToclasseur(SesileConfiguration sesileConfiguration, byte[] file,
@@ -201,9 +469,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
-            // TODO remove
-            boolean sendtest = true;
-            if (sendtest || pes.isPj()) {
+            // TODO add this attribute to localAuthority
+            boolean sesileSubscription = true;
+            if (!sesileSubscription || pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
             } else {
                 submitToSignature(pes);

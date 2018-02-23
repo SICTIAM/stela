@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 
 public class SesileTest {
 
-    SesileService sesileService = new SesileService(null, null, null);
+    SesileService sesileService = new SesileService(null, null, null, null);
 
     SesileConfiguration sesileConfiguration;
 
