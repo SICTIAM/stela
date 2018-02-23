@@ -82,6 +82,7 @@ services:
        - discovery
        - postgresql
        - rabbitmq
+       - clamav
       environment:
        - "SPRING_PROFILES_ACTIVE=integration"  
 
