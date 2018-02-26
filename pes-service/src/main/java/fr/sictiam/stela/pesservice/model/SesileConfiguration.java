@@ -17,17 +17,7 @@ public class SesileConfiguration {
 
     private int type;
 
-    private String token;
-
-    private String secret;
-
     public SesileConfiguration() {
-    }
-
-    public SesileConfiguration(String token, String secret) {
-        super();
-        this.token = token;
-        this.secret = secret;
     }
 
     public String getProfileUuid() {
@@ -69,21 +59,4 @@ public class SesileConfiguration {
     public void setType(Integer type) {
         this.type = type;
     }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
 }

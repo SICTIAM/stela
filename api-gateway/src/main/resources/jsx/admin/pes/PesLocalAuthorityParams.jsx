@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon, Dropdown } from 'semantic-ui-react'
+import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
@@ -21,6 +21,9 @@ class PesLocalAuthorityParams extends Component {
             name: '',
             siren: '',
             serverCode: '',
+            token: '',
+            secret: '',
+            sesileSubscription: false,
             sirens: []
         },
         serverCodes: [],
@@ -71,6 +74,16 @@ class PesLocalAuthorityParams extends Component {
         fields.serverCode = value
         this.setState({ fields: fields })
     }
+    sesileSubscriptionChange = ( checked ) => {
+        const fields = this.state.fields
+        fields.sesileSubscription = checked
+        this.setState({fields: fields})
+    }
+    sesileConfigurationChange = (e, {id, value }) => {
+        const fields = this.state.fields
+        fields[id] = value
+        this.setState({fields: fields})
+    }
     validateSiren = (siren) => {
         const validation = new Validator({ siren: siren.replace(/\s/g, "") }, { siren: 'required|digits:9' })
         return validation.passes()
@@ -80,8 +93,9 @@ class PesLocalAuthorityParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
-        const { serverCode, sirens } = this.state.fields
-        const data = JSON.stringify({ serverCode, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
+        const { serverCode, sirens, secret, token, sesileSubscription } = this.state.fields
+
+        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -122,6 +136,29 @@ class PesLocalAuthorityParams extends Component {
                                 className='simpleInput' />
                             <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>{t('api-gateway:form.add')}</Button>
                         </Field>
+                        <Field htmlFor='sesileSubscription' label={t('admin.modules.pes.local_authority_settings.sesile.subscription')}>
+                            <Checkbox toggle id='sesileSubscription'
+                                checked={this.state.fields.sesileSubscription}
+                                onChange={((e, { checked }) => this.sesileSubscriptionChange(checked))} />
+                        </Field>
+                        {(this.state.fields.sesileSubscription) &&
+                            <div>
+                                <Field htmlFor='token' label={t('admin.modules.pes.local_authority_settings.sesile.token')}>
+                                    <Input id='token' style={{ width: '25em' }}
+                                        placeholder={t('admin.modules.pes.local_authority_settings.sesile.token')}
+                                        value={this.state.fields.token}
+                                        required={this.state.fields.sesileSubscription}
+                                        onChange={this.sesileConfigurationChange} />
+                                </Field>
+                                <Field htmlFor='secret' label={t('admin.modules.pes.local_authority_settings.sesile.secret')}>
+                                    <Input id='secret' style={{ width: '25em' }}
+                                        placeholder={t('admin.modules.pes.local_authority_settings.sesile.secret')}
+                                        value={this.state.fields.secret}
+                                        required={this.state.fields.sesileSubscription}
+                                        onChange={this.sesileConfigurationChange} />
+                                </Field>
+                            </div>
+                        }                   
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary type='submit'>{t('api-gateway:form.update')}</Button>
                         </div>

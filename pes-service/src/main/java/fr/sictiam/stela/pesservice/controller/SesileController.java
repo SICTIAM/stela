@@ -1,7 +1,9 @@
 package fr.sictiam.stela.pesservice.controller;
 
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.SesileConfiguration;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
+import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,21 +20,32 @@ import java.util.List;
 public class SesileController {
 
     private final SesileService sesileService;
+    private final LocalAuthorityService localAuthorityService;
 
-    public SesileController(SesileService sesileService) {
+    public SesileController(SesileService sesileService, LocalAuthorityService localAuthorityService) {
         this.sesileService = sesileService;
+        this.localAuthorityService = localAuthorityService;
     }
 
     @GetMapping("/organisations")
     public List<ServiceOrganisation> getCurrentOrganisations(
-            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) throws Exception {
-        return sesileService.getServiceOrganisations(profileUuid);
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) throws Exception {
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
+        return sesileService.getServiceOrganisations(localAuthority, profileUuid);
     }
 
-    @GetMapping("/organisations/{profileUuid}")
-    public List<ServiceOrganisation> getCurrentOrganisationsByProfileUuid(@PathVariable String profileUuid)
-            throws Exception {
-        return sesileService.getServiceOrganisations(profileUuid);
+    @GetMapping("/organisations/{localAuthUuid}/{profileUuid}")
+    public List<ServiceOrganisation> getCurrentOrganisationsByProfileUuid(@PathVariable String localAuthUuid,
+            @PathVariable String profileUuid) throws Exception {
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthUuid);
+        return sesileService.getServiceOrganisations(localAuthority, profileUuid);
+    }
+
+    @GetMapping("/subscription/{localAuthUuid}")
+    public Boolean getCurrentOrganisationsByProfileUuid(@PathVariable String localAuthUuid) {
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthUuid);
+        return localAuthority.getSesileSubscription();
     }
 
     @PostMapping("/configuration")

@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.andrewoma.dexx.collection.Pair;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
 import fr.sictiam.signature.pes.verifier.CertificateProcessor.CertificatInformation1;
 import fr.sictiam.signature.pes.verifier.PesAllerAnalyser;
@@ -13,6 +14,7 @@ import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.
 import fr.sictiam.signature.pes.verifier.XadesInfoProcessor.XadesInfoProcessResult1;
 import fr.sictiam.signature.utils.DateUtils;
 import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.SesileConfiguration;
 import fr.sictiam.stela.pesservice.model.StatusType;
@@ -23,7 +25,6 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.exceptions.ProfileNotConfiguredForSesileException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,12 +99,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             LocalDate localDate = LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            ResponseEntity<Classeur> classeur = postClasseur(sesileConfiguration,
+            ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
                     new ClasseurRequest(pes.getObjet(), "", localDate.format(dateTimeFormatter),
                             sesileConfiguration.getType(), sesileConfiguration.getServiceOrganisationNumber(),
                             sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));
 
-            Document document = addFileToclasseur(sesileConfiguration, pes.getAttachment().getFile(),
+            Document document = addFileToclasseur(pes.getLocalAuthority(), pes.getAttachment().getFile(),
                     pes.getAttachment().getFilename(), classeur.getBody().getId()).getBody();
 
             pes.setSesileDocumentId(document.getId());
@@ -117,31 +118,15 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public void checkPesSigned() {
         List<PesAller> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
-            SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
-                    .orElseThrow(ProfileNotConfiguredForSesileException::new);
-            if (pes.getSesileDocumentId() != null
-                    && checkDocumentSigned(sesileConfiguration, pes.getSesileDocumentId())) {
 
-                byte[] file = getDocumentBody(sesileConfiguration, pes.getSesileDocumentId());
-                StatusType status = StatusType.PENDING_SEND;
-                String errorMessage = "";
-                try {
-                    SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
-                    if (isSigned(simplePesInformation)) {
-                        SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
-                        if (!signatureValidation.isValid()) {
-                            status = StatusType.SIGNATURE_INVALID;
-                            errorMessage = signatureValidation
-                                    .getSignatureValidationErrors().stream().map(error -> localesService
-                                            .getMessage("fr", "pes", "pes.signature_errors." + error.name()))
-                                    .collect(Collectors.joining("\n"));
-                        }
-                    } else {
-                        status = StatusType.SIGNATURE_MISSING;
-                    }
-                } catch (InvalidPesAllerFileException e) {
-                    LOGGER.error(e.getMessage());
-                }
+            if (pes.getSesileDocumentId() != null
+                    && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
+
+                byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
+                Pair<StatusType, String> signatureResult = getSignatureStatus(file);
+                StatusType status = signatureResult.component1();
+                String errorMessage = signatureResult.component2();
+
                 pes.getAttachment().setFile(file);
 
                 pes.setSigned(status.equals(StatusType.PENDING_SEND));
@@ -378,8 +363,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return signatureValidation;
     }
 
-    public ResponseEntity<Document> addFileToclasseur(SesileConfiguration sesileConfiguration, byte[] file,
-            String fileName, int classeur) {
+    public ResponseEntity<Document> addFileToclasseur(LocalAuthority localauthority, byte[] file, String fileName,
+            int classeur) {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
 
@@ -395,7 +380,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         map.add("file", contentsAsResource);
         HttpHeaders headers = new HttpHeaders();
-        headers.addAll(getHeaders(sesileConfiguration));
+        headers.addAll(getHeaders(localauthority));
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
@@ -403,25 +388,22 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 requestEntity, Document.class, classeur);
     }
 
-    public MultiValueMap<String, String> getHeaders(SesileConfiguration sesileConfiguration) {
+    public MultiValueMap<String, String> getHeaders(LocalAuthority localAuthority) {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-        headers.add("token", sesileConfiguration.getToken());
-        headers.add("secret", sesileConfiguration.getSecret());
+        headers.add("token", localAuthority.getToken());
+        headers.add("secret", localAuthority.getSecret());
         return headers;
     }
 
-    public List<ServiceOrganisation> getServiceOrganisations(String profileUuid) throws IOException {
-        SesileConfiguration sesileConfiguration = getConfigurationByUuid(profileUuid);
-        if (StringUtils.isBlank(sesileConfiguration.getToken()))
-            return new ArrayList<>();
+    public List<ServiceOrganisation> getServiceOrganisations(LocalAuthority localauthority, String profileUuid)
+            throws IOException {
         JsonNode profile = externalRestService.getProfile(profileUuid);
         String email = profile.get("agent").get("email").asText();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
-                getHeaders(sesileConfiguration));
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
         List<ServiceOrganisation> organisations = Arrays
                 .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
                         ServiceOrganisation[].class, email).getBody());
-        List<ClasseurType> types = Arrays.asList(getTypes(sesileConfiguration).getBody());
+        List<ClasseurType> types = Arrays.asList(getTypes(localauthority).getBody());
         organisations.forEach(organisation -> {
             organisation.setTypes(types.stream().filter(type -> organisation.getType_classeur().contains(type.getId()))
                     .collect(Collectors.toList()));
@@ -430,49 +412,73 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     }
 
-    public ResponseEntity<Classeur> checkClasseurStatus(SesileConfiguration sesileConfiguration, int classeur) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
-                getHeaders(sesileConfiguration));
+    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, int classeur) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         return restTemplate.exchange(sesileUrl + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                 classeur);
     }
 
-    public boolean checkDocumentSigned(SesileConfiguration sesileConfiguration, int document) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
-                getHeaders(sesileConfiguration));
+    public boolean checkDocumentSigned(LocalAuthority localAuthority, int document) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         return restTemplate
                 .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
                 .getBody().isSigned();
     }
 
-    public byte[] getDocumentBody(SesileConfiguration sesileConfiguration, int document) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
-                getHeaders(sesileConfiguration));
+    public byte[] getDocumentBody(LocalAuthority localAuthority, int document) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
 
         return restTemplate.exchange(sesileUrl + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
                 String.class, document).getBody().getBytes();
     }
 
-    public ResponseEntity<Classeur> postClasseur(SesileConfiguration sesileConfiguration, ClasseurRequest classeur) {
-        HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(sesileConfiguration));
+    public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
+        HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(localAuthority));
         return restTemplate.exchange(sesileUrl + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
     }
 
-    public ResponseEntity<ClasseurType[]> getTypes(SesileConfiguration sesileConfiguration) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
-                getHeaders(sesileConfiguration));
+    public ResponseEntity<ClasseurType[]> getTypes(LocalAuthority localAuthority) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         return restTemplate.exchange(sesileUrl + "/api/classeur/types/", HttpMethod.GET, requestEntity,
                 ClasseurType[].class);
+    }
+
+    public Pair<StatusType, String> getSignatureStatus(byte[] file) {
+        String errorMessage = "";
+        StatusType status = StatusType.PENDING_SEND;
+        try {
+            SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
+
+            if (isSigned(simplePesInformation)) {
+                SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
+                if (!signatureValidation.isValid()) {
+                    status = StatusType.SIGNATURE_INVALID;
+                    errorMessage = signatureValidation.getSignatureValidationErrors().stream().map(
+                            error -> localesService.getMessage("fr", "pes", "pes.signature_errors." + error.name()))
+                            .collect(Collectors.joining("\n"));
+                }
+            } else {
+                status = StatusType.SIGNATURE_MISSING;
+            }
+        } catch (InvalidPesAllerFileException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return new Pair<StatusType, String>(status, errorMessage);
+
     }
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
-            // TODO add this attribute to localAuthority
-            boolean sesileSubscription = true;
-            if (!sesileSubscription || pes.isPj()) {
+            boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription();
+            if (pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
+            } else if (!sesileSubscription) {
+                Pair<StatusType, String> signatureResult = getSignatureStatus(pes.getAttachment().getFile());
+                pes.setSigned(signatureResult.component1().equals(StatusType.PENDING_SEND));
+                pesService.save(pes);
+                pesService.updateStatus(pes.getUuid(), signatureResult.component1(), signatureResult.component2());
             } else {
                 submitToSignature(pes);
             }

@@ -11,8 +11,10 @@
       "FILE_ERROR": "Erreur sur le fichier PES",
       "NOTIFICATION_SENT": "Notification envoyée",
       "RESENT": "Renvoyé",
-      "PENDING_SIGNATURE": "en attente de signature",
-      "PENDING_SEND": "en attente d'envoi"
+      "PENDING_SIGNATURE": "En attente de signature",
+      "PENDING_SEND": "En attente d'envoi",
+      "SIGNATURE_INVALID": "Signature invalide",
+      "SIGNATURE_MISSING": "Signature manquante"
     },
     "fields": {
       "objet": "Objet",
@@ -73,7 +75,12 @@
           "HELIOS_transmission": "Transmission Helios",
           "serverCode": "Code serveur préfecture",
           "sirens": "Liste des SIRENs autorisés",
-          "no_siren": "Aucun SIREN"
+          "no_siren": "Aucun SIREN",
+          "sesile":  {
+            "subscription": "Abonnement à Sesile",
+            "secret": "Secret",
+            "token": "Token"
+          }
         },
         "module_settings": {
           "title": "Paramètres du module Helios",

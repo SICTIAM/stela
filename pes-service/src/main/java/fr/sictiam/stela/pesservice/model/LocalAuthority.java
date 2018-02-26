@@ -1,6 +1,14 @@
 package fr.sictiam.stela.pesservice.model;
 
-import javax.persistence.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 
 import java.util.List;
 
@@ -14,6 +22,9 @@ public class LocalAuthority {
     @Enumerated(EnumType.STRING)
     private ServerCode serverCode;
     private Boolean active;
+    private Boolean sesileSubscription;
+    private String token;
+    private String secret;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "sirens", joinColumns = @JoinColumn(name = "local_authority_uuid"))
@@ -74,6 +85,30 @@ public class LocalAuthority {
 
     public void setSirens(List<String> sirens) {
         this.sirens = sirens;
+    }
+
+    public Boolean getSesileSubscription() {
+        return sesileSubscription;
+    }
+
+    public void setSesileSubscription(Boolean sesileSubscription) {
+        this.sesileSubscription = sesileSubscription;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     @Override

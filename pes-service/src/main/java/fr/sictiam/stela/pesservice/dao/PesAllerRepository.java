@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface PesAllerRepository extends JpaRepository<PesAller, String> {
     Optional<PesAller> findByFileName(String fileName);
 
-    List<PesAller> findByPjFalseAndSignedFalse();
+    List<PesAller> findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrue();
 }
