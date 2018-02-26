@@ -24,13 +24,10 @@ public class SesileTest {
 
     SesileService sesileService = new SesileService(null, null, null, null);
 
-    LocalAuthority localAuthority;
+    LocalAuthority localAuthority = new LocalAuthority();
 
     @Before
     public void beforeTests() {
-
-        LocalAuthority localAuthority = new LocalAuthority();
-
         localAuthority.setToken("token_26686e906f40248f284f013e37700091");
         localAuthority.setSecret("secret_52491818dd846ccd4580a16cfd7736dc");
         ReflectionTestUtils.setField(sesileService, "sesileUrl", "https://demo.sesile.fr/");
