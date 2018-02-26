@@ -106,12 +106,14 @@ public class ActeRestController {
 
     @PostMapping("/ask-classification/current")
     public ResponseEntity askCurrentClassification(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        return new ResponseEntity(acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
+        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/ask-classification/{uuid}")
     public ResponseEntity askClassificationByUuid(@PathVariable String uuid) {
-        return new ResponseEntity(acteService.askNomenclature(localAuthorityService.getByUuid(uuid)));
+        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(uuid)));
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/ask-classification/all")

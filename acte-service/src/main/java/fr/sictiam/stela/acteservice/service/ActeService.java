@@ -490,6 +490,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         try {
             return send(attachment.getFile(), attachment.getFilename());
         } catch (Exception e) {
+            LOGGER.error("Error while asking a new classification for localAuthority {}: {}", localAuthority.getUuid(), e);
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
     }
