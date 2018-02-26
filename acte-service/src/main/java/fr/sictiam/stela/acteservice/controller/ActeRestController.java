@@ -55,6 +55,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/acte")
@@ -103,9 +104,22 @@ public class ActeRestController {
         return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
     }
 
-    @GetMapping("/classif/current")
-    public void askCurrentClassif(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid));
+    @PostMapping("/ask-classification/current")
+    public ResponseEntity askCurrentClassification(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/ask-classification/{uuid}")
+    public ResponseEntity askClassificationByUuid(@PathVariable String uuid) {
+        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(uuid)));
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/ask-classification/all")
+    public ResponseEntity askAllClassification() {
+        CompletableFuture.runAsync(acteService::askAllNomenclature);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")

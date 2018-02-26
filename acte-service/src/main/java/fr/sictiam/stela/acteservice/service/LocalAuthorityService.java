@@ -23,7 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,9 +56,7 @@ public class LocalAuthorityService {
     }
 
     public List<LocalAuthority> getAll() {
-        List<LocalAuthority> localAuthorities = localAuthorityRepository.findAll();
-        localAuthorities.sort(Comparator.comparing(LocalAuthority::getName, String.CASE_INSENSITIVE_ORDER));
-        return localAuthorities;
+        return localAuthorityRepository.findAllByActiveTrueOrderByName();
     }
 
     public LocalAuthority getByUuid(String uuid) {

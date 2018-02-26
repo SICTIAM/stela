@@ -480,11 +480,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
     }
 
+    public void askAllNomenclature() {
+        List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
+        localAuthorities.forEach(this::askNomenclature);
+    }
+
     public HttpStatus askNomenclature(LocalAuthority localAuthority) {
         Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority);
         try {
             return send(attachment.getFile(), attachment.getFilename());
         } catch (Exception e) {
+            LOGGER.error("Error while asking a new classification for localAuthority {}: {}", localAuthority.getUuid(), e);
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
     }

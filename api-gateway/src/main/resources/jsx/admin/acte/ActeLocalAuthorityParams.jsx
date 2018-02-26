@@ -4,6 +4,7 @@ import renderIf from 'render-if'
 import { translate } from 'react-i18next'
 import { Checkbox, Form, Button, Segment } from 'semantic-ui-react'
 import Validator from 'validatorjs'
+import moment from 'moment'
 
 import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
@@ -100,7 +101,18 @@ class ActeLocalAuthorityParams extends Component {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
-    cancelSubmit = (event) => event.preventDefault()
+    askClassificationUpdate = (event) => {
+        event.preventDefault()
+        const url = '/api/acte/ask-classification/' + (this.props.uuid || 'current')
+        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+            .then(checkStatus)
+            .then(() => this.context._addNotification(notifications.admin.classificationAsked))
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                })
+            })
+    }
     render() {
         const { t } = this.context
         const localAuthorityFetched = renderIf(this.state.localAuthorityFetched)
@@ -112,7 +124,10 @@ class ActeLocalAuthorityParams extends Component {
 
                         <Form onSubmit={this.submitForm}>
                             <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
-                                <span id="nomenclatureDate">{this.state.constantFields.nomenclatureDate}</span>
+                                <span id="nomenclatureDate">{moment(this.state.constantFields.nomenclatureDate).format('DD/MM/YYYY')}</span>
+                                <Button basic primary style={{ marginLeft: '1em' }} onClick={this.askClassificationUpdate}>
+                                    {t('admin.modules.acte.local_authority_settings.askClassification')}
+                                </Button>
                             </Field>
                             <Field htmlFor="department" label={t('api-gateway:local_authority.department')}>
                                 <InputValidation id='department'
