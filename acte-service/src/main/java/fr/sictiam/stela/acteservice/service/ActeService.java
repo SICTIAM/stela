@@ -364,6 +364,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public ActeHistory getLastMetierHistory(String uuid) {
+        // TODO: Improve later on with status improvements
         List<StatusType> statusOrdered = Arrays.asList(StatusType.CREATED, StatusType.ANTIVIRUS_KO, StatusType.SENT,
                 StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED, StatusType.CANCELLATION_ASKED, StatusType.CANCELLED,
                 StatusType.ARCHIVE_TOO_LARGE, StatusType.FILE_ERROR, StatusType.COURRIER_SIMPLE_RECEIVED,
