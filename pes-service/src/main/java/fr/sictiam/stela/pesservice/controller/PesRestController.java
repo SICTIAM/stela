@@ -70,7 +70,7 @@ public class PesRestController {
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
+            @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
         List<PesAller> pesList = pesAllerService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset,

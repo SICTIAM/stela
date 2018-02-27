@@ -82,7 +82,7 @@ public class ActeRestController {
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
+            @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-Groups") Set<String> groups) {
 
@@ -106,8 +106,10 @@ public class ActeRestController {
     }
 
     @PostMapping("/ask-classification/current")
-    public ResponseEntity askCurrentClassification(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
+    public ResponseEntity askCurrentClassification(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        CompletableFuture
+                .runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -205,7 +207,8 @@ public class ActeRestController {
     }
 
     @PostMapping("/{uuid}/courrier-simple")
-    public ResponseEntity sendReponseCourrierSimple(@PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity sendReponseCourrierSimple(@PathVariable String uuid,
+            @RequestParam("file") MultipartFile file) {
         try {
             acteService.sendReponseCourrierSimple(uuid, file);
         } catch (IOException e) {
@@ -216,7 +219,8 @@ public class ActeRestController {
     }
 
     @PostMapping("/{uuid}/lettre-observation/{reponseOrRejet}")
-    public ResponseEntity sendReponseLettreObservation(@PathVariable String uuid, @PathVariable String reponseOrRejet, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity sendReponseLettreObservation(@PathVariable String uuid, @PathVariable String reponseOrRejet,
+            @RequestParam("file") MultipartFile file) {
         try {
             acteService.sendReponseLettreObservation(uuid, reponseOrRejet, file);
         } catch (IOException e) {
@@ -227,7 +231,8 @@ public class ActeRestController {
     }
 
     @PostMapping("/{uuid}/pieces-complementaires/{reponseOrRejet}")
-    public ResponseEntity sendReponsePiecesComplementaires(@PathVariable String uuid, @PathVariable String reponseOrRejet, @RequestParam("files") MultipartFile[] files) {
+    public ResponseEntity sendReponsePiecesComplementaires(@PathVariable String uuid,
+            @PathVariable String reponseOrRejet, @RequestParam("files") MultipartFile[] files) {
         try {
             acteService.sendReponsePiecesComplementaires(uuid, reponseOrRejet, files);
         } catch (IOException e) {
@@ -348,7 +353,8 @@ public class ActeRestController {
     public ResponseEntity<Set<AttachmentType>> getAttachmentTypesForNature(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable ActeNature acteNature) {
-        return new ResponseEntity<>(localAuthorityService.getAttachmentTypeAvailable(acteNature, currentLocalAuthUuid), HttpStatus.OK);
+        return new ResponseEntity<>(localAuthorityService.getAttachmentTypeAvailable(acteNature, currentLocalAuthUuid),
+                HttpStatus.OK);
     }
 
     /* --------------------------- */
