@@ -6,13 +6,13 @@ import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.oasis_eu.spring.kernel.security.StaticOpenIdCConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
-
-    @Autowired
-    private HttpServletRequest request;
 
     @Value("${application.urlWithSlug}")
     private String applicationUrlWithSlug;
@@ -50,6 +50,11 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
 
     @Override
     public String getCallbackUri() {
-        return applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromRequest(request)) + "/callback";
+        RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
+        if (attribs instanceof NativeWebRequest) {
+            HttpServletRequest request = (HttpServletRequest) ((NativeWebRequest) attribs).getNativeRequest();
+            return applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromRequest(request)) + "/callback";
+        }
+        return null;
     }
 }
