@@ -21,8 +21,7 @@ public class SigningPolicies {
     private SigningPolicies() {
         try {
             Map<String, SigningPolicy1> signingPolicyByCode = new HashMap<>();
-            JarInputStream jarIS = new JarInputStream(
-                    getClass().getResource("/fr/sictiam/signature/pes/signingPolicies.zip").openStream());
+            JarInputStream jarIS = new JarInputStream(getClass().getResource(SIG_POLICY_ZIP_FILE).openStream());
             try {
                 JarEntry entry = null;
                 while ((entry = jarIS.getNextJarEntry()) != null) {
@@ -46,7 +45,6 @@ public class SigningPolicies {
                     signingPolicyByIdentifier.put(signingPolicy.getIdentifier(), signingPolicy);
                 }
             } finally {
-                String signingPolicyFileNameWithoutExtension;
                 jarIS.close();
             }
         } catch (Exception e) {
@@ -63,8 +61,7 @@ public class SigningPolicies {
     }
 
     public InputStream getContentInputStream(String contentZipEntryName) throws IOException {
-        JarInputStream jarIS = new JarInputStream(
-                getClass().getResource("/fr/sictiam/signature/pes/signingPolicies.zip").openStream());
+        JarInputStream jarIS = new JarInputStream(getClass().getResource(SIG_POLICY_ZIP_FILE).openStream());
         JarEntry entry = null;
         while ((entry = jarIS.getNextJarEntry()) != null) {
             if ((!entry.isDirectory()) && (entry.getName().equals(contentZipEntryName))) {

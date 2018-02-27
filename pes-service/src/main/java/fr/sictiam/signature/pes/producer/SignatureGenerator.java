@@ -329,7 +329,7 @@ public class SignatureGenerator {
             String xadprefix, String dsprefix) throws IOException {
         Element sigPolicyHash = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
                 xadprefix + DEUX_POINT + "SigPolicyHash", null, null);
-        List<ElementAttribute1> tmp = new ArrayList();
+        List<ElementAttribute1> tmp = new ArrayList<ElementAttribute1>();
         tmp.add(new ElementAttribute1("Algorithm", signingPolicy.getDigestMethod()));
         Element digestMethodElement = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
                 xadprefix + DEUX_POINT + "DigestMethod", tmp, null);
@@ -338,24 +338,6 @@ public class SignatureGenerator {
 
         Element digestValueElement = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
                 xadprefix + DEUX_POINT + "DigestValue", null, signingPolicy.getDigestValue());
-
-        sigPolicyHash.appendChild(digestValueElement);
-        return sigPolicyHash;
-    }
-
-    private static Element createSigPolicyHashPropertiesNodexad122(Document doc, SigningPolicy1 signingPolicy,
-            String xadprefix, String dsprefix) throws IOException {
-        Element sigPolicyHash = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
-                xadprefix + DEUX_POINT + "SigPolicyHash", null, null);
-        List<ElementAttribute1> tmp = new ArrayList();
-        tmp.add(new ElementAttribute1("Algorithm", signingPolicy.getDigestMethod()));
-        Element digestMethodElement = DomUtils.createElementNS(doc, "http://www.w3.org/2000/09/xmldsig#",
-                dsprefix + DEUX_POINT + "DigestMethod", tmp, null);
-
-        sigPolicyHash.appendChild(digestMethodElement);
-
-        Element digestValueElement = DomUtils.createElementNS(doc, "http://www.w3.org/2000/09/xmldsig#",
-                dsprefix + DEUX_POINT + "DigestValue", null, signingPolicy.getDigestValue());
 
         sigPolicyHash.appendChild(digestValueElement);
         return sigPolicyHash;

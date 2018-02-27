@@ -76,7 +76,6 @@ public class CertificateProcessor {
                     certificatInformation.setCertPathBuilderException(cpbe);
                 }
             } catch (IOException ex) {
-                PKIXBuilderParameters builderParams;
                 throw new UnExpectedException(ex);
             } catch (CertificateException ex) {
                 throw new UnExpectedException(ex);

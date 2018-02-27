@@ -13,9 +13,6 @@ import java.util.Map;
 
 public class DigestUtils {
     private static final Map<String, String> JAVA_DIGESTER_NAME_BY_XML_DIGESTER_NAME = new HashMap<>();
-    private static final String SHA1PROTOCOL = "SHA-1";
-    private static final String SHA256PROTOCOL = "SHA-256";
-    private static final String SHA512PROTOCOL = "SHA-512";
 
     static {
         JAVA_DIGESTER_NAME_BY_XML_DIGESTER_NAME.put("http://www.w3.org/2000/09/xmldsig#sha1", "SHA-1");
