@@ -87,7 +87,7 @@ public class XadesInfoProcessor {
         private String sigExpectedSecurityPolicyIdHash;
         private String sigSecurityPolicyIdHash;
         private SigningPolicy1 signingPolicy;
-        private static Map<String, String> securityAllowedProtocol = new HashMap();
+        private static Map<String, String> securityAllowedProtocol = new HashMap<>();
         public static final String SHA1XMLProtocol = "http://www.w3.org/2000/09/xmldsig#sha1";
         public static final String SHA256XMLProtocol = "http://www.w3.org/2001/04/xmlenc#sha256";
         public static final String SHA512XMLProtocol = "http://www.w3.org/2001/04/xmlenc#sha512";

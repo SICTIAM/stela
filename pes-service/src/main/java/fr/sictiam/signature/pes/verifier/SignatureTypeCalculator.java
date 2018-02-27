@@ -86,12 +86,12 @@ public class SignatureTypeCalculator {
         List<BordereauInfo1> bordereauxList = getSimplePesInformation().getBordereaux();
         Map.Entry[] tab = new Map.Entry[bordereauxList.size()];
         BordereauInfo1 bordereaux;
-        Iterator localIterator1;
+        Iterator<?> localIterator1;
         Map.Entry<Element, SignatureVerifierResult> entry;
         for (int i = 0; i < bordereauxList.size(); i++) {
             bordereaux = bordereauxList.get(i);
             for (localIterator1 = getSignatureVerifierResultMap().entrySet().iterator(); localIterator1.hasNext();) {
-                entry = (Map.Entry) localIterator1.next();
+                entry = (Map.Entry<Element, SignatureVerifierResult>) localIterator1.next();
                 if (entry.getValue().getUnverifiableSignatureException() == null) {
                     for (XMLDsigReference1 reference : entry.getValue().getSignatureAndRefsVerificationResult()
                             .getReferencesInfo()) {
@@ -111,7 +111,7 @@ public class SignatureTypeCalculator {
         for (int j = 0; j < tab.length; j++) {
             if (tab[j] == null) {
                 if (getListeBordereauxNonSignes() == null) {
-                    listeBordereauxNonSignes = new ArrayList();
+                    listeBordereauxNonSignes = new ArrayList<>();
                 }
                 String foundId = bordereauxList.get(j).getId();
                 if ((foundId == null) || (foundId.isEmpty())) {

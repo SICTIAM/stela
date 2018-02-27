@@ -1,5 +1,6 @@
 package fr.sictiam.signature.pes.verifier;
 
+import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1;
 import fr.sictiam.signature.utils.DomUtils;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.signature.Reference;
@@ -127,7 +128,7 @@ public class XMLDsigSignatureAndReferencesProcessor {
         private List<XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1> xmlDsigReferences;
 
         public SignatureAndRefsVerificationResult1() {
-            xmlDsigReferences = new ArrayList();
+            xmlDsigReferences = new ArrayList<XMLDsigReference1>();
         }
 
         private boolean mainC14Accepted = false;
@@ -150,7 +151,7 @@ public class XMLDsigSignatureAndReferencesProcessor {
         }
 
         public List<XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1> getSignedPropertiesReferences() {
-            List<XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1> signedPropertiesReferences = new ArrayList();
+            List<XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1> signedPropertiesReferences = new ArrayList<XMLDsigReference1>();
             for (XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1 xmlDsigReference : xmlDsigReferences) {
                 if (xmlDsigReference.isSignedPropertiesReference()) {
                     signedPropertiesReferences.add(xmlDsigReference);

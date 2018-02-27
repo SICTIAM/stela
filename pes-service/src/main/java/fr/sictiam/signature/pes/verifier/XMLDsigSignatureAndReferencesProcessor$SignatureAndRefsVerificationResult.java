@@ -11,7 +11,7 @@ public class XMLDsigSignatureAndReferencesProcessor$SignatureAndRefsVerification
     private List<XMLDsigReference1> xmlDsigReferences;
 
     public XMLDsigSignatureAndReferencesProcessor$SignatureAndRefsVerificationResult() {
-        xmlDsigReferences = new ArrayList();
+        xmlDsigReferences = new ArrayList<XMLDsigReference1>();
     }
 
     private boolean mainC14Accepted = false;
@@ -34,7 +34,7 @@ public class XMLDsigSignatureAndReferencesProcessor$SignatureAndRefsVerification
     }
 
     public List<XMLDsigReference1> getSignedPropertiesReferences() {
-        List<XMLDsigReference1> signedPropertiesReferences = new ArrayList();
+        List<XMLDsigReference1> signedPropertiesReferences = new ArrayList<XMLDsigReference1>();
         for (XMLDsigReference1 xmlDsigReference : xmlDsigReferences) {
             if (xmlDsigReference.isSignedPropertiesReference()) {
                 signedPropertiesReferences.add(xmlDsigReference);

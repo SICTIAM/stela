@@ -1,5 +1,6 @@
 package fr.sictiam.signature.pes.verifier;
 
+import fr.sictiam.signature.pes.verifier.SimplePesInformation.BordereauInfo1;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -19,8 +20,8 @@ public class SimplePesInformation {
     private boolean imported = false;
 
     public SimplePesInformation() {
-        bordereaux = new ArrayList();
-        signatureElements = new ArrayList();
+        bordereaux = new ArrayList<BordereauInfo1>();
+        signatureElements = new ArrayList<Element>();
     }
 
     public ByteArrayInputStream getPesSourceFile() {

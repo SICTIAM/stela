@@ -20,7 +20,7 @@ public class SigningPolicies {
 
     private SigningPolicies() {
         try {
-            Map<String, SigningPolicy1> signingPolicyByCode = new HashMap();
+            Map<String, SigningPolicy1> signingPolicyByCode = new HashMap<>();
             JarInputStream jarIS = new JarInputStream(
                     getClass().getResource("/fr/sictiam/signature/pes/signingPolicies.zip").openStream());
             try {
@@ -41,7 +41,7 @@ public class SigningPolicies {
                         }
                     }
                 }
-                signingPolicyByIdentifier = new HashMap();
+                signingPolicyByIdentifier = new HashMap<>();
                 for (SigningPolicy1 signingPolicy : signingPolicyByCode.values()) {
                     signingPolicyByIdentifier.put(signingPolicy.getIdentifier(), signingPolicy);
                 }

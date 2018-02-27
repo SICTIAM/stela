@@ -50,17 +50,17 @@ public class LocalAuthorityRestController {
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity updateParams(@PathVariable String uuid,
+    public ResponseEntity<?> updateParams(@PathVariable String uuid,
             @RequestBody @Valid LocalAuthorityUpdateUI localAuthorityUpdateUI) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
         } catch (Exception e) {
             LOGGER.error("Error while updating properties: {}", e);
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         localAuthorityService.createOrUpdate(localAuthority);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @GetMapping("/server-codes")

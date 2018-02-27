@@ -51,7 +51,7 @@ public class CertificateProcessor {
         }
         CertificatInformation1 certificatInformation = new CertificatInformation1(certificates);
 
-        List<X509Certificate> validatedCertPath = new ArrayList();
+        List<X509Certificate> validatedCertPath = new ArrayList<>();
         PKIXCertPathBuilderResult builderRes = null;
         X509CertSelector certSelector = new X509CertSelector();
         certSelector.setCertificate(certificates.iterator().next());
@@ -135,7 +135,7 @@ public class CertificateProcessor {
     }
 
     private List<X509Certificate> extractCertificates(XMLSignature xmlSignature) throws UnExpectedException {
-        List<X509Certificate> certificates = new ArrayList();
+        List<X509Certificate> certificates = new ArrayList<>();
         if (xmlSignature.getKeyInfo() != null) {
             try {
                 X509Data x509Data = xmlSignature.getKeyInfo().itemX509Data(0);
@@ -234,8 +234,8 @@ public class CertificateProcessor {
                 isCritical = false;
             }
             String BasicConstraintsExtensionOID = "2.5.29.19";
-            Set nonCritSet = getSigningCertificate().getNonCriticalExtensionOIDs();
-            Iterator i;
+            Set<?> nonCritSet = getSigningCertificate().getNonCriticalExtensionOIDs();
+            Iterator<?> i;
             if (nonCritSet != null) {
                 for (i = nonCritSet.iterator(); i.hasNext();) {
                     String oid = (String) i.next();

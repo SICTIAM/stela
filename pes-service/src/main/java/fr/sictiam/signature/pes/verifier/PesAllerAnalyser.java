@@ -193,7 +193,7 @@ public class PesAllerAnalyser {
 
     public void computeSignaturesVerificationResults() throws PesAllerAnalyser.InvalidPesAllerFileException {
         try {
-            Map<Element, SignatureVerifierResult> workingSignatureVerifierResult = new HashMap();
+            Map<Element, SignatureVerifierResult> workingSignatureVerifierResult = new HashMap<Element, SignatureVerifierResult>();
             for (Element signatureElement : getSimplePesInformation().getSignatureElements()) {
                 SignatureVerifierResult signatureVerifierResult = getSignatureVerifier().process(signatureElement,
                         null);
@@ -255,7 +255,7 @@ public class PesAllerAnalyser {
             dbf.setAttribute("http://xml.org/sax/features/namespaces", Boolean.TRUE);
             DocumentBuilder db;
             if ((isDoSchemaValidation()) && (getSchemaUrl() != null)) {
-                setSaxParseExceptionsList(new ArrayList());
+                setSaxParseExceptionsList(new ArrayList<SAXParseException>());
 
                 SchemaFactory sf = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
                 Schema schema = sf.newSchema(getSchemaUrl());

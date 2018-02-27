@@ -123,9 +123,9 @@ public class SignatureGenerator {
             String signedPropertiesId = signatureId + "_SP";
 
             XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance("DOM");
-            List<Reference> referencesList = new ArrayList();
+            List<Reference> referencesList = new ArrayList<Reference>();
 
-            ArrayList<Transform> transformListWithEnveloped = new ArrayList();
+            ArrayList<Transform> transformListWithEnveloped = new ArrayList<Transform>();
             transformListWithEnveloped.add(signatureFactory.newTransform(
                     "http://www.w3.org/2000/09/xmldsig#enveloped-signature", (TransformParameterSpec) null));
             transformListWithEnveloped.add(signatureFactory.newTransform("http://www.w3.org/2001/10/xml-exc-c14n#",
@@ -135,7 +135,7 @@ public class SignatureGenerator {
                     signatureFactory.newDigestMethod("http://www.w3.org/2000/09/xmldsig#sha1", null),
                     transformListWithEnveloped, null, null);
 
-            ArrayList<Transform> transformList = new ArrayList();
+            ArrayList<Transform> transformList = new ArrayList<Transform>();
             transformList.add(signatureFactory.newTransform("http://www.w3.org/2001/10/xml-exc-c14n#",
                     (TransformParameterSpec) null));
 
@@ -222,7 +222,7 @@ public class SignatureGenerator {
 
     private static Element createQualifyingPropertiesNode(Document doc, String target, String xadprefix,
             String dsprefix) {
-        List<ElementAttribute1> tmp = new ArrayList();
+        List<ElementAttribute1> tmp = new ArrayList<>();
         tmp.add(new ElementAttribute1("Target", target));
         Element qualifyingPropertiesElement = createXadesElement(doc, "http://uri.etsi.org/01903/v1.1.1#", xadprefix,
                 dsprefix, "QualifyingProperties");
@@ -231,7 +231,7 @@ public class SignatureGenerator {
     }
 
     private static Element createSignedPropertiesNode(Document doc, String id, String xadprefix, String dsprefix) {
-        List<ElementAttribute1> tmp = new ArrayList();
+        List<ElementAttribute1> tmp = new ArrayList<>();
         tmp.add(new ElementAttribute1("Id", id));
 
         Element signedPropertiesElement = createXadesElement(doc, "http://uri.etsi.org/01903/v1.1.1#", xadprefix,
@@ -269,33 +269,13 @@ public class SignatureGenerator {
     private static Element createCertDigestPropertiesNode(Document doc, X509Certificate signingCertificate,
             String digestMethod, String xadprefix, String dsprefix)
             throws CertificateEncodingException, NoSuchAlgorithmException, IOException {
-        List<ElementAttribute1> tmp = new ArrayList();
+        List<ElementAttribute1> tmp = new ArrayList<ElementAttribute1>();
         tmp.add(new ElementAttribute1("Algorithm", digestMethod));
         Element digestMethodElement = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
                 xadprefix + DEUX_POINT + "DigestMethod", tmp, null);
 
         Element digestValueElement = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
                 xadprefix + DEUX_POINT + "DigestValue", null,
-                DigestUtils.xmlBase64Digest(signingCertificate.getEncoded(), digestMethod));
-
-        Element certDigestElement = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",
-                xadprefix + DEUX_POINT + "CertDigest", null, null);
-
-        certDigestElement.appendChild(digestMethodElement);
-        certDigestElement.appendChild(digestValueElement);
-        return certDigestElement;
-    }
-
-    private static Element createCertDigestPropertiesNodeXad122(Document doc, X509Certificate signingCertificate,
-            String digestMethod, String xadprefix, String dsprefix)
-            throws CertificateEncodingException, NoSuchAlgorithmException, IOException {
-        List<ElementAttribute1> tmp = new ArrayList();
-        tmp.add(new ElementAttribute1("Algorithm", digestMethod));
-        Element digestMethodElement = DomUtils.createElementNS(doc, "http://www.w3.org/2000/09/xmldsig#",
-                dsprefix + DEUX_POINT + "DigestMethod", tmp, null);
-
-        Element digestValueElement = DomUtils.createElementNS(doc, "http://www.w3.org/2000/09/xmldsig#",
-                dsprefix + DEUX_POINT + "DigestValue", null,
                 DigestUtils.xmlBase64Digest(signingCertificate.getEncoded(), digestMethod));
 
         Element certDigestElement = DomUtils.createElementNS(doc, "http://uri.etsi.org/01903/v1.1.1#",

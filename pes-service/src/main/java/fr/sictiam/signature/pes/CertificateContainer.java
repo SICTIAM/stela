@@ -25,7 +25,7 @@ public abstract class CertificateContainer {
     public abstract Collection<X509Certificate> getAllCertificates();
 
     public static CertificateContainer fromZipURL(URL zipUrl) throws IOException, CertificateException {
-        List<X509Certificate> allCertificates = new ArrayList();
+        List<X509Certificate> allCertificates = new ArrayList<>();
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         JarInputStream jarIS = new JarInputStream(zipUrl.openStream());
         try {
@@ -62,7 +62,7 @@ public abstract class CertificateContainer {
     }
 
     public Collection<X509Certificate> extractRootCertificates() {
-        List<X509Certificate> toReturn = new ArrayList();
+        List<X509Certificate> toReturn = new ArrayList<>();
         for (X509Certificate certificate : getAllCertificates()) {
             if (CertificateUtils.isSelfSigned(certificate)) {
                 toReturn.add(certificate);
@@ -72,7 +72,7 @@ public abstract class CertificateContainer {
     }
 
     public Collection<X509Certificate> extractNotRootCertificates() {
-        List<X509Certificate> toReturn = new ArrayList();
+        List<X509Certificate> toReturn = new ArrayList<>();
         for (X509Certificate certificate : getAllCertificates()) {
             if (!CertificateUtils.isSelfSigned(certificate)) {
                 toReturn.add(certificate);
@@ -82,7 +82,7 @@ public abstract class CertificateContainer {
     }
 
     public Collection<X509Certificate> extractValidCertificates(Date date) {
-        List<X509Certificate> toReturn = new ArrayList();
+        List<X509Certificate> toReturn = new ArrayList<>();
         for (X509Certificate certificate : getAllCertificates()) {
             try {
                 certificate.checkValidity(date);

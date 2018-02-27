@@ -125,18 +125,18 @@ public class PesRestController {
     }
 
     @GetMapping("/{uuid}/file")
-    public ResponseEntity getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity<?> getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
         PesAller pesAller = pesAllerService.getByUuid(uuid);
         outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename());
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
-    public ResponseEntity getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
+    public ResponseEntity<?> getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
         PesHistory pesHistory = pesAllerService.getHistoryByUuid(historyUuid);
         if (pesHistory.getFile() != null) {
             outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<Object>(HttpStatus.OK);
         } else
             throw new FileNotFoundException();
     }
@@ -161,10 +161,10 @@ public class PesRestController {
     }
 
     @GetMapping("/pes-retour/{uuid}/file")
-    public ResponseEntity getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity<?> getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
         PesRetour pesRetour = pesRetourService.getByUuid(uuid);
         outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename());
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {

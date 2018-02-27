@@ -30,7 +30,7 @@ public class WindowsKeyStoreLoader extends AbstractKeyStoreLoader {
             if ("sun.security.mscapi.KeyStore$MY".equals(keyStoreVeritable.getClass().getName())) {
                 field = keyStoreVeritable.getClass().getEnclosingClass().getDeclaredField("entries");
                 field.setAccessible(true);
-                Collection entries = (Collection) field.get(keyStoreVeritable);
+                Collection<?> entries = (Collection<?>) field.get(keyStoreVeritable);
                 for (Object entry : entries) {
                     field = entry.getClass().getDeclaredField("certChain");
                     field.setAccessible(true);
@@ -47,7 +47,6 @@ public class WindowsKeyStoreLoader extends AbstractKeyStoreLoader {
                 }
             }
         } catch (Exception exception) {
-            Field field;
             System.err.println(exception);
             exception.printStackTrace();
         }

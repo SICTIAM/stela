@@ -20,10 +20,10 @@ import java.util.logging.Logger;
 public abstract class AbstractKeyStoreLoader {
     private KeyStore keyStore;
     protected char[] password = null;
-    private List<char[]> keyPasswordList = new ArrayList();
+    private List<char[]> keyPasswordList = new ArrayList<char[]>();
 
     public List<CertAliases1> recupCertList() {
-        List<CertAliases1> returnList = new ArrayList();
+        List<CertAliases1> returnList = new ArrayList<CertAliases1>();
         if (keyStore != null) {
             try {
                 Enumeration<String> aliases = keyStore.aliases();
@@ -41,7 +41,7 @@ public abstract class AbstractKeyStoreLoader {
     }
 
     public List<String> recupPrivateKeyAliasList() {
-        List<String> returnList = new ArrayList();
+        List<String> returnList = new ArrayList<String>();
         if (keyStore != null) {
             try {
                 Enumeration<String> aliases = keyStore.aliases();
