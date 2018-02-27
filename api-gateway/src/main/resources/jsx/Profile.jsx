@@ -211,6 +211,25 @@ class LocalAuthorityProfile extends Component {
         }
 
     }
+
+    fetchSesileInformation = () => {
+        const { profile } = this.props
+        fetchWithAuthzHandling({ url: `/api/pes/sesile/organisations/${profile.localAuthority.uuid}/${profile.uuid}` })
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ serviceOrganisationAvailable: json })
+            }).catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+            })
+        fetchWithAuthzHandling({ url: `/api/pes/sesile/configuration/${profile.uuid}` })
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ sesileConfiguration: json })
+            }).catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+            })
+    }
+
     componentDidMount() {
         const { profile } = this.props
         if(profile.uuid && profile.localAuthority.activatedModules.includes('PES')) {
@@ -219,27 +238,10 @@ class LocalAuthorityProfile extends Component {
                 .then(text => {
                     const sesileSub = text === 'true' 
                     this.setState({ sesileSubscription: sesileSub })
-                    if(sesileSub) {
-                        fetchWithAuthzHandling({ url: `/api/pes/sesile/organisations/${profile.localAuthority.uuid}/${profile.uuid}` })
-                            .then(response => response.json())
-                            .then(json => {
-                                this.setState({ serviceOrganisationAvailable: json })
-                            }).catch(response => {
-                                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
-                            })
-                        fetchWithAuthzHandling({ url: `/api/pes/sesile/configuration/${profile.uuid}` })
-                            .then(response => response.json())
-                            .then(json => {
-                                this.setState({ sesileConfiguration: json })
-                            }).catch(response => {
-                                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
-                            })
-                    }
-                    
+                    if(sesileSub) this.fetchSesileInformation()
                 }).catch(response => {
                     response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
                 })
-            
         }
     }
     render() {

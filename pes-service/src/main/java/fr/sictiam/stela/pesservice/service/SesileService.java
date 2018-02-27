@@ -276,13 +276,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 } else {
                     signatureValidation.getSignatureValidationErrors()
                             .add(SignatureValidationError.CERTIFICAT_RECOGNITION_ERROR);
-
                 }
 
                 if ((!mainC14Ok) || (!allrefsC14Ok)) {
                     signatureValidation.getSignatureValidationErrors()
                             .add(SignatureValidationError.RECOMMENDATION_NOT_RESPECTED);
-
                 }
 
                 if (xadesProcessOk) {
@@ -319,7 +317,6 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
                     if (verificationResult.getXadesInfo().getSigClaimedRole() == null) {
                         signatureValidation.getSignatureValidationErrors().add(SignatureValidationError.ROLE_BLANK);
-
                     }
 
                     String tmp1 = verificationResult.getXadesInfo().getSigPolicyId();
@@ -330,7 +327,6 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                         if ((tmp1 == null) || (tmp1.isEmpty())) {
                             signatureValidation.getSignatureValidationErrors()
                                     .add(SignatureValidationError.POLICY_ID_MISSING);
-
                         }
 
                         String hv = verificationResult.getXadesInfo().getSigPolicyHashDigestValue();
