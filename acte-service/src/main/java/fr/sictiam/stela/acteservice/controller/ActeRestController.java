@@ -99,9 +99,10 @@ public class ActeRestController {
             @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         boolean isActeACK = acteService.isActeACK(uuid);
+        ActeHistory lastMetierHistory = acteService.getLastMetierHistory(uuid);
         // TODO Retrieve current local authority
         StampPosition stampPosition = localAuthorityService.getByUuid(currentLocalAuthUuid).getStampPosition();
-        return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
+        return new ResponseEntity<>(new ActeUI(acte, isActeACK, lastMetierHistory, stampPosition), HttpStatus.OK);
     }
 
     @PostMapping("/ask-classification/current")
@@ -200,6 +201,39 @@ public class ActeRestController {
     public ResponseEntity getActeAttachment(HttpServletResponse response, @PathVariable String uuid) {
         Acte acte = acteService.getByUuid(uuid);
         outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/courrier-simple")
+    public ResponseEntity sendReponseCourrierSimple(@PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+        try {
+            acteService.sendReponseCourrierSimple(uuid, file);
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to save file: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/lettre-observation/{reponseOrRejet}")
+    public ResponseEntity sendReponseLettreObservation(@PathVariable String uuid, @PathVariable String reponseOrRejet, @RequestParam("file") MultipartFile file) {
+        try {
+            acteService.sendReponseLettreObservation(uuid, reponseOrRejet, file);
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to save file: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/pieces-complementaires/{reponseOrRejet}")
+    public ResponseEntity sendReponsePiecesComplementaires(@PathVariable String uuid, @PathVariable String reponseOrRejet, @RequestParam("files") MultipartFile[] files) {
+        try {
+            acteService.sendReponsePiecesComplementaires(uuid, reponseOrRejet, files);
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to save files: {}", e);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return new ResponseEntity(HttpStatus.OK);
     }
 

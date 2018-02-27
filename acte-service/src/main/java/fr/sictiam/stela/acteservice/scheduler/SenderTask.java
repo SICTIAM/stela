@@ -1,6 +1,7 @@
 package fr.sictiam.stela.acteservice.scheduler;
 
 import fr.sictiam.stela.acteservice.model.PendingMessage;
+import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
@@ -49,10 +50,8 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        switch (event.getActeHistory().getStatus()) {
-            case ARCHIVE_SIZE_CHECKED:
-                pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
-                break;
+        if (StatusType.ARCHIVE_SIZE_CHECKED.equals(event.getActeHistory().getStatus())) {
+            pendingQueue.add(pendingMessageService.save(new PendingMessage(event.getActeHistory())));
         }
     }
 
@@ -76,7 +75,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                     sendStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 }
                 if (HttpStatus.OK.equals(sendStatus)) {
-                    acteService.sent(pendingMessage.getActeUuid());
+                    acteService.sent(pendingMessage.getActeUuid(), pendingMessage.getFlux());
                     pendingMessageService.remove(pendingQueue.poll());
                     currentSizeUsed.addAndGet(pendingMessage.getFile().length);
                     LOGGER.info("Amount of data sent for this hour : " + currentSizeUsed);
@@ -88,7 +87,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                     // something wrong in what we send
                     // TODO when prefecture sending is "plugged", look if we can extract some useful
                     // info about the error
-                    acteService.notSent(pendingMessage.getActeUuid());
+                    acteService.notSent(pendingMessage.getActeUuid(), pendingMessage.getFlux());
                     pendingMessageService.remove(pendingQueue.poll());
                 }
             } else {

@@ -11,11 +11,40 @@
       "NACK_RECEIVED": "Anomalie Ministère",
       "CANCELLATION_ASKED": "Annulation demandée",
       "CANCELLATION_ARCHIVE_CREATED": "Archive d'annulation préparée",
+      "CANCELLED": "Annulé",
       "ARCHIVE_TOO_LARGE": "Archive trop large",
       "ARCHIVE_SIZE_CHECKED": "Taille d'archive vérifiée",
       "GROUP_NOTIFICATION_SENT": "Notification envoyée aux abonnés",
       "NOTIFICATION_SENT": "Notification envoyée au déposant",
-      "FILE_ERROR": "Erreur sur les fichiers de l'acte"
+      "FILE_ERROR": "Erreur sur les fichiers de l'acte",
+      "COURRIER_SIMPLE_RECEIVED": "Courrier simple reçu",
+      "DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED": "Réponse au courrier simple",
+      "LETTRE_OBSERVATION_RECEIVED": "Lettre d'observation reçue",
+      "DEFERE_RECEIVED": "Déféré reçu",
+      "REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED": "Archive créée pour le rejet de la lettre d'observation",
+      "REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED": "Archive créée pour le refus de pièces complémentaires",
+      "PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED": "Archive créée pour l'envoi de pièces complémentaires",
+      "REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED": "Archive créée pour la réponse à la lettre d'observation",
+      "REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED": "Archive créée pour la réponse au courrier simple",
+      "ACK_LETTRE_OBSERVATION_ARCHIVE_CREATED": "AR lettre d'observation",
+      "ACK_PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED": "AR pièces complémentaires",
+      "REPONSE_LETTRE_OBSEVATION_ASKED": "Réponse à la lettre d'observation enrregistré",
+      "REJET_LETTRE_OBSERVATION_ASKED": "Refus transmission à la lettre d'observation enregistré",
+      "REFUS_PIECES_COMPLEMENTAIRE_ASKED": "Refus transmission des pièces complémentaires enregistré",
+      "PIECE_COMPLEMENTAIRE_ASKED": "Pièces complémentaires déposées",
+      "REPONSE_COURRIER_SIMPLE_ASKED": "Réponse au courrier simple déposée",
+      "ACK_PIECE_COMPLEMENTAIRE": "AR pièces complémentaires",
+      "ACK_LETTRE_OBSERVATION": "AR lettre d'observation"
+    },
+    "flux_status": {
+      "TRANSMISSION_ACTE_SENT": "Envoyé",
+      "AR_LETTRE_OBSERVATION_SENT": "AR pour lettre d'observation transmis",
+      "AR_PIECE_COMPLEMENTAIRE_SENT": "AR pour pieces complémentaires transmis",
+      "REPONSE_COURRIER_SIMPLE_SENT": "Réponse au courrier simple transmise",
+      "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission à la lettre d'observation transmis",
+      "TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Pièces complémentaires transmises",
+      "REFUS_EXPLICITE_LETTRE_OBSERVATION_SENT": "Refus transmission des pièces complémentaires transmis",
+      "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise"
     },
     "nature": {
       "DELIBERATIONS": "Délibérations",
@@ -66,7 +95,34 @@
       "linked_file": "Fichier joint",
       "cancel_deposit": "Annuler le dépôt",
       "download_original": "Télécharger le fichier original",
-      "download_justificative": "Télécharger le justificatif"
+      "download_justificative": "Télécharger le justificatif",
+      "courrier_simple": {
+        "received": "Le ministère a envoyé un courrier simple pour cet acte",
+        "to_send": "Répondre au courrier simple",
+        "asked": "Réponse en cours de traitement",
+        "sent": "Réponse au courrier simple"
+      },
+      "defere": {
+        "received": "Le ministère a envoyé un déféré pour cet acte"
+      },
+      "lettre_observation": {
+        "received": "Le ministère a envoyé une lettre d'observation pour cet acte",
+        "to_send": "Répondre à la lettre d'observation",
+        "asked": "Réponse en cours de traitement",
+        "sent_rejet": "Refus à la lettre d'observation",
+        "sent_reponse": "Réponse à la lettre d'observation",
+        "submit_reponse": "Déposer une réponse",
+        "submit_rejet": "Déposer un rejet"
+      },
+      "pieces_complementaires": {
+        "received": "Le ministère a envoyé une demande de pièces complémentaires pour cet acte",
+        "to_send": "Répondre à la demande de pièces complémentaires",
+        "asked": "Réponse en cours de traitement",
+        "sent_rejet": "Refus à la demande de pièces complémentaires",
+        "sent_reponse": "Réponse à la demande de pièces complémentaires",
+        "submit_reponse": "Déposer une réponse",
+        "submit_rejet": "Déposer un rejet"
+      }
     },
     "stamp_pad": {
       "title": "Position du tampon",

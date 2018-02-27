@@ -105,7 +105,22 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                 status = StatusType.ANTIVIRUS_KO;
             }
         }
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, new ActeHistory(acteUuid, status)));
+        applicationEventPublisher
+                .publishEvent(new ActeHistoryEvent(this, new ActeHistory(acteUuid, status, Flux.TRANSMISSION_ACTE)));
+    }
+
+    private void checkEventAntivirus(ActeHistoryEvent event) {
+
+        StatusType status = StatusType.ANTIVIRUS_OK;
+
+        for (Attachment attachment : event.getAttachments()) {
+            ScanResult attachmentResult = clamavClient.scan(new ByteArrayInputStream(attachment.getFile()));
+            if (!attachmentResult.equals(OK.INSTANCE)) {
+                status = StatusType.ANTIVIRUS_KO;
+            }
+        }
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this,
+                new ActeHistory(event.getActeHistory().getActeUuid(), status, event.getActeHistory().getFlux()), event.getAttachments()));
     }
 
     /**
@@ -113,12 +128,12 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
      */
     private void createArchive(String acteUuid) {
         Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
-
+        Flux flux = Flux.TRANSMISSION_ACTE;
         try {
             int deliveryNumber = getNextIncrement();
 
             // this is the base filename for the message and attachments
-            String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_ACTE);
+            String baseFilename = getBaseFilename(acte, flux);
 
             String acteFilename = String.format("%s-%s_%d.%s",
                     !StringUtils.isEmpty(acte.getActeAttachment().getAttachmentTypeCode())
@@ -131,7 +146,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                 // sequence 1 is taken by the Acte file, so we start at two
                 int sequence = annexes.size() + 2;
                 String tempFilename = String.format("%s-%s_%d.%s",
-                        !StringUtils.isEmpty(attachment.getAttachmentTypeCode()) ? attachment.getAttachmentTypeCode() : "CO_DE",
+                        !StringUtils.isEmpty(attachment.getAttachmentTypeCode()) ? attachment.getAttachmentTypeCode()
+                                : "CO_DE",
                         baseFilename, sequence, StringUtils.getFilenameExtension(attachment.getFilename()));
                 annexes.put(tempFilename, attachment.getFile());
             });
@@ -152,14 +168,14 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                     messageContent, acte.getActeAttachment().getFile(), acteFilename, annexes);
 
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
-                    baos.toByteArray(), archiveName);
+                    baos.toByteArray(), archiveName, flux);
 
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
             LOGGER.info("Archive created : {}", archiveName);
         } catch (Exception e) {
             LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage(), flux);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
     }
@@ -170,11 +186,11 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                 acte.getNumber(), acte.getNature().getAbbreviation());
     }
 
-    private void createMessageArchive(String acteUuid, Flux flux, StatusType generatedStatus) {
+    private void createMessageArchive(String acteUuid, Flux flux) {
         Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
-            LOGGER.debug("Creating cancellation message for acte {}", acteUuid);
+            LOGGER.debug("Creating {} message for acte {}", flux, acteUuid);
 
             int deliveryNumber = getNextIncrement();
 
@@ -209,22 +225,21 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
                     sw.toString(), null, null, null);
 
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), generatedStatus, LocalDateTime.now(),
-                    baos.toByteArray(), archiveName);
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
+                    baos.toByteArray(), archiveName, flux);
 
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
-            LOGGER.info("Cancellation archive created : {}", archiveName);
+            LOGGER.info("Archive created : {}", archiveName);
         } catch (IOException e) {
-            LOGGER.error("Error while generating archive for cancellation of acte {} : {}", acte.getNumber(),
+            LOGGER.error("Error while generating archive for flux {} of acte {} : {}", flux, acte.getNumber(),
                     e.getMessage());
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
+            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage(), flux);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
     }
 
-    private void createMessageArchiveWithAttachment(String acteUuid, Flux flux, StatusType generatedStatus,
-            Attachment attachment) {
+    private void createMessageArchiveWithAttachment(String acteUuid, Flux flux, Attachment attachment) {
         Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
 
         try {
@@ -262,15 +277,15 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
                     messageContent, attachment.getFile(), repFilename);
 
-            ActeHistory acteHistoryCreated = new ActeHistory(acte.getUuid(), generatedStatus, LocalDateTime.now(),
-                    baos.toByteArray(), archiveName);
+            ActeHistory acteHistoryCreated = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED,
+                    LocalDateTime.now(), baos.toByteArray(), archiveName, flux);
 
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryCreated));
 
             LOGGER.info("Archive created : {}", archiveName);
         } catch (Exception e) {
             LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-            ActeHistory acteHistoryError = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
+            ActeHistory acteHistoryError = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage(), flux);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryError));
         }
     }
@@ -310,15 +325,15 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private void createArchivePieceComplementaire(String acteUuid, List<Attachment> pieces) {
         Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
-
+        Flux flux = Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES;
         try {
             int deliveryNumber = getNextIncrement();
 
-            String baseFilename = getBaseFilename(acte, Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES);
+            String baseFilename = getBaseFilename(acte, flux);
 
             String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
             Map<String, byte[]> annexes = new HashMap<>();
-            acte.getAnnexes().forEach(attachment -> {
+            pieces.forEach(attachment -> {
                 int sequence = annexes.size() + 1;
                 String tempFilename = String.format("%s_%d.%s", baseFilename, sequence,
                         StringUtils.getFilenameExtension(attachment.getFilename()));
@@ -340,16 +355,15 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             ByteArrayOutputStream baos = createArchiveAndCompress(enveloppeName, enveloppeContent, messageFilename,
                     messageContent, null, null, annexes);
 
-            ActeHistory acteHistoryCreated = new ActeHistory(acte.getUuid(),
-                    StatusType.PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED, LocalDateTime.now(), baos.toByteArray(),
-                    archiveName);
+            ActeHistory acteHistoryCreated = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED,
+                    LocalDateTime.now(), baos.toByteArray(), archiveName, flux);
 
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryCreated));
 
             LOGGER.info("Archive created : {}", archiveName);
         } catch (Exception e) {
             LOGGER.error("Error while generating archive for acte {} : {}", acte.getNumber(), e.getMessage());
-            ActeHistory acteHistoryError = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage());
+            ActeHistory acteHistoryError = new ActeHistory(acte.getUuid(), StatusType.FILE_ERROR, e.getMessage(), flux);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistoryError));
         }
     }
@@ -426,11 +440,12 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         LOGGER.debug("Archive size is {} (max allowed : {})", acteHistory.getFile().length, archiveMaxSize);
         if (acteHistory.getFile().length > archiveMaxSize) {
             // TODO need a specific message or is it enough with the status type ?
-            ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_TOO_LARGE);
+            ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_TOO_LARGE,
+                    acteHistory.getFlux());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, newActeHistory));
         } else {
             ActeHistory newActeHistory = new ActeHistory(acteHistory.getActeUuid(), StatusType.ARCHIVE_SIZE_CHECKED,
-                    acteHistory.getDate(), acteHistory.getFile(), acteHistory.getFileName());
+                    acteHistory.getDate(), acteHistory.getFile(), acteHistory.getFileName(), acteHistory.getFlux());
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, newActeHistory));
         }
     }
@@ -606,52 +621,35 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             case CREATED:
                 checkAntivirus(event.getActeHistory().getActeUuid());
                 break;
-            case ANTIVIRUS_OK:
-                createArchive(event.getActeHistory().getActeUuid());
+            case ANTIVIRUS_OK: {
+                if (Flux.TRANSMISSION_ACTE.equals(event.getActeHistory().getFlux())) {
+                    createArchive(event.getActeHistory().getActeUuid());
+                } else if (Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES.equals(event.getActeHistory().getFlux())) {
+                    createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
+                } else {
+                    createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
+                            event.getActeHistory().getFlux(), event.getAttachments().get(0));
+                }
                 break;
+            }
             case ARCHIVE_CREATED:
-            case CANCELLATION_ARCHIVE_CREATED:
-            case REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED:
-            case REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED:
-            case REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED:
-            case PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
-            case REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED:
-            case ACK_LETTRE_OBSERVATION_ARCHIVE_CREATED:
-            case ACK_PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED:
                 checkArchiveSize(event.getActeHistory());
                 break;
             case CANCELLATION_ASKED:
-                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.ANNULATION_TRANSMISSION,
-                        StatusType.CANCELLATION_ARCHIVE_CREATED);
+                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.ANNULATION_TRANSMISSION);
                 break;
             case LETTRE_OBSERVATION_RECEIVED:
-                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.AR_LETTRE_OBSERVATION,
-                        StatusType.ARCHIVE_CREATED);
+                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.AR_LETTRE_OBSERVATION);
                 break;
             case DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED:
-                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.AR_PIECE_COMPLEMENTAIRE,
-                        StatusType.ARCHIVE_CREATED, event.getAttachments().get(0));
-                break;
-            case REPONSE_COURRIER_SIMPLE_ASKED:
-                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_COURRIER_SIMPLE,
-                        StatusType.REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED, event.getAttachments().get(0));
+                createMessageArchive(event.getActeHistory().getActeUuid(), Flux.AR_PIECE_COMPLEMENTAIRE);
                 break;
             case PIECE_COMPLEMENTAIRE_ASKED:
-                createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
-                break;
+            case REPONSE_COURRIER_SIMPLE_ASKED:
             case REFUS_PIECES_COMPLEMENTAIRE_ASKED:
-                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
-                        Flux.REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES,
-                        StatusType.REFUS_PIECES_COMPLEMENTAIRE_ARCHIVE_CREATED, event.getAttachments().get(0));
-                break;
             case REPONSE_LETTRE_OBSEVATION_ASKED:
-                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(), Flux.REPONSE_LETTRE_OBSEVATION,
-                        StatusType.REPONSE_LETTRE_OBSERVATION_ARCHIVE_CREATED, event.getAttachments().get(0));
-                break;
             case REJET_LETTRE_OBSERVATION_ASKED:
-                createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
-                        Flux.REFUS_EXPLICITE_LETTRE_OBSERVATION, StatusType.REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED,
-                        event.getAttachments().get(0));
+                checkEventAntivirus(event);
                 break;
         }
     }

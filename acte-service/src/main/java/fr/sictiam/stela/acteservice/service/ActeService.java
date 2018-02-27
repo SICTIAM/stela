@@ -62,6 +62,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +128,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
         Acte created = acteRepository.save(acte);
 
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED, Flux.TRANSMISSION_ACTE);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
         LOGGER.info("Acte {} created with id {}", created.getNumber(), created.getUuid());
@@ -158,16 +159,30 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         LOGGER.info("Acte {} anomalie with id {}", acte.getNumber(), acte.getUuid());
     }
 
-    public void receiveAdditionalPiece(StatusType status, String idActe, Attachment attachment, String message) {
+    public void receiveAdditionalPiece(StatusType status, String idActe, Attachment attachment, String message,
+            Flux flux) {
         Acte acte = findByIdActe(idActe);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now(), attachment.getFile(),
-                attachment.getFilename());
+                attachment.getFilename(), flux);
         if (StringUtils.isNotBlank(message)) {
             acteHistory.setMessage(message);
         }
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         LOGGER.info("Acte {} addtional piece with id {}", acte.getNumber(), acte.getUuid());
+    }
 
+    public void registerAdditionalPieces(StatusType status, String acteUuid, List<Attachment> attachments,
+            String message, Flux flux) {
+        Acte acte = getByUuid(acteUuid);
+        Attachment attachment = attachments.get(0);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now(),
+                attachments.size() > 1 ? null : attachment.getFile(),
+                attachments.size() > 1 ? null : attachment.getFilename(), flux);
+        if (StringUtils.isNotBlank(message)) {
+            acteHistory.setMessage(message);
+        }
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory, attachments));
+        LOGGER.info("Acte {} addtional piece with id {}", acte.getNumber(), acte.getUuid());
     }
 
     public void receiveDefere(StatusType status, String idActe, List<Attachment> attachments, String message)
@@ -241,16 +256,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             LocalAuthorityJoin.on(builder.equal(LocalAuthorityJoin.get("uuid"), currentLocalAuthUuid));
         }
         if (!CollectionUtils.isEmpty(groups)) {
-            predicates.add(builder.or(
-                    acteRoot.get("groupUuid").in(groups),
-                    builder.equal(acteRoot.get("groupUuid"), ""),
-                    builder.isNull(acteRoot.get("groupUuid"))
-            ));
+            predicates.add(builder.or(acteRoot.get("groupUuid").in(groups),
+                    builder.equal(acteRoot.get("groupUuid"), ""), builder.isNull(acteRoot.get("groupUuid"))));
         } else {
-            predicates.add(builder.or(
-                    builder.equal(acteRoot.get("groupUuid"), ""),
-                    builder.isNull(acteRoot.get("groupUuid"))
-            ));
+            predicates.add(builder.or(builder.equal(acteRoot.get("groupUuid"), ""),
+                    builder.isNull(acteRoot.get("groupUuid"))));
         }
 
         if (nature != null)
@@ -292,20 +302,52 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public void cancel(String uuid) {
         if (isActeACK(uuid)) {
-            ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED);
+            ActeHistory acteHistory = new ActeHistory(uuid, StatusType.CANCELLATION_ASKED,
+                    Flux.ANNULATION_TRANSMISSION);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         } else
             throw new CancelForbiddenException();
     }
 
-    public void sent(String acteUuid) {
-        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.SENT);
+    public void sent(String acteUuid, Flux flux) {
+        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.SENT, flux);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
     }
 
-    public void notSent(String acteUuid) {
-        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.NOT_SENT);
+    public void notSent(String acteUuid, Flux flux) {
+        ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.NOT_SENT, flux);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+    }
+
+    public void sendReponseCourrierSimple(String uuid, MultipartFile file) throws IOException {
+        Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
+        registerAdditionalPieces(StatusType.REPONSE_COURRIER_SIMPLE_ASKED, uuid, Collections.singletonList(attachment),
+                null, Flux.REPONSE_COURRIER_SIMPLE);
+    }
+
+    public void sendReponseLettreObservation(String uuid, String reponseOrRejet, MultipartFile file) throws IOException {
+        Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
+        if (reponseOrRejet.equals("reponse")) {
+            registerAdditionalPieces(StatusType.REPONSE_LETTRE_OBSEVATION_ASKED, uuid,
+                    Collections.singletonList(attachment), null, Flux.REPONSE_LETTRE_OBSEVATION);
+        } else {
+            registerAdditionalPieces(StatusType.REJET_LETTRE_OBSERVATION_ASKED, uuid,
+                    Collections.singletonList(attachment), null, Flux.REFUS_EXPLICITE_LETTRE_OBSERVATION);
+        }
+    }
+
+    public void sendReponsePiecesComplementaires(String uuid, String reponseOrRejet, MultipartFile[] files) throws IOException {
+        List<Attachment> attachments = new ArrayList<>();
+        for (MultipartFile file : files) {
+            attachments.add(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
+        }
+        if (reponseOrRejet.equals("reponse")) {
+            registerAdditionalPieces(StatusType.PIECE_COMPLEMENTAIRE_ASKED, uuid, attachments, null,
+                    Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES);
+        } else {
+            registerAdditionalPieces(StatusType.REFUS_PIECES_COMPLEMENTAIRE_ASKED, uuid, attachments, null,
+                    Flux.REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES);
+        }
     }
 
     public boolean isActeACK(String uuid) {
@@ -319,6 +361,24 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         SortedSet<ActeHistory> acteHistoryList = acte.getActeHistories();
         return acteHistoryList.stream().anyMatch(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 && acteHistoryList.stream().noneMatch(acteHistory -> forbidenStatus.contains(acteHistory.getStatus()));
+    }
+
+    public ActeHistory getLastMetierHistory(String uuid) {
+        // TODO: Improve later on with status improvements
+        List<StatusType> statusOrdered = Arrays.asList(StatusType.CREATED, StatusType.ANTIVIRUS_KO, StatusType.SENT,
+                StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED, StatusType.CANCELLATION_ASKED, StatusType.CANCELLED,
+                StatusType.ARCHIVE_TOO_LARGE, StatusType.FILE_ERROR, StatusType.COURRIER_SIMPLE_RECEIVED,
+                StatusType.DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED, StatusType.LETTRE_OBSERVATION_RECEIVED,
+                StatusType.DEFERE_RECEIVED, StatusType.REPONSE_LETTRE_OBSEVATION_ASKED,
+                StatusType.REJET_LETTRE_OBSERVATION_ASKED, StatusType.REFUS_PIECES_COMPLEMENTAIRE_ASKED,
+                StatusType.PIECE_COMPLEMENTAIRE_ASKED, StatusType.REPONSE_COURRIER_SIMPLE_ASKED,
+                StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE, StatusType.ACK_REPONSE_LETTRE_OBSERVATION);
+        SortedSet<ActeHistory> acteHistories = getByUuid(uuid).getActeHistories();
+        if (acteHistories.size() == 0) return null;
+        List<ActeHistory> metierHistories = acteHistories.stream()
+                .filter(acteHistory -> statusOrdered.stream().anyMatch(statusType -> acteHistory.getStatus().equals(statusType)))
+                .collect(Collectors.toList());
+        return metierHistories.get(metierHistories.size() - 1);
     }
 
     public List<ActeCSVUI> getActesCSV(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) {

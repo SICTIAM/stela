@@ -24,12 +24,16 @@ const Field = ({ htmlFor, label, children }) =>
         <Grid.Column width={12}><strong>{children}</strong></Grid.Column>
     </Grid>
 
-const File = ({ attachment, onDelete, extraContent }) =>
-    <Card>
+const File = ({ attachment, onDelete, extraContent, src }) =>
+    <Card onClick={src ? () => window.open(src, '_blank') : undefined}>
         <Card.Content>
-            <Icon style={{ float: 'left' }} name='file outline' size='big' />
-            <Icon style={{ float: 'right', cursor: 'pointer' }} name='remove' onClick={() => onDelete(attachment.uuid)} />
-            <Card.Header style={{ fontSize: 1 + 'em' }}>{attachment.filename}</Card.Header>
+            <Icon color='black' style={{ float: 'left' }} name='file outline' size='big' />
+            {onDelete &&
+                <Icon style={{ float: 'right', cursor: 'pointer' }} name='remove' onClick={() => onDelete(attachment)} />
+            }
+            <Card.Header style={attachment.size ? { fontSize: 1 + 'em', overflow: 'hidden' } : { fontSize: 1 + 'em', overflow: 'hidden', marginTop: '0.5em' }}>
+                {attachment.filename}
+            </Card.Header>
             {attachment.size &&
                 <Card.Meta>{bytesToSize(attachment.size)}</Card.Meta>
             }

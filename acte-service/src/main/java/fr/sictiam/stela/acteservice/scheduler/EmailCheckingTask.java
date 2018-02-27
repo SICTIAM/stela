@@ -1,13 +1,16 @@
 package fr.sictiam.stela.acteservice.scheduler;
 
+import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.MailSSLSocketFactory;
 import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.Flux;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.xml.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.NoEnveloppeException;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,7 +190,7 @@ public class EmailCheckingTask {
                                     Attachment attachment = getFileAttachmentByName(
                                             courrierSimple.getDocument().getNomFichier(), originalMultipart);
                                     acteService.receiveAdditionalPiece(StatusType.COURRIER_SIMPLE_RECEIVED,
-                                            courrierSimple.getIDActe(), attachment, null);
+                                            courrierSimple.getIDActe(), attachment, null, Flux.COURRIER_SIMPLE);
 
                                 } else if ("DemandePieceComplementaire".equals(rootName)) {
                                     DemandePieceComplementaire demandePieceComplementaire = unmarshall(classSource,
@@ -198,13 +201,13 @@ public class EmailCheckingTask {
                                             originalMultipart);
                                     acteService.receiveAdditionalPiece(StatusType.DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED,
                                             demandePieceComplementaire.getIDActe(), attachment,
-                                            demandePieceComplementaire.getDescriptionPieces());
+                                            demandePieceComplementaire.getDescriptionPieces(), Flux.DEMANDE_PIECE_COMPLEMENTAIRE);
                                 } else if ("LettreObservations".equals(rootName)) {
                                     LettreObservations letterObs = unmarshall(classSource, LettreObservations.class);
                                     Attachment attachment = getFileAttachmentByName(
                                             letterObs.getDocument().getNomFichier(), originalMultipart);
                                     acteService.receiveAdditionalPiece(StatusType.LETTRE_OBSERVATION_RECEIVED,
-                                            letterObs.getIDActe(), attachment, letterObs.getMotif());
+                                            letterObs.getIDActe(), attachment, letterObs.getMotif(), Flux.LETTRE_OBSERVATION);
 
                                 } else if ("DefereTA".equals(rootName)) {
                                     DefereTA defereTA = unmarshall(classSource, DefereTA.class);
@@ -275,8 +278,13 @@ public class EmailCheckingTask {
                 BodyPart bodyPart = multipart.getBodyPart(j);
                 if (name.equals(bodyPart.getFileName())) {
                     InputStream inputStream = bodyPart.getInputStream();
-                    byte[] targetArray = new byte[inputStream.available()];
-                    inputStream.read(targetArray);
+                    byte[] targetArray;
+                    if (bodyPart.getContent() instanceof BASE64DecoderStream) {
+                        BASE64DecoderStream base64DecoderStream = (BASE64DecoderStream) bodyPart.getContent();
+                        targetArray = IOUtils.toByteArray(base64DecoderStream);
+                    } else {
+                        targetArray = IOUtils.toByteArray(inputStream);
+                    }
                     return new Attachment(targetArray, name, bodyPart.getSize());
                 }
             }

@@ -15,6 +15,12 @@ public class ActeHistoryEvent extends ApplicationEvent {
         this.acteHistory = acteHistory;
     }
 
+    public ActeHistoryEvent(Object source, ActeHistory acteHistory, List<Attachment> attachments) {
+        super(source);
+        this.acteHistory = acteHistory;
+        this.attachments = attachments;
+    }
+
     // transient attachments
     private List<Attachment> attachments;
 

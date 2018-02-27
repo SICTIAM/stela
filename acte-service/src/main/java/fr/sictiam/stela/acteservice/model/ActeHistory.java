@@ -33,6 +33,9 @@ public class ActeHistory implements Comparable<ActeHistory> {
     private byte[] file;
     private String fileName;
 
+    @Enumerated(EnumType.STRING)
+    private Flux flux;
+
     public ActeHistory() {
     }
 
@@ -42,11 +45,26 @@ public class ActeHistory implements Comparable<ActeHistory> {
         this.date = LocalDateTime.now();
     }
 
+    public ActeHistory(String acteUuid, StatusType status, Flux flux) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = LocalDateTime.now();
+        this.flux = flux;
+    }
+
     public ActeHistory(String acteUuid, StatusType status, String message) {
         this.acteUuid = acteUuid;
         this.status = status;
         this.date = LocalDateTime.now();
         this.message = message;
+    }
+
+    public ActeHistory(String acteUuid, StatusType status, String message, Flux flux) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = LocalDateTime.now();
+        this.message = message;
+        this.flux = flux;
     }
 
     public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
@@ -55,6 +73,16 @@ public class ActeHistory implements Comparable<ActeHistory> {
         this.date = date;
         this.file = file;
         this.fileName = fileName;
+    }
+
+    public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+            Flux flux) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = date;
+        this.file = file;
+        this.fileName = fileName;
+        this.flux = flux;
     }
 
     public String getUuid() {
@@ -87,6 +115,14 @@ public class ActeHistory implements Comparable<ActeHistory> {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Flux getFlux() {
+        return flux;
+    }
+
+    public void setFlux(Flux flux) {
+        this.flux = flux;
     }
 
     @Override

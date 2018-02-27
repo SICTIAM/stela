@@ -249,7 +249,7 @@ class NewActeForm extends Component {
         }
     }
     deleteDraftFile = () => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
-    deleteDraftAnnexe = (annexeUuid) => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexeUuid}`, annexeUuid)
+    deleteDraftAnnexe = (annexe) => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexe.uuid}`, annexe.uuid)
     deleteDraftAttachment = (url, annexeUuid) => {
         this.props.setStatus('saving', this.state.fields.uuid)
         fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.context })

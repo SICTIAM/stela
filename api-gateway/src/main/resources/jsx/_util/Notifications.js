@@ -41,6 +41,24 @@ const notifications = {
             message: 'notifications.acte.draft.multiple_deleted.success',
             level: 'success',
             position: 'br'
+        },
+        courrierSimpleAsked: {
+            title: 'notifications.acte.title',
+            message: 'notifications.acte.courrier_simple_asked',
+            level: 'success',
+            position: 'br'
+        },
+        lettreObservationAsked: {
+            title: 'notifications.acte.title',
+            message: 'notifications.acte.lettre_observation_asked',
+            level: 'success',
+            position: 'br'
+        },
+        piecesComplementairesAsked: {
+            title: 'notifications.acte.title',
+            message: 'notifications.acte.pieces_complementaires_asked',
+            level: 'success',
+            position: 'br'
         }
     },
     pes: {

@@ -137,6 +137,9 @@
                     }
                 }
             },
+            "courrier_simple_asked": "La réponse au courrier simple a bien été déposée",
+            "lettre_observation_asked": "La réponse à la lettre d'observation a bien été déposée",
+            "pieces_complementaires_asked": "La réponse à la demande de pièce complémentaire a bien été déposée",
             "annexe_not_found": "Fichier annexe inexistant",
             "history_not_found": "Historique d'acte inexistant",
             "no_history_file": "Aucun fichier pour cet historique",
