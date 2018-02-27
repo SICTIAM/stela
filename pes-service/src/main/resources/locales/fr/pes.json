@@ -11,8 +11,10 @@
       "FILE_ERROR": "Erreur sur le fichier PES",
       "NOTIFICATION_SENT": "Notification envoyée",
       "RESENT": "Renvoyé",
-      "PENDING_SIGNATURE": "en attente de signature",
-      "PENDING_SEND": "en attente d'envoi"
+      "PENDING_SIGNATURE": "En attente de signature",
+      "PENDING_SEND": "En attente d'envoi",
+      "SIGNATURE_INVALID": "Signature invalide",
+      "SIGNATURE_MISSING": "Signature manquante"
     },
     "fields": {
       "objet": "Objet",
@@ -31,6 +33,26 @@
       "linked_file": "Fichier joint",
       "no_history": "Aucun historique pour ce PES",
       "re_send": "Renvoyer le flux manuellement"
+    },
+    "signature_errors": {
+      "INVALID_SCHEMA": "Schema xml helios invalide",
+      "UNVERIFIABLE_SIGNATURE": "NOK : Signature non vérifiable. Cette signature n'a pu être analysée (problème grave de corruption du fichier)",
+      "NOT_SIGNED_CONTENT": "NOK : Des bordereaux n'ont pas été signés.",
+      "SIGNATURE_CONTROL_ERRORS": "NOK : Des anomalies de controle ont été détectées",
+      "ROLE_BLANK": "NOK : Rôle du signataire : NON_RENSEIGNE",
+      "DATE_BLANK": "NOK : Date de la signature : NON_RENSEIGNE",
+      "DATE_FORMAT_ERROR": "NOK : La date de signature n'est pas au format UTC",
+      "XADES_ERROR": "NOK : Cela signifie qu'il est possible que certaines informations XADES aient été modifiées. Merci de transmettre ce rapport à votre administrateur. Les informations Xades ne peuvent pas être validées",
+      "XADES_UPDATED": "NOK : Les informations Xades ont été modifiées.",
+      "XADES_UNSIGNED": "NOK : Les \"SignedProperties\" Xades n'ont pas été signées.",
+      "RECOMMENDATION_NOT_RESPECTED": "NOK : Cela signifie que le logiciel de signature n'a pas respecté les recommandations",
+      "CERTIFICAT_RECOGNITION_ERROR": "NOK : Le traitement de reconnaissance du certificat du signataire à rencontré une erreur ",
+      "UNTRUSTED_CERTIFICATE": "NOK : Cela signifie qu'il est possible que cette signature soit émise par une personne malintentionnée",
+      "WRONG_CERTIFICATE": "NOK : Le certificat utilisé n'a pas vocation à faire de la signature de document (l'usage de \"non-répudiation\" est absent)",
+      "XADES_EXCEPTION": "NOK : Le traitement d'extraction des informations XADES a rencontré une erreur",
+      "NO_POLICY": "OK : Pas de Hash de la politique de signature: il est préconisé de mettre le hash de la PS de la DGFiP : \"Jkdb+aba0Hz6+ZPKmKNhPByzQ+Q=\"",
+      "POLICY_QUALIFIER_MISSING": "OK : Pas de SigPolicyQualifier : il est préconisé de mettre celui de la PS de la DGFiP  : \"https://portail.dgfip.finances.gouv.fr/documents/PS_Helios_DGFiP.pdf\"",
+      "POLICY_ID_MISSING": "OK : Pas d'identifiant politique de signature. Il est préconisé de mettre  l'OID de la PS De la DGFiP : \"urn:oid:1.2.250.1.131.1.5.18.21.1.4\""
     },
     "list": {
       "title": "Liste des PES",
@@ -53,7 +75,12 @@
           "HELIOS_transmission": "Transmission Helios",
           "serverCode": "Code serveur préfecture",
           "sirens": "Liste des SIRENs autorisés",
-          "no_siren": "Aucun SIREN"
+          "no_siren": "Aucun SIREN",
+          "sesile":  {
+            "subscription": "Abonnement à Sesile",
+            "secret": "Secret",
+            "token": "Token"
+          }
         },
         "module_settings": {
           "title": "Paramètres du module Helios",

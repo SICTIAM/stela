@@ -153,7 +153,8 @@
                 "virus": "Le dépot PES a échoué car il contenait un virus",
                 "error": {
                     "bad_file_name": "Le nom de fichier est incorrect",
-                    "non_extractable_pes": "Erreur lors du traitement du pes"
+                    "non_extractable_pes": "Erreur lors du traitement du pes",
+                    "existing_file_name": "Le nom de fichier est deja utilisé"
                 },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             }

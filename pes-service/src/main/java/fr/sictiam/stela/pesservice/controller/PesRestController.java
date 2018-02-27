@@ -40,8 +40,6 @@ import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/pes")
@@ -103,41 +101,42 @@ public class PesRestController {
     public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
-        Pattern pattern = Pattern.compile(fileNamePattern);
-        Matcher matcher = pattern.matcher(file.getOriginalFilename());
 
-        if (matcher.matches() || file.getOriginalFilename().contains("depenses")) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
-                List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
-                if (!errors.isEmpty()) {
-                    CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
-                    return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
-                }
-                PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
-                return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-            } catch (IOException e) {
-                throw new PesCreationException();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            if (pesAllerService.checkVirus(file)) {
+                return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
-        } else {
-            return new ResponseEntity<>("notifications.pes.sent.error.bad_file_name", HttpStatus.BAD_REQUEST);
+            PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
+            List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
+            if (!errors.isEmpty()) {
+                CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
+                return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
+            }
+            pesAller = pesAllerService.populateFromFile(pesAller, file);
+            if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
+                return new ResponseEntity<>("notifications.pes.sent.error.existing_file_name", HttpStatus.BAD_REQUEST);
+            }
+            PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller);
+            return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+        } catch (IOException e) {
+            throw new PesCreationException();
         }
     }
 
     @GetMapping("/{uuid}/file")
-    public ResponseEntity getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity<?> getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
         PesAller pesAller = pesAllerService.getByUuid(uuid);
         outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename());
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
-    public ResponseEntity getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
+    public ResponseEntity<?> getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
         PesHistory pesHistory = pesAllerService.getHistoryByUuid(historyUuid);
         if (pesHistory.getFile() != null) {
             outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<Object>(HttpStatus.OK);
         } else
             throw new FileNotFoundException();
     }
@@ -162,10 +161,10 @@ public class PesRestController {
     }
 
     @GetMapping("/pes-retour/{uuid}/file")
-    public ResponseEntity getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity<?> getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
         PesRetour pesRetour = pesRetourService.getByUuid(uuid);
         outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename());
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename) {

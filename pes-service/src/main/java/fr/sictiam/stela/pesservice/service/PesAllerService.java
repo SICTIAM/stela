@@ -17,6 +17,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
@@ -25,7 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import xyz.capybara.clamav.ClamavClient;
+import xyz.capybara.clamav.ClamavException;
+import xyz.capybara.clamav.commands.scan.result.ScanResult;
+import xyz.capybara.clamav.commands.scan.result.ScanResult.OK;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -51,6 +57,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
@@ -66,6 +73,14 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     private final LocalAuthorityService localAuthorityService;
     private final DefaultFtpSessionFactory defaultFtpSessionFactory;
 
+    @Value("${application.clamav.port}")
+    private Integer clamavPort;
+
+    @Value("${application.clamav.host}")
+    private String clamavHost;
+
+    private ClamavClient clamavClient;
+
     @Autowired
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
@@ -76,6 +91,11 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         this.localAuthorityService = localAuthorityService;
         this.defaultFtpSessionFactory = defaultFtpSessionFactory;
 
+    }
+
+    @PostConstruct
+    private void init() {
+        clamavClient = new ClamavClient(clamavHost, clamavPort);
     }
 
     public Long countAllWithQuery(String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
@@ -147,10 +167,8 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         pesAllerRepository.save(pes);
     }
 
-    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller,
-            MultipartFile file) {
-        pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
-        pesAller.setProfileUuid(currentProfileUuid);
+    public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
+
         try {
             Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
             pesAller.setAttachment(attachment);
@@ -164,14 +182,24 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             XPath path = xpf.newXPath();
 
             pesAller.setFileType(path.evaluate("/PES_Aller/Enveloppe/Parametres/TypFic/@V", document));
+            pesAller.setFileName(path.evaluate("/PES_Aller/Enveloppe/Parametres/NomFic/@V", document));
             pesAller.setColCode(path.evaluate("/PES_Aller/EnTetePES/CodCol/@V", document));
             pesAller.setPostId(path.evaluate("/PES_Aller/EnTetePES/IdPost/@V", document));
             pesAller.setBudCode(path.evaluate("/PES_Aller/EnTetePES/CodBud/@V", document));
             pesAller.setPj("PES_PJ".equals(pesAller.getFileType()));
             pesAller.setSigned("PES_PJ".equals(pesAller.getFileType()));
+
         } catch (IOException | XPathExpressionException | ParserConfigurationException | SAXException e) {
             throw new PesCreationException();
         }
+        return pesAller;
+
+    }
+
+    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller) {
+        pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
+        pesAller.setProfileUuid(currentProfileUuid);
+
         pesAller = pesAllerRepository.save(pesAller);
         updateStatus(pesAller.getUuid(), StatusType.CREATED);
         return pesAller;
@@ -182,7 +210,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     List<PesAller> getPendingSinature() {
-        return pesAllerRepository.findByPjFalseAndSignedFalse();
+        return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrue();
     }
 
     public void updateStatus(String pesUuid, StatusType updatedStatus) {
@@ -200,12 +228,26 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
+    public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName, String message) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName, message);
+        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+    }
+
+    public boolean checkVirus(MultipartFile file) throws ClamavException, IOException {
+        ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(file.getBytes()));
+        boolean status = false;
+        if (!mainResult.equals(OK.INSTANCE)) {
+            status = true;
+        }
+        return status;
+    }
+
     public PesAller save(PesAller pes) {
         return pesAllerRepository.save(pes);
     }
 
-    public PesAller getByAttachementName(String fileName) {
-        return pesAllerRepository.findByAttachment_filename(fileName).orElseThrow(PesNotFoundException::new);
+    public Optional<PesAller> getByFileName(String fileName) {
+        return pesAllerRepository.findByFileName(fileName);
     }
 
     public List<PesAller> getBlockedFlux() {
@@ -256,12 +298,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();
         try {
-            ftpClient.sendSiteCommand("P_DEST "+ pes.getLocalAuthority().getServerCode().name());
+            ftpClient.sendSiteCommand("P_DEST " + pes.getLocalAuthority().getServerCode().name());
             ftpClient.sendSiteCommand("P_APPLI GHELPES2");
-            //ftpClient.sendCommand("P_MSG", pes.getFileType() + "#" + pes.getColCode() + "#"
-            //        + pes.getPostId() + "#" + pes.getBudCode());
+            // ftpClient.sendCommand("P_MSG", pes.getFileType() + "#" + pes.getColCode() +
+            // "#"
+            // + pes.getPostId() + "#" + pes.getBudCode());
             ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
-            //ftpSession.close();
+            // ftpSession.close();
         } catch (IOException e) {
             throw new PesSendException();
         }

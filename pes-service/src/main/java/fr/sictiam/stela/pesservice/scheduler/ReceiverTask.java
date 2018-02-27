@@ -8,6 +8,7 @@ import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
+import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
@@ -57,7 +58,7 @@ public class ReceiverTask {
         FTPFile[] files = ftpClient.listFiles();
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
-		LOGGER.debug("file RECEIVED : " + ftpFile.getName());
+                LOGGER.debug("file RECEIVED : " + ftpFile.getName());
                 InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                 if (ftpFile.getName().contains("ACK")) {
                     readACK(inputStream, ftpFile.getName());
@@ -85,9 +86,17 @@ public class ReceiverTask {
         Document document = builder.parse(byteArrayInputStream);
         String fileName = path.evaluate("/PES_ACQUIT/Enveloppe/Parametres/NomFic/@V", document);
 
-        PesAller pesAller = pesService.getByAttachementName(fileName + ".xml");
+        PesAller pesAller = pesService.getByFileName(fileName).orElseThrow(PesNotFoundException::new);
 
-        pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
+        int etatAck = Integer.valueOf(path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/EtatAck/@V", document));
+        if (etatAck == 1) {
+            pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
+        } else {
+            String errorMessage = path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/LibelleAnoAck/@V", document);
+            pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errorMessage);
+
+        }
+
     }
 
     public void readPesRetour(InputStream inputStream, String pesRetourName)

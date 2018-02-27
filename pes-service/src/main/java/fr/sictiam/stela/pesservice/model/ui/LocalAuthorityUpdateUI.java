@@ -11,6 +11,10 @@ public class LocalAuthorityUpdateUI {
     @SirenCollection
     private List<String> sirens;
 
+    private Boolean sesileSubscription;
+    private String token;
+    private String secret;
+
     public LocalAuthorityUpdateUI() {
     }
 
@@ -20,5 +24,17 @@ public class LocalAuthorityUpdateUI {
 
     public List<String> getSirens() {
         return sirens;
+    }
+
+    public Boolean getSesileSubscription() {
+        return sesileSubscription;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public String getSecret() {
+        return secret;
     }
 }

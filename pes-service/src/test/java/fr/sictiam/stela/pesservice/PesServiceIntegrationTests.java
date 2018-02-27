@@ -223,7 +223,6 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void sendTest() throws IOException {
         PesAller pes = samplePesAller();
-
         pesService.send(pes);
     }
 
@@ -342,6 +341,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         pes.setColCode("280");
         pes.setPostId("030004");
         pes.setBudCode("00");
+        pes.setFileName("28000-2017-P-RN-22-1516807373820");
         InputStream in = new ClassPathResource("data/28000-2017-P-RN-22-1516807373820.xml").getInputStream();
 
         byte[] targetArray = new byte[in.available()];

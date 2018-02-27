@@ -187,9 +187,10 @@ class LocalAuthorityProfile extends Component {
             visibility: 3,
             secret: '',
             token: '',
-            daysToValidated: 15
+            daysToValidated: 15,
         },
-        serviceOrganisationAvailable: []
+        serviceOrganisationAvailable: [],
+        sesileSubscription: false
     }
     sesileConfigurationChange = (e, {id, value }) => {
         const sesileConf = this.state.sesileConfiguration
@@ -210,20 +211,34 @@ class LocalAuthorityProfile extends Component {
         }
 
     }
+
+    fetchSesileInformation = () => {
+        const { profile } = this.props
+        fetchWithAuthzHandling({ url: `/api/pes/sesile/organisations/${profile.localAuthority.uuid}/${profile.uuid}` })
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ serviceOrganisationAvailable: json })
+            }).catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+            })
+        fetchWithAuthzHandling({ url: `/api/pes/sesile/configuration/${profile.uuid}` })
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ sesileConfiguration: json })
+            }).catch(response => {
+                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+            })
+    }
+
     componentDidMount() {
         const { profile } = this.props
         if(profile.uuid && profile.localAuthority.activatedModules.includes('PES')) {
-            fetchWithAuthzHandling({ url: `/api/pes/sesile/organisations/${profile.uuid}` })
-                .then(response => response.json())
-                .then(json => {
-                    this.setState({ serviceOrganisationAvailable: json })
-                }).catch(response => {
-                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
-                })
-            fetchWithAuthzHandling({ url: `/api/pes/sesile/configuration/${profile.uuid}` })
-                .then(response => response.json())
-                .then(json => {
-                    this.setState({ sesileConfiguration: json })
+            fetchWithAuthzHandling({ url: `/api/pes/sesile/subscription/${profile.localAuthority.uuid}` })
+                .then(response => response.text())
+                .then(text => {
+                    const sesileSub = text === 'true' 
+                    this.setState({ sesileSubscription: sesileSub })
+                    if(sesileSub) this.fetchSesileInformation()
                 }).catch(response => {
                     response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
                 })
@@ -250,7 +265,7 @@ class LocalAuthorityProfile extends Component {
         const typesAvailable = currentService ? currentService.types.map(type => { return { key: type.id, value: type.id, text: type.nom } }) : []
 
         const sesileConnection = profile.localAuthority.activatedModules.map(activatedModule =>
-              (activatedModule === 'PES' && this.state.sesileConfiguration) &&
+              (activatedModule === 'PES' && this.state.sesileSubscription && this.state.sesileConfiguration) &&
  
                 <div key={activatedModule} style={{ marginTop: '1em' }}>
                     <Header size='small'>{t('profile.sesile.title')}</Header>
@@ -281,23 +296,11 @@ class LocalAuthorityProfile extends Component {
                             value={this.state.sesileConfiguration.visibility}
                             onChange={this.sesileConfigurationChange} />
                     </Field>
-                    <Field htmlFor='daysToValidated' label={t('profile.sesile.daysToValidated')}>
+                    <Field htmlFor='daysToValidated' label={t('profile.sesile.validationLimit')}>
                         <Input id='daysToValidated'
                             type='number'
-                            placeholder={t('profile.sesile.daysToValidated')}
+                            placeholder={t('profile.sesile.validationLimit')}
                             value={this.state.sesileConfiguration.daysToValidated}
-                            onChange={this.sesileConfigurationChange} />
-                    </Field>
-                    <Field htmlFor='token' label={t('profile.sesile.token')}>
-                        <Input id='token' style={{ width: '25em' }}
-                            placeholder={t('profile.sesile.token')}
-                            value={this.state.sesileConfiguration.token}
-                            onChange={this.sesileConfigurationChange} />
-                    </Field>
-                    <Field htmlFor='secret' label={t('profile.sesile.secret')}>
-                        <Input id='secret' style={{ width: '25em' }}
-                            placeholder={t('profile.sesile.secret')}
-                            value={this.state.sesileConfiguration.secret}
                             onChange={this.sesileConfigurationChange} />
                     </Field>
                 </div>

@@ -4,7 +4,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import java.time.LocalDateTime;
 
@@ -48,6 +53,16 @@ public class PesHistory implements Comparable<PesHistory> {
         this.date = date;
         this.file = file;
         this.fileName = fileName;
+    }
+
+    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+            String message) {
+        this.pesUuid = pesUuid;
+        this.status = status;
+        this.date = date;
+        this.file = file;
+        this.fileName = fileName;
+        this.message = message;
     }
 
     public String getUuid() {

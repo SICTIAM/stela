@@ -1,5 +1,9 @@
 version: '3'
 services:
+  clamav:
+    image: mkodockx/docker-clamav:latest
+    ports:
+     - "3310:3310"
   postgresql:
     image: postgres:latest
     ports:
