@@ -4,9 +4,9 @@ import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -22,8 +22,8 @@ public class LocalAuthorityInstanceService {
 
     public LocalAuthorityInstance findLocalAuthorityInstance() {
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
-        if (attribs instanceof NativeWebRequest) {
-            HttpServletRequest request = (HttpServletRequest) ((NativeWebRequest) attribs).getNativeRequest();
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
             HttpSession session = request.getSession(false);
             if (session != null && session.getAttribute(INSTANCE_KEY) != null) {
                 return (LocalAuthorityInstance) session.getAttribute(INSTANCE_KEY);
@@ -39,8 +39,8 @@ public class LocalAuthorityInstanceService {
 
     public LocalAuthorityInstance findLocalAuthorityInstanceFromRequest() {
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
-        if (attribs instanceof NativeWebRequest) {
-            HttpServletRequest request = (HttpServletRequest) ((NativeWebRequest) attribs).getNativeRequest();
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
             String slugName = SlugUtils.getSlugNameFromRequest(request);
             WebClient webClient = WebClient.create(adminServiceUrl());
             Mono<LocalAuthorityInstance> localAuthorityInstanceMono = webClient.get()
