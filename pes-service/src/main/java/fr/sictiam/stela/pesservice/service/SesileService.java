@@ -152,7 +152,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public SignatureValidation isValidSignature(SimplePesInformation simplePesInformation)
             throws InvalidPesAllerFileException {
-        PesAllerAnalyser pesAllerAnalyser = new PesAllerAnalyser(simplePesInformation.getPesSourceFile());
+        PesAllerAnalyser pesAllerAnalyser = new PesAllerAnalyser(simplePesInformation);
         pesAllerAnalyser.computeSignaturesVerificationResults();
         pesAllerAnalyser.computeSignaturesTypeVerification();
 

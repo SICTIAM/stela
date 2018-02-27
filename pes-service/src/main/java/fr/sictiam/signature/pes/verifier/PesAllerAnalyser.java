@@ -65,6 +65,10 @@ public class PesAllerAnalyser {
         this.pesSourceFile = pesSourceFile;
     }
 
+    public PesAllerAnalyser(SimplePesInformation simplePesInformation) {
+        this.simplePesInformation = simplePesInformation;
+    }
+
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
     }
