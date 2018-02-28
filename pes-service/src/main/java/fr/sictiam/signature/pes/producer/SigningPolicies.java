@@ -14,7 +14,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 public class SigningPolicies {
-    private static final String SIG_POLICY_ZIP_FILE = "/fr/sictiam/signature/pes/signingPolicies.zip";
+    private static final String SIG_POLICY_ZIP_FILE = "/signature/signingPolicies.zip";
     private static final SigningPolicies instance = new SigningPolicies();
     private Map<String, SigningPolicy1> signingPolicyByIdentifier;
 

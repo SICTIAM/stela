@@ -1,7 +1,7 @@
 package fr.sictiam.signature.pes;
 
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -24,10 +24,10 @@ import java.util.jar.JarInputStream;
 public abstract class CertificateContainer {
     public abstract Collection<X509Certificate> getAllCertificates();
 
-    public static CertificateContainer fromZipURL(URL zipUrl) throws IOException, CertificateException {
+    public static CertificateContainer fromZipURL(InputStream zipStream) throws IOException, CertificateException {
         List<X509Certificate> allCertificates = new ArrayList<>();
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        JarInputStream jarIS = new JarInputStream(zipUrl.openStream());
+        JarInputStream jarIS = new JarInputStream(zipStream);
         try {
             JarEntry entry = null;
             while ((entry = jarIS.getNextJarEntry()) != null) {

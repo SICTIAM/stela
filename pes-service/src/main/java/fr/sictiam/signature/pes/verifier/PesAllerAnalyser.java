@@ -6,6 +6,7 @@ import fr.sictiam.signature.pes.verifier.SimplePesInformation.BordereauInfo1;
 import fr.sictiam.signature.pes.verifier.SimplePesInformation.EntetePesInfo1;
 import fr.sictiam.signature.utils.DomUtils;
 import org.apache.xpath.XPathAPI;
+import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -239,10 +240,10 @@ public class PesAllerAnalyser {
     public SignatureVerifier getSignatureVerifier() throws IOException, CertificateException, KeyStoreException,
             CRLException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         if (signatureVerifier == null) {
-            signatureVerifier = new SignatureVerifier(
-                    CertificateContainer.fromZipURL(getClass().getResource("/fr/sictiam/signature/pes/certs.zip")),
-                    CertificateContainer
-                            .fromZipURL(getClass().getResource("/fr/sictiam/signature/pes/certsInter.zip")));
+            ClassPathResource stream = new ClassPathResource("/signature/certs.zip");
+
+            signatureVerifier = new SignatureVerifier(CertificateContainer.fromZipURL(stream.getInputStream()),
+                    CertificateContainer.fromZipURL(stream.getInputStream()));
         }
         return signatureVerifier;
     }
