@@ -267,15 +267,17 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         subquery.where(subQueryPredicates.toArray(new Predicate[] {}));
 
         Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
-        subquery2.select(historyTable);
+        Root<PesHistory> historyTable2 = subquery2.from(PesHistory.class);
+        subquery2.select(historyTable2);
 
         List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
-        subQueryPredicates2.add(cb.equal(historyTable.get("status"), StatusType.SENT));
+        subQueryPredicates2.add(cb.equal(historyTable2.get("status"), StatusType.SENT));
         subquery2.where(subQueryPredicates2.toArray(new Predicate[] {}));
 
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
 
         mainQueryPredicates.add(cb.not(cb.exists(subquery)));
+        mainQueryPredicates.add(cb.exists(subquery2));
         query.where(mainQueryPredicates.toArray(new Predicate[] {}));
         TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
         List<PesAller> resultList = typedQuery.getResultList();
