@@ -89,11 +89,79 @@ services:
     container_name: pes-service
     ports:
      - "9010:9010"
+    depends_on:ry
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+  admin-service:
+    image: stela-poc/admin-service
+    container_name: admin-service
+    ports:
+     - "9006:9006"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+  acte-service:
+    image: stela-poc/acte-service
+    container_name: acte-service
+    ports:
+     - "9008:9008"
     depends_on:
      - config
      - discovery
      - postgresql
      - rabbitmq
      - clamav
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+    volumes:
+        - ./../stela-config/certificates:/certificates
+  pes-service:
+    image: stela-poc/pes-service
+    container_name: pes-service
+    ports:
+     - "9010:9010"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+     - clamav
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+  convocation-service:
+    image: stela-poc/convocation-service
+    container_name: convocation-service
+    ports:
+     - "9012:9012"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+     - clamav    
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+     - clamav
+    environment:
+     - "SPRING_PROFILES_ACTIVE=dev-docker"
+  convocation-service:
+    image: stela-poc/convocation-service
+    container_name: convocation-service
+    ports:
+     - "9012:9012"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+     - clamav    
     environment:
      - "SPRING_PROFILES_ACTIVE=dev-docker"

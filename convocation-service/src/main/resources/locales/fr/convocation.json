@@ -1,0 +1,24 @@
+{
+  "convocation": {
+    "status": {
+      "CREATED": "Créé",
+      "SENT": "envoyée"
+   },
+    "admin": {
+      "modules": {
+        "pes": {
+          "title": "Module Convocation",
+          "local_authority_settings": {
+            "title": "Paramétrage des collectivités",
+            "general_informations": "Informations générales"
+          },
+          "module_settings": {
+            "title": "Paramètres du module Convocation",
+            "alertMessageDisplayed": "Affichage du message d'alerte",
+            "alertMessage": "Message d'alerte"
+          }
+        }
+      }
+    }
+  }
+}
