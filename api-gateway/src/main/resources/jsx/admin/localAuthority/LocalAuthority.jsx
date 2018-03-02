@@ -187,7 +187,9 @@ class LocalAuthority extends Component {
                 <Segment>
                     <h2>{t('admin.local_authority.groups')}</h2>
                     <div style={{ textAlign: 'right' }}>
-                        <Link className='ui button basic primary' to={`/admin/collectivite/${this.state.fields.uuid}/groupes`}>Form new group</Link>
+                        <Link className='ui button basic primary' to={`/admin/collectivite/${this.state.fields.uuid}/groupes`}>
+                            {t('admin.local_authority.new_group')}
+                        </Link>
                     </div>
                     <List divided relaxed verticalAlign='middle'>
                         {groupList}
