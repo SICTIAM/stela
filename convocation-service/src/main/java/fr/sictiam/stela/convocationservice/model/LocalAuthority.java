@@ -21,6 +21,9 @@ public class LocalAuthority {
     @JsonView(Views.LocalAuthorityView.class)
     private Long residentNumber;
 
+    public LocalAuthority() {
+    }
+
     public LocalAuthority(String uuid, String name, String siren, Boolean active) {
         this.uuid = uuid;
         this.name = name;

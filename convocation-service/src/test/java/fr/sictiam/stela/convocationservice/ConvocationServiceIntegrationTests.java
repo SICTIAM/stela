@@ -38,9 +38,9 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PesServiceIntegrationTests extends BaseIntegrationTests {
+public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PesServiceIntegrationTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConvocationServiceIntegrationTests.class);
 
     @Value("${application.jwt.secret}")
     String SECRET;

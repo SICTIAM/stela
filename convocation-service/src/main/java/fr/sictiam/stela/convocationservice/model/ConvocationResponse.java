@@ -49,6 +49,9 @@ public class ConvocationResponse {
     @JsonView(Views.ConvocationResponseViewPrivate.class)
     private Set<QuestionResponse> questionResponses;
 
+    public ConvocationResponse() {
+    }
+
     public String getProfileUuid() {
         return profileUuid;
     }

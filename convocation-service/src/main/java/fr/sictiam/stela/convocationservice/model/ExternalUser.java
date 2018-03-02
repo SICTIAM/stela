@@ -28,6 +28,9 @@ public class ExternalUser {
     @JsonView(Views.ExternalUserViewPrivate.class)
     private LocalAuthority localAuthority;
 
+    public ExternalUser() {
+    }
+
     public String getFirstName() {
         return firstName;
     }

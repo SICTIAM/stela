@@ -14,171 +14,174 @@ import java.util.Set;
 @Entity
 public class Convocation {
 
-	public interface RestValidation {
-		// validation group marker interface
-	}
+    public interface RestValidation {
+        // validation group marker interface
+    }
 
-	@Id
-	@GeneratedValue(generator = "UUID")
-	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-	@JsonView(Views.ConvocationViewPublic.class)
-	private String uuid;
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String uuid;
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "observer_profile_uuids", joinColumns = @JoinColumn(name = "convocation_uuid"))
-	@Column(name = "profile_uuid")
-	@JsonView(Views.ConvocationViewPublic.class)
-	private Set<String> observerProfileUuids;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "observer_profile_uuids", joinColumns = @JoinColumn(name = "convocation_uuid"))
+    @Column(name = "profile_uuid")
+    @JsonView(Views.ConvocationViewPublic.class)
+    private Set<String> observerProfileUuids;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	@JsonView(Views.ConvocationViewPrivate.class)
-	private Set<ExternalUser> externalObserver;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonView(Views.ConvocationViewPrivate.class)
+    private Set<ExternalUser> externalObserver;
 
-	@ManyToOne
-	@JsonView(Views.ConvocationViewPrivate.class)
-	private AssemblyType assemblyType;
+    @ManyToOne
+    @JsonView(Views.ConvocationViewPrivate.class)
+    private AssemblyType assemblyType;
 
-	@ManyToOne
-	@JsonView(Views.ConvocationViewPublic.class)
-	private Attachment attachment;
+    @ManyToOne
+    @JsonView(Views.ConvocationViewPublic.class)
+    private Attachment attachment;
 
-	@OneToMany
-	@JsonView(Views.ConvocationViewPublic.class)
-	private Set<Attachment> annexes;
+    @OneToMany
+    @JsonView(Views.ConvocationViewPublic.class)
+    private Set<Attachment> annexes;
 
-	@OneToMany
-	@JsonView(Views.ConvocationViewPublic.class)
-	private Set<Question> questions;
+    @OneToMany
+    @JsonView(Views.ConvocationViewPublic.class)
+    private Set<Question> questions;
 
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
-	@JsonView(Views.ConvocationViewPublic.class)
-	private LocalDateTime creationDate;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonView(Views.ConvocationViewPublic.class)
+    private LocalDateTime creationDate;
 
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
-	@JsonView(Views.ConvocationViewPublic.class)
-	private LocalDateTime meetingDate;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonView(Views.ConvocationViewPublic.class)
+    private LocalDateTime meetingDate;
 
-	@JsonView(Views.ConvocationViewPublic.class)
-	private String place;
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String place;
 
-	@JsonView(Views.ConvocationViewPublic.class)
-	private String subject;
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String subject;
 
-	@JsonView(Views.ConvocationViewPublic.class)
-	private String comment;
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String comment;
 
-	@JsonView(Views.ConvocationViewPublic.class)
-	private String profileUuid;
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String profileUuid;
 
-	@JsonView(Views.ConvocationViewPublic.class)
-	private String groupUuid;
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String groupUuid;
 
-	public String getUuid() {
-		return uuid;
-	}
+    public Convocation() {
+    }
 
-	public Set<String> getObserverProfileUuids() {
-		return observerProfileUuids;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	public void setObserverProfileUuids(Set<String> observerProfileUuids) {
-		this.observerProfileUuids = observerProfileUuids;
-	}
+    public Set<String> getObserverProfileUuids() {
+        return observerProfileUuids;
+    }
 
-	public Set<ExternalUser> getExternalObserver() {
-		return externalObserver;
-	}
+    public void setObserverProfileUuids(Set<String> observerProfileUuids) {
+        this.observerProfileUuids = observerProfileUuids;
+    }
 
-	public void setExternalObserver(Set<ExternalUser> externalObserver) {
-		this.externalObserver = externalObserver;
-	}
+    public Set<ExternalUser> getExternalObserver() {
+        return externalObserver;
+    }
 
-	public AssemblyType getAssemblyType() {
-		return assemblyType;
-	}
+    public void setExternalObserver(Set<ExternalUser> externalObserver) {
+        this.externalObserver = externalObserver;
+    }
 
-	public void setAssemblyType(AssemblyType assemblyType) {
-		this.assemblyType = assemblyType;
-	}
+    public AssemblyType getAssemblyType() {
+        return assemblyType;
+    }
 
-	public Attachment getAttachment() {
-		return attachment;
-	}
+    public void setAssemblyType(AssemblyType assemblyType) {
+        this.assemblyType = assemblyType;
+    }
 
-	public void setAttachment(Attachment attachment) {
-		this.attachment = attachment;
-	}
+    public Attachment getAttachment() {
+        return attachment;
+    }
 
-	public Set<Attachment> getAnnexes() {
-		return annexes;
-	}
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
 
-	public void setAnnexes(Set<Attachment> annexes) {
-		this.annexes = annexes;
-	}
+    public Set<Attachment> getAnnexes() {
+        return annexes;
+    }
 
-	public Set<Question> getQuestions() {
-		return questions;
-	}
+    public void setAnnexes(Set<Attachment> annexes) {
+        this.annexes = annexes;
+    }
 
-	public void setQuestions(Set<Question> questions) {
-		this.questions = questions;
-	}
+    public Set<Question> getQuestions() {
+        return questions;
+    }
 
-	public LocalDateTime getCreationDate() {
-		return creationDate;
-	}
+    public void setQuestions(Set<Question> questions) {
+        this.questions = questions;
+    }
 
-	public void setCreationDate(LocalDateTime creationDate) {
-		this.creationDate = creationDate;
-	}
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
 
-	public LocalDateTime getMeetingDate() {
-		return meetingDate;
-	}
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	public void setMeetingDate(LocalDateTime meetingDate) {
-		this.meetingDate = meetingDate;
-	}
+    public LocalDateTime getMeetingDate() {
+        return meetingDate;
+    }
 
-	public String getPlace() {
-		return place;
-	}
+    public void setMeetingDate(LocalDateTime meetingDate) {
+        this.meetingDate = meetingDate;
+    }
 
-	public void setPlace(String place) {
-		this.place = place;
-	}
+    public String getPlace() {
+        return place;
+    }
 
-	public String getSubject() {
-		return subject;
-	}
+    public void setPlace(String place) {
+        this.place = place;
+    }
 
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
+    public String getSubject() {
+        return subject;
+    }
 
-	public String getComment() {
-		return comment;
-	}
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    public String getComment() {
+        return comment;
+    }
 
-	public String getProfileUuid() {
-		return profileUuid;
-	}
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	public void setProfileUuid(String profileUuid) {
-		this.profileUuid = profileUuid;
-	}
+    public String getProfileUuid() {
+        return profileUuid;
+    }
 
-	public String getGroupUuid() {
-		return groupUuid;
-	}
+    public void setProfileUuid(String profileUuid) {
+        this.profileUuid = profileUuid;
+    }
 
-	public void setGroupUuid(String groupUuid) {
-		this.groupUuid = groupUuid;
-	}
+    public String getGroupUuid() {
+        return groupUuid;
+    }
+
+    public void setGroupUuid(String groupUuid) {
+        this.groupUuid = groupUuid;
+    }
 
 }

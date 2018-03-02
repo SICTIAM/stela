@@ -2,12 +2,11 @@ package fr.sictiam.stela.acteservice.service.util;
 
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
-import fr.sictiam.stela.acteservice.config.NotTestCondition;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Conditional(NotTestCondition.class)
+@Profile("!test")
 public class DiscoveryUtils {
 
     private static EurekaClient discoveryClient;

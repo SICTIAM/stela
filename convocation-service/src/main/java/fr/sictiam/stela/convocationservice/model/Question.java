@@ -20,6 +20,9 @@ public class Question {
     @JsonView(Views.QuestionView.class)
     private String question;
 
+    public Question() {
+    }
+
     public String getQuestion() {
         return question;
     }

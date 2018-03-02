@@ -35,6 +35,9 @@ public class AssemblyType {
     @JsonView(Views.AssemblyTypeViewPrivate.class)
     private LocalAuthority localAuthority;
 
+    public AssemblyType() {
+    }
+
     public String getUuid() {
         return uuid;
     }

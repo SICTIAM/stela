@@ -29,6 +29,9 @@ public class QuestionResponse {
     @JsonView(Views.QuestionResponseViewPrivate.class)
     private ConvocationResponse convocationResponse;
 
+    public QuestionResponse() {
+    }
+
     public Question getQuestion() {
         return question;
     }
