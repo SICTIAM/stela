@@ -19,7 +19,7 @@ import java.net.URLConnection;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/pes")
+@RequestMapping("/api/convocation")
 public class ConvocationRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConvocationRestController.class);

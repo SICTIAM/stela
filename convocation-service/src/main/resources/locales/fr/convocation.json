@@ -6,7 +6,7 @@
    },
     "admin": {
       "modules": {
-        "pes": {
+        "convocation": {
           "title": "Module Convocation",
           "local_authority_settings": {
             "title": "Paramétrage des collectivités",
