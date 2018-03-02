@@ -18,7 +18,6 @@ public class AssemblyType {
     private String uuid;
 
     @JsonView(Views.AssemblyTypeViewPublic.class)
-
     private String name;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -30,6 +29,14 @@ public class AssemblyType {
     @OneToMany(fetch = FetchType.EAGER)
     @JsonView(Views.AssemblyTypeViewPrivate.class)
     private Set<ExternalUser> externalUsers;
+
+    public AssemblyType(String name, Set<String> profileUuids, Set<ExternalUser> externalUsers,
+            LocalAuthority localAuthority) {
+        this.name = name;
+        this.profileUuids = profileUuids;
+        this.externalUsers = externalUsers;
+        this.localAuthority = localAuthority;
+    }
 
     @ManyToOne
     @JsonView(Views.AssemblyTypeViewPrivate.class)

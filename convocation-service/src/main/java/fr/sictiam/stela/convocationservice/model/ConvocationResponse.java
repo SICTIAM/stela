@@ -52,6 +52,18 @@ public class ConvocationResponse {
     public ConvocationResponse() {
     }
 
+    public ConvocationResponse(String profileUuid, ExternalUser externalUser, String substituteProfileUuid,
+            ExternalUser substituteExternalUser, Convocation convocation, ResponseType responseType,
+            Set<QuestionResponse> questionResponses) {
+        this.profileUuid = profileUuid;
+        this.externalUser = externalUser;
+        this.substituteProfileUuid = substituteProfileUuid;
+        this.substituteExternalUser = substituteExternalUser;
+        this.convocation = convocation;
+        this.responseType = responseType;
+        this.questionResponses = questionResponses;
+    }
+
     public String getProfileUuid() {
         return profileUuid;
     }

@@ -31,6 +31,13 @@ public class ExternalUser {
     public ExternalUser() {
     }
 
+    public ExternalUser(String firstName, String name, String email, LocalAuthority localAuthority) {
+        this.firstName = firstName;
+        this.name = name;
+        this.email = email;
+        this.localAuthority = localAuthority;
+    }
+
     public String getFirstName() {
         return firstName;
     }

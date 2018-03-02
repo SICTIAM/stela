@@ -4,11 +4,11 @@ import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.model.event.ConvocationHistoryEvent;
 import org.springframework.context.ApplicationListener;
 
-class MockPesEventListener implements ApplicationListener<ConvocationHistoryEvent> {
+class MockConvocationEventListener implements ApplicationListener<ConvocationHistoryEvent> {
 
     StatusType status;
 
-    public MockPesEventListener(StatusType status) {
+    public MockConvocationEventListener(StatusType status) {
         this.status = status;
     }
 

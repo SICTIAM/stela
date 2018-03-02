@@ -32,6 +32,12 @@ public class QuestionResponse {
     public QuestionResponse() {
     }
 
+    public QuestionResponse(Boolean response, Question question, ConvocationResponse convocationResponse) {
+        this.response = response;
+        this.question = question;
+        this.convocationResponse = convocationResponse;
+    }
+
     public Question getQuestion() {
         return question;
     }

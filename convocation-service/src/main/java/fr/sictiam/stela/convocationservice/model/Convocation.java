@@ -14,6 +14,25 @@ import java.util.Set;
 @Entity
 public class Convocation {
 
+    public Convocation(Set<String> observerProfileUuids, Set<ExternalUser> externalObserver, AssemblyType assemblyType,
+            Attachment attachment, Set<Attachment> annexes, Set<Question> questions, LocalDateTime creationDate,
+            LocalDateTime meetingDate, String place, String subject, String comment, String profileUuid,
+            String groupUuid) {
+        this.observerProfileUuids = observerProfileUuids;
+        this.externalObserver = externalObserver;
+        this.assemblyType = assemblyType;
+        this.attachment = attachment;
+        this.annexes = annexes;
+        this.questions = questions;
+        this.creationDate = creationDate;
+        this.meetingDate = meetingDate;
+        this.place = place;
+        this.subject = subject;
+        this.comment = comment;
+        this.profileUuid = profileUuid;
+        this.groupUuid = groupUuid;
+    }
+
     public interface RestValidation {
         // validation group marker interface
     }

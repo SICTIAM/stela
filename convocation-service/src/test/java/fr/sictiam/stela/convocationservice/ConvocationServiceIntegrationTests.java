@@ -89,28 +89,26 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
             localAuthorityService.createOrUpdate(localAuthority);
 
             String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","
-                    + "\"localAuthorityNotifications\":[\"PES\"]," + "\"localAuthority\":{" + "\"uuid\":\""
+                    + "\"localAuthorityNotifications\":[\"CONVOCATION\"]," + "\"localAuthority\":{" + "\"uuid\":\""
                     + localAuthority.getUuid() + "\"," + "\"name\":\"SICTIAM-Test\"," + "\"siren\":\"999888777\","
-                    + "\"activatedModules\":[\"PES\"]" + "}," + "\"agent\":{"
+                    + "\"activatedModules\":[\"CONVOCATION\"]" + "}," + "\"agent\":{"
                     + "\"uuid\":\"158087ee-0a32-4acb-b521-8c0ed56ee43d\","
                     + "\"sub\":\"5854b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," + "\"email\":\"john.doe@sictiam.com\","
                     + "\"admin\":true," + "\"family_name\":\"Doe\"," + "\"given_name\":\"John\"" + "},"
-                    + "\"email\":\"john.doe@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":[" + "{"
-                    + "\"name\":\"PES_ACK_RECEIVED\"," + "\"active\":true" + "}," + "{" + "\"name\":\"PES_SENT\","
-                    + "\"active\":true" + "}" + "]," + "\"groups\":[" + "{"
+                    + "\"email\":\"john.doe@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":[" + "{" + "{"
+                    + "\"name\":\"CONVOCATION_SENT\"," + "\"active\":true" + "}" + "]," + "\"groups\":[" + "{"
                     + "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + "\"name\":\"aa\","
-                    + "\"rights\":[\"PES_ADMIN\"]" + "}" + "]" + "}";
+                    + "\"rights\":[\"CONVOCATION_ADMIN\"]" + "}" + "]" + "}";
 
             String profile2 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\","
-                    + "\"localAuthorityNotifications\":[\"PES\"]," + "\"localAuthority\":{" + "\"uuid\":\""
+                    + "\"localAuthorityNotifications\":[\"CONVOCATION\"]," + "\"localAuthority\":{" + "\"uuid\":\""
                     + localAuthority.getUuid() + "\"," + "\"name\":\"SICTIAM-Test\"," + "\"siren\":\"999888777\","
-                    + "\"activatedModules\":[\"PES\"]" + "}," + "\"agent\":{"
+                    + "\"activatedModules\":[\"CONVOCATION\"]" + "}," + "\"agent\":{"
                     + "\"uuid\":\"442087ee-0a32-4acb-b521-8c0ed56ee43d\","
                     + "\"sub\":\"4424b8b6-befd-4e6f-bf3d-8e35a9a5be00\"," + "\"email\":\"Laurent.Rojmeko@gmail.com\","
                     + "\"admin\":true," + "\"family_name\":\"De Rojmeko\"," + "\"given_name\":\"Laurent\"" + "},"
                     + "\"email\":\"Laurent.Rojmeko@sictiam.com\"," + "\"admin\":true," + "\"notificationValues\":["
-                    + "{" + "\"name\":\"PES_ACK_RECEIVED\"," + "\"active\":true" + "}," + "{" + "\"name\":\"PES_SENT\","
-                    + "\"active\":true" + "}" + "],"
+                    + "{" + "\"name\":\"CONVOCATION_SENT\"," + "\"active\":true" + "}" + "],"
                     + "\"groups\":[{\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\",\"name\":\"aa\"}]" + "}";
             String profilesJson = "[" + profile1 + "," + profile2 + "]";
             try {
@@ -140,6 +138,14 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void LocalAuthority() {
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getByName("SICTIAM-Test");
+
+        assertThat(localAuthority.isPresent(), is(true));
+        assertThat(localAuthority.get().getSiren(), is("999888777"));
+    }
+
+    @Test
+    public void ConvocationSendTest() {
         Optional<LocalAuthority> localAuthority = localAuthorityService.getByName("SICTIAM-Test");
 
         assertThat(localAuthority.isPresent(), is(true));
