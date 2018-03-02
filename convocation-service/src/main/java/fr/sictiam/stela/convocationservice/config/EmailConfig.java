@@ -1,4 +1,4 @@
-package fr.sictiam.stela.acteservice.config;
+package fr.sictiam.stela.convocationservice.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -1,8 +1,10 @@
-package fr.sictiam.stela.pesservice.model;
+package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -15,51 +17,57 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 @Entity
-public class PesHistory implements Comparable<PesHistory> {
+public class ConvocationHistory implements Comparable<ConvocationHistory> {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ConvocationViewPublic.class)
     private String uuid;
-    private String pesUuid;
+    @JsonView(Views.ConvocationViewPublic.class)
+    private String convocationUuid;
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.ConvocationViewPublic.class)
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonView(Views.ConvocationViewPublic.class)
     private LocalDateTime date;
     // Error messages can be quite lengthy
     @Column(length = 1024)
+    @JsonView(Views.ConvocationViewPublic.class)
     private String message;
     @JsonIgnore
     private byte[] file;
+    @JsonView(Views.ConvocationViewPublic.class)
     private String fileName;
 
-    public PesHistory() {
+    public ConvocationHistory() {
     }
 
-    public PesHistory(String pesUuid, StatusType status) {
-        this.pesUuid = pesUuid;
+    public ConvocationHistory(String pesUuid, StatusType status) {
+        this.convocationUuid = pesUuid;
         this.status = status;
         this.date = LocalDateTime.now();
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, String message) {
-        this.pesUuid = pesUuid;
+    public ConvocationHistory(String pesUuid, StatusType status, LocalDateTime date, String message) {
+        this.convocationUuid = pesUuid;
         this.status = status;
         this.date = date;
         this.message = message;
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
-        this.pesUuid = pesUuid;
+    public ConvocationHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
+        this.convocationUuid = pesUuid;
         this.status = status;
         this.date = date;
         this.file = file;
         this.fileName = fileName;
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+    public ConvocationHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
             String message) {
-        this.pesUuid = pesUuid;
+        this.convocationUuid = pesUuid;
         this.status = status;
         this.date = date;
         this.file = file;
@@ -71,8 +79,8 @@ public class PesHistory implements Comparable<PesHistory> {
         return uuid;
     }
 
-    public String getPesUuid() {
-        return pesUuid;
+    public String getConvocationUuid() {
+        return convocationUuid;
     }
 
     public LocalDateTime getDate() {
@@ -100,13 +108,14 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     @Override
-    public int compareTo(PesHistory acteHistory) {
-        return this.date.compareTo(acteHistory.getDate());
+    public String toString() {
+        return "ActeHistory{" + "uuid='" + uuid + '\'' + ", convocationUuid='" + convocationUuid + '\'' + ", status="
+                + status + ", date=" + date + ", message='" + message + '\'' + ", fileName='" + fileName + '\'' + '}';
     }
 
     @Override
-    public String toString() {
-        return "ActeHistory{" + "uuid='" + uuid + '\'' + ", pesUuid='" + pesUuid + '\'' + ", status=" + status
-                + ", date=" + date + ", message='" + message + '\'' + ", fileName='" + fileName + '\'' + '}';
+    public int compareTo(ConvocationHistory o) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }

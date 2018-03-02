@@ -1,4 +1,4 @@
-package fr.sictiam.stela.acteservice.service.util;
+package fr.sictiam.stela.convocationservice.service.util;
 
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;

@@ -1,0 +1,29 @@
+version: '3'
+services:
+  clamav:
+    image: mkodockx/docker-clamav:latest
+    ports:
+     - "3310:3310"
+  postgresql:
+    image: postgres:latest
+    ports:
+     - "5432:5432"
+    environment:
+      POSTGRES_USER: stela
+      POSTGRES_PASSWORD: stelapwd
+      POSTGRES_DB: stela-convocation-test
+  config:
+    image: stela-poc/config-service
+    healthcheck:  
+      test: ["CMD", "curl", "-f", "http://localhost:8888/convocation-service/test"]  
+      interval: 1s  
+      timeout: 5s  
+      retries: 12 
+    ports:
+     - "8888:8888"
+    volumes:
+     - ../../../../../stela-config:/stela-config
+    depends_on:
+     - postgresql
+    environment:
+     - "SPRING_PROFILES_ACTIVE=native"
