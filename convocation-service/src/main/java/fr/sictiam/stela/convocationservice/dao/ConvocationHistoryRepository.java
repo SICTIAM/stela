@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ConvocationHistoryRepository extends JpaRepository<ConvocationHistory, String> {
-	Optional<ConvocationHistory> findByUuid(String uuid);
+    Optional<ConvocationHistory> findByUuid(String uuid);
 
-	List<ConvocationHistory> findByconvocationUuidOrderByDate(String pesUuid);
+    List<ConvocationHistory> findByconvocationUuidOrderByDate(String pesUuid);
 
-	List<ConvocationHistory> findByconvocationUuidAndStatusInOrderByDateDesc(String pesUuid, List<StatusType> status);
+    List<ConvocationHistory> findByconvocationUuidAndStatusInOrderByDateDesc(String pesUuid, List<StatusType> status);
 }

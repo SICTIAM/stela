@@ -11,64 +11,64 @@ import java.util.Set;
 @Entity
 public class AssemblyType {
 
-	@Id
-	@GeneratedValue(generator = "UUID")
-	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-	@JsonView(Views.AssemblyTypeViewPublic.class)
-	private String uuid;
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.AssemblyTypeViewPublic.class)
+    private String uuid;
 
-	@JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.AssemblyTypeViewPublic.class)
 
-	private String name;
+    private String name;
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "profile_uuids", joinColumns = @JoinColumn(name = "assembly_type_uuid"))
-	@Column(name = "profile_uuid")
-	@JsonView(Views.AssemblyTypeViewPublic.class)
-	private Set<String> profileUuids;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "profile_uuids", joinColumns = @JoinColumn(name = "assembly_type_uuid"))
+    @Column(name = "profile_uuid")
+    @JsonView(Views.AssemblyTypeViewPublic.class)
+    private Set<String> profileUuids;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	@JsonView(Views.AssemblyTypeViewPrivate.class)
-	private Set<ExternalUser> externalUsers;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonView(Views.AssemblyTypeViewPrivate.class)
+    private Set<ExternalUser> externalUsers;
 
-	@ManyToOne
-	@JsonView(Views.AssemblyTypeViewPrivate.class)
-	private LocalAuthority localAuthority;
+    @ManyToOne
+    @JsonView(Views.AssemblyTypeViewPrivate.class)
+    private LocalAuthority localAuthority;
 
-	public String getUuid() {
-		return uuid;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Set<String> getProfileUuids() {
-		return profileUuids;
-	}
+    public Set<String> getProfileUuids() {
+        return profileUuids;
+    }
 
-	public void setProfileUuids(Set<String> profileUuids) {
-		this.profileUuids = profileUuids;
-	}
+    public void setProfileUuids(Set<String> profileUuids) {
+        this.profileUuids = profileUuids;
+    }
 
-	public Set<ExternalUser> getExternalUsers() {
-		return externalUsers;
-	}
+    public Set<ExternalUser> getExternalUsers() {
+        return externalUsers;
+    }
 
-	public void setExternalUsers(Set<ExternalUser> externalUsers) {
-		this.externalUsers = externalUsers;
-	}
+    public void setExternalUsers(Set<ExternalUser> externalUsers) {
+        this.externalUsers = externalUsers;
+    }
 
-	public LocalAuthority getLocalAuthority() {
-		return localAuthority;
-	}
+    public LocalAuthority getLocalAuthority() {
+        return localAuthority;
+    }
 
-	public void setLocalAuthority(LocalAuthority localAuthority) {
-		this.localAuthority = localAuthority;
-	}
+    public void setLocalAuthority(LocalAuthority localAuthority) {
+        this.localAuthority = localAuthority;
+    }
 
 }

@@ -1,5 +1,7 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -13,14 +15,18 @@ public class QuestionResponse {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.QuestionResponseViewPublic.class)
     private String uuid;
 
+    @JsonView(Views.QuestionResponseViewPublic.class)
     private Boolean response;
 
     @ManyToOne
+    @JsonView(Views.QuestionResponseViewPublic.class)
     private Question question;
 
     @ManyToOne
+    @JsonView(Views.QuestionResponseViewPrivate.class)
     private ConvocationResponse convocationResponse;
 
     public Question getQuestion() {

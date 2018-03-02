@@ -89,7 +89,12 @@ services:
     container_name: pes-service
     ports:
      - "9010:9010"
-    depends_on:ry
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+     - clamav
     environment:
      - "SPRING_PROFILES_ACTIVE=dev-docker"
   admin-service:

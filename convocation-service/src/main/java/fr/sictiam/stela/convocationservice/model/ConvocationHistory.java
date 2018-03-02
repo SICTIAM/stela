@@ -1,7 +1,10 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -19,16 +22,23 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ConvocationViewPublic.class)
     private String uuid;
+    @JsonView(Views.ConvocationViewPublic.class)
     private String convocationUuid;
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.ConvocationViewPublic.class)
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonView(Views.ConvocationViewPublic.class)
     private LocalDateTime date;
     // Error messages can be quite lengthy
     @Column(length = 1024)
+    @JsonView(Views.ConvocationViewPublic.class)
     private String message;
+    @JsonIgnore
     private byte[] file;
+    @JsonView(Views.ConvocationViewPublic.class)
     private String fileName;
 
     public ConvocationHistory() {

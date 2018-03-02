@@ -11,25 +11,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConvocationService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConvocationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConvocationService.class);
 
-	private final ConvocationRepository convocationRepository;
+    private final ConvocationRepository convocationRepository;
 
-	@Autowired
-	public ConvocationService(ConvocationRepository convocationRepository) {
-		this.convocationRepository = convocationRepository;
-	}
+    @Autowired
+    public ConvocationService(ConvocationRepository convocationRepository) {
+        this.convocationRepository = convocationRepository;
+    }
 
-	public Convocation createOrUpdate(Convocation convocation) {
-		return convocationRepository.save(convocation);
-	}
+    public Convocation createOrUpdate(Convocation convocation) {
+        return convocationRepository.save(convocation);
+    }
 
-	public void delete(Convocation convocation) {
-		convocationRepository.delete(convocation);
-	}
+    public void delete(Convocation convocation) {
+        convocationRepository.delete(convocation);
+    }
 
-	public Convocation getByUuid(String uuid) {
-		return convocationRepository.findById(uuid).orElseThrow(ConvocationNotFoundException::new);
-	}
+    public Convocation getByUuid(String uuid) {
+        return convocationRepository.findById(uuid).orElseThrow(ConvocationNotFoundException::new);
+    }
 
 }

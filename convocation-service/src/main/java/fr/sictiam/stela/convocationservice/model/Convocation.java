@@ -1,7 +1,9 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -19,42 +21,56 @@ public class Convocation {
 	@Id
 	@GeneratedValue(generator = "UUID")
 	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+	@JsonView(Views.ConvocationViewPublic.class)
 	private String uuid;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "observer_profile_uuids", joinColumns = @JoinColumn(name = "convocation_uuid"))
 	@Column(name = "profile_uuid")
+	@JsonView(Views.ConvocationViewPublic.class)
 	private Set<String> observerProfileUuids;
 
 	@OneToMany(fetch = FetchType.EAGER)
+	@JsonView(Views.ConvocationViewPrivate.class)
 	private Set<ExternalUser> externalObserver;
 
 	@ManyToOne
+	@JsonView(Views.ConvocationViewPrivate.class)
 	private AssemblyType assemblyType;
 
 	@ManyToOne
+	@JsonView(Views.ConvocationViewPublic.class)
 	private Attachment attachment;
 
 	@OneToMany
+	@JsonView(Views.ConvocationViewPublic.class)
 	private Set<Attachment> annexes;
 
 	@OneToMany
+	@JsonView(Views.ConvocationViewPublic.class)
 	private Set<Question> questions;
 
 	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	@JsonView(Views.ConvocationViewPublic.class)
 	private LocalDateTime creationDate;
 
 	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	@JsonView(Views.ConvocationViewPublic.class)
 	private LocalDateTime meetingDate;
 
+	@JsonView(Views.ConvocationViewPublic.class)
 	private String place;
 
+	@JsonView(Views.ConvocationViewPublic.class)
 	private String subject;
 
+	@JsonView(Views.ConvocationViewPublic.class)
 	private String comment;
 
+	@JsonView(Views.ConvocationViewPublic.class)
 	private String profileUuid;
 
+	@JsonView(Views.ConvocationViewPublic.class)
 	private String groupUuid;
 
 	public String getUuid() {

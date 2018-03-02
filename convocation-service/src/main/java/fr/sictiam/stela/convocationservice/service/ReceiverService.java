@@ -21,37 +21,37 @@ import org.springframework.stereotype.Service;
 @ConditionalOnProperty(value = "application.rabbit.enabled")
 public class ReceiverService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
-	@Value("${application.amqp.convocation.createdKey}")
-	private String sentDgfipKey;
+    @Value("${application.amqp.convocation.createdKey}")
+    private String sentDgfipKey;
 
-	@Value("${application.amqp.convocation.exchange}")
-	private String exchange;
+    @Value("${application.amqp.convocation.exchange}")
+    private String exchange;
 
-	@Autowired
-	private AmqpTemplate amqpTemplate;
+    @Autowired
+    private AmqpTemplate amqpTemplate;
 
-	@Autowired
-	private LocalAuthorityService localAuthorityService;
+    @Autowired
+    private LocalAuthorityService localAuthorityService;
 
-	@RabbitListener(bindings = @QueueBinding(value = @Queue(name = "acteQueue", durable = "true"), exchange = @Exchange(value = "#{'${application.amqp.convocation.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"), key = "#{'${application.amqp.acte.adminKey}'}"))
-	public void fromAdminService(Message message) {
-		LOGGER.debug("Received a message {}", message);
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = "acteQueue", durable = "true"), exchange = @Exchange(value = "#{'${application.amqp.convocation.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"), key = "#{'${application.amqp.acte.adminKey}'}"))
+    public void fromAdminService(Message message) {
+        LOGGER.debug("Received a message {}", message);
 
-		ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
 
-		try {
-			Event event = objectMapper.readValue(message.getBody(), Event.class);
-			LOGGER.debug(event.getOrigin());
+        try {
+            Event event = objectMapper.readValue(message.getBody(), Event.class);
+            LOGGER.debug(event.getOrigin());
 
-			if (event instanceof LocalAuthorityEvent) {
-				localAuthorityService.handleEvent((LocalAuthorityEvent) event);
-			}
+            if (event instanceof LocalAuthorityEvent) {
+                localAuthorityService.handleEvent((LocalAuthorityEvent) event);
+            }
 
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-		}
-		// amqpTemplate.convertAndSend(exchange, sentDgfipKey, message);
-	}
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+        // amqpTemplate.convertAndSend(exchange, sentDgfipKey, message);
+    }
 }

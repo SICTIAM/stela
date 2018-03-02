@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
@@ -28,6 +29,7 @@ public class PesHistory implements Comparable<PesHistory> {
     // Error messages can be quite lengthy
     @Column(length = 1024)
     private String message;
+    @JsonIgnore
     private byte[] file;
     private String fileName;
 

@@ -2,44 +2,76 @@ package fr.sictiam.stela.convocationservice.model.ui;
 
 public class Views {
 
-	public interface ConvocationView extends ConvocationViewPublic, ConvocationViewPrivate {
+    public interface ConvocationView
+            extends ConvocationViewPublic, ConvocationViewPrivate, LocalAuthorityView, AssemblyTypeView, QuestionView {
 
-	}
+    }
 
-	public interface ConvocationViewPublic {
+    public interface ConvocationViewPublic {
 
-	}
+    }
 
-	public interface ConvocationViewPrivate {
+    public interface ConvocationViewPrivate {
 
-	}
+    }
 
-	public interface AssemblyTypeView extends ExternalUserViewPublic, AssemblyTypeViewPublic, AssemblyTypeViewPrivate {
+    public interface ConvocationResponseView extends ConvocationViewPublic, ConvocationResponseViewPublic,
+            ConvocationResponseViewPrivate, ExternalUserView, QuestionResponseViewPublic, QuestionView {
 
-	}
+    }
 
-	public interface AssemblyTypeViewPublic {
+    public interface ConvocationResponseViewPublic {
 
-	}
+    }
 
-	public interface AssemblyTypeViewPrivate {
+    public interface ConvocationResponseViewPrivate {
 
-	}
+    }
 
-	public interface LocalAuthorityView {
+    public interface AssemblyTypeView
+            extends ExternalUserViewPublic, AssemblyTypeViewPublic, AssemblyTypeViewPrivate, ConvocationViewPublic {
 
-	}
+    }
 
-	public interface ExternalUserView extends ExternalUserViewPrivate, ExternalUserViewPublic {
+    public interface AssemblyTypeViewPublic {
 
-	}
+    }
 
-	public interface ExternalUserViewPublic {
+    public interface AssemblyTypeViewPrivate {
 
-	}
+    }
 
-	public interface ExternalUserViewPrivate {
+    public interface LocalAuthorityView {
 
-	}
+    }
+
+    public interface ExternalUserView extends ExternalUserViewPrivate, ExternalUserViewPublic {
+
+    }
+
+    public interface ExternalUserViewPublic {
+
+    }
+
+    public interface ExternalUserViewPrivate {
+
+    }
+
+    public interface QuestionView {
+
+    }
+
+    public interface QuestionResponseView
+            extends QuestionResponseViewPublic, QuestionResponseViewPrivate, QuestionView {
+
+    }
+
+    public interface QuestionResponseViewPublic {
+
+    }
+
+    public interface QuestionResponseViewPrivate {
+
+    }
 
 }

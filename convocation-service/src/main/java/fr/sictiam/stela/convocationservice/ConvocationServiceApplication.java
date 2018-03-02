@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @EnableRabbit
 public class ConvocationServiceApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(ConvocationServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ConvocationServiceApplication.class, args);
+    }
 }

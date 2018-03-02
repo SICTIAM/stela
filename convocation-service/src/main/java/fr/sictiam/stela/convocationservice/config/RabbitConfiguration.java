@@ -16,51 +16,51 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(value = "application.rabbit.enabled")
 public class RabbitConfiguration {
 
-	@Value("${spring.rabbitmq.host}")
-	private String hostname;
+    @Value("${spring.rabbitmq.host}")
+    private String hostname;
 
-	@Value("${spring.rabbitmq.username}")
-	private String username;
+    @Value("${spring.rabbitmq.username}")
+    private String username;
 
-	@Value("${spring.rabbitmq.password}")
-	private String password;
+    @Value("${spring.rabbitmq.password}")
+    private String password;
 
-	@Value("${application.amqp.convocation.exchange}")
-	private String exchangeName;
+    @Value("${application.amqp.convocation.exchange}")
+    private String exchangeName;
 
-	@Bean
-	Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
-		return new Jackson2JsonMessageConverter();
-	}
+    @Bean
+    Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
 
-	@Bean
-	FanoutExchange fanoutExchange() {
-		return new FanoutExchange(exchangeName, true, false);
-	}
+    @Bean
+    FanoutExchange fanoutExchange() {
+        return new FanoutExchange(exchangeName, true, false);
+    }
 
-	@Bean
-	ConnectionFactory connectionFactory() {
-		CachingConnectionFactory connectionFactory = new CachingConnectionFactory(hostname);
-		connectionFactory.setUsername(username);
-		connectionFactory.setPassword(password);
-		return connectionFactory;
-	}
+    @Bean
+    ConnectionFactory connectionFactory() {
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory(hostname);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
+        return connectionFactory;
+    }
 
-	@Bean
-	public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory() {
-		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-		factory.setConnectionFactory(connectionFactory());
-		factory.setConcurrentConsumers(3);
-		factory.setMaxConcurrentConsumers(10);
-		return factory;
-	}
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory() {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory());
+        factory.setConcurrentConsumers(3);
+        factory.setMaxConcurrentConsumers(10);
+        return factory;
+    }
 
-	@Bean
-	@Required
-	RabbitAdmin rabbitAdmin() {
-		RabbitAdmin admin = new RabbitAdmin(connectionFactory());
-		admin.setAutoStartup(true);
-		admin.declareExchange(fanoutExchange());
-		return admin;
-	}
+    @Bean
+    @Required
+    RabbitAdmin rabbitAdmin() {
+        RabbitAdmin admin = new RabbitAdmin(connectionFactory());
+        admin.setAutoStartup(true);
+        admin.declareExchange(fanoutExchange());
+        return admin;
+    }
 }

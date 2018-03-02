@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class ConvocationNotFoundException extends RuntimeException {
 
-	public ConvocationNotFoundException() {
-		super("notifications.convocation.not_found");
-	}
+    public ConvocationNotFoundException() {
+        super("notifications.convocation.not_found");
+    }
 
-	public ConvocationNotFoundException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public ConvocationNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
