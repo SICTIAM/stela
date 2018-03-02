@@ -100,9 +100,21 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
-        groupsUpdated: {
+        groupCreated: {
             title: 'notifications.admin.title',
-            message: 'notifications.admin.groups_updated',
+            message: 'notifications.admin.group_created',
+            level: 'success',
+            position: 'br'
+        },
+        groupUpdated: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.group_updated',
+            level: 'success',
+            position: 'br'
+        },
+        agentProfileUpdated: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.agent_profile_updated',
             level: 'success',
             position: 'br'
         }

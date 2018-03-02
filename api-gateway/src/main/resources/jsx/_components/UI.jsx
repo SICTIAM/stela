@@ -51,8 +51,8 @@ const InputFile = ({ htmlFor, label, children }) =>
         {children}
     </div>
 
-const ListItem = ({ children, icon, iconColor, title }) =>
-    <List.Item>
+const ListItem = ({ children, icon, iconColor, title, ...rest }) =>
+    <List.Item {...rest}>
         {children}
         {icon &&
             <List.Icon name={icon} size='large' color={iconColor} />

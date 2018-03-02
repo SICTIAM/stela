@@ -142,7 +142,8 @@ class LocalAuthority extends Component {
             )
         })
         const groupList = this.state.fields.groups.map(group =>
-            <ListItem key={group.uuid} title={group.name} icon='users'>
+            <ListItem as={Link} to={`/admin/collectivite/${this.state.fields.uuid}/groupes/${group.uuid}`}
+                key={group.uuid} title={group.name} icon='users' style={{ cursor: 'pointer' }}>
                 <List.Content floated='right'>
                     <Icon onClick={() => this.removeGroup(group.uuid)} name='remove' color='red' size='large' style={{ cursor: 'pointer' }} />
                 </List.Content>
@@ -201,6 +202,7 @@ class LocalAuthority extends Component {
                 <Segment>
                     <h2>{t('admin.local_authority.groups')}</h2>
                     <AddGroup addNewGroup={this.addNewGroup} />
+                    <Link to={`/admin/collectivite/${this.state.fields.uuid}/groupes`}>Form new group</Link>
                     <List divided relaxed verticalAlign='middle'>
                         {groupList}
                     </List>

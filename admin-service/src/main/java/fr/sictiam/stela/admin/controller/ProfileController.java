@@ -3,6 +3,7 @@ package fr.sictiam.stela.admin.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.WorkGroup;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -36,9 +36,15 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
-    @PutMapping("/{uuid}/group")
-    public void updateGroups(@PathVariable String uuid, @RequestBody List<String> groupUuids) {
-        profileService.updateGroups(uuid, groupUuids);
+    @PutMapping("/{uuid}/rights")
+    public ResponseEntity updateProfileRights(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid, @RequestBody ProfileRights profileRights) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        profileService.updateProfileRights(uuid, profileRights);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @JsonView(Views.WorkGroupViewPublic.class)
@@ -64,6 +70,8 @@ public class ProfileController {
         return profileService.getByUuid(uuid).getLocalAuthority().getSlugName();
     }
 
+    // TODO: Fix Rights on this endpoint
+    // one user do not need any right to modify all his profile but should not be able to modify all profiles
     @PatchMapping("/{uuid}")
     public ResponseEntity<?> updateProfile(@PathVariable String uuid, @RequestBody ProfileUI profileUI) {
         Profile profile = profileService.getByUuid(uuid);

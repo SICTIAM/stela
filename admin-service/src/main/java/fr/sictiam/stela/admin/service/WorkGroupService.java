@@ -2,6 +2,7 @@ package fr.sictiam.stela.admin.service;
 
 import fr.sictiam.stela.admin.dao.WorkGroupRepository;
 import fr.sictiam.stela.admin.model.LocalAuthority;
+import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -30,6 +31,13 @@ public class WorkGroupService {
         localAuthority.getGroups().add(workGroup);
         localAuthorityService.createOrUpdate(localAuthority);
         return workGroup;
+    }
+
+    public WorkGroup createFromUI(WorkGroupUI workGroupUI, String localAuthorityUuid) {
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
+        WorkGroup workGroup = new WorkGroup(localAuthority, workGroupUI.getName());
+        workGroup.setRights(workGroupUI.getRights());
+        return create(workGroup);
     }
 
     public List<WorkGroup> getAllByLocalAuthority(String localAuthorityUuid) {

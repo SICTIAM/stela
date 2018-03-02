@@ -5,7 +5,8 @@
         "log_in": "Connexion",
         "log_out": "Déconnexion",
         "profile": "Profil",
-        "admin": "Administration"
+        "admin": "Administration",
+        "back_to_app": "Application"
     },
     "select_localAuthority": "Sélectionner la collectivité",
     "last_localAuthorities": "Dernières collectivités utilisées",
@@ -163,7 +164,9 @@
             "title": "Administration",
             "local_authority_not_found": "Collectivité non trouvée",
             "agent_not_found": "Agent non trouvé",
-            "groups_updated": "Les groupes de l'agent ont bien été mis à jour"
+            "group_created": "Le groupe a bien été créé",
+            "group_updated": "Le groupe a bien été mis à jour",
+            "agent_profile_updated": "Les droits de l'agent ont bien été mis à jour"
         },
         "profile": {
             "title": "Profil",
@@ -189,11 +192,21 @@
         "given_name": "Prénom",
         "email": "Email",
         "modules": "Modules",
+        "local_authority_admin": "Administrateur de collectivité",
         "groups": "Groupes",
         "add_group": "Ajouter un groupe"
     },
     "group": {
-        "name": "Nom"
+        "name": "Nom",
+        "rights": "Droits"
+    },
+    "right": {
+        "ACTES_DEPOSIT": "Dépot d'actes",
+        "ACTES_DISPLAY": "Visualisation d'actes",
+        "ACTES_ADMIN": "Administration du module Actes",
+        "PES_DEPOSIT": "Dépot de PES",
+        "PES_DISPLAY": "Visualisation de PES",
+        "PES_ADMIN": "Administration du module PES"
     },
     "admin": {
         "dashboard": "Tableau de bord",
@@ -225,6 +238,10 @@
             "no_group": "Aucun groupe",
             "add_group": "Affecter un groupe..."
         },
+        "group": {
+            "no_rights": "Aucun droit",
+            "add_right": "Ajouter un droit"
+        },
         "back_to_stela": "Retourner sur STELA"
     },
     "modules": {
@@ -236,6 +253,10 @@
         "401": {
             "title": "Erreur 401",
             "content": "Vous devez être authentifié pour accéder à cette page"
+        },
+        "403": {
+            "title": "Erreur 403",
+            "content": "Vous n'avez pas les droits suffisants pour accéder à cette page"
         },
         "404": {
             "title": "Erreur 404",

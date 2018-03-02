@@ -59,6 +59,24 @@ const getHistoryStatusTranslationKey = (moduleName, history) => {
     return `${moduleName}:${moduleName}.${history.status === 'SENT' && history.flux !== 'TRANSMISSION_ACTE' && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
 }
 
+const getRightsFromGroups = (groups) => {
+    const rights = []
+    groups.forEach(group =>
+        group.rights.forEach(right => {
+            if (!rights.includes(right)) rights.push(right)
+        })
+    )
+    return rights
+}
+
+const rightsResolver = (userRights, allowedRights) => {
+    if (!allowedRights || allowedRights.length === 0) return true
+    for (let i in userRights) {
+        if (allowedRights.includes(userRights[i])) return true
+    }
+    return false
+}
+
 module.exports = {
     checkStatus,
     fetchWithAuthzHandling,
@@ -66,5 +84,7 @@ module.exports = {
     handleFieldChange,
     bytesToSize,
     capitalizeFirstLetter,
-    getHistoryStatusTranslationKey
+    getHistoryStatusTranslationKey,
+    getRightsFromGroups,
+    rightsResolver
 }

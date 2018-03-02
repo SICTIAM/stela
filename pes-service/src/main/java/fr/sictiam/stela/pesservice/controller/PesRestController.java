@@ -5,8 +5,10 @@ import fr.sictiam.stela.pesservice.model.CustomValidationUI;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.PesRetour;
+import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
@@ -39,7 +41,9 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/pes")
@@ -71,8 +75,12 @@ public class PesRestController {
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<PesAller> pesList = pesAllerService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset,
                 column, direction, currentLocalAuthUuid);
         Long count = pesAllerService.countAllWithQuery(objet, creationFrom, creationTo, status, currentLocalAuthUuid);
@@ -81,15 +89,22 @@ public class PesRestController {
 
     @GetMapping("/{uuid}")
     public ResponseEntity<PesAller> getByUuid(
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @PathVariable String uuid) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         PesAller pes = pesAllerService.getByUuid(uuid);
 
         return new ResponseEntity<>(pes, HttpStatus.OK);
     }
 
     @GetMapping("/resend/{uuid}")
-    public ResponseEntity<String> reSendFlux(@PathVariable String uuid) {
+    public ResponseEntity<String> reSendFlux(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @PathVariable String uuid) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         PesAller pes = pesAllerService.getByUuid(uuid);
         pesAllerService.send(pes);
         StatusType statusType = StatusType.MANUAL_RESENT;
@@ -98,10 +113,13 @@ public class PesRestController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+    public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
-
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         ObjectMapper mapper = new ObjectMapper();
         try {
             if (pesAllerService.checkVirus(file)) {
@@ -125,14 +143,24 @@ public class PesRestController {
     }
 
     @GetMapping("/{uuid}/file")
-    public ResponseEntity<?> getPesAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity getPesAttachment
+            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+                    HttpServletResponse response, @PathVariable String uuid) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         PesAller pesAller = pesAllerService.getByUuid(uuid);
         outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename());
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
-    public ResponseEntity<?> getFileHistory(HttpServletResponse response, @PathVariable String historyUuid) {
+    public ResponseEntity getFileHistory
+            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+                    HttpServletResponse response, @PathVariable String historyUuid) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         PesHistory pesHistory = pesAllerService.getHistoryByUuid(historyUuid);
         if (pesHistory.getFile() != null) {
             outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
@@ -142,18 +170,28 @@ public class PesRestController {
     }
 
     @GetMapping("/statuses")
-    public List<StatusType> getStatuses() {
-        return Arrays.asList(StatusType.values());
+    public ResponseEntity<List<StatusType>> getStatuses
+            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(Arrays.asList(StatusType.values()), HttpStatus.OK);
     }
 
     @GetMapping("/pes-retour")
     public ResponseEntity<SearchResultsUI> getAllPesRetour(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam(value = "filename", required = false) String filename,
-            @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
-            @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
+            @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate
+                    creationFrom,
+            @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate
+                    creationTo,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<PesRetour> pesRetours = pesRetourService.getAllWithQuery(filename, creationFrom, creationTo,
                 currentLocalAuthUuid, limit, offset);
         Long count = pesRetourService.countAllWithQuery(filename, creationFrom, creationTo, currentLocalAuthUuid);
@@ -161,7 +199,12 @@ public class PesRestController {
     }
 
     @GetMapping("/pes-retour/{uuid}/file")
-    public ResponseEntity<?> getPesRetourAttachment(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity getPesRetourAttachment
+            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+                    HttpServletResponse response, @PathVariable String uuid) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         PesRetour pesRetour = pesRetourService.getByUuid(uuid);
         outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename());
         return new ResponseEntity<Object>(HttpStatus.OK);
