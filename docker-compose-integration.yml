@@ -86,7 +86,7 @@ services:
       environment:
        - "SPRING_PROFILES_ACTIVE=integration"  
   convocation-service:
-    image: stela-poc/convocation-service
+    image: forge-registry.sictiam.fr/internet/stela-poc/convocation-service
     container_name: convocation-service
     ports:
      - "9012:9012"
