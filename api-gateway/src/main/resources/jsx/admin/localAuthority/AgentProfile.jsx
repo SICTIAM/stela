@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Label, Icon, Dropdown, Form, Button } from 'semantic-ui-react'
+import { Segment, Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic-ui-react'
 
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
@@ -28,7 +28,8 @@ class AgentProfile extends Component {
             localAuthority: {
                 name: ''
             },
-            groups: []
+            groups: [],
+            admin: false
         },
         allGroups: [],
         newGroup: ''
@@ -57,18 +58,24 @@ class AgentProfile extends Component {
         }
     }
     submitForm = () => {
-        const body = JSON.stringify(this.state.fields.groups.map(group => group.uuid))
+        const groupUuids = this.state.fields.groups.map(group => group.uuid)
+        const body = JSON.stringify({ admin: this.state.fields.admin, groupUuids })
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `/api/admin/profile/${this.state.fields.uuid}/group`, method: 'PUT', body, headers, context: this.context })
+        fetchWithAuthzHandling({ url: `/api/admin/profile/${this.state.fields.uuid}/rights`, method: 'PUT', body, headers, context: this.context })
             .then(checkStatus)
             .then(() =>
-                this.context._addNotification(notifications.admin.groupsUpdated)
+                this.context._addNotification(notifications.admin.agentProfileUpdated)
             )
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
+    }
+    handleCheckboxChange = (event, { id }) => {
+        const { fields } = this.state
+        fields[id] = !fields[id]
+        this.setState({ fields })
     }
     handleChange = (event, { value }) => {
         const { allGroups, fields } = this.state
@@ -99,7 +106,11 @@ class AgentProfile extends Component {
                         <Field htmlFor='email' label={t('agent.email')}>
                             <span id='email'>{agent.email}</span>
                         </Field>
-
+                        <Field htmlFor='admin' label={t('agent.local_authority_admin')}>
+                            <Checkbox id='admin'
+                                toggle checked={this.state.fields.admin}
+                                onChange={this.handleCheckboxChange} />
+                        </Field>
                         <Field htmlFor='groups' label={t('agent.groups')}>
                             <div style={{ marginBottom: '0.5em' }}>{groups.length > 0 ? groups : t('admin.agent.no_group')}</div>
                             <div style={{ marginBottom: '1em' }}>

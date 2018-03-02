@@ -10,7 +10,7 @@ import { translate } from 'react-i18next'
 import 'semantic-ui-css/semantic.min.css';
 import '../styles/index.css';
 
-import { fetchWithAuthzHandling } from './_util/utils'
+import { fetchWithAuthzHandling, getRightsFromGroups, rightsResolver } from './_util/utils'
 import history from './_util/history'
 import i18n from './_util/i18n'
 import ErrorPage from './_components/ErrorPage'
@@ -33,6 +33,7 @@ import AdminDashboard from './admin/AdminDashboard'
 import AgentList from './admin/AgentList'
 import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
 import LocalAuthority from './admin/localAuthority/LocalAuthority'
+import Group from './admin/localAuthority/Group'
 import ActeLocalAuthorityParams from './admin/acte/ActeLocalAuthorityParams'
 import PesLocalAuthorityParams from './admin/pes/PesLocalAuthorityParams'
 import AgentProfile from './admin/localAuthority/AgentProfile'
@@ -133,7 +134,7 @@ const PublicRoute = ({ component: Component, ...rest }) => (
         </div>
     } />
 )
-const AuthRoute = ({ component: Component, menu: Menu, admin, ...rest }, { isLoggedIn }) => (
+const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowedRights, ...rest }, { isLoggedIn }) => (
     <Route {...rest} render={(props) =>
         <div>
             <TopBar admin={!!admin} />
@@ -142,7 +143,9 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, ...rest }, { isLog
                 <Container className='mainContainer'>
                     <AlertMessage {...props} />
                     {isLoggedIn
-                        ? <Component {...props} {...props.match.params} />
+                        ? rightsResolver(userRights, allowedRights)
+                            ? <Component {...props} {...props.match.params} />
+                            : <ErrorPage error={403} />
                         : <ErrorPage error={401} />}
                 </Container>
             </div>
@@ -153,51 +156,72 @@ AuthRoute.contextTypes = {
     isLoggedIn: PropTypes.bool
 }
 
-const AppRoute = () =>
-    <Switch>
-        <PublicRoute exact path='/' component={Home} />
+class AppRoute extends Component {
+    state = {
+        userRights: []
+    }
+    componentDidMount() {
+        fetchWithAuthzHandling({ url: '/api/admin/profile' })
+            .then(response => response.json())
+            .then(profile => {
+                const userRights = getRightsFromGroups(profile.groups)
+                if (profile.admin) userRights.push('LOCAL_AUTHORITY_ADMIN')
+                if (profile.agent.admin) userRights.push('ADMIN')
+                this.setState({ userRights })
+            })
+    }
+    render() {
+        const { userRights } = this.state
+        return (
+            <Switch>
+                <PublicRoute exact path='/' component={Home} />
 
-        <Route path='/choix-collectivite' component={SelectLocalAuthority} />
+                <Route path='/choix-collectivite' component={SelectLocalAuthority} />
 
-        <AuthRoute path='/profil' component={UserProfile} menu={MenuBar} />
+                <AuthRoute path='/profil' component={UserProfile} menu={MenuBar} />
 
-        <Route exact path='/actes'>
-            <Redirect to="/actes/liste" />
-        </Route>
-        <AuthRoute path='/actes/liste' component={ActeList} menu={MenuBar} />
-        <AuthRoute path='/actes/brouillons/:uuid' component={NewActeSwitch} menu={MenuBar} />
-        <AuthRoute path='/actes/brouillons' component={DraftList} menu={MenuBar} />
-        <AuthRoute path='/actes/nouveau' component={NewActeSwitch} menu={MenuBar} />
-        <AuthRoute path='/actes/:uuid' component={Acte} menu={MenuBar} />
+                <Route exact path='/actes'>
+                    <Redirect to='/actes/liste' />
+                </Route>
+                <AuthRoute path='/actes/liste' userRights={userRights} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={ActeList} menu={MenuBar} />
+                <AuthRoute path='/actes/brouillons/:uuid' userRights={userRights} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} />
+                <AuthRoute path='/actes/brouillons' userRights={userRights} allowedRights={['ACTES_DEPOSIT']} component={DraftList} menu={MenuBar} />
+                <AuthRoute path='/actes/nouveau' userRights={userRights} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} />
+                <AuthRoute path='/actes/:uuid' userRights={userRights} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
 
-        <Route exact path='/pes'>
-            <Redirect to="/pes/liste" />
-        </Route>
-        <AuthRoute path='/pes/retour/liste' component={PesRetourList} menu={MenuBar} />
-        <AuthRoute path='/pes/liste' component={PesList} menu={MenuBar} />
-        <AuthRoute path='/pes/nouveau' component={NewPes} menu={MenuBar} />
-        <AuthRoute path='/pes/:uuid' component={Pes} menu={MenuBar} />
+                <Route exact path='/pes'>
+                    <Redirect to="/pes/liste" />
+                </Route>
+                <AuthRoute path='/pes/retour/liste' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesRetourList} menu={MenuBar} />
+                <AuthRoute path='/pes/liste' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
+                <AuthRoute path='/pes/nouveau' userRights={userRights} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} />
+                <AuthRoute path='/pes/:uuid' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
 
-        <Route exact path='/admin'>
-            <Redirect to="/admin/tableau-de-bord" />
-        </Route>
-        <AuthRoute path='/admin/tableau-de-bord' component={AdminDashboard} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/agents/:uuid' component={AdminProfile} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/agents' component={AgentList} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/ma-collectivite/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/ma-collectivite/pes' component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/ma-collectivite' component={LocalAuthority} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' component={AgentProfile} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/collectivite/:uuid/actes' component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/collectivite/:uuid/pes' component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/collectivite/:uuid' component={LocalAuthority} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/collectivite' component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/actes/parametrage-module' component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
-        <AuthRoute path='/admin/pes/parametrage-module' component={PesModuleParams} menu={AdminMenuBar} admin={true} />
+                <Route exact path='/admin'>
+                    <Redirect to="/admin/tableau-de-bord" />
+                </Route>
+                <AuthRoute path='/admin/tableau-de-bord' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminDashboard} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/agents/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/agents' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/actes/parametrage-module' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/pes/parametrage-module' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
 
-        <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
-        <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
-    </Switch>
+                <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
+                <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
+            </Switch>
+        )
+    }
+}
 
 const TranslatedApp = translate('api-gateway')(App)
 

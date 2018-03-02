@@ -3,6 +3,7 @@ package fr.sictiam.stela.admin.service;
 import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.NotificationValue;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -51,13 +52,14 @@ public class ProfileService {
                 .orElseThrow(() -> new NotFoundException("notifications.admin.profile_not_found"));
     }
 
-    public void updateGroups(String profileUuid, List<String> uuids) {
+    public void updateProfileRights(String profileUuid, ProfileRights profileRights) {
         Profile profile = getByUuid(profileUuid);
         profile.getGroups().forEach(workGroup -> workGroup.getProfiles().remove(profile));
 
-        Set<WorkGroup> groups = uuids.stream().map(workGroupService::getByUuid).collect(Collectors.toSet());
+        Set<WorkGroup> groups = profileRights.getGroupUuids().stream().map(workGroupService::getByUuid).collect(Collectors.toSet());
         groups.forEach(workGroup -> workGroup.getProfiles().add(profile));
         profile.setGroups(groups);
+        profile.setAdmin(profileRights.isAdmin());
         profileRepository.save(profile);
         localAuthorityService.createOrUpdate(profile.getLocalAuthority());
     }

@@ -2,9 +2,11 @@ package fr.sictiam.stela.acteservice.controller;
 
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
 import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.util.RightUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/acte/localAuthority")
@@ -37,27 +41,44 @@ public class LocalAuthorityRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LocalAuthority>> getAll() {
+    public ResponseEntity<List<LocalAuthority>> getAll(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
         return new ResponseEntity<>(localAuthorities, HttpStatus.OK);
     }
 
     @GetMapping("/current")
     public ResponseEntity<LocalAuthority> getCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(currentLocalAuthority, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<LocalAuthority> getByUuid(@PathVariable String uuid) {
+    public ResponseEntity<LocalAuthority> getByUuid(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         return new ResponseEntity<>(localAuthority, HttpStatus.OK);
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity<LocalAuthority> update(@PathVariable String uuid,
-            @Valid @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+    public ResponseEntity<LocalAuthority> update(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid, @Valid @RequestBody LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
@@ -71,7 +92,11 @@ public class LocalAuthorityRestController {
 
     @GetMapping("/depositFields")
     public ResponseEntity<ActeDepositFieldsUI> getActeDepositFields(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
 
         LOGGER.info("currentLocalAuthority: {}", currentLocalAuthority.getName());
@@ -79,15 +104,13 @@ public class LocalAuthorityRestController {
                 currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }
 
-    @GetMapping("/load-matieres")
-    public void loadCodesMatieres(@RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        localAuthorityService.loadClassification(currentLocalAuthority.getUuid());
-    }
-
     @GetMapping("/codes-matieres")
     public ResponseEntity<List<MaterialCode>> getCodesMatieres(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(localAuthorityService.getCodesMatieres(currentLocalAuthority.getUuid()),
                 HttpStatus.OK);
@@ -95,8 +118,12 @@ public class LocalAuthorityRestController {
 
     @GetMapping("/codes-matiere/{code}")
     public ResponseEntity<String> getCodeMatiereLabel(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String code) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), code),
                 HttpStatus.OK);

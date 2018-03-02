@@ -2,10 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { translate } from 'react-i18next'
-
-import { Segment, List, Form, Button, Icon, Confirm, Grid } from 'semantic-ui-react'
-import Validator from 'validatorjs'
-
+import { Segment, List, Button, Icon, Confirm, Grid } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
 import { notifications } from '../../_util/Notifications'
@@ -86,18 +83,6 @@ class LocalAuthority extends Component {
         confirmModalType === 'activation' && this.activateModule(moduleToEdit)
         confirmModalType === 'deactivation' && this.deactivateModule(moduleToEdit)
     }
-    addNewGroup = (newGroup, callback) => {
-        const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `/api/admin/local-authority/${this.state.fields.uuid}/group`, method: 'POST', body: newGroup, headers: headers, context: this.context })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => this.setState((prevState) => { prevState.fields.groups.push(json) }, callback))
-            .catch(response => {
-                response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                })
-            })
-    }
     removeGroup = (uuid) => {
         fetchWithAuthzHandling({ url: `/api/admin/local-authority/${this.state.fields.uuid}/group/${uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
@@ -142,7 +127,8 @@ class LocalAuthority extends Component {
             )
         })
         const groupList = this.state.fields.groups.map(group =>
-            <ListItem key={group.uuid} title={group.name} icon='users'>
+            <ListItem as={Link} to={`/admin/collectivite/${this.state.fields.uuid}/groupes/${group.uuid}`}
+                key={group.uuid} title={group.name} icon='users' style={{ cursor: 'pointer' }}>
                 <List.Content floated='right'>
                     <Icon onClick={() => this.removeGroup(group.uuid)} name='remove' color='red' size='large' style={{ cursor: 'pointer' }} />
                 </List.Content>
@@ -200,53 +186,16 @@ class LocalAuthority extends Component {
 
                 <Segment>
                     <h2>{t('admin.local_authority.groups')}</h2>
-                    <AddGroup addNewGroup={this.addNewGroup} />
+                    <div style={{ textAlign: 'right' }}>
+                        <Link className='ui button basic primary' to={`/admin/collectivite/${this.state.fields.uuid}/groupes`}>
+                            {t('admin.local_authority.new_group')}
+                        </Link>
+                    </div>
                     <List divided relaxed verticalAlign='middle'>
                         {groupList}
                     </List>
                 </Segment>
             </Page>
-        )
-    }
-}
-
-class AddGroup extends Component {
-    static contextTypes = {
-        t: PropTypes.func
-    }
-    state = {
-        newGroup: '',
-        isFormValid: false
-    }
-    validationRules = {
-        name: 'required'
-    }
-    addNewGroup = () => this.props.addNewGroup(this.state.newGroup, () => this.setState({ newGroup: '' }))
-    handleFieldChange = (e) => {
-        const { value } = e.target
-        this.setState({ newGroup: value }, this.validateForm)
-    }
-    validateForm = () => {
-        const validation = new Validator({ name: this.state.newGroup }, { name: 'required' })
-        this.setState({ isFormValid: validation.passes() })
-    }
-    render() {
-        const { t } = this.context
-        return (
-            <Form>
-                <Form.Field inline>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.5em' }}>
-                        <label htmlFor='name' style={{ marginLeft: '1em' }}>{t('admin.local_authority.new_group')}</label>
-                        <div style={{ marginLeft: '1em' }}>
-                            <input id='name'
-                                placeholder={t('group.name') + '...'}
-                                value={this.state.newGroup}
-                                onChange={this.handleFieldChange} />
-                        </div>
-                        <Button basic primary style={{ marginLeft: '1em' }} onClick={this.addNewGroup} disabled={!this.state.isFormValid} type='submit'>{t('form.add')}</Button>
-                    </div>
-                </Form.Field>
-            </Form>
         )
     }
 }

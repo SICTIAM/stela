@@ -1,8 +1,10 @@
 package fr.sictiam.stela.pesservice.controller;
 
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.ServerCode;
 import fr.sictiam.stela.pesservice.model.ui.LocalAuthorityUpdateUI;
+import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -21,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/pes/localAuthority")
@@ -38,34 +42,50 @@ public class LocalAuthorityRestController {
 
     @GetMapping("/current")
     public ResponseEntity<LocalAuthority> getCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(currentLocalAuthority, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<LocalAuthority> getByUuid(@PathVariable String uuid) {
+    public ResponseEntity<LocalAuthority> getByUuid(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(uuid);
         return new ResponseEntity<>(currentLocalAuthority, HttpStatus.OK);
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity<?> updateParams(@PathVariable String uuid,
-            @RequestBody @Valid LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+    public ResponseEntity updateParams(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid, @RequestBody @Valid LocalAuthorityUpdateUI localAuthorityUpdateUI) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
         } catch (Exception e) {
             LOGGER.error("Error while updating properties: {}", e);
-            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         localAuthorityService.createOrUpdate(localAuthority);
-        return new ResponseEntity<Object>(HttpStatus.OK);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/server-codes")
-    public List<ServerCode> getServerCodes() {
-        return Arrays.asList(ServerCode.values());
+    public ResponseEntity<List<ServerCode>> getServerCodes(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(Arrays.asList(ServerCode.values()), HttpStatus.OK);
     }
 
 }

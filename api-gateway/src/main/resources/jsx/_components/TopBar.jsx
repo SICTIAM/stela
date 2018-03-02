@@ -19,6 +19,7 @@ class TopBar extends Component {
         isUpdated: false,
         currentProfile: {
             uuid: '',
+            admin: false,
             localAuthority: {
                 name: ''
             }
@@ -92,7 +93,13 @@ class TopBar extends Component {
                                 <Popup style={{ padding: 0 }} trigger={trigger} on='click' position='bottom center'>
                                     <Menu vertical>
                                         <Menu.Item as={Link} to='/profil'><span><Icon name='user' /> {t('top_bar.profile')}</span></Menu.Item>
-                                        <Menu.Item as={Link} to='/admin'><span><Icon name='settings' /> {t('top_bar.admin')}</span></Menu.Item>
+                                        {this.state.currentProfile.admin &&
+                                            <Menu.Item as={Link} to={this.props.admin ? '/' : '/admin'} >
+                                                <span>
+                                                    <Icon name={this.props.admin ? 'reply' : 'settings'} /> {t(`top_bar.${this.props.admin ? 'back_to_app' : 'admin'}`)}
+                                                </span>
+                                            </Menu.Item>
+                                        }
                                         <Menu.Item onClick={() => window.location.href = '/logout'}><span><Icon name='sign out' /> {t('top_bar.log_out')}</span></Menu.Item>
                                     </Menu>
                                 </Popup>

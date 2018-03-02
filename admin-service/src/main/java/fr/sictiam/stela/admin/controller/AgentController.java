@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -83,23 +85,32 @@ public class AgentController {
 
     @GetMapping("/all")
     @JsonView(Views.AgentViewPublic.class)
-    public AgentResultsUI getAllAgent(
+    public ResponseEntity<AgentResultsUI> getAllAgent(
             @RequestParam(value = "search", required = false, defaultValue = "") String search,
             @RequestParam(value = "localAuthorityUuid", required = false, defaultValue = "") String localAuthorityUuid,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "familyName") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction) {
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<Agent> localAuthorities = agentService.getAllWithPagination(search, localAuthorityUuid, limit, offset,
                 column, direction);
         Long count = agentService.countAll();
-        return new AgentResultsUI(count, localAuthorities);
+        return new ResponseEntity<>(new AgentResultsUI(count, localAuthorities), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
     @JsonView(Views.AgentView.class)
-    public Agent getAgent(@PathVariable String uuid) {
-        return agentService.findByUuid(uuid).get();
+    public ResponseEntity<Agent> getAgent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(agentService.findByUuid(uuid).get(), HttpStatus.OK);
     }
 
     @GetMapping("/profiles")
