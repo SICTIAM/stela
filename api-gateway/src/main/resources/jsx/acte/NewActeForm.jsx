@@ -153,7 +153,7 @@ class NewActeForm extends Component {
         if (!acte.code) acte.code = ''
         if (!acte.codeLabel) acte.codeLabel = ''
         if (!acte.decision) acte.decision = ''
-        if (!acte.groupUuid) acte.groupUuid = ''
+        if (acte.groupUuid === '') acte.groupUuid = 'all_group'
         if (!acte.objet) acte.objet = ''
         if (!acte.number) acte.number = ''
         if (!acte.annexes) acte.annexes = []
@@ -163,6 +163,7 @@ class NewActeForm extends Component {
         const acteData = Object.assign({}, this.state.fields)
         if (acteData['nature'] === '') acteData['nature'] = null
         if (acteData['decision'] === '') acteData['decision'] = null
+        if (acteData['groupUuid'] === 'all_group') acteData['groupUuid'] = ''
         return acteData
     }
     extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
@@ -351,19 +352,21 @@ class NewActeForm extends Component {
         const isPublicFieldDisabled = !this.state.depositFields.publicField
         const isFormSaving = this.props.status === 'saving'
         const natureOptions = natures.map(nature =>
-            <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
+            ({ key: nature, value: nature, text: t(`acte.nature.${nature}`) })
         )
-        const codeOptions = this.state.codesMatieres.map(materialCode => {
-            const object = { key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label }
-            return object
-        })
+        const codeOptions = this.state.codesMatieres.map(materialCode =>
+            ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label })
+        )
         const attachmentTypeSource = this.props.mode === 'ACTE_BATCH' ? this.props.attachmentTypes : this.state.attachmentTypes
-        const attachmentTypes = attachmentTypeSource.map(attachmentType => {
-            return { key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.label }
-        })
-        const groupOptions = this.state.groups.map(group =>
-            <option key={group.uuid} value={group.uuid}>{group.name}</option>
+        const attachmentTypes = attachmentTypeSource.map(attachmentType =>
+            ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.label })
         )
+        const groupOptions = this.state.groups.map(group =>
+            ({ key: group.uuid, value: group.uuid, text: group.name })
+        )
+        // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
+        groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
+        const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
         const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) &&
             <Dropdown fluid selection
                 placeholder={t('acte.new.PJ_types')}
@@ -419,29 +422,28 @@ class NewActeForm extends Component {
                         </FormField>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BATCH')(
-                        <FormField htmlFor={`${this.state.fields.uuid}_group`} label={t('acte.fields.group')}>
-                            <select id='groupUuid' value={this.state.fields.groupUuid} onChange={e => this.handleFieldChange('groupUuid', e.target.value)}>
-                                <option value=''>{t('acte.new.every_group')}</option>
-                                {groupOptions}
-                            </select>
+                        <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}>
+                            <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
+                                value={groupOptionValue}
+                                onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                options={groupOptions}
+                                fluid selection />
                         </FormField>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH')(
                         <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')}>
                             <InputValidation id={`${this.state.fields.uuid}_nature`}
-                                type='select'
+                                type='dropdown'
                                 value={this.state.fields.nature}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.nature}
-                                fieldName={t('acte.fields.nature')}>
-                                <option value='' disabled>{t('acte.new.choose')}</option>
-                                {natureOptions}
-                            </InputValidation>
+                                fieldName={t('acte.fields.nature')}
+                                options={natureOptions} />
                         </FormField>
                     )}
                     <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')}>
                         <InputValidation id={`${this.state.fields.uuid}_code`}
-                            type='dropdown'
+                            type='dropdown' search
                             value={this.state.fields.code}
                             onChange={this.handleFieldChange}
                             validationRule={this.validationRules.code}

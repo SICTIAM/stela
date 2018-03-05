@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Accordion, Icon, Segment, Grid, Button, Header, Form } from 'semantic-ui-react'
+import { Accordion, Icon, Segment, Grid, Button, Header, Form, Dropdown } from 'semantic-ui-react'
 import moment from 'moment'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
@@ -78,13 +78,14 @@ class NewActeBatchedForm extends Component {
         // Hacks to prevent affecting `null` values
         if (!draft.nature) draft.nature = ''
         if (!draft.decision) draft.decision = ''
-        if (!draft.groupUuid) draft.groupUuid = ''
+        if (draft.groupUuid === '') draft.groupUuid = 'all_group'
         this.setState({ fields: draft }, callback)
     }
     getDraftData = () => {
         const draftData = Object.assign({}, this.state.fields)
         if (draftData['nature'] === '') draftData['nature'] = null
         if (draftData['decision'] === '') draftData['decision'] = null
+        if (draftData['groupUuid'] === 'all_group') draftData['groupUuid'] = ''
         return draftData
     }
     addBatchedActe = () => {
@@ -244,11 +245,14 @@ class NewActeBatchedForm extends Component {
         const isFormSaving = this.props.status === 'saving'
         const draftUuid = this.state.fields.uuid ? this.state.fields.uuid : this.props.uuid
         const natureOptions = natures.map(nature =>
-            <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
+            ({ key: nature, value: nature, text: t(`acte.nature.${nature}`) })
         )
         const groupOptions = this.state.groups.map(group =>
-            <option key={group.uuid} value={group.uuid}>{group.name}</option>
+            ({ key: group.uuid, value: group.uuid, text: group.name })
         )
+        // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
+        groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
+        const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
         const wrappedActes = this.state.fields.actes.map(acte =>
             <WrappedActeForm
                 key={acte.uuid}
@@ -281,10 +285,11 @@ class NewActeBatchedForm extends Component {
                     <Header size='medium'>{t('acte.new.common_fields')}</Header>
                     <Form>
                         <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')}>
-                            <select id='groupUuid' value={this.state.fields.groupUuid} onChange={e => this.handleFieldChange('groupUuid', e.target.value)}>
-                                <option value=''>{t('acte.new.every_group')}</option>
-                                {groupOptions}
-                            </select>
+                            <Dropdown id='groupUuid'
+                                value={groupOptionValue}
+                                onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                options={groupOptions}
+                                fluid selection />
                         </FormField>
                         <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
                             <InputValidation id={'decision'}
@@ -298,14 +303,12 @@ class NewActeBatchedForm extends Component {
                         </FormField>
                         <FormField htmlFor={'nature'} label={t('acte.fields.nature')}>
                             <InputValidation id={'nature'}
-                                type='select'
+                                type='dropdown'
                                 value={this.state.fields.nature}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.nature}
-                                fieldName={t('acte.fields.nature')}>
-                                <option value='' disabled>{t('acte.new.choose')}</option>
-                                {natureOptions}
-                            </InputValidation>
+                                fieldName={t('acte.fields.nature')}
+                                options={natureOptions} />
                         </FormField>
                     </Form>
                 </Segment>
