@@ -33,7 +33,7 @@ class NewActeForm extends Component {
             number: '',
             decision: '',
             nature: '',
-            groupUuid: '',
+            groupUuid: null,
             code: '',
             objet: '',
             acteAttachment: null,
@@ -127,6 +127,7 @@ class NewActeForm extends Component {
             .then(json => {
                 this.loadActe(json, () => {
                     if (json.nature && this.props.mode !== 'ACTE_BATCH') this.fetchAttachmentTypes()
+                    this.updateGroup()
                     this.validateForm()
                 })
             })
@@ -147,13 +148,19 @@ class NewActeForm extends Component {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
+    updateGroup = () => {
+        if (this.state.fields.groupUuid === null) {
+            const { fields } = this.state
+            fields.groupUuid = this.state.groups.length > 0 ? this.state.groups[0].uuid : 'all_group'
+            this.setState({ fields })
+        }
+    }
     loadActe = (acte, callback) => {
         // Hacks to prevent affecting `null` values from the new empty returned acte
         if (!acte.nature) acte.nature = ''
         if (!acte.code) acte.code = ''
         if (!acte.codeLabel) acte.codeLabel = ''
         if (!acte.decision) acte.decision = ''
-        if (acte.groupUuid === '') acte.groupUuid = 'all_group'
         if (!acte.objet) acte.objet = ''
         if (!acte.number) acte.number = ''
         if (!acte.annexes) acte.annexes = []

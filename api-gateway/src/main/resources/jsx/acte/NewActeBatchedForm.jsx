@@ -30,7 +30,7 @@ class NewActeBatchedForm extends Component {
             lastModified: null,
             decision: '',
             nature: '',
-            groupUuid: ''
+            groupUuid: null
         },
         attachmentTypes: [],
         groups: [],
@@ -52,6 +52,7 @@ class NewActeBatchedForm extends Component {
             .then(response => response.json())
             .then(json =>
                 this.loadDraft(json, () => {
+                    this.updateGroup()
                     this.validateForm()
                     if (json.nature) this.fetchAttachmentTypes()
                     this.setState({ active: this.state.fields.actes[0].uuid })
@@ -199,6 +200,13 @@ class NewActeBatchedForm extends Component {
         const { formValid } = this.state
         formValid[uuid] = isFormValidValue
         this.setState({ formValid }, this.updateAllFormValid)
+    }
+    updateGroup = () => {
+        if (this.state.fields.groupUuid === null) {
+            const { fields } = this.state
+            fields.groupUuid = this.state.groups.length > 0 ? this.state.groups[0].uuid : 'all_group'
+            this.setState({ fields })
+        }
     }
     updateAllFormValid = () => {
         let isAllFormValid = true
