@@ -181,6 +181,7 @@ class NewActeForm extends Component {
         if (field === 'nature' && value === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') {
             fields['public'] = false
             fields['publicWebsite'] = false
+            if (!fields.code.startsWith('7-1-')) fields.code = ''
         }
         if ((field === 'objet' || field === 'number') && this.props.mode === 'ACTE_BATCH') this.props.setField(this.state.fields.uuid, field, value)
         this.props.setStatus('', this.state.fields.uuid)
@@ -208,10 +209,14 @@ class NewActeForm extends Component {
             nature: this.state.fields.nature,
             decision: this.state.fields.decision,
             acteAttachment: this.state.fields.acteAttachment,
+            annexes: this.state.fields.annexes,
             code: this.state.fields.code
         }
+        const validationRules = this.validationRules
+        if (this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.mode === 'ACTE_BUDGETAIRE')
+            validationRules.annexes = 'required'
         Validator.register('acteAttachmentType', this.validateActeAttachmentType, this.context.t('acte.new.PJ_types_validation'))
-        const validation = new Validator(data, this.validationRules)
+        const validation = new Validator(data, validationRules)
         const isFormValid = validation.passes()
         this.setState({ isFormValid })
         if (this.props.mode === 'ACTE_BATCH') {
@@ -361,9 +366,13 @@ class NewActeForm extends Component {
         const natureOptions = natures.map(nature =>
             ({ key: nature, value: nature, text: t(`acte.nature.${nature}`) })
         )
-        const codeOptions = this.state.codesMatieres.map(materialCode =>
-            ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label })
-        )
+        const codeOptions = this.state.codesMatieres
+            .filter(materialCode => this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.mode === 'ACTE_BUDGETAIRE'
+                ? materialCode.code.startsWith('7-1-')
+                : true)
+            .map(materialCode =>
+                ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label })
+            )
         const attachmentTypeSource = this.props.mode === 'ACTE_BATCH' ? this.props.attachmentTypes : this.state.attachmentTypes
         const attachmentTypes = attachmentTypeSource.map(attachmentType =>
             ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.label })
