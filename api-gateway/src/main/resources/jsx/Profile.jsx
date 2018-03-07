@@ -13,7 +13,6 @@ class Profile extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
-        user: PropTypes.object,
         t: PropTypes.func,
         _addNotification: PropTypes.func
     }
@@ -90,7 +89,7 @@ class Profile extends Component {
             
     }
     render() {
-        const { t, user } = this.context
+        const { t } = this.context
         const { activeProfile, agent, allNotifications } = this.state
         const currentLocalAuthorityProfile = agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
         const allLocalAuthorityProfiles = this.props.uuid ? [] : [
@@ -121,13 +120,13 @@ class Profile extends Component {
             <Page title={t('profile.title')}>
                 <Segment style={{ borderTop: '2px solid #663399' }}>
                     <Field htmlFor='family_name' label={t('agent.family_name')}>
-                        <span id='family_name'>{user.family_name}</span>
+                        <span id='family_name'>{agent.family_name}</span>
                     </Field>
                     <Field htmlFor='given_name' label={t('agent.given_name')}>
-                        <span id='given_name'>{user.given_name}</span>
+                        <span id='given_name'>{agent.given_name}</span>
                     </Field>
                     <Field htmlFor='email' label={t('agent.email')}>
-                        <span id='email'>{user.email}</span>
+                        <span id='email'>{agent.email}</span>
                     </Field>
                     {!this.props.uuid &&
                         <div style={{ textAlign: 'right' }}>
