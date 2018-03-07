@@ -246,6 +246,7 @@ class NewActeForm extends Component {
             this.props.setStatus('saving', this.state.fields.uuid)
             const data = new FormData()
             data.append('file', file)
+            data.append('nature', this.state.fields.nature)
             fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.context })
                 .then(checkStatus)
                 .then(response => response.json())
