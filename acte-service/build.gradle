@@ -3,7 +3,7 @@ archivesBaseName = 'stela-acte-service'
 dependencies {
     compile (project(':signature-lib')) {
 	    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.58'
-	    compile group: 'org.bouncycastle', name: 'bckix-jdk15on', version: '1.58'
+	    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.58'
 	}
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
