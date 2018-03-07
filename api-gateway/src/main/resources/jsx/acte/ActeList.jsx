@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import { translate } from 'react-i18next'
-import { Accordion, Form, Button, Segment } from 'semantic-ui-react'
+import { Form, Button, Segment } from 'semantic-ui-react'
 import FileSaver from 'file-saver'
 
 import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
+import AdvancedSearch from '../_components/AdvancedSearch'
+import InputDatetime from '../_components/InputDatetime'
 import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page } from '../_components/UI'
@@ -25,6 +27,7 @@ class ActeList extends Component {
         column: '',
         direction: '',
         search: {
+            multifield: '',
             number: '',
             objet: '',
             nature: '',
@@ -51,6 +54,8 @@ class ActeList extends Component {
         Object.keys(this.state.search)
             .filter(k => this.state.search[k] !== '')
             .map(k => data[k] = this.state.search[k])
+        if (data.decisionFrom) data.decisionFrom = moment(data.decisionFrom).format('YYYY-MM-DD')
+        if (data.decisionTo) data.decisionTo = moment(data.decisionTo).format('YYYY-MM-DD')
         return data
     }
     handlePageClick = (data) => {
@@ -101,6 +106,13 @@ class ActeList extends Component {
     }
     render() {
         const { t } = this.context
+        const { search } = this.state
+        const natureOptions = natures.map(nature =>
+            <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
+        )
+        const statusOptions = status.map(statusItem =>
+            <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
+        )
         const statusDisplay = (histories) => {
             const lastHistory = histories[histories.length - 1]
             return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(getHistoryStatusTranslationKey('acte', lastHistory))}</span>
@@ -135,10 +147,54 @@ class ActeList extends Component {
         return (
             <Page title={t('acte.list.title')}>
                 <Segment>
-                    <ActeListForm
-                        search={this.state.search}
-                        handleFieldChange={this.handleFieldChange}
-                        submitForm={this.submitForm} />
+                    <AdvancedSearch
+                        isDefaultOpen={false}
+                        fieldId='multifield'
+                        fieldValue={search.multifield}
+                        fieldOnChange={this.handleFieldChange}
+                        onSubmit={this.submitForm}>
+
+                        <Form onSubmit={this.submitForm}>
+                            <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
+                                <input id='number' value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
+                            </FormFieldInline>
+                            <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
+                                <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                            </FormFieldInline>
+                            <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
+                                <Form.Group style={{ marginBottom: 0 }} widths='equal'>
+                                    <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
+                                        <InputDatetime id='decisionFrom'
+                                            timeFormat={false}
+                                            value={search.decisionFrom}
+                                            onChange={date => this.handleFieldChange('decisionFrom', date)} />
+                                    </FormField>
+                                    <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
+                                        <InputDatetime id='decisionTo'
+                                            timeFormat={false}
+                                            value={search.decisionTo}
+                                            onChange={date => this.handleFieldChange('decisionTo', date)} />
+                                    </FormField>
+                                </Form.Group>
+                            </FormFieldInline>
+                            <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
+                                <select id='nature' value={search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
+                                    <option value=''>{t('api-gateway:form.all_feminine')}</option>
+                                    {natureOptions}
+                                </select>
+                            </FormFieldInline>
+                            <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
+                                <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <option value=''>{t('api-gateway:form.all')}</option>
+                                    {statusOptions}
+                                </select>
+                            </FormFieldInline>
+                            <div style={{ textAlign: 'right' }}>
+                                <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                            </div>
+                        </Form>
+                    </AdvancedSearch>
+
                     <StelaTable
                         data={this.state.actes}
                         metaData={metaData}
@@ -156,72 +212,6 @@ class ActeList extends Component {
                         column={this.state.column} />
                 </Segment >
             </Page>
-        )
-    }
-}
-
-class ActeListForm extends Component {
-    static contextTypes = {
-        t: PropTypes.func
-    }
-    state = {
-        isAccordionOpen: false
-    }
-    handleAccordion = () => {
-        const isAccordionOpen = this.state.isAccordionOpen
-        this.setState({ isAccordionOpen: !isAccordionOpen })
-    }
-    submitForm = (event) => {
-        if (event) event.preventDefault()
-        this.props.submitForm()
-    }
-    render() {
-        const { t } = this.context
-        const natureOptions = natures.map(nature =>
-            <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
-        )
-        const statusOptions = status.map(statusItem =>
-            <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
-        )
-        return (
-            <Accordion style={{ marginBottom: '1em' }} styled>
-                <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('api-gateway:form.advanced_search')}</Accordion.Title>
-                <Accordion.Content active={this.state.isAccordionOpen}>
-                    <Form onSubmit={this.submitForm}>
-                        <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
-                            <input id='number' value={this.props.search.number} onChange={e => this.props.handleFieldChange('number', e.target.value)} />
-                        </FormFieldInline>
-                        <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                            <input id='objet' value={this.props.search.objet} onChange={e => this.props.handleFieldChange('objet', e.target.value)} />
-                        </FormFieldInline>
-                        <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
-                            <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
-                                    <input type='date' id='decisionFrom' value={this.props.search.decisionFrom} onChange={e => this.props.handleFieldChange('decisionFrom', e.target.value)} />
-                                </FormField>
-                                <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
-                                    <input type='date' id='decisionTo' value={this.props.search.decisionTo} onChange={e => this.props.handleFieldChange('decisionTo', e.target.value)} />
-                                </FormField>
-                            </Form.Group>
-                        </FormFieldInline>
-                        <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
-                            <select id='nature' value={this.props.search.nature} onChange={e => this.props.handleFieldChange('nature', e.target.value)}>
-                                <option value=''>{t('api-gateway:form.all_feminine')}</option>
-                                {natureOptions}
-                            </select>
-                        </FormFieldInline>
-                        <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                            <select id='status' value={this.props.search.status} onChange={e => this.props.handleFieldChange('status', e.target.value)}>
-                                <option value=''>{t('api-gateway:form.all')}</option>
-                                {statusOptions}
-                            </select>
-                        </FormFieldInline>
-                        <div style={{ textAlign: 'right' }}>
-                            <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
-                        </div>
-                    </Form>
-                </Accordion.Content>
-            </Accordion>
         )
     }
 }

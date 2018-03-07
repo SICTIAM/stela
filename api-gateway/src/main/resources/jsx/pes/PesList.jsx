@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Form, Accordion, Button } from 'semantic-ui-react'
+import { Segment, Form, Button } from 'semantic-ui-react'
 import moment from 'moment'
 
 import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
+import AdvancedSearch from '../_components/AdvancedSearch'
+import InputDatetime from '../_components/InputDatetime'
 import { Page, FormFieldInline, FormField } from '../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
@@ -17,7 +19,9 @@ class PesList extends Component {
     }
     state = {
         pess: [],
+        pesStatuses: [],
         search: {
+            multifield: '',
             objet: '',
             creationFrom: '',
             creationTo: '',
@@ -33,6 +37,9 @@ class PesList extends Component {
         const itemPerPage = localStorage.getItem('itemPerPage')
         if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
         else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
+        fetchWithAuthzHandling({ url: '/api/pes/statuses' })
+            .then(response => response.json())
+            .then(json => this.setState({ pesStatuses: json }))
     }
     getSearchData = () => {
         const { limit, offset, direction, column } = this.state
@@ -40,6 +47,8 @@ class PesList extends Component {
         Object.keys(this.state.search)
             .filter(k => this.state.search[k] !== '')
             .forEach(k => data[k] = this.state.search[k])
+        if (data.creationFrom) data.creationFrom = moment(data.creationFrom).format('YYYY-MM-DD')
+        if (data.creationTo) data.creationTo = moment(data.creationTo).format('YYYY-MM-DD')
         return data
     }
     handleFieldChange = (field, value) => {
@@ -75,6 +84,10 @@ class PesList extends Component {
     }
     render() {
         const { t, _addNotification } = this.context
+        const { search } = this.state
+        const statusOptions = this.state.pesStatuses.map(statusItem =>
+            <option key={statusItem} value={statusItem}>{t(`pes.status.${statusItem}`)}</option>
+        )
         const statusDisplay = (histories) => {
             const lastHistory = histories[histories.length - 1]
             return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(`pes.status.${lastHistory.status}`)}</span>
@@ -99,10 +112,45 @@ class PesList extends Component {
         return (
             <Page title={t('pes.list.title')}>
                 <Segment>
-                    <PesListForm
-                        search={this.state.search}
-                        handleFieldChange={this.handleFieldChange}
-                        submitForm={this.submitForm} />
+                    <AdvancedSearch
+                        isDefaultOpen={false}
+                        fieldId='multifield'
+                        fieldValue={search.multifield}
+                        fieldOnChange={this.handleFieldChange}
+                        onSubmit={this.submitForm}>
+
+                        <Form onSubmit={this.submitForm}>
+                            <FormFieldInline htmlFor='objet' label={t('pes.fields.objet')} >
+                                <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                            </FormFieldInline>
+                            <FormFieldInline htmlFor='creationFrom' label={t('pes.fields.creation')}>
+                                <Form.Group style={{ marginBottom: 0 }} widths='equal'>
+                                    <FormField htmlFor='creationFrom' label={t('api-gateway:form.from')}>
+                                        <InputDatetime id='creationFrom'
+                                            timeFormat={false}
+                                            value={search.decisionFrom}
+                                            onChange={date => this.handleFieldChange('creationFrom', date)} />
+                                    </FormField>
+                                    <FormField htmlFor='creationTo' label={t('api-gateway:form.to')}>
+                                        <InputDatetime id='creationTo'
+                                            timeFormat={false}
+                                            value={search.creationTo}
+                                            onChange={date => this.handleFieldChange('creationTo', date)} />
+                                    </FormField>
+                                </Form.Group>
+                            </FormFieldInline>
+                            <FormFieldInline htmlFor='status' label={t('pes.fields.status')}>
+                                <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <option value=''>{t('api-gateway:form.all')}</option>
+                                    {statusOptions}
+                                </select>
+                            </FormFieldInline>
+                            <div style={{ textAlign: 'right' }}>
+                                <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                            </div>
+                        </Form>
+                    </AdvancedSearch>
+
                     <StelaTable
                         data={this.state.pess}
                         metaData={metaData}
@@ -118,67 +166,6 @@ class PesList extends Component {
                         column={this.state.column} />
                 </Segment>
             </Page>
-        )
-    }
-}
-
-class PesListForm extends Component {
-    static contextTypes = {
-        t: PropTypes.func
-    }
-    state = {
-        isAccordionOpen: false,
-        pesStatuses: []
-    }
-    componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/pes/statuses' })
-            .then(response => response.json())
-            .then(json => this.setState({ pesStatuses: json }))
-    }
-    handleAccordion = () => {
-        const isAccordionOpen = this.state.isAccordionOpen
-        this.setState({ isAccordionOpen: !isAccordionOpen })
-    }
-    submitForm = (event) => {
-        if (event) event.preventDefault()
-        this.props.submitForm()
-    }
-    render() {
-        const { t } = this.context
-        const { search, handleFieldChange } = this.props
-        const statusOptions = this.state.pesStatuses.map(statusItem =>
-            <option key={statusItem} value={statusItem}>{t(`pes.status.${statusItem}`)}</option>
-        )
-        return (
-            <Accordion style={{ marginBottom: '1em' }} styled>
-                <Accordion.Title active={this.state.isAccordionOpen} onClick={this.handleAccordion}>{t('api-gateway:form.advanced_search')}</Accordion.Title>
-                <Accordion.Content active={this.state.isAccordionOpen}>
-                    <Form onSubmit={this.submitForm}>
-                        <FormFieldInline htmlFor='objet' label={t('pes.fields.objet')} >
-                            <input id='objet' value={search.objet} onChange={e => handleFieldChange('objet', e.target.value)} />
-                        </FormFieldInline>
-                        <FormFieldInline htmlFor='creationFrom' label={t('pes.fields.creation')}>
-                            <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                <FormField htmlFor='creationFrom' label={t('api-gateway:form.from')}>
-                                    <input type='date' id='creationFrom' value={search.decisionFrom} onChange={e => handleFieldChange('creationFrom', e.target.value)} />
-                                </FormField>
-                                <FormField htmlFor='creationTo' label={t('api-gateway:form.to')}>
-                                    <input type='date' id='creationTo' value={search.decisionTo} onChange={e => handleFieldChange('creationTo', e.target.value)} />
-                                </FormField>
-                            </Form.Group>
-                        </FormFieldInline>
-                        <FormFieldInline htmlFor='status' label={t('pes.fields.status')}>
-                            <select id='status' value={search.status} onChange={e => handleFieldChange('status', e.target.value)}>
-                                <option value=''>{t('api-gateway:form.all')}</option>
-                                {statusOptions}
-                            </select>
-                        </FormFieldInline>
-                        <div style={{ textAlign: 'right' }}>
-                            <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
-                        </div>
-                    </Form>
-                </Accordion.Content>
-            </Accordion>
         )
     }
 }

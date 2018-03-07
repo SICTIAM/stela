@@ -10,6 +10,7 @@ import java.util.List;
 public class ActeUuidsAndSearchUI {
 
     private List<String> uuids;
+    private String multifield;
     private String number;
     private String objet;
     private ActeNature nature;
@@ -28,6 +29,10 @@ public class ActeUuidsAndSearchUI {
 
     public List<String> getUuids() {
         return uuids;
+    }
+
+    public String getMultifield() {
+        return multifield;
     }
 
     public String getNumber() {

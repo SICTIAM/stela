@@ -208,13 +208,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     }
 
-    public Long countAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom,
+    public Long countAllWithQuery(String multifield, String number, String objet, ActeNature nature, LocalDate decisionFrom,
             LocalDate decisionTo, StatusType status, String currentLocalAuthUuid, Set<String> groups) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, number, objet, nature, decisionFrom,
+        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature, decisionFrom,
                 decisionTo, status, currentLocalAuthUuid, groups);
         query.select(builder.count(acteRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
@@ -222,7 +222,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<Acte> getAllWithQuery(String number, String objet, ActeNature nature, LocalDate decisionFrom,
+    public List<Acte> getAllWithQuery(String multifield, String number, String objet, ActeNature nature, LocalDate decisionFrom,
             LocalDate decisionTo, StatusType status, Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid, Set<String> groups) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -230,7 +230,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         Root<Acte> acteRoot = query.from(Acte.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
-        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, number, objet, nature, decisionFrom,
+        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature, decisionFrom,
                 decisionTo, status, currentLocalAuthUuid, groups);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
@@ -240,11 +240,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<Acte> acteRoot, String number,
-            String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo, StatusType status,
-            String currentLocalAuthUuid, Set<String> groups) {
+    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<Acte> acteRoot, String multifield,
+            String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo,
+            StatusType status, String currentLocalAuthUuid, Set<String> groups) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(builder.and(builder.isNull(acteRoot.get("draft"))));
+        if (StringUtils.isNotBlank(multifield)) {
+            predicates.add(builder.or(
+                    builder.like(builder.lower(acteRoot.get("number")), "%" + multifield.toLowerCase() + "%"),
+                    builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%")
+            ));
+        }
         if (StringUtils.isNotBlank(number))
             predicates.add(
                     builder.and(builder.like(builder.lower(acteRoot.get("number")), "%" + number.toLowerCase() + "%")));
@@ -427,7 +433,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ? ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList())
-                : getAllWithQuery(ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(),
+                : getAllWithQuery(ui.getMultifield(), ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(),
                 ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
     }
 

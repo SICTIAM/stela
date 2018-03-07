@@ -41,13 +41,13 @@ public class PesRetourService {
         return pesRetourRepository.findByUuid(uuid).get();
     }
 
-    public List<PesRetour> getAllWithQuery(String filename, LocalDate creationFrom, LocalDate creationTo,
+    public List<PesRetour> getAllWithQuery(String multifield, String filename, LocalDate creationFrom, LocalDate creationTo,
             String currentLocalAuthUuid, Integer limit, Integer offset) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PesRetour> query = builder.createQuery(PesRetour.class);
         Root<PesRetour> pesRetourRoot = query.from(PesRetour.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, filename, creationFrom, creationTo,
+        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom, creationTo,
                 currentLocalAuthUuid);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(builder.desc(pesRetourRoot.get("creation")));
@@ -55,13 +55,13 @@ public class PesRetourService {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    public Long countAllWithQuery(String filename, LocalDate creationFrom, LocalDate creationTo,
+    public Long countAllWithQuery(String multifield, String filename, LocalDate creationFrom, LocalDate creationTo,
             String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<PesRetour> pesRetourRoot = query.from(PesRetour.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, filename, creationFrom, creationTo,
+        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom, creationTo,
                 currentLocalAuthUuid);
         query.select(builder.count(pesRetourRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
@@ -69,9 +69,15 @@ public class PesRetourService {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesRetour> pesRetourRoot, String filename,
-            LocalDate creationFrom, LocalDate creationTo, String currentLocalAuthUuid) {
+    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesRetour> pesRetourRoot,
+            String multifield, String filename, LocalDate creationFrom, LocalDate creationTo,
+            String currentLocalAuthUuid) {
         List<Predicate> predicates = new ArrayList<>();
+        if (StringUtils.isNotBlank(multifield)) {
+            Join<Attachment, PesRetour> attachmentJoin = pesRetourRoot.join("attachment");
+            attachmentJoin.on(
+                    builder.like(builder.lower(attachmentJoin.get("filename")), "%" + multifield.toLowerCase() + "%"));
+        }
         if (StringUtils.isNotBlank(filename)) {
             Join<Attachment, PesRetour> attachmentJoin = pesRetourRoot.join("attachment");
             attachmentJoin.on(
