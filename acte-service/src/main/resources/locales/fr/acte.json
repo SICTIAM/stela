@@ -46,6 +46,13 @@
       "REFUS_EXPLICITE_LETTRE_OBSERVATION_SENT": "Refus transmission des pièces complémentaires transmis",
       "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise"
     },
+    "signature": {
+       "NO_CERTIFICATE_CHAIN_FOUND": "Aucun certificat valide",
+       "OUT_OF_BOUNDS_NO_POE": "La date de signature est invalide pour ce certificat",
+       "REVOKED_NO_POE ": "Le certificat a été revoqué",
+       "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correct",
+       "CHAIN_CONSTRAINTS_FAILURE ": "La signature est invalide"
+    },
     "nature": {
       "DELIBERATIONS": "Délibérations",
       "ARRETES_REGLEMENTAIRES": "Actes réglementaires",

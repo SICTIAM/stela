@@ -43,6 +43,9 @@ subprojects {
 			// docker-compose-rule is published on bintray
 			url 'https://dl.bintray.com/palantir/releases'
 		}
+		maven {
+            url 'https://ec.europa.eu/cefdigital/artifact/content/groups/public'
+        }
 	}
 
 	dependencies {

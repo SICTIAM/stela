@@ -1,5 +1,9 @@
 package fr.sictiam.stela.acteservice.service;
 
+import eu.europa.esig.dss.validation.policy.rules.Indication;
+import eu.europa.esig.dss.validation.reports.DetailedReport;
+import fr.sictiam.signature.utils.PadesUtils;
+import fr.sictiam.signature.utils.PdfSignatureResult;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
@@ -18,6 +22,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +48,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.cert.CertificateException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
@@ -73,16 +81,18 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final EnveloppeCounterRepository enveloppeCounterRepository;
     private final AdminRepository adminRepository;
+    private final LocalesService localesService;
     private ClamavClient clamavClient;
 
     public ArchiveService(ActeRepository acteRepository, Jaxb2Marshaller jaxb2Marshaller,
             ApplicationEventPublisher applicationEventPublisher, EnveloppeCounterRepository enveloppeCounterRepository,
-            AdminRepository adminRepository) {
+            AdminRepository adminRepository, LocalesService localesService) {
         this.acteRepository = acteRepository;
         this.jaxb2Marshaller = jaxb2Marshaller;
         this.applicationEventPublisher = applicationEventPublisher;
         this.enveloppeCounterRepository = enveloppeCounterRepository;
         this.adminRepository = adminRepository;
+        this.localesService = localesService;
     }
 
     @PostConstruct
@@ -120,7 +130,72 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             }
         }
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this,
-                new ActeHistory(event.getActeHistory().getActeUuid(), status, event.getActeHistory().getFlux()), event.getAttachments()));
+                new ActeHistory(event.getActeHistory().getActeUuid(), status, event.getActeHistory().getFlux()),
+                event.getAttachments()));
+    }
+
+    private List<String> checkAttachmentSignature(Attachment attachment) throws CertificateException, IOException {
+        List<String> messages = new ArrayList<>();
+        if (FilenameUtils.isExtension(attachment.getFilename(), "pdf")) {
+            DetailedReport report = PadesUtils.validatePdf(attachment.getFile());
+            if (PadesUtils.isSigned(report)) {
+                List<PdfSignatureResult> pdfSignatureResults = PadesUtils.getSignatureResults(report);
+                pdfSignatureResults.forEach(signatureResult -> {
+                    if (!(Indication.TOTAL_PASSED.equals(signatureResult.getStatus())
+                            || Indication.PASSED.equals(signatureResult.getStatus()))) {
+                        messages.add(localesService.getMessage("fr", "acte",
+                                "$.acte.signature." + signatureResult.getReason()));
+                    }
+                });
+            }
+        }
+        return messages;
+
+    }
+
+    private boolean checkActeSignature(String acteUuid) {
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteUuid).orElseThrow(ActeNotFoundException::new);
+        Attachment mainAttachment = acte.getActeAttachment();
+        List<String> messages = new ArrayList<>();
+        try {
+            messages = checkAttachmentSignature(mainAttachment);
+            for (Attachment attachment : acte.getAnnexes()) {
+                messages.addAll(checkAttachmentSignature(attachment));
+            }
+        } catch (CertificateException | IOException e) {
+            LOGGER.error(e.getMessage());
+        }
+
+        if (!messages.isEmpty()) {
+            String errorMessages = messages.stream().collect(Collectors.joining("\n"));
+            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this,
+                    new ActeHistory(acteUuid, StatusType.SIGNATURE_ERROR, errorMessages, Flux.TRANSMISSION_ACTE)));
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
+    private boolean checkEventSignature(ActeHistoryEvent event) {
+        List<String> messages = new ArrayList<>();
+
+        for (Attachment attachment : event.getAttachments()) {
+            try {
+                messages.addAll(checkAttachmentSignature(attachment));
+            } catch (CertificateException | IOException e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
+        if (!messages.isEmpty()) {
+            String errorMessages = messages.stream().collect(Collectors.joining("\n"));
+            applicationEventPublisher
+                    .publishEvent(new ActeHistoryEvent(this, new ActeHistory(event.getActeHistory().getActeUuid(),
+                            StatusType.SIGNATURE_ERROR, errorMessages, event.getActeHistory().getFlux())));
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -506,7 +581,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         ObjectFactory objectFactory = new ObjectFactory();
 
         DonneesActe donneesActe = new DonneesActe();
-        // currently just hardcoding the first two as they are the only used
+
         String[] codes = acte.getCode().split("-");
         DonneesActe.CodeMatiere1 codeMatiere1 = new DonneesActe.CodeMatiere1();
         codeMatiere1.setCodeMatiere(Integer.valueOf(codes[0]));
@@ -514,6 +589,19 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         DonneesActe.CodeMatiere2 codeMatiere2 = new DonneesActe.CodeMatiere2();
         codeMatiere2.setCodeMatiere(Integer.valueOf(codes[1]));
         donneesActe.setCodeMatiere2(codeMatiere2);
+
+        DonneesActe.CodeMatiere3 codeMatiere3 = new DonneesActe.CodeMatiere3();
+        codeMatiere3.setCodeMatiere(Integer.valueOf(codes[2]));
+        donneesActe.setCodeMatiere3(codeMatiere3);
+
+        DonneesActe.CodeMatiere4 codeMatiere4 = new DonneesActe.CodeMatiere4();
+        codeMatiere4.setCodeMatiere(Integer.valueOf(codes[3]));
+        donneesActe.setCodeMatiere3(codeMatiere3);
+
+        DonneesActe.CodeMatiere5 codeMatiere5 = new DonneesActe.CodeMatiere5();
+        codeMatiere5.setCodeMatiere(Integer.valueOf(codes[4]));
+        donneesActe.setCodeMatiere5(codeMatiere5);
+
         donneesActe.setCodeNatureActe(Integer.valueOf(acte.getNature().getCode()));
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
@@ -623,13 +711,17 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                 break;
             case ANTIVIRUS_OK: {
                 if (Flux.TRANSMISSION_ACTE.equals(event.getActeHistory().getFlux())) {
-                    createArchive(event.getActeHistory().getActeUuid());
-                } else if (Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES.equals(event.getActeHistory().getFlux())) {
-                    createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
-                } else {
-                    createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
-                            event.getActeHistory().getFlux(), event.getAttachments().get(0));
+                    if (checkActeSignature(event.getActeHistory().getActeUuid()))
+                        createArchive(event.getActeHistory().getActeUuid());
+                } else if (checkEventSignature(event)) {
+                    if (Flux.TRANSMISSION_PIECES_COMPLEMENTAIRES.equals(event.getActeHistory().getFlux())) {
+                        createArchivePieceComplementaire(event.getActeHistory().getActeUuid(), event.getAttachments());
+                    } else {
+                        createMessageArchiveWithAttachment(event.getActeHistory().getActeUuid(),
+                                event.getActeHistory().getFlux(), event.getAttachments().get(0));
+                    }
                 }
+
                 break;
             }
             case ARCHIVE_CREATED:
