@@ -20,6 +20,7 @@
         "from": "de",
         "to": "à",
         "submit": "Déposer",
+        "create": "Créer",
         "update": "Mettre à jour",
         "delete_draft": "Supprimer le brouillon",
         "add_a_file": "Ajouter un fichier",
@@ -166,6 +167,7 @@
             "agent_not_found": "Agent non trouvé",
             "group_created": "Le groupe a bien été créé",
             "group_updated": "Le groupe a bien été mis à jour",
+            "group_deleted": "Le groupe a bien été supprimé",
             "agent_profile_updated": "Les droits de l'agent ont bien été mis à jour"
         },
         "profile": {

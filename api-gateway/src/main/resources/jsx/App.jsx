@@ -203,9 +203,14 @@ class AppRoute extends Component {
                 <AuthRoute path='/admin/tableau-de-bord' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminDashboard} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/agents/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/agents' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />
+
+                <AuthRoute path='/admin/ma-collectivite/agent/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+
                 <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
@@ -213,6 +218,7 @@ class AppRoute extends Component {
                 <AuthRoute path='/admin/collectivite/:uuid/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />
+
                 <AuthRoute path='/admin/actes/parametrage-module' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/pes/parametrage-module' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
 

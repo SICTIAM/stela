@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Label, Icon, Dropdown, Form, Button } from 'semantic-ui-react'
 
+import history from '../../_util/history'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
@@ -32,9 +33,9 @@ class Group extends Component {
         name: 'required|max:250',
     }
     componentDidMount() {
-        const { localAuthorityUuid, uuid } = this.props
-        if (localAuthorityUuid && uuid) {
-            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid}/group/${uuid}` })
+        const { uuid } = this.props
+        if (uuid) {
+            fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json }))
@@ -75,12 +76,15 @@ class Group extends Component {
         const { uuid, localAuthorityUuid } = this.props
         const body = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
-        const url = `/api/admin/local-authority/${localAuthorityUuid}/group${uuid ? `/${uuid}` : ''}`
+        const url = uuid
+            ? `/api/admin/local-authority/group/${uuid}`
+            : `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group`
         const method = uuid ? 'PATCH' : 'POST'
         fetchWithAuthzHandling({ url, method, body, headers, context: this.context })
             .then(checkStatus)
-            .then(() => {
-                const { uuid } = this.props
+            .then(response => response.json())
+            .then(json => {
+                if (!uuid) history.push(this.props.location.pathname + '/' + json.uuid)
                 this.context._addNotification(uuid ? notifications.admin.groupUpdated : notifications.admin.groupCreated)
             })
             .catch(response => {
@@ -119,7 +123,7 @@ class Group extends Component {
                             </div>
                         </Field>
                         <div style={{ textAlign: 'right' }}>
-                            <Button basic primary onClick={this.submitForm} type='submit'>{t('api-gateway:form.update')}</Button>
+                            <Button basic primary onClick={this.submitForm} type='submit'>{t(this.props.uuid ? 'form.update' : 'form.create')}</Button>
                         </div>
                     </Form>
                 </Segment>

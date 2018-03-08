@@ -112,6 +112,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        groupDeleted: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.group_deleted',
+            level: 'success',
+            position: 'br'
+        },
         agentProfileUpdated: {
             title: 'notifications.admin.title',
             message: 'notifications.admin.agent_profile_updated',
