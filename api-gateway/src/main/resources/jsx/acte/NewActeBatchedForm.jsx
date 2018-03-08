@@ -78,14 +78,22 @@ class NewActeBatchedForm extends Component {
     loadDraft = (draft, callback) => {
         // Hacks to prevent affecting `null` values
         if (!draft.nature) draft.nature = ''
-        if (!draft.decision) draft.decision = ''
+        if (!draft.decision) {
+            draft.decision = ''
+        } else {
+            draft.decision = moment(draft)
+        }
         if (draft.groupUuid === '') draft.groupUuid = 'all_group'
         this.setState({ fields: draft }, callback)
     }
     getDraftData = () => {
         const draftData = Object.assign({}, this.state.fields)
         if (draftData['nature'] === '') draftData['nature'] = null
-        if (draftData['decision'] === '') draftData['decision'] = null
+        if (!draftData['decision']) {
+            draftData['decision'] = null
+        } else {
+            draftData['decision'] = moment(draftData['decision']).format('YYYY-MM-DD')
+        }
         if (draftData['groupUuid'] === 'all_group') draftData['groupUuid'] = ''
         return draftData
     }
@@ -302,12 +310,11 @@ class NewActeBatchedForm extends Component {
                         <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
                             <InputValidation id={'decision'}
                                 type='date'
-                                placeholder='aaaa-mm-jj'
                                 value={this.state.fields.decision}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.decision}
                                 fieldName={t('acte.fields.decision')}
-                                max={moment().format('YYYY-MM-DD')} />
+                                isValidDate={(current) => current.isBefore(new moment())} />
                         </FormField>
                         <FormField htmlFor={'nature'} label={t('acte.fields.nature')}>
                             <InputValidation id={'nature'}
