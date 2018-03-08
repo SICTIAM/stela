@@ -11,7 +11,7 @@ import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
-import { natures } from '../_util/constants'
+import { natures, materialCodeBudgetaire } from '../_util/constants'
 import moment from 'moment'
 
 class NewActeForm extends Component {
@@ -181,7 +181,7 @@ class NewActeForm extends Component {
         if (field === 'nature' && value === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') {
             fields['public'] = false
             fields['publicWebsite'] = false
-            if (!fields.code.startsWith('7-1-')) fields.code = ''
+            if (!fields.code.startsWith(materialCodeBudgetaire)) fields.code = ''
         }
         if ((field === 'objet' || field === 'number') && this.props.mode === 'ACTE_BATCH') this.props.setField(this.state.fields.uuid, field, value)
         this.props.setStatus('', this.state.fields.uuid)
@@ -369,7 +369,7 @@ class NewActeForm extends Component {
         )
         const codeOptions = this.state.codesMatieres
             .filter(materialCode => this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.mode === 'ACTE_BUDGETAIRE'
-                ? materialCode.code.startsWith('7-1-')
+                ? materialCode.code.startsWith(materialCodeBudgetaire)
                 : true)
             .map(materialCode =>
                 ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label })
