@@ -46,6 +46,14 @@ task frontBundle(type: YarnTask) {
             from "${sourceSets.main.resources.srcDirs[0]}/build/asset-manifest.json"
             into "${sourceSets.main.output.resourcesDir}/public/"
         }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/manifest.json"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/browserconfig.xml"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
     }
 }
 

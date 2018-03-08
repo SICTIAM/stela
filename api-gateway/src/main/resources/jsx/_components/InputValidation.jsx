@@ -73,7 +73,8 @@ export default class InputValidation extends Component {
                         onChange={(event, data) => this.props.onChange(this.props.id, data.value)}
                         onBlur={this.validateValue}
                         options={this.props.options}
-                        fluid search selection />}
+                        search={this.props.search || false}
+                        fluid selection />}
 
                 <div>
                     {renderIf(!this.state.isValid)(

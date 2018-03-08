@@ -44,6 +44,7 @@ body, html {
     margin-bottom: 5em;
 }
 .ui.segment {
+    padding-top: 2em;
     padding-bottom: 2em;
 }
 .ui.segment .ui.label.labelStatus {
