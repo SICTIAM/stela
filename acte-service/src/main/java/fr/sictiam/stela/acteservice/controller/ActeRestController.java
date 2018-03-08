@@ -75,7 +75,9 @@ public class ActeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "number", required = false) String number,
+    public ResponseEntity<SearchResultsUI> getAll(
+            @RequestParam(value = "multifield", required = false) String multifield,
+            @RequestParam(value = "number", required = false) String number,
             @RequestParam(value = "objet", required = false) String objet,
             @RequestParam(value = "nature", required = false) ActeNature nature,
             @RequestParam(value = "decisionFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate decisionFrom,
@@ -92,9 +94,9 @@ public class ActeRestController {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        List<Acte> actes = acteService.getAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status, limit,
-                offset, column, direction, currentLocalAuthUuid, groups);
-        Long count = acteService.countAllWithQuery(number, objet, nature, decisionFrom, decisionTo, status,
+        List<Acte> actes = acteService.getAllWithQuery(multifield, number, objet, nature, decisionFrom, decisionTo,
+                status, limit, offset, column, direction, currentLocalAuthUuid, groups);
+        Long count = acteService.countAllWithQuery(multifield, number, objet, nature, decisionFrom, decisionTo, status,
                 currentLocalAuthUuid, groups);
         return new ResponseEntity<>(new SearchResultsUI(count, actes), HttpStatus.OK);
     }

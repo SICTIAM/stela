@@ -67,7 +67,9 @@ public class PesRestController {
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
+    public ResponseEntity<SearchResultsUI> getAll(
+            @RequestParam(value = "multifield", required = false) String multifield,
+            @RequestParam(value = "objet", required = false) String objet,
             @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
             @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
             @RequestParam(value = "status", required = false) StatusType status,
@@ -81,9 +83,10 @@ public class PesRestController {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        List<PesAller> pesList = pesAllerService.getAllWithQuery(objet, creationFrom, creationTo, status, limit, offset,
-                column, direction, currentLocalAuthUuid);
-        Long count = pesAllerService.countAllWithQuery(objet, creationFrom, creationTo, status, currentLocalAuthUuid);
+        List<PesAller> pesList = pesAllerService.getAllWithQuery(multifield, objet, creationFrom, creationTo, status,
+                limit, offset, column, direction, currentLocalAuthUuid);
+        Long count = pesAllerService.countAllWithQuery(multifield, objet, creationFrom, creationTo, status,
+                currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, pesList), HttpStatus.OK);
     }
 
@@ -182,6 +185,7 @@ public class PesRestController {
     public ResponseEntity<SearchResultsUI> getAllPesRetour(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "multifield", required = false) String multifield,
             @RequestParam(value = "filename", required = false) String filename,
             @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate
                     creationFrom,
@@ -192,9 +196,10 @@ public class PesRestController {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        List<PesRetour> pesRetours = pesRetourService.getAllWithQuery(filename, creationFrom, creationTo,
+        List<PesRetour> pesRetours = pesRetourService.getAllWithQuery(multifield, filename, creationFrom, creationTo,
                 currentLocalAuthUuid, limit, offset);
-        Long count = pesRetourService.countAllWithQuery(filename, creationFrom, creationTo, currentLocalAuthUuid);
+        Long count = pesRetourService.countAllWithQuery(multifield, filename, creationFrom, creationTo,
+                currentLocalAuthUuid);
         return new ResponseEntity<>(new SearchResultsUI(count, pesRetours), HttpStatus.OK);
     }
 

@@ -98,13 +98,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         clamavClient = new ClamavClient(clamavHost, clamavPort);
     }
 
-    public Long countAllWithQuery(String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
+    public Long countAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
             String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, objet, creationFrom, creationTo, status,
+        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo, status,
                 currentLocalAuthUuid);
         query.select(builder.count(pesRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
@@ -112,14 +112,14 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<PesAller> getAllWithQuery(String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
+    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
             Integer limit, Integer offset, String column, String direction, String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PesAller> query = builder.createQuery(PesAller.class);
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
-        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, objet, creationFrom, creationTo, status,
+        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo, status,
                 currentLocalAuthUuid);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
@@ -129,9 +129,16 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesAller> pesRoot, String objet,
-            LocalDate creationFrom, LocalDate creationTo, StatusType status, String currentLocalAuthUuid) {
+    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesAller> pesRoot, String multifield,
+            String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
+            String currentLocalAuthUuid) {
         List<Predicate> predicates = new ArrayList<>();
+        if (StringUtils.isNotBlank(multifield)) {
+            predicates.add(builder.or(
+                    builder.like(builder.lower(pesRoot.get("objet")), "%" + multifield.toLowerCase() + "%"),
+                    builder.like(builder.lower(pesRoot.get("comment")), "%" + multifield.toLowerCase() + "%")
+            ));
+        }
         if (StringUtils.isNotBlank(objet))
             predicates.add(
                     builder.and(builder.like(builder.lower(pesRoot.get("objet")), "%" + objet.toLowerCase() + "%")));
@@ -264,7 +271,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         List<Predicate> subQueryPredicates = new ArrayList<Predicate>();
         subQueryPredicates
                 .add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
-        subquery.where(subQueryPredicates.toArray(new Predicate[] {}));
+        subquery.where(subQueryPredicates.toArray(new Predicate[]{}));
 
         Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable2 = subquery2.from(PesHistory.class);
@@ -272,13 +279,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
         List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
         subQueryPredicates2.add(cb.equal(historyTable2.get("status"), StatusType.SENT));
-        subquery2.where(subQueryPredicates2.toArray(new Predicate[] {}));
+        subquery2.where(subQueryPredicates2.toArray(new Predicate[]{}));
 
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
 
         mainQueryPredicates.add(cb.not(cb.exists(subquery)));
         mainQueryPredicates.add(cb.exists(subquery2));
-        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
+        query.where(mainQueryPredicates.toArray(new Predicate[]{}));
         TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
         List<PesAller> resultList = typedQuery.getResultList();
 
