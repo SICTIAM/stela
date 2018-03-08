@@ -196,7 +196,7 @@ public class PesAllerAnalyser {
         return signaturesVerifierResults;
     }
 
-    public void computeSignaturesVerificationResults() throws PesAllerAnalyser.InvalidPesAllerFileException {
+    public void computeSignaturesVerificationResults() throws InvalidPesAllerFileException {
         try {
             Map<Element, SignatureVerifierResult> workingSignatureVerifierResult = new HashMap<Element, SignatureVerifierResult>();
             for (Element signatureElement : getSimplePesInformation().getSignatureElements()) {
@@ -322,20 +322,6 @@ public class PesAllerAnalyser {
 
     public void setSaxParseExceptionsList(ArrayList<SAXParseException> saxParseExceptionsList) {
         this.saxParseExceptionsList = saxParseExceptionsList;
-    }
-
-    public static class InvalidPesAllerFileException extends Exception {
-        public InvalidPesAllerFileException(String message) {
-            super();
-        }
-
-        public InvalidPesAllerFileException(Throwable cause) {
-            super();
-        }
-
-        public InvalidPesAllerFileException(String message, Throwable cause) {
-            super(cause);
-        }
     }
 
     private class ValidatorErrorHandler1 extends DefaultHandler {

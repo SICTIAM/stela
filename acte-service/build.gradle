@@ -28,7 +28,13 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')
 }
-
+sourceSets {
+    main {
+        java {
+            srcDir project(':signature-lib').file('src/main/java')
+        }
+    }
+}
 test {
     useJUnit {
         excludeCategories 'fr.sictiam.stela.acteservice.IntegrationTests'

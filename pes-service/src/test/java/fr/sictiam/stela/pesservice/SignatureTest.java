@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice;
 
-import fr.sictiam.signature.pes.verifier.PesAllerAnalyser.InvalidPesAllerFileException;
 import fr.sictiam.signature.pes.verifier.SignatureValidation;
 import fr.sictiam.signature.pes.verifier.SimplePesInformation;
 import fr.sictiam.stela.pesservice.service.SesileService;
@@ -20,7 +19,7 @@ public class SignatureTest {
     SesileService sesileService = new SesileService(null, null, null, null);
 
     @Test
-    public void testsigned() throws IOException, InvalidPesAllerFileException {
+    public void testsigned() throws IOException {
         Init.init();
         InputStream file = new ClassPathResource("data/30002-2015-P-DN-16-1429552171140-sign.xml").getInputStream();
 

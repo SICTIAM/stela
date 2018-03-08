@@ -11,4 +11,3 @@ dependencies {
     compile group: 'eu.europa.ec.joinup.sd-dss', name: 'dss-utils-apache-commons', version: '5.2'
     
 }
-

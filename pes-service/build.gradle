@@ -28,6 +28,14 @@ dependencies {
     testCompile('org.springframework:spring-mock:2.0.8')
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir project(':signature-lib').file('src/main/java')
+        }
+    }
+}
+
 test {
     useJUnit {
         excludeCategories 'fr.sictiam.stela.pesservice.IntegrationTests'
