@@ -166,7 +166,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
                     + "\"name\":\"ACTE_SENT\"," + "\"active\":true" + "}," + "{" + "\"name\":\"ACTE_CANCELLED\","
                     + "\"active\":true" + "}" + "]," + "\"groups\":[" + "{"
                     + "\"uuid\":\"d6e6c438-8fc9-4146-9e42-b7f7d8ccb98c\"," + "\"name\":\"aa\","
-                    + "\"rights\":[\"ACTES_ADMIN\"]" + "}" + "]" + "}";
+                    + "\"rights\":[\"ACTES_DEPOSIT\", \"ACTES_DEPOSIT\"]" + "}" + "]" + "}";
 
             String profile2 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac887b\","
                     + "\"localAuthorityNotifications\":[\"ACTES\"]," + "\"localAuthority\":{" + "\"uuid\":\""

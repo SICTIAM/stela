@@ -25,25 +25,32 @@ public class ValidationUtil {
             FieldError objectError = new FieldError("acte", "acteAttachment", "form.validation.mandatoryfile");
             errorCopy.add(objectError);
         } else {
-            String[] extensions = ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS.equals(acte.getNature())
-                    ? new String[] { "xml" }
-                    : new String[] { "pdf", "jpg", "png" };
-
-            if (!FilenameUtils.isExtension(file.getOriginalFilename(), extensions)) {
-                ObjectError objectError = new ObjectError("acte.attachment", "form.validation.badextension");
-                errorCopy.add(objectError);
-            }
+            errorCopy.addAll(validateFile(file, acte.getNature(), true, "acteAttachment"));
         }
         int i = 0;
         for (MultipartFile annexe : annexes) {
-            String[] extensions = ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS.equals(acte.getNature())
-                    ? new String[] { "pdf", "jpg", "png" }
-                    : new String[] { "pdf", "jpg", "png", "xml" };
-            if (!FilenameUtils.isExtension(annexe.getOriginalFilename(), extensions)) {
-                FieldError objectError = new FieldError("acte", "acte.extensions." + i, "form.validation.badextension");
-                errorCopy.add(objectError);
-            }
+            errorCopy.addAll(validateFile(annexe, acte.getNature(), false, "acte.extensions." + i));
             ++i;
+        }
+        if (ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS.equals(acte.getNature()) && i == 0) {
+            FieldError objectError = new FieldError("acte", "annexes", "form.validation.mandatoryfile");
+            errorCopy.add(objectError);
+        }
+        return errorCopy;
+    }
+
+    public static List<ObjectError> validateFile(MultipartFile file, ActeNature acteNature, boolean isActeFile, String field) {
+        List<ObjectError> errorCopy = new ArrayList<>();
+        String[] extensions = isActeFile ?
+                (ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS.equals(acteNature)
+                        ? new String[]{"xml"}
+                        : new String[]{"pdf", "jpg", "png"}) :
+                (ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS.equals(acteNature)
+                        ? new String[]{"pdf", "jpg", "png"}
+                        : new String[]{"pdf", "jpg", "png", "xml"});
+        if (!FilenameUtils.isExtension(file.getOriginalFilename(), extensions)) {
+            ObjectError objectError = new FieldError("acte", field, "form.validation.badextension");
+            errorCopy.add(objectError);
         }
         return errorCopy;
     }

@@ -39,4 +39,6 @@ const anomalies = [
 
 const sesileVisibility = [0, 1, 3]
 
-module.exports = { modules, natures, status, anomalies, sesileVisibility }
+const materialCodeBudgetaire = "7-1-"
+
+module.exports = { modules, natures, status, anomalies, sesileVisibility, materialCodeBudgetaire }

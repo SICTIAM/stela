@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.controller;
 
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeMode;
+import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
@@ -207,12 +208,17 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}/file")
-    public ResponseEntity<Acte> saveActeDraftFile(
+    public ResponseEntity<?> saveActeDraftFile(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+            @PathVariable String uuid, @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "nature", required = false) ActeNature nature) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<ObjectError> objectErrors = ValidationUtil.validateFile(file, nature, true, "acteAttachment");
+        if (!objectErrors.isEmpty()) {
+            return new ResponseEntity<>(new CustomValidationUI(objectErrors, "has failed"), HttpStatus.BAD_REQUEST);
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
@@ -225,12 +231,17 @@ public class ActeDraftRestController {
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}/annexe")
-    public ResponseEntity<Acte> saveActeDraftAnnexe(
+    public ResponseEntity<?> saveActeDraftAnnexe(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+            @PathVariable String uuid, @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "nature", required = false) ActeNature nature) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<ObjectError> objectErrors = ValidationUtil.validateFile(file, nature, false, "acte.extensions");
+        if (!objectErrors.isEmpty()) {
+            return new ResponseEntity<>(new CustomValidationUI(objectErrors, "has failed"), HttpStatus.BAD_REQUEST);
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         try {
