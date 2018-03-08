@@ -29,7 +29,7 @@ import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
 import AdminMenuBar from './admin/AdminMenuBar'
-import AdminDashboard from './admin/AdminDashboard'
+import AdminInstance from './admin/AdminInstance'
 import AgentList from './admin/AgentList'
 import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
 import LocalAuthority from './admin/localAuthority/LocalAuthority'
@@ -198,9 +198,9 @@ class AppRoute extends Component {
                 <AuthRoute path='/pes/:uuid' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
 
                 <Route exact path='/admin'>
-                    <Redirect to="/admin/tableau-de-bord" />
+                    <Redirect to="/admin/ma-collectivite" />
                 </Route>
-                <AuthRoute path='/admin/tableau-de-bord' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminDashboard} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/parametrage-instance' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminInstance} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/agents/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/agents' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />

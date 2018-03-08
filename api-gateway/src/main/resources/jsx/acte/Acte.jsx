@@ -75,7 +75,7 @@ class Acte extends Component {
         const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
-                <a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a>
+                <span className='fieldValue'><a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a></span>
             </List.Item>
         )
         const stampPosition = (
@@ -151,23 +151,23 @@ class Acte extends Component {
                             </div>
 
                             <Field htmlFor="number" label={t('acte.fields.number')}>
-                                <span id="number">{acte.number}</span>
+                                <span className='fieldValue' id="number">{acte.number}</span>
                             </Field>
                             <Field htmlFor="decision" label={t('acte.fields.decision')}>
-                                <span id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span>
+                                <span className='fieldValue' id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span>
                             </Field>
                             <Field htmlFor="nature" label={t('acte.fields.nature')}>
-                                <span id="nature">{t(`acte.nature.${acte.nature}`)}</span>
+                                <span className='fieldValue' id="nature">{t(`acte.nature.${acte.nature}`)}</span>
                             </Field>
                             <Field htmlFor="code" label={t('acte.fields.code')}>
-                                <span id="code">{acte.codeLabel} ({acte.code})</span>
+                                <span className='fieldValue' id="code">{acte.codeLabel} ({acte.code})</span>
                             </Field>
                             <Grid>
                                 <Grid.Column width={4}>
                                     <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
                                 </Grid.Column>
                                 <Grid.Column width={12}>
-                                    <span id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
+                                    <span className='fieldValue' id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
                                 </Grid.Column>
                             </Grid>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
