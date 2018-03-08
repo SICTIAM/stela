@@ -5,6 +5,7 @@ import renderIf from 'render-if'
 import { Button, Form, Checkbox, Card, Dropdown } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
+import moment from 'moment'
 
 import { FormField, File, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
@@ -12,7 +13,6 @@ import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
-import moment from 'moment'
 
 class NewActeForm extends Component {
     static contextTypes = {
@@ -160,7 +160,11 @@ class NewActeForm extends Component {
         if (!acte.nature) acte.nature = ''
         if (!acte.code) acte.code = ''
         if (!acte.codeLabel) acte.codeLabel = ''
-        if (!acte.decision) acte.decision = ''
+        if (!acte.decision) {
+            acte.decision = ''
+        } else {
+            acte.decision = moment(acte)
+        }
         if (!acte.objet) acte.objet = ''
         if (!acte.number) acte.number = ''
         if (!acte.annexes) acte.annexes = []
@@ -169,7 +173,11 @@ class NewActeForm extends Component {
     getActeData = () => {
         const acteData = Object.assign({}, this.state.fields)
         if (acteData['nature'] === '') acteData['nature'] = null
-        if (acteData['decision'] === '') acteData['decision'] = null
+        if (!acteData['decision']) {
+            acteData['decision'] = null
+        } else {
+            acteData['decision'] = moment(acteData['decision']).format('YYYY-MM-DD')
+        }
         if (acteData['groupUuid'] === 'all_group') acteData['groupUuid'] = ''
         return acteData
     }
@@ -430,12 +438,11 @@ class NewActeForm extends Component {
                         <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
                             <InputValidation id={`${this.state.fields.uuid}_decision`}
                                 type='date'
-                                placeholder='aaaa-mm-jj'
                                 value={this.state.fields.decision}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.decision}
                                 fieldName={t('acte.fields.decision')}
-                                max={moment().format('YYYY-MM-DD')} />
+                                isValidDate={(current) => current.isBefore(new moment())} />
                         </FormField>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BATCH')(

@@ -2,8 +2,10 @@ import React, { Component } from 'react'
 import { Label, Dropdown } from 'semantic-ui-react'
 import renderIf from 'render-if'
 import Validator from 'validatorjs'
+import moment from 'moment'
 
 import { InputFile } from './UI'
+import InputDatetime from './InputDatetime'
 
 export default class InputValidation extends Component {
     state = {
@@ -18,15 +20,17 @@ export default class InputValidation extends Component {
         style: {}
     }
     validateValue = () => {
-        const validation = new Validator({ field: this.props.value }, { field: this.props.validationRule }, this.props.customErrorMessages)
+        const value = this.props.type === 'date' ? moment(this.props.value).format('YYYY-MM-DD') : this.props.value
+        const validation = new Validator({ field: value }, { field: this.props.validationRule }, this.props.customErrorMessages)
         validation.setAttributeNames({ field: this.props.fieldName });
         const isValid = validation.passes()
         const errorMessage = validation.errors.first('field') || ''
         this.setState({ isValid: isValid, errorMessage: errorMessage })
     }
     render() {
+        const { style, onChange, ...rest } = this.props
         return (
-            <div style={this.props.style}>
+            <div style={style}>
                 {(this.props.type === 'text' || this.props.type === '')
                     && <input id={this.props.id}
                         className={this.props.className}
@@ -35,14 +39,10 @@ export default class InputValidation extends Component {
                         onChange={e => this.props.onChange(this.props.id, e.target.value)}
                         onBlur={this.validateValue} />}
 
-                {this.props.type === 'date'
-                    && <input id={this.props.id}
-                        type='date'
-                        className={this.props.className}
-                        placeholder={this.props.placeholder}
-                        max={this.props.max}
-                        value={this.props.value}
-                        onChange={e => this.props.onChange(this.props.id, e.target.value)}
+                {this.props.type === 'date' &&
+                    <InputDatetime {...rest}
+                        timeFormat={false}
+                        onChange={date => onChange(this.props.id, date)}
                         onBlur={this.validateValue} />}
 
                 {this.props.type === 'file' &&
