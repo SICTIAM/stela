@@ -78,16 +78,16 @@ class Pes extends Component {
                                 }
                             </div>
                             <Field htmlFor='objet' label={t('pes.fields.objet')}>
-                                <span id='objet'>{pes.objet}</span>
+                                <span className='fieldValue' id='objet'>{pes.objet}</span>
                             </Field>
                             <Field htmlFor='comment' label={t('pes.fields.comment')}>
-                                <span id='comment'>{pes.comment}</span>
+                                <span className='fieldValue' id='comment'>{pes.comment}</span>
                             </Field>
                             <Field htmlFor='creation' label={t('pes.fields.creation')}>
-                                <span id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</span>
+                                <span className='fieldValue' id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</span>
                             </Field>
                             <Field htmlFor='attachment' label={t('pes.fields.attachment')}>
-                                <a id='attachment' target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a>
+                                <span className='fieldValue'><a id='attachment' target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a></span>
                             </Field>
                         </Segment>
                         <History

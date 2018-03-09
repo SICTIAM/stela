@@ -82,6 +82,12 @@ const notifications = {
         }
     },
     admin: {
+        instanceParamsUpdated: {
+            title: 'notifications.acte.admin.title',
+            message: 'notifications.acte.admin.instance_params_updated',
+            level: 'success',
+            position: 'br'
+        },
         localAuthorityUpdate: {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.local_authority.update.success',

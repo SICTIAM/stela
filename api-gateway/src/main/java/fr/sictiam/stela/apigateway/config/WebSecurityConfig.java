@@ -46,6 +46,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .antMatchers("/api/admin/local-authority/all").permitAll()
                     .antMatchers("/api/admin/ozwillo/**").permitAll()
                     .antMatchers("/api/api-gateway/isMainDomain").permitAll()
+                    .antMatchers("/api/admin/instance/welcome-message").permitAll()
                     .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
                     .antMatchers("/api/*/locales/**").permitAll()
                     .antMatchers("/api/**").authenticated().and()

@@ -126,6 +126,7 @@
             },
             "admin": {
                 "title": "Admin module Acte",
+                "instance_params_updated": "Paramètres de l'instance enregistrés",
                 "local_authority": {
                     "classificationAsked": "Demande de classfication envoyée",
                     "update": {
@@ -214,6 +215,10 @@
         "all_local_authorities": "Toutes les collectivités",
         "local_authorities": "Collectivités",
         "my_local_authority": "Ma collectivité",
+        "instance_params": {
+            "title": "Paramètres de l'instance",
+            "welcome_message": "Message de bienvenue"
+        },
         "local_authority": {
             "general_informations": "Informations générales",
             "modules": "Modules",

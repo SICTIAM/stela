@@ -21,7 +21,7 @@ const FormFieldInline = ({ htmlFor, label, children }) =>
 const Field = ({ htmlFor, label, children }) =>
     <Grid>
         <Grid.Column width={4}><label style={{ verticalAlign: 'middle' }} htmlFor={htmlFor}>{label}</label></Grid.Column>
-        <Grid.Column width={12}><strong>{children}</strong></Grid.Column>
+        <Grid.Column width={12}>{children}</Grid.Column>
     </Grid>
 
 const File = ({ attachment, onDelete, extraContent, src }) =>

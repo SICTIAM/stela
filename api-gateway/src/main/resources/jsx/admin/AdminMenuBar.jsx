@@ -18,10 +18,10 @@ class AdminMenuBar extends Component {
                         <Icon name='tasks' size='large' />
                         <Menu.Header>Général</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item as={NavLink} to='/admin/tableau-de-bord'>{t('admin.dashboard')}</Menu.Item>
                             <Menu.Item as={NavLink} to='/admin/ma-collectivite'>{t('admin.my_local_authority')}</Menu.Item>
                             <Menu.Item as={NavLink} to='/admin/agents'>{t('admin.users')}</Menu.Item>
                             <Menu.Item as={NavLink} to='/admin/collectivite'>{t('admin.local_authorities')}</Menu.Item>
+                            <Menu.Item as={NavLink} to='/admin/parametrage-instance'>Paramètre d'instance</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
 
