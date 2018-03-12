@@ -132,6 +132,18 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(profileService.getByAgentAndLocalAuthority(uuid, agentUuid), HttpStatus.OK);
     }
 
+    @GetMapping("/current/agent/{agentUuid}")
+    @JsonView(Views.ProfileView.class)
+    public ResponseEntity<Profile> getProfileFromCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String agentUuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(profileService.getByAgentAndLocalAuthority(currentLocalAuthUuid, agentUuid), HttpStatus.OK);
+    }
+
     @GetMapping("/{uuid}/group")
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<List<WorkGroup>> getAllGroupByLocalAuthority(
@@ -143,9 +155,20 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(workGroupService.getAllByLocalAuthority(uuid), HttpStatus.OK);
     }
 
+    @GetMapping("/current/group")
+    @JsonView(Views.WorkGroupView.class)
+    public ResponseEntity<List<WorkGroup>> getAllGroupForCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(workGroupService.getAllByLocalAuthority(currentLocalAuthUuid), HttpStatus.OK);
+    }
+
     @PostMapping("/{uuid}/group")
     @JsonView(Views.WorkGroupView.class)
-    public ResponseEntity<WorkGroup> newGroup(
+    public ResponseEntity<WorkGroup> newGroupByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @PathVariable String uuid, @RequestBody WorkGroupUI workGroupUI) {
         if (!isLocalAuthorityAdmin) {
@@ -154,7 +177,19 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(workGroupService.createFromUI(workGroupUI, uuid), HttpStatus.OK);
     }
 
-    @GetMapping("/{localAuthorityUuid}/group/{uuid}")
+    @PostMapping("/current/group")
+    @JsonView(Views.WorkGroupView.class)
+    public ResponseEntity<WorkGroup> newGroupForCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestBody WorkGroupUI workGroupUI) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(workGroupService.createFromUI(workGroupUI, currentLocalAuthUuid), HttpStatus.OK);
+    }
+
+    @GetMapping("/group/{uuid}")
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<WorkGroup> getGroup(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
@@ -166,8 +201,9 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(workGroup, HttpStatus.OK);
     }
 
-    @PatchMapping("/{localAuthorityUuid}/group/{uuid}")
-    public ResponseEntity updateGroup(
+    @PatchMapping("/group/{uuid}")
+    @JsonView(Views.WorkGroupView.class)
+    public ResponseEntity<WorkGroup> updateGroup(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @PathVariable String uuid, @RequestBody WorkGroupUI workGroupUI) {
         if (!isLocalAuthorityAdmin) {
@@ -178,20 +214,19 @@ public class LocalAuthorityController {
             BeanUtils.copyProperties(workGroup, workGroupUI);
         } catch (Exception e) {
             LOGGER.error("Error while updating properties: {}", e);
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        workGroupService.update(workGroup);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(workGroupService.update(workGroup), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{uuid}/group/{groupUuid}")
+    @DeleteMapping("/group/{uuid}")
     public ResponseEntity deleteGroup(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @PathVariable String groupUuid) {
+            @PathVariable String uuid) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        workGroupService.deleteGroup(groupUuid);
+        workGroupService.deleteGroup(uuid);
         return new ResponseEntity(HttpStatus.OK);
     }
 

@@ -83,13 +83,15 @@ class LocalAuthority extends Component {
         confirmModalType === 'activation' && this.activateModule(moduleToEdit)
         confirmModalType === 'deactivation' && this.deactivateModule(moduleToEdit)
     }
-    removeGroup = (uuid) => {
-        fetchWithAuthzHandling({ url: `/api/admin/local-authority/${this.state.fields.uuid}/group/${uuid}`, method: 'DELETE', context: this.context })
+    removeGroup = (event, uuid) => {
+        event.preventDefault()
+        fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
                 fields.groups = fields.groups.filter(group => group.uuid !== uuid)
                 this.setState({ fields })
+                this.context._addNotification(notifications.admin.groupDeleted)
             })
             .catch(response => {
                 response.json().then(json => {
@@ -127,10 +129,10 @@ class LocalAuthority extends Component {
             )
         })
         const groupList = this.state.fields.groups.map(group =>
-            <ListItem as={Link} to={`/admin/collectivite/${this.state.fields.uuid}/groupes/${group.uuid}`}
+            <ListItem as={Link} to={`/admin/${this.props.uuid ? `collectivite/${this.state.fields.uuid}` : 'ma-collectivite'}/groupes/${group.uuid}`}
                 key={group.uuid} title={group.name} icon='users' style={{ cursor: 'pointer' }}>
                 <List.Content floated='right'>
-                    <Icon onClick={() => this.removeGroup(group.uuid)} name='remove' color='red' size='large' style={{ cursor: 'pointer' }} />
+                    <Icon onClick={e => this.removeGroup(e, group.uuid)} name='remove' color='red' size='large' style={{ cursor: 'pointer' }} />
                 </List.Content>
             </ListItem>
         )
@@ -178,7 +180,7 @@ class LocalAuthority extends Component {
                             { property: 'email', displayed: true, displayName: t('agent.email'), searchable: true },
                         ]}
                         header={true}
-                        link={`/admin/collectivite/${this.state.fields.uuid}/agent/`}
+                        link={this.props.uuid ? `/admin/collectivite/${this.state.fields.uuid}/agent/` : '/admin/ma-collectivite/agent/'}
                         linkProperty='uuid'
                         noDataMessage={t('admin.local_authority.no_user')}
                         keyProperty='uuid' />

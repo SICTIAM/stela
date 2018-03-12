@@ -36,8 +36,8 @@ class AgentProfile extends Component {
     }
     componentDidMount() {
         const { localAuthorityUuid, uuid } = this.props
-        if (localAuthorityUuid && uuid) {
-            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid}/agent/${uuid}` })
+        if (uuid) {
+            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid || 'current'}/agent/${uuid}` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json }))
@@ -46,7 +46,7 @@ class AgentProfile extends Component {
                         this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                     })
                 })
-            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid}/group` })
+            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ allGroups: json }))
