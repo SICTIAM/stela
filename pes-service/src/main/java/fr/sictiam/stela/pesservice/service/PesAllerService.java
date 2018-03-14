@@ -98,29 +98,30 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         clamavClient = new ClamavClient(clamavHost, clamavPort);
     }
 
-    public Long countAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
-            String currentLocalAuthUuid) {
+    public Long countAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo,
+            StatusType status, String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo, status,
-                currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo,
+                status, currentLocalAuthUuid);
         query.select(builder.count(pesRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
-            Integer limit, Integer offset, String column, String direction, String currentLocalAuthUuid) {
+    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo,
+            StatusType status, Integer limit, Integer offset, String column, String direction,
+            String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PesAller> query = builder.createQuery(PesAller.class);
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
-        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo, status,
-                currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo,
+                status, currentLocalAuthUuid);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
                         ? builder.asc(pesRoot.get(columnAttribute))
@@ -134,10 +135,9 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             String currentLocalAuthUuid) {
         List<Predicate> predicates = new ArrayList<>();
         if (StringUtils.isNotBlank(multifield)) {
-            predicates.add(builder.or(
-                    builder.like(builder.lower(pesRoot.get("objet")), "%" + multifield.toLowerCase() + "%"),
-                    builder.like(builder.lower(pesRoot.get("comment")), "%" + multifield.toLowerCase() + "%")
-            ));
+            predicates.add(
+                    builder.or(builder.like(builder.lower(pesRoot.get("objet")), "%" + multifield.toLowerCase() + "%"),
+                            builder.like(builder.lower(pesRoot.get("comment")), "%" + multifield.toLowerCase() + "%")));
         }
         if (StringUtils.isNotBlank(objet))
             predicates.add(
@@ -174,16 +174,12 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         pesAllerRepository.save(pes);
     }
 
-    public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
+    public PesAller populateFromByte(PesAller pesAller, byte[] file) {
 
         try {
-            Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
-            pesAller.setAttachment(attachment);
-            pesAller.setCreation(LocalDateTime.now());
-
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(file.getBytes()));
+            Document document = builder.parse(new ByteArrayInputStream(file));
 
             XPathFactory xpf = XPathFactory.newInstance();
             XPath path = xpf.newXPath();
@@ -197,6 +193,22 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             pesAller.setSigned("PES_PJ".equals(pesAller.getFileType()));
 
         } catch (IOException | XPathExpressionException | ParserConfigurationException | SAXException e) {
+            throw new PesCreationException();
+        }
+        return pesAller;
+
+    }
+
+    public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
+
+        try {
+            Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
+            pesAller.setAttachment(attachment);
+            pesAller.setCreation(LocalDateTime.now());
+
+            populateFromByte(pesAller, file.getBytes());
+
+        } catch (IOException e) {
             throw new PesCreationException();
         }
         return pesAller;
@@ -240,8 +252,8 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public boolean checkVirus(MultipartFile file) throws ClamavException, IOException {
-        ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(file.getBytes()));
+    public boolean checkVirus(byte[] file) throws ClamavException, IOException {
+        ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(file));
         boolean status = false;
         if (!mainResult.equals(OK.INSTANCE)) {
             status = true;
@@ -271,7 +283,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         List<Predicate> subQueryPredicates = new ArrayList<Predicate>();
         subQueryPredicates
                 .add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
-        subquery.where(subQueryPredicates.toArray(new Predicate[]{}));
+        subquery.where(subQueryPredicates.toArray(new Predicate[] {}));
 
         Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable2 = subquery2.from(PesHistory.class);
@@ -279,17 +291,21 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
         List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
         subQueryPredicates2.add(cb.equal(historyTable2.get("status"), StatusType.SENT));
-        subquery2.where(subQueryPredicates2.toArray(new Predicate[]{}));
+        subquery2.where(subQueryPredicates2.toArray(new Predicate[] {}));
 
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
 
         mainQueryPredicates.add(cb.not(cb.exists(subquery)));
         mainQueryPredicates.add(cb.exists(subquery2));
-        query.where(mainQueryPredicates.toArray(new Predicate[]{}));
+        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
         TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
         List<PesAller> resultList = typedQuery.getResultList();
 
         return resultList;
+    }
+
+    public List<PesHistory> getPesHistoryByTypes(String uuid, List<StatusType> statusTypes) {
+        return pesHistoryRepository.findBypesUuidAndStatusInOrderByDateDesc(uuid, statusTypes);
     }
 
     public PesHistory getLastSentHistory(String uuid) {

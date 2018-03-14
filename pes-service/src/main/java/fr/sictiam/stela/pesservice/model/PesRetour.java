@@ -35,10 +35,13 @@ public class PesRetour {
     @ManyToOne
     private LocalAuthority localAuthority;
 
+    private boolean collected;
+
     public PesRetour(Attachment attachment, LocalAuthority localAuthority) {
         this.creation = LocalDateTime.now();
         this.attachment = attachment;
         this.localAuthority = localAuthority;
+        this.collected = false;
     }
 
     public PesRetour() {
@@ -70,5 +73,13 @@ public class PesRetour {
 
     public void setAttachment(Attachment attachment) {
         this.attachment = attachment;
+    }
+
+    public boolean isCollected() {
+        return collected;
+    }
+
+    public void setCollected(boolean collected) {
+        this.collected = collected;
     }
 }

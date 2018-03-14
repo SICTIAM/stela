@@ -66,7 +66,6 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     public void proccessEvent(PesHistoryEvent event) throws MessagingException, IOException {
         PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
-        JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
 
         Notification notification = Notification.notifications.stream()
                 .filter(notif -> notif.getStatusType().equals(event.getPesHistory().getStatus())).findFirst().get();
@@ -98,20 +97,27 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
             }
         });
 
-        List<NotificationValue> notifications = getNotificationValues(node);
+        if (StringUtils.isNotBlank(pes.getProfileUuid())) {
+            JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
 
-        if (notification.isDeactivatable() || notifications.stream().anyMatch(
-                notif -> notif.getName().equals(event.getPesHistory().getStatus().toString()) && notif.isActive())
-                || (notification.isDefaultValue() && notifications.isEmpty())) {
-            sendMail(getAgentMail(node),
-                    localesService.getMessage("fr", "pes_notification",
-                            "$.pes." + event.getPesHistory().getStatus().name() + ".subject"),
-                    localesService.getMessage("fr", "pes_notification",
-                            "$.pes." + event.getPesHistory().getStatus().name() + ".body", getAgentInfo(node)));
+            List<NotificationValue> notifications = getNotificationValues(node);
 
-            PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
-            applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+            if (notification.isDeactivatable()
+                    || notifications.stream()
+                            .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
+                                    && notif.isActive())
+                    || (notification.isDefaultValue() && notifications.isEmpty())) {
+                sendMail(getAgentMail(node),
+                        localesService.getMessage("fr", "pes_notification",
+                                "$.pes." + event.getPesHistory().getStatus().name() + ".subject"),
+                        localesService.getMessage("fr", "pes_notification",
+                                "$.pes." + event.getPesHistory().getStatus().name() + ".body", getAgentInfo(node)));
+
+                PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
+                applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+            }
         }
+
     }
 
     public List<NotificationValue> getNotificationValues(JsonNode node) {

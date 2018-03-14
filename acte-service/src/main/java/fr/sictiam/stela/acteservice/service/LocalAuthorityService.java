@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +62,24 @@ public class LocalAuthorityService {
 
     public LocalAuthority getByUuid(String uuid) {
         return localAuthorityRepository.findByUuid(uuid).get();
+    }
+
+    @Transactional
+    public void generateFormMiatReturn(String localAuthorityUuid, Map<String, Object> map) {
+
+        LocalAuthority localAuthority = getByUuid(localAuthorityUuid);
+        map.put("codeMatiere", localAuthority.getMaterialCodes().stream()
+                .collect(Collectors.toMap(MaterialCode::getCode, MaterialCode::getLabel)));
+        map.put("natureActes", localAuthority.getAttachmentTypeReferencials().stream().map(ref -> ref.getActeNature())
+                .collect(Collectors.toMap(ActeNature::getCode, ActeNature::name)));
+        map.put("collectivite_id", localAuthority.getUuid());
+        map.put("collectivite_nom", localAuthority.getName());
+        // TODO get the date format
+        map.put("collectivite_dateClassification", localAuthority.getNomenclatureDate());
+        map.put("collectivite_siren", localAuthority.getSiren());
+        map.put("collectivite_departement", localAuthority.getDepartment());
+        map.put("collectivite_arrondissement", localAuthority.getDistrict());
+        map.put("collectivite_nature", localAuthority.getNature());
     }
 
     public Optional<LocalAuthority> getByName(String name) {

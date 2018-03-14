@@ -60,4 +60,8 @@ public class Views {
 
     }
 
+    public interface GenericAccountView extends LocalAuthorityView {
+
+    }
+
 }

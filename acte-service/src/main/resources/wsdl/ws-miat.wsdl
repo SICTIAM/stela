@@ -1,0 +1,850 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions 
+	name			= "MyDefinition" 
+ 	targetNamespace	= "urn:MyServiceNamespace"
+ 	xmlns:tns		= "urn:MyServiceNamespace"   
+ 	xmlns:xsd		= "http://www.w3.org/2001/XMLSchema" 
+ 	xmlns:soap		= "http://schemas.xmlsoap.org/wsdl/soap/" 
+ 	xmlns:wsdl	    = "http://schemas.xmlsoap.org/wsdl/"
+ 	xmlns ="urn:myInputNamespace">
+	
+	<soap:Header>
+	   <authHeader name="authHeader">
+		 <SSLCertificatSerial>string</SSLCertificatSerial>
+		 <SSLCertificatVendor>string</SSLCertificatVendor>
+	   </authHeader>
+	</soap:Header>
+ 	
+ 	<wsdl:types>
+    <xsd:schema xmlns ="urn:myInputNamespace"
+      targetNamespace="urn:myInputNamespace">
+
+      <xsd:element name="getConnexionSTELA" type="connexionSTELA_Input" />
+      <xsd:complexType name="connexionSTELA_Input">
+        <xsd:sequence>
+          <xsd:element name="typeRetour" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setConnexionSTELA" type="connexionSTELA_Output" />
+      <xsd:complexType name="connexionSTELA_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonConnexionSTELA" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getConnexionSTELA2" type="connexionSTELA_Input2" />
+      <xsd:complexType name="connexionSTELA_Input2">
+        <xsd:sequence>
+          <xsd:element name="email" type="xsd:string" />
+          <xsd:element name="password" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setConnexionSTELA2" type="connexionSTELA_Output2" />
+      <xsd:complexType name="connexionSTELA_Output2">
+        <xsd:sequence>
+          <xsd:element name="jsonConnexionSTELA2" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getgetStatusActe_avalid" type="Acte_avalid_Input" />
+      <xsd:complexType name="Acte_avalid_Input">
+        <xsd:sequence>
+          <xsd:element name="form_id" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setgetStatusActe_avalid" type="Acte_avalid_Output" />
+      <xsd:complexType name="Acte_avalid_Output">
+        <xsd:sequence>
+          <xsd:element name="jsongetStatusActe_avalid" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetRetoursPrefecture" type="GetRetoursPrefecture_Input" />
+      <xsd:complexType name="GetRetoursPrefecture_Input">
+        <xsd:sequence>
+          <xsd:element name="groupeid" type="xsd:string" />
+          <xsd:element name="date" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetRetoursPrefecture" type="GetRetoursPrefecture_Output" />
+      <xsd:complexType name="GetRetoursPrefecture_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetRetoursPrefecture" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetResultatFormMiat" type="GetResultatFormMiat_Input" />
+      <xsd:complexType name="GetResultatFormMiat_Input">
+        <xsd:sequence>
+          <xsd:element name="uid" type="xsd:string" />
+          <xsd:element name="groupeid" type="xsd:string" />
+          <xsd:element name="mail" type="xsd:string" />
+          <xsd:element name="pwd" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetResultatFormMiat" type="GetResultatFormMiat_Output" />
+      <xsd:complexType name="GetResultatFormMiat_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetResultatFormMiat" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetDocument" type="GetDocument_Input" />
+      <xsd:complexType name="GetDocument_Input">
+        <xsd:sequence>
+          <xsd:element name="miat_ID" type="xsd:string" />
+          <xsd:element name="tampon" type="xsd:string" />
+          <xsd:element name="mail" type="xsd:string" />
+          <xsd:element name="pwd" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetDocument" type="GetDocument_Output" />
+      <xsd:complexType name="GetDocument_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetDocument" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetAnnexes" type="GetAnnexes_Input" />
+      <xsd:complexType name="GetAnnexes_Input">
+        <xsd:sequence>
+          <xsd:element name="miat_ID" type="xsd:string" />
+          <xsd:element name="tampon" type="xsd:string" />
+          <xsd:element name="mail" type="xsd:string" />
+          <xsd:element name="pwd" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetAnnexes" type="GetAnnexes_Output" />
+      <xsd:complexType name="GetAnnexes_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetAnnexes" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+       <xsd:element name="getGetDocumentComplementaire" type="GetDocumentComplementaire_Input" />
+      <xsd:complexType name="GetDocumentComplementaire_Input">
+        <xsd:sequence>
+          <xsd:element name="form_id_doc" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetDocumentComplementaire" type="GetDocumentComplementaire_Output" />
+      <xsd:complexType name="GetDocumentComplementaire_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetDocumentComplementaire" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetDetailsActe" type="GetDetailsActe_Input" />
+      <xsd:complexType name="GetDetailsActe_Input">
+        <xsd:sequence>
+          <xsd:element name="miat_ID" type="xsd:string" />
+          <xsd:element name="mail" type="xsd:string" />
+          <xsd:element name="pwd" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetDetailsActe" type="GetDetailsActe_Output" />
+      <xsd:complexType name="GetDetailsActe_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetDetailsActe" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetListeDeliberations" type="GetListeDeliberations_Input" />
+      <xsd:complexType name="GetListeDeliberations_Input">
+        <xsd:sequence>
+          <xsd:element name="groupe" type="xsd:string" />
+          <xsd:element name="start" type="xsd:string" />
+          <xsd:element name="perPage" type="xsd:string" />
+          <xsd:element name="sort" type="xsd:string" />
+          <xsd:element name="order" type="xsd:string" />
+          <xsd:element name="champRecherche" type="xsd:string" />
+          <xsd:element name="filtreAnnee" type="xsd:string" />
+          <xsd:element name="lienDetail" type="xsd:string" />
+          <xsd:element name="filtreNature" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetListeDeliberations" type="GetListeDeliberations_Output" />
+      <xsd:complexType name="GetListeDeliberations_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetListeDeliberations" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetAnneeDebut" type="GetAnneeDebut_Input" />
+      <xsd:complexType name="GetAnneeDebut_Input">
+        <xsd:sequence>
+          <xsd:element name="groupe" type="xsd:string" />
+          <xsd:element name="filtreNature" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetAnneeDebut" type="GetAnneeDebut_Output" />
+      <xsd:complexType name="GetAnneeDebut_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetAnneeDebut" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getAutoCompletion" type="AutoCompletion_Input" />
+      <xsd:complexType name="AutoCompletion_Input">
+        <xsd:sequence>
+          <xsd:element name="numero" type="xsd:string" />
+          <xsd:element name="uid" type="xsd:string" />
+          <xsd:element name="groupeid" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setAutoCompletion" type="AutoCompletiont_Output" />
+      <xsd:complexType name="AutoCompletion_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonAutoCompletion" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getPutActe" type="PutActe_Input" />
+      <xsd:complexType name="PutActe_Input">
+        <xsd:sequence>
+          <xsd:element name="file_content" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setPutActe" type="PutActe_Output" />
+      <xsd:complexType name="PutActe_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonPutActe" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getPutActe_Banette" type="PutActe_Banette_Input" />
+      <xsd:complexType name="PutActe_Banette_Input">
+        <xsd:sequence>
+          <xsd:element name="file_content" type="xsd:string" />
+          <xsd:element name="mail" type="xsd:string" />
+          <xsd:element name="pwd" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setPutActe_Banette" type="PutActe_Banette_Output" />
+      <xsd:complexType name="PutActe_Banette_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonPutActe_Banette" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getGetAnomaliesEnveloppe" type="GetAnomaliesEnveloppe_Input" />
+      <xsd:complexType name="GetAnomaliesEnveloppe_Input">
+        <xsd:sequence>
+          <xsd:element name="enveloppe_id" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setGetAnomaliesEnveloppe" type="GetAnomaliesEnveloppe_Output" />
+      <xsd:complexType name="GetAnomaliesEnveloppe_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonGetAnomaliesEnveloppe" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      
+      <xsd:element name="getAnnulationActe" type="AnnulationActe_Input" />
+      <xsd:complexType name="AnnulationActe_Input">
+        <xsd:sequence>
+          <xsd:element name="miat_ID" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+	  
+	  <xsd:element name="setAnnulationActe" type="AnnulationActe_Output" />
+      <xsd:complexType name="AnnulationActe_Output">
+        <xsd:sequence>
+          <xsd:element name="jsonAnnulationActe" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+
+      
+    </xsd:schema>
+  </wsdl:types>
+<!-- Messages -->
+ 	<!-- Messages connexionSTELA -->
+	<wsdl:message name="getConnexionSTELA">
+		<wsdl:part name="body" element="getConnexionSTELA"/>
+ 	</wsdl:message>
+
+    <wsdl:message name="setConnexionSTELA">
+        <wsdl:part name="body" element="setConnexionSTELA"/>
+    </wsdl:message>
+
+    <!-- Messages connexionSTELA2 -->
+    <wsdl:message name="getConnexionSTELA2">
+		<wsdl:part name="body" element="getConnexionSTELA2"/>
+    </wsdl:message>
+
+    <wsdl:message name="setConnexionSTELA2">
+		<wsdl:part name="body" element="setConnexionSTELA2"/>
+    </wsdl:message>
+
+    <!-- Messages getStatusActe_avalid -->
+    <wsdl:message name="getgetStatusActe_avalid">
+        <wsdl:part name="body" element="getgetStatusActe_avalid"/>
+    </wsdl:message>
+
+    <wsdl:message name="setgetStatusActe_avalid">
+        <wsdl:part name="body" element="setgetStatusActe_avalid"/>
+    </wsdl:message>
+
+	<!-- Messages getRetoursPrefecture -->
+	<wsdl:message name="getGetRetoursPrefecture">
+		<wsdl:part name="body" element="getGetRetoursPrefecture"/>
+ 	</wsdl:message>
+	
+ 	<wsdl:message name="setGetRetoursPrefecture">
+  		<wsdl:part name="body" element="setGetRetoursPrefecture"/>
+ 	</wsdl:message>
+ 	
+	<!-- Messages getResultatFormMiat -->
+	<wsdl:message name="getGetResultatFormMiat">
+  		<wsdl:part name="body" element="getGetResultatFormMiat"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetResultatFormMiat">
+  		<wsdl:part name="body" element="setGetResultatFormMiat"/>
+ 	</wsdl:message>
+	
+	
+	<!-- Messages getDocument -->
+	<wsdl:message name="getGetDocument">
+  		<wsdl:part name="body" element="getGetDocument"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetDocument">
+  		<wsdl:part name="body" element="setGetDocument"/>
+ 	</wsdl:message>
+	
+	<!-- Messages getAnnexes -->
+	<wsdl:message name="getGetAnnexes">
+  		<wsdl:part name="body" element="getGetAnnexes"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetAnnexes">
+  		<wsdl:part name="body" element="setGetAnnexes"/>
+ 	</wsdl:message>
+	
+	<!-- Messages getDocumentComplementaire -->
+	<wsdl:message name="getGetDocumentComplementaire">
+  		<wsdl:part name="body" element="getGetDocumentComplementaire"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetDocumentComplementaire">
+  		<wsdl:part name="body" element="setGetDocumentComplementaire"/>
+ 	</wsdl:message>
+	
+	<!-- Messages getDetailsActe -->
+	<wsdl:message name="getGetDetailsActe">
+  		<wsdl:part name="body" element="getGetDetailsActe"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetDetailsActe">
+  		<wsdl:part name="body" element="setGetDetailsActe"/>
+ 	</wsdl:message>
+	
+	<!-- Messages getListeDeliberations -->
+	<wsdl:message name="getGetListeDeliberations">
+    		<wsdl:part name="body" element="getGetListeDeliberations"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetListeDeliberations">
+    	<wsdl:part name="body" element="setGetListeDeliberations"/>
+ 	</wsdl:message>
+	
+	<!-- Messages getAnneeDebut -->
+	<wsdl:message name="getGetAnneeDebut">
+    	<wsdl:part name="body" element="getGetAnneeDebut"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetAnneeDebut">
+    	<wsdl:part name="body" element="setGetAnneeDebut"/>
+ 	</wsdl:message>
+	
+ 	<!-- Messages autoCompletion -->
+	<wsdl:message name="getAutoCompletion">
+    	<wsdl:part name="body" element="getAutoCompletion"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setAutoCompletion">
+    	<wsdl:part name="body" element="setAutoCompletion"/>
+ 	</wsdl:message>
+ 	
+	<!-- Messages putActe -->
+	<wsdl:message name="getPutActe">
+    	<wsdl:part name="body" element="getPutActe"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setPutActe">
+    	<wsdl:part name="body" element="setPutActe"/>
+ 	</wsdl:message>
+	
+    <!-- Messages putActe_Banette -->
+    <wsdl:message name="getPutActe_Banette">
+    	<wsdl:part name="body" element="getPutActe_Banette"/>
+    </wsdl:message>
+
+    <wsdl:message name="setPutActe_Banette">
+    	<wsdl:part name="body" element="setPutActe_Banette"/>
+    </wsdl:message>
+
+	<!-- Messages getAnomaliesEnveloppe -->
+	<wsdl:message name="getGetAnomaliesEnveloppe">
+    	<wsdl:part name="body" element="getGetAnomaliesEnveloppe"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setGetAnomaliesEnveloppe">
+    	<wsdl:part name="body" element="setGetAnomaliesEnveloppe"/>
+ 	</wsdl:message>
+	
+	<!-- Messages annulationActe -->
+	<wsdl:message name="getAnnulationActe">
+    	<wsdl:part name="body" element="getAnnulationActe"/>
+ 	</wsdl:message>
+ 	
+ 	<wsdl:message name="setAnnulationActe">
+    	<wsdl:part name="body" element="setAnnulationActe"/>
+ 	</wsdl:message>
+	
+ 
+<!-- Ports -->
+	<!-- Ports ConnexionSTELA -->
+ 	<wsdl:portType name="portConnexionSTELA">
+  		<wsdl:operation name="connexionSTELA">
+   			<wsdl:input message="tns:getConnexionSTELA"/>
+			<wsdl:output message="tns:setConnexionSTELA"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+
+    <!-- Ports ConnexionSTELA2 -->
+    <wsdl:portType name="portConnexionSTELA2">
+        <wsdl:operation name="connexionSTELA2">
+            <wsdl:input message="tns:getConnexionSTELA2"/>
+            <wsdl:output message="tns:setConnexionSTELA2"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- Ports getStatusActe_avalid -->
+    <wsdl:portType name="portgetStatusActe_avalid">
+        <wsdl:operation name="getStatusActe_avalid">
+            <wsdl:input message="tns:getgetStatusActe_avalid"/>
+            <wsdl:output message="tns:setgetStatusActe_avalid"/>
+        </wsdl:operation>
+    </wsdl:portType>
+	
+	<!-- Ports GetRetoursPrefecture -->
+ 	<wsdl:portType name="portGetRetoursPrefecture">
+  		<wsdl:operation name="getRetoursPrefecture">
+   			<wsdl:input message="tns:getGetRetoursPrefecture"/>
+			<wsdl:output message="tns:setGetRetoursPrefecture"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+ 	
+ 	<!-- Ports GetResultatFormMiat -->
+ 	<wsdl:portType name="portGetResultatFormMiat">  		
+  		<wsdl:operation name="getResultatFormMiat">
+   			<wsdl:input message="tns:getGetResultatFormMiat"/>
+  			<wsdl:output message="tns:setGetResultatFormMiat"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+	<!-- Ports GetDocument -->
+ 	<wsdl:portType name="portGetDocument">  		
+  		<wsdl:operation name="getDocument">
+   			<wsdl:input message="tns:getGetDocument"/>
+  			<wsdl:output message="tns:setGetDocument"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+	<!-- Ports GetAnnexes -->
+ 	<wsdl:portType name="portGetAnnexes">  		
+  		<wsdl:operation name="getAnnexes">
+   			<wsdl:input message="tns:getGetAnnexes"/>
+  			<wsdl:output message="tns:setGetAnnexes"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+	<!-- Ports GetDocumentComplementaire -->
+ 	<wsdl:portType name="portGetDocumentComplementaire">  		
+  		<wsdl:operation name="getDocumentComplementaire">
+   			<wsdl:input message="tns:getGetDocumentComplementaire"/>
+  			<wsdl:output message="tns:setGetDocumentComplementaire"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>	
+	
+	<!-- Ports GetDetailsActe -->
+ 	<wsdl:portType name="portGetDetailsActe">  		
+  		<wsdl:operation name="getDetailsActe">
+   			<wsdl:input message="tns:getGetDetailsActe"/>
+  			<wsdl:output message="tns:setGetDetailsActe"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+	<!-- Ports GetListeDeliberations -->
+ 	<wsdl:portType name="portGetListeDeliberations">  		
+  		<wsdl:operation name="getListeDeliberations">
+   			<wsdl:input message="tns:getGetListeDeliberations"/>
+  			<wsdl:output message="tns:setGetListeDeliberations"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+	<!-- Ports GetAnneeDebut -->
+ 	<wsdl:portType name="portGetAnneeDebut">  		
+  		<wsdl:operation name="getAnneeDebut">
+   			<wsdl:input message="tns:getGetAnneeDebut"/>
+  			<wsdl:output message="tns:setGetAnneeDebut"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+ 	
+	<!-- Ports AutoCompletion -->
+ 	<wsdl:portType name="portAutoCompletion">
+  		<wsdl:operation name="autoCompletion">
+   			<wsdl:input message="tns:getAutoCompletion"/>
+  			<wsdl:output message="tns:setAutoCompletion"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+ 	
+ 	<!-- Ports PutActe -->
+ 	<wsdl:portType name="portPutActe">  		
+  		<wsdl:operation name="putActe">
+   			<wsdl:input message="tns:getPutActe"/>
+  			<wsdl:output message="tns:setPutActe"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+    <!-- Ports PutActe_Banette -->
+    <wsdl:portType name="portPutActe_Banette">
+        <wsdl:operation name="putActe_Banette">
+            <wsdl:input message="tns:getPutActe_Banette"/>
+            <wsdl:output message="tns:setPutActe_Banette"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+	<!-- Ports GetAnomaliesEnveloppe -->
+ 	<wsdl:portType name="portGetAnomaliesEnveloppe">  		
+  		<wsdl:operation name="getAnomaliesEnveloppe">
+   			<wsdl:input message="tns:getGetAnomaliesEnveloppe"/>
+  			<wsdl:output message="tns:setGetAnomaliesEnveloppe"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+	
+	<!-- Ports AnnulationActe -->
+ 	<wsdl:portType name="portAnnulationActe">  		
+  		<wsdl:operation name="annulationActe">
+   			<wsdl:input message="tns:getAnnulationActe"/>
+  			<wsdl:output message="tns:setAnnulationActe"/>
+  		</wsdl:operation>
+ 	</wsdl:portType>
+ 	
+ 	
+<!-- Binding -->
+	<!-- Binding ConnexionSTELA -->
+    <wsdl:binding name="bindingConnexionSTELA" type="tns:portConnexionSTELA">
+        <soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="connexionSTELA">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="urn:myInputNamespace" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="urn:myOutputNamespace" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- Binding ConnexionSTELA2 -->
+    <wsdl:binding name="bindingConnexionSTELA2" type="tns:portConnexionSTELA2">
+        <soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="connexionSTELA2">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="urn:myInputNamespace" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="urn:myOutputNamespace" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- Binding getStatusActe_avalid -->
+    <wsdl:binding name="bindinggetStatusActe_avalid" type="tns:portgetStatusActe_avalid">
+        <soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getStatusActe_avalid">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="urn:myInputNamespace" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="urn:myOutputNamespace" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+	
+	<!-- Binding GetRetoursPrefecture -->
+ 	<wsdl:binding name="bindingGetRetoursPrefecture" type="tns:portGetRetoursPrefecture">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getRetoursPrefecture">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+ 	
+ 	<!-- Binding GetResultatFormMiat -->
+ 	<wsdl:binding name="bindingGetResultatFormMiat" type="tns:portGetResultatFormMiat">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getResultatFormMiat">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding GetDocument -->
+ 	<wsdl:binding name="bindingGetDocument" type="tns:portGetDocument">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getDocument">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding GetAnnexes -->
+ 	<wsdl:binding name="bindingGetAnnexes" type="tns:portGetAnnexes">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getAnnexes">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding GetDocumentComplementaire -->
+ 	<wsdl:binding name="bindingGetDocumentComplementaire" type="tns:portGetDocumentComplementaire">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getDocumentComplementaire">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding GetDetailsActe -->
+ 	<wsdl:binding name="bindingGetDetailsActe" type="tns:portGetDetailsActe">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getDetailsActe">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding GetListeDeliberations -->
+ 	<wsdl:binding name="bindingGetListeDeliberations" type="tns:portGetListeDeliberations">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getListeDeliberations">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding GetAnneeDebut -->
+ 	<wsdl:binding name="bindingGetAnneeDebut" type="tns:portGetAnneeDebut">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getAnneeDebut">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+ 	
+	<!-- Binding AutoCompletion -->
+ 	<wsdl:binding name="bindingAutoCompletion" type="tns:portAutoCompletion">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="autoCompletion">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+ 	
+ 	<!-- Binding PutActe -->
+ 	<wsdl:binding name="bindingPutActe" type="tns:portPutActe">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="putActe">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+    <!-- Binding PutActe_Banette-->
+    <wsdl:binding name="bindingPutActe_Banette" type="tns:portPutActe_Banette">
+        <soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="putActe_Banette">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="urn:myInputNamespace" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="urn:myOutputNamespace" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+	<!-- Binding GetAnomaliesEnveloppe -->
+ 	<wsdl:binding name="bindingGetAnomaliesEnveloppe" type="tns:portGetAnomaliesEnveloppe">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="getAnomaliesEnveloppe">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+	<!-- Binding AnnulationActe -->
+ 	<wsdl:binding name="bindingAnnulationActe" type="tns:portAnnulationActe">
+  		<soap:binding  transport="http://schemas.xmlsoap.org/soap/http"/>
+   		<wsdl:operation name="annulationActe">
+   			<soap:operation soapAction=""/>
+   			<wsdl:input>
+    			<soap:body use="literal" namespace="urn:myInputNamespace" />
+   			</wsdl:input>
+   			<wsdl:output>
+    			<soap:body use="literal" namespace="urn:myOutputNamespace" />
+   			</wsdl:output>
+  		</wsdl:operation>
+ 	</wsdl:binding>
+	
+ 	
+<!-- Services -->
+ 	<wsdl:service name="MyService">
+  		<wsdl:documentation>Returns a greeting string.</wsdl:documentation>
+  		<!-- Service ConnexionSTELA -->
+  		<wsdl:port name="portConnexionSTELA" binding="tns:bindingConnexionSTELA">
+   			<soap:address location="localhost:9008/miat/ws/connexionSTELA"/>
+  		</wsdl:port>
+        <!-- Service ConnexionSTELA2 -->
+        <wsdl:port name="portConnexionSTELA2" binding="tns:bindingConnexionSTELA2">
+            <soap:address location="localhost:9008/miat/ws/connexionSTELA2"/>
+        </wsdl:port>
+        <!-- Service getStatusActe_avalid -->
+        <wsdl:port name="portgetStatusActe_avalid" binding="tns:bindinggetStatusActe_avalid">
+            <soap:address location="localhost:9008/miat/ws/getStatusActe_avalid"/>
+        </wsdl:port>
+		<!-- Service GetRetoursPrefecture -->
+  		<wsdl:port name="portGetRetoursPrefecture" binding="tns:bindingGetRetoursPrefecture">
+   			<soap:address location="localhost:9008/miat/ws/getRetoursPrefecture"/>
+  		</wsdl:port>
+  		<!-- Service AutoCompletion -->
+  		<wsdl:port name="portAutoCompletion" binding="tns:bindingAutoCompletion">
+   			<soap:address location="localhost:9008/miat/ws/autoCompletion"/>
+  		</wsdl:port>
+  		<!-- Service GetResultatFormMiat -->
+  		<wsdl:port name="portGetResultatFormMiat" binding="tns:bindingGetResultatFormMiat">
+   			<soap:address location="localhost:9008/miat/ws/getResultatFormMiat"/>
+  		</wsdl:port>
+		<!-- Service GetDocument -->
+  		<wsdl:port name="portGetDocument" binding="tns:bindingGetDocument">
+   			<soap:address location="localhost:9008/miat/ws/getDocument"/>
+  		</wsdl:port>
+		<!-- Service GetAnnexes -->
+  		<wsdl:port name="portGetAnnexes" binding="tns:bindingGetAnnexes">
+   			<soap:address location="localhost:9008/miat/ws/getAnnexes"/>
+  		</wsdl:port>
+		<!-- Service GetDocumentComplementaire -->
+  		<wsdl:port name="portGetDocumentComplementaire" binding="tns:bindingGetDocumentComplementaire">
+   			<soap:address location="localhost:9008/miat/ws/getDocumentComplementaire"/>
+  		</wsdl:port>
+		<!-- Service GetDetailsActe -->
+  		<wsdl:port name="portGetDetailsActe" binding="tns:bindingGetDetailsActe">
+   			<soap:address location="localhost:9008/miat/ws/getDetailsActe"/>
+  		</wsdl:port>
+		<!-- Service GetListeDeliberations -->
+  		<wsdl:port name="portGetListeDeliberations" binding="tns:bindingGetListeDeliberations">
+   			<soap:address location="localhost:9008/miat/ws/getListeDeliberations"/>
+  		</wsdl:port>
+		<!-- Service GetAnneeDebut -->
+  		<wsdl:port name="portGetAnneeDebut" binding="tns:bindingGetAnneeDebut">
+   			<soap:address location="localhost:9008/miat/ws/getAnneeDebut"/>
+  		</wsdl:port>
+  		<!-- Service PutActe -->
+  		<wsdl:port name="portPutActe" binding="tns:bindingPutActe">
+   			<soap:address location="localhost:9008/miat/ws/putActe"/>
+  		</wsdl:port>
+        <!-- Service PutActe_Banette -->
+        <wsdl:port name="portPutActe_Banette" binding="tns:bindingPutActe_Banette">
+            <soap:address location="localhost:9008/miat/ws/putActe_Banette"/>
+        </wsdl:port>
+		<!-- Service GetAnomaliesEnveloppe -->
+  		<wsdl:port name="portGetAnomaliesEnveloppe" binding="tns:bindingGetAnomaliesEnveloppe">
+   			<soap:address location="localhost:9008/miat/ws/getAnomaliesEnveloppe"/>
+  		</wsdl:port>		
+		<!-- Service AnnulationActe -->
+  		<wsdl:port name="portAnnulationActe" binding="tns:bindingAnnulationActe">
+   			<soap:address location="localhost:9008/miat/ws/annulationActe"/>
+  		</wsdl:port>
+		
+		
+ 	</wsdl:service>
+ 
+</wsdl:definitions>

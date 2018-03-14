@@ -47,16 +47,22 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-                .authorizeRequests().antMatchers("/api/admin/local-authority/all").permitAll()
-                .antMatchers("/api/admin/ozwillo/**").permitAll().antMatchers("/api/api-gateway/isMainDomain")
-                .permitAll().antMatchers("/api/admin/instance/welcome-message").permitAll()
-                .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll().antMatchers("/api/*/locales/**")
-                .permitAll().antMatchers("/api/**").authenticated().and().csrf()
-                .ignoringAntMatchers("/api/admin/ozwillo/**").and().logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
-                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()
-                .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()),
-                        ExceptionTranslationFilter.class)
+                .authorizeRequests()
+                    .antMatchers("/api/admin/local-authority/all").permitAll()
+                    .antMatchers("/api/admin/ozwillo/**").permitAll()
+                    .antMatchers("/api/api-gateway/isMainDomain").permitAll()
+                    .antMatchers("/api/admin/instance/welcome-message").permitAll()
+                    .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
+                    .antMatchers("/api/*/locales/**").permitAll()
+                    .antMatchers("/api/*/ws/**").permitAll()
+                    .antMatchers("/api/**").authenticated().and()
+                .csrf()
+                    .ignoringAntMatchers("/api/admin/ozwillo/**").ignoringAntMatchers("/api/*/ws/**").and()
+                .logout()
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
+                .exceptionHandling()
+                    .authenticationEntryPoint(authenticationEntryPoint()).and()
+                .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class)
                 .addFilterAfter(new CsrfTokenGeneratorFilter(), CsrfFilter.class);
     }
 }

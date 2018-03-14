@@ -113,6 +113,12 @@ public class AgentController {
         return new ResponseEntity<>(agentService.findByUuid(uuid).get(), HttpStatus.OK);
     }
 
+    @GetMapping("/{uuid}/profiles")
+    @JsonView(Views.AgentView.class)
+    public Set<Profile> getProfiles(@PathVariable String uuid) {
+        return agentService.findByUuid(uuid).get().getProfiles();
+    }
+
     @GetMapping("/profiles")
     @JsonView(Views.AgentView.class)
     public Set<Profile> getCurrentProfiles(@RequestAttribute("STELA-Sub") String sub) {

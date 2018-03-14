@@ -1,0 +1,1 @@
+ALTER TABLE pes_retour ADD COLUMN collected boolean;

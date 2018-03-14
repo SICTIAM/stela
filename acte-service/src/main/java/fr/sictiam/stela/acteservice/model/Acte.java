@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.model;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -60,6 +61,16 @@ public class Acte {
     private String profileUuid;
 
     private String groupUuid;
+
+    public String getMiatId() {
+        return miatId;
+    }
+
+    @Formula("(select concat(la.department,'-',la.siren, '-',to_char(creation, 'YYYYMMdd'),'-', number,'-', CASE WHEN nature = '0' THEN 'DE' "
+            + " WHEN nature = '1' THEN 'AR' " + " WHEN nature = '2' THEN 'AI' " + " WHEN nature = '3' THEN 'CC' "
+            + " WHEN nature = '4' THEN 'BF' "
+            + " WHEN nature = '5' THEN 'AU' ELSE '' END)  from local_authority la where la.uuid=local_authority_uuid)")
+    private String miatId;
 
     public Acte() {
     }

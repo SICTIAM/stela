@@ -21,6 +21,7 @@ import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PesRetourService {
@@ -41,14 +42,14 @@ public class PesRetourService {
         return pesRetourRepository.findByUuid(uuid).get();
     }
 
-    public List<PesRetour> getAllWithQuery(String multifield, String filename, LocalDate creationFrom, LocalDate creationTo,
-            String currentLocalAuthUuid, Integer limit, Integer offset) {
+    public List<PesRetour> getAllWithQuery(String multifield, String filename, LocalDate creationFrom,
+            LocalDate creationTo, String currentLocalAuthUuid, Integer limit, Integer offset) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PesRetour> query = builder.createQuery(PesRetour.class);
         Root<PesRetour> pesRetourRoot = query.from(PesRetour.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom, creationTo,
-                currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom,
+                creationTo, currentLocalAuthUuid);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(builder.desc(pesRetourRoot.get("creation")));
 
@@ -61,8 +62,8 @@ public class PesRetourService {
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<PesRetour> pesRetourRoot = query.from(PesRetour.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom, creationTo,
-                currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom,
+                creationTo, currentLocalAuthUuid);
         query.select(builder.count(pesRetourRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -92,5 +93,20 @@ public class PesRetourService {
                     creationTo.plusDays(1).atStartOfDay())));
         }
         return predicates;
+    }
+
+    public List<PesRetour> getUncollectedLocalAuthrotityPesRetours(String siren) {
+        return pesRetourRepository.findByLocalAuthoritySirenAndCollectedFalse(siren);
+    }
+
+    public PesRetour collect(String filename) {
+        Optional<PesRetour> pesRetourOpt = pesRetourRepository
+                .findByAttachmentFilename(filename.replace(".tar.gz", ""));
+        PesRetour pesRetour = pesRetourOpt.orElse(null);
+        if (pesRetourOpt.isPresent()) {
+            pesRetour.setCollected(true);
+            pesRetour = pesRetourRepository.save(pesRetour);
+        }
+        return pesRetour;
     }
 }
