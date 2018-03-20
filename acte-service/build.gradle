@@ -1,6 +1,10 @@
 archivesBaseName = 'stela-acte-service'
 
 dependencies {
+    compile (project(':signature-lib')) {
+	    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.58'
+	    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.58'
+	}
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
@@ -24,7 +28,13 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')
 }
-
+sourceSets {
+    main {
+        java {
+            srcDir project(':signature-lib').file('src/main/java')
+        }
+    }
+}
 test {
     useJUnit {
         excludeCategories 'fr.sictiam.stela.acteservice.IntegrationTests'

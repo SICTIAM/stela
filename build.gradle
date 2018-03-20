@@ -43,6 +43,9 @@ subprojects {
 			// docker-compose-rule is published on bintray
 			url 'https://dl.bintray.com/palantir/releases'
 		}
+		maven {
+            url 'https://ec.europa.eu/cefdigital/artifact/content/groups/public'
+        }
 	}
 
 	dependencies {
@@ -81,23 +84,23 @@ subprojects {
     quality {
         strict = false
     }
-
-    task image(type: Docker, dependsOn: build) {
-        registry = 'forge-registry.sictiam.fr/internet'
-        push = project.hasProperty('ush')
-        applicationName = 'stela-poc/' + jar.baseName
-        dockerfile = file('src/main/docker/Dockerfile')
-        doFirst {
-            copy {
-                from jar
-                into stageDir
-            } 
-            copy {
-                from ("${gradle.gradleUserHomeDir}/../.ssh/id_rsa")
-                into stageDir
-            }
-
-        }
+	if (project.name.endsWith('service')) {
+	    task image(type: Docker, dependsOn: build) {
+			registry = 'forge-registry.sictiam.fr/internet'
+	        push = project.hasProperty('ush')
+	        applicationName = 'stela-poc/' + jar.baseName
+	        dockerfile = file('src/main/docker/Dockerfile')
+	        doFirst {
+	            copy {
+	                from jar
+	                into stageDir
+	            } 
+	            copy {
+	                from ("${gradle.gradleUserHomeDir}/../.ssh/id_rsa")
+	                into stageDir
+	            }
+	        }    
+	    }
     }
 }
 

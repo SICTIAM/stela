@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.andrewoma.dexx.collection.Pair;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
 import fr.sictiam.signature.pes.verifier.CertificateProcessor.CertificatInformation1;
+import fr.sictiam.signature.pes.verifier.InvalidPesAllerFileException;
 import fr.sictiam.signature.pes.verifier.PesAllerAnalyser;
-import fr.sictiam.signature.pes.verifier.PesAllerAnalyser.InvalidPesAllerFileException;
 import fr.sictiam.signature.pes.verifier.SignatureValidation;
 import fr.sictiam.signature.pes.verifier.SignatureValidationError;
 import fr.sictiam.signature.pes.verifier.SignatureVerifierResult;
@@ -136,13 +136,17 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         });
     }
 
-    public SimplePesInformation computeSimplePesInformation(byte[] file) throws InvalidPesAllerFileException {
+    public SimplePesInformation computeSimplePesInformation(byte[] file) {
         ByteArrayInputStream bais = new ByteArrayInputStream(file);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         PesAllerAnalyser pesAllerAnalyser = new PesAllerAnalyser(bais, stream);
 
         pesAllerAnalyser.setDoSchemaValidation(true);
-        pesAllerAnalyser.computeSimpleInformation();
+        try {
+            pesAllerAnalyser.computeSimpleInformation();
+        } catch (InvalidPesAllerFileException e) {
+            LOGGER.error(e.getMessage());
+        }
         return pesAllerAnalyser.getSimplePesInformation();
     }
 
@@ -150,10 +154,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return simplePesInformation.isSigned();
     }
 
-    public SignatureValidation isValidSignature(SimplePesInformation simplePesInformation)
-            throws InvalidPesAllerFileException {
+    public SignatureValidation isValidSignature(SimplePesInformation simplePesInformation) {
         PesAllerAnalyser pesAllerAnalyser = new PesAllerAnalyser(simplePesInformation);
-        pesAllerAnalyser.computeSignaturesVerificationResults();
+        try {
+            pesAllerAnalyser.computeSignaturesVerificationResults();
+        } catch (InvalidPesAllerFileException e) {
+            LOGGER.error(e.getMessage());
+        }
         pesAllerAnalyser.computeSignaturesTypeVerification();
 
         SignatureValidation signatureValidation = new SignatureValidation();
@@ -178,7 +185,6 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             if (verificationResult.getUnverifiableSignatureException() != null) {
                 signatureValidationErrors.add(SignatureValidationError.UNVERIFIABLE_SIGNATURE);
             } else {
-                int verificationResultHash = verificationResult.hashCode();
 
                 XadesInfoProcessResult1 xadesInfoProcessResult = verificationResult.getXadesInfoProcessResult();
                 List<XMLDsigReference1> listRef = verificationResult.getSignatureAndRefsVerificationResult()
@@ -442,22 +448,18 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public Pair<StatusType, String> getSignatureStatus(byte[] file) {
         String errorMessage = "";
         StatusType status = StatusType.PENDING_SEND;
-        try {
-            SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
+        SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
 
-            if (isSigned(simplePesInformation)) {
-                SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
-                if (!signatureValidation.isValid()) {
-                    status = StatusType.SIGNATURE_INVALID;
-                    errorMessage = signatureValidation.getSignatureValidationErrors().stream().map(
-                            error -> localesService.getMessage("fr", "pes", "pes.signature_errors." + error.name()))
-                            .collect(Collectors.joining("\n"));
-                }
-            } else {
-                status = StatusType.SIGNATURE_MISSING;
+        if (isSigned(simplePesInformation)) {
+            SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
+            if (!signatureValidation.isValid()) {
+                status = StatusType.SIGNATURE_INVALID;
+                errorMessage = signatureValidation.getSignatureValidationErrors().stream()
+                        .map(error -> localesService.getMessage("fr", "pes", "pes.signature_errors." + error.name()))
+                        .collect(Collectors.joining("\n"));
             }
-        } catch (InvalidPesAllerFileException e) {
-            LOGGER.error(e.getMessage());
+        } else {
+            status = StatusType.SIGNATURE_MISSING;
         }
         return new Pair<StatusType, String>(status, errorMessage);
 
