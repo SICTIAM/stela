@@ -89,6 +89,7 @@ class PesList extends Component {
             <option key={statusItem} value={statusItem}>{t(`pes.status.${statusItem}`)}</option>
         )
         const statusDisplay = (histories) => {
+            if (histories.length === 0) return ''
             const lastHistory = histories[histories.length - 1]
             return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(`pes.status.${lastHistory.status}`)}</span>
         }

@@ -1,0 +1,1 @@
+ALTER TABLE pes_aller ADD COLUMN imported boolean default false;
