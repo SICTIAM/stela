@@ -13,13 +13,13 @@ services:
 stages:
   - test
   - registry
+  - registry-prod
 # Disabled for now as it does not work and it's a pita to know why
 #  - integrationTest
 
 test:
   stage: test
   script:
-    - ./gradlew --build-cache --stacktrace image
     - ./gradlew --build-cache --stacktrace test
 # Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
 #  artifacts:
@@ -38,7 +38,14 @@ registry:
   stage: registry
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace image -Push
+    - ./gradlew --build-cache --stacktrace image -Ppush
   only:
     - develop
+
+registry-prod:
+  stage: registry-prod
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - ./gradlew --build-cache --stacktrace image -Ppush -Pprod
+  only:
     - master

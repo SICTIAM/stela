@@ -87,7 +87,10 @@ subprojects {
 	if (project.name.endsWith('service')) {
 	    task image(type: Docker, dependsOn: build) {
 			registry = 'forge-registry.sictiam.fr/internet'
-	        push = project.hasProperty('ush')
+	        push = project.hasProperty('push')
+            if(project.hasProperty('prod')) {
+                tagVersion = 'prod'
+            }
 	        applicationName = 'stela-poc/' + jar.baseName
 	        dockerfile = file('src/main/docker/Dockerfile')
 	        doFirst {
