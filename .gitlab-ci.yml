@@ -19,6 +19,7 @@ stages:
 test:
   stage: test
   script:
+    - ./gradlew --build-cache --stacktrace image
     - ./gradlew --build-cache --stacktrace test
 # Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
 #  artifacts:
