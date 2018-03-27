@@ -28,7 +28,6 @@ FROM
 	LEFT JOIN `stela_stela_messages` messages_ANO ON anomalies_ANO.`message_id` = messages_ANO.`message_id`
 
 WHERE
-FROM_UNIXTIME(enveloppe_pes_PES.`date_enveloppe_pes`) >= NOW() - INTERVAL {{year}} year AND
 messages_PES.`user_groupid` =
 (
 	SELECT `groupid`

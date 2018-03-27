@@ -1,12 +1,14 @@
 package fr.sictiam.stela.pesservice.service;
 
+import fr.sictiam.stela.pesservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.PesMigration;
 import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.migration.MigrationStatus;
+import fr.sictiam.stela.pesservice.model.migration.PesMigration;
 import fr.sictiam.stela.pesservice.model.util.StreamingInMemoryDestFile;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
@@ -51,6 +53,7 @@ public class MigrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MigrationService.class);
 
     private final PesAllerRepository pesAllerRepository;
+    private final LocalAuthorityRepository localAuthorityRepository;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -81,19 +84,25 @@ public class MigrationService {
 
     private final String query = getStringResourceFromStream("migration.sql");
 
-    public MigrationService(PesAllerRepository pesAllerRepository) {
+    public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository) {
         this.pesAllerRepository = pesAllerRepository;
+        this.localAuthorityRepository = localAuthorityRepository;
     }
 
-    public void migrateStela2PES(LocalAuthority localAuthority, String stela2Siren) {
+    public void migrateStela2PES(LocalAuthority localAuthority) {
+        localAuthority.setMigrationStatus(MigrationStatus.ONGOING);
+        localAuthority = localAuthorityRepository.save(localAuthority);
+        LOGGER.error("MigrationStatus: {}", localAuthority.getMigrationStatus());
+
         SSHClient sshClient = getShellConnexion();
-        String proccessedQuery = query
-                .replaceAll("\\{\\{siren}}", stela2Siren)
-                .replaceAll("\\{\\{year}}", "2");
+        String proccessedQuery = query.replaceAll("\\{\\{siren}}", localAuthority.getSiren());
         ResultSet resultSet = executeMySQLQuery(proccessedQuery);
         List<PesMigration> pesMigrations = toPesMigration(resultSet);
         importPesMigrations(pesMigrations, localAuthority, sshClient);
         closeShellConnexion(sshClient);
+
+        localAuthority.setMigrationStatus(MigrationStatus.DONE);
+        localAuthorityRepository.save(localAuthority);
     }
 
     private void importPesMigrations(List<PesMigration> pesMigrations, LocalAuthority localAuthority, SSHClient sshClient) {
@@ -240,8 +249,6 @@ public class MigrationService {
 
     private SSHClient getShellConnexion() {
         SSHClient sshClient = null;
-        LOGGER.error(privateKeyPath);
-        LOGGER.error(publicKeyPath);
         try {
             String privateKey = getStringResourceFromStream(new FileInputStream(ResourceUtils.getFile(privateKeyPath)));
             String publicKey = getStringResourceFromStream(new FileInputStream(ResourceUtils.getFile(publicKeyPath)));

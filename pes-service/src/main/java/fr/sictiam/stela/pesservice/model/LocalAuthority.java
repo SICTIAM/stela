@@ -1,5 +1,7 @@
 package fr.sictiam.stela.pesservice.model;
 
+import fr.sictiam.stela.pesservice.model.migration.MigrationStatus;
+
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -31,6 +33,8 @@ public class LocalAuthority {
     @CollectionTable(name = "sirens", joinColumns = @JoinColumn(name = "local_authority_uuid"))
     @Column(name = "siren")
     private List<String> sirens;
+    @Enumerated(EnumType.STRING)
+    private MigrationStatus migrationStatus;
 
     public LocalAuthority() {
     }
@@ -112,12 +116,21 @@ public class LocalAuthority {
         this.secret = secret;
     }
 
+
     public String getGenericProfileUuid() {
         return genericProfileUuid;
     }
 
     public void setGenericProfileUuid(String genericProfileUuid) {
         this.genericProfileUuid = genericProfileUuid;
+    }
+
+    public MigrationStatus getMigrationStatus() {
+        return migrationStatus;
+    }
+
+    public void setMigrationStatus(MigrationStatus migrationStatus) {
+        this.migrationStatus = migrationStatus;
     }
 
     @Override

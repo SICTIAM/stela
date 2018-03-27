@@ -40,6 +40,7 @@ import PesLocalAuthorityParams from './admin/pes/PesLocalAuthorityParams'
 import AgentProfile from './admin/localAuthority/AgentProfile'
 import ActeModuleParams from './admin/acte/ActeModuleParams'
 import PesModuleParams from './admin/pes/PesModuleParams'
+import PesLocalAuthorityMigration from './admin/pes/PesLocalAuthorityMigration'
 
 
 import Validator from 'validatorjs'
@@ -211,6 +212,7 @@ class AppRoute extends Component {
                 <AuthRoute path='/admin/ma-collectivite/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/pes/migration' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/ma-collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
 
@@ -218,6 +220,7 @@ class AppRoute extends Component {
                 <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:uuid/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/pes/migration' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:uuid/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />

@@ -149,3 +149,11 @@ ul.pagination li a.item:focus {
 span.fieldValue {
     font-weight: bold;
 }
+.ui.steps .step.active .title {
+    color: initial;
+}
+.ui.steps .step>.icons {
+    line-height: 1;
+    font-size: 2.5em;
+    margin: 0 1rem 0 0;
+}

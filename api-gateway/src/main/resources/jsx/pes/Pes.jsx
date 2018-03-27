@@ -5,7 +5,7 @@ import { Button, Segment, Label } from 'semantic-ui-react'
 import moment from 'moment'
 
 import History from '../_components/History'
-import { Field, Page } from '../_components/UI'
+import { Field, Page, FieldValue } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -78,16 +78,18 @@ class Pes extends Component {
                                 }
                             </div>
                             <Field htmlFor='objet' label={t('pes.fields.objet')}>
-                                <span className='fieldValue' id='objet'>{pes.objet}</span>
+                                <FieldValue id='objet'>{pes.objet}</FieldValue>
                             </Field>
                             <Field htmlFor='comment' label={t('pes.fields.comment')}>
-                                <span className='fieldValue' id='comment'>{pes.comment}</span>
+                                <FieldValue id='comment'>{pes.comment}</FieldValue>
                             </Field>
                             <Field htmlFor='creation' label={t('pes.fields.creation')}>
-                                <span className='fieldValue' id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</span>
+                                <FieldValue id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</FieldValue>
                             </Field>
                             <Field htmlFor='attachment' label={t('pes.fields.attachment')}>
-                                <span className='fieldValue'><a id='attachment' target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a></span>
+                                <FieldValue id='attachment'>
+                                    <a target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a>
+                                </FieldValue>
                             </Field>
                         </Segment>
                         <History

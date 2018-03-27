@@ -6,6 +6,7 @@ import fr.sictiam.stela.pesservice.model.ServerCode;
 import fr.sictiam.stela.pesservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.MigrationService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/pes/localAuthority")
@@ -34,10 +37,12 @@ public class LocalAuthorityRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityRestController.class);
 
     private final LocalAuthorityService localAuthorityService;
+    private final MigrationService migrationService;
 
     @Autowired
-    public LocalAuthorityRestController(LocalAuthorityService localAuthorityService) {
+    public LocalAuthorityRestController(LocalAuthorityService localAuthorityService, MigrationService migrationService) {
         this.localAuthorityService = localAuthorityService;
+        this.migrationService = migrationService;
     }
 
     @GetMapping("/current")
@@ -86,6 +91,32 @@ public class LocalAuthorityRestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(Arrays.asList(ServerCode.values()), HttpStatus.OK);
+    }
+
+    @PostMapping("/current/migration")
+    public ResponseEntity migratePES(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
+        // TODO : A websocket would be nice
+        CompletableFuture.runAsync(() -> migrationService.migrateStela2PES(localAuthority));
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/migration")
+    public ResponseEntity migratePESByUuid(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
+        // TODO : A websocket would be nice
+        CompletableFuture.runAsync(() -> migrationService.migrateStela2PES(localAuthority));
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 }

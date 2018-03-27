@@ -1,4 +1,4 @@
-package fr.sictiam.stela.pesservice.model;
+package fr.sictiam.stela.pesservice.model.migration;
 
 import java.time.LocalDateTime;
 
