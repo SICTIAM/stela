@@ -11,7 +11,6 @@ services:
   - docker:dind
 
 stages:
-  - build
   - test
   - registry
 # Disabled for now as it does not work and it's a pita to know why
@@ -33,11 +32,6 @@ test:
 #  artifacts:
 #    paths:
 #    - acte-service/build/reports/tests/*
-
-build:
-  stage: build
-  script:
-      - ./gradlew --stacktrace build
 
 registry:
   stage: registry
