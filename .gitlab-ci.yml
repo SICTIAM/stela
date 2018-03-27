@@ -5,8 +5,7 @@ image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
 # runtime for each build is more reliable since the runtime is completely
 # isolated from any previous builds.
 variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-
+  GRADLE_OPTS: "-Dorg.gradle.daemon=true"
 services:
   - docker:dind
 
@@ -20,7 +19,7 @@ stages:
 test:
   stage: test
   script:
-    - ./gradlew --build-cache --stacktrace test
+    - ./gradlew --build-cache --stacktrace -g /cache test
 # Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
 #  artifacts:
 #    paths:
@@ -38,7 +37,7 @@ registry:
   stage: registry
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace image -Ppush
+    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush
   only:
     - develop
 
@@ -46,6 +45,6 @@ registry-prod:
   stage: registry-prod
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace image -Ppush -Pprod
+    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
   only:
     - master
