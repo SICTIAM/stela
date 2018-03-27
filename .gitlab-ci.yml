@@ -13,6 +13,7 @@ services:
 stages:
   - build
   - test
+  - registry
 # Disabled for now as it does not work and it's a pita to know why
 #  - integrationTest
 
@@ -35,6 +36,12 @@ test:
 
 build:
   stage: build
+
+registry:
+  stage: registry
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
     - ./gradlew --build-cache --stacktrace image -Push
+  only:
+    - develop
+    - master
