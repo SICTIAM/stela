@@ -36,6 +36,8 @@ test:
 
 build:
   stage: build
+  script:
+      - ./gradlew --stacktrace build
 
 registry:
   stage: registry
