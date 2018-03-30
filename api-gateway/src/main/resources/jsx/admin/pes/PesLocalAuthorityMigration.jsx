@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Icon } from 'semantic-ui-react'
+import { Segment, Icon, Input } from 'semantic-ui-react'
 
 import { Page, Field, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
@@ -24,6 +24,10 @@ class PesLocalAuthorityMigration extends Component {
             siren: '',
             migrationStatus: ''
         },
+        form: {
+            email: '',
+            siren: ''
+        },
         status: 'init'
     }
     componentDidMount() {
@@ -39,9 +43,22 @@ class PesLocalAuthorityMigration extends Component {
                 })
             })
     }
+    onFormChange = (e, { id, value }) => {
+        const { form } = this.state
+        form[id] = value
+        this.setState({ form })
+    }
+    getFormData = () => {
+        const data = {}
+        Object.keys(this.state.form)
+            .filter(k => this.state.form[k] !== '')
+            .map(k => data[k] = this.state.form[k])
+        return data
+    }
     migrate = () => {
         const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration`
-        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        const data = this.getFormData()
+        fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -58,8 +75,8 @@ class PesLocalAuthorityMigration extends Component {
         const { t } = this.context
         const status = this.state.fields.migrationStatus || 'NOT_DONE'
         return (
-            <Page title='Migration du module Hélios'>
-                <Segment style={{ height: '100%' }}>
+            <Page title={t('admin.modules.pes.migration.title')}>
+                <Segment>
                     <h2>{t('api-gateway:admin.local_authority.general_informations')}</h2>
                     <Field htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
                         <FieldValue id="uuid">{this.state.fields.uuid}</FieldValue>
@@ -71,26 +88,42 @@ class PesLocalAuthorityMigration extends Component {
                         <FieldValue id="siren">{this.state.fields.siren}</FieldValue>
                     </Field>
                 </Segment>
+
+                <Segment>
+                    <h2>{t('admin.modules.pes.migration.additional_options.title')}</h2>
+                    <Field htmlFor='email' label={t('admin.modules.pes.migration.additional_options.email')}>
+                        <Input id='email'
+                            placeholder='Email...'
+                            value={this.state.form.email}
+                            onChange={this.onFormChange} />
+                    </Field>
+                    <Field htmlFor='siren' label={t('admin.modules.pes.migration.additional_options.siren')}>
+                        <Input id='siren'
+                            placeholder='SIREN...'
+                            value={this.state.form.siren}
+                            onChange={this.onFormChange} />
+                    </Field>
+                </Segment>
                 <Segment>
                     <MigrationSteps
                         disabled
                         icon={<Icon name='users' />}
-                        title='Migration des utilisateurs du module'
-                        description='Récupération des utilisateurs du module PES de STELA 2'
-                        status='init'
+                        title={t('admin.modules.pes.migration.users_migration.title')}
+                        description={t('admin.modules.pes.migration.users_migration.description')}
+                        status='NOT_DONE'
                         onClick={this.migrate} />
                     <MigrationSteps
                         icon={<Icon name='calculator' />}
-                        title='Migration des PES'
-                        description='Récupération des PES de STELA 2'
+                        title={t('admin.modules.pes.migration.pes.title')}
+                        description={t('admin.modules.pes.migration.pes.description')}
                         status={status}
                         onClick={this.migrate} />
                     <MigrationSteps
                         disabled
                         icon={<Icon.Group><Icon name='users' /><Icon corner name='delete' /> </Icon.Group>}
-                        title='Désactivation des utilisateurs du module'
-                        description='Désactivation des utilisateurs du module PES de STELA 2'
-                        status='init'
+                        title={t('admin.modules.pes.migration.users_deactivation.title')}
+                        description={t('admin.modules.pes.migration.users_deactivation.title')}
+                        status='NOT_DONE'
                         onClick={this.migrate} />
                 </Segment>
             </Page>

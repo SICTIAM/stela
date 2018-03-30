@@ -7,6 +7,7 @@ import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.migration.MigrationLog;
 import fr.sictiam.stela.pesservice.model.migration.MigrationStatus;
 import fr.sictiam.stela.pesservice.model.migration.PesMigration;
 import fr.sictiam.stela.pesservice.model.util.StreamingInMemoryDestFile;
@@ -28,6 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
+
+import javax.mail.MessagingException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,6 +57,7 @@ public class MigrationService {
 
     private final PesAllerRepository pesAllerRepository;
     private final LocalAuthorityRepository localAuthorityRepository;
+    private final NotificationService notificationService;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -84,30 +88,53 @@ public class MigrationService {
 
     private final String query = getStringResourceFromStream("migration.sql");
 
-    public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository) {
+    public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository, NotificationService notificationService) {
         this.pesAllerRepository = pesAllerRepository;
         this.localAuthorityRepository = localAuthorityRepository;
+        this.notificationService = notificationService;
     }
 
-    public void migrateStela2PES(LocalAuthority localAuthority) {
+    public void migrateStela2PES(LocalAuthority localAuthority, String siren, String email) {
+
+        MigrationLog migrationLog = new MigrationLog();
+
+        log(migrationLog, "Starting migration for localAuthority " + localAuthority.getName()
+                + " (uuid: " + localAuthority.getUuid() + ", siren: " + localAuthority.getSiren() + ")", false);
+        if (StringUtils.isNotBlank(siren)) {
+            log(migrationLog, "Migration for a specific siren was asked: " + siren, false);
+        }
+        if (StringUtils.isNotBlank(email)) {
+            log(migrationLog, "A copy of these logs will be sent to this email address:  " + email, false);
+        }
+
         localAuthority.setMigrationStatus(MigrationStatus.ONGOING);
         localAuthority = localAuthorityRepository.save(localAuthority);
-        LOGGER.error("MigrationStatus: {}", localAuthority.getMigrationStatus());
 
-        SSHClient sshClient = getShellConnexion();
-        String proccessedQuery = query.replaceAll("\\{\\{siren}}", localAuthority.getSiren());
-        ResultSet resultSet = executeMySQLQuery(proccessedQuery);
-        List<PesMigration> pesMigrations = toPesMigration(resultSet);
-        importPesMigrations(pesMigrations, localAuthority, sshClient);
-        closeShellConnexion(sshClient);
+        SSHClient sshClient = getShellConnexion(migrationLog);
+        String proccessedQuery = query.replaceAll("\\{\\{siren}}", StringUtils.isNotBlank(siren) ? siren : localAuthority.getSiren());
+        ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
+        List<PesMigration> pesMigrations = toPesMigration(resultSet, migrationLog);
+        importPesMigrations(pesMigrations, localAuthority, sshClient, migrationLog);
+        closeShellConnexion(sshClient, migrationLog);
 
         localAuthority.setMigrationStatus(MigrationStatus.DONE);
         localAuthorityRepository.save(localAuthority);
+        log(migrationLog, "Ending migration", false);
+        if (StringUtils.isNotBlank(email)) {
+            try {
+                notificationService.sendMail(email, "Migration report for '" + localAuthority.getName() + "'",
+                        migrationLog.getLogs());
+                LOGGER.info("Migration report sent to {}", email);
+            } catch (MessagingException | IOException e) {
+                LOGGER.error("Error while trying to send the migration report");
+            }
+        }
     }
 
-    private void importPesMigrations(List<PesMigration> pesMigrations, LocalAuthority localAuthority, SSHClient sshClient) {
+    private void importPesMigrations(List<PesMigration> pesMigrations, LocalAuthority localAuthority,
+            SSHClient sshClient, MigrationLog migrationLog) {
         int i = 0;
-        LOGGER.info("{} PES to migrate", pesMigrations.size());
+        log(migrationLog, pesMigrations.size() + " PES to migrate", false);
         for (PesMigration pesMigration : pesMigrations) {
 
             byte[] archiveBytes = null;
@@ -161,15 +188,20 @@ public class MigrationService {
             }
             pesAllerRepository.save(pesAller);
             LOGGER.info("PES with message_id '{}' successfully migrated", pesMigration.getMessage_id());
+            log(migrationLog, "PES with message_id '" + pesMigration.getMessage_id() + "' successfully migrated", false);
             i++;
+            // TEST
+            if (i == 200) break;
         }
-        LOGGER.info("{} PES migrated", i);
+        log(migrationLog, i + " PES migrated", false);
     }
 
-    private List<PesMigration> toPesMigration(ResultSet resultSet) {
+    private List<PesMigration> toPesMigration(ResultSet resultSet, MigrationLog migrationLog) {
         List<PesMigration> pesMigrations = new ArrayList<>();
+        log(migrationLog, "Extracting the PES data from the request result", false);
         // TODO: Improve with an automated parsing resultSet->pojo
         try {
+            int i = 0;
             while (resultSet.next()) {
                 pesMigrations.add(new PesMigration(
                         resultSet.getString("message_id"),
@@ -193,9 +225,12 @@ public class MigrationService {
                         resultSet.getString("filenameANO"),
                         resultSet.getString("pathFilenameANO")
                 ));
+                i++;
             }
+            log(migrationLog, i + " PES extracted", false);
         } catch (SQLException e) {
             LOGGER.error("Error while mapping the resultSet: {}", e);
+            log(migrationLog, "Error while mapping the resultSet", true);
         }
         return pesMigrations;
     }
@@ -211,17 +246,23 @@ public class MigrationService {
                         TimeZone.getDefault().toZoneId()) : null;
     }
 
-    private ResultSet executeMySQLQuery(String processedQuery) {
+    private ResultSet executeMySQLQuery(String processedQuery, MigrationLog migrationLog) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connect = DriverManager.getConnection("jdbc:mysql://" +
                     serverIP + ":" + mySQLPort + "/" + database, mySQLUser, mySQLPassword);
+            log(migrationLog, "Connection to MySQL server (" + serverIP + ":" + mySQLPort + "/" + database
+                    + ") established", false);
             Statement statement = connect.createStatement();
-            return statement.executeQuery(processedQuery);
+            ResultSet resultSet = statement.executeQuery(processedQuery);
+            log(migrationLog, "MySQL query successfully executed", false);
+            return resultSet;
         } catch (ClassNotFoundException e) {
             LOGGER.error("Error while loading the jdbc driver: {}", e);
+            log(migrationLog, "Error while loading the jdbc driver", true);
         } catch (SQLException e) {
             LOGGER.error("Error while connecting to host: {}", e);
+            log(migrationLog, "Error while connecting to host", true);
         }
         return null;
     }
@@ -247,7 +288,7 @@ public class MigrationService {
         return content;
     }
 
-    private SSHClient getShellConnexion() {
+    private SSHClient getShellConnexion(MigrationLog migrationLog) {
         SSHClient sshClient = null;
         try {
             String privateKey = getStringResourceFromStream(new FileInputStream(ResourceUtils.getFile(privateKeyPath)));
@@ -258,17 +299,21 @@ public class MigrationService {
             PasswordFinder passwordFinder = PasswordUtils.createOneOff(privKeyPassphrase.toCharArray());
             KeyProvider keys = sshClient.loadKeys(privateKey, publicKey, passwordFinder);
             sshClient.authPublickey(serverUser, keys);
+            log(migrationLog, "SSH connection established with " + serverUser + "@" + serverIP, false);
         } catch (IOException e) {
-            LOGGER.error("Could not connect to host {}: {}", serverIP, e);
+            LOGGER.error("Could not connect to host {}@{}: {}", serverUser, serverIP, e);
+            log(migrationLog, "Could not connect to host with " + serverUser + "@" + serverIP, true);
         }
         return sshClient;
     }
 
-    private void closeShellConnexion(SSHClient sshClient) {
+    private void closeShellConnexion(SSHClient sshClient, MigrationLog migrationLog) {
         try {
+            log(migrationLog, "Closing SSH connection", false);
             sshClient.close();
         } catch (IOException e) {
-            LOGGER.error("Could close ssh connexion to host {}: {}", e);
+            LOGGER.error("Could close SSH connection: {}", e);
+            log(migrationLog, "Could close SSH connection", true);
         }
     }
 
@@ -327,5 +372,10 @@ public class MigrationService {
             }
         }
         return null;
+    }
+
+    private void log(MigrationLog migrationLog, String str, boolean isError) {
+        migrationLog.setLogs(migrationLog.getLogs() + "<br/>" + (isError ? "ERROR" : " INFO") + ": " + str);
+        if (!isError) LOGGER.info(str);
     }
 }

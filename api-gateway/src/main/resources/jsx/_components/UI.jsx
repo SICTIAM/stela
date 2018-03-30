@@ -96,7 +96,7 @@ const MigrationSteps = ({ icon, title, description, status, onClick, disabled = 
             <Step disabled={disabled} link onClick={onClick} style={{ backgroundColor: '#21ba45', color: 'white' }}>
                 <Icon name='download' />
                 <Step.Content>
-                    <Step.Title>Lancer la migration</Step.Title>
+                    <Step.Title>{t('api-gateway:migration.start')}</Step.Title>
                 </Step.Content>
             </Step>
         }
@@ -104,7 +104,7 @@ const MigrationSteps = ({ icon, title, description, status, onClick, disabled = 
             <Step disabled={disabled} active>
                 <Icon loading name='refresh' />
                 <Step.Content>
-                    <Step.Title>Migration en cours</Step.Title>
+                    <Step.Title>{t('api-gateway:migration.ongoing')}</Step.Title>
                 </Step.Content>
             </Step>
         }
@@ -112,7 +112,7 @@ const MigrationSteps = ({ icon, title, description, status, onClick, disabled = 
             <Step disabled={disabled} style={{ color: '#21ba45', background: '#f3f4f5' }}>
                 <Icon name='check' />
                 <Step.Content>
-                    <Step.Title style={{ color: '#21ba45' }}>Migration effectuée</Step.Title>
+                    <Step.Title style={{ color: '#21ba45' }}>{t('api-gateway:migration.finished')}</Step.Title>
                 </Step.Content>
             </Step>
         }
