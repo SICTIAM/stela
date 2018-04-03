@@ -1,10 +1,14 @@
 archivesBaseName = 'stela-acte-service'
 
 dependencies {
-    compile (project(':signature-lib')) {
-	    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.58'
-	    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.58'
-	}
+    compile(project(':signature-lib')) {
+        compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.58'
+        compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.58'
+    }
+    compile('com.hierynomus:sshj:0.23.0') {
+        compile('org.bouncycastle:bcprov-jdk15on:1.57')
+        compile('org.bouncycastle:bcpkix-jdk15on:1.57')
+    }
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
@@ -16,7 +20,7 @@ dependencies {
     compile('commons-io:commons-io:2.4')
     compile('org.apache.commons:commons-lang3:3.7')
     compile('com.sun.mail:javax.mail:1.6.0')
-    compile('org.springframework:spring-oxm')  
+    compile('org.springframework:spring-oxm')
     compile('commons-beanutils:commons-beanutils:1.8.3')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile('org.xhtmlrenderer:flying-saucer-pdf:9.1.4')
@@ -24,6 +28,7 @@ dependencies {
     compile('org.apache.pdfbox:pdfbox:2.0.8')
     compile('org.apache.pdfbox:pdfbox-tools:2.0.8')
     compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile('mysql:mysql-connector-java:5.1.29')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework:spring-mock:2.0.8')
     testCompile('org.springframework.boot:spring-boot-starter-test')

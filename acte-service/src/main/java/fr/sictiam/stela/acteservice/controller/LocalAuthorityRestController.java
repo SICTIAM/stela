@@ -3,9 +3,11 @@ package fr.sictiam.stela.acteservice.controller;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.Right;
+import fr.sictiam.stela.acteservice.model.migration.MigrationStatus;
 import fr.sictiam.stela.acteservice.model.ui.ActeDepositFieldsUI;
 import fr.sictiam.stela.acteservice.model.ui.LocalAuthorityUpdateUI;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.MigrationService;
 import fr.sictiam.stela.acteservice.service.util.RightUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -16,9 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -26,6 +30,7 @@ import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/acte/localAuthority")
@@ -34,10 +39,12 @@ public class LocalAuthorityRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityRestController.class);
 
     private final LocalAuthorityService localAuthorityService;
+    private final MigrationService migrationService;
 
     @Autowired
-    public LocalAuthorityRestController(LocalAuthorityService localAuthorityService) {
+    public LocalAuthorityRestController(LocalAuthorityService localAuthorityService, MigrationService migrationService) {
         this.localAuthorityService = localAuthorityService;
+        this.migrationService = migrationService;
     }
 
     @GetMapping
@@ -127,5 +134,38 @@ public class LocalAuthorityRestController {
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         return new ResponseEntity<>(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), code),
                 HttpStatus.OK);
+    }
+
+    @PostMapping("/current/migration")
+    public ResponseEntity migrateActesFromCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "siren", required = false) String siren,
+            @RequestParam(value = "year", required = false) String year) {
+        return migrateActes(isLocalAuthorityAdmin, currentLocalAuthUuid, email, siren, year);
+    }
+
+    @PostMapping("/{uuid}/migration")
+    public ResponseEntity migrateActesByUuid(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid, @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "siren", required = false) String siren,
+            @RequestParam(value = "year", required = false) String year) {
+        return migrateActes(isLocalAuthorityAdmin, uuid, email, siren, year);
+    }
+
+    private ResponseEntity migrateActes(boolean isLocalAuthorityAdmin, String localAuthUuid, String email,
+            String siren, String year) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthUuid);
+        // TODO : A websocket would be nice
+        if (localAuthority.getMigrationStatus() != null && !localAuthority.getMigrationStatus().equals(MigrationStatus.NOT_DONE)) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, email, year));
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

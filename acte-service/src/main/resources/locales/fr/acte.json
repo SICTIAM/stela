@@ -178,6 +178,27 @@
           "unavailabilityMiat": "Couper l'accès MIAT",
           "alertMessageDisplayed": "Affichage du message d'alerte",
           "alertMessage": "Message d'alerte"
+        },
+        "migration": {
+          "title": "Migration du module Actes",
+          "additional_options": {
+            "title": "Options de migration supplémentaires",
+            "email": "Recevoir un rapport d'import par mail",
+            "siren": "Récupérer les actes lié à un autre SIREN",
+            "year": "Nombre d'années d'actes à récupérer"
+          },
+          "users_migration": {
+            "title": "Migration des utilisateurs du module",
+            "description": "Récupération des utilisateurs du module Acte de STELA 2"
+          },
+          "acte": {
+            "title": "Migration des actes",
+            "description": "Récupération des actes de STELA 2"
+          },
+          "users_deactivation": {
+            "title": "Désactivation des utilisateurs du module",
+            "description": "Désactivation des utilisateurs du module Acte de STELA 2"
+          }
         }
       }
     }

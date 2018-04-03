@@ -7,7 +7,7 @@ import { Page, Field, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
-class PesLocalAuthorityMigration extends Component {
+class ActeLocalAuthorityMigration extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
@@ -26,13 +26,14 @@ class PesLocalAuthorityMigration extends Component {
         },
         form: {
             email: '',
-            siren: ''
+            siren: '',
+            year: '1'
         },
         status: 'init'
     }
     componentDidMount() {
         const uuid = this.props.uuid
-        const url = uuid ? '/api/pes/localAuthority' + uuid : '/api/pes/localAuthority/current'
+        const url = uuid ? '/api/acte/localAuthority' + uuid : '/api/acte/localAuthority/current'
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
@@ -56,7 +57,7 @@ class PesLocalAuthorityMigration extends Component {
         return data
     }
     migrate = () => {
-        const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration`
+        const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}/migration`
         const data = this.getFormData()
         fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
             .then(checkStatus)
@@ -75,7 +76,7 @@ class PesLocalAuthorityMigration extends Component {
         const { t } = this.context
         const status = this.state.fields.migrationStatus || 'NOT_DONE'
         return (
-            <Page title={t('admin.modules.pes.migration.title')}>
+            <Page title={t('admin.modules.acte.migration.title')}>
                 <Segment>
                     <h2>{t('api-gateway:admin.local_authority.general_informations')}</h2>
                     <Field htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
@@ -90,17 +91,24 @@ class PesLocalAuthorityMigration extends Component {
                 </Segment>
 
                 <Segment>
-                    <h2>{t('admin.modules.pes.migration.additional_options.title')}</h2>
-                    <Field htmlFor='email' label={t('admin.modules.pes.migration.additional_options.email')}>
+                    <h2>{t('admin.modules.acte.migration.additional_options.title')}</h2>
+                    <Field htmlFor='email' label={t('admin.modules.acte.migration.additional_options.email')}>
                         <Input id='email'
                             placeholder={`${t('api-gateway:agent.email')}...`}
                             value={this.state.form.email}
                             onChange={this.onFormChange} />
                     </Field>
-                    <Field htmlFor='siren' label={t('admin.modules.pes.migration.additional_options.siren')}>
+                    <Field htmlFor='siren' label={t('admin.modules.acte.migration.additional_options.siren')}>
                         <Input id='siren'
                             placeholder={`${t('api-gateway:local_authority.siren')}...`}
                             value={this.state.form.siren}
+                            onChange={this.onFormChange} />
+                    </Field>
+                    <Field htmlFor='year' label={t('admin.modules.acte.migration.additional_options.year')}>
+                        <Input id='year'
+                            type='number'
+                            min='1'
+                            value={this.state.form.year}
                             onChange={this.onFormChange} />
                     </Field>
                 </Segment>
@@ -108,21 +116,21 @@ class PesLocalAuthorityMigration extends Component {
                     <MigrationSteps
                         disabled
                         icon={<Icon name='users' />}
-                        title={t('admin.modules.pes.migration.users_migration.title')}
-                        description={t('admin.modules.pes.migration.users_migration.description')}
+                        title={t('admin.modules.acte.migration.users_migration.title')}
+                        description={t('admin.modules.acte.migration.users_migration.description')}
                         status='NOT_DONE'
                         onClick={this.migrate} />
                     <MigrationSteps
                         icon={<Icon name='calculator' />}
-                        title={t('admin.modules.pes.migration.pes.title')}
-                        description={t('admin.modules.pes.migration.pes.description')}
+                        title={t('admin.modules.acte.migration.acte.title')}
+                        description={t('admin.modules.acte.migration.acte.description')}
                         status={status}
                         onClick={this.migrate} />
                     <MigrationSteps
                         disabled
                         icon={<Icon.Group><Icon name='users' /><Icon corner name='delete' /> </Icon.Group>}
-                        title={t('admin.modules.pes.migration.users_deactivation.title')}
-                        description={t('admin.modules.pes.migration.users_deactivation.title')}
+                        title={t('admin.modules.acte.migration.users_deactivation.title')}
+                        description={t('admin.modules.acte.migration.users_deactivation.title')}
                         status='NOT_DONE'
                         onClick={this.migrate} />
                 </Segment>
@@ -131,4 +139,4 @@ class PesLocalAuthorityMigration extends Component {
     }
 }
 
-export default translate(['pes', 'api-gateway'])(PesLocalAuthorityMigration)
+export default translate(['acte', 'api-gateway'])(ActeLocalAuthorityMigration)
