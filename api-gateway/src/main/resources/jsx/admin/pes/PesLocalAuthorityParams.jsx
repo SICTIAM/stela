@@ -23,15 +23,31 @@ class PesLocalAuthorityParams extends Component {
             serverCode: '',
             token: '',
             secret: '',
+            genericProfileUuid: '',
             sesileSubscription: false,
             sirens: []
         },
         serverCodes: [],
+        profiles: [],
         newSiren: '',
         isNewSirenValid: false
     }
     componentDidMount() {
         const uuid = this.props.uuid
+        
+        const adminUrl = uuid ? `/api/admin/local-authority/${uuid}` : '/api/admin/local-authority/current'
+            fetchWithAuthzHandling({ url: adminUrl })
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(json => {
+                    this.setState({ profiles: json.profiles })
+                })
+                .catch(response => {
+                    response.json().then(json => {
+                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    })
+                })
+        
         const url = uuid ? '/api/pes/localAuthority/' + uuid : '/api/pes/localAuthority/current'
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
@@ -51,6 +67,7 @@ class PesLocalAuthorityParams extends Component {
                     this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
                 })
             })
+        
     }
     onkeyPress = (event) => {
         // prevent from sending the form on 'Enter'
@@ -93,9 +110,9 @@ class PesLocalAuthorityParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
-        const { serverCode, sirens, secret, token, sesileSubscription } = this.state.fields
+        const { serverCode, sirens, secret, token, sesileSubscription, genericProfileUuid } = this.state.fields
 
-        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
+        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, genericProfileUuid, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -113,6 +130,8 @@ class PesLocalAuthorityParams extends Component {
             <Label basic key={index}>{siren} <Icon name='delete' onClick={() => this.onRemoveSiren(siren)} /></Label>
         )
         const serverCodes = this.state.serverCodes.map(serverCode => { return { key: serverCode, value: serverCode, text: serverCode } })
+        const profiles = this.state.profiles.map(profile => { return { key: profile.uuid, value: profile.uuid, text: `${profile.agent.given_name} ${profile.agent.family_name}` } })
+
         return (
             <Page title={this.state.fields.name} >
                 <Segment>
@@ -135,6 +154,15 @@ class PesLocalAuthorityParams extends Component {
                                 onChange={(e) => this.handleNewSirenChange(e.target.value)}
                                 className='simpleInput' />
                             <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>{t('api-gateway:form.add')}</Button>
+                        </Field>
+                        <Field htmlFor='genericProfileUuid' label={t('admin.modules.pes.local_authority_settings.genericProfileUuid')}>
+                            <Dropdown compact search selection
+                                id='genericProfileUuid'
+                                className='simpleInput'
+                                options={profiles}
+                                value={this.state.fields.genericProfileUuid}
+                                onChange={this.sesileConfigurationChange} 
+                                placeholder={`${t('admin.modules.pes.local_authority_settings.genericProfileUuid')}...`} />
                         </Field>
                         <Field htmlFor='sesileSubscription' label={t('admin.modules.pes.local_authority_settings.sesile.subscription')}>
                             <Checkbox toggle id='sesileSubscription'

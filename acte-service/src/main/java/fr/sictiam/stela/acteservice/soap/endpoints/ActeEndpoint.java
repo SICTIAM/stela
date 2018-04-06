@@ -733,7 +733,7 @@ public class ActeEndpoint {
             acte.setCreation(LocalDateTime.now());
             LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(sendGroup);
             acte.setLocalAuthority(currentLocalAuthority);
-
+            acte.setProfileUuid(currentLocalAuthority.getGenericProfileUuid());
             acte.setCodeLabel(
                     localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
             return acteService.publishActe(acte);

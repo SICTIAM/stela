@@ -75,6 +75,7 @@
           "HELIOS_transmission": "Transmission Helios",
           "serverCode": "Code serveur préfecture",
           "sirens": "Liste des SIRENs autorisés",
+          "genericProfileUuid": "Agent garant",
           "no_siren": "Aucun SIREN",
           "sesile":  {
             "subscription": "Abonnement à Sesile",

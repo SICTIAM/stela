@@ -26,6 +26,7 @@ public class LocalAuthority {
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
     private Boolean active;
+    private String genericProfileUuid;
 
     @Embedded
     private StampPosition stampPosition;
@@ -188,6 +189,14 @@ public class LocalAuthority {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getGenericProfileUuid() {
+        return genericProfileUuid;
+    }
+
+    public void setGenericProfileUuid(String genericProfileUuid) {
+        this.genericProfileUuid = genericProfileUuid;
     }
 
     @Override

@@ -25,6 +25,7 @@ public class LocalAuthority {
     private Boolean sesileSubscription;
     private String token;
     private String secret;
+    private String genericProfileUuid;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "sirens", joinColumns = @JoinColumn(name = "local_authority_uuid"))
@@ -109,6 +110,14 @@ public class LocalAuthority {
 
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    public String getGenericProfileUuid() {
+        return genericProfileUuid;
+    }
+
+    public void setGenericProfileUuid(String genericProfileUuid) {
+        this.genericProfileUuid = genericProfileUuid;
     }
 
     @Override

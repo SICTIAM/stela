@@ -518,8 +518,9 @@ public class PesEndpoint {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "DUPLICATE_FILE"));
                     return returnObject;
                 }
-                String profileUuid = "";
-                pesAllerService.create(profileUuid, sendGroup, pesAller);
+
+                pesAllerService.create(localAuthorityService.getByUuid(sendGroup).getGenericProfileUuid(), sendGroup,
+                        pesAller);
 
                 returnObject.setRetour(soapReturnGenerator.generateReturn("OK", "_HELIOS_OK_INSERT"));
             }

@@ -183,6 +183,7 @@
         "department": "Département",
         "district": "Arrondissement",
         "nature": "Nature",
+        "genericProfileUuid": "Agent garant",
         "nomenclatureDate": "Date de nomenclature",
         "canPublishRegistre": "Affichage sur le registre des délibérations",
         "canPublishWebSite": "Affichage sur site internet",
