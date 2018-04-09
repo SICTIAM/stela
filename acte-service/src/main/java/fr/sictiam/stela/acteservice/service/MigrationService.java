@@ -8,10 +8,14 @@ import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.Flux;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.migration.ActeMigration;
+import fr.sictiam.stela.acteservice.model.migration.Migration;
 import fr.sictiam.stela.acteservice.model.migration.MigrationLog;
 import fr.sictiam.stela.acteservice.model.migration.MigrationStatus;
+import fr.sictiam.stela.acteservice.model.migration.MigrationWrapper;
+import fr.sictiam.stela.acteservice.model.migration.UserMigration;
 import fr.sictiam.stela.acteservice.model.util.StreamingInMemoryDestFile;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
@@ -29,8 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.RestTemplate;
 
 import javax.mail.MessagingException;
 
@@ -47,10 +53,15 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static fr.sictiam.stela.acteservice.service.util.DiscoveryUtils.adminServiceUrl;
 
 @Service
 public class MigrationService {
@@ -88,12 +99,65 @@ public class MigrationService {
     @Value("${application.migration.database}")
     String database;
 
-    private final String query = getStringResourceFromStream("migration.sql");
+    private final String sql_actes = getStringResourceFromStream("migration/actes.sql");
+    private final String sql_users = getStringResourceFromStream("migration/users.sql");
+    private final String sql_local_authority_groups = getStringResourceFromStream("migration/local_authority_groups.sql");
 
     public MigrationService(ActeRepository acteRepository, LocalAuthorityRepository localAuthorityRepository, NotificationService notificationService) {
         this.acteRepository = acteRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
+    }
+
+    public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
+        MigrationLog migrationLog = new MigrationLog();
+        log(migrationLog, "Starting users migration for localAuthority " + localAuthority.getName()
+                + " (uuid: " + localAuthority.getUuid() + ", siren: " + localAuthority.getSiren() + ")", false);
+        if (StringUtils.isNotBlank(siren)) {
+            log(migrationLog, "Migration for a specific siren was asked: " + siren, false);
+        }
+        if (StringUtils.isNotBlank(email)) {
+            log(migrationLog, "A copy of these logs will be sent to this email address:  " + email, false);
+        }
+
+        if (localAuthority.getMigration() == null) localAuthority.setMigration(new Migration());
+        localAuthority.getMigration().setMigrationUsers(MigrationStatus.ONGOING);
+        localAuthority = localAuthorityRepository.save(localAuthority);
+
+        List<String> groupIds = getGroupIdsFromSiren(StringUtils.isNotBlank(siren) ? siren : localAuthority.getSiren(),
+                migrationLog);
+        if (groupIds == null || groupIds.isEmpty()) {
+            log(migrationLog, "No groupIds for this localAuthority", false);
+        } else {
+            StringBuilder sqlGroupids = new StringBuilder();
+            for (String groupId : groupIds) {
+                sqlGroupids.append(" AND gul2.groupid = ").append(groupId);
+            }
+            String proccessedQuery = sql_users
+                    .replaceAll("\\{\\{groupIds}}", sqlGroupids.toString());
+            ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
+            List<UserMigration> userMigrations = toUsersMigration(resultSet, migrationLog);
+            MigrationWrapper migrationWrapper = new MigrationWrapper(userMigrations, "acte",
+                    new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())));
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.postForEntity(adminServiceUrl()
+                    + "/api/admin/agent/migration/users/{localAuthorityUuid}", migrationWrapper, String.class, localAuthority.getUuid());
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log(migrationLog, "Bad response while trying to sending users to the admin-service: "
+                        + response.getStatusCode().toString(), true);
+            } else {
+                log(migrationLog, "Users successfully created", false);
+                // TODO Fetch certificates info from the LDAP
+                // TODO Send users to Ozwillo
+            }
+            userMigrations.forEach(userMigration -> LOGGER.error(userMigration.toString()));
+        }
+
+        localAuthority.getMigration().setMigrationUsers(MigrationStatus.DONE);
+        localAuthorityRepository.save(localAuthority);
+        log(migrationLog, "Ending migration", false);
+        processEmail(email, localAuthority.getName(), migrationLog);
     }
 
     public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String email, String year) {
@@ -110,11 +174,12 @@ public class MigrationService {
             log(migrationLog, "A copy of these logs will be sent to this email address:  " + email, false);
         }
 
-        localAuthority.setMigrationStatus(MigrationStatus.ONGOING);
+        if (localAuthority.getMigration() == null) localAuthority.setMigration(new Migration());
+        localAuthority.getMigration().setMigrationData(MigrationStatus.ONGOING);
         localAuthority = localAuthorityRepository.save(localAuthority);
 
         SSHClient sshClient = getShellConnexion(migrationLog);
-        String proccessedQuery = query
+        String proccessedQuery = sql_actes
                 .replaceAll("\\{\\{siren}}", StringUtils.isNotBlank(siren) ? siren : localAuthority.getSiren())
                 .replaceAll("\\{\\{year}}", (StringUtils.isNotBlank(year) && Integer.parseInt(year) > 0) ? year : "1");
         ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
@@ -122,18 +187,10 @@ public class MigrationService {
         importActesMigrations(acteMigrations, localAuthority, sshClient, migrationLog);
         closeShellConnexion(sshClient, migrationLog);
 
-        localAuthority.setMigrationStatus(MigrationStatus.DONE);
+        localAuthority.getMigration().setMigrationData(MigrationStatus.DONE);
         localAuthorityRepository.save(localAuthority);
         log(migrationLog, "Ending migration", false);
-        if (StringUtils.isNotBlank(email)) {
-            try {
-                notificationService.sendMail(email, "Migration report for '" + localAuthority.getName() + "'",
-                        migrationLog.getLogs());
-                LOGGER.info("Migration report sent to {}", email);
-            } catch (MessagingException | IOException e) {
-                LOGGER.error("Error while trying to send the migration report");
-            }
-        }
+        processEmail(email, localAuthority.getName(), migrationLog);
     }
 
     private void importActesMigrations(List<ActeMigration> acteMigrations, LocalAuthority localAuthority,
@@ -227,6 +284,22 @@ public class MigrationService {
         log(migrationLog, i + " Actes migrated", false);
     }
 
+    private List<String> getGroupIdsFromSiren(String siren, MigrationLog migrationLog) {
+        log(migrationLog, "Fetching local authority groupIds", false);
+        String proccessedQuery = sql_local_authority_groups
+                .replaceAll("\\{\\{siren}}", siren);
+        ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
+        try {
+            resultSet.next();
+            String groupIds = resultSet.getString("groupid");
+            return Arrays.asList(groupIds.split(","));
+        } catch (SQLException e) {
+            LOGGER.error("Error while mapping the resultSet: {}", e);
+            log(migrationLog, "Error while mapping the resultSet", true);
+            return null;
+        }
+    }
+
     private List<ActeMigration> toActesMigration(ResultSet resultSet, MigrationLog migrationLog) {
         List<ActeMigration> acteMigrations = new ArrayList<>();
         log(migrationLog, "Extracting the Acte data from the request result", false);
@@ -278,6 +351,28 @@ public class MigrationService {
         return acteMigrations;
     }
 
+    private List<UserMigration> toUsersMigration(ResultSet resultSet, MigrationLog migrationLog) {
+        List<UserMigration> userMigrations = new ArrayList<>();
+        log(migrationLog, "Extracting the Users data from the request result", false);
+        // TODO: Improve with an automated parsing resultSet->pojo
+        try {
+            int i = 0;
+            while (resultSet.next()) {
+                userMigrations.add(new UserMigration(
+                        resultSet.getString("name"),
+                        resultSet.getString("uname"),
+                        resultSet.getString("email")
+                ));
+                i++;
+            }
+            log(migrationLog, i + " users extracted", false);
+        } catch (SQLException e) {
+            LOGGER.error("Error while mapping the resultSet: {}", e);
+            log(migrationLog, "Error while mapping the resultSet", true);
+        }
+        return userMigrations;
+    }
+
     private Attachment getAttachmentFromArchive(String filename, byte[] archiveBytes, long size) {
         byte[] fileBytes = getFileFromTarGz(archiveBytes, filename);
         return new Attachment(fileBytes, filename, size);
@@ -298,7 +393,7 @@ public class MigrationService {
                     + ") established", false);
             Statement statement = connect.createStatement();
             ResultSet resultSet = statement.executeQuery(processedQuery);
-            log(migrationLog, "MySQL query successfully executed", false);
+            log(migrationLog, "MySQL sql_actes successfully executed", false);
             return resultSet;
         } catch (ClassNotFoundException e) {
             LOGGER.error("Error while loading the jdbc driver: {}", e);
@@ -415,6 +510,18 @@ public class MigrationService {
             }
         }
         return null;
+    }
+
+    private void processEmail(String email, String localAuthorityName, MigrationLog migrationLog) {
+        if (StringUtils.isNotBlank(email)) {
+            try {
+                notificationService.sendMail(email, "Migration report for '" + localAuthorityName + "'",
+                        migrationLog.getLogs());
+                LOGGER.info("Migration report sent to {}", email);
+            } catch (MessagingException | IOException e) {
+                LOGGER.error("Error while trying to send the migration report");
+            }
+        }
     }
 
     private void log(MigrationLog migrationLog, String str, boolean isError) {

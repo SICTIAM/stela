@@ -33,8 +33,6 @@ public class Agent {
     @JsonView(Views.AgentViewPublic.class)
     private String givenName;
     // the sub in OpenId Connect parliance
-    @NotNull
-    @NotEmpty
     @Column(unique = true)
     @JsonView(Views.AgentViewPrivate.class)
     private String sub;
@@ -53,7 +51,13 @@ public class Agent {
     @JsonView(Views.AgentViewPrivate.class)
     private Set<Profile> profiles;
 
+    private Boolean imported;
+
     protected Agent() {
+    }
+
+    public Agent(String email) {
+        this.email = email;
     }
 
     public Agent(String familyName, String givenName, String email) {
@@ -120,6 +124,14 @@ public class Agent {
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
+    }
+
+    public Boolean getImported() {
+        return imported;
+    }
+
+    public void setImported(Boolean imported) {
+        this.imported = imported;
     }
 
     @Override

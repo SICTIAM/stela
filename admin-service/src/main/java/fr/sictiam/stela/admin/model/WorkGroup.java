@@ -15,6 +15,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import java.util.HashSet;
 import java.util.Set;
 
 //Group is reserved in Postgresql
@@ -66,7 +67,7 @@ public class WorkGroup {
     }
 
     public Set<Profile> getProfiles() {
-        return profiles;
+        return profiles != null ? profiles : new HashSet<>();
     }
 
     public void setProfiles(Set<Profile> profiles) {

@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -86,7 +87,7 @@ public class Profile {
     }
 
     public Set<WorkGroup> getGroups() {
-        return groups;
+        return groups != null ? groups : new HashSet<>();
     }
 
     public void setGroups(Set<WorkGroup> groups) {

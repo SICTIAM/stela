@@ -1,12 +1,10 @@
 package fr.sictiam.stela.acteservice.model;
 
-import fr.sictiam.stela.acteservice.model.migration.MigrationStatus;
+import fr.sictiam.stela.acteservice.model.migration.Migration;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
@@ -32,8 +30,7 @@ public class LocalAuthority {
     private Boolean active;
     // Default deposit profile for external software
     private String genericProfileUuid;
-    @Enumerated(EnumType.STRING)
-    private MigrationStatus migrationStatus;
+    private Migration migration;
 
     @Embedded
     private StampPosition stampPosition;
@@ -206,12 +203,12 @@ public class LocalAuthority {
         this.genericProfileUuid = genericProfileUuid;
     }
 
-    public MigrationStatus getMigrationStatus() {
-        return migrationStatus;
+    public Migration getMigration() {
+        return migration;
     }
 
-    public void setMigrationStatus(MigrationStatus migrationStatus) {
-        this.migrationStatus = migrationStatus;
+    public void setMigration(Migration migration) {
+        this.migration = migration;
     }
 
     @Override

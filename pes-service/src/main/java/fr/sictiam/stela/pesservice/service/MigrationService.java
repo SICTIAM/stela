@@ -87,6 +87,7 @@ public class MigrationService {
     String database;
 
     private final String query = getStringResourceFromStream("migration.sql");
+    private final String query_liaison_server = getStringResourceFromStream("migration.sql");
 
     public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository, NotificationService notificationService) {
         this.pesAllerRepository = pesAllerRepository;

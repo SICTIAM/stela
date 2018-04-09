@@ -113,7 +113,7 @@ class PesLocalAuthorityMigration extends Component {
                         status='NOT_DONE'
                         onClick={this.migrate} />
                     <MigrationSteps
-                        icon={<Icon name='calculator' />}
+                        icon={<Icon name='database' />}
                         title={t('admin.modules.pes.migration.pes.title')}
                         description={t('admin.modules.pes.migration.pes.description')}
                         status={status}

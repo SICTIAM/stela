@@ -40,7 +40,7 @@ class LocalAuthority extends Component {
             .then(response => response.json())
             .then(json => {
                 //flaten agent properties for the table component
-                json.agents = json.profiles.map( profile => profile.agent);;
+                json.agents = json.profiles.map(profile => profile.agent)
                 this.setState({ fields: json })
             })
             .catch(response => {
