@@ -84,7 +84,7 @@ subprojects {
     quality {
         strict = false
     }
-	if (project.name.endsWith('service')) {
+	if (project.name.endsWith('service')||project.name=="api-gateway") {
 	    task image(type: Docker, dependsOn: build) {
 			registry = 'forge-registry.sictiam.fr/internet'
 	        push = project.hasProperty('push')
