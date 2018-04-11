@@ -69,11 +69,9 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
             if ((pendingMessage.getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
 
                 HttpStatus sendStatus = null;
-                try {
-                    sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
-                } catch (Exception e) {
-                    sendStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                }
+
+                sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
+
                 if (HttpStatus.OK.equals(sendStatus)) {
                     acteService.sent(pendingMessage.getActeUuid(), pendingMessage.getFlux());
                     pendingMessageService.remove(pendingQueue.poll());

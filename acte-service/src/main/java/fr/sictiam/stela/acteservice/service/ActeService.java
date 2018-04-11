@@ -90,6 +90,9 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     @Value("${application.miat.url}")
     private String acteUrl;
 
+    @Value("${application.miat.rescueUrl}")
+    private String rescueUrl;
+
     @Autowired
     @Qualifier("miatRestTemplate")
     private RestTemplate miatRestTemplate;
@@ -208,30 +211,31 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     }
 
-    public Long countAllWithQuery(String multifield, String number, String objet, ActeNature nature, LocalDate decisionFrom,
-            LocalDate decisionTo, StatusType status, String currentLocalAuthUuid, Set<String> groups) {
+    public Long countAllWithQuery(String multifield, String number, String objet, ActeNature nature,
+            LocalDate decisionFrom, LocalDate decisionTo, StatusType status, String currentLocalAuthUuid,
+            Set<String> groups) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature, decisionFrom,
-                decisionTo, status, currentLocalAuthUuid, groups);
+        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
+                decisionFrom, decisionTo, status, currentLocalAuthUuid, groups);
         query.select(builder.count(acteRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<Acte> getAllWithQuery(String multifield, String number, String objet, ActeNature nature, LocalDate decisionFrom,
-            LocalDate decisionTo, StatusType status, Integer limit, Integer offset, String column, String direction,
-            String currentLocalAuthUuid, Set<String> groups) {
+    public List<Acte> getAllWithQuery(String multifield, String number, String objet, ActeNature nature,
+            LocalDate decisionFrom, LocalDate decisionTo, StatusType status, Integer limit, Integer offset,
+            String column, String direction, String currentLocalAuthUuid, Set<String> groups) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
-        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature, decisionFrom,
-                decisionTo, status, currentLocalAuthUuid, groups);
+        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
+                decisionFrom, decisionTo, status, currentLocalAuthUuid, groups);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
                         ? builder.asc(acteRoot.get(columnAttribute))
@@ -248,8 +252,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         if (StringUtils.isNotBlank(multifield)) {
             predicates.add(builder.or(
                     builder.like(builder.lower(acteRoot.get("number")), "%" + multifield.toLowerCase() + "%"),
-                    builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%")
-            ));
+                    builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%")));
         }
         if (StringUtils.isNotBlank(number))
             predicates.add(
@@ -331,7 +334,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 null, Flux.REPONSE_COURRIER_SIMPLE);
     }
 
-    public void sendReponseLettreObservation(String uuid, String reponseOrRejet, MultipartFile file) throws IOException {
+    public void sendReponseLettreObservation(String uuid, String reponseOrRejet, MultipartFile file)
+            throws IOException {
         Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
         if (reponseOrRejet.equals("reponse")) {
             registerAdditionalPieces(StatusType.REPONSE_LETTRE_OBSEVATION_ASKED, uuid,
@@ -342,7 +346,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
     }
 
-    public void sendReponsePiecesComplementaires(String uuid, String reponseOrRejet, MultipartFile[] files) throws IOException {
+    public void sendReponsePiecesComplementaires(String uuid, String reponseOrRejet, MultipartFile[] files)
+            throws IOException {
         List<Attachment> attachments = new ArrayList<>();
         for (MultipartFile file : files) {
             attachments.add(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
@@ -380,9 +385,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 StatusType.PIECE_COMPLEMENTAIRE_ASKED, StatusType.REPONSE_COURRIER_SIMPLE_ASKED,
                 StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE, StatusType.ACK_REPONSE_LETTRE_OBSERVATION);
         SortedSet<ActeHistory> acteHistories = getByUuid(uuid).getActeHistories();
-        if (acteHistories.size() == 0) return null;
+        if (acteHistories.size() == 0)
+            return null;
         List<ActeHistory> metierHistories = acteHistories.stream()
-                .filter(acteHistory -> statusOrdered.stream().anyMatch(statusType -> acteHistory.getStatus().equals(statusType)))
+                .filter(acteHistory -> statusOrdered.stream()
+                        .anyMatch(statusType -> acteHistory.getStatus().equals(statusType)))
                 .collect(Collectors.toList());
         return metierHistories.get(metierHistories.size() - 1);
     }
@@ -433,8 +440,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ? ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList())
-                : getAllWithQuery(ui.getMultifield(), ui.getNumber(), ui.getObjet(), ui.getNature(), ui.getDecisionFrom(),
-                ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
+                : getAllWithQuery(ui.getMultifield(), ui.getNumber(), ui.getObjet(), ui.getNature(),
+                        ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
     }
 
     public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
@@ -553,15 +560,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public HttpStatus askNomenclature(LocalAuthority localAuthority) {
         Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority);
-        try {
-            return send(attachment.getFile(), attachment.getFilename());
-        } catch (Exception e) {
-            LOGGER.error("Error while asking a new classification for localAuthority {}: {}", localAuthority.getUuid(), e);
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
+        return send(attachment.getFile(), attachment.getFilename());
     }
 
-    public HttpStatus send(byte[] file, String fileName) throws Exception {
+    public HttpStatus send(byte[] file, String fileName) {
 
         System.setProperty("javax.net.debug", "all");
 
@@ -585,9 +587,27 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
 
-        ResponseEntity<String> result = miatRestTemplate.exchange(acteUrl, HttpMethod.POST, requestEntity,
-                String.class);
-        return result.getStatusCode();
+        HttpStatus httpStatus = null;
+        try {
+            ResponseEntity<String> result = miatRestTemplate.exchange(acteUrl, HttpMethod.POST, requestEntity,
+                    String.class);
+            httpStatus = result.getStatusCode();
+        } catch (Exception e) {
+            LOGGER.error("Miat main server unavailable!");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        if (!HttpStatus.OK.equals(httpStatus)) {
+            try {
+                ResponseEntity<String> result = miatRestTemplate.exchange(rescueUrl, HttpMethod.POST, requestEntity,
+                        String.class);
+                httpStatus = result.getStatusCode();
+            } catch (Exception e) {
+                LOGGER.error("Miat rescue server unavailable!");
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
+        }
+        return httpStatus;
     }
 
     @Override
