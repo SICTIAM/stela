@@ -22,7 +22,11 @@ class PesLocalAuthorityMigration extends Component {
             uuid: '',
             name: '',
             siren: '',
-            migrationStatus: ''
+            migration: {
+                migrationUsers: 'NOT_DONE',
+                migrationData: 'NOT_DONE',
+                migrationUsersDeactivation: 'NOT_DONE'
+            }
         },
         form: {
             email: '',
@@ -55,14 +59,15 @@ class PesLocalAuthorityMigration extends Component {
             .map(k => data[k] = this.state.form[k])
         return data
     }
-    migrate = () => {
-        const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration`
+    migrate = (migrationType) => {
+        const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}`
         const data = this.getFormData()
         fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
-                fields.migrationStatus = 'ONGOING'
+                if (fields.migration === null) fields.migration = {}
+                fields.migration[migrationType] = 'ONGOING'
                 this.setState({ fields })
             })
             .catch(response => {
@@ -73,7 +78,7 @@ class PesLocalAuthorityMigration extends Component {
     }
     render() {
         const { t } = this.context
-        const status = this.state.fields.migrationStatus || 'NOT_DONE'
+        const { migration } = this.state.fields
         return (
             <Page title={t('admin.modules.pes.migration.title')}>
                 <Segment>
@@ -106,24 +111,23 @@ class PesLocalAuthorityMigration extends Component {
                 </Segment>
                 <Segment>
                     <MigrationSteps
-                        disabled
                         icon={<Icon name='users' />}
                         title={t('admin.modules.pes.migration.users_migration.title')}
                         description={t('admin.modules.pes.migration.users_migration.description')}
-                        status='NOT_DONE'
-                        onClick={this.migrate} />
+                        status={migration ? (migration.migrationUsers || 'NOT_DONE') : 'NOT_DONE'}
+                        onClick={() => this.migrate('migrationUsers')} />
                     <MigrationSteps
                         icon={<Icon name='database' />}
                         title={t('admin.modules.pes.migration.pes.title')}
                         description={t('admin.modules.pes.migration.pes.description')}
-                        status={status}
-                        onClick={this.migrate} />
+                        status={migration ? (migration.migrationData || 'NOT_DONE') : 'NOT_DONE'}
+                        onClick={() => this.migrate('migrationData')} />
                     <MigrationSteps
                         disabled
                         icon={<Icon.Group><Icon name='users' /><Icon corner name='delete' /> </Icon.Group>}
                         title={t('admin.modules.pes.migration.users_deactivation.title')}
                         description={t('admin.modules.pes.migration.users_deactivation.title')}
-                        status='NOT_DONE'
+                        status={migration ? (migration.migrationUsersDeactivation || 'NOT_DONE') : 'NOT_DONE'}
                         onClick={this.migrate} />
                 </Segment>
             </Page>

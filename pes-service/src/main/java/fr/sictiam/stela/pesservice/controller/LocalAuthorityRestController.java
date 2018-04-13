@@ -95,33 +95,50 @@ public class LocalAuthorityRestController {
         return new ResponseEntity<>(Arrays.asList(ServerCode.values()), HttpStatus.OK);
     }
 
-    @PostMapping("/current/migration")
-    public ResponseEntity migratePESFromCurrent(
+    @PostMapping("/current/migration/{migrationType}")
+    public ResponseEntity migrationFromCurrent(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String migrationType,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren) {
-        return migratePES(isLocalAuthorityAdmin, currentLocalAuthUuid, email, siren);
+        return migration(migrationType, isLocalAuthorityAdmin, currentLocalAuthUuid, email, siren);
     }
 
-    @PostMapping("/{uuid}/migration")
-    public ResponseEntity migratePESByUuid(
+    @PostMapping("/{uuid}/migration/{migrationType}")
+    public ResponseEntity migrationByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @PathVariable String uuid, @RequestParam(value = "email", required = false) String email,
+            @PathVariable String uuid, @PathVariable String migrationType,
+            @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren) {
-        return migratePES(isLocalAuthorityAdmin, uuid, email, siren);
+        return migration(migrationType, isLocalAuthorityAdmin, uuid, email, siren);
     }
 
-    private ResponseEntity migratePES(boolean isLocalAuthorityAdmin, String localAuthUuid, String email, String siren) {
+    private ResponseEntity migration(String migrationType, boolean isLocalAuthorityAdmin, String localAuthUuid, String email, String siren) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthUuid);
         // TODO : A websocket would be nice
-        if (localAuthority.getMigrationStatus() != null && !localAuthority.getMigrationStatus().equals(MigrationStatus.NOT_DONE)) {
+
+        if ("migrationUsers".equals(migrationType)) {
+            if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationUsers().equals(MigrationStatus.NOT_DONE)) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            }
+            CompletableFuture.runAsync(() -> migrationService.migrateStela2Users(localAuthority, siren, email));
+        } else if ("migrationData".equals(migrationType)) {
+            if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationData().equals(MigrationStatus.NOT_DONE)) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            }
+            CompletableFuture.runAsync(() -> migrationService.migrateStela2PES(localAuthority, siren, email));
+        } else if ("migrationUsersDeactivation".equals(migrationType)) {
+            if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationUsersDeactivation().equals(MigrationStatus.NOT_DONE)) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            }
+            //CompletableFuture.runAsync(() -> migrationService.migrateStela2PES(localAuthority, siren, email));
+        } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        CompletableFuture.runAsync(() -> migrationService.migrateStela2PES(localAuthority, siren, email));
         return new ResponseEntity(HttpStatus.OK);
     }
 

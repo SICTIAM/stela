@@ -8,7 +8,7 @@ FROM_UNIXTIME(u1.last_login) >= NOW() - INTERVAL 1 year AND
 groupid = (
 	SELECT groupid
 	FROM stela_groups
-	WHERE stela_groups.name LIKE "%stelamiat%"
+	WHERE stela_groups.name LIKE "%stela helios%"
 ) AND
 u1.uid IN (
 	SELECT u2.uid
