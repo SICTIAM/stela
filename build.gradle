@@ -13,7 +13,6 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 		classpath('se.transmode.gradle:gradle-docker:1.2')
-        classpath('ru.vyarus:gradle-quality-plugin:2.4.0')
 	}
 }
 
@@ -30,8 +29,6 @@ subprojects {
 	apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 	apply plugin: 'docker'
-
-    apply plugin: 'ru.vyarus.quality'
 
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
@@ -81,9 +78,6 @@ subprojects {
         }
     }
 
-    quality {
-        strict = false
-    }
 	if (project.name.endsWith('service')||project.name=="api-gateway") {
 	    task image(type: Docker, dependsOn: build) {
 			registry = 'forge-registry.sictiam.fr/internet'

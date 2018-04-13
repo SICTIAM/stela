@@ -17,7 +17,7 @@ public class DiscoveryUtilsKub implements DiscoveryUtils {
     @Value("${application.kub.services.acte}")
     private String acteUrl;
 
-    @Value("${application.kub.services.admin.convoc}")
+    @Value("${application.kub.services.convoc}")
     private String convocUrl;
 
     @Override
