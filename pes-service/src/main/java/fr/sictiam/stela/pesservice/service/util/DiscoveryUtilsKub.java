@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Profile({ "integration", "prod", "test" })
 public class DiscoveryUtilsKub implements DiscoveryUtils {
 
-    @Value("${kub.services.admin}")
+    @Value("${application.kub.services.admin}")
     private String adminUrl;
 
     @Override
