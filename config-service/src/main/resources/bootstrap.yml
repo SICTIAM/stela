@@ -20,3 +20,13 @@ spring:
       server:
         native:
           search-locations: file:../stela-config
+          
+---
+
+spring:
+  profiles: prod
+  cloud:
+    config:
+      server: 
+       git:
+          default-label: master    
