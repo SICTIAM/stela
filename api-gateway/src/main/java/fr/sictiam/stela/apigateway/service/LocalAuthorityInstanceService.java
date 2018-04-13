@@ -1,7 +1,9 @@
 package fr.sictiam.stela.apigateway.service;
 
 import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
+import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
@@ -13,12 +15,13 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
-
 @Service
 public class LocalAuthorityInstanceService {
 
     private static final String INSTANCE_KEY = "instance";
+
+    @Autowired
+    DiscoveryUtils discoveryUtils;
 
     public LocalAuthorityInstance findLocalAuthorityInstance() {
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
@@ -42,7 +45,7 @@ public class LocalAuthorityInstanceService {
         if (RequestContextHolder.getRequestAttributes() != null) {
             HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
             String slugName = SlugUtils.getSlugNameFromRequest(request);
-            WebClient webClient = WebClient.create(adminServiceUrl());
+            WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
             Mono<LocalAuthorityInstance> localAuthorityInstanceMono = webClient.get()
                     .uri("/api/admin/local-authority/instance/{slugName}", slugName).retrieve()
                     .onStatus(HttpStatus::is4xxClientError, response -> Mono.empty())

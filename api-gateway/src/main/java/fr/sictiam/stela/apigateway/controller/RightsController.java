@@ -1,5 +1,7 @@
 package fr.sictiam.stela.apigateway.controller;
 
+import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,19 +11,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.acteServiceUrl;
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.pesServiceUrl;
-
 @RestController
 @RequestMapping("/api/api-gateway/rights")
 public class RightsController {
 
+    @Autowired
+    DiscoveryUtils discoveryUtils;
+
     @GetMapping
     public List<String> getRights() {
         RestTemplate restTemplate = new RestTemplate();
-        String[] acteRights = restTemplate.getForObject(acteServiceUrl() + "/api/acte/rights", String[].class);
+        String[] acteRights = restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/rights",
+                String[].class);
 
-        String[] pesRights = restTemplate.getForObject(pesServiceUrl() + "/api/pes/rights", String[].class);
+        String[] pesRights = restTemplate.getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/rights",
+                String[].class);
 
         List<String> notificationList = new ArrayList<>();
         notificationList.addAll(Arrays.asList(acteRights));

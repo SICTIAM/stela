@@ -2,7 +2,9 @@ package fr.sictiam.stela.apigateway.controller;
 
 import fr.sictiam.stela.apigateway.model.AlertMessage;
 import fr.sictiam.stela.apigateway.model.Notification;
+import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,10 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.acteServiceUrl;
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.pesServiceUrl;
-
 @RestController
 @RequestMapping("/api/api-gateway")
 public class ProfileController {
@@ -34,13 +32,16 @@ public class ProfileController {
     @Value("${application.ozwilloPortalUrl}")
     String ozwilloPortalUrl;
 
+    @Autowired
+    DiscoveryUtils discoveryUtils;
+
     @GetMapping(value = "/switch/{profileUuid}")
     public void switchProfile(@PathVariable String profileUuid, HttpServletResponse response,
             HttpServletRequest request) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String slugForProfile = restTemplate.getForObject(adminServiceUrl() + "/api/admin/profile/{uuid}/slug",
-                String.class, profileUuid);
+        String slugForProfile = restTemplate.getForObject(
+                discoveryUtils.adminServiceUrl() + "/api/admin/profile/{uuid}/slug", String.class, profileUuid);
 
         request.getSession().invalidate();
 
@@ -58,11 +59,11 @@ public class ProfileController {
     public List<Notification> getAllNotifications() {
         RestTemplate restTemplate = new RestTemplate();
 
-        Notification[] acteNotifications = restTemplate.getForObject(acteServiceUrl() + "/api/acte/notifications/all",
-                Notification[].class);
+        Notification[] acteNotifications = restTemplate
+                .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/notifications/all", Notification[].class);
 
-        Notification[] pesNotifications = restTemplate.getForObject(pesServiceUrl() + "/api/pes/notifications/all",
-                Notification[].class);
+        Notification[] pesNotifications = restTemplate
+                .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/notifications/all", Notification[].class);
 
         List<Notification> notificationFiltered = new ArrayList<>();
 
@@ -84,11 +85,11 @@ public class ProfileController {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, AlertMessage> alertMessageModules = new HashMap<>();
-        AlertMessage alertMessageActe = restTemplate.getForObject(acteServiceUrl() + "/api/acte/admin/alert-message",
-                AlertMessage.class);
+        AlertMessage alertMessageActe = restTemplate
+                .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
         alertMessageModules.put("actes", alertMessageActe);
-        AlertMessage alertMessagePes = restTemplate.getForObject(pesServiceUrl() + "/api/pes/admin/alert-message",
-                AlertMessage.class);
+        AlertMessage alertMessagePes = restTemplate
+                .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
         alertMessageModules.put("pes", alertMessagePes);
 
         return alertMessageModules;

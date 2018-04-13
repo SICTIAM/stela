@@ -1,30 +1,13 @@
 package fr.sictiam.stela.apigateway.util;
 
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.EurekaClient;
-import org.springframework.stereotype.Component;
+public interface DiscoveryUtils {
 
-@Component
-public class DiscoveryUtils {
+    String acteServiceUrl();
 
-    private static EurekaClient discoveryClient;
+    String adminServiceUrl();
 
-    public DiscoveryUtils(EurekaClient discoveryClient) {
-        DiscoveryUtils.discoveryClient = discoveryClient;
-    }
+    String pesServiceUrl();
 
-    public static String acteServiceUrl() {
-        InstanceInfo instance = discoveryClient.getNextServerFromEureka("acte-service", false);
-        return instance.getHomePageUrl();
-    }
+    String convocServiceUrl();
 
-    public static String adminServiceUrl() {
-        InstanceInfo instance = discoveryClient.getNextServerFromEureka("admin-service", false);
-        return instance.getHomePageUrl();
-    }
-
-    public static String pesServiceUrl() {
-        InstanceInfo instance = discoveryClient.getNextServerFromEureka("pes-service", false);
-        return instance.getHomePageUrl();
-    }
 }

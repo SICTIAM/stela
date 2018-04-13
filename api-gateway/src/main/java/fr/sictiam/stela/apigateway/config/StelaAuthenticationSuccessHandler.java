@@ -2,6 +2,7 @@ package fr.sictiam.stela.apigateway.config;
 
 import fr.sictiam.stela.apigateway.model.Agent;
 import fr.sictiam.stela.apigateway.model.StelaUserInfo;
+import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
 import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
@@ -16,16 +17,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-import static fr.sictiam.stela.apigateway.util.DiscoveryUtils.adminServiceUrl;
-
 public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StelaAuthenticationSuccessHandler.class);
 
     private final String applicationUrlWithSlug;
 
-    public StelaAuthenticationSuccessHandler(String applicationUrlWithSlug) {
+    private final DiscoveryUtils discoveryUtils;
+
+    public StelaAuthenticationSuccessHandler(String applicationUrlWithSlug, DiscoveryUtils discoveryUtils) {
         this.applicationUrlWithSlug = applicationUrlWithSlug;
+        this.discoveryUtils = discoveryUtils;
     }
 
     @Override
@@ -41,8 +43,8 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
 
             Agent agent = new Agent(authenticationOpen.getUserInfo(), authenticationOpen.isAppAdmin(),
                     SlugUtils.getSlugNameFromRequest(request));
-            ResponseEntity<String> agentProfile = restTemplate.postForEntity(adminServiceUrl() + "/api/admin/agent",
-                    agent, String.class);
+            ResponseEntity<String> agentProfile = restTemplate
+                    .postForEntity(discoveryUtils.adminServiceUrl() + "/api/admin/agent", agent, String.class);
 
             String token = agentProfile.getBody();
 
