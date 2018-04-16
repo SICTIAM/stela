@@ -245,8 +245,6 @@ public class MigrationService {
             LOGGER.info("PES with message_id '{}' successfully migrated", pesMigration.getMessage_id());
             log(migrationLog, "PES with message_id '" + pesMigration.getMessage_id() + "' successfully migrated", false);
             i++;
-            // TEST
-            if (i == 200) break;
         }
         log(migrationLog, i + " PES migrated", false);
     }

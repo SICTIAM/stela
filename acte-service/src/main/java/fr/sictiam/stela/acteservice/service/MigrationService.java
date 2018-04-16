@@ -278,8 +278,6 @@ public class MigrationService {
             LOGGER.info("Acte with form_id '{}' successfully migrated", acteMigration.getForm_id());
             log(migrationLog, "Acte with form_id '" + acteMigration.getForm_id() + "' successfully migrated", false);
             i++;
-            // TEST
-            if (i == 200) break;
         }
         log(migrationLog, i + " Actes migrated", false);
     }
