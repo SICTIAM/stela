@@ -31,7 +31,7 @@ class ActeLocalAuthorityMigration extends Component {
         form: {
             email: '',
             siren: '',
-            year: '1'
+            month: '6'
         },
         status: 'init'
     }
@@ -109,11 +109,11 @@ class ActeLocalAuthorityMigration extends Component {
                             value={this.state.form.siren}
                             onChange={this.onFormChange} />
                     </Field>
-                    <Field htmlFor='year' label={t('admin.modules.acte.migration.additional_options.year')}>
-                        <Input id='year'
+                    <Field htmlFor='month' label={t('admin.modules.acte.migration.additional_options.month')}>
+                        <Input id='month'
                             type='number'
                             min='1'
-                            value={this.state.form.year}
+                            value={this.state.form.month}
                             onChange={this.onFormChange} />
                     </Field>
                 </Segment>

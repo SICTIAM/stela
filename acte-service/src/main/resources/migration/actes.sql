@@ -55,6 +55,6 @@ FROM
 	LEFT JOIN `stela_stelamiat_enveloppesMISILLCL` enveloppesMISILLCL_AR_CANCEL ON messages_AR_CANCEL.`message_id` = enveloppesMISILLCL_AR_CANCEL.`message_id`
 
 WHERE
-FROM_UNIXTIME(messages_ACTE.`dateIncoming`) >= NOW() - INTERVAL {{year}} year AND
+FROM_UNIXTIME(messages_ACTE.`dateIncoming`) >= NOW() - INTERVAL {{month}} month AND
 forms_ACTE.`env_siren` = {{siren}} and
 forms_ACTE.`form_type` = 1

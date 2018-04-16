@@ -17,6 +17,7 @@ import fr.sictiam.stela.acteservice.model.migration.MigrationStatus;
 import fr.sictiam.stela.acteservice.model.migration.MigrationWrapper;
 import fr.sictiam.stela.acteservice.model.migration.UserMigration;
 import fr.sictiam.stela.acteservice.model.util.StreamingInMemoryDestFile;
+import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
@@ -61,8 +62,6 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static fr.sictiam.stela.acteservice.service.util.DiscoveryUtils.adminServiceUrl;
-
 @Service
 public class MigrationService {
 
@@ -71,6 +70,7 @@ public class MigrationService {
     private final ActeRepository acteRepository;
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
+    private final DiscoveryUtils discoveryUtils;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -103,10 +103,12 @@ public class MigrationService {
     private final String sql_users = getStringResourceFromStream("migration/users.sql");
     private final String sql_local_authority_groups = getStringResourceFromStream("migration/local_authority_groups.sql");
 
-    public MigrationService(ActeRepository acteRepository, LocalAuthorityRepository localAuthorityRepository, NotificationService notificationService) {
+    public MigrationService(ActeRepository acteRepository, LocalAuthorityRepository localAuthorityRepository,
+            NotificationService notificationService, DiscoveryUtils discoveryUtils) {
         this.acteRepository = acteRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
+        this.discoveryUtils = discoveryUtils;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -141,7 +143,7 @@ public class MigrationService {
                     new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())));
 
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.postForEntity(adminServiceUrl()
+            ResponseEntity<String> response = restTemplate.postForEntity(discoveryUtils.adminServiceUrl()
                     + "/api/admin/agent/migration/users/{localAuthorityUuid}", migrationWrapper, String.class, localAuthority.getUuid());
             if (!response.getStatusCode().is2xxSuccessful()) {
                 log(migrationLog, "Bad response while trying to sending users to the admin-service: "
@@ -160,7 +162,7 @@ public class MigrationService {
         processEmail(email, localAuthority.getName(), migrationLog);
     }
 
-    public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String email, String year) {
+    public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String email, String month) {
 
         // siren 214400152
         MigrationLog migrationLog = new MigrationLog();
@@ -181,7 +183,7 @@ public class MigrationService {
         SSHClient sshClient = getShellConnexion(migrationLog);
         String proccessedQuery = sql_actes
                 .replaceAll("\\{\\{siren}}", StringUtils.isNotBlank(siren) ? siren : localAuthority.getSiren())
-                .replaceAll("\\{\\{year}}", (StringUtils.isNotBlank(year) && Integer.parseInt(year) > 0) ? year : "1");
+                .replaceAll("\\{\\{month}}", (StringUtils.isNotBlank(month) && Integer.parseInt(month) > 0) ? month : "1");
         ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
         List<ActeMigration> acteMigrations = toActesMigration(resultSet, migrationLog);
         importActesMigrations(acteMigrations, localAuthority, sshClient, migrationLog);

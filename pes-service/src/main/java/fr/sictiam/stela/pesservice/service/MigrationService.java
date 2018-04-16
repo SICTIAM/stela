@@ -15,6 +15,7 @@ import fr.sictiam.stela.pesservice.model.migration.MigrationWrapper;
 import fr.sictiam.stela.pesservice.model.migration.PesMigration;
 import fr.sictiam.stela.pesservice.model.migration.UserMigration;
 import fr.sictiam.stela.pesservice.model.util.StreamingInMemoryDestFile;
+import fr.sictiam.stela.pesservice.service.util.DiscoveryUtils;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
@@ -59,8 +60,6 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static fr.sictiam.stela.pesservice.service.util.DiscoveryUtils.adminServiceUrl;
-
 @Service
 public class MigrationService {
 
@@ -69,6 +68,7 @@ public class MigrationService {
     private final PesAllerRepository pesAllerRepository;
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
+    private final DiscoveryUtils discoveryUtils;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -103,10 +103,12 @@ public class MigrationService {
     // TODO: Migrate liaison_server
     private final String sql_liaison_server = getStringResourceFromStream("migration/liaison_siren.sql");
 
-    public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository, NotificationService notificationService) {
+    public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository,
+            NotificationService notificationService, DiscoveryUtils discoveryUtils) {
         this.pesAllerRepository = pesAllerRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
+        this.discoveryUtils = discoveryUtils;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -137,7 +139,7 @@ public class MigrationService {
                     new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())));
 
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.postForEntity(adminServiceUrl()
+            ResponseEntity<String> response = restTemplate.postForEntity(discoveryUtils.adminServiceUrl()
                     + "/api/admin/agent/migration/users/{localAuthorityUuid}", migrationWrapper, String.class, localAuthority.getUuid());
             if (!response.getStatusCode().is2xxSuccessful()) {
                 log(migrationLog, "Bad response while trying to sending users to the admin-service: "
