@@ -3,8 +3,8 @@ package fr.sictiam.stela.admin.service;
 import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.NotificationValue;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.WorkGroup;
+import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +42,11 @@ public class ProfileService {
         return profileRepository.save(profile);
     }
 
+    public Profile getByLocalAuthoritySirenAndEmail(String siren, String email) {
+        return profileRepository.findByLocalAuthority_SirenAndAgent_Email(siren, email)
+                .orElseThrow(() -> new NotFoundException("notifications.admin.agent_not_found"));
+    }
+
     public Profile getByAgentAndLocalAuthority(String localAuthorityUuid, String agentUuid) {
         return profileRepository.findByLocalAuthority_UuidAndAgent_Uuid(localAuthorityUuid, agentUuid)
                 .orElseThrow(() -> new NotFoundException("notifications.admin.agent_not_found"));
@@ -56,7 +61,8 @@ public class ProfileService {
         Profile profile = getByUuid(profileUuid);
         profile.getGroups().forEach(workGroup -> workGroup.getProfiles().remove(profile));
 
-        Set<WorkGroup> groups = profileRights.getGroupUuids().stream().map(workGroupService::getByUuid).collect(Collectors.toSet());
+        Set<WorkGroup> groups = profileRights.getGroupUuids().stream().map(workGroupService::getByUuid)
+                .collect(Collectors.toSet());
         groups.forEach(workGroup -> workGroup.getProfiles().add(profile));
         profile.setGroups(groups);
         profile.setAdmin(profileRights.isAdmin());

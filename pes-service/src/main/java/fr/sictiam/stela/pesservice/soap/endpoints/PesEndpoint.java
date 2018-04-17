@@ -8,23 +8,19 @@ import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
+import fr.sictiam.stela.pesservice.model.util.TarGzUtils;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.soap.model.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.xml.security.utils.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.ObjectError;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -37,10 +33,7 @@ import org.w3c.dom.Node;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.dom.DOMResult;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -236,11 +229,11 @@ public class PesEndpoint {
         TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
 
         try {
-            addEntry(pesAller.getAttachment().getFilename(), pesAller.getAttachment().getFile(), taos);
+            TarGzUtils.addEntry(pesAller.getAttachment().getFilename(), pesAller.getAttachment().getFile(), taos);
 
             fileHistories.forEach(pesHistory -> {
                 try {
-                    addEntry(pesHistory.getFileName(), pesHistory.getFile(), taos);
+                    TarGzUtils.addEntry(pesHistory.getFileName(), pesHistory.getFile(), taos);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage());
                 }
@@ -248,7 +241,7 @@ public class PesEndpoint {
             taos.close();
             baos.close();
 
-            ByteArrayOutputStream archive = compress(baos);
+            ByteArrayOutputStream archive = TarGzUtils.compress(baos);
             String archiveName = pesAller.getAttachment().getFilename() + ".tar.gz";
             String archiveBase64 = Base64.encode(archive.toByteArray());
             Map<String, String> returnMap = new HashMap<>();
@@ -293,30 +286,6 @@ public class PesEndpoint {
 
         return returnObject;
 
-    }
-
-    private void addEntry(String entryName, byte[] content, TarArchiveOutputStream taos) throws IOException {
-        File file = new File(entryName);
-        FileCopyUtils.copy(content, file);
-        ArchiveEntry archiveEntry = new TarArchiveEntry(file, entryName);
-        taos.putArchiveEntry(archiveEntry);
-        IOUtils.copy(new FileInputStream(file), taos);
-        taos.closeArchiveEntry();
-        file.delete();
-    }
-
-    private ByteArrayOutputStream compress(ByteArrayOutputStream baos) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-        GzipCompressorOutputStream gcos = new GzipCompressorOutputStream(baos2);
-        final byte[] buffer = new byte[2048];
-        int n;
-        while (-1 != (n = bais.read(buffer))) {
-            gcos.write(buffer, 0, n);
-        }
-        gcos.close();
-        bais.close();
-        return baos2;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getDetailsPESAller")
@@ -378,31 +347,8 @@ public class PesEndpoint {
             return returnObject;
         }
 
-        List<PesRetour> pesRetours = pesRetourService
-                .getUncollectedLocalAuthrotityPesRetours(StringUtils.substring(pesRetourInput.getIcColl(), 0, 9));
-
-        List<Map<String, String>> outputList = pesRetours.stream().map(pesRetour -> {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
-                addEntry(pesRetour.getAttachment().getFilename(), pesRetour.getAttachment().getFile(), taos);
-
-                taos.close();
-                baos.close();
-
-                ByteArrayOutputStream archive = compress(baos);
-                String archiveName = pesRetour.getAttachment().getFilename() + ".tar.gz";
-                String archiveBase64 = Base64.encode(archive.toByteArray());
-                Map<String, String> returnMap = new HashMap<>();
-                returnMap.put("chaine_archive", archiveBase64);
-                returnMap.put("filename", archiveName);
-                return returnMap;
-
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage());
-            }
-            return null;
-        }).filter(pesRetourMap -> pesRetourMap != null).collect(Collectors.toList());
+        List<Map<String, String>> outputList = pesRetourService
+                .getUncollectedLocalAuthorityPesRetours(StringUtils.substring(pesRetourInput.getIcColl(), 0, 9));
 
         returnObject.setJsonGetPESRetour(soapReturnGenerator.generateReturn("OK", outputList));
 

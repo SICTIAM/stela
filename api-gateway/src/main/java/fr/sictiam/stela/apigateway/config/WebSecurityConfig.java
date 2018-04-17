@@ -55,6 +55,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
                     .antMatchers("/api/*/locales/**").permitAll()
                     .antMatchers("/api/*/ws/**").permitAll()
+                    .antMatchers("*/fr/classic/*/services/api/**").permitAll()
                     .antMatchers("/api/**").authenticated().and()
                 .csrf()
                     .ignoringAntMatchers("/api/admin/ozwillo/**").ignoringAntMatchers("/api/*/ws/**").and()

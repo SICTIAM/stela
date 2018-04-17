@@ -96,17 +96,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     .orElseThrow(ProfileNotConfiguredForSesileException::new);
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
-            LocalDate localDate = LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
+            LocalDate localDate = LocalDate.now().plusDays(pes.getDaysToValidated() != null ? pes.getDaysToValidated()
+                    : sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
                     new ClasseurRequest(pes.getObjet(), "", localDate.format(dateTimeFormatter),
-                            sesileConfiguration.getType(), sesileConfiguration.getServiceOrganisationNumber(),
+                            sesileConfiguration.getType(),
+                            pes.getServiceOrganisationNumber() != null ? pes.getServiceOrganisationNumber()
+                                    : sesileConfiguration.getServiceOrganisationNumber(),
                             sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));
 
             Document document = addFileToclasseur(pes.getLocalAuthority(), pes.getAttachment().getFile(),
                     pes.getAttachment().getFilename(), classeur.getBody().getId()).getBody();
 
+            pes.setSesileClasseurId(classeur.getBody().getId());
             pes.setSesileDocumentId(document.getId());
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
@@ -410,6 +414,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             organisation.setTypes(types.stream().filter(type -> organisation.getType_classeur().contains(type.getId()))
                     .collect(Collectors.toList()));
         });
+        return organisations;
+
+    }
+
+    public List<ServiceOrganisation> getHeliosServiceOrganisations(LocalAuthority localauthority, String email) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
+        List<ServiceOrganisation> organisations = Arrays
+                .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                        ServiceOrganisation[].class, email).getBody());
+        List<Integer> types = Arrays.asList(getTypes(localauthority).getBody()).stream()
+                .filter(type -> type.getNom().equals("Helios")).map(type -> type.getId()).collect(Collectors.toList());
+
+        organisations = organisations.stream()
+                .filter(orga -> orga.getType_classeur().stream().anyMatch(type -> types.contains(type)))
+                .collect(Collectors.toList());
         return organisations;
 
     }

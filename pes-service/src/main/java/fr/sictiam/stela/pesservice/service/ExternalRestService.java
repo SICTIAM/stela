@@ -80,6 +80,21 @@ public class ExternalRestService {
         return opt.get();
     }
 
+    public JsonNode getProfileByLocalAuthoritySirenAndEmail(String siren, String email) throws IOException {
+        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        Mono<String> genericAccount = webClient.get()
+                .uri("/api/admin/profile/getByLocalAuthoritySirenAndEmail/{siren}/{email}", siren, email).retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        response -> Mono.error(new RuntimeException("generic_account_not_found")))
+                .bodyToMono(String.class);
+
+        Optional<String> opt = genericAccount.blockOptional();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
+
     public GenericAccount authWithCertificate(String serial, String vendor) throws IOException {
 
         Map<String, String> body = new HashMap<>();
