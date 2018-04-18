@@ -30,6 +30,7 @@ import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminInstance from './admin/AdminInstance'
+import GenericAccountCreation from './admin/GenericAccountCreation'
 import AgentList from './admin/AgentList'
 import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
 import LocalAuthority from './admin/localAuthority/LocalAuthority'
@@ -200,6 +201,8 @@ class AppRoute extends Component {
                 <Route exact path='/admin'>
                     <Redirect to="/admin/ma-collectivite" />
                 </Route>
+                <AuthRoute path='/admin/creation-generique' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccountCreation} menu={AdminMenuBar} admin={true} />
+
                 <AuthRoute path='/admin/parametrage-instance' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminInstance} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/agents/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path='/admin/agents' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />

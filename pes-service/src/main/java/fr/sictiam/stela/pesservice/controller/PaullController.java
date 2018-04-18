@@ -7,6 +7,7 @@ import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
+import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
@@ -16,12 +17,15 @@ import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.utils.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,8 +40,10 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/{siren}/fr/classic/webservhelios/services/api/rest.php/")
 public class PaullController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaullController.class);
 
     private final SesileService sesileService;
     private final LocalAuthorityService localAuthorityService;
@@ -65,7 +71,26 @@ public class PaullController {
 
     }
 
-    @PostMapping("{siren}/fr/classic/webservhelios/services/api/rest.php/depotpes")
+    public GenericAccount emailAuth(String email, String password) {
+
+        GenericAccount genericAccount = null;
+        try {
+
+            genericAccount = externalRestService.authWithEmailPassword(email, password);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return genericAccount;
+    }
+
+    public boolean localAuthorityGranted(GenericAccount genericAccount, String siren) {
+
+        return genericAccount.getLocalAuthorities().stream()
+                .anyMatch(localAuthority -> localAuthority.getActivatedModules().contains("PES")
+                        && localAuthority.getSiren().equals(siren));
+    }
+
+    @PostMapping("/depotpes")
     public ResponseEntity<?> DepotPES(@PathVariable String siren, @RequestParam("file") MultipartFile file,
             @RequestParam(name = "title") String title,
             @RequestParam(name = "comment", required = false) String comment, @RequestParam(name = "name") String name,
@@ -74,10 +99,19 @@ public class PaullController {
             @RequestParam(name = "service") String service, @RequestParam(name = "email") String email,
             @RequestParam(name = "PESPJ", required = false, defaultValue = "0") int PESPJ,
             @RequestParam(name = "SSLSerial", required = false) String SSLSerial,
-            @RequestParam(name = "SSLVendor", required = false) String SSLVendor) {
+            @RequestParam(name = "SSLVendor", required = false) String SSLVendor,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
-        Map<String, Object> data = new HashMap<>();
+        GenericAccount genericAccount = emailAuth(userid, password);
+
         HttpStatus status = HttpStatus.OK;
+        Map<String, Object> data = new HashMap<>();
+
+        if (genericAccount == null) {
+            status = HttpStatus.FORBIDDEN;
+            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
+        }
+
         try {
             if (pesAllerService.checkVirus(file.getBytes())) {
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
@@ -119,11 +153,18 @@ public class PaullController {
         return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
     }
 
-    @GetMapping("{siren}/fr/classic/webservhelios/services/api/rest.php/infopes/{idFlux}")
-    public ResponseEntity<?> infoPes(@PathVariable String siren, @PathVariable String idFlux) throws IOException {
+    @GetMapping("/infopes/{idFlux}")
+    public ResponseEntity<?> infoPes(@PathVariable String siren, @PathVariable String idFlux,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
+
+        GenericAccount genericAccount = emailAuth(userid, password);
+        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+            status = HttpStatus.FORBIDDEN;
+            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
+        }
 
         PesAller pesAller = pesAllerService.getByUuid(idFlux);
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
@@ -161,11 +202,18 @@ public class PaullController {
 
     }
 
-    @GetMapping("{siren}/fr/classic/webservhelios/services/api/rest.php/docpes/{idFlux}")
-    public ResponseEntity<?> docpes(@PathVariable String siren, @PathVariable String idFlux) throws IOException {
+    @GetMapping("/docpes/{idFlux}")
+    public ResponseEntity<?> docpes(@PathVariable String siren, @PathVariable String idFlux,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
+
+        GenericAccount genericAccount = emailAuth(userid, password);
+        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+            status = HttpStatus.FORBIDDEN;
+            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
+        }
 
         PesAller pesAller = pesAllerService.getByUuid(idFlux);
 
@@ -176,11 +224,18 @@ public class PaullController {
 
     }
 
-    @GetMapping("{siren}/fr/classic/webservhelios/services/api/rest.php/getPESRetour/{idCommune}")
+    @GetMapping("/getPESRetour/{idCommune}")
     public ResponseEntity<?> getPESRetour(@PathVariable String siren, @PathVariable String idCommune,
-            @RequestParam(name = "majauto", required = false, defaultValue = "0") int majauto) {
+            @RequestParam(name = "majauto", required = false, defaultValue = "0") int majauto,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;
+
+        GenericAccount genericAccount = emailAuth(userid, password);
+        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+            status = HttpStatus.FORBIDDEN;
+            return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
+        }
 
         List<Map<String, String>> outputList = pesRetourService.getUncollectedLocalAuthorityPesRetours(siren);
         if (majauto == 1) {
@@ -190,10 +245,17 @@ public class PaullController {
 
     }
 
-    @GetMapping("{siren}/fr/classic/webservhelios/services/api/rest.php/servicespes/{email}")
-    public ResponseEntity<?> servicespes(@PathVariable String siren, @PathVariable String email) {
+    @GetMapping("/servicespes/{email}")
+    public ResponseEntity<?> servicespes(@PathVariable String siren, @PathVariable String email,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;
+
+        GenericAccount genericAccount = emailAuth(userid, password);
+        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+            status = HttpStatus.FORBIDDEN;
+            return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
+        }
 
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
         if (localAuthority.isPresent()) {
@@ -209,10 +271,17 @@ public class PaullController {
 
     }
 
-    @GetMapping("{siren}/fr/classic/webservhelios/services/api/rest.php/sendACKPESRetour/{fileName}")
-    public ResponseEntity<?> getPESRetour(@PathVariable String siren, @PathVariable String fileName) {
+    @GetMapping("/sendACKPESRetour/{fileName}")
+    public ResponseEntity<?> getPESRetour(@PathVariable String siren, @PathVariable String fileName,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;
+
+        GenericAccount genericAccount = emailAuth(userid, password);
+        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+            status = HttpStatus.FORBIDDEN;
+            return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
+        }
 
         pesRetourService.collect(fileName);
         return new ResponseEntity<Object>(generatePaullResponse(status, null), status);

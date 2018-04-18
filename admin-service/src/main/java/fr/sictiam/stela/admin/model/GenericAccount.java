@@ -44,7 +44,7 @@ public class GenericAccount {
     @JsonView(Views.GenericAccountView.class)
     private Set<LocalAuthority> localAuthorities;
 
-    protected GenericAccount() {
+    public GenericAccount() {
     }
 
     public String getUuid() {

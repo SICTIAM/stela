@@ -55,7 +55,7 @@ public class ExternalRestService {
     }
 
     public JsonNode getAgentProfiles(String uuid) throws IOException {
-        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> profiles = webClient.get().uri("/api/admin/agent/{uuid}/profiles", uuid).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         response -> Mono.error(new RuntimeException("Profiles not Found")))
@@ -69,7 +69,7 @@ public class ExternalRestService {
     }
 
     public GenericAccount getGenericAccount(String uuid) throws IOException {
-        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<GenericAccount> genericAccount = webClient.get().uri("/api/admin/generic_account/{uuid}", uuid).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         response -> Mono.error(new RuntimeException("generic_account_not_found")))
@@ -81,7 +81,7 @@ public class ExternalRestService {
     }
 
     public JsonNode getProfileByLocalAuthoritySirenAndEmail(String siren, String email) throws IOException {
-        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> genericAccount = webClient.get()
                 .uri("/api/admin/profile/getByLocalAuthoritySirenAndEmail/{siren}/{email}", siren, email).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
@@ -100,7 +100,7 @@ public class ExternalRestService {
         Map<String, String> body = new HashMap<>();
         body.put("serial", serial);
         body.put("vendor", vendor);
-        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<GenericAccount> genericAccount = webClient.post().uri("/api/admin/generic_account/authWithCertificate")
                 .body(BodyInserters.fromObject(body)).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
@@ -117,7 +117,7 @@ public class ExternalRestService {
         body.put("email", email);
         body.put("password", password);
 
-        WebClient webClient = WebClient.create(DiscoveryUtils.adminServiceUrl());
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<GenericAccount> genericAccount = webClient.post().uri("/api/admin/generic_account/authWithEmailPassword")
                 .body(BodyInserters.fromObject(body)).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
