@@ -618,7 +618,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
     }
 
-    public Optional<Acte> getStartYear(ActeNature nature, String uuid, Boolean isPublicWebsite) {
+    public Optional<Acte> getFirstActeCreatedForNature(ActeNature nature, String uuid, Boolean isPublicWebsite) {
         return acteRepository.findFirstByNatureAndLocalAuthorityUuidAndIsPublicWebsiteOrderByDecisionAsc(nature, uuid,
                 isPublicWebsite);
     }
@@ -628,7 +628,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         localAuthorities.forEach(this::askNomenclature);
     }
 
-    public List<Acte> getActeMacth(String str) {
+    public List<Acte> getActesMatchingMiatId(String str) {
         return acteRepository.findAllByDraftNullAndMiatIdContainingIgnoreCase(str);
     }
 
@@ -639,7 +639,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         } catch (Exception e) {
             LOGGER.error("Error while asking a new classification for localAuthority {}: {}", localAuthority.getUuid(),
                     e);
-            return HttpStatus.INTERNAL_SERVER_ERROR;
+            return HttpStatus.BAD_REQUEST;
         }
     }
 

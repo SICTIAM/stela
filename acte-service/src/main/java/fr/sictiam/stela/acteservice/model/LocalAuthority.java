@@ -26,6 +26,7 @@ public class LocalAuthority {
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
     private Boolean active;
+    // Default deposit profile for external software
     private String genericProfileUuid;
 
     @Embedded

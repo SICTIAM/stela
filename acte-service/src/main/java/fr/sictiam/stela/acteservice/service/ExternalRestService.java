@@ -75,7 +75,8 @@ public class ExternalRestService {
         Mono<GenericAccount> genericAccount = webClient.post().uri("/api/admin/generic_account/authWithCertificate")
                 .body(BodyInserters.fromObject(body)).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        response -> Mono.error(new RuntimeException("generic_account_not_found")))
+                        response -> Mono.error(new RuntimeException(
+                                "No generic account for serial : " + serial + "and vendor : " + vendor)))
                 .bodyToMono(GenericAccount.class);
 
         Optional<GenericAccount> opt = genericAccount.blockOptional();
@@ -92,7 +93,7 @@ public class ExternalRestService {
         Mono<GenericAccount> genericAccount = webClient.post().uri("/api/admin/generic_account/authWithEmailPassword")
                 .body(BodyInserters.fromObject(body)).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        response -> Mono.error(new RuntimeException("generic_account_not_found")))
+                        response -> Mono.error(new RuntimeException("Account or password invalid")))
                 .bodyToMono(GenericAccount.class);
 
         Optional<GenericAccount> opt = genericAccount.blockOptional();

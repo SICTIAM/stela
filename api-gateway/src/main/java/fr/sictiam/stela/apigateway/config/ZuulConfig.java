@@ -8,11 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ZuulConfig {
 
-    // @Bean
-    // public ZuulFallbackProvider zuulFallbackProvider() {
-    // return new DefaultFallbackProvider();
-    // }
-
     @Bean
     public PreLoggingFilter preLoggingFilter() {
         return new PreLoggingFilter();

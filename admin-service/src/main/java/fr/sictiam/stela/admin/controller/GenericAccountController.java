@@ -61,7 +61,7 @@ public class GenericAccountController {
 
         if (genericAccountSearch.isPresent()) {
             return new ResponseEntity<Object>("notifications.admin.existing_account.email_conflict",
-                    HttpStatus.BAD_REQUEST);
+                    HttpStatus.CONFLICT);
         }
 
         if (StringUtils.isNotBlank(genericAccount.getSerial()) && StringUtils.isNoneBlank(genericAccount.getVendor())) {
@@ -69,7 +69,7 @@ public class GenericAccountController {
                     .getBySerialAndVendor(genericAccount.getSerial(), genericAccount.getVendor());
             if (genericAccountSearchCertificate.isPresent()) {
                 return new ResponseEntity<Object>("notifications.admin.existing_account.certificate_conflict",
-                        HttpStatus.BAD_REQUEST);
+                        HttpStatus.CONFLICT);
             }
         }
 
