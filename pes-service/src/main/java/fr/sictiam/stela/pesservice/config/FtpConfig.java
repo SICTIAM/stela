@@ -30,7 +30,7 @@ public class FtpConfig {
         sf.setPort(port);
         sf.setUsername(username);
         sf.setPassword(password);
-        sf.setClientMode(FTPClient.PASSIVE_LOCAL_DATA_CONNECTION_MODE);
+        sf.setClientMode(FTPClient.PASSIVE_REMOTE_DATA_CONNECTION_MODE);
         return sf;
     }
 }
