@@ -66,10 +66,7 @@ public class ReceiverTask {
                     readPesRetour(inputStream, ftpFile.getName());
                 }
             }
-
         }
-        ftpSession.close();
-
     }
 
     public void readACK(InputStream inputStream, String ackName)
