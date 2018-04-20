@@ -88,6 +88,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        generic_account_created: {
+            title: 'notifications.acte.admin.title',
+            message: 'notifications.admin.generic_account_created',
+            level: 'success',
+            position: 'br'
+        },
         localAuthorityUpdate: {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.local_authority.update.success',

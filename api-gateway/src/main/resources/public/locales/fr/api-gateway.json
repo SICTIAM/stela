@@ -128,6 +128,11 @@
             "admin": {
                 "title": "Admin module Acte",
                 "instance_params_updated": "Paramètres de l'instance enregistrés",
+                "generic_account_created": "Compte générique créé",
+                "existing_account" : {
+                	"email_conflict" : "Cet email est déjà utilisé pour un compte générique",
+                	"certificate_conflict" : "Ce certificat est déjà utilisé pour un compte générique"
+                },
                 "local_authority": {
                     "classificationAsked": "Demande de classfication envoyée",
                     "update": {
@@ -183,6 +188,7 @@
         "department": "Département",
         "district": "Arrondissement",
         "nature": "Nature",
+        "genericProfileUuid": "Agent garant",
         "nomenclatureDate": "Date de nomenclature",
         "canPublishRegistre": "Affichage sur le registre des délibérations",
         "canPublishWebSite": "Affichage sur site internet",
@@ -217,6 +223,7 @@
         "all_local_authorities": "Toutes les collectivités",
         "local_authorities": "Collectivités",
         "my_local_authority": "Ma collectivité",
+        "creation_generic": "Compte générique",
         "instance_params": {
             "title": "Paramètres de l'instance",
             "welcome_message": "Message de bienvenue"
@@ -244,6 +251,17 @@
         "agent": {
             "no_group": "Aucun groupe",
             "add_group": "Affecter un groupe..."
+        },
+        "generic_account": {
+        	"title": "Creation de compte générique",
+            "no_localAuthorities": "Aucune collectivité",
+            "add_localAuthority": "Affecter une collectivité...",
+            "software": "Logiciel",
+            "email": "Email",
+            "password": "Mot de passe",
+            "serial": "Serial",
+            "vendor": "Vendor",
+            "localAuthorities": "Collectivités"            
         },
         "group": {
             "no_rights": "Aucun droit",

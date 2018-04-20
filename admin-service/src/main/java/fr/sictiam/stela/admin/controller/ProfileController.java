@@ -3,10 +3,10 @@ package fr.sictiam.stela.admin.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.ProfileService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -65,13 +65,20 @@ public class ProfileController {
         return profileService.getByUuid(uuid);
     }
 
+    @GetMapping("/getByLocalAuthoritySirenAndEmail/{siren}/{email}")
+    @JsonView(Views.ProfileView.class)
+    public Profile getByLocalAuthoritySirenAndEmail(@PathVariable String siren, @PathVariable String email) {
+        return profileService.getByLocalAuthoritySirenAndEmail(siren, email);
+    }
+
     @GetMapping("/{uuid}/slug")
     public String getSlugForProfile(@PathVariable String uuid) {
         return profileService.getByUuid(uuid).getLocalAuthority().getSlugName();
     }
 
     // TODO: Fix Rights on this endpoint
-    // one user do not need any right to modify all his profile but should not be able to modify all profiles
+    // one user do not need any right to modify all his profile but should not be
+    // able to modify all profiles
     @PatchMapping("/{uuid}")
     public ResponseEntity<?> updateProfile(@PathVariable String uuid, @RequestBody ProfileUI profileUI) {
         Profile profile = profileService.getByUuid(uuid);

@@ -14,6 +14,7 @@ public class LocalAuthorityUpdateUI {
     private Boolean sesileSubscription;
     private String token;
     private String secret;
+    private String genericProfileUuid;
 
     public LocalAuthorityUpdateUI() {
     }
@@ -36,5 +37,13 @@ public class LocalAuthorityUpdateUI {
 
     public String getSecret() {
         return secret;
+    }
+
+    public String getGenericProfileUuid() {
+        return genericProfileUuid;
+    }
+
+    public void setGenericProfileUuid(String genericProfileUuid) {
+        this.genericProfileUuid = genericProfileUuid;
     }
 }

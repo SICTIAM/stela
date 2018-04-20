@@ -208,7 +208,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             int deliveryNumber = getNextIncrement();
 
             // this is the base filename for the message and attachments
-            String baseFilename = getBaseFilename(acte, flux);
+            String baseFilename = generateActeBaseFilename(acte, flux);
 
             String acteFilename = String.format("%s-%s_%d.%s",
                     !StringUtils.isEmpty(acte.getActeAttachment().getAttachmentTypeCode())
@@ -269,7 +269,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             int deliveryNumber = getNextIncrement();
 
-            String baseFilename = getBaseFilename(acte, flux);
+            String baseFilename = generateBaseFilename(acte, flux);
             String enveloppeName = String.format("EACT--%s--%s-%d.xml", acte.getLocalAuthority().getSiren(),
                     getFormattedDate(LocalDate.now()), deliveryNumber);
             String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
@@ -320,7 +320,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         try {
             int deliveryNumber = getNextIncrement();
 
-            String baseFilename = getBaseFilename(acte, flux);
+            String baseFilename = generateBaseFilename(acte, flux);
 
             String repFilename = String.format("%s_%d.%s", baseFilename, 1,
                     StringUtils.getFilenameExtension(attachment.getFilename()));
@@ -404,7 +404,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         try {
             int deliveryNumber = getNextIncrement();
 
-            String baseFilename = getBaseFilename(acte, flux);
+            String baseFilename = generateBaseFilename(acte, flux);
 
             String messageFilename = String.format("%s_%d.xml", baseFilename, 0);
             Map<String, byte[]> annexes = new HashMap<>();
@@ -529,7 +529,18 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         return String.format("%s-%s.%s", trigraph, StringUtils.stripFilenameExtension(enveloppeName), "tar.gz");
     }
 
-    public String getBaseFilename(Acte acte, Flux flux) {
+    public String generateActeBaseFilename(Acte acte, Flux flux) {
+        return String.format("%s-%s-%s", generateMiatId(acte), acte.getNumber(), acte.getNature().getAbbreviation());
+    }
+
+    public String generateMiatId(Acte acte) {
+        String today = acte.getCreation().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
+
+        return String.format("%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
+                acte.getLocalAuthority().getSiren(), today, acte.getNumber(), acte.getNature().getAbbreviation());
+    }
+
+    public String generateBaseFilename(Acte acte, Flux flux) {
         String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
 
         return String.format("%s-%s-%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),

@@ -1,0 +1,1 @@
+ALTER TABLE local_authority ADD COLUMN generic_profile_uuid character varying(255) NULL;

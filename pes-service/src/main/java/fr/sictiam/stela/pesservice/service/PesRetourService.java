@@ -4,7 +4,10 @@ import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesRetour;
+import fr.sictiam.stela.pesservice.model.util.TarGzUtils;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.xml.security.utils.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +21,15 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PesRetourService {
@@ -41,14 +50,14 @@ public class PesRetourService {
         return pesRetourRepository.findByUuid(uuid).get();
     }
 
-    public List<PesRetour> getAllWithQuery(String multifield, String filename, LocalDate creationFrom, LocalDate creationTo,
-            String currentLocalAuthUuid, Integer limit, Integer offset) {
+    public List<PesRetour> getAllWithQuery(String multifield, String filename, LocalDate creationFrom,
+            LocalDate creationTo, String currentLocalAuthUuid, Integer limit, Integer offset) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PesRetour> query = builder.createQuery(PesRetour.class);
         Root<PesRetour> pesRetourRoot = query.from(PesRetour.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom, creationTo,
-                currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom,
+                creationTo, currentLocalAuthUuid);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(builder.desc(pesRetourRoot.get("creation")));
 
@@ -61,8 +70,8 @@ public class PesRetourService {
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<PesRetour> pesRetourRoot = query.from(PesRetour.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom, creationTo,
-                currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, pesRetourRoot, multifield, filename, creationFrom,
+                creationTo, currentLocalAuthUuid);
         query.select(builder.count(pesRetourRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -92,5 +101,44 @@ public class PesRetourService {
                     creationTo.plusDays(1).atStartOfDay())));
         }
         return predicates;
+    }
+
+    public List<Map<String, String>> getUncollectedLocalAuthorityPesRetours(String siren) {
+        List<PesRetour> pesRetours = pesRetourRepository.findByLocalAuthoritySirenAndCollectedFalse(siren);
+
+        List<Map<String, String>> outputList = pesRetours.stream().map(pesRetour -> {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
+                TarGzUtils.addEntry(pesRetour.getAttachment().getFilename(), pesRetour.getAttachment().getFile(), taos);
+
+                taos.close();
+                baos.close();
+
+                ByteArrayOutputStream archive = TarGzUtils.compress(baos);
+                String archiveName = pesRetour.getAttachment().getFilename() + ".tar.gz";
+                String archiveBase64 = Base64.encode(archive.toByteArray());
+                Map<String, String> returnMap = new HashMap<>();
+                returnMap.put("chaine_archive", archiveBase64);
+                returnMap.put("filename", archiveName);
+                return returnMap;
+
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage());
+            }
+            return null;
+        }).filter(pesRetourMap -> pesRetourMap != null).collect(Collectors.toList());
+        return outputList;
+    }
+
+    public PesRetour collect(String filename) {
+        Optional<PesRetour> pesRetourOpt = pesRetourRepository
+                .findByAttachmentFilename(filename.replace(".tar.gz", ""));
+        PesRetour pesRetour = pesRetourOpt.orElse(null);
+        if (pesRetourOpt.isPresent()) {
+            pesRetour.setCollected(true);
+            pesRetour = pesRetourRepository.save(pesRetour);
+        }
+        return pesRetour;
     }
 }

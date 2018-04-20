@@ -174,16 +174,12 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         pesAllerRepository.save(pes);
     }
 
-    public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
+    public PesAller populateFromByte(PesAller pesAller, byte[] file) {
 
         try {
-            Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
-            pesAller.setAttachment(attachment);
-            pesAller.setCreation(LocalDateTime.now());
-
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(file.getBytes()));
+            Document document = builder.parse(new ByteArrayInputStream(file));
 
             XPathFactory xpf = XPathFactory.newInstance();
             XPath path = xpf.newXPath();
@@ -197,6 +193,22 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             pesAller.setSigned("PES_PJ".equals(pesAller.getFileType()));
 
         } catch (IOException | XPathExpressionException | ParserConfigurationException | SAXException e) {
+            throw new PesCreationException();
+        }
+        return pesAller;
+
+    }
+
+    public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
+
+        try {
+            Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
+            pesAller.setAttachment(attachment);
+            pesAller.setCreation(LocalDateTime.now());
+
+            populateFromByte(pesAller, file.getBytes());
+
+        } catch (IOException e) {
             throw new PesCreationException();
         }
         return pesAller;
@@ -240,8 +252,8 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public boolean checkVirus(MultipartFile file) throws ClamavException, IOException {
-        ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(file.getBytes()));
+    public boolean checkVirus(byte[] file) throws ClamavException, IOException {
+        ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(file));
         boolean status = false;
         if (!mainResult.equals(OK.INSTANCE)) {
             status = true;
@@ -290,6 +302,10 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         List<PesAller> resultList = typedQuery.getResultList();
 
         return resultList;
+    }
+
+    public List<PesHistory> getPesHistoryByTypes(String uuid, List<StatusType> statusTypes) {
+        return pesHistoryRepository.findBypesUuidAndStatusInOrderByDateDesc(uuid, statusTypes);
     }
 
     public PesHistory getLastSentHistory(String uuid) {

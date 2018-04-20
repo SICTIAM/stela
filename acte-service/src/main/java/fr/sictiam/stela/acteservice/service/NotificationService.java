@@ -67,7 +67,6 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     public void proccessEvent(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
-        JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
 
         Notification notification = Notification.notifications.stream()
                 .filter(notif -> notif.getStatusType().equals(event.getActeHistory().getStatus())).findFirst().get();
@@ -104,20 +103,27 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.GROUP_NOTIFICATION_SENT);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         }
-        List<NotificationValue> notifications = getNotificationValues(node);
 
-        if (notification.isDeactivatable() || notifications.stream().anyMatch(
-                notif -> notif.getName().equals(event.getActeHistory().getStatus().toString()) && notif.isActive())
-                || (notification.isDefaultValue() && notifications.isEmpty())) {
-            sendMail(getAgentMail(node),
-                    localesService.getMessage("fr", "acte_notification",
-                            "$.acte." + event.getActeHistory().getStatus().name() + ".subject"),
-                    localesService.getMessage("fr", "acte_notification",
-                            "$.acte." + event.getActeHistory().getStatus().name() + ".body", getAgentInfo(node)));
+        if (StringUtils.isNotBlank(acte.getProfileUuid())) {
+            JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
+            List<NotificationValue> notifications = getNotificationValues(node);
 
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
-            applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+            if (notification.isDeactivatable()
+                    || notifications.stream()
+                            .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
+                                    && notif.isActive())
+                    || (notification.isDefaultValue() && notifications.isEmpty())) {
+                sendMail(getAgentMail(node),
+                        localesService.getMessage("fr", "acte_notification",
+                                "$.acte." + event.getActeHistory().getStatus().name() + ".subject"),
+                        localesService.getMessage("fr", "acte_notification",
+                                "$.acte." + event.getActeHistory().getStatus().name() + ".body", getAgentInfo(node)));
+
+                ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
+                applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+            }
         }
+
     }
 
     public List<NotificationValue> getNotificationValues(JsonNode node) {

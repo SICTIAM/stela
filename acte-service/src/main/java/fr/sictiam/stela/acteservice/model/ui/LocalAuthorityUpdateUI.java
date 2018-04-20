@@ -19,6 +19,7 @@ public class LocalAuthorityUpdateUI {
     private Boolean canPublishRegistre;
     private Boolean canPublishWebSite;
     private StampPosition stampPosition;
+    private String genericProfileUuid;
 
     public LocalAuthorityUpdateUI() {
     }
@@ -45,5 +46,13 @@ public class LocalAuthorityUpdateUI {
 
     public StampPosition getStampPosition() {
         return stampPosition;
+    }
+
+    public String getGenericProfileUuid() {
+        return genericProfileUuid;
+    }
+
+    public void setGenericProfileUuid(String genericProfileUuid) {
+        this.genericProfileUuid = genericProfileUuid;
     }
 }

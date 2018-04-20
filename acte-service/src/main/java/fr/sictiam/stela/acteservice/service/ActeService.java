@@ -49,11 +49,13 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
@@ -66,6 +68,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
@@ -83,6 +86,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
+    private final LocalesService localesService;
     private final ArchiveService archiveService;
     private final PdfGeneratorUtil pdfGeneratorUtil;
     private final ZipGeneratorUtil zipGeneratorUtil;
@@ -101,7 +105,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
             AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
             LocalAuthorityService localAuthorityService, ArchiveService archiveService,
-            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil) {
+            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -110,6 +114,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         this.archiveService = archiveService;
         this.pdfGeneratorUtil = pdfGeneratorUtil;
         this.zipGeneratorUtil = zipGeneratorUtil;
+        this.localesService = localesService;
     }
 
     public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
@@ -129,6 +134,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         if (!currentLocalAuthority.getCanPublishRegistre())
             acte.setPublic(false);
 
+        return publishActe(acte);
+    }
+
+    public Acte publishActe(Acte acte) {
         Acte created = acteRepository.save(acte);
 
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.CREATED, Flux.TRANSMISSION_ACTE);
@@ -291,6 +300,37 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
 
         return predicates;
+    }
+
+    public List<ActeHistory> getPrefectureReturns(String currentLocalAuthUuid, LocalDateTime date) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ActeHistory> query = cb.createQuery(ActeHistory.class);
+        Root<ActeHistory> acteHistoryTable = query.from(ActeHistory.class);
+        query.select(acteHistoryTable);
+
+        Subquery<String> acteQuery = query.subquery(String.class);
+        Root<Acte> acteTable = acteQuery.from(Acte.class);
+
+        acteQuery.select(acteTable.get("uuid"));
+        Join<LocalAuthority, Acte> localAuthorityJoin = acteTable.join("localAuthority");
+        localAuthorityJoin.on(cb.equal(localAuthorityJoin.get("uuid"), currentLocalAuthUuid));
+
+        List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
+
+        mainQueryPredicates.add(acteHistoryTable.get("status")
+                .in(Arrays.asList(StatusType.COURRIER_SIMPLE_RECEIVED, StatusType.ACK_RECEIVED,
+                        StatusType.COURRIER_SIMPLE_RECEIVED, StatusType.LETTRE_OBSERVATION_RECEIVED,
+                        StatusType.ACK_REPONSE_LETTRE_OBSERVATION, StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE,
+                        StatusType.DEFERE_RECEIVED, StatusType.NACK_RECEIVED, StatusType.CANCELLED)));
+        mainQueryPredicates.add(acteHistoryTable.get("acteUuid").in(acteQuery));
+        mainQueryPredicates.add(cb.and(cb.greaterThan(acteHistoryTable.get("date"), date)));
+        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
+        TypedQuery<ActeHistory> typedQuery = entityManager.createQuery(query);
+        List<ActeHistory> resultList = typedQuery.getResultList();
+
+        return resultList;
+
     }
 
     public Acte getByUuid(String uuid) {
@@ -535,6 +575,19 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return data;
     }
 
+    public String getActeHistoryDefinition(ActeHistory acteHistory) {
+        return localesService.getMessage("fr", "acte", "$.acte.status." + acteHistory.getStatus().name());
+    }
+
+    public List<String> getActeHistoryDefinitions(ActeHistory acteHistory) {
+        return Arrays.asList(generateMiatId(getByUuid(acteHistory.getActeUuid())),
+                getActeHistoryDefinition(acteHistory));
+    }
+
+    public String generateMiatId(Acte acte) {
+        return archiveService.generateMiatId(acte);
+    }
+
     public byte[] getStampedActe(Acte acte, Integer x, Integer y, LocalAuthority localAuthority)
             throws IOException, DocumentException {
         if (x == null || y == null) {
@@ -543,9 +596,21 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
         ActeHistory ackHistory = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
-        return pdfGeneratorUtil.stampPDF(archiveService.getBaseFilename(acte, Flux.TRANSMISSION_ACTE),
+        return pdfGeneratorUtil.stampPDF(generateMiatId(acte),
                 ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")),
                 acte.getActeAttachment().getFile(), x, y);
+    }
+
+    public byte[] getStampedAnnexe(Acte acte, Attachment attachment, Integer x, Integer y,
+            LocalAuthority localAuthority) throws IOException, DocumentException {
+        if (x == null || y == null) {
+            x = localAuthority.getStampPosition().getX();
+            y = localAuthority.getStampPosition().getY();
+        }
+        ActeHistory ackHistory = acte.getActeHistories().stream()
+                .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
+        return pdfGeneratorUtil.stampPDF(generateMiatId(acte),
+                ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), attachment.getFile(), x, y);
     }
 
     public byte[] getActeAttachmentThumbnail(String uuid) throws IOException {
@@ -553,14 +618,29 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
     }
 
+    public Optional<Acte> getStartYear(ActeNature nature, String uuid, Boolean isPublicWebsite) {
+        return acteRepository.findFirstByNatureAndLocalAuthorityUuidAndIsPublicWebsiteOrderByDecisionAsc(nature, uuid,
+                isPublicWebsite);
+    }
+
     public void askAllNomenclature() {
         List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
         localAuthorities.forEach(this::askNomenclature);
     }
 
+    public List<Acte> getActeMacth(String str) {
+        return acteRepository.findAllByDraftNullAndMiatIdContainingIgnoreCase(str);
+    }
+
     public HttpStatus askNomenclature(LocalAuthority localAuthority) {
         Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority);
-        return send(attachment.getFile(), attachment.getFilename());
+        try {
+            return send(attachment.getFile(), attachment.getFilename());
+        } catch (Exception e) {
+            LOGGER.error("Error while asking a new classification for localAuthority {}: {}", localAuthority.getUuid(),
+                    e);
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
     }
 
     public HttpStatus send(byte[] file, String fileName) {

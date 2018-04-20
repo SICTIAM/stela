@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
-import { Checkbox, Form, Button, Segment } from 'semantic-ui-react'
+import { Checkbox, Form, Button, Dropdown, Segment } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
@@ -35,10 +35,12 @@ class ActeLocalAuthorityParams extends Component {
             stampPosition: {
                 x: 10,
                 y: 10
-            }
+            },
+            genericProfileUuid: ''
         },
         localAuthorityFetched: false,
-        isFormValid: false
+        isFormValid: false,
+        profiles: []
     }
     validationRules = {
         department: 'required|digits:3',
@@ -47,6 +49,20 @@ class ActeLocalAuthorityParams extends Component {
     }
     componentDidMount() {
         const uuid = this.props.uuid
+
+        const adminUrl = uuid ? `/api/admin/local-authority/${uuid}` : '/api/admin/local-authority/current'
+            fetchWithAuthzHandling({ url: adminUrl })
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(json => {
+                    this.setState({ profiles: json.profiles })
+                })
+                .catch(response => {
+                    response.json().then(json => {
+                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    })
+                })
+
         const url = uuid ? '/api/acte/localAuthority/' + uuid : '/api/acte/localAuthority/current'
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
@@ -59,15 +75,20 @@ class ActeLocalAuthorityParams extends Component {
                 history.push('/admin/actes/parametrage-collectivite')
             })
     }
-    updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite, stampPosition }) => {
+    updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite, stampPosition, genericProfileUuid }) => {
         const constantFields = { uuid, name, siren, nomenclatureDate }
-        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite, stampPosition }
+        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite, stampPosition, genericProfileUuid }
         this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true }, this.validateForm)
     }
     handleFieldChange = (field, value) => {
         const fields = this.state.fields
         fields[field] = value
         this.setState({ fields: fields }, this.validateForm)
+    }
+    handleStateChange = (event, { id, value}) => {
+        const { fields } = this.state
+        fields[id] = value
+        this.setState({ fields })
     }
     handleChangeDeltaPosition = (position) => {
         const { fields } = this.state
@@ -116,6 +137,8 @@ class ActeLocalAuthorityParams extends Component {
     render() {
         const { t } = this.context
         const localAuthorityFetched = renderIf(this.state.localAuthorityFetched)
+        const profiles = this.state.profiles.map(profile => { return { key: profile.uuid, value: profile.uuid, text: `${profile.agent.given_name} ${profile.agent.family_name}` } })
+
         return (
             localAuthorityFetched(
                 <Page title={this.state.constantFields.name}>
@@ -168,6 +191,16 @@ class ActeLocalAuthorityParams extends Component {
                             </Field>
                             <Field htmlFor='canPublishWebSite' label={t('api-gateway:local_authority.canPublishWebSite')}>
                                 <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
+                            </Field>
+                            <Field htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
+                                <Dropdown compact search selection
+                                    id='genericProfileUuid'
+                                    field='genericProfileUuid'
+                                    className='simpleInput'
+                                    options={profiles}
+                                    value={this.state.fields.genericProfileUuid}
+                                    onChange={this.handleStateChange} 
+                                    placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
                             </Field>
                             <div style={{ textAlign: 'right' }}>
                                 <Button basic primary style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('api-gateway:form.update')}</Button>

@@ -56,7 +56,13 @@ public class PesAller {
 
     private boolean signed;
 
+    private Integer sesileClasseurId;
+
     private Integer sesileDocumentId;
+
+    private Integer daysToValidated;
+
+    private Integer serviceOrganisationNumber;
 
     public PesAller() {
     }
@@ -173,12 +179,36 @@ public class PesAller {
         return signed;
     }
 
+    public Integer getSesileClasseurId() {
+        return sesileClasseurId;
+    }
+
+    public void setSesileClasseurId(Integer sesileClasseurId) {
+        this.sesileClasseurId = sesileClasseurId;
+    }
+
     public void setSigned(boolean signed) {
         this.signed = signed;
     }
 
     public Integer getSesileDocumentId() {
         return sesileDocumentId;
+    }
+
+    public Integer getDaysToValidated() {
+        return daysToValidated;
+    }
+
+    public void setDaysToValidated(Integer daysToValidated) {
+        this.daysToValidated = daysToValidated;
+    }
+
+    public Integer getServiceOrganisationNumber() {
+        return serviceOrganisationNumber;
+    }
+
+    public void setServiceOrganisationNumber(Integer serviceOrganisationNumber) {
+        this.serviceOrganisationNumber = serviceOrganisationNumber;
     }
 
     public void setSesileDocumentId(Integer sesileDocumentId) {
