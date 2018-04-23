@@ -622,7 +622,7 @@ public class ActeEndpoint {
 
         ActeNature nature = StringUtils.isEmpty(getAnneeDebutInput.getFiltreNature()) ? null
                 : ActeNature.code(Integer.parseInt(getAnneeDebutInput.getFiltreNature()));
-        Optional<Acte> acte = acteService.getStartYear(nature, getAnneeDebutInput.getGroupe(), true);
+        Optional<Acte> acte = acteService.getFirstActeCreatedForNature(nature, getAnneeDebutInput.getGroupe(), true);
 
         int year = acte.isPresent() ? acte.get().getDecision().getYear() : 0;
 
@@ -642,7 +642,7 @@ public class ActeEndpoint {
             output.setJsonAutoCompletion(soapReturnGenerator.connectionFailedReturn());
             return output;
         }
-        List<Acte> actes = acteService.getActeMacth(autoCompletionInput.getNumero());
+        List<Acte> actes = acteService.getActesMatchingMiatId(autoCompletionInput.getNumero());
         output.setJsonAutoCompletion(soapReturnGenerator.generateReturn("OK",
                 actes.stream().map(acte -> acte.getMiatId()).collect(Collectors.toList())));
         return output;

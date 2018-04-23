@@ -5,10 +5,10 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
@@ -141,7 +141,8 @@ public class LocalAuthorityController {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(profileService.getByAgentAndLocalAuthority(currentLocalAuthUuid, agentUuid), HttpStatus.OK);
+        return new ResponseEntity<>(profileService.getByAgentAndLocalAuthority(currentLocalAuthUuid, agentUuid),
+                HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/group")
@@ -257,9 +258,6 @@ public class LocalAuthorityController {
     public ResponseEntity<List<Profile>> getProfiles(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         return new ResponseEntity<>(profileService.getProfilesByLocalAuthorityUuid(uuid), HttpStatus.OK);
     }
 }

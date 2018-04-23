@@ -65,7 +65,7 @@ public class ProfileController {
         return profileService.getByUuid(uuid);
     }
 
-    @GetMapping("/getByLocalAuthoritySirenAndEmail/{siren}/{email}")
+    @GetMapping("/local-authority/{siren}/{email}")
     @JsonView(Views.ProfileView.class)
     public Profile getByLocalAuthoritySirenAndEmail(@PathVariable String siren, @PathVariable String email) {
         return profileService.getByLocalAuthoritySirenAndEmail(siren, email);
