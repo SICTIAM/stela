@@ -192,10 +192,27 @@ public class LocalAuthorityService {
         return localAuthority.getMaterialCodes();
     }
 
-    public Set<AttachmentType> getAttachmentTypeAvailable(ActeNature acteNature, String uuid) {
-        return attachmentTypeRepository
+    public Set<AttachmentType> getAttachmentTypeAvailable(ActeNature acteNature, String uuid, String materialCode) {
+
+        // the following code reproduce stela 2 behaviour for attachment type filtering
+        String[] materialSplit = materialCode.split("-");
+
+        String materialCode1 = materialSplit[0];
+        String materialCode2 = materialSplit[1];
+
+        Set<AttachmentType> attachmentTypes = attachmentTypeRepository
                 .findByAttachmentTypeReferencial_acteNatureAndAttachmentTypeReferencial_localAuthorityUuidOrderByLabel(
                         acteNature, uuid);
+        attachmentTypes = attachmentTypes.stream().filter(attachmentType -> {
+
+            String firstChar = attachmentType.getCode().substring(0, 1);
+            String secondChar = attachmentType.getCode().substring(1, 2);
+
+            return (attachmentType.getCode().startsWith("99"))
+                    || ((materialCode1.equals(firstChar) || firstChar.equals("0"))
+                            && (materialCode2.equals(secondChar) || secondChar.equals("0")));
+        }).collect(Collectors.toSet());
+        return attachmentTypes;
     }
 
     public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {

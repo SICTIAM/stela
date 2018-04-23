@@ -139,8 +139,9 @@ class NewActeForm extends Component {
     }
     fetchAttachmentTypes = () => {
         const nature = this.state.fields.nature
+        const materialCode = this.state.fields.code
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}`, headers: headers, context: this.context })
+        fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ attachmentTypes: json }))
@@ -196,7 +197,8 @@ class NewActeForm extends Component {
         this.setState({ fields: fields }, () => {
             this.validateForm()
             this.saveDraft()
-            if (field === 'nature' && this.props.mode !== 'ACTE_BATCH') {
+            if ((field === 'nature' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.code !== '') 
+                    || (field === 'code' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.nature !== '')) {
                 this.fetchAttachmentTypes()
                 this.fetchRemoveAttachmentTypes()
             }
@@ -384,7 +386,7 @@ class NewActeForm extends Component {
             )
         const attachmentTypeSource = this.props.mode === 'ACTE_BATCH' ? this.props.attachmentTypes : this.state.attachmentTypes
         const attachmentTypes = attachmentTypeSource.map(attachmentType =>
-            ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.label })
+            ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.code + " - " + attachmentType.label })
         )
         const groupOptions = this.state.groups.map(group =>
             ({ key: group.uuid, value: group.uuid, text: group.name })
