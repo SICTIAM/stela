@@ -124,7 +124,7 @@ class LocalAuthority extends Component {
                     }
                     {isActivated &&
                         <List.Content floated='right'>
-                            <Link to={migrationUrl} className='ui button compact basic primary'>Migration</Link>
+                            <Link to={migrationUrl} className='ui button compact basic primary'>{t('migration.title')}</Link>
                         </List.Content>
                     }
                 </ListItem>

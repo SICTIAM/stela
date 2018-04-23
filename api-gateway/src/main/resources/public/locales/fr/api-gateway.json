@@ -218,6 +218,7 @@
         "PES_ADMIN": "Administration du module PES"
     },
     "migration": {
+        "title": "Migration",
         "start": "Lancer la migration",
         "ongoing": "Migration en cours",
         "finished": "Migration effectuée"

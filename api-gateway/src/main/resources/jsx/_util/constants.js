@@ -41,4 +41,8 @@ const sesileVisibility = [0, 1, 3]
 
 const materialCodeBudgetaire = "7-1-"
 
-module.exports = { modules, natures, status, anomalies, sesileVisibility, materialCodeBudgetaire }
+// Default period we have to keep actes before archiving. 
+// It also corresponds to the number of months of actes that must be migrated.
+const monthBeforeArchiving = 6
+
+module.exports = { modules, natures, status, anomalies, sesileVisibility, materialCodeBudgetaire, monthBeforeArchiving }

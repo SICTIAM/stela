@@ -35,8 +35,7 @@ class PesLocalAuthorityMigration extends Component {
         status: 'init'
     }
     componentDidMount() {
-        const uuid = this.props.uuid
-        const url = uuid ? '/api/pes/localAuthority' + uuid : '/api/pes/localAuthority/current'
+        const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}`
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
@@ -122,13 +121,6 @@ class PesLocalAuthorityMigration extends Component {
                         description={t('admin.modules.pes.migration.pes.description')}
                         status={migration ? (migration.migrationData || 'NOT_DONE') : 'NOT_DONE'}
                         onClick={() => this.migrate('migrationData')} />
-                    <MigrationSteps
-                        disabled
-                        icon={<Icon.Group><Icon name='users' /><Icon corner name='delete' /> </Icon.Group>}
-                        title={t('admin.modules.pes.migration.users_deactivation.title')}
-                        description={t('admin.modules.pes.migration.users_deactivation.title')}
-                        status={migration ? (migration.migrationUsersDeactivation || 'NOT_DONE') : 'NOT_DONE'}
-                        onClick={this.migrate} />
                 </Segment>
             </Page>
         )

@@ -153,7 +153,7 @@ public class MigrationService {
                 // TODO Fetch certificates info from the LDAP
                 // TODO Send users to Ozwillo
             }
-            userMigrations.forEach(userMigration -> LOGGER.error(userMigration.toString()));
+            userMigrations.forEach(userMigration -> LOGGER.debug(userMigration.toString()));
         }
 
         localAuthority.getMigration().setMigrationUsers(MigrationStatus.DONE);
@@ -303,7 +303,6 @@ public class MigrationService {
     private List<ActeMigration> toActesMigration(ResultSet resultSet, MigrationLog migrationLog) {
         List<ActeMigration> acteMigrations = new ArrayList<>();
         log(migrationLog, "Extracting the Acte data from the request result", false);
-        // TODO: Improve with an automated parsing resultSet->pojo
         try {
             int i = 0;
             while (resultSet.next()) {

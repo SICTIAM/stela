@@ -163,22 +163,17 @@ public class LocalAuthorityRestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthUuid);
-        // TODO : A websocket would be nice
+        // TODO : Add the migrationUsersDeactivation
         if ("migrationUsers".equals(migrationType)) {
             if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationUsers().equals(MigrationStatus.NOT_DONE)) {
-                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
             }
             CompletableFuture.runAsync(() -> migrationService.migrateStela2Users(localAuthority, siren, email));
         } else if ("migrationData".equals(migrationType)) {
             if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationData().equals(MigrationStatus.NOT_DONE)) {
-                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
             }
             CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, email, year));
-        } else if ("migrationUsersDeactivation".equals(migrationType)) {
-            if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationData().equals(MigrationStatus.NOT_DONE)) {
-                return new ResponseEntity(HttpStatus.BAD_REQUEST);
-            }
-            //CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, email, year));
         } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }

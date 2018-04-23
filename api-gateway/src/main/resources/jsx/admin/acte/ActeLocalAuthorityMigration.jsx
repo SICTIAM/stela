@@ -6,6 +6,7 @@ import { Segment, Icon, Input } from 'semantic-ui-react'
 import { Page, Field, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { monthBeforeArchiving } from '../../_util/constants'
 
 class ActeLocalAuthorityMigration extends Component {
     static contextTypes = {
@@ -31,13 +32,12 @@ class ActeLocalAuthorityMigration extends Component {
         form: {
             email: '',
             siren: '',
-            month: '6'
+            month: monthBeforeArchiving
         },
         status: 'init'
     }
     componentDidMount() {
-        const uuid = this.props.uuid
-        const url = uuid ? '/api/acte/localAuthority' + uuid : '/api/acte/localAuthority/current'
+        const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}`
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
@@ -130,13 +130,6 @@ class ActeLocalAuthorityMigration extends Component {
                         description={t('admin.modules.acte.migration.acte.description')}
                         status={migration ? (migration.migrationData || 'NOT_DONE') : 'NOT_DONE'}
                         onClick={() => this.migrate('migrationData')} />
-                    <MigrationSteps
-                        disabled
-                        icon={<Icon.Group><Icon name='users' /><Icon corner name='delete' /> </Icon.Group>}
-                        title={t('admin.modules.acte.migration.users_deactivation.title')}
-                        description={t('admin.modules.acte.migration.users_deactivation.title')}
-                        status={migration ? (migration.migrationUsersDeactivation || 'NOT_DONE') : 'NOT_DONE'}
-                        onClick={this.migrate} />
                 </Segment>
             </Page>
         )
