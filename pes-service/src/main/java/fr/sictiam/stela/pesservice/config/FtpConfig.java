@@ -31,8 +31,6 @@ public class FtpConfig {
         sf.setUsername(username);
         sf.setPassword(password);
         sf.setClientMode(FTPClient.PASSIVE_LOCAL_DATA_CONNECTION_MODE);
-        sf.setFileType(FTPClient.BINARY_FILE_TYPE);
-        sf.setDataTimeout(60000);
         return sf;
     }
 }

@@ -67,6 +67,7 @@ public class ReceiverTask {
                 }
             }
         }
+        ftpSession.close();
     }
 
     public void readACK(InputStream inputStream, String ackName)
