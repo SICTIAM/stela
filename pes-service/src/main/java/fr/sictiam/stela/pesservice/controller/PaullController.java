@@ -103,7 +103,7 @@ public class PaullController {
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         GenericAccount genericAccount = emailAuth(userid, password);
-
+        siren = StringUtils.removeStart(siren, "sys");
         HttpStatus status = HttpStatus.OK;
         Map<String, Object> data = new HashMap<>();
 
@@ -159,7 +159,7 @@ public class PaullController {
 
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
-
+        siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
@@ -208,7 +208,7 @@ public class PaullController {
 
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
-
+        siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
@@ -230,7 +230,7 @@ public class PaullController {
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;
-
+        siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
@@ -250,7 +250,7 @@ public class PaullController {
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;
-
+        siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
