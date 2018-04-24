@@ -276,6 +276,7 @@ public class PaullController {
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;
+        siren = StringUtils.removeStart(siren, "sys");
 
         GenericAccount genericAccount = emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
