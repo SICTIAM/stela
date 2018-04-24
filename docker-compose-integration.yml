@@ -71,7 +71,8 @@ services:
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
     volumes:
-       - ./../stela-config/certificates:/certificates
+     - ./../stela-config/certificates:/certificates
+     - ./../stela-config/ssh-keys:/ssh-keys
   pes-service:
     image: forge-registry.sictiam.fr/internet/stela-poc/pes-service
     container_name: pes-service
