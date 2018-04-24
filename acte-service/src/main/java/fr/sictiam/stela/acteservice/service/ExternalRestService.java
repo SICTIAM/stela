@@ -42,7 +42,7 @@ public class ExternalRestService {
 
     public JsonNode getProfiles(String uuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
-        Mono<String> profiles = webClient.get().uri("/api/admin/local-authority/{uuid}/profiles", uuid).retrieve()
+        Mono<String> profiles = webClient.get().uri("/api/admin/profile/local-authority/{uuid}", uuid).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         response -> Mono.error(new RuntimeException("Profiles not Found")))
                 .bodyToMono(String.class);

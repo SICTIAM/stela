@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -95,5 +96,13 @@ public class ProfileController {
     @GetMapping("/modules")
     public Set<Module> getProfileModules(@RequestAttribute("STELA-Current-Profile-UUID") String profile) {
         return profileService.getByUuid(profile).getLocalAuthority().getActivatedModules();
+    }
+
+    @GetMapping("/local-authority/{uuid}")
+    @JsonView(Views.ProfileView.class)
+    public ResponseEntity<List<Profile>> getProfiles(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid) {
+        return new ResponseEntity<>(profileService.getProfilesByLocalAuthorityUuid(uuid), HttpStatus.OK);
     }
 }

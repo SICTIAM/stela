@@ -252,12 +252,4 @@ public class LocalAuthorityController {
         localAuthorityService.removeModule(uuid, module);
         return new ResponseEntity(HttpStatus.OK);
     }
-
-    @GetMapping("/{uuid}/profiles")
-    @JsonView(Views.ProfileView.class)
-    public ResponseEntity<List<Profile>> getProfiles(
-            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @PathVariable String uuid) {
-        return new ResponseEntity<>(profileService.getProfilesByLocalAuthorityUuid(uuid), HttpStatus.OK);
-    }
 }
