@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.filter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.acteservice.model.Right;
+import fr.sictiam.stela.acteservice.model.util.AuthorizationContextClasses;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        AuthorizationContextClasses acr = AuthorizationContextClasses.getByValue(request.getHeader("ACR"));
         JsonNode token = getToken(request);
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
@@ -45,6 +47,7 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Profile-UUID", token.get("uuid").asText());
             request.setAttribute("STELA-Current-Local-Authority-UUID",
                     token.get("localAuthority").get("uuid").asText());
+            request.setAttribute("ACR", acr);
         }
 
         filterChain.doFilter(request, response);

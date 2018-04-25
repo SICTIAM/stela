@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { render } from 'react-dom';
 import { I18nextProvider } from 'react-i18next'
 import { Router, Route, Switch, Redirect } from 'react-router-dom'
@@ -137,17 +137,21 @@ const PublicRoute = ({ component: Component, ...rest }) => (
         </div>
     } />
 )
-const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowedRights, ...rest }, { isLoggedIn }) => (
+const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowedRights, certificate, certRequired = false, ...rest }, { isLoggedIn }) => (
     <Route {...rest} render={(props) =>
         <div>
             <TopBar admin={!!admin} />
             <div className='wrapperContainer'>
                 <Menu />
                 <Container className='mainContainer'>
-                    <AlertMessage {...props} />
                     {isLoggedIn
                         ? rightsResolver(userRights, allowedRights)
-                            ? <Component {...props} {...props.match.params} />
+                            ? certificate || !certRequired
+                                ? <Fragment>
+                                    <AlertMessage {...props} />
+                                    <Component {...props} {...props.match.params} />
+                                </Fragment>
+                                : <ErrorPage error={'certificate_required'} />
                             : <ErrorPage error={403} />
                         : <ErrorPage error={401} />}
                 </Container>
@@ -161,7 +165,8 @@ AuthRoute.contextTypes = {
 
 class AppRoute extends Component {
     state = {
-        userRights: []
+        userRights: [],
+        certificate: false
     }
     componentDidMount() {
         fetchWithAuthzHandling({ url: '/api/admin/profile' })
@@ -172,9 +177,12 @@ class AppRoute extends Component {
                 if (profile.agent.admin) userRights.push('ADMIN')
                 this.setState({ userRights })
             })
+        fetchWithAuthzHandling({ url: '/api/api-gateway/isAuthenticatedWithCertificate' })
+            .then(response => response.json())
+            .then(certificate => this.setState({ certificate }))
     }
     render() {
-        const { userRights } = this.state
+        const params = this.state
         return (
             <Switch>
                 <PublicRoute exact path='/' component={Home} />
@@ -186,54 +194,54 @@ class AppRoute extends Component {
                 <Route exact path='/actes'>
                     <Redirect to='/actes/liste' />
                 </Route>
-                <AuthRoute path='/actes/liste' userRights={userRights} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={ActeList} menu={MenuBar} />
-                <AuthRoute path='/actes/brouillons/:uuid' userRights={userRights} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} />
-                <AuthRoute path='/actes/brouillons' userRights={userRights} allowedRights={['ACTES_DEPOSIT']} component={DraftList} menu={MenuBar} />
-                <AuthRoute path='/actes/nouveau' userRights={userRights} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} />
-                <AuthRoute path='/actes/:uuid' userRights={userRights} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
+                <AuthRoute path='/actes/liste' {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={ActeList} menu={MenuBar} />
+                <AuthRoute path='/actes/brouillons/:uuid' {...params} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} certRequired />
+                <AuthRoute path='/actes/brouillons' {...params} allowedRights={['ACTES_DEPOSIT']} component={DraftList} menu={MenuBar} />
+                <AuthRoute path='/actes/nouveau' {...params} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} certRequired />
+                <AuthRoute path='/actes/:uuid' {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
 
                 <Route exact path='/pes'>
                     <Redirect to="/pes/liste" />
                 </Route>
-                <AuthRoute path='/pes/retour/liste' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesRetourList} menu={MenuBar} />
-                <AuthRoute path='/pes/liste' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
-                <AuthRoute path='/pes/nouveau' userRights={userRights} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} />
-                <AuthRoute path='/pes/:uuid' userRights={userRights} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
+                <AuthRoute path='/pes/retour/liste' {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesRetourList} menu={MenuBar} />
+                <AuthRoute path='/pes/liste' {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
+                <AuthRoute path='/pes/nouveau' {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
+                <AuthRoute path='/pes/:uuid' {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
 
                 <Route exact path='/admin'>
                     <Redirect to="/admin/ma-collectivite" />
                 </Route>
-                <AuthRoute path='/admin/creation-generique' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccountCreation} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/creation-generique' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccountCreation} menu={AdminMenuBar} admin={true} />
 
-                <AuthRoute path='/admin/parametrage-instance' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminInstance} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/agents/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/agents' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/parametrage-instance' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminInstance} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/agents/:uuid' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/agents' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />
 
-                <AuthRoute path='/admin/ma-collectivite/agent/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite/actes/migration' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite/pes/migration' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/ma-collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/agent/:uuid' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/groupes/:uuid' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/groupes' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/actes/migration' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/actes' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/pes/migration' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite/pes' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/ma-collectivite' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
 
-                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:uuid/actes/migration' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:uuid/actes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:uuid/pes/migration' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:uuid/pes' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite/:uuid' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/collectivite' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/agent/:uuid' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes/:uuid' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:localAuthorityUuid/groupes' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/actes/migration' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/actes' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/pes/migration' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid/pes' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite/:uuid' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/collectivite' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityList} menu={AdminMenuBar} admin={true} />
 
-                <AuthRoute path='/admin/actes/parametrage-module' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path='/admin/pes/parametrage-module' userRights={userRights} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/actes/parametrage-module' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path='/admin/pes/parametrage-module' {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
 
                 <PublicRoute path='/admin/*' component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
                 <PublicRoute path='/*' component={() => <ErrorPage error={404} />} menu={MenuBar} />
-            </Switch>
+            </Switch >
         )
     }
 }
