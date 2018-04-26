@@ -126,7 +126,7 @@ class NewActeForm extends Component {
             .then(response => response.json())
             .then(json => {
                 this.loadActe(json, () => {
-                    if (json.nature && this.props.mode !== 'ACTE_BATCH') this.fetchAttachmentTypes()
+                    if (json.nature && json.code && this.props.mode !== 'ACTE_BATCH') this.fetchAttachmentTypes()
                     this.updateGroup()
                     this.validateForm()
                 })

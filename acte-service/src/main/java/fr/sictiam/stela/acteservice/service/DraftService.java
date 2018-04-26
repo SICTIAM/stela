@@ -7,6 +7,7 @@ import fr.sictiam.stela.acteservice.dao.AttachmentTypeRepository;
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.ActeMode;
+import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.Draft;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
@@ -119,7 +120,7 @@ public class DraftService {
         acteDraftRepository.save(draft);
     }
 
-    private Acte getEmptyActe(LocalAuthority currentLocalAuthority) {
+    private Acte getEmptyActe(LocalAuthority currentLocalAuthority, ActeMode mode) {
         Acte acte = new Acte();
         acte.setLocalAuthority(currentLocalAuthority);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
@@ -127,11 +128,16 @@ public class DraftService {
             acte.setPublicWebsite(false);
         if (!currentLocalAuthority.getCanPublishRegistre())
             acte.setPublic(false);
+        if (mode.equals(ActeMode.ACTE_BUDGETAIRE)) acte.setNature(ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS);
         return acte;
     }
 
+    private Acte getEmptyActe(LocalAuthority currentLocalAuthority) {
+        return getEmptyActe(currentLocalAuthority, ActeMode.ACTE);
+    }
+
     public Acte newDraft(LocalAuthority currentLocalAuthority, ActeMode mode) {
-        Acte acte = getEmptyActe(currentLocalAuthority);
+        Acte acte = getEmptyActe(currentLocalAuthority, mode);
         acte.setDraft(new Draft(LocalDateTime.now(), mode));
         return acteRepository.save(acte);
     }
