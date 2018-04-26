@@ -70,7 +70,11 @@ class NewActeForm extends Component {
         fetchWithAuthzHandling({ url: '/api/acte/localAuthority/depositFields' })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ depositFields: json }))
+            .then(depositFields => {
+                const { fields } = this.state
+                if (!this.props.draftUuid && !this.props.uuid && depositFields.publicField) fields.public = true
+                this.setState({ fields, depositFields })
+            })
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)

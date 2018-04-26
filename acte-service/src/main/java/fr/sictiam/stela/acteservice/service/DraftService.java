@@ -124,10 +124,9 @@ public class DraftService {
         Acte acte = new Acte();
         acte.setLocalAuthority(currentLocalAuthority);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-        if (!currentLocalAuthority.getCanPublishWebSite())
-            acte.setPublicWebsite(false);
-        if (!currentLocalAuthority.getCanPublishRegistre())
-            acte.setPublic(false);
+        if (!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
+        if (!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
+        else acte.setPublic(true);
         if (mode.equals(ActeMode.ACTE_BUDGETAIRE)) acte.setNature(ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS);
         return acte;
     }
