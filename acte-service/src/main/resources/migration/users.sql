@@ -13,5 +13,5 @@ groupid = (
 u1.uid IN (
 	SELECT u2.uid
     FROM stela_users u2, stela_groups_users_link gul2
-    WHERE u2.uid = gul2.uid {{groupIds}}
+    WHERE u2.uid = gul2.uid AND ({{groupIds}})
 )

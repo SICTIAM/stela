@@ -131,12 +131,9 @@ public class MigrationService {
         if (groupIds == null || groupIds.isEmpty()) {
             log(migrationLog, "No groupIds for this localAuthority", false);
         } else {
-            StringBuilder sqlGroupids = new StringBuilder();
-            for (String groupId : groupIds) {
-                sqlGroupids.append(" AND gul2.groupid = ").append(groupId);
-            }
+            String sqlGroupIds = groupIds.stream().collect(Collectors.joining(" OR "));
             String proccessedQuery = sql_users
-                    .replaceAll("\\{\\{groupIds}}", sqlGroupids.toString());
+                    .replaceAll("\\{\\{groupIds}}", sqlGroupIds);
             ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
             List<UserMigration> userMigrations = toUsersMigration(resultSet, migrationLog);
             MigrationWrapper migrationWrapper = new MigrationWrapper(userMigrations, "acte",
