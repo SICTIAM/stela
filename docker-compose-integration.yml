@@ -71,20 +71,23 @@ services:
     environment:
      - "SPRING_PROFILES_ACTIVE=integration"
     volumes:
-       - ./../stela-config/certificates:/certificates
+     - ./../stela-config/certificates:/certificates
+     - ./../stela-config/ssh-keys:/ssh-keys
   pes-service:
-      image: forge-registry.sictiam.fr/internet/stela-poc/pes-service
-      container_name: pes-service
-      ports:
-       - "9010:9010"
-      depends_on:
-       - config
-       - discovery
-       - postgresql
-       - rabbitmq
-       - clamav
-      environment:
-       - "SPRING_PROFILES_ACTIVE=integration"  
+    image: forge-registry.sictiam.fr/internet/stela-poc/pes-service
+    container_name: pes-service
+    ports:
+     - "9010:9010"
+    depends_on:
+     - config
+     - discovery
+     - postgresql
+     - rabbitmq
+     - clamav
+    environment:
+     - "SPRING_PROFILES_ACTIVE=integration"
+    volumes:
+     - ./../stela-config/ssh-keys:/ssh-keys
   convocation-service:
     image: forge-registry.sictiam.fr/internet/stela-poc/convocation-service
     container_name: convocation-service

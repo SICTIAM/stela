@@ -5,9 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.AgentConnection;
+import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.UI.AgentResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.model.UserMigration;
 import fr.sictiam.stela.admin.service.AgentConnectionService;
 import fr.sictiam.stela.admin.service.AgentService;
 import io.jsonwebtoken.Jwts;
@@ -123,5 +125,10 @@ public class AgentController {
     @JsonView(Views.AgentView.class)
     public Set<Profile> getCurrentProfiles(@RequestAttribute("STELA-Sub") String sub) {
         return agentService.findBySub(sub).get().getProfiles();
+    }
+
+    @PostMapping("/migration/users/{localAuthorityUuid}")
+    public void usersMigration(@RequestBody MigrationWrapper migrationWrapper, @PathVariable String localAuthorityUuid) {
+        agentService.migrateUsers(migrationWrapper, localAuthorityUuid);
     }
 }

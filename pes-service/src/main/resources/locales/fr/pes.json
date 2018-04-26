@@ -77,7 +77,7 @@
           "sirens": "Liste des SIRENs autorisés",
           "genericProfileUuid": "Agent garant",
           "no_siren": "Aucun SIREN",
-          "sesile":  {
+          "sesile": {
             "subscription": "Abonnement à Sesile",
             "secret": "Secret",
             "token": "Token"
@@ -89,6 +89,26 @@
           "unavailabilityHelios": "Couper l'accès Helios",
           "alertMessageDisplayed": "Affichage du message d'alerte",
           "alertMessage": "Message d'alerte"
+        },
+        "migration": {
+          "title": "Migration du module Hélios",
+          "additional_options": {
+            "title": "Options de migration supplémentaires",
+            "email": "Recevoir un rapport d'import par mail",
+            "siren": "Récupérer les PES lié à un autre SIREN"
+          },
+          "users_migration": {
+            "title": "Migration des utilisateurs du module",
+            "description": "Récupération des utilisateurs du module PES de STELA 2"
+          },
+          "pes": {
+            "title": "Migration des PES",
+            "description": "Récupération des PES de STELA 2"
+          },
+          "users_deactivation": {
+            "title": "Désactivation des utilisateurs du module",
+            "description": "Désactivation des utilisateurs du module PES de STELA 2"
+          }
         }
       }
     }

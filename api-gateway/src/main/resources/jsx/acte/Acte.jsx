@@ -10,7 +10,7 @@ import Defere from './Defere'
 import LettreObservation from './LettreObservation'
 import DemandePiecesComplementaires from './DemandePiecesComplementaires'
 import DraggablePosition from '../_components/DraggablePosition'
-import { Field, Page } from '../_components/UI'
+import { Field, Page, FieldValue } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
@@ -75,7 +75,7 @@ class Acte extends Component {
         const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
-                <span className='fieldValue'><a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a></span>
+                <FieldValue><a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a></FieldValue>
             </List.Item>
         )
         const stampPosition = (
@@ -151,23 +151,25 @@ class Acte extends Component {
                             </div>
 
                             <Field htmlFor="number" label={t('acte.fields.number')}>
-                                <span className='fieldValue' id="number">{acte.number}</span>
+                                <FieldValue id="number">{acte.number}</FieldValue>
                             </Field>
                             <Field htmlFor="decision" label={t('acte.fields.decision')}>
-                                <span className='fieldValue' id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</span>
+                                <FieldValue id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</FieldValue>
                             </Field>
                             <Field htmlFor="nature" label={t('acte.fields.nature')}>
-                                <span className='fieldValue' id="nature">{t(`acte.nature.${acte.nature}`)}</span>
+                                <FieldValue id="nature">{t(`acte.nature.${acte.nature}`)}</FieldValue>
                             </Field>
                             <Field htmlFor="code" label={t('acte.fields.code')}>
-                                <span className='fieldValue' id="code">{acte.codeLabel} ({acte.code})</span>
+                                <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
                             </Field>
                             <Grid>
                                 <Grid.Column width={4}>
                                     <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
                                 </Grid.Column>
                                 <Grid.Column width={12}>
-                                    <span className='fieldValue' id="acteAttachment"><a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a></span>
+                                    <FieldValue id="acteAttachment">
+                                        <a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a>
+                                    </FieldValue>
                                 </Grid.Column>
                             </Grid>
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>

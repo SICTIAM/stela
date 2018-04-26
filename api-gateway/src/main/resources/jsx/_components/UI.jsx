@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Form, Grid, Card, Icon, List, Header } from 'semantic-ui-react'
+import { Form, Grid, Card, Icon, List, Header, Step } from 'semantic-ui-react'
 
 import { bytesToSize } from '../_util/utils'
 
@@ -23,6 +23,10 @@ const Field = ({ htmlFor, label, children }) =>
         <Grid.Column width={4}><label style={{ verticalAlign: 'middle' }} htmlFor={htmlFor}>{label}</label></Grid.Column>
         <Grid.Column width={12}>{children}</Grid.Column>
     </Grid>
+
+const FieldValue = ({ id, children }) => (
+    <span className='fieldValue' id={id}>{children}</span>
+)
 
 const File = ({ attachment, onDelete, extraContent, src }) =>
     <Card onClick={src ? () => window.open(src, '_blank') : undefined}>
@@ -78,4 +82,56 @@ InputTextControlled.contextTypes = {
     t: PropTypes.func
 }
 
-module.exports = { FormField, FormFieldInline, Field, File, InputFile, ListItem, Page, InputTextControlled }
+const MigrationSteps = ({ icon, title, description, status, onClick, disabled = false }, { t }) => (
+    <Step.Group fluid>
+        <Step disabled={disabled} style={{ width: '50%', justifyContent: 'flex-start' }}>
+            {icon || <Icon name='tag' />}
+            <Step.Content>
+                <Step.Title>{title}</Step.Title>
+                {description &&
+                    <Step.Description>{description}</Step.Description>}
+            </Step.Content>
+        </Step>
+        {status === 'NOT_DONE' &&
+            <Step disabled={disabled} link onClick={onClick} style={{ backgroundColor: '#21ba45', color: 'white' }}>
+                <Icon name='download' />
+                <Step.Content>
+                    <Step.Title>{t('api-gateway:migration.start')}</Step.Title>
+                </Step.Content>
+            </Step>
+        }
+        {status === 'ONGOING' &&
+            <Step disabled={disabled} active>
+                <Icon loading name='refresh' />
+                <Step.Content>
+                    <Step.Title>{t('api-gateway:migration.ongoing')}</Step.Title>
+                </Step.Content>
+            </Step>
+        }
+        {status === 'DONE' &&
+            <Step disabled={disabled} style={{ color: '#21ba45', background: '#f3f4f5' }}>
+                <Icon name='check' />
+                <Step.Content>
+                    <Step.Title style={{ color: '#21ba45' }}>{t('api-gateway:migration.finished')}</Step.Title>
+                </Step.Content>
+            </Step>
+        }
+    </Step.Group >
+)
+
+MigrationSteps.contextTypes = {
+    t: PropTypes.func
+}
+
+module.exports = {
+    FormField,
+    FormFieldInline,
+    Field,
+    FieldValue,
+    File,
+    InputFile,
+    ListItem,
+    Page,
+    InputTextControlled,
+    MigrationSteps
+}

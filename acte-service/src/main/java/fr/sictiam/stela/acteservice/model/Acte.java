@@ -27,21 +27,21 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @NotNull(groups = { RestValidation.class })
-    @Size(max = 15, groups = { RestValidation.class })
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
+    @Size(max = 15, groups = {RestValidation.class})
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", groups = {RestValidation.class})
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     private LocalDate decision;
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     private ActeNature nature;
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     private String code;
     private String codeLabel;
     @Column(length = 512)
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     @Size(max = 500)
     private String objet;
     private boolean isPublic;
@@ -71,6 +71,7 @@ public class Acte {
             + " WHEN nature = '4' THEN 'BF' "
             + " WHEN nature = '5' THEN 'AU' ELSE '' END)  from local_authority la where la.uuid=local_authority_uuid)")
     private String miatId;
+    private boolean imported;
 
     public Acte() {
     }
@@ -84,6 +85,26 @@ public class Acte {
         this.objet = objet;
         this.isPublic = isPublic;
         this.isPublicWebsite = isPublicWebsite;
+    }
+
+    public Acte(String number, LocalDateTime creation, LocalDate decision, ActeNature nature, String code,
+            String codeLabel, String objet, boolean isPublic, boolean isPublicWebsite, Attachment acteAttachment,
+            List<Attachment> annexes, SortedSet<ActeHistory> acteHistories, LocalAuthority localAuthority,
+            boolean imported) {
+        this.number = number;
+        this.creation = creation;
+        this.decision = decision;
+        this.nature = nature;
+        this.code = code;
+        this.codeLabel = codeLabel;
+        this.objet = objet;
+        this.isPublic = isPublic;
+        this.isPublicWebsite = isPublicWebsite;
+        this.acteAttachment = acteAttachment;
+        this.annexes = annexes;
+        this.acteHistories = acteHistories;
+        this.localAuthority = localAuthority;
+        this.imported = imported;
     }
 
     public String getUuid() {
@@ -216,6 +237,14 @@ public class Acte {
 
     public void setGroupUuid(String groupUuid) {
         this.groupUuid = groupUuid;
+    }
+
+    public boolean isImported() {
+        return imported;
+    }
+
+    public void setImported(boolean imported) {
+        this.imported = imported;
     }
 
     public boolean empty() {

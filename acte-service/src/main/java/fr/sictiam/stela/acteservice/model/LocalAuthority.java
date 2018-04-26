@@ -1,5 +1,7 @@
 package fr.sictiam.stela.acteservice.model;
 
+import fr.sictiam.stela.acteservice.model.migration.Migration;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -28,6 +30,7 @@ public class LocalAuthority {
     private Boolean active;
     // Default deposit profile for external software
     private String genericProfileUuid;
+    private Migration migration;
 
     @Embedded
     private StampPosition stampPosition;
@@ -198,6 +201,14 @@ public class LocalAuthority {
 
     public void setGenericProfileUuid(String genericProfileUuid) {
         this.genericProfileUuid = genericProfileUuid;
+    }
+
+    public Migration getMigration() {
+        return migration;
+    }
+
+    public void setMigration(Migration migration) {
+        this.migration = migration;
     }
 
     @Override

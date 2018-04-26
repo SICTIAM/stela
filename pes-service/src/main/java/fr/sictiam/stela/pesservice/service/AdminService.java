@@ -5,6 +5,7 @@ import fr.sictiam.stela.pesservice.model.Admin;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AdminService {
@@ -24,7 +25,13 @@ public class AdminService {
     }
 
     public Admin getAdmin() {
-        return adminRepository.findAll().get(0);
+        List<Admin> admins = adminRepository.findAll();
+        if (admins.size() == 0) {
+            create(new Admin(true, LocalDateTime.now(), LocalDateTime.now(), false, ""));
+            return adminRepository.findAll().get(0);
+        } else {
+            return admins.get(0);
+        }
     }
 
     public boolean isHeliosAvailable() {

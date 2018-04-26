@@ -47,11 +47,11 @@
       "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise"
     },
     "signature": {
-       "NO_CERTIFICATE_CHAIN_FOUND": "Aucun certificat valide",
-       "OUT_OF_BOUNDS_NO_POE": "La date de signature est invalide pour ce certificat",
-       "REVOKED_NO_POE ": "Le certificat a été revoqué",
-       "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correct",
-       "CHAIN_CONSTRAINTS_FAILURE ": "La signature est invalide"
+      "NO_CERTIFICATE_CHAIN_FOUND": "Aucun certificat valide",
+      "OUT_OF_BOUNDS_NO_POE": "La date de signature est invalide pour ce certificat",
+      "REVOKED_NO_POE ": "Le certificat a été revoqué",
+      "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correct",
+      "CHAIN_CONSTRAINTS_FAILURE ": "La signature est invalide"
     },
     "nature": {
       "DELIBERATIONS": "Délibérations",
@@ -178,6 +178,27 @@
           "unavailabilityMiat": "Couper l'accès MIAT",
           "alertMessageDisplayed": "Affichage du message d'alerte",
           "alertMessage": "Message d'alerte"
+        },
+        "migration": {
+          "title": "Migration du module Actes",
+          "additional_options": {
+            "title": "Options de migration supplémentaires",
+            "email": "Recevoir un rapport d'import par mail",
+            "siren": "Récupérer les actes lié à un autre SIREN",
+            "month": "Nombre de mois d'actes à récupérer"
+          },
+          "users_migration": {
+            "title": "Migration des utilisateurs du module",
+            "description": "Récupération des utilisateurs du module Acte de STELA 2"
+          },
+          "acte": {
+            "title": "Migration des actes",
+            "description": "Récupération des actes de STELA 2"
+          },
+          "users_deactivation": {
+            "title": "Désactivation des utilisateurs du module",
+            "description": "Désactivation des utilisateurs du module Acte de STELA 2"
+          }
         }
       }
     }

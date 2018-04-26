@@ -67,12 +67,41 @@ public class ActeHistory implements Comparable<ActeHistory> {
         this.flux = flux;
     }
 
+    public ActeHistory(String acteUuid, StatusType status, LocalDateTime localDateTime, String message, Flux flux) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = localDateTime;
+        this.message = message;
+        this.flux = flux;
+    }
+
     public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
         this.acteUuid = acteUuid;
         this.status = status;
         this.date = date;
         this.file = file;
         this.fileName = fileName;
+    }
+
+    public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+            String message) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = date;
+        this.file = file;
+        this.fileName = fileName;
+        this.message = message;
+    }
+
+    public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+            String message, Flux flux) {
+        this.acteUuid = acteUuid;
+        this.status = status;
+        this.date = date;
+        this.file = file;
+        this.fileName = fileName;
+        this.message = message;
+        this.flux = flux;
     }
 
     public ActeHistory(String acteUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,

@@ -4,7 +4,10 @@ import fr.sictiam.stela.admin.dao.AgentRepository;
 import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.LocalAuthority;
+import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UserMigration;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,12 +37,14 @@ public class AgentService {
     private final AgentRepository agentRepository;
     private final ProfileRepository profileRepository;
     private final LocalAuthorityService localAuthorityService;
+    private final WorkGroupService workGroupService;
 
     public AgentService(AgentRepository agentRepository, ProfileRepository profileRepository,
-            LocalAuthorityService localAuthorityService) {
+            LocalAuthorityService localAuthorityService, WorkGroupService workGroupService) {
         this.agentRepository = agentRepository;
         this.profileRepository = profileRepository;
         this.localAuthorityService = localAuthorityService;
+        this.workGroupService = workGroupService;
     }
 
     private Agent createIfNotExists(Agent agent) {
@@ -81,6 +86,47 @@ public class AgentService {
             return agentFetched.getProfiles().stream()
                     .filter(profile -> profile.getLocalAuthority().getUuid().equals(localAuthority.getUuid()))
                     .findFirst().get();
+        }
+    }
+
+    public void migrateUsers(MigrationWrapper migrationWrapper, String uuid) {
+        WorkGroup workGroup = new WorkGroup(localAuthorityService.getByUuid(uuid),
+                migrationWrapper.getModuleName() + "-migration");
+        workGroup.setRights(migrationWrapper.getRights());
+        workGroup = workGroupService.create(workGroup);
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
+
+        for (UserMigration userMigration : migrationWrapper.getUserMigrations()) {
+            Optional<Agent> agentOpt = agentRepository.findByEmail(userMigration.getEmail());
+            Agent agent;
+            if (agentOpt.isPresent()) agent = agentOpt.get();
+            else {
+                agent = new Agent(userMigration.getEmail());
+                agent.setAdmin(false);
+            }
+            agent.setImported(true);
+
+            Profile profile = null;
+            if (agent.getUuid() != null) {
+                Optional<Profile> profileOpt = profileRepository.findByLocalAuthority_UuidAndAgent_Uuid(
+                        localAuthority.getUuid(), agent.getUuid());
+                if (profileOpt.isPresent()) profile = profileOpt.get();
+            }
+            if (profile == null) {
+                profile = new Profile(localAuthority, agent, agent.isAdmin());
+                agent.getProfiles().add(profile);
+            }
+            agentRepository.save(agent);
+            profile = profileRepository.save(profile);
+
+            // FIXME: profiles are not realy added to the group
+            workGroup.getProfiles().add(profile);
+            workGroup = workGroupService.update(workGroup);
+            profile.getGroups().add(workGroup);
+            profile = profileRepository.save(profile);
+
+            localAuthority.getProfiles().add(profile);
+            localAuthorityService.createOrUpdate(localAuthority);
         }
     }
 

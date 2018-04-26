@@ -6,8 +6,8 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,8 +15,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertThat;
 
 public class JsonViewTest {
@@ -52,7 +52,7 @@ public class JsonViewTest {
         assertThat(localAuthorityRead.getGroups(), hasSize(1));
         assertThat(localAuthorityRead.getGroups().stream().findFirst().get().getProfiles(), hasSize(1));
         assertThat(localAuthorityRead.getProfiles(), hasSize(1));
-        assertThat(localAuthorityRead.getProfiles().stream().findFirst().get().getGroups(), nullValue());
+        assertThat(localAuthorityRead.getProfiles().stream().findFirst().get().getGroups(), empty());
     }
 
 }

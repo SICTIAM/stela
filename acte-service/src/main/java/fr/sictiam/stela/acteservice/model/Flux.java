@@ -12,7 +12,8 @@ public enum Flux {
     AR_LETTRE_OBSERVATION("4", "2"),
     REFUS_EXPLICITE_LETTRE_OBSERVATION("4", "3"),
     REPONSE_LETTRE_OBSEVATION("4", "4"),
-    ANNULATION_TRANSMISSION("6", "1");
+    ANNULATION_TRANSMISSION("6", "1"),
+    AR_ANNULATION_TRANSMISSION("6", "2");
 
     private String transactionNumber;
     private String fluxNumber;

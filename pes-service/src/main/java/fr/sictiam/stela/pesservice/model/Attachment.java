@@ -37,6 +37,13 @@ public class Attachment {
         this.date = LocalDateTime.now();
     }
 
+    public Attachment(byte[] file, String filename, long size, LocalDateTime date) {
+        this.file = file;
+        this.filename = filename;
+        this.size = size;
+        this.date = date;
+    }
+
     public String getUuid() {
         return uuid;
     }

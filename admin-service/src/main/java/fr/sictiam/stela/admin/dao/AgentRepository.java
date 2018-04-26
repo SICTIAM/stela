@@ -11,6 +11,8 @@ public interface AgentRepository extends JpaRepository<Agent, String> {
 
     Optional<Agent> findByUuid(String uuid);
 
+    Optional<Agent> findByEmail(String email);
+
     @Query("SELECT COUNT (a.uuid) FROM Agent a")
     Long countAll();
 }

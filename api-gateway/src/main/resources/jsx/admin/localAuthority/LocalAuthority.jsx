@@ -7,7 +7,7 @@ import { Segment, List, Button, Icon, Confirm, Grid } from 'semantic-ui-react'
 import StelaTable from '../../_components/StelaTable'
 import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
-import { Field, ListItem, Page } from '../../_components/UI'
+import { Field, FieldValue, ListItem, Page } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
 class LocalAuthority extends Component {
@@ -40,7 +40,7 @@ class LocalAuthority extends Component {
             .then(response => response.json())
             .then(json => {
                 //flaten agent properties for the table component
-                json.agents = json.profiles.map( profile => profile.agent);;
+                json.agents = json.profiles.map(profile => profile.agent)
                 this.setState({ fields: json })
             })
             .catch(response => {
@@ -104,6 +104,7 @@ class LocalAuthority extends Component {
             const isActivatedUrl = this.props.uuid
                 ? `/admin/collectivite/${this.state.fields.uuid}/${moduleName.toLowerCase()}`
                 : `/admin/ma-collectivite/${moduleName.toLowerCase()}`
+            const migrationUrl = isActivatedUrl + '/migration'
             return (
                 <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='setting' iconColor={isActivated ? 'green' : 'red'}>
                     {isActivated &&
@@ -119,6 +120,11 @@ class LocalAuthority extends Component {
                     {isActivated &&
                         <List.Content floated='right'>
                             <Link to={isActivatedUrl} className='ui button compact basic primary'>{t('form.configure')}</Link>
+                        </List.Content>
+                    }
+                    {isActivated &&
+                        <List.Content floated='right'>
+                            <Link to={migrationUrl} className='ui button compact basic primary'>{t('migration.title')}</Link>
                         </List.Content>
                     }
                 </ListItem>
@@ -140,10 +146,10 @@ class LocalAuthority extends Component {
                         <Segment style={{ height: '100%' }}>
                             <h2>{t('admin.local_authority.general_informations')}</h2>
                             <Field htmlFor="uuid" label={t('local_authority.uuid')}>
-                                <span id="uuid">{this.state.fields.uuid}</span>
+                                <FieldValue id="uuid">{this.state.fields.uuid}</FieldValue>
                             </Field>
                             <Field htmlFor="siren" label={t('local_authority.siren')}>
-                                <span id="siren">{this.state.fields.siren}</span>
+                                <FieldValue id="siren">{this.state.fields.siren}</FieldValue>
                             </Field>
                         </Segment>
                     </Grid.Column>

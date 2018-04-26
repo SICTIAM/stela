@@ -27,8 +27,8 @@ public class PesAller {
     private LocalDateTime creation;
 
     @Column(length = 512)
-    @NotNull(groups = { RestValidation.class })
-    @Size(max = 500, groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
+    @Size(max = 500, groups = {RestValidation.class})
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -43,7 +43,7 @@ public class PesAller {
 
     private String profileUuid;
 
-    @Size(max = 250, groups = { RestValidation.class })
+    @Size(max = 250, groups = {RestValidation.class})
     private String comment;
 
     private String fileType;
@@ -64,7 +64,30 @@ public class PesAller {
 
     private Integer serviceOrganisationNumber;
 
+    private boolean imported;
+
     public PesAller() {
+    }
+
+    public PesAller(LocalDateTime creation, String objet, Attachment attachment, SortedSet<PesHistory> pesHistories, LocalAuthority localAuthority, String profileUuid, String comment, String fileType,
+            String colCode, String postId, String budCode, String fileName, boolean pj, boolean signed,
+            Integer sesileDocumentId, boolean imported) {
+        this.creation = creation;
+        this.objet = objet;
+        this.attachment = attachment;
+        this.pesHistories = pesHistories;
+        this.localAuthority = localAuthority;
+        this.profileUuid = profileUuid;
+        this.comment = comment;
+        this.fileType = fileType;
+        this.colCode = colCode;
+        this.postId = postId;
+        this.budCode = budCode;
+        this.fileName = fileName;
+        this.pj = pj;
+        this.signed = signed;
+        this.sesileDocumentId = sesileDocumentId;
+        this.imported = imported;
     }
 
     public String getUuid() {
@@ -213,5 +236,13 @@ public class PesAller {
 
     public void setSesileDocumentId(Integer sesileDocumentId) {
         this.sesileDocumentId = sesileDocumentId;
+    }
+
+    public boolean isImported() {
+        return imported;
+    }
+
+    public void setImported(boolean imported) {
+        this.imported = imported;
     }
 }

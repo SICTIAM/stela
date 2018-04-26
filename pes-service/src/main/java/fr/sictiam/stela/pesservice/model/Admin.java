@@ -34,6 +34,15 @@ public class Admin {
 
     }
 
+    public Admin(boolean heliosAvailable, LocalDateTime unavailabilityHeliosStartDate,
+            LocalDateTime unavailabilityHeliosEndDate, boolean alertMessageDisplayed, String alertMessage) {
+        this.heliosAvailable = heliosAvailable;
+        this.unavailabilityHeliosStartDate = unavailabilityHeliosStartDate;
+        this.unavailabilityHeliosEndDate = unavailabilityHeliosEndDate;
+        this.alertMessageDisplayed = alertMessageDisplayed;
+        this.alertMessage = alertMessage;
+    }
+
     public Admin(String uuid, @NotNull boolean heliosAvailable, @NotNull LocalDateTime unavailabilityHeliosStartDate,
             @NotNull LocalDateTime unavailabilityHeliosEndDate, boolean alertMessageDisplayed, String alertMessage) {
         this.uuid = uuid;
