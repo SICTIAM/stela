@@ -75,6 +75,22 @@ class PesLocalAuthorityMigration extends Component {
                 })
             })
     }
+    reset = (migrationType) => {
+        const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}/reset`
+        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+            .then(checkStatus)
+            .then(() => {
+                const { fields } = this.state
+                if (fields.migration === null) fields.migration = {}
+                fields.migration[migrationType] = 'NOT_DONE'
+                this.setState({ fields })
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                })
+            })
+    }
     render() {
         const { t } = this.context
         const { migration } = this.state.fields
@@ -114,13 +130,15 @@ class PesLocalAuthorityMigration extends Component {
                         title={t('admin.modules.pes.migration.users_migration.title')}
                         description={t('admin.modules.pes.migration.users_migration.description')}
                         status={migration ? (migration.migrationUsers || 'NOT_DONE') : 'NOT_DONE'}
-                        onClick={() => this.migrate('migrationUsers')} />
+                        onClick={() => this.migrate('migrationUsers')}
+                        reset={() => this.reset('migrationUsers')} />
                     <MigrationSteps
                         icon={<Icon name='database' />}
                         title={t('admin.modules.pes.migration.pes.title')}
                         description={t('admin.modules.pes.migration.pes.description')}
                         status={migration ? (migration.migrationData || 'NOT_DONE') : 'NOT_DONE'}
-                        onClick={() => this.migrate('migrationData')} />
+                        onClick={() => this.migrate('migrationData')}
+                        reset={() => this.reset('migrationData')} />
                 </Segment>
             </Page>
         )

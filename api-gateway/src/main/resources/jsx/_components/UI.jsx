@@ -82,7 +82,7 @@ InputTextControlled.contextTypes = {
     t: PropTypes.func
 }
 
-const MigrationSteps = ({ icon, title, description, status, onClick, disabled = false }, { t }) => (
+const MigrationSteps = ({ icon, title, description, status, onClick, reset, disabled = false }, { t }) => (
     <Step.Group fluid>
         <Step disabled={disabled} style={{ width: '50%', justifyContent: 'flex-start' }}>
             {icon || <Icon name='tag' />}
@@ -116,6 +116,9 @@ const MigrationSteps = ({ icon, title, description, status, onClick, disabled = 
                 </Step.Content>
             </Step>
         }
+        <Step style={{ paddingLeft: 0, paddingRight: 0 }} link onClick={() => reset()}>
+            <Icon name='repeat' style={{ margin: 0 }} />
+        </Step>
     </Step.Group >
 )
 

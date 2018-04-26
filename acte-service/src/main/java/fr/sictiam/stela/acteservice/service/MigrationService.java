@@ -284,6 +284,20 @@ public class MigrationService {
         log(migrationLog, i + " Actes migrated", false);
     }
 
+    public void resetMigration(String migrationType, String localAuthUuid) {
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(localAuthUuid).orElse(null);
+        if (localAuthority != null) {
+            if (localAuthority.getMigration() == null) {
+                localAuthority.setMigration(new Migration());
+            } else if ("migrationUsers".equals(migrationType)) {
+                localAuthority.getMigration().setMigrationUsers(MigrationStatus.NOT_DONE);
+            } else if ("migrationData".equals(migrationType)) {
+                localAuthority.getMigration().setMigrationData(MigrationStatus.NOT_DONE);
+            }
+            localAuthorityRepository.save(localAuthority);
+        }
+    }
+
     private List<String> getGroupIdsFromSiren(String siren, MigrationLog migrationLog) {
         log(migrationLog, "Fetching local authority groupIds", false);
         String proccessedQuery = sql_local_authority_groups

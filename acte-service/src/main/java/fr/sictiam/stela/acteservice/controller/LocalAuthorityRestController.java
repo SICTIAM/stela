@@ -179,4 +179,27 @@ public class LocalAuthorityRestController {
         }
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PostMapping("/current/migration/{migrationType}/reset")
+    public ResponseEntity resetMigrationFromCurrent(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String migrationType) {
+        return resetMigration(migrationType, isLocalAuthorityAdmin, currentLocalAuthUuid);
+    }
+
+    @PostMapping("/{uuid}/migration/{migrationType}/reset")
+    public ResponseEntity resetMigrationByUuid(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid, @PathVariable String migrationType) {
+        return resetMigration(migrationType, isLocalAuthorityAdmin, uuid);
+    }
+
+    private ResponseEntity resetMigration(String migrationType, boolean isLocalAuthorityAdmin, String localAuthUuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        migrationService.resetMigration(migrationType, localAuthUuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
