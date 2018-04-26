@@ -611,7 +611,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void testAttachmentType() throws Exception {
         Set<AttachmentType> attachmentTypes = localAuthorityService.getAttachmentTypeAvailable(ActeNature.AUTRES,
-                "639fd48c-93b9-4569-a414-3b372c71e0a1");
+                "639fd48c-93b9-4569-a414-3b372c71e0a1", "1-1-0-0-0");
         assertThat(attachmentTypes, hasSize(2));
         assertThat(attachmentTypes, hasItem(Matchers.<AttachmentType>hasProperty("code", is("99_SE"))));
     }

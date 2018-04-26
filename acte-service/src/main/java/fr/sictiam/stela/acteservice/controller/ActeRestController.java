@@ -102,8 +102,7 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<ActeUI> getByUuid(
-            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+    public ResponseEntity<ActeUI> getByUuid(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
@@ -241,9 +240,8 @@ public class ActeRestController {
     }
 
     @PostMapping("/{uuid}/courrier-simple")
-    public ResponseEntity sendReponseCourrierSimple
-            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-                    @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity sendReponseCourrierSimple(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -290,8 +288,8 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/file/thumbnail")
     public ResponseEntity getActeAttachmentThumbnail(
-            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String uuid) {
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights, HttpServletResponse response,
+            @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -310,12 +308,10 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/file/stamped")
-    public ResponseEntity getStampedActeAttachment
-            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-                    @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-                    HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) Integer
-                    x,
-                    @RequestParam(required = false) Integer y) {
+    public ResponseEntity getStampedActeAttachment(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) Integer x,
+            @RequestParam(required = false) Integer y) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -340,9 +336,8 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
-    public ResponseEntity getFileHistory
-            (@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-                    HttpServletResponse response, @PathVariable String historyUuid) {
+    public ResponseEntity getFileHistory(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            HttpServletResponse response, @PathVariable String historyUuid) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -356,8 +351,7 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/annexes")
     public ResponseEntity<List<Attachment>> getAnnexes(
-            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @PathVariable String uuid) {
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights, @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -421,16 +415,17 @@ public class ActeRestController {
         }
     }
 
-    @GetMapping("/attachment-types/{acteNature}")
+    @GetMapping("/attachment-types/{acteNature}/{materialCode}")
     public ResponseEntity<Set<AttachmentType>> getAttachmentTypesForNature(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @PathVariable ActeNature acteNature) {
+            @PathVariable ActeNature acteNature, @PathVariable String materialCode) {
 
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(localAuthorityService.getAttachmentTypeAvailable(acteNature, currentLocalAuthUuid),
+        return new ResponseEntity<>(
+                localAuthorityService.getAttachmentTypeAvailable(acteNature, currentLocalAuthUuid, materialCode),
                 HttpStatus.OK);
     }
 
