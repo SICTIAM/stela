@@ -1,0 +1,6 @@
+archivesBaseName = 'stela-config-service'
+
+dependencies {
+	compile('org.springframework.cloud:spring-cloud-config-server')
+	testCompile('org.springframework.boot:spring-boot-starter-test') 
+}

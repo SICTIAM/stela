@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions name="MyDefinition" targetNamespace="urn:myTargetNamespace"
+	xmlns:tns="urn:myTns" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:stela="urn:myInputNamespace"
+	xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+	<soap:Header>
+		<authHeader name="authHeader">
+			<SSLCertificatSerial>string</SSLCertificatSerial>
+			<SSLCertificatVendor>string</SSLCertificatVendor>
+		</authHeader>
+	</soap:Header>
+	<types>
+		<xsd:schema xmlns="urn:myInputNamespace" targetNamespace="urn:myInputNamespace">
+
+			<xsd:element name="getConnexionSTELA" type="connexionSTELA_Input" />
+			<xsd:complexType name="connexionSTELA_Input">
+				<xsd:sequence>
+					<xsd:element name="typeRetour" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setConnexionSTELA" type="connexionSTELA_Output" />
+			<xsd:complexType name="connexionSTELA_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonConnexionSTELA" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getConnexionSTELA2" type="connexionSTELA_Input2" />
+			<xsd:complexType name="connexionSTELA_Input2">
+				<xsd:sequence>
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setConnexionSTELA2" type="connexionSTELA_Output2" />
+			<xsd:complexType name="connexionSTELA_Output2">
+				<xsd:sequence>
+					<xsd:element name="jsonConnexionSTELA2" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getGetResultatFormHelios" type="getResultatFormHelios_Input" />
+			<xsd:complexType name="getResultatFormHelios_Input">
+				<xsd:sequence>
+					<xsd:element name="uid" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setGetResultatFormHelios" type="getResultatFormHelios_Output" />
+			<xsd:complexType name="getResultatFormHelios_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonReturnResultatFormHelios" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getGetPESAller" type="getPESAller_Input" />
+			<xsd:complexType name="getPESAller_Input">
+				<xsd:sequence>
+					<xsd:element name="enveloppe_id" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setGetPESAller" type="getPESAller_Output" />
+			<xsd:complexType name="getPESAller_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonGetPESAller" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getGetACKAller" type="getACKAller_Input" />
+			<xsd:complexType name="getACKAller_Input">
+				<xsd:sequence>
+					<xsd:element name="enveloppe_id" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setGetACKAller" type="getACKAller_Output" />
+			<xsd:complexType name="getACKAller_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonGetACKAller" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getGetDetailsPESAller" type="getDetailsPESAller_Input" />
+			<xsd:complexType name="getDetailsPESAller_Input">
+				<xsd:sequence>
+					<xsd:element name="enveloppe_id" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setGetDetailsPESAller" type="getDetailsPESAller_Output" />
+			<xsd:complexType name="getDetailsPESAller_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonGetDetailsPESAller" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getGetPESRetour" type="getPESRetour_Input" />
+			<xsd:complexType name="getPESRetour_Input">
+				<xsd:sequence>
+					<xsd:element name="icColl" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setGetPESRetour" type="getPESRetour_Output" />
+			<xsd:complexType name="getPESRetour_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonGetPESRetour" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getSendACKPESRetour" type="sendACKPESRetour_Input" />
+			<xsd:complexType name="sendACKPESRetour_Input">
+				<xsd:sequence>
+					<xsd:element name="fileName" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setSendACKPESRetour" type="sendACKPESRetour_Output" />
+			<xsd:complexType name="sendACKPESRetour_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonSendACKPESRetour" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getGetDetailsPESRetour" type="getDetailsPESRetour_Input" />
+			<xsd:complexType name="getDetailsPESRetour_Input">
+				<xsd:sequence>
+					<xsd:element name="enveloppe_id" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setGetDetailsPESRetour" type="getDetailsPESRetour_Output" />
+			<xsd:complexType name="getDetailsPESRetour_Output">
+				<xsd:sequence>
+					<xsd:element name="jsonGetDetailsPESRetour" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="getPutPESAller" type="putPESAller_Input" />
+			<xsd:complexType name="putPESAller_Input">
+				<xsd:sequence>
+					<xsd:element name="file_content" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="password" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="setPutPESAller" type="putPESAller_Output" />
+			<xsd:complexType name="putPESAller_Output">
+				<xsd:sequence>
+					<xsd:element name="retour" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+		</xsd:schema>
+	</types>
+	<!-- Messages -->
+
+	<!-- Messages connexionSTELA -->
+	<message name="getConnexionSTELA">
+		<part name="body" element="stela:getConnexionSTELA" />
+	</message>
+
+	<message name="setConnexionSTELA">
+		<part name="body" element="stela:setConnexionSTELA" />
+	</message>
+
+	<!-- Messages connexionSTELA2 -->
+	<message name="getConnexionSTELA2">
+		<part name="body" element="stela:getConnexionSTELA2" />
+	</message>
+
+	<message name="setConnexionSTELA2">
+		<part name="body" element="stela:setConnexionSTELA2" />
+	</message>
+
+	<!-- Messages getResultatFormHelios -->
+	<message name="getGetResultatFormHelios">
+		<part name="body" element="stela:getGetResultatFormHelios" />
+	</message>
+
+	<message name="setGetResultatFormHelios">
+		<part name="body" element="stela:setGetResultatFormHelios" />
+	</message>
+
+	<!-- Messages getPESAller -->
+	<message name="getGetPESAller">
+		<part name="body" element="stela:getGetPESAller" />
+	</message>
+
+	<message name="setGetPESAller">
+		<part name="body" element="stela:setGetPESAller" />
+	</message>
+
+	<!-- Messages getACKAller -->
+	<message name="getGetACKAller">
+		<part name="body" element="stela:getGetACKAller" />
+	</message>
+
+	<message name="setGetACKAller">
+		<part name="body" element="stela:setGetACKAller" />
+	</message>
+
+	<!-- Messages getDetailsPESAller -->
+	<message name="getGetDetailsPESAller">
+		<part name="body" element="stela:getGetDetailsPESAller" />
+	</message>
+
+	<message name="setGetDetailsPESAller">
+		<part name="body" element="stela:setGetDetailsPESAller" />
+	</message>
+
+	<!-- Messages getPESRetour -->
+	<message name="getGetPESRetour">
+		<part name="body" element="stela:getGetPESRetour" />
+	</message>
+
+	<message name="setGetPESRetour">
+		<part name="body" element="stela:setGetPESRetour" />
+	</message>
+
+	<!-- Messages sendACKPESRetour -->
+	<message name="getSendACKPESRetour">
+		<part name="body" element="stela:getSendACKPESRetour" />
+	</message>
+
+	<message name="setSendACKPESRetour">
+		<part name="body" element="stela:setSendACKPESRetour" />
+	</message>
+
+	<!-- Messages getDetailsPESRetour -->
+	<message name="getGetDetailsPESRetour">
+		<part name="body" element="stela:getGetDetailsPESRetour" />
+	</message>
+
+	<message name="setGetDetailsPESRetour">
+		<part name="body" element="stela:setGetDetailsPESRetour" />
+	</message>
+
+	<!-- Messages putPESAller -->
+	<message name="getPutPESAller">
+		<part name="body" element="stela:getPutPESAller" />
+	</message>
+
+	<message name="setPutPESAller">
+		<part name="body" element="stela:setPutPESAller" />
+	</message>
+
+	<!-- Ports -->
+	<!-- Ports connexionSTELA -->
+	<portType name="portConnexionSTELA">
+		<operation name="connexionSTELA">
+			<input message="tns:getConnexionSTELA" />
+			<output message="tns:setConnexionSTELA" />
+		</operation>
+	</portType>
+
+	<!-- Ports ConnexionSTELA2 -->
+	<portType name="portConnexionSTELA2">
+		<operation name="connexionSTELA2">
+			<input message="tns:getConnexionSTELA2" />
+			<output message="tns:setConnexionSTELA2" />
+		</operation>
+	</portType>
+
+	<!-- Ports GetResultatFormHelios -->
+	<portType name="portGetResultatFormHelios">
+		<operation name="getResultatFormHelios">
+			<input message="tns:getGetResultatFormHelios" />
+			<output message="tns:setGetResultatFormHelios" />
+		</operation>
+	</portType>
+
+	<!-- Ports GetPESAller -->
+	<portType name="portGetPESAller">
+		<operation name="getPESAller">
+			<input message="tns:getGetPESAller" />
+			<output message="tns:setGetPESAller" />
+		</operation>
+	</portType>
+
+	<!-- Ports GetACKAller -->
+	<portType name="portGetACKAller">
+		<operation name="getACKAller">
+			<input message="tns:getGetACKAller" />
+			<output message="tns:setGetACKAller" />
+		</operation>
+	</portType>
+
+	<!-- Ports GetDetailsPESAller -->
+	<portType name="portGetDetailsPESAller">
+		<operation name="getDetailsPESAller">
+			<input message="tns:getGetDetailsPESAller" />
+			<output message="tns:setGetDetailsPESAller" />
+		</operation>
+	</portType>
+
+	<!-- Ports SendACKPESRetour -->
+	<portType name="portSendACKPESRetour">
+		<operation name="sendACKPESRetour">
+			<input message="tns:getSendACKPESRetour" />
+			<output message="tns:setSendACKPESRetour" />
+		</operation>
+	</portType>
+
+	<!-- Ports GetPESRetour -->
+	<portType name="portGetPESRetour">
+		<operation name="getPESRetour">
+			<input message="tns:getGetPESRetour" />
+			<output message="tns:setGetPESRetour" />
+		</operation>
+	</portType>
+
+	<!-- Ports GetDetailsPESRetour -->
+	<portType name="portGetDetailsPESRetour">
+		<operation name="getDetailsPESRetour">
+			<input message="tns:getGetDetailsPESRetour" />
+			<output message="tns:setGetDetailsPESRetour" />
+		</operation>
+	</portType>
+
+	<!-- Ports PutPESAller -->
+	<portType name="portPutPESAller">
+		<operation name="putPESAller">
+			<input message="tns:getPutPESAller" />
+			<output message="tns:setPutPESAller" />
+		</operation>
+	</portType>
+
+	<!-- Binding -->
+	<!-- Binding ConnexionSTELA -->
+	<binding name="bindingConnexionSTELA" type="tns:portConnexionSTELA">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="connexionSTELA">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding ConnexionSTELA2 -->
+	<binding name="bindingConnexionSTELA2" type="tns:portConnexionSTELA2">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="connexionSTELA2">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding GetResultatFormHelios -->
+	<binding name="bindingGetResultatFormHelios" type="tns:portGetResultatFormHelios">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="getResultatFormHelios">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding GetPESAller -->
+	<binding name="bindingGetPESAller" type="tns:portGetPESAller">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="getPESAller">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding GetACKAller -->
+	<binding name="bindingGetACKAller" type="tns:portGetACKAller">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="getACKAller">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding GetDetailsPESAller -->
+	<binding name="bindingGetDetailsPESAller" type="tns:portGetDetailsPESAller">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="getDetailsPESAller">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding GetPESRetour -->
+	<binding name="bindingGetPESRetour" type="tns:portGetPESRetour">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="getPESRetour">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding SendACKPESRetour -->
+	<binding name="bindingSendACKPESRetour" type="tns:portSendACKPESRetour">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="sendACKPESRetour">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding GetDetailsPESRetour -->
+	<binding name="bindingGetDetailsPESRetour" type="tns:portGetDetailsPESRetour">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="getDetailsPESRetour">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Binding PutPESAller -->
+	<binding name="bindingPutPESAller" type="tns:portPutPESAller">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="putPESAller">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" namespace="urn:myInputNamespace" />
+			</input>
+			<output>
+				<soap:body use="literal" namespace="urn:myOutputNamespace" />
+			</output>
+		</operation>
+	</binding>
+
+	<!-- Services -->
+	<service name="MyService">
+		<documentation>Returns a greeting string.</documentation>
+		<!-- Service ConnexionSTELA -->
+		<port name="portConnexionSTELA" binding="tns:bindingConnexionSTELA">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service ConnexionSTELA2 -->
+		<port name="portConnexionSTELA2" binding="tns:bindingConnexionSTELA2">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service GetResultatFormHelios -->
+		<port name="portGetResultatFormHelios" binding="tns:bindingGetResultatFormHelios">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service GetPESAller -->
+		<port name="portGetPESAller" binding="tns:bindingGetPESAller">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service GetACKAller -->
+		<port name="portGetACKAller" binding="tns:bindingGetACKAller">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service GetDetailsPESAller -->
+		<port name="portGetDetailsPESAller" binding="tns:bindingGetDetailsPESAller">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service GetPESRetour -->
+		<port name="portGetPESRetour" binding="tns:bindingGetPESRetour">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service SendACKPESRetour -->
+		<port name="portSendACKPESRetour" binding="tns:bindingSendACKPESRetour">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service GetDetailsPESRetour -->
+		<port name="portGetDetailsPESRetour" binding="tns:bindingGetDetailsPESRetour">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+		<!-- Service PutPESAller -->
+		<port name="portPutPESAller" binding="tns:bindingPutPESAller">
+			<soap:address location="localhost:9010/helios/ws" />
+		</port>
+	</service>
+
+</definitions>

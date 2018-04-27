@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:ie="http://xml.insee.fr/schema" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://xml.insee.fr/schema" elementFormDefault="qualified" attributeFormDefault="qualified" version="2.1">
+  <xs:annotation>
+    <xs:documentation>Modélisation de types communs aux schémas INSEE</xs:documentation>
+  </xs:annotation>
+  <xs:simpleType name="ChaineNumeriqueType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="[0-9]*"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[0-9]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ChaineAsciiMajusculeType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="[A-Z]*</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[A-Z]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ChaineNumeriqueEtAsciiMajusculeType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="[0-9A-Z]*"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[0-9A-Z]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ChaineFrancaisOfficielType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="[A-Za-zÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸàâäçéèêëîïôöùûüÿÆŒæœ -']*"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[A-Za-zÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸàâäçéèêëîïôöùûüÿÆŒæœ \-']*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ChaineFrancaisOfficielMajusculeType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="[A-ZÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸÆŒ -']*"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[A-ZÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸÆŒ \-']*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ChaineFrancaisOfficielMinusculeType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="[a-zàâäçéèêëîïôöùûüÿæœ -']*"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[a-zàâäçéèêëîïôöùûüÿæœ \-']*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="DateType">
+    <xs:annotation>
+      <xs:documentation>Date au format AAAA-MM-JJ</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:date">
+      <xs:pattern value="(\d{4})-(\d{2})-(\d{2})"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="AnneeType">
+    <xs:annotation>
+      <xs:documentation>Année au format AAAA</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:gYear">
+      <xs:pattern value="(\d{4})"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="MoisType">
+    <xs:annotation>
+      <xs:documentation>xs:pattern value="(\d{4})-(\d{2})"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:gYearMonth">
+      <xs:pattern value="(\d{4})-(\d{2})"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="DateSoupleType">
+    <xs:annotation>
+      <xs:documentation>Date complète ou comportant uniquement l'année, ou le mois et l'année</xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="ie:DateType ie:AnneeType ie:MoisType"/>
+  </xs:simpleType>
+  <xs:simpleType name="DateHeureType">
+    <xs:annotation>
+      <xs:documentation>Date et heure au format AAAA-MM-JJThh:mm:ss</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:dateTime">
+      <xs:pattern value="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="DateOuDateHeureType">
+    <xs:annotation>
+      <xs:documentation>Date comprenant l'année, le mois, et uniquement le jour ou bien le jour et l'heure</xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="ie:DateHeureType ie:DateType"/>
+  </xs:simpleType>
+  <xs:simpleType name="HeureType">
+    <xs:annotation>
+      <xs:documentation>Heure au format hh:mm:ss</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:time">
+      <xs:pattern value="d{2}:\d{2}:\d{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="HeureMinuteType">
+    <xs:annotation>
+      <xs:documentation>Heure au format hh:mm</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="([01][0-9]|2[0-3]):[0-5][0-9]"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LibelleType">
+    <xs:annotation>
+      <xs:documentation>xs:maxLength value="255"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:maxLength value="255"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="NumeroType">
+    <xs:annotation>
+      <xs:documentation>xs:maxLength value="255"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="ie:ChaineNumeriqueType">
+      <xs:maxLength value="255"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="CodeType">
+    <xs:annotation>
+      <xs:documentation>xs:maxLength value="255"</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:maxLength value="255"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:annotation ie:obsolete="true">
+    <xs:documentation> Les types qui suivent sont obsolètes et seront remplacés dans les prochaines versions par des types équivalents qui suivent les conventions de nommage en vigueur.</xs:documentation>
+  </xs:annotation>
+  <xs:simpleType name="Chaîne_Numérique_stype" ie:obsolete="true">
+    <xs:annotation>
+      <xs:documentation>Ce type est obsolète et sera remplacé par le type équivalent ChaineNumeriqueType dans les prochaines versions de ce schéma.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="ie:ChaineNumeriqueType"/>
+  </xs:simpleType>
+  <xs:simpleType name="Chaîne_ASCII_Majuscule_stype" ie:obsolete="true">
+    <xs:annotation>
+      <xs:documentation>Ce type est obsolète et sera remplacé par le type équivalent ChaineAsciiMajusculeType dans les prochaines versions de ce schéma.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="ie:ChaineAsciiMajusculeType"/>
+  </xs:simpleType>
+  <xs:simpleType name="Chaîne_Numérique_et_ASCII_Majuscule_stype" ie:obsolete="true">
+    <xs:annotation>
+      <xs:documentation>Ce type est obsolète et sera remplacé par le type équivalent ChaineNumeriqueEtAsciiMajusculeType dans les prochaines versions de ce schéma.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="ie:ChaineNumeriqueEtAsciiMajusculeType"/>
+  </xs:simpleType>
+</xs:schema>

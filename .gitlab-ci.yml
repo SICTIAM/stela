@@ -1,0 +1,50 @@
+image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
+
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=true"
+services:
+  - docker:dind
+
+stages:
+  - test
+  - registry
+  - registry-prod
+# Disabled for now as it does not work and it's a pita to know why
+#  - integrationTest
+
+test:
+  stage: test
+  script:
+    - ./gradlew --build-cache --stacktrace -g /cache test
+# Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
+#  artifacts:
+#    paths:
+#    - acte-service/build/reports/tests/*
+
+#integrationTest:
+#  stage: integrationTest
+#  script:
+#    - ./gradlew --build-cache --stacktrace integrationTest
+#  artifacts:
+#    paths:
+#    - acte-service/build/reports/tests/*
+
+registry:
+  stage: registry
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush
+  only:
+    - develop
+
+registry-prod:
+  stage: registry-prod
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
+  only:
+    - master

@@ -1,0 +1,61 @@
+plugins {
+    id "com.moowork.node" version "1.2.0"
+}
+
+archivesBaseName = 'stela-api-gateway'
+
+node {
+    version = '8.9.4'
+    //yarnVersion = '0.16.1'
+    download = false
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile('org.springframework.cloud:spring-cloud-starter-config')
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-zuul')
+    compile('org.springframework.cloud:spring-cloud-starter-security')
+    compile("org.springframework.retry:spring-retry")
+    compile("org.springframework.boot:spring-boot-starter-aop")
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile('com.ozwillo:ozwillo-java-spring-integration:1.25.8')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+configure(tasks.processResources) {
+    // we don't want source JSX in the jar, we only need their transpiled, bundled version in build/
+    exclude 'jsx/'
+    exclude 'build/'
+    exclude 'styles/'
+}
+
+task frontBundle(type: YarnTask) {
+    args = ['run', 'build']
+    doLast {
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/static"
+            into "${sourceSets.main.output.resourcesDir}/public/static"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/index.html"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/asset-manifest.json"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/manifest.json"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+        copy {
+            from "${sourceSets.main.resources.srcDirs[0]}/build/browserconfig.xml"
+            into "${sourceSets.main.output.resourcesDir}/public/"
+        }
+    }
+}
+
+bootJar.dependsOn(frontBundle)
+frontBundle.dependsOn(npmInstall)

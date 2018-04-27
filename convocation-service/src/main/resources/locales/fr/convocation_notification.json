@@ -1,0 +1,8 @@
+{
+  "convocation": {
+    "SENT":{
+    	"subject":"[Stela V3] Convocation envoyée",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre convocation a bien été envoyée aux elus <br/> Cordialement le Sictiam"
+    }
+  }
+}

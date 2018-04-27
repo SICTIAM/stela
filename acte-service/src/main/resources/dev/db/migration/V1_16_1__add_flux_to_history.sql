@@ -1,0 +1,1 @@
+update acte_history set flux = 'TRANSMISSION_ACTE' where status = 'SENT';

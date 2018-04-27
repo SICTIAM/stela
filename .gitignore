@@ -23,3 +23,13 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+## 
+*.class
+
+## YPR ##
+.env
+*.PS1
+bin/
+.vscode/
+\.gradletasknamecache

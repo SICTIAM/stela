@@ -1,0 +1,22 @@
+{
+  "pes": {
+    "ACK_RECEIVED":{
+    	"subject":"[Stela V3] Pes reçu",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"
+    },
+    "SENT":{
+    	"subject":"[Stela V3] Pes transmis",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre pes a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
+    },
+    "copy" : {
+    	"ACK_RECEIVED":{
+    	"subject":"[Stela V3] Pes reçu sur votre collectivité",
+    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"
+    	},
+	    "SENT":{
+	    	"subject":"[Stela V3] Pes transmis sur votre collectivité",
+	    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un pes a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
+	    }
+    }
+  }
+}

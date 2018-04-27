@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<actes:RetourClassification xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" xmlns:insee="http://xml.insee.fr/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.interieur.gouv.fr/ACTES#v1.1-20040216 actesv1_1.xsd">
+  <actes:DateClassification>2017-04-19</actes:DateClassification>
+  <actes:NaturesActes>
+    <actes:NatureActe actes:CodeNatureActe="6" actes:Libelle="Autres" actes:TypeAbrege="AU">
+    	<actes:TypePJNatureActe actes:CodeTypePJ="55" actes:Libelle="Type de test"/>
+    	<actes:TypePJNatureActe actes:CodeTypePJ="45" actes:Libelle="Type de test2"/>
+    </actes:NatureActe>
+    <actes:NatureActe actes:CodeNatureActe="2" actes:Libelle="Actes réglementaires" actes:TypeAbrege="AR"/>
+    <actes:NatureActe actes:CodeNatureActe="3" actes:Libelle="Actes individuels" actes:TypeAbrege="AI"/>
+    <actes:NatureActe actes:CodeNatureActe="4" actes:Libelle="Contrats, conventions et avenants" actes:TypeAbrege="CC"/>
+    <actes:NatureActe actes:CodeNatureActe="5" actes:Libelle="Documents budgétaires et financiers" actes:TypeAbrege="BF"/>
+    <actes:NatureActe actes:CodeNatureActe="1" actes:Libelle="Délibérations" actes:TypeAbrege="DE"/>
+  </actes:NaturesActes>
+  <actes:Matieres>
+    <actes:Matiere1 actes:CodeMatiere="1" actes:Libelle="Commande Publique">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Marchés publics"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Délégation de service public"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Conventions de Mandat"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Autres types de contrats"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Transactions /protocole d accord transactionnel"/>
+      <actes:Matiere2 actes:CodeMatiere="6" actes:Libelle="Actes relatifs à la maîtrise d'oeuvre"/>
+      <actes:Matiere2 actes:CodeMatiere="7" actes:Libelle="Actes speciaux et divers"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="2" actes:Libelle="Urbanisme">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Documents d urbanisme "/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Actes relatifs au droit d occupation ou d utilisation des sols"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Droit de preemption urbain "/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="3" actes:Libelle="Domaine et patrimoine">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Acquisitions"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Alienations"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Locations"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Limites territoriales"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Autres actes de gestion du domaine public"/>
+      <actes:Matiere2 actes:CodeMatiere="6" actes:Libelle="Autres actes de gestion du domaine prive"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="4" actes:Libelle="Fonction publique">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Personnel titulaires et stagiaires de la F.P.T."/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Personnel contractuel"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Fonction publique hospitaliere"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Autres categories de personnels"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Regime indemnitaire"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="5" actes:Libelle="Institutions et vie politique">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Election executif"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Fonctionnement des assemblees"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Designation de representants"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Delegation de fonctions"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Delegation de signature"/>
+      <actes:Matiere2 actes:CodeMatiere="6" actes:Libelle="Exercice des mandats locaux"/>
+      <actes:Matiere2 actes:CodeMatiere="7" actes:Libelle="Intercommunalite"/>
+      <actes:Matiere2 actes:CodeMatiere="8" actes:Libelle="Decision d ester en justice"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="6" actes:Libelle="Libertés publiques et pourvoirs de police">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Police municipale"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Pouvoir du president du conseil general"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Pouvoir du president du conseil regional"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Autres actes reglementaires"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Actes pris au nom de l Etat et soumis au controle hierarchique"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="7" actes:Libelle="Finances locales">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Decisions budgetaires"/>
+      <actes:Matiere2 actes:CodeMatiere="10" actes:Libelle="Divers"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Fiscalité"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Emprunts"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Interventions economiques"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Subventions"/>
+      <actes:Matiere2 actes:CodeMatiere="6" actes:Libelle="Contributions budgetaires"/>
+      <actes:Matiere2 actes:CodeMatiere="7" actes:Libelle="Avances"/>
+      <actes:Matiere2 actes:CodeMatiere="8" actes:Libelle="Fonds de concours"/>
+      <actes:Matiere2 actes:CodeMatiere="9" actes:Libelle="Prise de participation (SEM, etc...)"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="8" actes:Libelle="Domaines de competences par themes">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Enseignement"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Aide sociale"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Voirie"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Amenagement du territoire"/>
+      <actes:Matiere2 actes:CodeMatiere="5" actes:Libelle="Politique de la ville-habitat-logement"/>
+      <actes:Matiere2 actes:CodeMatiere="6" actes:Libelle="Emploi-formation professionnelle"/>
+      <actes:Matiere2 actes:CodeMatiere="7" actes:Libelle="Transports"/>
+      <actes:Matiere2 actes:CodeMatiere="8" actes:Libelle="Environnement"/>
+      <actes:Matiere2 actes:CodeMatiere="9" actes:Libelle="Culture"/>
+    </actes:Matiere1>
+    <actes:Matiere1 actes:CodeMatiere="9" actes:Libelle="Autres domaines de competences">
+      <actes:Matiere2 actes:CodeMatiere="1" actes:Libelle="Autres domaines de competences des communes"/>
+      <actes:Matiere2 actes:CodeMatiere="2" actes:Libelle="Autres domaines de competences des departements"/>
+      <actes:Matiere2 actes:CodeMatiere="3" actes:Libelle="Autres domaines de competences des regions"/>
+      <actes:Matiere2 actes:CodeMatiere="4" actes:Libelle="Voeux et motions"/>
+    </actes:Matiere1>
+  </actes:Matieres>
+</actes:RetourClassification>

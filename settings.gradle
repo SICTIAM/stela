@@ -1,0 +1,1 @@
+include "acte-service", "admin-service", "api-gateway", "config-service", "discovery-service" , "pes-service", "convocation-service", "signature-lib"

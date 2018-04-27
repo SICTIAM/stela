@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:ie="http://xml.insee.fr/schema" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://xml.insee.fr/schema" version="2.0">
+  <xs:include schemaLocation="insee-commun.xsd"/>
+  <xs:simpleType name="SIRENType">
+    <xs:restriction base="ie:ChaineNumeriqueType">
+      <xs:length value="9"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="SIREN" type="ie:SIRENType"/>
+  <xs:attribute name="siren" type="ie:SIRENType"/>
+  <xs:simpleType name="NICType">
+    <xs:restriction base="ie:ChaineNumeriqueType">
+      <xs:length value="5"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="NIC" type="ie:NICType"/>
+  <xs:attribute name="nic" type="ie:NICType"/>
+  <xs:complexType name="SIRETStructureType">
+    <xs:sequence>
+      <xs:element ref="ie:SIREN"/>
+      <xs:element ref="ie:NIC"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SIRETStructure" type="ie:SIRETStructureType"/>
+  <xs:simpleType name="SIRETType">
+    <xs:restriction base="ie:ChaineNumeriqueType">
+      <xs:length value="14"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="SIRET" type="ie:SIRETType"/>
+  <xs:attribute name="siret" type="ie:SIRETType"/>
+  <xs:annotation ie:obsolete="true">
+    <xs:documentation> Les types qui suivent sont dépréciés et seront remplacés dans les prochaines versions par des types équivalents qui suivent les conventions de nommage en vigueur.</xs:documentation>
+  </xs:annotation>
+  <xs:simpleType name="SIREN_stype" ie:obsolete="true">
+    <xs:restriction base="ie:Chaîne_Numérique_stype">
+      <xs:length value="9"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="NIC_stype" ie:obsolete="true">
+    <xs:restriction base="ie:Chaîne_Numérique_stype">
+      <xs:length value="5"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SIRET_ctype" ie:obsolete="true">
+    <xs:sequence>
+      <xs:element ref="ie:SIREN"/>
+      <xs:element ref="ie:NIC"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="SIRET_stype" ie:obsolete="true">
+    <xs:restriction base="ie:Chaîne_Numérique_stype">
+      <xs:length value="14"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:attribute name="SIREN" type="ie:SIREN_stype" ie:obsolete="true"/>
+  <xs:attribute name="NIC" type="ie:NIC_stype" ie:obsolete="true"/>
+  <xs:attribute name="SIRET" type="ie:SIRET_stype" ie:obsolete="true"/>
+</xs:schema>
