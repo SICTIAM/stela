@@ -353,6 +353,7 @@ public class MigrationService {
 
     private ResultSet executeMySQLQuery(String processedQuery, MigrationLog migrationLog) {
         try {
+            LOGGER.debug(processedQuery);
             Class.forName("com.mysql.jdbc.Driver");
             Connection connect = DriverManager.getConnection("jdbc:mysql://" +
                     serverIP + ":" + mySQLPort + "/" + database, mySQLUser, mySQLPassword);
