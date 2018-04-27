@@ -6,7 +6,7 @@ import fr.sictiam.stela.admin.model.GenericAccount;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.service.GenericAccountService;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
-import fr.sictiam.stela.admin.soap.model.LoginOutput;
+import fr.sictiam.stela.admin.soap.model.LoginResponse;
 import fr.sictiam.stela.admin.soap.model.PaullSoapToken;
 import fr.sictiam.stela.admin.soap.model.loginRequest;
 import io.jsonwebtoken.Jwts;
@@ -58,9 +58,9 @@ public class LoginEndPoint {
         this.localAuthorityService = localAuthorityService;
     }
 
-    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "loginRequest")
-    public @ResponsePayload LoginOutput login(@RequestPayload loginRequest loginInput) {
-        LoginOutput loginOutput = new LoginOutput();
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "login")
+    public @ResponsePayload LoginResponse login(@RequestPayload loginRequest loginInput) {
+        LoginResponse loginOutput = new LoginResponse();
         Optional<GenericAccount> genericAccount = genericAccountService.getByEmail(loginInput.getUserid());
         HttpServletRequest request = getHttpServletRequest();
 

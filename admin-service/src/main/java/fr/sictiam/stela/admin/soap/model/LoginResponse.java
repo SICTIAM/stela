@@ -14,14 +14,36 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "loginResponse", propOrder = { "statusCode", "message" })
+@XmlType(name = "loginResponse")
 @XmlRootElement(name = "loginResponse")
-public class LoginOutput {
+public class LoginResponse {
 
     @XmlElement(required = true)
     protected String statusCode;
     @XmlElement(required = true)
     protected String message;
+
+    @XmlElement(required = true)
+    protected String version;
+
+    @XmlElement(required = true)
+    protected String timestamp;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public String getStatusCode() {
         return statusCode;

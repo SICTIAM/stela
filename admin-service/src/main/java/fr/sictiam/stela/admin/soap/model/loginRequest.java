@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "loginRequest", propOrder = { "userid", "password" })
+@XmlType(name = "login", propOrder = { "userid", "password" })
 public class loginRequest {
 
     @XmlElement(name = "userid", required = true)
