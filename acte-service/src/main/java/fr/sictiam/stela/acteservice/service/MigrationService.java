@@ -131,7 +131,9 @@ public class MigrationService {
         if (groupIds == null || groupIds.isEmpty()) {
             log(migrationLog, "No groupIds for this localAuthority", false);
         } else {
-            String sqlGroupIds = groupIds.stream().collect(Collectors.joining(" OR "));
+            String sqlGroupIds = groupIds.stream()
+                    .map(groupId -> "gul2.groupid = " + groupId)
+                    .collect(Collectors.joining(" OR "));
             String proccessedQuery = sql_users
                     .replaceAll("\\{\\{groupIds}}", sqlGroupIds);
             ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
