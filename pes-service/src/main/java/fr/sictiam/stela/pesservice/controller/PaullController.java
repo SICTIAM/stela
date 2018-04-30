@@ -6,7 +6,6 @@ import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
-import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
@@ -38,9 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/{siren}/fr/classic/webservhelios/services/api/rest.php/")
+@RequestMapping("/rest/externalws/{siren}/fr/classic/webservhelios/services/api/rest.php/")
 public class PaullController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaullController.class);
@@ -83,13 +83,6 @@ public class PaullController {
         return genericAccount;
     }
 
-    public boolean localAuthorityGranted(GenericAccount genericAccount, String siren) {
-
-        return genericAccount.getLocalAuthorities().stream()
-                .anyMatch(localAuthority -> localAuthority.getActivatedModules().contains("PES")
-                        && localAuthority.getSiren().equals(siren));
-    }
-
     @PostMapping("/depotpes")
     public ResponseEntity<?> DepotPES(@PathVariable String siren, @RequestParam("file") MultipartFile file,
             @RequestParam(name = "title") String title,
@@ -107,7 +100,7 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         Map<String, Object> data = new HashMap<>();
 
-        if (genericAccount == null) {
+        if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
         }
@@ -161,7 +154,7 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+        if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
         }
@@ -174,17 +167,17 @@ public class PaullController {
 
         JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
 
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         data.put("Title", pesAller.getObjet());
 
         data.put("Name", classeur.getBody().getId());
         data.put("Username", node.get("email").asText());
         data.put("NomDocument", pesAller.getFileName());
-        data.put("dateDepot", pesAller.getCreation());
+        data.put("dateDepot", dateFormatter.format(pesAller.getCreation()));
 
         List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(idFlux,
                 Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
 
@@ -210,7 +203,7 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+        if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
         }
@@ -232,7 +225,7 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+        if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
         }
@@ -252,15 +245,20 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
         GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+        if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
         }
 
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
         if (localAuthority.isPresent()) {
-            List<ServiceOrganisation> validationCircuits = sesileService
-                    .getHeliosServiceOrganisations(localAuthority.get(), email);
+            List<Map<String, Object>> validationCircuits = sesileService
+                    .getHeliosServiceOrganisations(localAuthority.get(), email).stream().map(circuit -> {
+                        Map<String, Object> circuitInfo = new HashMap<>();
+                        circuitInfo.put("id", circuit.getId());
+                        circuitInfo.put("nom", circuit.getNom());
+                        return circuitInfo;
+                    }).collect(Collectors.toList());
             return new ResponseEntity<Object>(generatePaullResponse(status, validationCircuits), status);
 
         } else {
@@ -279,7 +277,7 @@ public class PaullController {
         siren = StringUtils.removeStart(siren, "sys");
 
         GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null || !localAuthorityGranted(genericAccount, siren)) {
+        if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
         }

@@ -22,13 +22,20 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         servlet.setApplicationContext(applicationContext);
         servlet.setTransformWsdlLocations(true);
         servlet.setXsdSchemaHandlerAdapterBeanName("xsdSchemaBean");
-        return new ServletRegistrationBean<MessageDispatcherServlet>(servlet, "/api/pes/ws/*");
+        return new ServletRegistrationBean<MessageDispatcherServlet>(servlet, "/api/pes/ws/*", "/externalws/*");
     }
 
     @Bean(name = "wshelios")
     public Wsdl11Definition defaultWsdl11Definition() {
         SimpleWsdl11Definition wsdl11Definition = new SimpleWsdl11Definition();
         wsdl11Definition.setWsdl(new ClassPathResource("/wsdl/ws-helios.wsdl"));
+        return wsdl11Definition;
+    }
+
+    @Bean(name = "wshelios_paul")
+    public Wsdl11Definition defaultWsdl11DefinitionPaull() {
+        SimpleWsdl11Definition wsdl11Definition = new SimpleWsdl11Definition();
+        wsdl11Definition.setWsdl(new ClassPathResource("/wsdl/ws-paull.wsdl"));
         return wsdl11Definition;
     }
 }

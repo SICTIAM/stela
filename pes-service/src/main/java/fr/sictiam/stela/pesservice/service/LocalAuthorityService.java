@@ -3,6 +3,7 @@ package fr.sictiam.stela.pesservice.service;
 import fr.sictiam.stela.pesservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,13 @@ public class LocalAuthorityService {
 
     public Optional<LocalAuthority> getBySirenOrSirens(String siren) {
         return localAuthorityRepository.findByActiveTrueAndSirenEqualsOrSirens(siren, siren);
+    }
+
+    public boolean localAuthorityGranted(GenericAccount genericAccount, String siren) {
+
+        return genericAccount.getLocalAuthorities().stream()
+                .anyMatch(localAuthority -> localAuthority.getActivatedModules().contains("PES")
+                        && localAuthority.getSiren().equals(siren));
     }
 
     @Transactional

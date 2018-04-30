@@ -35,7 +35,7 @@ public class ReceiverService {
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
-    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = "pesQueue", durable = "true"), exchange = @Exchange(value = "#{'${application.amqp.pes.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"), key = "#{'${application.amqp.pes.adminKey}'}"))
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = "pesQueue"), exchange = @Exchange(value = "#{'${application.amqp.pes.exchange}'}", type = ExchangeTypes.FANOUT, durable = "true"), key = "#{'${application.amqp.pes.adminKey}'}"))
     public void fromAdminService(Message message) {
         LOGGER.debug("Received a message {}", message);
 
