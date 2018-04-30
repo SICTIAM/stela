@@ -32,38 +32,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link PmResponse }
-     *
-     */
-    public PmResponse createPmResponse() {
-        return new PmResponse();
-    }
-
-    /**
-     * Create an instance of {@link TestsvnRequest }
-     *
-     */
-    public TestsvnRequest createTestsvnRequest() {
-        return new TestsvnRequest();
-    }
-
-    /**
-     * Create an instance of {@link TestsvnResponse }
-     *
-     */
-    public TestsvnResponse createTestsvnResponse() {
-        return new TestsvnResponse();
-    }
-
-    /**
-     * Create an instance of {@link TestsvnStruct }
-     *
-     */
-    public TestsvnStruct createTestsvnStruct() {
-        return new TestsvnStruct();
-    }
-
-    /**
      * Create an instance of {@link DepotPESAllerRequest }
      *
      */
