@@ -65,24 +65,27 @@ public class PaullEndpoint {
         this.sesileService = sesileService;
     }
 
-    PaullSoapToken getToken(String token) {
-        if (token != null) {
-            Claims tokenClaim = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
-            if (tokenClaim.getExpiration().before(new Date())) {
-                return null;
-            }
-            String tokenParsed = tokenClaim.getSubject();
+    PaullSoapToken getToken(String sessionID) {
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            PaullSoapToken node;
+        if (sessionID != null) {
+
             try {
+                String token = externalRestService.getPaullConnection(sessionID).get("token").asText();
+                Claims tokenClaim = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
+                if (tokenClaim.getExpiration().before(new Date())) {
+                    return null;
+                }
+                String tokenParsed = tokenClaim.getSubject();
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                PaullSoapToken node;
                 node = objectMapper.readValue(tokenParsed, PaullSoapToken.class);
+
+                return node;
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
                 return null;
             }
-
-            return node;
 
         }
         return null;

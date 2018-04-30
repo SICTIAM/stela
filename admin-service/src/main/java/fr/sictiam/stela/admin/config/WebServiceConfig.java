@@ -4,6 +4,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
@@ -28,17 +29,18 @@ public class WebServiceConfig extends WsConfigurerAdapter {
     }
 
     @Bean(name = "paull_login")
-    public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema countriesSchema) {
+    public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema paullSchema) {
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("PaullLogin");
         wsdl11Definition.setLocationUri("/fr/classic/services/wsdl2");
         wsdl11Definition.setTargetNamespace(NAMESPACE_URI);
-        wsdl11Definition.setSchema(countriesSchema);
+        wsdl11Definition.setSchema(paullSchema);
         return wsdl11Definition;
     }
 
     @Bean
-    public XsdSchema countriesSchema() {
+    @Primary
+    public XsdSchema paullSchema() {
         return new SimpleXsdSchema(new ClassPathResource("wsdl/paull.xsd"));
     }
 }

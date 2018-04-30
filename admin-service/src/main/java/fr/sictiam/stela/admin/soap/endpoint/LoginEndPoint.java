@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.admin.model.GenericAccount;
 import fr.sictiam.stela.admin.model.LocalAuthority;
+import fr.sictiam.stela.admin.model.PaullConnection;
 import fr.sictiam.stela.admin.service.GenericAccountService;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
+import fr.sictiam.stela.admin.service.PaullConnectionService;
 import fr.sictiam.stela.admin.soap.model.LoginResponse;
 import fr.sictiam.stela.admin.soap.model.PaullSoapToken;
 import fr.sictiam.stela.admin.soap.model.loginRequest;
@@ -26,6 +28,8 @@ import org.springframework.ws.transport.http.HttpServletConnection;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
 
@@ -38,7 +42,9 @@ public class LoginEndPoint {
 
     private final GenericAccountService genericAccountService;
     private final LocalAuthorityService localAuthorityService;
+    private final PaullConnectionService paullConnectionService;
     private final PasswordEncoder passwordEncoder;
+    private static SecureRandom random = new SecureRandom();
 
     protected HttpServletRequest getHttpServletRequest() {
         TransportContext ctx = TransportContextHolder.getTransportContext();
@@ -52,10 +58,11 @@ public class LoginEndPoint {
     long EXPIRATIONTIME;
 
     public LoginEndPoint(GenericAccountService genericAccountService, PasswordEncoder passwordEncoder,
-            LocalAuthorityService localAuthorityService) {
+            LocalAuthorityService localAuthorityService, PaullConnectionService paullConnectionService) {
         this.genericAccountService = genericAccountService;
         this.passwordEncoder = passwordEncoder;
         this.localAuthorityService = localAuthorityService;
+        this.paullConnectionService = paullConnectionService;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "login")
@@ -92,7 +99,11 @@ public class LoginEndPoint {
                     String jwtToken = Jwts.builder().setSubject(body)
                             .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                             .signWith(SignatureAlgorithm.HS512, SECRET).compact();
-                    loginOutput.setMessage(jwtToken);
+                    BigInteger bigInteger = new BigInteger(130, random);
+
+                    String sessionId = String.valueOf(bigInteger.toString(32)).toUpperCase();
+                    paullConnectionService.save(new PaullConnection(sessionId, jwtToken));
+                    loginOutput.setMessage(sessionId);
                 } else {
                     loginOutput.setStatusCode("NOK");
                     loginOutput.setMessage("LocalAuthority not granted");

@@ -2,10 +2,12 @@ package fr.sictiam.stela.admin.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.GenericAccount;
+import fr.sictiam.stela.admin.model.PaullConnection;
 import fr.sictiam.stela.admin.model.UI.GenericAccountUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.GenericAccountService;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
+import fr.sictiam.stela.admin.service.PaullConnectionService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,19 +35,26 @@ public class GenericAccountController {
 
     private final GenericAccountService genericAccountService;
     private final LocalAuthorityService localAuthorityService;
+    private final PaullConnectionService paullConnectionService;
     private final PasswordEncoder passwordEncoder;
 
     public GenericAccountController(GenericAccountService genericAccountService, PasswordEncoder passwordEncoder,
-            LocalAuthorityService localAuthorityService) {
+            LocalAuthorityService localAuthorityService, PaullConnectionService paullConnectionService) {
         this.genericAccountService = genericAccountService;
         this.passwordEncoder = passwordEncoder;
         this.localAuthorityService = localAuthorityService;
+        this.paullConnectionService = paullConnectionService;
     }
 
     @GetMapping("/{uuid}")
     @JsonView(Views.GenericAccountView.class)
     public ResponseEntity<GenericAccount> findByUuid(@PathVariable String uuid) {
         return new ResponseEntity<>(genericAccountService.getByUuid(uuid), HttpStatus.OK);
+    }
+
+    @GetMapping("/session/{sessionID}")
+    public ResponseEntity<PaullConnection> getSession(@PathVariable String sessionID) {
+        return new ResponseEntity<>(paullConnectionService.getBySessionID(sessionID), HttpStatus.OK);
     }
 
     @PostMapping
