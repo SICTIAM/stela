@@ -13,6 +13,8 @@ import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;
 import org.springframework.xml.xsd.SimpleXsdSchema;
 import org.springframework.xml.xsd.XsdSchema;
 
+import java.util.Properties;
+
 @EnableWs
 @Configuration
 public class WebServiceConfig extends WsConfigurerAdapter {
@@ -43,8 +45,10 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         wsdl11Definition.setTargetNamespace(NAMESPACE_URI);
         wsdl11Definition.setSchema(paullSchema);
         wsdl11Definition.setCreateSoap11Binding(false);
-
         wsdl11Definition.setCreateSoap12Binding(true);
+        Properties properties = new Properties();
+        properties.put("login", "http://www.processmaker.com/login");
+        wsdl11Definition.setSoapActions(properties);
         return wsdl11Definition;
     }
 
