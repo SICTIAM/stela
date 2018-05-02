@@ -42,6 +42,9 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         wsdl11Definition.setLocationUri("/fr/classic/services/wsdl2");
         wsdl11Definition.setTargetNamespace(NAMESPACE_URI);
         wsdl11Definition.setSchema(paullSchema);
+        wsdl11Definition.setCreateSoap11Binding(false);
+
+        wsdl11Definition.setCreateSoap12Binding(true);
         return wsdl11Definition;
     }
 
