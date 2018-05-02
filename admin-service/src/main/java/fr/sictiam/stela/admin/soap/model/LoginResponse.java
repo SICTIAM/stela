@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "loginResponse")
+@XmlType(name = "loginResponse", propOrder = { "statusCode", "message", "version", "timestamp" })
 @XmlRootElement(name = "loginResponse")
 public class LoginResponse {
 
@@ -23,10 +23,10 @@ public class LoginResponse {
     @XmlElement(required = true)
     protected String message;
 
-    @XmlElement(required = true)
+    @XmlElement
     protected String version;
 
-    @XmlElement(required = true)
+    @XmlElement
     protected String timestamp;
 
     public String getVersion() {

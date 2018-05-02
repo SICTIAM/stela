@@ -101,9 +101,11 @@ public class LoginEndPoint {
                             .signWith(SignatureAlgorithm.HS512, SECRET).compact();
                     BigInteger bigInteger = new BigInteger(130, random);
 
-                    String sessionId = String.valueOf(bigInteger.toString(32)).toUpperCase();
+                    String sessionId = String.valueOf(bigInteger.toString(32));
                     paullConnectionService.save(new PaullConnection(sessionId, jwtToken));
                     loginOutput.setMessage(sessionId);
+                    loginOutput.setVersion("2.0");
+                    loginOutput.setTimestamp(System.currentTimeMillis() + "");
                 } else {
                     loginOutput.setStatusCode("NOK");
                     loginOutput.setMessage("LocalAuthority not granted");
