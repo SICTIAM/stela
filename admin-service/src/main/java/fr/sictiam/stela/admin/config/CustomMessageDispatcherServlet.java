@@ -42,14 +42,10 @@ public class CustomMessageDispatcherServlet extends MessageDispatcherServlet {
         wsdlDefinitions = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, WsdlDefinition.class, true, false);
     }
 
-    // here with dealing with "wsdl" parameter in HTTP GET request
     @Override
     protected WsdlDefinition getWsdlDefinition(HttpServletRequest request) {
-
         if (HttpTransportConstants.METHOD_GET.equals(request.getMethod())) {
-
             return wsdlDefinitions.get("paull_login");
-
         } else {
             return null;
         }

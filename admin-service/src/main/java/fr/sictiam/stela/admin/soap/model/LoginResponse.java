@@ -18,15 +18,13 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "loginResponse")
 public class LoginResponse {
 
-    @XmlElement(required = true)
-    protected String statusCode;
+    @XmlElement(name = "status_code", required = true)
+    protected Integer statusCode;
     @XmlElement(required = true)
     protected String message;
-
-    @XmlElement
+    @XmlElement(required = true)
     protected String version;
-
-    @XmlElement
+    @XmlElement(required = true)
     protected String timestamp;
 
     public String getVersion() {
@@ -45,11 +43,11 @@ public class LoginResponse {
         this.timestamp = timestamp;
     }
 
-    public String getStatusCode() {
+    public Integer getStatusCode() {
         return statusCode;
     }
 
-    public void setStatusCode(String statusCode) {
+    public void setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
     }
 

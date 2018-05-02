@@ -83,7 +83,7 @@ public class LoginEndPoint {
                 if (genericAccount.get().getLocalAuthorities().stream()
                         .anyMatch(localAuth -> localAuth.getSiren().equals(siren))) {
 
-                    loginOutput.setStatusCode("OK");
+                    loginOutput.setStatusCode(0);
                     PaullSoapToken paullSoapToken = new PaullSoapToken(genericAccount.get().getUuid(), siren,
                             localAuthority.get().getActivatedModules());
                     ObjectMapper mapper = new ObjectMapper();
@@ -92,7 +92,7 @@ public class LoginEndPoint {
                         body = mapper.writeValueAsString(paullSoapToken);
                     } catch (JsonProcessingException e) {
                         LOGGER.error(e.getMessage());
-                        loginOutput.setStatusCode("NOK");
+                        loginOutput.setStatusCode(5);
                         loginOutput.setMessage("INTERNAL ERROR");
                         return loginOutput;
                     }
@@ -107,16 +107,16 @@ public class LoginEndPoint {
                     loginOutput.setVersion("2.0");
                     loginOutput.setTimestamp(System.currentTimeMillis() + "");
                 } else {
-                    loginOutput.setStatusCode("NOK");
+                    loginOutput.setStatusCode(3);
                     loginOutput.setMessage("LocalAuthority not granted");
                 }
 
             } else {
-                loginOutput.setStatusCode("NOK");
+                loginOutput.setStatusCode(4);
                 loginOutput.setMessage("Wrong User id or password");
             }
         } else {
-            loginOutput.setStatusCode("NOK");
+            loginOutput.setStatusCode(1);
             loginOutput.setMessage("LocalAuthority not found");
         }
 

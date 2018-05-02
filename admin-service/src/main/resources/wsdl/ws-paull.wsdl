@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.processmaker.com" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.processmaker.com" targetNamespace="http://www.processmaker.com">
+  <wsdl:types>
+    <xs:schema xmlns:tns="http://www.example.org/paull" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.processmaker.com">
+	<xs:element name="login">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="userid" type="xs:string"/>
+			<xs:element name="password" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      
+      <xs:element name="loginResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="status_code" type="xs:integer"/>
+            <xs:element name="message" type="xs:string"/>
+            <xs:element name="version" type="xs:string"/>
+            <xs:element name="timestamp" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="loginResponse">
+    <wsdl:part element="tns:loginResponse" name="loginResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="PaullLogin">
+    <wsdl:operation name="login">
+      <wsdl:output message="tns:loginResponse" name="loginResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PaullLoginSoap11" type="tns:PaullLogin">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="login">
+      <soap:operation soapAction=""/>
+      <wsdl:output name="loginResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="PaullLoginService">
+    <wsdl:port binding="tns:PaullLoginSoap11" name="PaullLoginSoap11">
+      <soap:address location="http://admin-service:9006/fr/classic/services/wsdl2"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
