@@ -37,7 +37,8 @@ public class WebServiceConfig extends WsConfigurerAdapter {
     @Bean(name = "paull_login")
     public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema paullSchema) {
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
-        wsdl11Definition.setPortTypeName("PaullLogin");
+        wsdl11Definition.setPortTypeName("ProcessMakerServiceSoap");
+        wsdl11Definition.setServiceName("ProcessMakerService");
         wsdl11Definition.setLocationUri("/fr/classic/services/wsdl2");
         wsdl11Definition.setTargetNamespace(NAMESPACE_URI);
         wsdl11Definition.setSchema(paullSchema);

@@ -16,7 +16,7 @@ public class CustomLocationTransformer extends WsdlDefinitionHandlerAdapter {
         StringBuilder url = new StringBuilder(applicationUrl);
         url.append("/externalws/");
         String siren = StringUtils.removeStart(request.getRequestURI().split("/")[2], "sys");
-        url.append(siren).append("/");
+        url.append(siren);
         if (location.startsWith("/")) {
             // a relative path, prepend the context path
             url.append(request.getContextPath()).append(location);
