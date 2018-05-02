@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
-import org.springframework.ws.transport.http.MessageDispatcherServlet;
 import org.springframework.ws.wsdl.wsdl11.SimpleWsdl11Definition;
 import org.springframework.ws.wsdl.wsdl11.Wsdl11Definition;
 
@@ -16,13 +15,13 @@ import org.springframework.ws.wsdl.wsdl11.Wsdl11Definition;
 public class WebServiceConfig extends WsConfigurerAdapter {
 
     @Bean
-    public ServletRegistrationBean<MessageDispatcherServlet> messageDispatcherServlet(
+    public ServletRegistrationBean<CustomMessageDispatcherServlet> messageDispatcherServlet(
             ApplicationContext applicationContext) {
-        MessageDispatcherServlet servlet = new MessageDispatcherServlet();
+        CustomMessageDispatcherServlet servlet = new CustomMessageDispatcherServlet();
         servlet.setApplicationContext(applicationContext);
         servlet.setTransformWsdlLocations(true);
         servlet.setXsdSchemaHandlerAdapterBeanName("xsdSchemaBean");
-        return new ServletRegistrationBean<MessageDispatcherServlet>(servlet, "/api/pes/ws/*", "/externalws/*");
+        return new ServletRegistrationBean<CustomMessageDispatcherServlet>(servlet, "/api/pes/ws/*", "/externalws/*");
     }
 
     @Bean(name = "wshelios")

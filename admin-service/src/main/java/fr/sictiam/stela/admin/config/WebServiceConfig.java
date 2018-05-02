@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
-import org.springframework.ws.transport.http.MessageDispatcherServlet;
 import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;
 import org.springframework.xml.xsd.SimpleXsdSchema;
 import org.springframework.xml.xsd.XsdSchema;
@@ -20,12 +19,12 @@ public class WebServiceConfig extends WsConfigurerAdapter {
     private static final String NAMESPACE_URI = "http://www.processmaker.com";
 
     @Bean
-    public ServletRegistrationBean<MessageDispatcherServlet> messageDispatcherServletPaull(
+    public ServletRegistrationBean<CustomMessageDispatcherServlet> messageDispatcherServletPaull(
             ApplicationContext applicationContext) {
-        MessageDispatcherServlet servlet = new MessageDispatcherServlet();
+        CustomMessageDispatcherServlet servlet = new CustomMessageDispatcherServlet();
         servlet.setApplicationContext(applicationContext);
         servlet.setTransformWsdlLocations(true);
-        return new ServletRegistrationBean<MessageDispatcherServlet>(servlet, "/externalws/*");
+        return new ServletRegistrationBean<CustomMessageDispatcherServlet>(servlet, "/externalws/*");
     }
 
     @Bean(name = "paull_login")
