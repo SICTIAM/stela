@@ -1,5 +1,7 @@
 package fr.sictiam.stela.pesservice.model.util;
 
+import org.thymeleaf.util.StringUtils;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -18,6 +20,7 @@ public enum AuthorizationContextClasses {
     }
 
     static public AuthorizationContextClasses getByValue(String s) {
+        if (StringUtils.isEmpty(s)) return null;
         Optional<AuthorizationContextClasses> opt = Arrays.stream(AuthorizationContextClasses.values())
                 .filter(authorizationContextClasses -> authorizationContextClasses.getValue().equals(s))
                 .findFirst();
