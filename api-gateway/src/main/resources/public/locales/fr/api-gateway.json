@@ -129,9 +129,9 @@
                 "title": "Admin module Acte",
                 "instance_params_updated": "Paramètres de l'instance enregistrés",
                 "generic_account_created": "Compte générique créé",
-                "existing_account" : {
-                	"email_conflict" : "Cet email est déjà utilisé pour un compte générique",
-                	"certificate_conflict" : "Ce certificat est déjà utilisé pour un compte générique"
+                "existing_account": {
+                    "email_conflict": "Cet email est déjà utilisé pour un compte générique",
+                    "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
                 },
                 "local_authority": {
                     "classificationAsked": "Demande de classfication envoyée",
@@ -259,7 +259,7 @@
             "add_group": "Affecter un groupe..."
         },
         "generic_account": {
-        	"title": "Creation de compte générique",
+            "title": "Creation de compte générique",
             "no_localAuthorities": "Aucune collectivité",
             "add_localAuthority": "Affecter une collectivité...",
             "software": "Logiciel",
@@ -267,7 +267,7 @@
             "password": "Mot de passe",
             "serial": "Serial",
             "vendor": "Vendor",
-            "localAuthorities": "Collectivités"            
+            "localAuthorities": "Collectivités"
         },
         "group": {
             "no_rights": "Aucun droit",
@@ -292,6 +292,10 @@
         "404": {
             "title": "Erreur 404",
             "content": "Cette page n'existe pas"
+        },
+        "certificate_required": {
+            "title": "Certificat électronique requis",
+            "content": "Merci de vous reconnecter avec un certificat électronique pour pouvoir accéder à cette fonctionnalité"
         }
     },
     "made_with_love": "Créé avec ❤ par le SICTIAM"

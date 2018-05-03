@@ -16,10 +16,12 @@ import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.acteservice.model.util.AuthorizationContextClasses;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
+import fr.sictiam.stela.acteservice.service.util.CertUtilService;
 import fr.sictiam.stela.acteservice.service.util.RightUtils;
 import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.apache.commons.io.IOUtils;
@@ -67,11 +69,13 @@ public class ActeRestController {
 
     private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
+    private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService) {
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService, CertUtilService certUtilService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
+        this.certUtilService = certUtilService;
     }
 
     @GetMapping
@@ -383,9 +387,11 @@ public class ActeRestController {
     @PostMapping
     ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("ACR") AuthorizationContextClasses acr,
             @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
             @RequestParam("annexes") MultipartFile... annexes) {
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
+                || !certUtilService.checkCert(acr.getValue())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);

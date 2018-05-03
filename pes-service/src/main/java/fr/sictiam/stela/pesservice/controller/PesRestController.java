@@ -8,12 +8,14 @@ import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.pesservice.model.util.AuthorizationContextClasses;
 import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+import fr.sictiam.stela.pesservice.service.util.CertUtilService;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -53,6 +55,7 @@ public class PesRestController {
 
     private final PesAllerService pesAllerService;
     private final PesRetourService pesRetourService;
+    private final CertUtilService certUtilService;
 
     @Value("${application.filenamepattern}")
     private String fileNamePattern;
@@ -61,9 +64,10 @@ public class PesRestController {
     private ReceiverTask receiverTask;
 
     @Autowired
-    public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService) {
+    public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService, CertUtilService certUtilService) {
         this.pesAllerService = pesAllerService;
         this.pesRetourService = pesRetourService;
+        this.certUtilService = certUtilService;
     }
 
     @GetMapping
@@ -116,10 +120,12 @@ public class PesRestController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("ACR") AuthorizationContextClasses acr,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))
+                || !certUtilService.checkCert(acr.getValue())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         ObjectMapper mapper = new ObjectMapper();
