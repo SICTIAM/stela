@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
+import org.springframework.ws.transport.http.LocationTransformerObjectSupport;
 import org.springframework.ws.wsdl.wsdl11.SimpleWsdl11Definition;
 import org.springframework.ws.wsdl.wsdl11.Wsdl11Definition;
 
@@ -20,8 +21,13 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         CustomMessageDispatcherServlet servlet = new CustomMessageDispatcherServlet();
         servlet.setApplicationContext(applicationContext);
         servlet.setTransformWsdlLocations(true);
-        servlet.setXsdSchemaHandlerAdapterBeanName("xsdSchemaBean");
+        servlet.setWsdlDefinitionHandlerAdapterBeanName("paull_location");
         return new ServletRegistrationBean<CustomMessageDispatcherServlet>(servlet, "/api/pes/ws/*", "/externalws/*");
+    }
+
+    @Bean(name = "paull_location")
+    public LocationTransformerObjectSupport customLocationTransformer() {
+        return new CustomLocationTransformer();
     }
 
     @Bean(name = "wshelios")

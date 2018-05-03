@@ -37,7 +37,7 @@ public class DiscoveryUtilsKub implements DiscoveryUtils {
     }
 
     @Override
-    public String convocServiceUrl() {
+    public String convocationServiceUrl() {
         return convocUrl;
     }
 

@@ -289,7 +289,7 @@
   <service name="ProcessMakerService">
     <documentation>ProcessMaker Web Service</documentation>
     <port name="ProcessMakerServiceSoap" binding="xs0:ProcessMakerServiceSoap">
-      <soap12:address location="___SOAP_ADDRESS___"/>
+      <soap12:address location="/fr/classic/services/webservhelios/soap2"/>
     </port>
   </service>
 </definitions>

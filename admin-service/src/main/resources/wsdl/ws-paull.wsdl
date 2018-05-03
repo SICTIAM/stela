@@ -1669,7 +1669,7 @@
   <service name="ProcessMakerService">
     <documentation>ProcessMaker Web Service</documentation>
     <port name="ProcessMakerServiceSoap" binding="xs0:ProcessMakerServiceSoap">
-      <soap12:address location="http://ganesh.demo.sictiam.fr:80/sysJulien/fr/classic/services/soap2"/>
+      <soap12:address location="/fr/classic/services/soap2"/>
     </port>
   </service>
 </definitions>
