@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.controller;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
@@ -61,14 +62,51 @@ public class PaullController {
         this.pesRetourService = pesRetourService;
     }
 
-    public Map<String, Object> generatePaullResponse(HttpStatus httpStatus, Object datas) {
-        Map<String, Object> returnMap = new HashMap<>();
-        returnMap.put("status", httpStatus.value());
-        returnMap.put("status_message", httpStatus.getReasonPhrase());
-        returnMap.put("data", datas);
+    @JsonPropertyOrder({ "status", "status_message", "data" })
+    class PaullResponse {
 
-        return returnMap;
+        String status;
+        String status_message;
+        Object data;
 
+        public PaullResponse() {
+
+        }
+
+        public PaullResponse(String status, String status_message, Object data) {
+            this.status = status;
+            this.status_message = status_message;
+            this.data = data;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getStatus_message() {
+            return status_message;
+        }
+
+        public void setStatus_message(String status_message) {
+            this.status_message = status_message;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public void setData(Object data) {
+            this.data = data;
+        }
+
+    }
+
+    public PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
+        return new PaullResponse(httpStatus.value() + "", httpStatus.getReasonPhrase(), datas);
     }
 
     public GenericAccount emailAuth(String email, String password) {
