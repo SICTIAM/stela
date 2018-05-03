@@ -9,11 +9,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
 import org.springframework.ws.transport.http.LocationTransformerObjectSupport;
-import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;
+import org.springframework.ws.wsdl.wsdl11.SimpleWsdl11Definition;
+import org.springframework.ws.wsdl.wsdl11.Wsdl11Definition;
 import org.springframework.xml.xsd.SimpleXsdSchema;
 import org.springframework.xml.xsd.XsdSchema;
-
-import java.util.Properties;
 
 @EnableWs
 @Configuration
@@ -32,23 +31,14 @@ public class WebServiceConfig extends WsConfigurerAdapter {
     }
 
     @Bean(name = "paull_location")
-    public LocationTransformerObjectSupport yolo() {
+    public LocationTransformerObjectSupport customLocationTransformer() {
         return new CustomLocationTransformer();
     }
 
     @Bean(name = "paull_login")
-    public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema paullSchema) {
-        DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
-        wsdl11Definition.setPortTypeName("ProcessMakerServiceSoap");
-        wsdl11Definition.setServiceName("ProcessMakerService");
-        wsdl11Definition.setLocationUri("/fr/classic/services/wsdl2");
-        wsdl11Definition.setTargetNamespace(NAMESPACE_URI);
-        wsdl11Definition.setSchema(paullSchema);
-        wsdl11Definition.setCreateSoap11Binding(false);
-        wsdl11Definition.setCreateSoap12Binding(true);
-        Properties properties = new Properties();
-        properties.put("login", "http://www.processmaker.com/login");
-        wsdl11Definition.setSoapActions(properties);
+    public Wsdl11Definition defaultWsdl11Definition() {
+        SimpleWsdl11Definition wsdl11Definition = new SimpleWsdl11Definition();
+        wsdl11Definition.setWsdl(new ClassPathResource("/wsdl/ws-paull.wsdl"));
         return wsdl11Definition;
     }
 
