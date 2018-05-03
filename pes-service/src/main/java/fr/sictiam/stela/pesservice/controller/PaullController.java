@@ -63,7 +63,7 @@ public class PaullController {
 
     public Map<String, Object> generatePaullResponse(HttpStatus httpStatus, Object datas) {
         Map<String, Object> returnMap = new HashMap<>();
-        returnMap.put("status", httpStatus.name());
+        returnMap.put("status", httpStatus.value());
         returnMap.put("status_message", httpStatus.getReasonPhrase());
         returnMap.put("data", datas);
 
@@ -86,10 +86,12 @@ public class PaullController {
     @PostMapping("/depotpes")
     public ResponseEntity<?> DepotPES(@PathVariable String siren, @RequestParam("file") MultipartFile file,
             @RequestParam(name = "title") String title,
-            @RequestParam(name = "comment", required = false) String comment, @RequestParam(name = "name") String name,
+            @RequestParam(name = "comment", required = false) String comment,
+            @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "desc", required = false) String desc,
             @RequestParam(name = "validation ", required = false) String validation,
-            @RequestParam(name = "service") String service, @RequestParam(name = "email") String email,
+            @RequestParam(name = "service", required = false) String service,
+            @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "PESPJ", required = false, defaultValue = "0") int PESPJ,
             @RequestParam(name = "SSLSerial", required = false) String SSLSerial,
             @RequestParam(name = "SSLVendor", required = false) String SSLVendor,
