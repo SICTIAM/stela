@@ -295,7 +295,7 @@ public class PaullController {
             List<Map<String, Object>> validationCircuits = sesileService
                     .getHeliosServiceOrganisations(localAuthority.get(), email).stream().map(circuit -> {
                         Map<String, Object> circuitInfo = new HashMap<>();
-                        circuitInfo.put("id", circuit.getId());
+                        circuitInfo.put("id", circuit.getId() + "");
                         circuitInfo.put("nom", circuit.getNom());
                         return circuitInfo;
                     }).collect(Collectors.toList());
