@@ -31,7 +31,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -122,12 +126,13 @@ public class PaullController {
     }
 
     @PostMapping("/depotpes")
-    public ResponseEntity<?> DepotPES(@PathVariable String siren, @RequestParam("file") MultipartFile file,
-            @RequestParam(name = "title") String title,
+    public ResponseEntity<?> DepotPES(@PathVariable String siren, HttpServletRequest request,
+            @RequestParam(name = "file", required = false) MultipartFile file,
+            @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "comment", required = false) String comment,
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "desc", required = false) String desc,
-            @RequestParam(name = "validation ", required = false) String validation,
+            @RequestParam(name = "validation", required = false) String validation,
             @RequestParam(name = "service", required = false) String service,
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "PESPJ", required = false, defaultValue = "0") int PESPJ,
@@ -135,6 +140,10 @@ public class PaullController {
             @RequestParam(name = "SSLVendor", required = false) String SSLVendor,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
+        // Debuggin request
+        LOGGER.debug("DEBUUGING  PES DEPOSIT");
+        Map<String, String[]> map = request.getParameterMap();
+        map.keySet().forEach(key -> LOGGER.debug("key" + key));
         GenericAccount genericAccount = emailAuth(userid, password);
         siren = StringUtils.removeStart(siren, "sys");
         HttpStatus status = HttpStatus.OK;
@@ -152,6 +161,14 @@ public class PaullController {
             PesAller pesAller = new PesAller();
             pesAller.setObjet(title);
             pesAller.setComment(comment);
+            if (StringUtils.isNotBlank(service)) {
+                pesAller.setServiceOrganisationNumber(Integer.parseInt(service));
+            }
+            if (StringUtils.isNotBlank(validation)) {
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate deadline = LocalDate.parse(validation, dateFormatter);
+                pesAller.setDaysToValidated((int) Duration.between(LocalDate.now(), deadline).toDays());
+            }
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {
                 status = HttpStatus.BAD_REQUEST;

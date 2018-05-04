@@ -32,6 +32,8 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -130,6 +132,14 @@ public class PaullEndpoint {
                     Attachment attachment = new Attachment(file, name, file.length);
                     pesAller.setAttachment(attachment);
                     pesAller.setCreation(LocalDateTime.now());
+                    if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
+                        pesAller.setServiceOrganisationNumber(Integer.parseInt(depotPESAllerStruct1.getGroupid()));
+                    }
+                    if (StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
+                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        LocalDate deadline = LocalDate.parse(depotPESAllerStruct1.getValidation(), dateFormatter);
+                        pesAller.setDaysToValidated((int) Duration.between(LocalDate.now(), deadline).toDays());
+                    }
                     pesAller = pesAllerService.populateFromByte(pesAller, file);
                     if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                         returnMessage = "DUPLICATE_FILE";
