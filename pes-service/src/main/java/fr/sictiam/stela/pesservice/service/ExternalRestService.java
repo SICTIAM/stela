@@ -99,7 +99,7 @@ public class ExternalRestService {
         Mono<String> genericAccount = webClient.get()
                 .uri("/api/admin/profile/local-authority/{siren}/{email}", siren, email).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        response -> Mono.error(new RuntimeException("generic_account_not_found")))
+                        response -> Mono.error(new RuntimeException("profile_not_found")))
                 .bodyToMono(String.class);
 
         Optional<String> opt = genericAccount.blockOptional();

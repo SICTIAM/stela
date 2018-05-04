@@ -207,7 +207,7 @@ public class PaullController {
         return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
     }
 
-    @GetMapping("/infopes/{idFlux}")
+    @GetMapping("/infospes/{idFlux}")
     public ResponseEntity<?> infoPes(@PathVariable String siren, @PathVariable String idFlux,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
