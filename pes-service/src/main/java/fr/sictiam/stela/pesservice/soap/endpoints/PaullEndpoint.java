@@ -33,7 +33,6 @@ import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -137,8 +136,9 @@ public class PaullEndpoint {
                     }
                     if (StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
                         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        LocalDate deadline = LocalDate.parse(depotPESAllerStruct1.getValidation(), dateFormatter);
-                        pesAller.setDaysToValidated((int) Duration.between(LocalDate.now(), deadline).toDays());
+                        LocalDateTime deadline = LocalDateTime.parse(depotPESAllerStruct1.getValidation(),
+                                dateFormatter);
+                        pesAller.setDaysToValidated((int) Duration.between(LocalDateTime.now(), deadline).toDays());
                     }
                     pesAller = pesAllerService.populateFromByte(pesAller, file);
                     if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {

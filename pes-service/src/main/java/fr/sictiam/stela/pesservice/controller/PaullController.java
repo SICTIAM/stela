@@ -30,15 +30,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -126,7 +126,7 @@ public class PaullController {
     }
 
     @PostMapping("/depotpes")
-    public ResponseEntity<?> DepotPES(@PathVariable String siren, HttpServletRequest request,
+    public ResponseEntity<?> DepotPES(@PathVariable String siren, MultipartHttpServletRequest request,
             @RequestParam(name = "file", required = false) MultipartFile file,
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "comment", required = false) String comment,
@@ -143,7 +143,11 @@ public class PaullController {
         // Debuggin request
         LOGGER.debug("DEBUUGING  PES DEPOSIT");
         Map<String, String[]> map = request.getParameterMap();
-        map.keySet().forEach(key -> LOGGER.debug("key" + key));
+        map.keySet().forEach(key -> LOGGER.debug("key " + key));
+        Iterator<String> itrator = request.getFileNames();
+        MultipartFile multiFile = request.getFile(itrator.next());
+
+        LOGGER.debug("FILENAME : " + multiFile.getName());
         GenericAccount genericAccount = emailAuth(userid, password);
         siren = StringUtils.removeStart(siren, "sys");
         HttpStatus status = HttpStatus.OK;
@@ -155,7 +159,7 @@ public class PaullController {
         }
 
         try {
-            if (pesAllerService.checkVirus(file.getBytes())) {
+            if (pesAllerService.checkVirus(multiFile.getBytes())) {
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
             PesAller pesAller = new PesAller();
@@ -166,15 +170,15 @@ public class PaullController {
             }
             if (StringUtils.isNotBlank(validation)) {
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                LocalDate deadline = LocalDate.parse(validation, dateFormatter);
-                pesAller.setDaysToValidated((int) Duration.between(LocalDate.now(), deadline).toDays());
+                LocalDateTime deadline = LocalDateTime.parse(validation, dateFormatter);
+                pesAller.setDaysToValidated((int) Duration.between(LocalDateTime.now(), deadline).toDays());
             }
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {
                 status = HttpStatus.BAD_REQUEST;
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
             }
-            pesAller = pesAllerService.populateFromFile(pesAller, file);
+            pesAller = pesAllerService.populateFromFile(pesAller, multiFile);
             if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                 status = HttpStatus.BAD_REQUEST;
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
