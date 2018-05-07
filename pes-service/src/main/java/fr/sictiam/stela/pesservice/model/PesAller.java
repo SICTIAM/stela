@@ -28,8 +28,8 @@ public class PesAller {
     private LocalDateTime creation;
 
     @Column(length = 512)
-    @NotNull(groups = { RestValidation.class })
-    @Size(max = 500, groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
+    @Size(max = 500, groups = {RestValidation.class})
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -44,7 +44,7 @@ public class PesAller {
 
     private String profileUuid;
 
-    @Size(max = 250, groups = { RestValidation.class })
+    @Size(max = 250, groups = {RestValidation.class})
     private String comment;
 
     private String fileType;
@@ -66,6 +66,8 @@ public class PesAller {
     private Integer serviceOrganisationNumber;
 
     private boolean imported;
+
+    private boolean archived;
 
     public PesAller() {
     }
@@ -246,5 +248,13 @@ public class PesAller {
 
     public void setImported(boolean imported) {
         this.imported = imported;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

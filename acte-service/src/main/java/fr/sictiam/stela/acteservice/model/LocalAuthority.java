@@ -31,6 +31,7 @@ public class LocalAuthority {
     // Default deposit profile for external software
     private String genericProfileUuid;
     private Migration migration;
+    private ArchiveSettings archiveSettings;
 
     @Embedded
     private StampPosition stampPosition;
@@ -209,6 +210,14 @@ public class LocalAuthority {
 
     public void setMigration(Migration migration) {
         this.migration = migration;
+    }
+
+    public ArchiveSettings getArchiveSettings() {
+        return archiveSettings;
+    }
+
+    public void setArchiveSettings(ArchiveSettings archiveSettings) {
+        this.archiveSettings = archiveSettings;
     }
 
     @Override

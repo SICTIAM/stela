@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice.dao;
 
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.ArchiveStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -26,4 +27,8 @@ public interface ActeRepository extends JpaRepository<Acte, String> {
     Optional<Acte> findByUuid(String uuid);
 
     Optional<Acte> findByNumberAndLocalAuthoritySiren(String number, String siren);
+
+    List<Acte> findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(String uuid);
+
+    List<Acte> findAllByDraftNullAndLocalAuthorityUuidAndArchive_Status(String uuid, ArchiveStatus archiveStatus);
 }

@@ -55,7 +55,7 @@ class NewActeForm extends Component {
         acteFetched: false
     }
     validationRules = {
-        number: ['required', 'max:15', 'regex:/^[a-zA-Z0-9_]+$/'],
+        number: ['required', 'max:15', 'regex:/^[A-Z0-9_]+$/'],
         objet: 'required|max:500',
         nature: 'required',
         code: 'required',

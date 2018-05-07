@@ -3,6 +3,7 @@ package fr.sictiam.stela.pesservice;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pesservice.dao.AdminRepository;
+import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
@@ -16,6 +17,7 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.scheduler.RetryTask;
 import fr.sictiam.stela.pesservice.service.AdminService;
+import fr.sictiam.stela.pesservice.service.ArchiverService;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.LocalesService;
@@ -61,6 +63,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -105,6 +108,12 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private LocalesService localService;
+
+    @Autowired
+    private AttachmentRepository attachmentRepository;
+
+    @Autowired
+    private ArchiverService archiverService;
 
     @Autowired
     private ReceiverTask receiverTask;
@@ -345,18 +354,28 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(pesRetourRepository.count(), is(0L));
     }
 
+
+    @Test
+    public void deletePESFileTest() {
+
+        try {
+            PesAller pesAller = sampleSignedPesAller();
+            String pesAttachmentUuid = pesAller.getAttachment().getUuid();
+
+            assertThat(pesService.getByUuid(pesAller.getUuid()).getAttachment(), notNullValue());
+            assertThat(attachmentRepository.findByUuid(pesAttachmentUuid).isPresent(), is(true));
+
+            archiverService.deletePesFile(pesAller);
+            assertThat(pesService.getByUuid(pesAller.getUuid()).getAttachment(), nullValue());
+            assertThat(attachmentRepository.findByUuid(pesAttachmentUuid).isPresent(), is(false));
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to create a new PesAller");
+        }
+    }
+
     private PesAller samplePesAller() throws IOException {
-        Optional<LocalAuthority> localAuthority = localAuthorityService.getByName("SICTIAM-Test");
         PesAller pes = new PesAller();
-        pes.setPj(false);
-        pes.setComment("comment");
-        pes.setCreation(LocalDateTime.now());
-        pes.setLocalAuthority(localAuthority.get());
-        pes.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
-        pes.setFileType("PESALR1");
-        pes.setColCode("280");
-        pes.setPostId("030004");
-        pes.setBudCode("00");
+        pes = setPesAllerValues(pes);
         pes.setFileName("28000-2017-P-RN-22-1516807373820");
         InputStream in = new ClassPathResource("data/28000-2017-P-RN-22-1516807373820.xml").getInputStream();
 
@@ -367,6 +386,35 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         pes.setAttachment(pesSent);
         pes = pesService.save(pes);
         return pes;
+    }
+
+    private PesAller sampleSignedPesAller() throws IOException {
+        PesAller pes = new PesAller();
+        pes = setPesAllerValues(pes);
+        pes.setFileName("30002-2015-P-DN-16-1429552171140-sign");
+        InputStream in = new ClassPathResource("data/30002-2015-P-DN-16-1429552171140-sign.xml").getInputStream();
+
+        byte[] targetArray = new byte[in.available()];
+        in.read(targetArray);
+
+        Attachment pesSent = new Attachment(targetArray, "30002-2015-P-DN-16-1429552171140-sign.xml", in.available());
+        pes.setAttachment(pesSent);
+        pes = pesService.save(pes);
+        return pes;
+    }
+
+    private PesAller setPesAllerValues(PesAller pesAller) {
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getByName("SICTIAM-Test");
+        pesAller.setPj(false);
+        pesAller.setComment("comment");
+        pesAller.setCreation(LocalDateTime.now());
+        pesAller.setLocalAuthority(localAuthority.get());
+        pesAller.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
+        pesAller.setFileType("PESALR1");
+        pesAller.setColCode("280");
+        pesAller.setPostId("030004");
+        pesAller.setBudCode("00");
+        return pesAller;
     }
 
     @Test

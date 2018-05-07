@@ -77,15 +77,17 @@
   "admin": {
     "modules": {
       "pes": {
-        "title": "Module Helios",
+        "title": "Module PES",
         "local_authority_settings": {
-          "title": "Paramétrage des collectivités",
+          "title": "Paramétrage des du module PES de la collectivité",
           "general_informations": "Informations générales",
           "HELIOS_transmission": "Transmission Helios",
           "serverCode": "Code serveur trésorerie",
           "sirens": "Liste des SIRENs autorisés",
           "genericProfileUuid": "Agent garant",
           "no_siren": "Aucun SIREN",
+          "archive_parameters": "Préférence d'archivage",
+          "paull_parameters": "Fonctionnalités PAULL",
           "sesile": {
             "subscription": "Abonnement à Sesile",
             "secret": "Secret",
@@ -93,7 +95,7 @@
           }
         },
         "module_settings": {
-          "title": "Paramètres du module Helios",
+          "title": "Paramètres du module PES",
           "heliosAvailable": "Accessibilité du serveur Helios",
           "unavailabilityHelios": "Couper l'accès Helios",
           "alertMessageDisplayed": "Affichage du message d'alerte",

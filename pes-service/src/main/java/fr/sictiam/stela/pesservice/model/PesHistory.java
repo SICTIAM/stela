@@ -99,6 +99,14 @@ public class PesHistory implements Comparable<PesHistory> {
         this.message = message;
     }
 
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     @Override
     public int compareTo(PesHistory acteHistory) {
         return this.date.compareTo(acteHistory.getDate());

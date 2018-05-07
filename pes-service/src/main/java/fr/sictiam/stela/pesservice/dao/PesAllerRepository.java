@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface PesAllerRepository extends JpaRepository<PesAller, String> {
     Optional<PesAller> findByFileName(String fileName);
 
+    List<PesAller> findAllByLocalAuthorityUuidAndArchivedFalse(String uuid);
+
     List<PesAller> findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrue();
 }

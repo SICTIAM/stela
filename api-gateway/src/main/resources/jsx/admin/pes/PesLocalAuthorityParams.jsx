@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox} from 'semantic-ui-react'
+import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
@@ -34,20 +34,20 @@ class PesLocalAuthorityParams extends Component {
     }
     componentDidMount() {
         const uuid = this.props.uuid
-        
+
         const adminUrl = uuid ? `/api/admin/local-authority/${uuid}` : '/api/admin/local-authority/current'
-            fetchWithAuthzHandling({ url: adminUrl })
-                .then(checkStatus)
-                .then(response => response.json())
-                .then(json => {
-                    this.setState({ profiles: json.profiles })
+        fetchWithAuthzHandling({ url: adminUrl })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ profiles: json.profiles })
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
-                .catch(response => {
-                    response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                    })
-                })
-        
+            })
+
         const url = uuid ? '/api/pes/localAuthority/' + uuid : '/api/pes/localAuthority/current'
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
@@ -67,7 +67,7 @@ class PesLocalAuthorityParams extends Component {
                     this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
                 })
             })
-        
+
     }
     onkeyPress = (event) => {
         // prevent from sending the form on 'Enter'
@@ -91,15 +91,15 @@ class PesLocalAuthorityParams extends Component {
         fields.serverCode = value
         this.setState({ fields: fields })
     }
-    sesileSubscriptionChange = ( checked ) => {
+    sesileSubscriptionChange = (checked) => {
         const fields = this.state.fields
         fields.sesileSubscription = checked
-        this.setState({fields: fields})
+        this.setState({ fields: fields })
     }
-    sesileConfigurationChange = (e, {id, value }) => {
+    sesileConfigurationChange = (e, { id, value }) => {
         const fields = this.state.fields
         fields[id] = value
-        this.setState({fields: fields})
+        this.setState({ fields: fields })
     }
     validateSiren = (siren) => {
         const validation = new Validator({ siren: siren.replace(/\s/g, "") }, { siren: 'required|digits:9' })
@@ -135,8 +135,9 @@ class PesLocalAuthorityParams extends Component {
         return (
             <Page title={this.state.fields.name} >
                 <Segment>
-                    <h2>{t('admin.modules.pes.local_authority_settings.title')}</h2>
                     <Form onSubmit={this.submitForm}>
+
+                        <h2>{t('admin.modules.pes.local_authority_settings.title')}</h2>
                         <Field htmlFor='serverCode' label={t('admin.modules.pes.local_authority_settings.serverCode')}>
                             <Dropdown compact search selection
                                 id='serverCode'
@@ -155,13 +156,15 @@ class PesLocalAuthorityParams extends Component {
                                 className='simpleInput' />
                             <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>{t('api-gateway:form.add')}</Button>
                         </Field>
+
+                        <h2>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
                         <Field htmlFor='genericProfileUuid' label={t('admin.modules.pes.local_authority_settings.genericProfileUuid')}>
                             <Dropdown compact search selection
                                 id='genericProfileUuid'
                                 className='simpleInput'
                                 options={profiles}
                                 value={this.state.fields.genericProfileUuid}
-                                onChange={this.sesileConfigurationChange} 
+                                onChange={this.sesileConfigurationChange}
                                 placeholder={`${t('admin.modules.pes.local_authority_settings.genericProfileUuid')}...`} />
                         </Field>
                         <Field htmlFor='sesileSubscription' label={t('admin.modules.pes.local_authority_settings.sesile.subscription')}>
@@ -186,7 +189,7 @@ class PesLocalAuthorityParams extends Component {
                                         onChange={this.sesileConfigurationChange} />
                                 </Field>
                             </div>
-                        }                   
+                        }
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary type='submit'>{t('api-gateway:form.update')}</Button>
                         </div>
