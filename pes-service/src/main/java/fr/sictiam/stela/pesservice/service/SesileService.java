@@ -443,7 +443,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         return restTemplate
                 .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
-                .getBody().isSigned();
+                .getBody().getNom().endsWith("-sign.xml");
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document) {

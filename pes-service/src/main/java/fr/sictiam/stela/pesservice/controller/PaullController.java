@@ -127,7 +127,6 @@ public class PaullController {
 
     @PostMapping("/depotpes")
     public ResponseEntity<?> DepotPES(@PathVariable String siren, MultipartHttpServletRequest request,
-            @RequestParam(name = "file", required = false) MultipartFile file,
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "comment", required = false) String comment,
             @RequestParam(name = "name", required = false) String name,
@@ -140,10 +139,6 @@ public class PaullController {
             @RequestParam(name = "SSLVendor", required = false) String SSLVendor,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
-        // Debuggin request
-        LOGGER.debug("DEBUUGING  PES DEPOSIT");
-        Map<String, String[]> map = request.getParameterMap();
-        map.keySet().forEach(key -> LOGGER.debug("key " + key));
         Iterator<String> itrator = request.getFileNames();
         MultipartFile multiFile = request.getFile(itrator.next());
 
