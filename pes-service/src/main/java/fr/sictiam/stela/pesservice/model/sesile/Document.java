@@ -5,7 +5,7 @@ public class Document {
 
     private int id;
 
-    private String nom;
+    private String name;
 
     private boolean signed;
 
@@ -17,12 +17,12 @@ public class Document {
         this.id = id;
     }
 
-    public String getNom() {
-        return nom;
+    public String getName() {
+        return name;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isSigned() {

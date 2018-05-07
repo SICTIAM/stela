@@ -445,7 +445,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         return StringUtils.endsWith(restTemplate
                 .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
-                .getBody().getNom(), "-sign.xml");
+                .getBody().getName(), "-sign.xml");
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document) {
