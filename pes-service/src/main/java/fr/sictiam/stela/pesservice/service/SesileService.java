@@ -433,7 +433,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     }
 
-    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, int classeur) {
+    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         return restTemplate.exchange(sesileUrl + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                 classeur);
