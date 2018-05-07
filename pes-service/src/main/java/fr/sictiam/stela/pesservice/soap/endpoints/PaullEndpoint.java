@@ -134,7 +134,8 @@ public class PaullEndpoint {
                     if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
                         pesAller.setServiceOrganisationNumber(Integer.parseInt(depotPESAllerStruct1.getGroupid()));
                     }
-                    if (StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
+                    if (depotPESAllerStruct1.getPESPJ() != 1
+                            && StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
                         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                         LocalDateTime deadline = LocalDateTime.parse(depotPESAllerStruct1.getValidation(),
                                 dateFormatter);

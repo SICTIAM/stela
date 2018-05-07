@@ -277,6 +277,17 @@ public class PaullController {
     public ResponseEntity<?> getPESRetour(@PathVariable String siren, @PathVariable String idCommune,
             @RequestParam(name = "majauto", required = false, defaultValue = "0") int majauto,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
+        return getPESRetours(siren, majauto, userid, password);
+    }
+
+    @GetMapping("/getPESRetour")
+    public ResponseEntity<?> getPESRetourForSiren(@PathVariable String siren,
+            @RequestParam(name = "majauto", required = false, defaultValue = "0") int majauto,
+            @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
+        return getPESRetours(siren, majauto, userid, password);
+    }
+
+    public ResponseEntity<?> getPESRetours(String siren, int majauto, String userid, String password) {
 
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
@@ -291,7 +302,6 @@ public class PaullController {
             outputList.forEach(pesRetour -> pesRetourService.collect(pesRetour.get("filename")));
         }
         return new ResponseEntity<Object>(generatePaullResponse(status, outputList), status);
-
     }
 
     @GetMapping("/servicespes/{email}")
