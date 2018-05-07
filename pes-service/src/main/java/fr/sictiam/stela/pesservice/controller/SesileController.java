@@ -5,6 +5,8 @@ import fr.sictiam.stela.pesservice.model.SesileConfiguration;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.SesileService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/pes/sesile")
 public class SesileController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SesileController.class);
 
     private final SesileService sesileService;
     private final LocalAuthorityService localAuthorityService;
@@ -30,16 +35,26 @@ public class SesileController {
     @GetMapping("/organisations")
     public List<ServiceOrganisation> getCurrentOrganisations(
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) throws Exception {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        return sesileService.getServiceOrganisations(localAuthority, profileUuid);
+        try {
+            return sesileService.getServiceOrganisations(localAuthority, profileUuid);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
     @GetMapping("/organisations/{localAuthUuid}/{profileUuid}")
     public List<ServiceOrganisation> getCurrentOrganisationsByProfileUuid(@PathVariable String localAuthUuid,
-            @PathVariable String profileUuid) throws Exception {
+            @PathVariable String profileUuid) {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthUuid);
-        return sesileService.getServiceOrganisations(localAuthority, profileUuid);
+        try {
+            return sesileService.getServiceOrganisations(localAuthority, profileUuid);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
     @GetMapping("/subscription/{localAuthUuid}")

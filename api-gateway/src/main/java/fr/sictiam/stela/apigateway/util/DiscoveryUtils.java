@@ -8,6 +8,6 @@ public interface DiscoveryUtils {
 
     String pesServiceUrl();
 
-    String convocServiceUrl();
+    String convocationServiceUrl();
 
 }

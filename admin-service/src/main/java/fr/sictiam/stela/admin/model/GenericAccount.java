@@ -5,6 +5,7 @@ import fr.sictiam.stela.admin.model.UI.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -37,7 +38,7 @@ public class GenericAccount {
     @JsonView(Views.GenericAccountView.class)
     private String vendor;
 
-    @ManyToMany(targetEntity = LocalAuthority.class)
+    @ManyToMany(targetEntity = LocalAuthority.class, fetch = FetchType.EAGER)
     @JoinTable(name = "generic_account_local_authorities", joinColumns = {
             @JoinColumn(name = "generic_account_uuid") }, inverseJoinColumns = {
                     @JoinColumn(name = "local_authority_uuid") })

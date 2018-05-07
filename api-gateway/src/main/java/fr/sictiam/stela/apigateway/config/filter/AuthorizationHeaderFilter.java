@@ -40,6 +40,7 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
 
         ctx.addZuulRequestHeader("Authorization", "Bearer " + authenticationOpen.getAccessToken());
+        ctx.addZuulRequestHeader("ACR", authenticationOpen.getAcr());
         ctx.addZuulRequestHeader("STELA-Active-Token",
                 ((StelaUserInfo) authenticationOpen.getUserInfo()).getStelaToken());
         return null;

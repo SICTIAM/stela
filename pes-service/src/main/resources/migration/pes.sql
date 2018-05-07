@@ -33,4 +33,6 @@ messages_PES.`user_groupid` =
 	SELECT `groupid`
 	FROM `stela_stelahelios_liaison`
 	WHERE `idcoll` LIKE '%{{siren}}%'
+	LIMIT 1
 )
+group by(message_id)

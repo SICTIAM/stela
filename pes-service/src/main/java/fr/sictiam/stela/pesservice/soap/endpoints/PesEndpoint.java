@@ -429,8 +429,6 @@ public class PesEndpoint {
             JsonNode metadatas = node.get("informations");
 
             String sendGroup = metadatas.get("groupSend").asText();
-            // JsonNode profiles =
-            // externalRestService.getAgentProfiles(metadatas.get("uid").asText());
 
             boolean granted = localAuthorityGranted(genericAccount, sendGroup);
 
@@ -452,6 +450,8 @@ public class PesEndpoint {
                     return returnObject;
                 }
                 PesAller pesAller = new PesAller();
+                pesAller.setObjet(metadatas.get("title").asText());
+                pesAller.setComment(metadatas.get("comment").asText());
                 List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
                 if (!errors.isEmpty()) {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "INVALID_DATAS"));

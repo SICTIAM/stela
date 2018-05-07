@@ -34,7 +34,7 @@ public class DiscoveryUtilsDev implements DiscoveryUtils {
     }
 
     @Override
-    public String convocServiceUrl() {
+    public String convocationServiceUrl() {
         InstanceInfo instance = discoveryClient.getNextServerFromEureka("convocation-service", false);
         return instance.getHomePageUrl();
     }

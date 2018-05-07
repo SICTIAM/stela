@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xs0="http://www.processmaker.com" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://www.processmaker.com">
+  <types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://www.processmaker.com">
+
+      <xs:element name="pmResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="status_code" type="xs:integer"/>
+            <xs:element name="message" type="xs:string"/>
+            <xs:element name="timestamp" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="testsvnRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="testsvnStruct">
+        <xs:sequence>
+          <xs:element name="result1" type="xs:string"/>
+          <xs:element name="result2" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="testsvnResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="retoursvn" maxOccurs="unbounded" type="xs0:testsvnStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="depotPESAllerStruct1">
+        <xs:sequence>
+          <xs:element name="title" type="xs:string"/>
+          <xs:element name="comment" type="xs:string"/>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="desc" type="xs:string"/>
+          <xs:element name="validation" type="xs:string"/>
+          <xs:element name="PESPJ" type="xs:int" default="0" nillable="true"/>
+          <xs:element name="email" type="xs:string" nillable="true"/>
+          <xs:element name="SSLSerial" type="xs:string" nillable="true"/>
+          <xs:element name="SSLVendor" type="xs:string" nillable="true"/>
+          <xs:element name="token" type="xs:string" nillable="true"/>
+          <xs:element name="secret" type="xs:string" nillable="true"/>
+          <xs:element name="tokenSign" type="xs:string" nillable="true"/>
+          <xs:element name="secretSign" type="xs:string" nillable="true"/>
+      <xs:element name="groupid" type="xs:string" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="depotPESAllerStruct3">
+        <xs:sequence>
+          <xs:element name="filename" type="xs:string"/>
+          <xs:element name="base64" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="depotPESAllerRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+            <xs:element name="infosPESAller" maxOccurs="unbounded" type="xs0:depotPESAllerStruct1"/>
+            <xs:element name="fichier" maxOccurs="unbounded" type="xs0:depotPESAllerStruct3"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="depotPESAllerStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="idPesAller" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="depotPESAllerResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:depotPESAllerStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getDetailsPESAllerRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+            <xs:element name="IdPesAller" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="getDetailsPESAllerStruct1">
+        <xs:sequence>
+          <xs:element name="nomActeur" type="xs:string"/>
+          <xs:element name="dateAction" type="xs:string"/>
+          <xs:element name="libelleAction" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getDetailsPESAllerStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="PESPJ" type="xs:string"/>
+          <xs:element name="objet" type="xs:string"/>
+          <xs:element name="userName" type="xs:string"/>
+          <xs:element name="nomDocument" type="xs:string"/>
+          <xs:element name="dateDepot" type="xs:string"/>
+          <xs:element name="dateAR" type="xs:string"/>
+          <xs:element name="dateAnomalie" type="xs:string"/>
+          <xs:element name="motifAnomalie" type="xs:string"/>
+          <xs:element name="motifPlusAnomalie" type="xs:string"/>
+          <xs:element name="userNameBannette" type="xs:string"/>
+          <xs:element name="dateDepotBannette" type="xs:string"/>
+          <xs:element name="statutBannette" type="xs:string"/>
+          <xs:element name="etatclasseur" type="xs:string"/>
+          <xs:element name="acteurCourant" type="xs:string"/>
+          <xs:element name="nomClasseur" type="xs:string"/>
+          <xs:element name="circuitClasseur" type="xs:string"/>
+          <xs:element name="actionsClasseur" maxOccurs="unbounded" type="xs0:getDetailsPESAllerStruct1"/>
+
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getDetailsPESAllerResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:getDetailsPESAllerStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getPESAllerRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+            <xs:element name="IdPesAller" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="getPESAllerStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="filename" type="xs:string"/>
+          <xs:element name="base64" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getPESAllerResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:getPESAllerStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getPESRetourRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+        <xs:element name="IdColl" type="xs:string"/>
+        <xs:element name="majauto" type="xs:int" default="0" nillable="true"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="getTabPESRetourStruct">
+        <xs:sequence>
+          <xs:element name="chaine_archive" type="xs:string"/>
+      <xs:element name="filename" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getPESRetourStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+      <xs:element name="tabpesretour" maxOccurs="unbounded" type="xs0:getTabPESRetourStruct1"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getPESRetourResponse">
+        <xs:complexType>
+      <xs:sequence>
+        <xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:getPESRetourStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </types>
+
+  <message name="pmResponse">
+    <part name="parameters" element="xs0:pmResponse"/>
+  </message>
+  <message name="testsvnRequest">
+    <part name="parameters" element="xs0:testsvnRequest"/>
+  </message>
+  <message name="testsvnResponse">
+    <part name="parameters" element="xs0:testsvnResponse"/>
+  </message>
+  <message name="depotPESAllerRequest">
+    <part name="parameters" element="xs0:depotPESAllerRequest"/>
+  </message>
+  <message name="depotPESAllerResponse">
+    <part name="parameters" element="xs0:depotPESAllerResponse"/>
+  </message>
+  <message name="getDetailsPESAllerRequest">
+    <part name="parameters" element="xs0:getDetailsPESAllerRequest"/>
+  </message>
+  <message name="getDetailsPESAllerResponse">
+    <part name="parameters" element="xs0:getDetailsPESAllerResponse"/>
+  </message>
+  <message name="getPESAllerRequest">
+    <part name="parameters" element="xs0:getPESAllerRequest"/>
+  </message>
+  <message name="getPESAllerResponse">
+    <part name="parameters" element="xs0:getPESAllerResponse"/>
+  </message>
+   <message name="getPESRetourRequest">
+    <part name="parameters" element="xs0:getPESRetourRequest"/>
+  </message>
+  <message name="getPESRetourResponse">
+    <part name="parameters" element="xs0:getPESRetourResponse"/>
+  </message>
+
+  <portType name="ProcessMakerServiceSoap">
+    <operation name="testsvn">
+      <input message="xs0:testsvnRequest"/>
+      <output message="xs0:testsvnResponse"/>
+    </operation>
+    <operation name="depotPESAller">
+      <input message="xs0:depotPESAllerRequest"/>
+      <output message="xs0:depotPESAllerResponse"/>
+    </operation>
+    <operation name="getPESAller">
+      <input message="xs0:getPESAllerRequest"/>
+      <output message="xs0:getPESAllerResponse"/>
+    </operation>
+    <operation name="getDetailsPESAller">
+      <input message="xs0:getDetailsPESAllerRequest"/>
+      <output message="xs0:getDetailsPESAllerResponse"/>
+    </operation>
+    <operation name="getPESRetour">
+      <input message="xs0:getPESRetourRequest"/>
+      <output message="xs0:getPESRetourResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="ProcessMakerServiceSoap" type="xs0:ProcessMakerServiceSoap">
+    <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="testsvn">
+      <soap12:operation soapAction="urn:testsvn" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="depotPESAller">
+      <soap12:operation soapAction="urn:depotPESAller" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getDetailsPESAller">
+      <soap12:operation soapAction="urn:getDetailsPESAller" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getPESAller">
+      <soap12:operation soapAction="urn:getPESAller" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getPESRetour">
+      <soap12:operation soapAction="urn:getPESRetour" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="ProcessMakerService">
+    <documentation>ProcessMaker Web Service</documentation>
+    <port name="ProcessMakerServiceSoap" binding="xs0:ProcessMakerServiceSoap">
+      <soap12:address location="/fr/classic/services/webservhelios/soap2"/>
+    </port>
+  </service>
+</definitions>

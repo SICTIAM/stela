@@ -12,6 +12,8 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-web-services')
+    compile('wsdl4j:wsdl4j:1.6.2')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.apache.commons:commons-lang3:3.6')
     compile('commons-beanutils:commons-beanutils:1.8.3')

@@ -8,8 +8,10 @@ import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
+import fr.sictiam.stela.acteservice.model.util.AuthorizationContextClasses;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.util.CertUtilService;
 import fr.sictiam.stela.acteservice.service.util.RightUtils;
 import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.slf4j.Logger;
@@ -35,11 +37,13 @@ public class ActeDraftRestController {
 
     private final DraftService draftService;
     private final LocalAuthorityService localAuthorityService;
+    private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeDraftRestController(DraftService draftService, LocalAuthorityService localAuthorityService) {
+    public ActeDraftRestController(DraftService draftService, LocalAuthorityService localAuthorityService, CertUtilService certUtilService) {
         this.draftService = draftService;
         this.localAuthorityService = localAuthorityService;
+        this.certUtilService = certUtilService;
     }
 
     @GetMapping("/draft/{mode}")
@@ -121,9 +125,11 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}")
     ResponseEntity<?> submitDraft(@PathVariable String draftUuid,
+            @RequestAttribute("ACR") AuthorizationContextClasses acr,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
+                || !certUtilService.checkCert(acr.getValue())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Optional opt = draftService.sumitDraft(draftUuid, profileUuid);
@@ -154,9 +160,11 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
     ResponseEntity<?> submitActeDraft(@PathVariable String uuid,
+            @RequestAttribute("ACR") AuthorizationContextClasses acr,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
+                || !certUtilService.checkCert(acr.getValue())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);

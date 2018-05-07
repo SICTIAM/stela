@@ -100,9 +100,7 @@ public class ProfileController {
 
     @GetMapping("/local-authority/{uuid}")
     @JsonView(Views.ProfileView.class)
-    public ResponseEntity<List<Profile>> getProfiles(
-            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @PathVariable String uuid) {
+    public ResponseEntity<List<Profile>> getProfiles(@PathVariable String uuid) {
         return new ResponseEntity<>(profileService.getProfilesByLocalAuthorityUuid(uuid), HttpStatus.OK);
     }
 }

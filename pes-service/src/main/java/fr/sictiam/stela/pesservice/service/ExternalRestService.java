@@ -68,6 +68,20 @@ public class ExternalRestService {
         return node;
     }
 
+    public JsonNode getPaullConnection(String sessionID) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> profiles = webClient.get().uri("/api/admin/generic_account/session/{sessionID}", sessionID)
+                .retrieve().onStatus(HttpStatus::is4xxClientError,
+                        response -> Mono.error(new RuntimeException("Session not Found")))
+                .bodyToMono(String.class);
+
+        Optional<String> opt = profiles.blockOptional();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
+
     public GenericAccount getGenericAccount(String uuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<GenericAccount> genericAccount = webClient.get().uri("/api/admin/generic_account/{uuid}", uuid).retrieve()
@@ -85,7 +99,7 @@ public class ExternalRestService {
         Mono<String> genericAccount = webClient.get()
                 .uri("/api/admin/profile/local-authority/{siren}/{email}", siren, email).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        response -> Mono.error(new RuntimeException("generic_account_not_found")))
+                        response -> Mono.error(new RuntimeException("profile_not_found")))
                 .bodyToMono(String.class);
 
         Optional<String> opt = genericAccount.blockOptional();
