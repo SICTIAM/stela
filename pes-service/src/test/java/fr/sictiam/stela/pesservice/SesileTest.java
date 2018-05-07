@@ -7,6 +7,7 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class SesileTest {
     }
 
     @Test
+    @Ignore
     public void testPostClasseur() throws IOException {
         ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority,
                 new ClasseurRequest("test", "test", "20/02/2018", 2, 1, 3, "f.laussinot@sictiam.fr"));

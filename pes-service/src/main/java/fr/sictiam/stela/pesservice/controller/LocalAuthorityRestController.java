@@ -1,11 +1,9 @@
 package fr.sictiam.stela.pesservice.controller;
 
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.ServerCode;
 import fr.sictiam.stela.pesservice.model.migration.MigrationStatus;
 import fr.sictiam.stela.pesservice.model.ui.LocalAuthorityUpdateUI;
-import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.MigrationService;
 import org.apache.commons.beanutils.BeanUtils;
@@ -27,9 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -88,8 +84,9 @@ public class LocalAuthorityRestController {
     }
 
     @GetMapping("/server-codes")
-    public ResponseEntity<List<ServerCode>> getServerCodes(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights) {
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
+    public ResponseEntity<List<ServerCode>> getServerCodes(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(Arrays.asList(ServerCode.values()), HttpStatus.OK);
