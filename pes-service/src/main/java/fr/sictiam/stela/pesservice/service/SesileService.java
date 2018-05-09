@@ -25,7 +25,6 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.exceptions.ProfileNotConfiguredForSesileException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -443,9 +442,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public boolean checkDocumentSigned(LocalAuthority localAuthority, int document) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
 
-        return StringUtils.endsWith(restTemplate
+        return restTemplate
                 .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
-                .getBody().getName(), "-sign.xml");
+                .getBody().isSigned();
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document) {

@@ -227,7 +227,7 @@ public class PaullController {
 
         data.put("Title", pesAller.getObjet());
 
-        data.put("Name", classeur.getBody().getId());
+        data.put("Name", classeur.getBody().getNom());
         data.put("Username", node.get("email").asText());
         data.put("NomDocument", pesAller.getFileName());
         data.put("dateDepot", dateFormatter.format(pesAller.getCreation()));

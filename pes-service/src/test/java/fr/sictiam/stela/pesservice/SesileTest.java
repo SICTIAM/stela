@@ -21,6 +21,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+@Ignore
 public class SesileTest {
 
     SesileService sesileService = new SesileService(null, null, null, null);
@@ -35,7 +36,6 @@ public class SesileTest {
     }
 
     @Test
-    @Ignore
     public void testPostClasseur() throws IOException {
         ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority,
                 new ClasseurRequest("test", "test", "20/02/2018", 2, 1, 3, "f.laussinot@sictiam.fr"));
@@ -60,6 +60,11 @@ public class SesileTest {
         assertThat(retour.getStatusCodeValue(), is(HttpStatus.OK.value()));
 
         assertThat(sesileService.checkDocumentSigned(localAuthority, retour.getBody().getId()), is(false));
+    }
+
+    @Test
+    public void testSigned() {
+        assertThat(sesileService.checkDocumentSigned(localAuthority, 3217), is(true));
     }
 
 }
