@@ -10,7 +10,7 @@ import { translate } from 'react-i18next'
 import 'semantic-ui-css/semantic.min.css';
 import '../styles/index.css';
 
-import { fetchWithAuthzHandling, getRightsFromGroups, rightsResolver } from './_util/utils'
+import { fetchWithAuthzHandling, getRightsFromGroups, rightsFeatureResolver } from './_util/utils'
 import history from './_util/history'
 import i18n from './_util/i18n'
 import ErrorPage from './_components/ErrorPage'
@@ -145,7 +145,7 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowe
                 <Menu />
                 <Container className='mainContainer'>
                     {isLoggedIn
-                        ? rightsResolver(userRights, allowedRights)
+                        ? rightsFeatureResolver(userRights, allowedRights)
                             ? certificate || !certRequired
                                 ? <Fragment>
                                     <AlertMessage {...props} />
