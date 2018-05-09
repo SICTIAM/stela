@@ -230,36 +230,34 @@ public class PaullGenericController {
         String message = "OK";
 
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
+
         if (localAuthority.isPresent()) {
-            if (localAuthority.isPresent()) {
-                ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(),
-                        idFlux);
+            ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
 
-                if (classeurResponse.hasBody()) {
-                    Classeur classeur = classeurResponse.getBody();
+            if (classeurResponse.hasBody()) {
+                Classeur classeur = classeurResponse.getBody();
 
-                    if (!classeur.getDocuments().isEmpty()) {
-                        Document document = classeur.getDocuments().get(0);
-                        data.put("NomDocument", document.getName());
+                if (!classeur.getDocuments().isEmpty()) {
+                    Document document = classeur.getDocuments().get(0);
+                    data.put("NomDocument", document.getName());
 
-                        data.put("Contenu",
-                                Base64.encode(sesileService.getDocumentBody(localAuthority.get(), document.getId())));
-                        data.put("datevalide", classeur.getValidation());
-
-                    } else {
-                        status = HttpStatus.BAD_REQUEST;
-                        message = "No document in Classeur";
-                    }
+                    data.put("Contenu",
+                            Base64.encode(sesileService.getDocumentBody(localAuthority.get(), document.getId())));
+                    data.put("datevalide", classeur.getValidation());
 
                 } else {
                     status = HttpStatus.BAD_REQUEST;
-                    message = "Classeur was not found";
+                    message = "No document in Classeur";
                 }
 
             } else {
                 status = HttpStatus.BAD_REQUEST;
-                message = "LocalAuthority was not found";
+                message = "Classeur was not found";
             }
+
+        } else {
+            status = HttpStatus.BAD_REQUEST;
+            message = "LocalAuthority was not found";
         }
 
         return new ResponseEntity<Object>(generatePaullResponse(status, data, message), status);
