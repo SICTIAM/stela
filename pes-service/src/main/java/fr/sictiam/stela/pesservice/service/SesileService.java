@@ -13,7 +13,9 @@ import fr.sictiam.signature.pes.verifier.SimplePesInformation;
 import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1;
 import fr.sictiam.signature.pes.verifier.XadesInfoProcessor.XadesInfoProcessResult1;
 import fr.sictiam.signature.utils.DateUtils;
+import fr.sictiam.stela.pesservice.dao.GenericDocumentRepository;
 import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
+import fr.sictiam.stela.pesservice.model.GenericDocument;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.SesileConfiguration;
@@ -53,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,14 +74,18 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private final SesileConfigurationRepository sesileConfigurationRepository;
 
+    private final GenericDocumentRepository genericDocumentRepository;
+
     private final LocalesService localesService;
 
     public SesileService(PesAllerService pesService, ExternalRestService externalRestService,
-            SesileConfigurationRepository sesileConfigurationRepository, LocalesService localesService) {
+            SesileConfigurationRepository sesileConfigurationRepository, LocalesService localesService,
+            GenericDocumentRepository genericDocumentRepository) {
         this.pesService = pesService;
         this.externalRestService = externalRestService;
         this.sesileConfigurationRepository = sesileConfigurationRepository;
         this.localesService = localesService;
+        this.genericDocumentRepository = genericDocumentRepository;
     }
 
     public SesileConfiguration createOrUpdate(SesileConfiguration sesileConfiguration) {
@@ -418,6 +425,16 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     }
 
+    public List<ServiceOrganisation> getServiceGenericOrganisations(LocalAuthority localauthority, String email) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
+        List<ServiceOrganisation> organisations = Arrays
+                .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                        ServiceOrganisation[].class, email).getBody());
+
+        return organisations;
+
+    }
+
     public List<ServiceOrganisation> getHeliosServiceOrganisations(LocalAuthority localauthority, String email) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
         List<ServiceOrganisation> organisations = Arrays
@@ -440,11 +457,15 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public boolean checkDocumentSigned(LocalAuthority localAuthority, int document) {
+        return getDocument(localAuthority, document).isSigned();
+    }
+
+    public Document getDocument(LocalAuthority localAuthority, int document) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
 
         return restTemplate
                 .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
-                .getBody().isSigned();
+                .getBody();
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document) {
@@ -483,6 +504,14 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         }
         return new Pair<StatusType, String>(status, errorMessage);
 
+    }
+
+    public Optional<GenericDocument> getGenericDocument(Integer fluxId) {
+        return genericDocumentRepository.findById(fluxId);
+    }
+
+    public GenericDocument saveGenericDocument(GenericDocument genericDocument) {
+        return genericDocumentRepository.save(genericDocument);
     }
 
     @Override

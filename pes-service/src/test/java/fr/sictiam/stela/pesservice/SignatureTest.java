@@ -16,7 +16,7 @@ import static org.junit.Assert.assertThat;
 
 public class SignatureTest {
 
-    SesileService sesileService = new SesileService(null, null, null, null);
+    SesileService sesileService = new SesileService(null, null, null, null, null);
 
     @Test
     public void testsigned() throws IOException {

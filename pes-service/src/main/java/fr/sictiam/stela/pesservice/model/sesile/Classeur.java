@@ -16,6 +16,8 @@ public class Classeur {
 
     private String validation;
 
+    private String circuit;
+
     private int type;
 
     private ClasseurStatus status;
@@ -31,8 +33,6 @@ public class Classeur {
     }
 
     private int visibilite;
-
-    private String email;
 
     public String getNom() {
         return nom;
@@ -66,6 +66,14 @@ public class Classeur {
         this.type = type;
     }
 
+    public String getCircuit() {
+        return circuit;
+    }
+
+    public void setCircuit(String circuit) {
+        this.circuit = circuit;
+    }
+
     public int getId() {
         return id;
     }
@@ -90,11 +98,11 @@ public class Classeur {
         this.visibilite = visibilite;
     }
 
-    public String getEmail() {
-        return email;
+    public List<Document> getDocuments() {
+        return documents;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setDocuments(List<Document> documents) {
+        this.documents = documents;
     }
 }
