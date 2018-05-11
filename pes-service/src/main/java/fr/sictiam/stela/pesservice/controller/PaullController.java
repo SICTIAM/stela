@@ -33,9 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -167,8 +165,8 @@ public class PaullController {
             if (StringUtils.isNotBlank(validation)) {
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDate deadline = LocalDate.parse(validation, dateFormatter);
-                pesAller.setDaysToValidated(
-                        (int) Duration.between(LocalDateTime.now(), deadline.atStartOfDay()).toDays());
+                pesAller.setValidationLimit(deadline);
+
             }
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {

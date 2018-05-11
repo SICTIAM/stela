@@ -27,6 +27,7 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.exceptions.ProfileNotConfiguredForSesileException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,13 +104,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     .orElseThrow(ProfileNotConfiguredForSesileException::new);
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
-            LocalDate localDate = LocalDate.now().plusDays(pes.getDaysToValidated() != null ? pes.getDaysToValidated()
-                    : sesileConfiguration.getDaysToValidated());
+            LocalDate deadline = pes.getValidationLimit() != null ? pes.getValidationLimit()
+                    : LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
-                    new ClasseurRequest(pes.getObjet(), "", localDate.format(dateTimeFormatter),
-                            sesileConfiguration.getType(),
+                    new ClasseurRequest(pes.getObjet(), StringUtils.defaultString(pes.getComment()),
+                            deadline.format(dateTimeFormatter), sesileConfiguration.getType(),
                             pes.getServiceOrganisationNumber() != null ? pes.getServiceOrganisationNumber()
                                     : sesileConfiguration.getServiceOrganisationNumber(),
                             sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));

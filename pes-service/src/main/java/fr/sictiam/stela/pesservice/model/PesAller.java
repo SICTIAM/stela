@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.SortedSet;
 
@@ -27,8 +28,8 @@ public class PesAller {
     private LocalDateTime creation;
 
     @Column(length = 512)
-    @NotNull(groups = {RestValidation.class})
-    @Size(max = 500, groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
+    @Size(max = 500, groups = { RestValidation.class })
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -43,7 +44,7 @@ public class PesAller {
 
     private String profileUuid;
 
-    @Size(max = 250, groups = {RestValidation.class})
+    @Size(max = 250, groups = { RestValidation.class })
     private String comment;
 
     private String fileType;
@@ -60,7 +61,7 @@ public class PesAller {
 
     private Integer sesileDocumentId;
 
-    private Integer daysToValidated;
+    private LocalDate validationLimit;
 
     private Integer serviceOrganisationNumber;
 
@@ -69,9 +70,10 @@ public class PesAller {
     public PesAller() {
     }
 
-    public PesAller(LocalDateTime creation, String objet, Attachment attachment, SortedSet<PesHistory> pesHistories, LocalAuthority localAuthority, String profileUuid, String comment, String fileType,
-            String colCode, String postId, String budCode, String fileName, boolean pj, boolean signed,
-            Integer sesileDocumentId, boolean imported) {
+    public PesAller(LocalDateTime creation, String objet, Attachment attachment, SortedSet<PesHistory> pesHistories,
+            LocalAuthority localAuthority, String profileUuid, String comment, String fileType, String colCode,
+            String postId, String budCode, String fileName, boolean pj, boolean signed, Integer sesileDocumentId,
+            boolean imported) {
         this.creation = creation;
         this.objet = objet;
         this.attachment = attachment;
@@ -218,12 +220,12 @@ public class PesAller {
         return sesileDocumentId;
     }
 
-    public Integer getDaysToValidated() {
-        return daysToValidated;
+    public LocalDate getValidationLimit() {
+        return validationLimit;
     }
 
-    public void setDaysToValidated(Integer daysToValidated) {
-        this.daysToValidated = daysToValidated;
+    public void setValidationLimit(LocalDate validationLimit) {
+        this.validationLimit = validationLimit;
     }
 
     public Integer getServiceOrganisationNumber() {
