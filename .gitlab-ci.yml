@@ -7,7 +7,7 @@ image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=true"
 services:
-  - docker:dind
+  - docker:18.03-dind
 
 stages:
   - test
