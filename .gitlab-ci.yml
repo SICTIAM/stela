@@ -36,7 +36,7 @@ test:
 registry:
   stage: registry
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - docker login -u gitlab-ci-token -p IG0heUNFAIEAtvYz forge-registry.sictiam.fr &
     - ./gradlew --build-cache --stacktrace -g /cache image -Ppush
   only:
     - develop
@@ -44,7 +44,7 @@ registry:
 registry-prod:
   stage: registry-prod
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - docker login -u gitlab-ci-token -p IG0heUNFAIEAtvYz forge-registry.sictiam.fr &
     - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
   only:
     - master
