@@ -476,6 +476,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
+        LOGGER.debug(classeur.toString());
         HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(localAuthority));
         return restTemplate.exchange(sesileUrl + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
     }
