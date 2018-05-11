@@ -85,7 +85,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété title.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getTitle() {
         return title;
@@ -96,7 +96,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setTitle(String value) {
         this.title = value;
@@ -106,7 +106,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété comment.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getComment() {
         return comment;
@@ -117,7 +117,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setComment(String value) {
         this.comment = value;
@@ -127,7 +127,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété name.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getName() {
         return name;
@@ -138,7 +138,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -148,7 +148,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété desc.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getDesc() {
         return desc;
@@ -159,7 +159,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setDesc(String value) {
         this.desc = value;
@@ -169,7 +169,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété validation.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getValidation() {
         return validation;
@@ -180,7 +180,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setValidation(String value) {
         this.validation = value;
@@ -190,7 +190,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété pespj.
      *
      * @return possible object is {@link Integer }
-     * 
+     *
      */
     public Integer getPESPJ() {
         return pespj;
@@ -201,7 +201,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link Integer }
-     * 
+     *
      */
     public void setPESPJ(Integer value) {
         this.pespj = value;
@@ -211,7 +211,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété email.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getEmail() {
         return email;
@@ -222,7 +222,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setEmail(String value) {
         this.email = value;
@@ -232,7 +232,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété sslSerial.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getSSLSerial() {
         return sslSerial;
@@ -243,7 +243,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setSSLSerial(String value) {
         this.sslSerial = value;
@@ -253,7 +253,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété sslVendor.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getSSLVendor() {
         return sslVendor;
@@ -264,7 +264,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setSSLVendor(String value) {
         this.sslVendor = value;
@@ -274,7 +274,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété token.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getToken() {
         return token;
@@ -285,7 +285,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setToken(String value) {
         this.token = value;
@@ -295,7 +295,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété secret.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getSecret() {
         return secret;
@@ -306,7 +306,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setSecret(String value) {
         this.secret = value;
@@ -316,7 +316,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété tokenSign.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getTokenSign() {
         return tokenSign;
@@ -327,7 +327,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setTokenSign(String value) {
         this.tokenSign = value;
@@ -337,7 +337,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété secretSign.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getSecretSign() {
         return secretSign;
@@ -348,7 +348,7 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setSecretSign(String value) {
         this.secretSign = value;
@@ -358,7 +358,7 @@ public class DepotPESAllerStruct1 {
      * Obtient la valeur de la propriété groupid.
      *
      * @return possible object is {@link String }
-     * 
+     *
      */
     public String getGroupid() {
         return groupid;
@@ -369,10 +369,18 @@ public class DepotPESAllerStruct1 {
      *
      * @param value
      *            allowed object is {@link String }
-     * 
+     *
      */
     public void setGroupid(String value) {
         this.groupid = value;
+    }
+
+    @Override
+    public String toString() {
+        return "DepotPESAllerStruct1 [title=" + title + ", comment=" + comment + ", name=" + name + ", desc=" + desc
+                + ", validation=" + validation + ", pespj=" + pespj + ", email=" + email + ", sslSerial=" + sslSerial
+                + ", sslVendor=" + sslVendor + ", token=" + token + ", secret=" + secret + ", tokenSign=" + tokenSign
+                + ", secretSign=" + secretSign + ", groupid=" + groupid + "]";
     }
 
 }

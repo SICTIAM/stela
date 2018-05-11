@@ -115,6 +115,7 @@ public class PaullEndpoint {
 
             } else {
                 DepotPESAllerStruct1 depotPESAllerStruct1 = depotPesAller.getInfosPESAller().get(0);
+                LOGGER.debug(depotPESAllerStruct1.toString());
                 byte[] file = Base64.decode(depotPesAller.getFichier().get(0).getBase64().getBytes("UTF-8"));
                 String name = StringUtils.stripAccents(depotPesAller.getFichier().get(0).getFilename());
                 if (pesAllerService.checkVirus(file)) {
@@ -131,6 +132,7 @@ public class PaullEndpoint {
                     Attachment attachment = new Attachment(file, name, file.length);
                     pesAller.setAttachment(attachment);
                     pesAller.setCreation(LocalDateTime.now());
+
                     if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
                         pesAller.setServiceOrganisationNumber(Integer.parseInt(depotPESAllerStruct1.getGroupid()));
                     }
