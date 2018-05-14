@@ -157,8 +157,8 @@ public class PaullController {
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
             PesAller pesAller = new PesAller();
-            String decodedTitle = new String(title.getBytes("ISO-8859-1"));
-            String decodedComment = new String(comment.getBytes("UTF-8"));
+            String decodedTitle = new String(title.getBytes("Windows-1252"));
+            String decodedComment = new String(comment.getBytes("Windows-1252"));
             pesAller.setObjet(decodedTitle);
             pesAller.setComment(decodedComment);
             if (StringUtils.isNotBlank(service)) {
