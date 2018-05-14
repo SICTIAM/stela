@@ -177,7 +177,7 @@ class AppRoute extends Component {
                 if (profile.agent.admin) userRights.push('ADMIN')
                 this.setState({ userRights })
             })
-        fetchWithAuthzHandling({ url: '/api/api-gateway/isAuthenticatedWithCertificate' })
+        fetchWithAuthzHandling({ url: '/api/api-gateway/hasValidCertificate' })
             .then(response => response.json())
             .then(certificate => this.setState({ certificate }))
     }

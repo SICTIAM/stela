@@ -1,5 +1,6 @@
 package fr.sictiam.stela.apigateway.controller;
 
+import fr.sictiam.stela.apigateway.model.CertificateInfos;
 import fr.sictiam.stela.apigateway.service.CertUtilService;
 import fr.sictiam.stela.apigateway.service.LocalAuthorityInstanceService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
@@ -51,6 +52,16 @@ public class InstanceController {
         OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
         return !certVerificationEnabled
                 || certUtilService.checkCert(authenticationOpen.getAcr());
+    }
+
+    @GetMapping(value = "/hasValidCertificate")
+    public Boolean hasValidCertificate(HttpServletRequest request) {
+        return !certVerificationEnabled || certUtilService.checkCert(request);
+    }
+
+    @GetMapping(value = "/certInfos")
+    public CertificateInfos getCertInfos(HttpServletRequest request) {
+        return certUtilService.getCertInfosFromHeaders(request);
     }
 
     @GetMapping(value = "/isMainDomain")

@@ -295,7 +295,10 @@
         },
         "certificate_required": {
             "title": "Certificat électronique requis",
-            "content": "Merci de vous reconnecter avec un certificat électronique pour pouvoir accéder à cette fonctionnalité"
+            "EXPIRED": "Votre certificat est expiré",
+            "REVOKED": "Votre certificat est révoqué",
+            "OTHER": "Votre certificat est invalide",
+            "VALID": "Votre certificat est valide"
         }
     },
     "made_with_love": "Créé avec ❤ par le SICTIAM"
