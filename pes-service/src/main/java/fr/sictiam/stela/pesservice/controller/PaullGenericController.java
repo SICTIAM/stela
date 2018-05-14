@@ -116,7 +116,7 @@ public class PaullGenericController {
         return genericAccount;
     }
 
-    @PostMapping("/depotdoc")
+    @PostMapping("/depot")
     public ResponseEntity<?> depotDoc(@PathVariable String siren, MultipartHttpServletRequest request,
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "comment", required = false) String comment,
