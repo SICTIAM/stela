@@ -59,15 +59,19 @@ public class ReceiverTask {
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
                 LOGGER.debug("file RECEIVED : " + ftpFile.getName());
-                InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                 if (ftpFile.getName().contains("ACK")) {
+                    InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                     readACK(inputStream, ftpFile.getName());
                 } else if (ftpFile.isFile() && ftpFile.getName().startsWith("PES2R")) {
+                    InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                     readPesRetour(inputStream, ftpFile.getName());
+
                 }
             }
         }
-        // ftpSession.close();
+        ftpClient.logout();
+        ftpClient.disconnect();
+        ftpSession.close();
     }
 
     public void readACK(InputStream inputStream, String ackName)
