@@ -65,13 +65,9 @@ public class ReceiverTask {
                 } else if (ftpFile.isFile() && ftpFile.getName().startsWith("PES2R")) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                     readPesRetour(inputStream, ftpFile.getName());
-
                 }
             }
         }
-        ftpClient.logout();
-        ftpClient.disconnect();
-        ftpSession.close();
     }
 
     public void readACK(InputStream inputStream, String ackName)
@@ -96,9 +92,7 @@ public class ReceiverTask {
         } else {
             String errorMessage = path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/LibelleAnoAck/@V", document);
             pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errorMessage);
-
         }
-
     }
 
     public void readPesRetour(InputStream inputStream, String pesRetourName)
@@ -122,7 +116,6 @@ public class ReceiverTask {
         } else {
             String idPost = path.evaluate("/PES_Retour/EnTetePES/IdPost/@V", document);
             // TODO send mail to user of this idpost CF redmine issue #3140
-
         }
 
     }
