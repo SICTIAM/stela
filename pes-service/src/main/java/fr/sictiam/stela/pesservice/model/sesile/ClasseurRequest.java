@@ -82,4 +82,10 @@ public class ClasseurRequest {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    @Override
+    public String toString() {
+        return "ClasseurRequest [name=" + name + ", desc=" + desc + ", validation=" + validation + ", type=" + type
+                + ", groupe=" + groupe + ", visibilite=" + visibilite + ", email=" + email + "]";
+    }
 }

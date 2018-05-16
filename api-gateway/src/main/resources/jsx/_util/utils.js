@@ -69,10 +69,17 @@ const getRightsFromGroups = (groups) => {
     return rights
 }
 
-const rightsResolver = (userRights, allowedRights) => {
+const rightsFeatureResolver = (userRights, allowedRights) => {
     if (!allowedRights || allowedRights.length === 0) return true
     for (let i in userRights) {
         if (allowedRights.includes(userRights[i])) return true
+    }
+    return false
+}
+
+const rightsModuleResolver = (userRights, moduleName) => {
+    for (let i in userRights) {
+        if (userRights[i].includes(moduleName)) return true
     }
     return false
 }
@@ -86,5 +93,6 @@ module.exports = {
     capitalizeFirstLetter,
     getHistoryStatusTranslationKey,
     getRightsFromGroups,
-    rightsResolver
+    rightsFeatureResolver,
+    rightsModuleResolver
 }

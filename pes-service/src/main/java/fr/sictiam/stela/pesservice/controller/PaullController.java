@@ -33,8 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -158,15 +157,18 @@ public class PaullController {
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
             PesAller pesAller = new PesAller();
-            pesAller.setObjet(title);
-            pesAller.setComment(comment);
+            String decodedTitle = new String(title.getBytes("Windows-1252"));
+            String decodedComment = new String(comment.getBytes("Windows-1252"));
+            pesAller.setObjet(decodedTitle);
+            pesAller.setComment(decodedComment);
             if (StringUtils.isNotBlank(service)) {
                 pesAller.setServiceOrganisationNumber(Integer.parseInt(service));
             }
             if (StringUtils.isNotBlank(validation)) {
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                LocalDateTime deadline = LocalDateTime.parse(validation, dateFormatter);
-                pesAller.setDaysToValidated((int) Duration.between(LocalDateTime.now(), deadline).toDays());
+                LocalDate deadline = LocalDate.parse(validation, dateFormatter);
+                pesAller.setValidationLimit(deadline);
+
             }
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {
@@ -227,7 +229,7 @@ public class PaullController {
 
         data.put("Title", pesAller.getObjet());
 
-        data.put("Name", classeur.getBody().getId());
+        data.put("Name", classeur.getBody().getNom());
         data.put("Username", node.get("email").asText());
         data.put("NomDocument", pesAller.getFileName());
         data.put("dateDepot", dateFormatter.format(pesAller.getCreation()));

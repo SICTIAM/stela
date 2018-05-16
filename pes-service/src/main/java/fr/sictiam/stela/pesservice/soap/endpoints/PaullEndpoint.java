@@ -32,7 +32,7 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.io.IOException;
-import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -115,6 +115,7 @@ public class PaullEndpoint {
 
             } else {
                 DepotPESAllerStruct1 depotPESAllerStruct1 = depotPesAller.getInfosPESAller().get(0);
+                LOGGER.debug(depotPESAllerStruct1.toString());
                 byte[] file = Base64.decode(depotPesAller.getFichier().get(0).getBase64().getBytes("UTF-8"));
                 String name = StringUtils.stripAccents(depotPesAller.getFichier().get(0).getFilename());
                 if (pesAllerService.checkVirus(file)) {
@@ -131,15 +132,15 @@ public class PaullEndpoint {
                     Attachment attachment = new Attachment(file, name, file.length);
                     pesAller.setAttachment(attachment);
                     pesAller.setCreation(LocalDateTime.now());
+
                     if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
                         pesAller.setServiceOrganisationNumber(Integer.parseInt(depotPESAllerStruct1.getGroupid()));
                     }
                     if (depotPESAllerStruct1.getPESPJ() != 1
                             && StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
                         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        LocalDateTime deadline = LocalDateTime.parse(depotPESAllerStruct1.getValidation(),
-                                dateFormatter);
-                        pesAller.setDaysToValidated((int) Duration.between(LocalDateTime.now(), deadline).toDays());
+                        LocalDate deadline = LocalDate.parse(depotPESAllerStruct1.getValidation(), dateFormatter);
+                        pesAller.setValidationLimit(deadline);
                     }
                     pesAller = pesAllerService.populateFromByte(pesAller, file);
                     if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {

@@ -7,7 +7,7 @@ image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=true"
 services:
-  - docker:dind
+  - docker:18.03-dind
 
 stages:
   - test
@@ -36,7 +36,7 @@ test:
 registry:
   stage: registry
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
     - ./gradlew --build-cache --stacktrace -g /cache image -Ppush
   only:
     - develop
@@ -44,7 +44,7 @@ registry:
 registry-prod:
   stage: registry-prod
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN forge-registry.sictiam.fr &
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
     - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
   only:
     - master
