@@ -29,6 +29,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -59,15 +61,31 @@ public class ReceiverTask {
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
                 LOGGER.debug("file RECEIVED : " + ftpFile.getName());
-                if (ftpFile.getName().contains("ACK")) {
+                if (ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
-                    readACK(inputStream, ftpFile.getName());
-                } else if (ftpFile.isFile() && ftpFile.getName().startsWith("PES2R")) {
-                    InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
-                    readPesRetour(inputStream, ftpFile.getName());
+                    boolean completed = ftpClient.completePendingCommand();
+                    if (completed) {
+                        byte[] buffer = new byte[inputStream.available()];
+                        inputStream.read(buffer);
+
+                        File targetFile = new File(ftpFile.getName());
+                        FileOutputStream outStream = new FileOutputStream(targetFile);
+                        outStream.write(buffer);
+                        if (ftpFile.getName().contains("ACK")) {
+                            readACK(inputStream, ftpFile.getName());
+                        } else if (ftpFile.getName().startsWith("PES2R")) {
+                            readPesRetour(inputStream, ftpFile.getName());
+                        }
+                        inputStream.close();
+                        outStream.close();
+                    } else {
+                        LOGGER.error("download not completed");
+                    }
                 }
             }
         }
+        ftpClient.logout();
+        ftpSession.close();
     }
 
     public void readACK(InputStream inputStream, String ackName)

@@ -327,9 +327,19 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             ftpClient.sendSiteCommand("P_APPLI GHELPES2");
             ftpClient.sendSiteCommand("P_MSG " + pes.getFileType() + "#" + pes.getColCode() + "#" + pes.getPostId()
                     + "#" + pes.getBudCode());
-            ftpSession.append(byteArrayInputStream, pes.getAttachment().getFilename());
-        } catch (IOException e) {
+            ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
+            Thread.sleep(2000);
+        } catch (IOException | InterruptedException e) {
             throw new PesSendException();
+        } finally {
+            try {
+                byteArrayInputStream.close();
+                ftpClient.logout();
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage());
+            } finally {
+                ftpSession.close();
+            }
         }
     }
 }
