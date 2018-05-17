@@ -1,0 +1,1 @@
+ALTER TABLE local_authority ADD COLUMN organization_id character varying(255);

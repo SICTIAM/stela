@@ -6,13 +6,19 @@ import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UserGatewayRequest;
 import fr.sictiam.stela.admin.model.UserMigration;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,8 +29,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AgentService {
@@ -34,10 +42,20 @@ public class AgentService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Value("${application.usersgw.url}")
+    private String usersgwUrl;
+
+    @Value("${application.usersgw.user}")
+    private String usersgwUser;
+
+    @Value("${application.usersgw.password}")
+    private String usersgwPassword;
+
     private final AgentRepository agentRepository;
     private final ProfileRepository profileRepository;
     private final LocalAuthorityService localAuthorityService;
     private final WorkGroupService workGroupService;
+    private RestTemplate restTemplate = new RestTemplate();
 
     public AgentService(AgentRepository agentRepository, ProfileRepository profileRepository,
             LocalAuthorityService localAuthorityService, WorkGroupService workGroupService) {
@@ -99,7 +117,8 @@ public class AgentService {
         for (UserMigration userMigration : migrationWrapper.getUserMigrations()) {
             Optional<Agent> agentOpt = agentRepository.findByEmail(userMigration.getEmail());
             Agent agent;
-            if (agentOpt.isPresent()) agent = agentOpt.get();
+            if (agentOpt.isPresent())
+                agent = agentOpt.get();
             else {
                 agent = new Agent(userMigration.getEmail());
                 agent.setAdmin(false);
@@ -108,9 +127,10 @@ public class AgentService {
 
             Profile profile = null;
             if (agent.getUuid() != null) {
-                Optional<Profile> profileOpt = profileRepository.findByLocalAuthority_UuidAndAgent_Uuid(
-                        localAuthority.getUuid(), agent.getUuid());
-                if (profileOpt.isPresent()) profile = profileOpt.get();
+                Optional<Profile> profileOpt = profileRepository
+                        .findByLocalAuthority_UuidAndAgent_Uuid(localAuthority.getUuid(), agent.getUuid());
+                if (profileOpt.isPresent())
+                    profile = profileOpt.get();
             }
             if (profile == null) {
                 profile = new Profile(localAuthority, agent, agent.isAdmin());
@@ -128,6 +148,25 @@ public class AgentService {
             localAuthority.getProfiles().add(profile);
             localAuthorityService.createOrUpdate(localAuthority);
         }
+
+        HttpHeaders headers = createHeaders(usersgwUser, usersgwPassword);
+        UserGatewayRequest userGatewayRequest = new UserGatewayRequest(migrationWrapper.getUserMigrations().stream()
+                .map(userMigration -> userMigration.getEmail()).collect(Collectors.toList()),
+                localAuthority.getOzwilloInstanceInfo());
+        HttpEntity<UserGatewayRequest> requestEntity = new HttpEntity<>(userGatewayRequest, headers);
+        restTemplate.exchange(usersgwUrl, HttpMethod.POST, requestEntity, String.class);
+
+    }
+
+    HttpHeaders createHeaders(String username, String password) {
+        return new HttpHeaders() {
+            {
+                String auth = username + ":" + password;
+                byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes());
+                String authHeader = "Basic " + new String(encodedAuth);
+                set("Authorization", authHeader);
+            }
+        };
     }
 
     public List<Agent> getAllWithPagination(String search, String localAuthorityUuid, Integer limit, Integer offset,

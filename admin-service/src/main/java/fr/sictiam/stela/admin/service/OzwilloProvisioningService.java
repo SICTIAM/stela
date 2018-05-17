@@ -111,10 +111,11 @@ public class OzwilloProvisioningService {
         String slugName = new Slugify().slugify(provisioningRequest.getOrganization().getName());
         LocalAuthority localAuthority = new LocalAuthority(provisioningRequest.getOrganization().getName(), siren,
                 slugName);
-        OzwilloInstanceInfo ozwilloInstanceInfo = new OzwilloInstanceInfo(provisioningRequest.getInstanceId(),
-                provisioningRequest.getClientId(), provisioningRequest.getClientSecret(),
-                provisioningRequest.getInstanceRegistrationUri(), provisioningRequest.getUser().getId(),
-                provisioningRequest.getUser().getName(), provisioningRequest.getOrganization().getDcId());
+        OzwilloInstanceInfo ozwilloInstanceInfo = new OzwilloInstanceInfo(provisioningRequest.getOrganization().getId(),
+                provisioningRequest.getInstanceId(), provisioningRequest.getClientId(),
+                provisioningRequest.getClientSecret(), provisioningRequest.getInstanceRegistrationUri(),
+                provisioningRequest.getUser().getId(), provisioningRequest.getUser().getName(),
+                provisioningRequest.getOrganization().getDcId());
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
         localAuthorityService.createOrUpdate(localAuthority);
 
@@ -189,10 +190,10 @@ public class OzwilloProvisioningService {
 
         LocalAuthority localAuthority = optionalLocalAuthority.get();
         switch (statusChangeRequest.getStatus()) {
-        case "STOPPED":
-            localAuthority.setStatus(LocalAuthority.Status.STOPPED);
-        case "RUNNING":
-            localAuthority.setStatus(LocalAuthority.Status.RUNNING);
+            case "STOPPED":
+                localAuthority.setStatus(LocalAuthority.Status.STOPPED);
+            case "RUNNING":
+                localAuthority.setStatus(LocalAuthority.Status.RUNNING);
         }
 
         localAuthorityService.modify(localAuthority);

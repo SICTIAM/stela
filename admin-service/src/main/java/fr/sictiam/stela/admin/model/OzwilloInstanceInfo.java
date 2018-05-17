@@ -7,6 +7,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class OzwilloInstanceInfo {
 
+    private String organizationId;
     private String instanceId;
     private String clientId;
     private String clientSecret;
@@ -22,8 +23,9 @@ public class OzwilloInstanceInfo {
     public OzwilloInstanceInfo() {
     }
 
-    public OzwilloInstanceInfo(String instanceId, String clientId, String clientSecret, String instanceRegistrationUri,
-            String creatorId, String creatorName, String dcId) {
+    public OzwilloInstanceInfo(String organizationId, String instanceId, String clientId, String clientSecret,
+            String instanceRegistrationUri, String creatorId, String creatorName, String dcId) {
+        this.organizationId = organizationId;
         this.instanceId = instanceId;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -33,6 +35,14 @@ public class OzwilloInstanceInfo {
         this.creatorId = creatorId;
         this.creatorName = creatorName;
         this.dcId = dcId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getInstanceId() {

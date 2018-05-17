@@ -51,7 +51,8 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
         LocalAuthority localAuthority = new LocalAuthority("Test", "368569321", "test");
 
         localAuthority.addModule(Module.ACTES);
-        OzwilloInstanceInfo ow = new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test");
+        OzwilloInstanceInfo ow = new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test",
+                "test");
         localAuthority.setOzwilloInstanceInfo(ow);
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
         WorkGroup workGroup = workGroupService.create(new WorkGroup(localAuthority, "GlobalGroup"));
