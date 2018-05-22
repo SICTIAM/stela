@@ -22,7 +22,8 @@
       "comment": "Commentaire",
       "attachment": "Fichier",
       "creation": "Date de création",
-      "status": "Status"
+      "status": "Status",
+      "agent": "Déposé par"
     },
     "new": {
       "title": "Télétransmission d'une enveloppe"

@@ -28,8 +28,10 @@ class Pes extends Component {
             },
             pesHistories: [],
             localAuthority: {},
+            profileUuid: '',
             pj: false
         },
+        agent: '',
         fetched: false
     }
     componentDidMount() {
@@ -37,13 +39,18 @@ class Pes extends Component {
             fetchWithAuthzHandling({ url: '/api/pes/' + this.props.uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ pes: json, fetched: true }))
+                .then(json => this.setState({ pes: json, fetched: true }, this.getAgentInfos))
                 .catch(response => {
                     response.json().then(json => {
                         this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
                     })
                 })
         }
+    }
+    getAgentInfos = () => {
+        fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.pes.profileUuid })
+            .then(response => response.json())
+            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
     }
     getStatusColor = (status) => {
         if (['ACK_RECEIVED'].includes(status)) return 'green'
@@ -63,7 +70,7 @@ class Pes extends Component {
     }
     render() {
         const { t } = this.context
-        const { pes, fetched } = this.state
+        const { pes, fetched, agent } = this.state
         const lastHistory = pes.pesHistories[pes.pesHistories.length - 1]
         return (
             <Page title={pes.objet}>
@@ -80,12 +87,19 @@ class Pes extends Component {
                             <Field htmlFor='objet' label={t('pes.fields.objet')}>
                                 <FieldValue id='objet'>{pes.objet}</FieldValue>
                             </Field>
-                            <Field htmlFor='comment' label={t('pes.fields.comment')}>
-                                <FieldValue id='comment'>{pes.comment}</FieldValue>
-                            </Field>
+                            {pes.comment &&
+                                <Field htmlFor='comment' label={t('pes.fields.comment')}>
+                                    <FieldValue id='comment'>{pes.comment}</FieldValue>
+                                </Field>
+                            }
                             <Field htmlFor='creation' label={t('pes.fields.creation')}>
                                 <FieldValue id='creation'>{moment(pes.creation).format('DD/MM/YYYY')}</FieldValue>
                             </Field>
+                            {agent &&
+                                <Field htmlFor='agent' label={t('pes.fields.agent')}>
+                                    <FieldValue id='agent'>{agent}</FieldValue>
+                                </Field>
+                            }
                             <Field htmlFor='attachment' label={t('pes.fields.attachment')}>
                                 <FieldValue id='attachment'>
                                     <a target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a>
