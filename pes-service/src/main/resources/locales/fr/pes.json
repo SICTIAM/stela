@@ -14,7 +14,8 @@
       "PENDING_SIGNATURE": "En attente de signature",
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",
-      "SIGNATURE_MISSING": "Signature manquante"
+      "SIGNATURE_MISSING": "Signature manquante",
+      "SIGNATURE_SENDING_ERROR" : "Erreur lors de l'envoi vers le parapheure, veuillez vérifier la configuration du profile déposant ou de la collectivité"
     },
     "fields": {
       "objet": "Objet",

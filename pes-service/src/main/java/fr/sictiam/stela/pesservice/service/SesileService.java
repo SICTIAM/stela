@@ -26,7 +26,6 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
-import fr.sictiam.stela.pesservice.service.exceptions.ProfileNotConfiguredForSesileException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         try {
             SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
-                    .orElseThrow(ProfileNotConfiguredForSesileException::new);
+                    .orElse(sesileConfigurationRepository.findById(pes.getLocalAuthority().getGenericProfileUuid())
+                            .get());
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
             LocalDate deadline = pes.getValidationLimit() != null ? pes.getValidationLimit()
@@ -126,6 +126,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         }
     }
 
