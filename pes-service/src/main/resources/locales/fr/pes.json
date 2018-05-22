@@ -14,14 +14,16 @@
       "PENDING_SIGNATURE": "En attente de signature",
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",
-      "SIGNATURE_MISSING": "Signature manquante"
+      "SIGNATURE_MISSING": "Signature manquante",
+      "SIGNATURE_SENDING_ERROR" : "Erreur lors de l'envoi vers le parapheure, veuillez vérifier la configuration du profile déposant ou de la collectivité"
     },
     "fields": {
       "objet": "Objet",
       "comment": "Commentaire",
       "attachment": "Fichier",
       "creation": "Date de création",
-      "status": "Status"
+      "status": "Status",
+      "agent": "Déposé par"
     },
     "new": {
       "title": "Télétransmission d'une enveloppe"

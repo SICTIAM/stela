@@ -26,7 +26,6 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
-import fr.sictiam.stela.pesservice.service.exceptions.ProfileNotConfiguredForSesileException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Element;
 
@@ -49,6 +49,7 @@ import javax.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -101,7 +102,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         try {
             SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
-                    .orElseThrow(ProfileNotConfiguredForSesileException::new);
+                    .orElse(sesileConfigurationRepository.findById(pes.getLocalAuthority().getGenericProfileUuid())
+                            .get());
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
             LocalDate deadline = pes.getValidationLimit() != null ? pes.getValidationLimit()
@@ -124,6 +126,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         }
     }
 
@@ -134,16 +137,20 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             if (pes.getSesileDocumentId() != null
                     && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
 
-                byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
-                Pair<StatusType, String> signatureResult = getSignatureStatus(file);
-                StatusType status = signatureResult.component1();
-                String errorMessage = signatureResult.component2();
+                try {
+                    byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
+                    Pair<StatusType, String> signatureResult = getSignatureStatus(file);
+                    StatusType status = signatureResult.component1();
+                    String errorMessage = signatureResult.component2();
+                    pes.setSigned(status.equals(StatusType.PENDING_SEND));
+                    pesService.save(pes);
+                    pesService.updateStatus(pes.getUuid(), status, errorMessage);
 
-                pes.getAttachment().setFile(file);
+                    pes.getAttachment().setFile(file);
+                } catch (RestClientException | UnsupportedEncodingException e) {
+                    LOGGER.debug(e.getMessage());
+                }
 
-                pes.setSigned(status.equals(StatusType.PENDING_SEND));
-                pesService.save(pes);
-                pesService.updateStatus(pes.getUuid(), status, errorMessage);
             }
         });
     }
@@ -469,11 +476,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 .getBody();
     }
 
-    public byte[] getDocumentBody(LocalAuthority localAuthority, int document) {
+    public byte[] getDocumentBody(LocalAuthority localAuthority, int document)
+            throws RestClientException, UnsupportedEncodingException {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
 
         return restTemplate.exchange(sesileUrl + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
-                String.class, document).getBody().getBytes();
+                String.class, document).getBody().getBytes("ISO-8859-1");
     }
 
     public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
