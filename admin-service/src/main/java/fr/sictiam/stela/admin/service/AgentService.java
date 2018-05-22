@@ -66,7 +66,8 @@ public class AgentService {
     }
 
     private Agent createIfNotExists(Agent agent) {
-        return agentRepository.findBySub(agent.getSub()).orElseGet(() -> agentRepository.save(agent));
+        return agentRepository.findBySub(agent.getSub()).orElseGet(
+                () -> agentRepository.findByEmail(agent.getEmail()).orElseGet(() -> agentRepository.save(agent)));
     }
 
     public Optional<Agent> findBySub(String sub) {
@@ -82,7 +83,7 @@ public class AgentService {
         LocalAuthority localAuthority = localAuthorityService.getBySlugName(slugName)
                 .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
         Agent agentFetched = createIfNotExists(agent);
-
+        agentFetched.setSub(agent.getSub());
         agentFetched.setAdmin(agent.isAdmin());
         agentFetched.setFamilyName(agent.getFamilyName());
         agentFetched.setGivenName(agent.getGivenName());
