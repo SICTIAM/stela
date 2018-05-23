@@ -330,15 +330,6 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             ftpSession.append(byteArrayInputStream, pes.getAttachment().getFilename());
         } catch (IOException e) {
             throw new PesSendException();
-        } finally {
-            // try {
-            // byteArrayInputStream.close();
-            // ftpClient.logout();
-            // } catch (IOException e) {
-            // LOGGER.error(e.getMessage());
-            // } finally {
-            // ftpSession.close();
-            // }
         }
     }
 }
