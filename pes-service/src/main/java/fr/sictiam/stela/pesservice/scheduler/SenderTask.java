@@ -63,7 +63,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         currentSizeUsed.set(0);
     }
 
-    @Scheduled(fixedRate = 5000)
+    // @Scheduled(fixedRate = 5000)
     public void senderTask() {
 
         if (!pendingQueue.isEmpty() && adminService.isHeliosAvailable()) {
