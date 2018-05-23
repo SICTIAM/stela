@@ -3,7 +3,7 @@ package fr.sictiam.stela.pesservice.filter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pesservice.model.Right;
-import fr.sictiam.stela.pesservice.model.util.AuthorizationContextClasses;
+import fr.sictiam.stela.pesservice.model.util.CertificateStatus;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +29,8 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        AuthorizationContextClasses acr = AuthorizationContextClasses.getByValue(request.getHeader("ACR"));
+        CertificateStatus certificateStatus = StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"))
+                ? null : CertificateStatus.valueOf(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"));
         JsonNode token = getToken(request);
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
@@ -44,7 +45,7 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Profile-UUID", token.get("uuid").asText());
             request.setAttribute("STELA-Current-Local-Authority-UUID",
                     token.get("localAuthority").get("uuid").asText());
-            request.setAttribute("ACR", acr);
+            request.setAttribute("STELA-Certificate-Status", certificateStatus);
         }
 
         filterChain.doFilter(request, response);

@@ -8,7 +8,7 @@ import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.pesservice.model.util.AuthorizationContextClasses;
+import fr.sictiam.stela.pesservice.model.util.CertificateStatus;
 import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
@@ -120,12 +120,12 @@ public class PesRestController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("ACR") AuthorizationContextClasses acr,
+            @RequestAttribute("STELA-Certificate-Status") CertificateStatus certificateStatus,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))
-                || !certUtilService.checkCert(acr.getValue())) {
+                || !certUtilService.checkCert(certificateStatus)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         ObjectMapper mapper = new ObjectMapper();
