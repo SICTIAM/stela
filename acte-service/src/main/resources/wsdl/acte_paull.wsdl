@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xs0="http://www.processmaker.com" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://www.processmaker.com">
+  <types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://www.processmaker.com" >
+      <xs:element name="pmResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="status_code" type="xs:integer"/>
+            <xs:element name="message" type="xs:string"/>
+            <xs:element name="timestamp" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="testsvnRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="testsvnStruct">
+        <xs:sequence>
+          <xs:element name="result1" type="xs:string"/>
+          <xs:element name="result2" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="testsvnResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="retoursvn" maxOccurs="unbounded" type="xs0:testsvnStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="depotActeStruct1">
+        <xs:sequence>
+          <xs:element name="dateDecision" type="xs:string"/>
+		  <xs:element name="numInterne" type="xs:string"/>
+		  <xs:element name="natureActe" type="xs:string"/>
+		  <xs:element name="matiereActe" type="xs:string"/>
+		  <xs:element name="objet" type="xs:string"/>
+		  <xs:element name="precedent_acte_id" type="xs:string"/>
+		  <xs:element name="name" type="xs:string"/>
+		  <xs:element name="desc" type="xs:string"/>
+		  <xs:element name="validation" type="xs:string"/>
+          <xs:element name="email" type="xs:string" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+	  <xs:complexType name="depotActeStruct2">
+        <xs:sequence>
+		  <xs:element name="filename" type="xs:string"/>
+          <xs:element name="base64" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+	  <xs:element name="depotActeRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+			<xs:element name="infosActe" maxOccurs="unbounded" type="xs0:depotActeStruct1"/>
+			<xs:element name="fichiers"  maxOccurs="unbounded" type="xs0:depotActeStruct2"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+	  <xs:complexType name="depotActeStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="idActe" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="depotActeResponse">
+        <xs:complexType>
+		  <xs:sequence>
+			<xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:depotActeStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+	  <xs:element name="getDetailsActeRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+			<xs:element name="idActe" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="getDetailsActeStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="numActe" type="xs:string"/>
+		  <xs:element name="miatID" type="xs:string"/>
+		  <xs:element name="precedentActeId" type="xs:string"/>
+		  <xs:element name="objet" type="xs:string"/>
+		  <xs:element name="userName" type="xs:string"/>
+		  <xs:element name="userNameDeposantBannette" type="xs:string"/>
+		  <xs:element name="natureActe" type="xs:string"/>
+		  <xs:element name="matiereActe" type="xs:string"/>
+		  <xs:element name="nomDocument" type="xs:string"/>
+		  <xs:element name="annexesList" type="xs:string"/>
+		  <xs:element name="statut" type="xs:string"/>
+		  <xs:element name="dateDecision" type="xs:string"/>
+		  <xs:element name="dateDepotBannette" type="xs:string"/>
+		  <xs:element name="dateDepotActe" type="xs:string"/>
+		  <xs:element name="dateAR" type="xs:string"/>
+		  <xs:element name="dateAnnul" type="xs:string"/>
+		  <xs:element name="dateARAnnul" type="xs:string"/>
+          <xs:element name="anomalies" type="xs:string"/>
+		  <xs:element name="courrierSimple" type="xs:string"/>
+		  <xs:element name="reponseCourrier_simple" type="xs:string"/>
+		  <xs:element name="lettreObservations" type="xs:string"/>
+		  <xs:element name="reponseLettreObservations" type="xs:string"/>
+		  <xs:element name="refusLettreObservations" type="xs:string"/>
+		  <xs:element name="demandePC" type="xs:string"/>
+		  <xs:element name="reponseDemandePC" type="xs:string"/>
+		  <xs:element name="refusDemandePC" type="xs:string"/>
+		  <xs:element name="defer" type="xs:string"/>
+		  <xs:element name="etatClasseur" type="xs:string"/>
+		  <xs:element name="acteurCourant" type="xs:string"/>
+		  <xs:element name="nomClasseur" type="xs:string"/>
+		  <xs:element name="circuitClasseur" type="xs:string"/>
+		  <xs:element name="actionsClasseur" maxOccurs="unbounded" type="xs0:getDetailsActeStruct1"/>
+        </xs:sequence>
+      </xs:complexType>
+	  <xs:complexType name="getDetailsActeStruct1">
+        <xs:sequence>
+          <xs:element name="nomActeur" type="xs:string"/>
+          <xs:element name="dateAction" type="xs:string"/>
+		  <xs:element name="libelleAction" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getDetailsActeResponse">
+      <xs:complexType>
+		<xs:sequence>
+			<xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:getDetailsActeStruct"/>
+        </xs:sequence>
+      </xs:complexType>
+      </xs:element>
+      <xs:element name="getDocumentRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+			<xs:element name="IdActe" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+	  <xs:complexType name="getDocumentStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="filename" type="xs:string"/>
+		  <xs:element name="base64" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getDocumentResponse">
+        <xs:complexType>
+		  <xs:sequence>
+			<xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:getDocumentStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getAnnexesRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+			<xs:element name="IdActe" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="getAnnexesStruct">
+        <xs:sequence>
+          <xs:element name="filename" type="xs:string"/>
+		  <xs:element name="base64" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+	  <xs:complexType name="getAnnexesStruct1">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+		  <xs:element name="fichiers" maxOccurs="unbounded" type="xs0:getAnnexesStruct"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getAnnexesResponse">
+        <xs:complexType>
+		  <xs:sequence>
+			<xs:element name="statusCode" type="xs:string"/>
+            <xs:element name="retour" maxOccurs="unbounded" type="xs0:getAnnexesStruct1"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getClassificationActeRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sessionId" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="getClassificationActeStruct1">
+        <xs:sequence>
+          <xs:element name="cle" type="xs:string"/>
+		  <xs:element name="valeur" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getClassificationActeStruct">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="codeMatiere" maxOccurs="unbounded" type="xs0:getClassificationActeStruct1"/>
+		  <xs:element name="natureActes" maxOccurs="unbounded" type="xs0:getClassificationActeStruct1"/>
+		  <xs:element name="collectiviteDateClassification" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="getClassificationActeResponse">
+        <xs:complexType>
+		  <xs:sequence>
+            <xs:element name="statusCode" type="xs:string"/>
+			<xs:element name="retour" type="xs0:getClassificationActeStruct"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </types>
+
+  <message name="pmResponse">
+    <part name="parameters" element="xs0:pmResponse"/>
+  </message>
+  <message name="testsvnRequest">
+    <part name="parameters" element="xs0:testsvnRequest"/>
+  </message>
+  <message name="testsvnResponse">
+    <part name="parameters" element="xs0:testsvnResponse"/>
+  </message>
+   <message name="depotActeRequest">
+    <part name="parameters" element="xs0:depotActeRequest"/>
+  </message>
+  <message name="depotActeResponse">
+    <part name="parameters" element="xs0:depotActeResponse"/>
+  </message>
+  <message name="getDetailsActeRequest">
+    <part name="parameters" element="xs0:getDetailsActeRequest"/>
+  </message>
+  <message name="getDetailsActeResponse">
+    <part name="parameters" element="xs0:getDetailsActeResponse"/>
+  </message>
+  <message name="getDocumentRequest">
+    <part name="parameters" element="xs0:getDocumentRequest"/>
+  </message>
+  <message name="getDocumentResponse">
+    <part name="parameters" element="xs0:getDocumentResponse"/>
+  </message>
+  <message name="getAnnexesRequest">
+    <part name="parameters" element="xs0:getAnnexesRequest"/>
+  </message>
+  <message name="getAnnexesResponse">
+    <part name="parameters" element="xs0:getAnnexesResponse"/>
+  </message>
+  <message name="getClassificationActeRequest">
+    <part name="parameters" element="xs0:getClassificationActeRequest"/>
+  </message>
+  <message name="getClassificationActeResponse">
+    <part name="parameters" element="xs0:getClassificationActeResponse"/>
+  </message>
+  
+  <portType name="ProcessMakerServiceSoap">
+    <operation name="testsvn">
+      <input message="xs0:testsvnRequest"/>
+      <output message="xs0:testsvnResponse"/>
+    </operation>
+    <operation name="depotActe">
+      <input message="xs0:depotActeRequest"/>
+      <output message="xs0:depotActeResponse"/>
+    </operation>
+	<operation name="getDocument">
+      <input message="xs0:getDocumentRequest"/>
+      <output message="xs0:getDocumentResponse"/>
+    </operation>
+	<operation name="getDetailsActe">
+      <input message="xs0:getDetailsActeRequest"/>
+      <output message="xs0:getDetailsActeResponse"/>
+    </operation>
+	<operation name="getAnnexes">
+      <input message="xs0:getAnnexesRequest"/>
+      <output message="xs0:getAnnexesResponse"/>
+    </operation>
+	<operation name="getClassificationActe">
+      <input message="xs0:getClassificationActeRequest"/>
+      <output message="xs0:getClassificationActeResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="ProcessMakerServiceSoap" type="xs0:ProcessMakerServiceSoap">
+    <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="testsvn">
+      <soap12:operation soapAction="urn:testsvn" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="depotActe">
+      <soap12:operation soapAction="urn:depotActe" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getDetailsActe">
+      <soap12:operation soapAction="urn:getDetailsActe" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getDocument">
+      <soap12:operation soapAction="urn:getDocument" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getAnnexes">
+      <soap12:operation soapAction="urn:Annexes" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="getClassificationActe">
+      <soap12:operation soapAction="urn:Annexes" soapActionRequired="true" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+
+  <service name="ProcessMakerService">
+    <documentation>ProcessMaker Web Service</documentation>
+    <port name="ProcessMakerServiceSoap" binding="xs0:ProcessMakerServiceSoap">
+    	<soap12:address location="/fr/classic/services/webservactes/soap2"/>
+    </port>
+  </service>
+</definitions>

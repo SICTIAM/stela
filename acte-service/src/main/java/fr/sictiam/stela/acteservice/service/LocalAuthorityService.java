@@ -9,6 +9,7 @@ import fr.sictiam.stela.acteservice.model.AttachmentTypeReferencial;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.MaterialCode;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.acteservice.model.ui.GenericAccount;
 import fr.sictiam.stela.acteservice.model.xml.RetourClassification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -233,6 +234,12 @@ public class LocalAuthorityService {
 
         createOrUpdate(localAuthority);
 
+    }
+
+    public boolean localAuthorityGranted(GenericAccount genericAccount, String siren) {
+        return genericAccount.getLocalAuthorities().stream()
+                .anyMatch(localAuthority -> localAuthority.getActivatedModules().contains("ACTES")
+                        && localAuthority.getSiren().equals(siren));
     }
 
 }

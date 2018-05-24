@@ -100,4 +100,18 @@ public class ExternalRestService {
 
         return opt.get();
     }
+
+    public JsonNode getPaullConnection(String sessionID) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> profiles = webClient.get().uri("/api/admin/generic_account/session/{sessionID}", sessionID)
+                .retrieve().onStatus(HttpStatus::is4xxClientError,
+                        response -> Mono.error(new RuntimeException("Session not Found")))
+                .bodyToMono(String.class);
+
+        Optional<String> opt = profiles.blockOptional();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
 }
