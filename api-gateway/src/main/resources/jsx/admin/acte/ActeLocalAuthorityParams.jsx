@@ -124,7 +124,7 @@ class ActeLocalAuthorityParams extends Component {
     }
     askClassificationUpdate = (event, force = false) => {
         event.preventDefault()
-        const url = `/api/acte/ask-classification${force && '-force'}/${this.props.uuid || 'current'}`
+        const url = `/api/acte/ask-classification${force ? '-force' : ''}/${this.props.uuid || 'current'}`
         fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(() => this.context._addNotification(notifications.admin.classificationAsked))
@@ -148,7 +148,7 @@ class ActeLocalAuthorityParams extends Component {
                         <Form onSubmit={this.submitForm}>
                             <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
                                 <span id="nomenclatureDate">{moment(this.state.constantFields.nomenclatureDate).format('DD/MM/YYYY')}</span>
-                                <Button basic primary style={{ marginLeft: '1em' }} onClick={this.askClassificationUpdate}>
+                                <Button basic primary style={{ marginLeft: '1em' }} onClick={e => this.askClassificationUpdate(e, false)}>
                                     {t('admin.modules.acte.local_authority_settings.askClassification')}
                                 </Button>
                                 <Button basic negative style={{ marginLeft: '1em' }} onClick={e => this.askClassificationUpdate(e, true)}>
