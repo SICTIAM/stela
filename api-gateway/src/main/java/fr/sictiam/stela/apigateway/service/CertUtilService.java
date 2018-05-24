@@ -40,8 +40,8 @@ public class CertUtilService {
                         : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_BEFORE")),
                 StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")) ? null
                         : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")),
-                StringUtils.isEmpty(request.getHeader("X-Ssl-Error")) ? null
-                        : CertificateStatus.valueOf(request.getHeader("X-Ssl-Error"))
+                StringUtils.isEmpty(request.getHeader("X-Ssl-Status")) ? null
+                        : CertificateStatus.valueOf(request.getHeader("X-Ssl-Status"))
         );
     }
 }
