@@ -11,6 +11,7 @@
       "FILE_ERROR": "Erreur sur le fichier PES",
       "NOTIFICATION_SENT": "Notification envoyée",
       "RESENT": "Renvoyé",
+      "MANUAL_RESENT": "Renvoyé manuellement",
       "PENDING_SIGNATURE": "En attente de signature",
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",

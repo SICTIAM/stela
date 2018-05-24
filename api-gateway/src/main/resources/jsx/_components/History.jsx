@@ -36,7 +36,7 @@ class History extends Component {
                     )}
                     {renderIf(status.fileName)(
                         <Feed.Extra>
-                            {t(`${moduleName}.page.linked_file`)}: <a target='_blank' href={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`}>{status.fileName}</a>
+                            {t(`${moduleName}:${moduleName}.page.linked_file`)}: <a target='_blank' href={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`}>{status.fileName}</a>
                         </Feed.Extra>
                     )}
                 </Feed.Content>
