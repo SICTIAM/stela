@@ -21,7 +21,9 @@ public class CertUtilService {
     }
 
     public boolean checkCert(HttpServletRequest request) {
-        return !certVerificationEnabled || CertificateStatus.VALID.equals(getCertInfosFromHeaders(request).getStatus());
+        CertificateInfos certificateInfos = getCertInfosFromHeaders(request);
+        return !certVerificationEnabled || ("USED".equals(certificateInfos.getCertUsed()) ||
+                CertificateStatus.VALID.equals(certificateInfos.getStatus()));
     }
 
     public CertificateInfos getCertInfosFromHeaders(HttpServletRequest request) {
@@ -39,8 +41,10 @@ public class CertUtilService {
                         : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_BEFORE")),
                 StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")) ? null
                         : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")),
+                StringUtils.isEmpty(request.getHeader("X-Ssl-Cert-Used")) ? null
+                        : request.getHeader("X-Ssl-Cert-Used"),
                 StringUtils.isEmpty(request.getHeader("X-Ssl-Error")) ? null
-                        : CertificateStatus.getByValue((request.getHeader("X-Ssl-Error")))
+                        : CertificateStatus.valueOf(request.getHeader("X-Ssl-Error"))
         );
     }
 }
