@@ -31,6 +31,7 @@ public class FtpConfig {
         sf.setUsername(username);
         sf.setPassword(password);
         sf.setClientMode(FTPClient.PASSIVE_LOCAL_DATA_CONNECTION_MODE);
+        sf.setBufferSize(100000);
         return sf;
     }
 }
