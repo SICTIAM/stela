@@ -19,15 +19,14 @@ public class CertificateInfos {
     private LocalDate issuedDate; // HTTP_X_SSL_CLIENT_NOT_BEFORE
     private LocalDate expiredDate; // HTTP_X_SSL_CLIENT_NOT_AFTER
 
-    private String certUsed; // X-Ssl-Cert-Used
-    private CertificateStatus status; // X-Ssl-Error
+    private CertificateStatus status; // X-Ssl-Status
 
     public CertificateInfos() {
     }
 
     public CertificateInfos(String serial, String issuer, String subjectCommonName, String subjectOrganization,
             String subjectOrganizationUnit, String subjectEmaill, String issuerCommonName, String issuerOrganization,
-            String issuerEmaill, LocalDate issuedDate, LocalDate expiredDate, String certUsed, CertificateStatus status) {
+            String issuerEmaill, LocalDate issuedDate, LocalDate expiredDate, CertificateStatus status) {
         this.serial = serial;
         this.issuer = issuer;
         this.subjectCommonName = subjectCommonName;
@@ -39,7 +38,6 @@ public class CertificateInfos {
         this.issuerEmaill = issuerEmaill;
         this.issuedDate = issuedDate;
         this.expiredDate = expiredDate;
-        this.certUsed = certUsed;
         this.status = status;
     }
 
@@ -85,10 +83,6 @@ public class CertificateInfos {
 
     public LocalDate getExpiredDate() {
         return expiredDate;
-    }
-
-    public String getCertUsed() {
-        return certUsed;
     }
 
     public CertificateStatus getStatus() {
