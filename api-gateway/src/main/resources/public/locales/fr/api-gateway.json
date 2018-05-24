@@ -298,6 +298,7 @@
             "EXPIRED": "Votre certificat est expiré",
             "REVOKED": "Votre certificat est révoqué",
             "OTHER": "Votre certificat est invalide",
+            "NONE": "Aucun certificat détecté",
             "VALID": "Votre certificat est valide"
         }
     },
