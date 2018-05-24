@@ -619,7 +619,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     @Test
     public void askNomenclature() throws Exception {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
-        assertThat(acteService.askNomenclature(localAuthority), is(HttpStatus.OK));
+        assertThat(acteService.askNomenclature(localAuthority, false), is(HttpStatus.OK));
 
     }
 

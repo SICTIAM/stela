@@ -167,6 +167,7 @@
           "general_informations": "Informations générales",
           "MIAT_transmission": "Transmission MIAT",
           "askClassification": "Demander une mise à jour",
+          "askClassificationForce": "Forcer la mise à jour",
           "askClassifications": "Demander la mise à jour des nomenclatures"
         },
         "module_settings": {

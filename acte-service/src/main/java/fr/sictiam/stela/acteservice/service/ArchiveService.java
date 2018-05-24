@@ -51,6 +51,7 @@ import java.io.StringWriter;
 import java.security.cert.CertificateException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -365,7 +366,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         }
     }
 
-    public Attachment createNomenclatureAskMessage(LocalAuthority localAuthority) {
+    public Attachment createNomenclatureAskMessage(LocalAuthority localAuthority, boolean force) {
 
         try {
             int deliveryNumber = getNextIncrement();
@@ -374,7 +375,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                     getFormattedDate(LocalDate.now()), deliveryNumber);
 
             DemandeClassification demandeClassification = new DemandeClassification();
-            demandeClassification.setDateClassification(localAuthority.getNomenclatureDate());
+            demandeClassification.setDateClassification(force ? LocalDate.of(2001, Month.JANUARY, 1)
+                    : localAuthority.getNomenclatureDate());
 
             StringWriter sw = new StringWriter();
             jaxb2Marshaller.marshal(demandeClassification, new StreamResult(sw));

@@ -325,7 +325,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         StatusType.DEFERE_RECEIVED, StatusType.NACK_RECEIVED, StatusType.CANCELLED)));
         mainQueryPredicates.add(acteHistoryTable.get("acteUuid").in(acteQuery));
         mainQueryPredicates.add(cb.and(cb.greaterThan(acteHistoryTable.get("date"), date)));
-        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
+        query.where(mainQueryPredicates.toArray(new Predicate[]{}));
         TypedQuery<ActeHistory> typedQuery = entityManager.createQuery(query);
         List<ActeHistory> resultList = typedQuery.getResultList();
 
@@ -481,7 +481,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ? ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList())
                 : getAllWithQuery(ui.getMultifield(), ui.getNumber(), ui.getObjet(), ui.getNature(),
-                        ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
+                ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
     }
 
     public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
@@ -625,16 +625,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public void askAllNomenclature() {
         List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
-        localAuthorities.forEach(this::askNomenclature);
+        localAuthorities.forEach(localAuthority -> askNomenclature(localAuthority, false));
     }
 
     public List<Acte> getActesMatchingMiatId(String str) {
         return acteRepository.findAllByDraftNullAndMiatIdContainingIgnoreCase(str);
     }
 
-    public HttpStatus askNomenclature(LocalAuthority localAuthority) {
-        Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority);
+    public HttpStatus askNomenclature(LocalAuthority localAuthority, boolean force) {
+        Attachment attachment = archiveService.createNomenclatureAskMessage(localAuthority, force);
         try {
+            LOGGER.info((force ? "FORCING" : "Asking") + " a new classification for localAuthority {}", localAuthority.getUuid());
             return send(attachment.getFile(), attachment.getFilename());
         } catch (Exception e) {
             LOGGER.error("Error while asking a new classification for localAuthority {}: {}", localAuthority.getUuid(),

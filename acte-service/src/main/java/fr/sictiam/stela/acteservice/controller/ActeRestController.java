@@ -124,13 +124,35 @@ public class ActeRestController {
     public ResponseEntity askCurrentClassification(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
         CompletableFuture
-                .runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid)));
+                .runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid), false));
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/ask-classification/{uuid}")
     public ResponseEntity askClassificationByUuid(@PathVariable String uuid) {
-        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(uuid)));
+        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(uuid), false));
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/ask-classification-force/current")
+    public ResponseEntity askCurrentClassificationForce(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        CompletableFuture
+                .runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid), true));
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/ask-classification-force/{uuid}")
+    public ResponseEntity askClassificationForceByUuid(@PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        CompletableFuture.runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(uuid), true));
         return new ResponseEntity(HttpStatus.OK);
     }
 

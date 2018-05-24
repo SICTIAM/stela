@@ -51,17 +51,17 @@ class ActeLocalAuthorityParams extends Component {
         const uuid = this.props.uuid
 
         const adminUrl = uuid ? `/api/admin/local-authority/${uuid}` : '/api/admin/local-authority/current'
-            fetchWithAuthzHandling({ url: adminUrl })
-                .then(checkStatus)
-                .then(response => response.json())
-                .then(json => {
-                    this.setState({ profiles: json.profiles })
+        fetchWithAuthzHandling({ url: adminUrl })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ profiles: json.profiles })
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
-                .catch(response => {
-                    response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                    })
-                })
+            })
 
         const url = uuid ? '/api/acte/localAuthority/' + uuid : '/api/acte/localAuthority/current'
         fetchWithAuthzHandling({ url })
@@ -85,7 +85,7 @@ class ActeLocalAuthorityParams extends Component {
         fields[field] = value
         this.setState({ fields: fields }, this.validateForm)
     }
-    handleStateChange = (event, { id, value}) => {
+    handleStateChange = (event, { id, value }) => {
         const { fields } = this.state
         fields[id] = value
         this.setState({ fields })
@@ -122,9 +122,9 @@ class ActeLocalAuthorityParams extends Component {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
-    askClassificationUpdate = (event) => {
+    askClassificationUpdate = (event, force = false) => {
         event.preventDefault()
-        const url = '/api/acte/ask-classification/' + (this.props.uuid || 'current')
+        const url = `/api/acte/ask-classification${force && '-force'}/${this.props.uuid || 'current'}`
         fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(() => this.context._addNotification(notifications.admin.classificationAsked))
@@ -150,6 +150,9 @@ class ActeLocalAuthorityParams extends Component {
                                 <span id="nomenclatureDate">{moment(this.state.constantFields.nomenclatureDate).format('DD/MM/YYYY')}</span>
                                 <Button basic primary style={{ marginLeft: '1em' }} onClick={this.askClassificationUpdate}>
                                     {t('admin.modules.acte.local_authority_settings.askClassification')}
+                                </Button>
+                                <Button basic negative style={{ marginLeft: '1em' }} onClick={e => this.askClassificationUpdate(e, true)}>
+                                    {t('admin.modules.acte.local_authority_settings.askClassificationForce')}
                                 </Button>
                             </Field>
                             <Field htmlFor="department" label={t('api-gateway:local_authority.department')}>
@@ -199,7 +202,7 @@ class ActeLocalAuthorityParams extends Component {
                                     className='simpleInput'
                                     options={profiles}
                                     value={this.state.fields.genericProfileUuid}
-                                    onChange={this.handleStateChange} 
+                                    onChange={this.handleStateChange}
                                     placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
                             </Field>
                             <div style={{ textAlign: 'right' }}>
