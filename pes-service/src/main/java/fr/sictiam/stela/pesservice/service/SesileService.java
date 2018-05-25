@@ -143,10 +143,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     StatusType status = signatureResult.component1();
                     String errorMessage = signatureResult.component2();
                     pes.setSigned(status.equals(StatusType.PENDING_SEND));
+                    pes.getAttachment().setFile(file);
+
                     pesService.save(pes);
                     pesService.updateStatus(pes.getUuid(), status, errorMessage);
 
-                    pes.getAttachment().setFile(file);
                 } catch (RestClientException | UnsupportedEncodingException e) {
                     LOGGER.debug(e.getMessage());
                 }
