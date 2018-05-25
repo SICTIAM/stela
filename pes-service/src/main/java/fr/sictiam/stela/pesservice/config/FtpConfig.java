@@ -22,6 +22,9 @@ public class FtpConfig {
     @Value("${application.ftp.password}")
     private String password;
 
+    @Value("${application.ftp.bufferSize}")
+    private int bufferSize;
+
     @Bean
     @Primary
     public DefaultFtpSessionFactory sf() {
@@ -31,7 +34,7 @@ public class FtpConfig {
         sf.setUsername(username);
         sf.setPassword(password);
         sf.setClientMode(FTPClient.PASSIVE_LOCAL_DATA_CONNECTION_MODE);
-        sf.setBufferSize(100000);
+        sf.setBufferSize(bufferSize);
         return sf;
     }
 }
