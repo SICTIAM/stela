@@ -34,7 +34,7 @@ class CertificateInfos extends Component {
     render() {
         const { t } = this.context
         const { certificate } = this.state
-        
+
         return (
             <Segment>
                 <h2>{t('profile.certificate.title')}</h2>
@@ -54,6 +54,7 @@ class CertificateInfos extends Component {
                 <Field htmlFor="status" label={t('profile.certificate.status')}>
                     <FieldValue id="status">{certificate.status}</FieldValue>
                 </Field>
+                
                 <Header as='h3' dividing>{t('profile.certificate.subject')}</Header>
                 <Field htmlFor="subjectCommonName" label={t('profile.certificate.subjectCommonName')}>
                     <FieldValue id="subjectCommonName">{certificate.subjectCommonName}</FieldValue>
@@ -67,6 +68,7 @@ class CertificateInfos extends Component {
                 <Field htmlFor="subjectEmaill" label={t('profile.certificate.subjectEmaill')}>
                     <FieldValue id="subjectEmaill">{certificate.subjectEmaill}</FieldValue>
                 </Field>
+
                 <Header as='h3' dividing>{t('profile.certificate.issuer')}</Header>
                 <Field htmlFor="issuerCommonName" label={t('profile.certificate.issuerCommonName')}>
                     <FieldValue id="issuerCommonName">{certificate.issuerCommonName}</FieldValue>
@@ -78,7 +80,7 @@ class CertificateInfos extends Component {
                     <FieldValue id="issuerEmaill">{certificate.issuerEmaill}</FieldValue>
                 </Field>
 
-            </Segment >
+            </Segment>
         )
     }
 }
