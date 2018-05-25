@@ -6,8 +6,8 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.WorkGroup;
+import fr.sictiam.stela.admin.model.UI.Views;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -26,7 +26,8 @@ public class JsonViewTest {
 
         LocalAuthority localAuthority = new LocalAuthority("Test", "368569321", "test");
         localAuthority.addModule(Module.ACTES);
-        OzwilloInstanceInfo ow = new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test");
+        OzwilloInstanceInfo ow = new OzwilloInstanceInfo("test", "test", "test", "test", "test", "test", "test",
+                "test");
         localAuthority.setOzwilloInstanceInfo(ow);
         WorkGroup workGroup = new WorkGroup(localAuthority, "GlobalGroup");
         Set<WorkGroup> groups = new HashSet<>();
