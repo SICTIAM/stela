@@ -6,6 +6,7 @@ import { Button, Segment, Label, Input, Header, Checkbox, Dropdown } from 'seman
 import { Field, Page } from './_components/UI'
 import { notifications } from './_util/Notifications'
 import AccordionSegment from './_components/AccordionSegment'
+import CertificateInfos from './_components/CertificateInfos'
 import { fetchWithAuthzHandling, checkStatus } from './_util/utils'
 import { modules, sesileVisibility } from './_util/constants'
 
@@ -139,6 +140,8 @@ class Profile extends Component {
                 </Segment>
 
                 {allLocalAuthorityProfiles}
+
+                <CertificateInfos />
 
             </Page >
         )
