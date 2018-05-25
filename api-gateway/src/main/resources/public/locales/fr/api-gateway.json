@@ -87,6 +87,22 @@
             "PES_ACK_RECEIVED": "Reception de l'AR d'un PES",
             "PES_SENT": "Envoi réussi d'un PES"
         },
+        "certificate": {
+            "title": "Informations du certificat",
+            "serial": "Numéro de série",
+            "issuer": "Émetteur",
+            "subject": "Propriétaire",
+            "subjectCommonName": "Nom",
+            "subjectOrganization": "Organisation",
+            "subjectOrganizationUnit": "Unité d'organisation",
+            "subjectEmaill": "Email",
+            "issuerCommonName": "Nom",
+            "issuerOrganization": "Organisation",
+            "issuerEmaill": "Email",
+            "issuedDate": "Émis le",
+            "expiredDate": "Expire le",
+            "status": "Status"
+        },
         "sesile": {
             "title": "Connexion Sesile",
             "serviceOrganisationNumber": "Service organisationel",
