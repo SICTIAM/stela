@@ -9,6 +9,7 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -51,36 +53,39 @@ public class ReceiverTask {
     private DefaultFtpSessionFactory defaultFtpSessionFactory;
 
     @Scheduled(fixedRate = 60000)
-    public void receive() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+    public void receive() throws IOException {
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();
 
         FTPFile[] files = ftpClient.listFiles();
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
-                LOGGER.debug("file RECEIVED : " + ftpFile.getName());
+                String fileName = ftpFile.getName();
+                LOGGER.debug("file RECEIVED : " + fileName);
                 if (ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
-
-                    if (ftpFile.getName().contains("ACK")) {
-                        readACK(inputStream, ftpFile.getName());
-                    } else if (ftpFile.getName().startsWith("PES2R")) {
-                        readPesRetour(inputStream, ftpFile.getName());
+                    byte[] targetArray = new byte[inputStream.available()];
+                    inputStream.read(targetArray);
+                    try {
+                        if (ftpFile.getName().contains("ACK")) {
+                            readACK(targetArray, fileName);
+                        } else if (ftpFile.getName().startsWith("PES2R")) {
+                            readPesRetour(targetArray, fileName);
+                        }
+                    } catch (IOException | ParserConfigurationException | XPathExpressionException | SAXException e) {
+                        FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
+                    } finally {
+                        inputStream.close();
                     }
-
-                    inputStream.close();
-
                 }
             }
         }
     }
 
-    public void readACK(InputStream inputStream, String ackName)
+    public void readACK(byte[] targetArray, String ackName)
             throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
 
         LOGGER.debug("ACK RECEIVED : " + ackName);
-        byte[] targetArray = new byte[inputStream.available()];
-        inputStream.read(targetArray);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(targetArray);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -100,10 +105,9 @@ public class ReceiverTask {
         }
     }
 
-    public void readPesRetour(InputStream inputStream, String pesRetourName)
+    public void readPesRetour(byte[] targetArray, String pesRetourName)
             throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
-        byte[] targetArray = new byte[inputStream.available()];
-        inputStream.read(targetArray);
+
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(targetArray);
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

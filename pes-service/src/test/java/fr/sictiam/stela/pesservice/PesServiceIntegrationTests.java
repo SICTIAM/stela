@@ -233,7 +233,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
         InputStream ackStream = new ClassPathResource("data/030004_180124163513-ACK-A2600191_A00DL4ZW_OK.xml")
                 .getInputStream();
-        receiverTask.readACK(ackStream, "030004_180124163513-ACK-A2600191_A00DL4ZW_OK.xml");
+        byte[] targetArray = new byte[ackStream.available()];
+        ackStream.read(targetArray);
+        receiverTask.readACK(targetArray, "030004_180124163513-ACK-A2600191_A00DL4ZW_OK.xml");
 
         MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
         try {
@@ -255,7 +257,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
         InputStream ackStream = new ClassPathResource(
                 "data/PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml").getInputStream();
-        receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml");
+        byte[] targetArray = new byte[ackStream.available()];
+        ackStream.read(targetArray);
+        receiverTask.readPesRetour(targetArray, "PES2R_DEP_P_303_00_083110_20180124_20180124_20180125051547.xml");
 
         assertThat(pesRetourRepository.count(), is(1L));
     }
@@ -324,7 +328,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
 
         InputStream ackStream = new ClassPathResource("data/PES2R_DEP_P_unknow.xml").getInputStream();
-        receiverTask.readPesRetour(ackStream, "PES2R_DEP_P_unknow.xml");
+        byte[] targetArray = new byte[ackStream.available()];
+        ackStream.read(targetArray);
+        receiverTask.readPesRetour(targetArray, "PES2R_DEP_P_unknow.xml");
 
         assertThat(pesRetourRepository.count(), is(0L));
     }
