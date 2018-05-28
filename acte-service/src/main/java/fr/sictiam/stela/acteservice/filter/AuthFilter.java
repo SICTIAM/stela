@@ -30,7 +30,7 @@ public class AuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         CertificateStatus certificateStatus = StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"))
-                ? null : CertificateStatus.valueOf(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"));
+                ? CertificateStatus.NONE : CertificateStatus.valueOf(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"));
         JsonNode token = getToken(request);
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
