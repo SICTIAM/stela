@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
 import org.springframework.integration.ftp.session.FtpSession;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -49,7 +50,7 @@ public class ReceiverTask {
     @Autowired
     private DefaultFtpSessionFactory defaultFtpSessionFactory;
 
-    // @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000)
     public void receive() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();
