@@ -4,4 +4,4 @@ EXPOSE 9010 9011
 ADD stela-pes-service.jar app.jar
 RUN sh -c 'touch /app.jar'
 ENV JAVA_OPTS=""
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Xmx1024m","-jar","/app.jar"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Xmx4096m","-jar","/app.jar"]
