@@ -64,19 +64,23 @@ public class ReceiverTask {
                 LOGGER.debug("file RECEIVED : " + fileName);
                 if (ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
-                    byte[] targetArray = new byte[inputStream.available()];
-                    inputStream.read(targetArray);
-                    try {
-                        if (ftpFile.getName().contains("ACK")) {
-                            readACK(targetArray, fileName);
-                        } else if (ftpFile.getName().startsWith("PES2R")) {
-                            readPesRetour(targetArray, fileName);
+                    if (ftpClient.completePendingCommand()) {
+                        byte[] targetArray = new byte[inputStream.available()];
+                        inputStream.read(targetArray);
+                        try {
+                            if (ftpFile.getName().contains("ACK")) {
+                                readACK(targetArray, fileName);
+                            } else if (ftpFile.getName().startsWith("PES2R")) {
+                                readPesRetour(targetArray, fileName);
+                            }
+                        } catch (IOException | ParserConfigurationException | XPathExpressionException
+                                | SAXException e) {
+                            FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
+                        } finally {
+                            inputStream.close();
                         }
-                    } catch (IOException | ParserConfigurationException | XPathExpressionException | SAXException e) {
-                        FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
-                    } finally {
-                        inputStream.close();
                     }
+
                 }
             }
         }
