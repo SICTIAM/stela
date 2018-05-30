@@ -129,6 +129,10 @@
                     "non_extrayable_act": "Impossible de récupérer les données de l'acte"
                 }
             },
+            "republished": {
+                "success": "L'acte a bien été redéposé'",
+                "error": "Impossible de redéposer l'acte"
+            },
             "cancelled": {
                 "success": "La demande d'annulation du dépot a bien été prise en compte",
                 "forbidden": "Cet acte ne peut pas être annulé"

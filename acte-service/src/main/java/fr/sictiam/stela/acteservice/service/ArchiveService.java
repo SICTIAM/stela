@@ -375,8 +375,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
                     getFormattedDate(LocalDate.now()), deliveryNumber);
 
             DemandeClassification demandeClassification = new DemandeClassification();
-            demandeClassification.setDateClassification(force ? LocalDate.of(2001, Month.JANUARY, 1)
-                    : localAuthority.getNomenclatureDate());
+            demandeClassification.setDateClassification(
+                    force ? LocalDate.of(2001, Month.JANUARY, 1) : localAuthority.getNomenclatureDate());
 
             StringWriter sw = new StringWriter();
             jaxb2Marshaller.marshal(demandeClassification, new StreamResult(sw));
@@ -596,24 +596,43 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         DonneesActe donneesActe = new DonneesActe();
 
         String[] codes = acte.getCode().split("-");
-        DonneesActe.CodeMatiere1 codeMatiere1 = new DonneesActe.CodeMatiere1();
-        codeMatiere1.setCodeMatiere(Integer.valueOf(codes[0]));
-        donneesActe.setCodeMatiere1(codeMatiere1);
-        DonneesActe.CodeMatiere2 codeMatiere2 = new DonneesActe.CodeMatiere2();
-        codeMatiere2.setCodeMatiere(Integer.valueOf(codes[1]));
-        donneesActe.setCodeMatiere2(codeMatiere2);
 
-        DonneesActe.CodeMatiere3 codeMatiere3 = new DonneesActe.CodeMatiere3();
-        codeMatiere3.setCodeMatiere(Integer.valueOf(codes[2]));
-        donneesActe.setCodeMatiere3(codeMatiere3);
+        Integer materialCode1 = Integer.valueOf(codes[0]);
 
-        DonneesActe.CodeMatiere4 codeMatiere4 = new DonneesActe.CodeMatiere4();
-        codeMatiere4.setCodeMatiere(Integer.valueOf(codes[3]));
-        donneesActe.setCodeMatiere3(codeMatiere3);
+        if (materialCode1 != 0) {
+            DonneesActe.CodeMatiere1 codeMatiere1 = new DonneesActe.CodeMatiere1();
+            codeMatiere1.setCodeMatiere(materialCode1);
+            donneesActe.setCodeMatiere1(codeMatiere1);
+        }
 
-        DonneesActe.CodeMatiere5 codeMatiere5 = new DonneesActe.CodeMatiere5();
-        codeMatiere5.setCodeMatiere(Integer.valueOf(codes[4]));
-        donneesActe.setCodeMatiere5(codeMatiere5);
+        Integer materialCode2 = Integer.valueOf(codes[1]);
+
+        if (materialCode2 != 0) {
+            DonneesActe.CodeMatiere2 codeMatiere2 = new DonneesActe.CodeMatiere2();
+            codeMatiere2.setCodeMatiere(materialCode2);
+            donneesActe.setCodeMatiere2(codeMatiere2);
+        }
+
+        Integer materialCode3 = Integer.valueOf(codes[2]);
+        if (materialCode3 != 0) {
+            DonneesActe.CodeMatiere3 codeMatiere3 = new DonneesActe.CodeMatiere3();
+            codeMatiere3.setCodeMatiere(materialCode3);
+            donneesActe.setCodeMatiere3(codeMatiere3);
+        }
+
+        Integer materialCode4 = Integer.valueOf(codes[3]);
+        if (materialCode4 != 0) {
+            DonneesActe.CodeMatiere4 codeMatiere4 = new DonneesActe.CodeMatiere4();
+            codeMatiere4.setCodeMatiere(materialCode4);
+            donneesActe.setCodeMatiere4(codeMatiere4);
+        }
+
+        Integer materialCode5 = Integer.valueOf(codes[4]);
+        if (materialCode5 != 0) {
+            DonneesActe.CodeMatiere5 codeMatiere5 = new DonneesActe.CodeMatiere5();
+            codeMatiere5.setCodeMatiere(materialCode5);
+            donneesActe.setCodeMatiere5(codeMatiere5);
+        }
 
         donneesActe.setCodeNatureActe(Integer.valueOf(acte.getNature().getCode()));
         donneesActe.setDate(acte.getDecision());
@@ -720,6 +739,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         switch (event.getActeHistory().getStatus()) {
             case CREATED:
+            case RECREATED:
                 checkAntivirus(event.getActeHistory().getActeUuid());
                 break;
             case ANTIVIRUS_OK: {

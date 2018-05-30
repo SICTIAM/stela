@@ -20,6 +20,8 @@ import ActeCancelButton from './ActeCancelButton'
 
 class Acte extends Component {
     static contextTypes = {
+        csrfToken: PropTypes.string,
+        csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
         _addNotification: PropTypes.func
     }
@@ -40,7 +42,8 @@ class Acte extends Component {
                 y: 10
             }
         },
-        acteFetched: false
+        acteFetched: false,
+        republished: false
     }
     componentDidMount() {
         const uuid = this.props.uuid
@@ -65,6 +68,20 @@ class Acte extends Component {
         if (['ACK_RECEIVED'].includes(status)) return 'green'
         else if (anomalies.includes(status)) return 'red'
         else return 'blue'
+    }
+    republish = () => {
+        const uuid = this.props.uuid
+        if (uuid !== '') {
+            fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/republish', method: 'POST', context: this.context })
+                .then(checkStatus)
+                .then(() => {
+                    this.context._addNotification(notifications.acte.republished)
+                    this.setState({ republished: true })
+                })
+                .catch(response => {
+                    response.text().then(text => this.context._addNotification(notifications.acte.republishedError))
+                })
+        }
     }
     render() {
         const { t } = this.context
@@ -146,6 +163,9 @@ class Acte extends Component {
                                         }
                                     </Dropdown.Menu>
                                 </Dropdown>
+                                {(lastHistory && anomalies.includes(lastHistory.status) && !this.state.republished) &&
+                                    <Button basic color={'orange'} onClick={this.republish}>{t('acte.page.republish')}</Button>
+                                }
 
                                 <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
                             </div>
