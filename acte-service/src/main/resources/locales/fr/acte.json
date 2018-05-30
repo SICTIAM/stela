@@ -2,6 +2,7 @@
   "acte": {
     "status": {
       "CREATED": "Déposé",
+      "RECREATED": "Redéposé",
       "ARCHIVE_CREATED": "Archive préparée",
       "ANTIVIRUS_OK": "Antivirus OK",
       "ANTIVIRUS_KO": "Antivirus KO",
@@ -103,6 +104,7 @@
       "cancel_deposit": "Annuler le dépôt",
       "download_original": "Télécharger le fichier original",
       "download_justificative": "Télécharger le justificatif",
+      "republish": "Redéposer",
       "courrier_simple": {
         "received": "Le ministère a envoyé un courrier simple pour cet acte",
         "to_send": "Répondre au courrier simple",

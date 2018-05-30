@@ -109,6 +109,7 @@ public class ActeRestController {
     @PostMapping("/{uuid}/republish")
     public ResponseEntity republishActe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @PathVariable String uuid) {
+        LOGGER.error("COUCOU!");
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

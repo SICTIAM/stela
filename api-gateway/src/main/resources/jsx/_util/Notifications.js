@@ -18,6 +18,18 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        republished: {
+            title: 'notifications.acte.title',
+            message: 'notifications.acte.sent.success',
+            level: 'success',
+            position: 'br'
+        },
+        republishedError: {
+            title: 'notifications.acte.title',
+            message: 'notifications.acte.sent.error',
+            level: 'error',
+            position: 'br'
+        },
         cancelled: {
             title: 'notifications.acte.title',
             message: 'notifications.acte.cancelled.success',
