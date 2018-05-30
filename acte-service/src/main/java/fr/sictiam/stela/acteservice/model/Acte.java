@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -27,21 +28,21 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @NotNull(groups = {RestValidation.class})
-    @Size(max = 15, groups = {RestValidation.class})
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
+    @Size(max = 15, groups = { RestValidation.class })
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", groups = { RestValidation.class })
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     private LocalDate decision;
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     private ActeNature nature;
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     private String code;
     private String codeLabel;
     @Column(length = 512)
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     @Size(max = 500)
     private String objet;
     private boolean isPublic;
@@ -192,7 +193,7 @@ public class Acte {
     }
 
     public List<Attachment> getAnnexes() {
-        return annexes;
+        return annexes != null ? annexes : new ArrayList<>();
     }
 
     public void setAnnexes(List<Attachment> annexes) {
