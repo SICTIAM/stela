@@ -5,7 +5,7 @@ image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
 # runtime for each build is more reliable since the runtime is completely
 # isolated from any previous builds.
 variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=true"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 services:
   - docker:18.03-dind
 

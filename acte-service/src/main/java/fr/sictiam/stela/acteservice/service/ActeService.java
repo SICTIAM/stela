@@ -72,6 +72,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
@@ -689,6 +690,15 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             }
         }
         return httpStatus;
+    }
+
+    public Optional<ActeHistory> findFirstActeHistory(Acte acte, StatusType statusType) {
+        return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()))
+                .findFirst();
+    }
+
+    public Stream<ActeHistory> streamActeHistoriesByStatus(Acte acte, StatusType statusType) {
+        return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()));
     }
 
     @Override

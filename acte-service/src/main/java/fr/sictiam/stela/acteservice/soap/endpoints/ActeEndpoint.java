@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Endpoint
@@ -417,28 +416,28 @@ public class ActeEndpoint {
         returnMap.put("dateDecision", dateFormatter.format(acte.getDecision()));
         returnMap.put("dateDepotActe", dateTimeFormatter.format(acte.getCreation()));
 
-        Optional<ActeHistory> sentHistory = findFirstActeHistory(acte, StatusType.SENT);
+        Optional<ActeHistory> sentHistory = acteService.findFirstActeHistory(acte, StatusType.SENT);
 
         returnMap.put("dateEnvoiActe",
                 sentHistory.isPresent() ? dateTimeFormatter.format(sentHistory.get().getDate()) : "");
 
         returnMap.put("dateDepotBanette", "");
 
-        Optional<ActeHistory> arHistory = findFirstActeHistory(acte, StatusType.ACK_RECEIVED);
+        Optional<ActeHistory> arHistory = acteService.findFirstActeHistory(acte, StatusType.ACK_RECEIVED);
 
         returnMap.put("dateAR", arHistory.isPresent() ? dateTimeFormatter.format(arHistory.get().getDate()) : "");
 
-        Optional<ActeHistory> canceledHistory = findFirstActeHistory(acte, StatusType.CANCELLED);
+        Optional<ActeHistory> canceledHistory = acteService.findFirstActeHistory(acte, StatusType.CANCELLED);
 
         returnMap.put("dateARAnnul",
                 canceledHistory.isPresent() ? dateTimeFormatter.format(canceledHistory.get().getDate()) : "");
 
-        Optional<ActeHistory> nackHistory = findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
+        Optional<ActeHistory> nackHistory = acteService.findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
 
         returnMap.put("anomalies", canceledHistory.isPresent() ? nackHistory.get().getMessage() : "");
 
         returnMap.put("courrier_simple",
-                streamActeHistoriesByStatus(acte, StatusType.COURRIER_SIMPLE_RECEIVED).map(acteHistory -> {
+                acteService.streamActeHistoriesByStatus(acte, StatusType.COURRIER_SIMPLE_RECEIVED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
                     map.put("nom_fichier", acteHistory.getFileName());
@@ -446,8 +445,8 @@ public class ActeEndpoint {
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("reponse_courrier_simple",
-                streamActeHistoriesByStatus(acte, StatusType.REPONSE_COURRIER_SIMPLE_ASKED).map(acteHistory -> {
+        returnMap.put("reponse_courrier_simple", acteService
+                .streamActeHistoriesByStatus(acte, StatusType.REPONSE_COURRIER_SIMPLE_ASKED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("form_id_courrier_simple", acteHistory.getUuid());
                     map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
@@ -455,16 +454,17 @@ public class ActeEndpoint {
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("defere", streamActeHistoriesByStatus(acte, StatusType.DEFERE_RECEIVED).map(acteHistory -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("nature_illegalite", acteHistory.getMessage());
-            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+        returnMap.put("defere",
+                acteService.streamActeHistoriesByStatus(acte, StatusType.DEFERE_RECEIVED).map(acteHistory -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("nature_illegalite", acteHistory.getMessage());
+                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
 
-            return map;
-        }).collect(Collectors.toList()));
+                    return map;
+                }).collect(Collectors.toList()));
 
-        returnMap.put("lettre_observations",
-                streamActeHistoriesByStatus(acte, StatusType.LETTRE_OBSERVATION_RECEIVED).map(acteHistory -> {
+        returnMap.put("lettre_observations", acteService
+                .streamActeHistoriesByStatus(acte, StatusType.LETTRE_OBSERVATION_RECEIVED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("form_id_lo", acteHistory.getUuid());
                     map.put("nom_fichier", acteHistory.getFileName());
@@ -474,22 +474,22 @@ public class ActeEndpoint {
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("reponse_lettre_observations",
-                streamActeHistoriesByStatus(acte, StatusType.REPONSE_LETTRE_OBSEVATION_ASKED).map(acteHistory -> {
+        returnMap.put("reponse_lettre_observations", acteService
+                .streamActeHistoriesByStatus(acte, StatusType.REPONSE_LETTRE_OBSEVATION_ASKED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("refus_lettre_observations",
-                streamActeHistoriesByStatus(acte, StatusType.REJET_LETTRE_OBSERVATION_ASKED).map(acteHistory -> {
+        returnMap.put("refus_lettre_observations", acteService
+                .streamActeHistoriesByStatus(acte, StatusType.REJET_LETTRE_OBSERVATION_ASKED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("demande_pc",
-                streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
+        returnMap.put("demande_pc", acteService.streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED)
+                .map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("form_id_lo", acteHistory.getUuid());
                     map.put("nom_fichier", acteHistory.getFileName());
@@ -499,15 +499,15 @@ public class ActeEndpoint {
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("reponse_demande_pc",
-                streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
+        returnMap.put("reponse_demande_pc", acteService
+                .streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
                     return map;
                 }).collect(Collectors.toList()));
 
-        returnMap.put("refus_demande_pc",
-                streamActeHistoriesByStatus(acte, StatusType.REFUS_PIECES_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
+        returnMap.put("refus_demande_pc", acteService
+                .streamActeHistoriesByStatus(acte, StatusType.REFUS_PIECES_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
                     return map;
@@ -516,15 +516,6 @@ public class ActeEndpoint {
         returnObject.setJsonGetDetailsActe(soapReturnGenerator.generateReturn("OK", returnMap));
         return returnObject;
 
-    }
-
-    Optional<ActeHistory> findFirstActeHistory(Acte acte, StatusType statusType) {
-        return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()))
-                .findFirst();
-    }
-
-    Stream<ActeHistory> streamActeHistoriesByStatus(Acte acte, StatusType statusType) {
-        return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()));
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getListeDeliberations")
@@ -754,7 +745,7 @@ public class ActeEndpoint {
             return output;
         }
         Acte acte = acteService.getByUuid(anomaliesEnveloppeInput.getEnveloppeId());
-        Optional<ActeHistory> acteHistory = findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
+        Optional<ActeHistory> acteHistory = acteService.findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
         if (acteHistory.isPresent()) {
             output.setJsonGetAnomaliesEnveloppe(
                     soapReturnGenerator.generateReturn("OK", acteHistory.get().getMessage()));
