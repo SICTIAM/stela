@@ -61,7 +61,7 @@ public class ReceiverTask {
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
                 String fileName = ftpFile.getName();
-                LOGGER.debug("file RECEIVED : " + fileName);
+                LOGGER.debug("file found: " + fileName);
                 if (ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                     if (ftpClient.completePendingCommand()) {

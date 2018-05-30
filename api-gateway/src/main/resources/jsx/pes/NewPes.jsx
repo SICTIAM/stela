@@ -24,7 +24,8 @@ class NewPes extends Component {
             comment: '',
         },
         attachment: null,
-        isFormValid: false
+        isFormValid: false,
+        isSubmitButtonLoading: false
     }
     validationRules = {
         objet: 'required|max:500',
@@ -52,6 +53,7 @@ class NewPes extends Component {
     }, 500)
     submit = () => {
         if (this.state.isFormValid) {
+            this.setState({ isSubmitButtonLoading: true })
             const data = new FormData()
             data.append('pesAller', JSON.stringify(this.state.fields))
             data.append('file', this.state.attachment)
@@ -63,6 +65,7 @@ class NewPes extends Component {
                     history.push('/pes/' + pesUuid)
                 })
                 .catch(response => {
+                    this.setState({ isSubmitButtonLoading: false })
                     response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
                 })
         }
@@ -104,7 +107,11 @@ class NewPes extends Component {
                                 onChange={this.handleFieldChange} />
                         </FormField>
                         <div style={{ textAlign: 'right' }}>
-                            <Button type='submit' primary basic disabled={!this.state.isFormValid}>{t('api-gateway:form.submit')}</Button>
+                            <Button type='submit' primary basic
+                                loading={this.state.isSubmitButtonLoading}
+                                disabled={!this.state.isFormValid || this.state.isSubmitButtonLoading}>
+                                {t('api-gateway:form.submit')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

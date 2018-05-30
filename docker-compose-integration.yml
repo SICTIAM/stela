@@ -1,7 +1,7 @@
 version: '3'
 services:
   clamav:
-    image: mkodockx/docker-clamav:latest
+    image: forge-registry.sictiam.fr/internet/stela-poc/clamavupsized:latest
     container_name: clamav
     ports:
      - "3310:3310"

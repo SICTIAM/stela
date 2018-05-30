@@ -124,10 +124,14 @@ public class DraftService {
         Acte acte = new Acte();
         acte.setLocalAuthority(currentLocalAuthority);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-        if (!currentLocalAuthority.getCanPublishWebSite()) acte.setPublicWebsite(false);
-        if (!currentLocalAuthority.getCanPublishRegistre()) acte.setPublic(false);
-        else acte.setPublic(true);
-        if (mode.equals(ActeMode.ACTE_BUDGETAIRE)) acte.setNature(ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS);
+        if (!currentLocalAuthority.getCanPublishWebSite())
+            acte.setPublicWebsite(false);
+        if (!currentLocalAuthority.getCanPublishRegistre())
+            acte.setPublic(false);
+        else
+            acte.setPublic(true);
+        if (mode.equals(ActeMode.ACTE_BUDGETAIRE))
+            acte.setNature(ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS);
         return acte;
     }
 
@@ -158,6 +162,13 @@ public class DraftService {
         return new ActeDraftUI(acte.getUuid(), acte.getNumber(), acte.getObjet(), acte.getNature());
     }
 
+    public Acte saveOrUpdateActeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
+        Acte acteTemp = StringUtils.isBlank(acte.getUuid()) ? new Acte() : getActeDraftByUuid(acte.getUuid());
+        acte.setActeAttachment(acteTemp.getActeAttachment());
+        acte.setAnnexes(acteTemp.getAnnexes());
+        return saveActeDraft(acte, currentLocalAuthority);
+    }
+
     public Acte saveActeDraft(Acte acte, LocalAuthority currentLocalAuthority) {
         acte.setLocalAuthority(currentLocalAuthority);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
@@ -177,7 +188,7 @@ public class DraftService {
         if (acte.empty())
             acteRepository.delete(acte);
         else
-            saveActeDraft(acte, currentLocalAuthority);
+            saveOrUpdateActeDraft(acte, currentLocalAuthority);
     }
 
     public Acte saveActeDraftFile(String uuid, MultipartFile file, LocalAuthority currentLocalAuthority)
