@@ -72,7 +72,8 @@ public class ActeRestController {
     private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService, CertUtilService certUtilService) {
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService,
+            CertUtilService certUtilService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
         this.certUtilService = certUtilService;
@@ -105,6 +106,16 @@ public class ActeRestController {
         return new ResponseEntity<>(new SearchResultsUI(count, actes), HttpStatus.OK);
     }
 
+    @PostMapping("/{uuid}/republish")
+    public ResponseEntity republishActe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @PathVariable String uuid) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        acteService.rePublishActe(uuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @GetMapping("/{uuid}")
     public ResponseEntity<ActeUI> getByUuid(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
@@ -123,8 +134,8 @@ public class ActeRestController {
     @PostMapping("/ask-classification/current")
     public ResponseEntity askCurrentClassification(
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        CompletableFuture
-                .runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid), false));
+        CompletableFuture.runAsync(
+                () -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid), false));
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -141,8 +152,8 @@ public class ActeRestController {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        CompletableFuture
-                .runAsync(() -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid), true));
+        CompletableFuture.runAsync(
+                () -> acteService.askNomenclature(localAuthorityService.getByUuid(currentLocalAuthUuid), true));
         return new ResponseEntity(HttpStatus.OK);
     }
 
