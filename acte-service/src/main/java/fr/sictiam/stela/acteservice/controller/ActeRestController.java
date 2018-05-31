@@ -109,7 +109,6 @@ public class ActeRestController {
     @PostMapping("/{uuid}/republish")
     public ResponseEntity republishActe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @PathVariable String uuid) {
-        LOGGER.error("COUCOU!");
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -500,7 +499,7 @@ public class ActeRestController {
             InputStream fileInputStream = new ByteArrayInputStream(file);
 
             response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
-            response.addHeader("Content-Type", getContentType(filename) + "; charset=UTF-8");
+            response.addHeader("Content-Type", getContentType(filename));
 
             IOUtils.copy(fileInputStream, response.getOutputStream());
             response.flushBuffer();

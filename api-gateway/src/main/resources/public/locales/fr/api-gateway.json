@@ -130,7 +130,7 @@
                 }
             },
             "republished": {
-                "success": "L'acte a bien été redéposé'",
+                "success": "L'acte a bien été redéposé",
                 "error": "Impossible de redéposer l'acte"
             },
             "cancelled": {

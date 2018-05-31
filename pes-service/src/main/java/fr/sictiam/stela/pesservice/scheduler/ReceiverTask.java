@@ -104,7 +104,10 @@ public class ReceiverTask {
         if (etatAck == 1) {
             pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
         } else {
-            String errorMessage = path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/LibelleAnoAck/@V", document);
+            String errorTitle = path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/Erreur/NumAnoAck/@V", document);
+
+            String errorMessage = errorTitle + " "
+                    + path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/Erreur/LibelleAnoAck/@V", document);
             pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errorMessage);
         }
     }

@@ -164,18 +164,20 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteRepository.findByNumberAndLocalAuthoritySiren(number, siren).orElseThrow(ActeNotFoundException::new);
     }
 
-    public Acte receiveAREvent(String iDActe, StatusType statusType) {
+    public Acte receiveAREvent(String iDActe, StatusType statusType, Attachment attachment) {
         Acte acte = findByIdActe(iDActe);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType, LocalDateTime.now(), attachment.getFile(),
+                attachment.getFilename());
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         LOGGER.info("Acte {} {} with id {}", acte.getNumber(), statusType, acte.getUuid());
         return acte;
     }
 
-    public void receiveAnomalie(String siren, String number, String detail) {
+    public void receiveAnomalie(String siren, String number, String detail, Attachment attachment) {
         Acte acte = acteRepository.findByNumberAndLocalAuthoritySiren(number, siren)
                 .orElseThrow(ActeNotFoundException::new);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, detail);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, LocalDateTime.now(),
+                attachment.getFile(), attachment.getFilename(), detail);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
         LOGGER.info("Acte {} anomalie with id {}", acte.getNumber(), acte.getUuid());
     }
