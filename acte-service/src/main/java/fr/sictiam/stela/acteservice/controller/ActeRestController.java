@@ -499,7 +499,7 @@ public class ActeRestController {
             InputStream fileInputStream = new ByteArrayInputStream(file);
 
             response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
-            response.addHeader("Content-Type", getContentType(filename) + "; charset=UTF-8");
+            response.addHeader("Content-Type", getContentType(filename));
 
             IOUtils.copy(fileInputStream, response.getOutputStream());
             response.flushBuffer();
