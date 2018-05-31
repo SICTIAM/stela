@@ -133,7 +133,6 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     public void sendMail(String mail, String subject, String text) throws MessagingException, IOException {
 
         MimeMessage message = emailSender.createMimeMessage();
-        LOGGER.debug("SENDING MAIL TO " + mail);
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setSubject(subject);
         helper.setText(text, true);
@@ -143,6 +142,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     }
 
     public String getAgentMail(JsonNode node) {
+        // FIXME probleme if no profile email return null
+        LOGGER.debug(node.toString());
         return StringUtils.isNotBlank(node.get("email").asText()) ? node.get("email").asText()
                 : node.get("agent").get("email").asText();
     }
