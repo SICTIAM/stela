@@ -170,20 +170,33 @@ public class EmailCheckingTask {
                                 StreamSource classSource = new StreamSource(bodyPart.getInputStream());
                                 if ("ARActe".equals(rootName)) {
                                     ARActe arActe = unmarshall(classSource, ARActe.class);
-                                    acteService.receiveAREvent(arActe.getIDActe(), StatusType.ACK_RECEIVED);
+                                    byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
+
+                                    Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
+                                            bodyPart.getSize());
+                                    acteService.receiveAREvent(arActe.getIDActe(), StatusType.ACK_RECEIVED, attachment);
 
                                 } else if ("ARAnnulation".equals(rootName)) {
                                     ARAnnulation arAnnulation = unmarshall(classSource, ARAnnulation.class);
-                                    acteService.receiveAREvent(arAnnulation.getIDActe(), StatusType.CANCELLED);
+                                    byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
+
+                                    Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
+                                            bodyPart.getSize());
+                                    acteService.receiveAREvent(arAnnulation.getIDActe(), StatusType.CANCELLED,
+                                            attachment);
 
                                 } else if ("AnomalieActe".equals(rootName)) {
                                     if (enveloppe == null) {
                                         throw new NoEnveloppeException();
                                     }
                                     AnomalieActe anomalie = unmarshall(classSource, AnomalieActe.class);
+                                    byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 
+                                    Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
+                                            bodyPart.getSize());
                                     acteService.receiveAnomalie(enveloppe.getDestinataire().getSIREN(),
-                                            anomalie.getActeRecu().getNumeroInterne(), anomalie.getDetail());
+                                            anomalie.getActeRecu().getNumeroInterne(), anomalie.getDetail(),
+                                            attachment);
 
                                 } else if ("CourrierSimple".equals(rootName)) {
                                     CourrierSimple courrierSimple = unmarshall(classSource, CourrierSimple.class);
@@ -201,13 +214,15 @@ public class EmailCheckingTask {
                                             originalMultipart);
                                     acteService.receiveAdditionalPiece(StatusType.DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED,
                                             demandePieceComplementaire.getIDActe(), attachment,
-                                            demandePieceComplementaire.getDescriptionPieces(), Flux.DEMANDE_PIECE_COMPLEMENTAIRE);
+                                            demandePieceComplementaire.getDescriptionPieces(),
+                                            Flux.DEMANDE_PIECE_COMPLEMENTAIRE);
                                 } else if ("LettreObservations".equals(rootName)) {
                                     LettreObservations letterObs = unmarshall(classSource, LettreObservations.class);
                                     Attachment attachment = getFileAttachmentByName(
                                             letterObs.getDocument().getNomFichier(), originalMultipart);
                                     acteService.receiveAdditionalPiece(StatusType.LETTRE_OBSERVATION_RECEIVED,
-                                            letterObs.getIDActe(), attachment, letterObs.getMotif(), Flux.LETTRE_OBSERVATION);
+                                            letterObs.getIDActe(), attachment, letterObs.getMotif(),
+                                            Flux.LETTRE_OBSERVATION);
 
                                 } else if ("DefereTA".equals(rootName)) {
                                     DefereTA defereTA = unmarshall(classSource, DefereTA.class);
@@ -221,15 +236,23 @@ public class EmailCheckingTask {
 
                                 } else if ("ARPieceComplementaire".equals(rootName)) {
                                     JAXBElement<ARReponseCL> arPieceComplementaire = unmarshallARReponseCL(classSource);
+                                    byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
+
+                                    Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
+                                            bodyPart.getSize());
                                     acteService.receiveAREvent(
                                             arPieceComplementaire.getValue().getInfosCourrierPref().getIDActe(),
-                                            StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE);
+                                            StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE, attachment);
 
                                 } else if ("ARReponseRejetLettreObservations".equals(rootName)) {
                                     JAXBElement<ARReponseCL> arLettreObs = unmarshallARReponseCL(classSource);
+                                    byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
+
+                                    Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
+                                            bodyPart.getSize());
                                     acteService.receiveAREvent(
                                             arLettreObs.getValue().getInfosCourrierPref().getIDActe(),
-                                            StatusType.ACK_REPONSE_LETTRE_OBSERVATION);
+                                            StatusType.ACK_REPONSE_LETTRE_OBSERVATION, attachment);
 
                                 } else if ("RetourClassification".equals(rootName)) {
                                     RetourClassification retClassification = unmarshall(classSource,
