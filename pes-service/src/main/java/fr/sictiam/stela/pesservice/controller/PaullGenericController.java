@@ -52,7 +52,7 @@ public class PaullGenericController {
         this.externalRestService = externalRestService;
     }
 
-    @JsonPropertyOrder({ "status", "status_message", "data" })
+    @JsonPropertyOrder({"status", "status_message", "data"})
     class PaullResponse {
 
         String status;
@@ -117,7 +117,7 @@ public class PaullGenericController {
     }
 
     @PostMapping("/depot")
-    public ResponseEntity<?> depotDoc(@PathVariable String siren, MultipartHttpServletRequest request,
+    public ResponseEntity<?> depotDocument(@PathVariable String siren, MultipartHttpServletRequest request,
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "comment", required = false) String comment,
             @RequestParam(name = "name", required = false) String name,
@@ -165,7 +165,7 @@ public class PaullGenericController {
     }
 
     @GetMapping("/infosdoc/{idFlux}")
-    public ResponseEntity<?> infosDoc(@PathVariable String siren, @PathVariable Integer idFlux,
+    public ResponseEntity<?> infosDocument(@PathVariable String siren, @PathVariable Integer idFlux,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
         Map<String, Object> data = new HashMap<>();
@@ -216,7 +216,7 @@ public class PaullGenericController {
     }
 
     @GetMapping("/doc/{idFlux}")
-    public ResponseEntity<?> docpes(@PathVariable String siren, @PathVariable Integer idFlux,
+    public ResponseEntity<?> getDocument(@PathVariable String siren, @PathVariable Integer idFlux,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
         Map<String, Object> data = new HashMap<>();
@@ -264,7 +264,7 @@ public class PaullGenericController {
     }
 
     @GetMapping("/servicesorganisationnels/{email}")
-    public ResponseEntity<?> services(@PathVariable String siren, @PathVariable String email,
+    public ResponseEntity<?> getServices(@PathVariable String siren, @PathVariable String email,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;

@@ -9,6 +9,14 @@ import javax.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
+/**
+ * GenericDocument
+ * <p>
+ * This class is used to store the link between a sesileClasseurId with a sesileDocumentId for metier applications that
+ * will call (formerly PAULL) Stela to get infos on a classeur.
+ * It is also used as a trace
+ */
+
 @Entity
 public class GenericDocument {
 
