@@ -11,4 +11,5 @@ public interface ActeHistoryRepository extends JpaRepository<ActeHistory, String
 
     List<ActeHistory> findByacteUuidOrderByDate(String acteUuid);
 
+    Optional<ActeHistory> findFirstByFileNameContaining(String filename);
 }

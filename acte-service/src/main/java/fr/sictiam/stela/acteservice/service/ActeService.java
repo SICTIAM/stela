@@ -173,8 +173,22 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acte;
     }
 
-    public void receiveAnomalie(String siren, String number, String detail, Attachment attachment) {
+    public void receiveAnomalieActe(String siren, String number, String detail, Attachment attachment) {
         Acte acte = acteRepository.findByNumberAndLocalAuthoritySiren(number, siren)
+                .orElseThrow(ActeNotFoundException::new);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, LocalDateTime.now(),
+                attachment.getFile(), attachment.getFilename(), detail);
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} anomalie with id {}", acte.getNumber(), acte.getUuid());
+    }
+
+    public void receiveAnomalieEnveloppe(String anomalieFilename, String detail, Attachment attachment) {
+        String[] splited = anomalieFilename.split("--");
+        splited = Arrays.copyOfRange(splited, 1, splited.length);
+        String sourceTarGz = String.join("--", splited).replace(".xml", ".tar.gz");
+        ActeHistory acteHistorySource = acteHistoryRepository.findFirstByFileNameContaining(sourceTarGz)
+                .orElseThrow(ActeNotFoundException::new);
+        Acte acte = acteRepository.findByUuidAndDraftNull(acteHistorySource.getActeUuid())
                 .orElseThrow(ActeNotFoundException::new);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, LocalDateTime.now(),
                 attachment.getFile(), attachment.getFilename(), detail);
@@ -336,7 +350,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         StatusType.DEFERE_RECEIVED, StatusType.NACK_RECEIVED, StatusType.CANCELLED)));
         mainQueryPredicates.add(acteHistoryTable.get("acteUuid").in(acteQuery));
         mainQueryPredicates.add(cb.and(cb.greaterThan(acteHistoryTable.get("date"), date)));
-        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
+        query.where(mainQueryPredicates.toArray(new Predicate[]{}));
         TypedQuery<ActeHistory> typedQuery = entityManager.createQuery(query);
         List<ActeHistory> resultList = typedQuery.getResultList();
 
@@ -492,7 +506,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private List<Acte> getActesFromUuidsOrSearch(ActeUuidsAndSearchUI ui) {
         return ui.getUuids().size() > 0 ? ui.getUuids().stream().map(this::getByUuid).collect(Collectors.toList())
                 : getAllWithQuery(ui.getMultifield(), ui.getNumber(), ui.getObjet(), ui.getNature(),
-                        ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
+                ui.getDecisionFrom(), ui.getDecisionTo(), ui.getStatus(), 1, 0, "", "", null, null);
     }
 
     public List<Acte> getAckedActeFromUuidsOrSearch(ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
