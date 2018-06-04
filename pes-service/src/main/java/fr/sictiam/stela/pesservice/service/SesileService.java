@@ -69,6 +69,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private RestTemplate restTemplate = new RestTemplate();
 
+    // TODO: Make configurable for SESILE v4
     @Value("${application.sesile.apiUrl}")
     String sesileUrl;
 
@@ -223,7 +224,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 boolean certificatProcessOk = verificationResult.getCertificateProcessException() == null;
                 boolean certificatHashOk = (xadesInfoProcessResult.getSigCertExpectedHash() == null)
                         || (xadesInfoProcessResult.getSigCertExpectedHash()
-                                .equals(xadesInfoProcessResult.getSigCertcalculatedHash()));
+                        .equals(xadesInfoProcessResult.getSigCertcalculatedHash()));
 
                 boolean mainC14Ok = verificationResult.getSignatureAndRefsVerificationResult().isMainC14Accepted();
                 boolean allrefsC14Ok = verificationResult.getSignatureAndRefsVerificationResult()
@@ -239,10 +240,10 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
                 boolean certificatSerialNumberOk = (xadesInfoProcessResult.getSigCertExpectedSerialNumber() == null)
                         || (xadesInfoProcessResult.getSigCertExpectedSerialNumber()
-                                .equals(xadesInfoProcessResult.getSigCertSerialNumber()));
+                        .equals(xadesInfoProcessResult.getSigCertSerialNumber()));
                 boolean certificateIssuerOk = (xadesInfoProcessResult.getSigCertExpectedIssuerName() == null)
                         || (xadesInfoProcessResult.getSigCertExpectedIssuerName().replaceAll(" ", "")
-                                .equals(xadesInfoProcessResult.getSigCertIssuerName().replaceAll(" ", "")));
+                        .equals(xadesInfoProcessResult.getSigCertIssuerName().replaceAll(" ", "")));
                 boolean certificatdigitalSignatureOk = certificatInformation.getSigningCertificate()
                         .getKeyUsage() != null ? certificatInformation.getSigningCertificate().getKeyUsage()[1] : false;
                 boolean certificatChainOk = certificatInformation.isSignCertAuthorized();
@@ -251,7 +252,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 if (!certificateIssuerOk) {
                     certificateIssuerOk = (xadesInfoProcessResult.getSigCertExpectedIssuerName() == null)
                             || (xadesInfoProcessResult.getSigCertExpectedIssuerName().replaceAll(" ", "")
-                                    .equals(xadesInfoProcessResult.getSigCertIssuerNameRFC2253().replaceAll(" ", "")));
+                            .equals(xadesInfoProcessResult.getSigCertIssuerNameRFC2253().replaceAll(" ", "")));
                 }
 
                 boolean certificatBasicConstraintsCritical = certificatInformation.isBasicConstraintCritical();
@@ -260,7 +261,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 boolean xadesSigPolicyHashOk = (xadesInfoProcessResult.getSigExpectedSecurityPolicyIdHash() == null)
                         || (xadesInfoProcessResult.getSigSecurityPolicyIdHash() == null)
                         || (xadesInfoProcessResult.getSigExpectedSecurityPolicyIdHash()
-                                .equals(xadesInfoProcessResult.getSigSecurityPolicyIdHash()));
+                        .equals(xadesInfoProcessResult.getSigSecurityPolicyIdHash()));
                 boolean problemRef = false;
                 boolean problemSignedPropertyRef = false;
                 for (XMLDsigReference1 ref : listRef) {
@@ -436,6 +437,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public List<ServiceOrganisation> getServiceGenericOrganisations(LocalAuthority localauthority, String email) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
+        // TODO: Add a new call with SIREN for SESILE v4
         List<ServiceOrganisation> organisations = Arrays
                 .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
                         ServiceOrganisation[].class, email).getBody());
