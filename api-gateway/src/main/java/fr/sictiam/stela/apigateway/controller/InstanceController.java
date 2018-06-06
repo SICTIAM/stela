@@ -61,7 +61,6 @@ public class InstanceController {
 
     @GetMapping(value = "/certInfos")
     public CertificateInfos getCertInfos(HttpServletRequest request) {
-        LOGGER.debug("getCertInfos");
         return certUtilService.getCertInfosFromHeaders(request);
     }
 

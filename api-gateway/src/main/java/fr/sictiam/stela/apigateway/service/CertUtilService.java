@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.Enumeration;
 
 @Service
 public class CertUtilService {
@@ -31,31 +30,22 @@ public class CertUtilService {
     }
 
     public CertificateInfos getCertInfosFromHeaders(HttpServletRequest request) {
-        Enumeration headerNames = request.getHeaderNames();
-        LOGGER.debug("Headers:");
-        while (headerNames.hasMoreElements()) {
-            String headerName = (String) headerNames.nextElement();
-            LOGGER.debug("{}: {}", headerName, request.getHeader(headerName));
-        }
-        CertificateInfos certificateInfos = new CertificateInfos(
-                request.getHeader("HTTP_X_SSL_CLIENT_M_SERIAL"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_CN"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_O"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_OU"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_EMAIL"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN_CN"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN_O"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN_EMAIL"),
-                StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_NOT_BEFORE")) ? null
-                        : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_BEFORE")),
-                StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")) ? null
-                        : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")),
-                StringUtils.isEmpty(request.getHeader("X-Ssl-Status")) ? null
-                        : CertificateStatus.valueOf(request.getHeader("X-Ssl-Status"))
+        return new CertificateInfos(
+                request.getHeader("x-ssl-client-m-serial"),
+                request.getHeader("x-ssl-client-issuer-dn"),
+                request.getHeader("x-ssl-client-s-dn-cn"),
+                request.getHeader("x-ssl-client-s-dn-o"),
+                request.getHeader("x-ssl-client-s-dn-ou"),
+                request.getHeader("x-ssl-client-s-dn-email"),
+                request.getHeader("x-ssl-client-i-dn-cn"),
+                request.getHeader("x-ssl-client-i-dn-o"),
+                request.getHeader("x-ssl-client-i-dn-email"),
+                StringUtils.isEmpty(request.getHeader("x-ssl-client-not-before")) ? null
+                        : LocalDate.parse(request.getHeader("x-ssl-client-not-before")),
+                StringUtils.isEmpty(request.getHeader("x-ssl-client-not-after")) ? null
+                        : LocalDate.parse(request.getHeader("x-ssl-client-not-after")),
+                StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? null
+                        : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
-        LOGGER.debug("CertInfos:");
-        LOGGER.debug(certificateInfos.toString());
-        return certificateInfos;
     }
 }
