@@ -47,6 +47,7 @@ public class CertUtilService {
                 StringUtils.isEmpty(request.getHeader("X-Ssl-Status")) ? null
                         : CertificateStatus.valueOf(request.getHeader("X-Ssl-Status"))
         );
+        LOGGER.debug("CertInfos:");
         LOGGER.debug(certificateInfos.toString());
         return certificateInfos;
     }
