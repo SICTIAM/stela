@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.Enumeration;
 
 @Service
 public class CertUtilService {
@@ -30,6 +31,12 @@ public class CertUtilService {
     }
 
     public CertificateInfos getCertInfosFromHeaders(HttpServletRequest request) {
+        Enumeration headerNames = request.getHeaderNames();
+        LOGGER.debug("Headers:");
+        while (headerNames.hasMoreElements()) {
+            String headerName = (String) headerNames.nextElement();
+            LOGGER.debug("{}: {}", headerName, request.getHeader(headerName));
+        }
         CertificateInfos certificateInfos = new CertificateInfos(
                 request.getHeader("HTTP_X_SSL_CLIENT_M_SERIAL"),
                 request.getHeader("HTTP_X_SSL_CLIENT_I_DN"),
