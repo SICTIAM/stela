@@ -136,12 +136,15 @@ class Profile extends Component {
                                 <img style={{ height: '1.5em', float: 'left', marginRight: '1em' }} src={process.env.PUBLIC_URL + '/img/logo_ozwillo.png'} alt="Ozwillo" />
                                 {t('profile.modify_my_profile')}
                             </a>
-                        </div>}
+                        </div>
+                    }
                 </Segment>
 
                 {allLocalAuthorityProfiles}
 
-                <CertificateInfos />
+                {!this.props.uuid &&
+                    <CertificateInfos />
+                }
 
             </Page >
         )
