@@ -88,4 +88,22 @@ public class CertificateInfos {
     public CertificateStatus getStatus() {
         return status;
     }
+
+    @Override
+    public String toString() {
+        return "CertificateInfos{" +
+                "serial='" + serial + '\'' +
+                ", issuer='" + issuer + '\'' +
+                ", subjectCommonName='" + subjectCommonName + '\'' +
+                ", subjectOrganization='" + subjectOrganization + '\'' +
+                ", subjectOrganizationUnit='" + subjectOrganizationUnit + '\'' +
+                ", subjectEmaill='" + subjectEmaill + '\'' +
+                ", issuerCommonName='" + issuerCommonName + '\'' +
+                ", issuerOrganization='" + issuerOrganization + '\'' +
+                ", issuerEmaill='" + issuerEmaill + '\'' +
+                ", issuedDate=" + issuedDate +
+                ", expiredDate=" + expiredDate +
+                ", status=" + status +
+                '}';
+    }
 }
