@@ -43,8 +43,8 @@ public class CertUtilService {
                 request.getHeader("x-ssl-client-i-dn-cn"),
                 request.getHeader("x-ssl-client-i-dn-o"),
                 request.getHeader("x-ssl-client-i-dn-email"),
-                timestampToLocalDate(request.getHeader("x-ssl-client-not-before")),
-                timestampToLocalDate(request.getHeader("x-ssl-client-not-after")),
+                timestampToLocalDate(request.getHeader("x-ssl-client-not-before").replace("Z", "")),
+                timestampToLocalDate(request.getHeader("x-ssl-client-not-after").replace("Z", "")),
                 StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? CertificateStatus.NONE
                         : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
