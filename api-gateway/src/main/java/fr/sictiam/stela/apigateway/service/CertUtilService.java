@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class CertUtilService {
@@ -40,12 +43,15 @@ public class CertUtilService {
                 request.getHeader("x-ssl-client-i-dn-cn"),
                 request.getHeader("x-ssl-client-i-dn-o"),
                 request.getHeader("x-ssl-client-i-dn-email"),
-                StringUtils.isEmpty(request.getHeader("x-ssl-client-not-before")) ? null
-                        : LocalDate.parse(request.getHeader("x-ssl-client-not-before")),
-                StringUtils.isEmpty(request.getHeader("x-ssl-client-not-after")) ? null
-                        : LocalDate.parse(request.getHeader("x-ssl-client-not-after")),
-                StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? null
+                timestampToLocalDate(request.getHeader("x-ssl-client-not-before")),
+                timestampToLocalDate(request.getHeader("x-ssl-client-not-after")),
+                StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? CertificateStatus.NONE
                         : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
+    }
+
+    private LocalDate timestampToLocalDate(String timestamp) {
+        if (StringUtils.isEmpty(timestamp)) return null;
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(timestamp)), ZoneOffset.UTC).toLocalDate();
     }
 }
