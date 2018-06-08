@@ -272,7 +272,7 @@ class LocalAuthorityProfile extends Component {
             (activatedModule === 'PES' && this.state.sesileSubscription && this.state.sesileConfiguration) &&
 
             <div key={activatedModule} style={{ marginTop: '1em' }}>
-                <Header size='small'>{t('profile.sesile.title')}</Header>
+                <Header as='h3' dividing>{t('profile.sesile.title')}</Header>
                 <Field htmlFor='serviceOrganisationNumber' label={t('profile.sesile.serviceOrganisationNumber')}>
                     <Dropdown compact search selection
                         id='serviceOrganisationNumber'
@@ -312,7 +312,7 @@ class LocalAuthorityProfile extends Component {
         );
         const profileNotifications = profile.localAuthority.activatedModules.map(activatedModule =>
             <div style={{ marginTop: '2em' }} key={activatedModule}>
-                <Header size='small'>{t('profile.notifications_title')} {activatedModule}</Header>
+                <Header as='h3' dividing>{t('profile.notifications_title')} {activatedModule}</Header>
                 <Field htmlFor={activatedModule} label={t(`profile.localAuthorityNotifications`)}>
                     <Checkbox toggle
                         id={activatedModule} checked={profile.localAuthorityNotifications.includes(activatedModule)}

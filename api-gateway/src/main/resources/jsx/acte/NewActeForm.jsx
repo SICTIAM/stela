@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Button, Form, Checkbox, Card, Dropdown } from 'semantic-ui-react'
+import { Button, Form, Checkbox, Card, Dropdown, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
@@ -187,7 +187,7 @@ class NewActeForm extends Component {
         return acteData
     }
     extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
-    handleFieldChange = (field, value) => {
+    handleFieldChange = (field, value, callback) => {
         field = this.extractFieldNameFromId(field)
         const fields = this.state.fields
         fields[field] = value
@@ -201,8 +201,9 @@ class NewActeForm extends Component {
         this.setState({ fields: fields }, () => {
             this.validateForm()
             this.saveDraft()
-            if ((field === 'nature' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.code !== '') 
-                    || (field === 'code' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.nature !== '')) {
+            if (callback) callback()
+            if ((field === 'nature' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.code !== '')
+                || (field === 'code' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.nature !== '')) {
                 this.fetchAttachmentTypes()
                 this.fetchRemoveAttachmentTypes()
             }
@@ -424,14 +425,42 @@ class NewActeForm extends Component {
         return (
             renderIf(this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid)(
                 <Form onSubmit={this.saveAndSubmitForm}>
-                    <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}>
-                        <InputValidation id={`${this.state.fields.uuid}_number`}
-                            placeholder={t('acte.fields.number') + '...'}
-                            value={this.state.fields.number}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.number}
-                            fieldName={t('acte.fields.number')} />
-                    </FormField>
+                    <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
+                        <Grid.Column>
+                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}>
+                                <InputValidation id={`${this.state.fields.uuid}_number`}
+                                    placeholder={t('acte.fields.number') + '...'}
+                                    value={this.state.fields.number}
+                                    onChange={this.handleFieldChange}
+                                    validationRule={this.validationRules.number}
+                                    fieldName={t('acte.fields.number')} />
+                            </FormField>
+                        </Grid.Column>
+                        {renderIf(this.props.mode !== 'ACTE_BATCH')(
+                            <Grid.Column>
+                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
+                                    <InputValidation id={`${this.state.fields.uuid}_decision`}
+                                        type='date'
+                                        value={this.state.fields.decision}
+                                        onChange={this.handleFieldChange}
+                                        validationRule={this.validationRules.decision}
+                                        fieldName={t('acte.fields.decision')}
+                                        isValidDate={(current) => current.isBefore(new moment())} />
+                                </FormField>
+                            </Grid.Column>
+                        )}
+                        {renderIf(this.props.mode !== 'ACTE_BATCH')(
+                            <Grid.Column>
+                                <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}>
+                                    <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
+                                        value={groupOptionValue}
+                                        onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                        options={groupOptions}
+                                        fluid selection />
+                                </FormField>
+                            </Grid.Column>
+                        )}
+                    </Grid>
                     <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')}>
                         <InputValidation id={`${this.state.fields.uuid}_objet`}
                             placeholder={t('acte.fields.objet') + '...'}
@@ -440,26 +469,6 @@ class NewActeForm extends Component {
                             validationRule={this.validationRules.objet}
                             fieldName={t('acte.fields.objet')} />
                     </FormField>
-                    {renderIf(this.props.mode !== 'ACTE_BATCH')(
-                        <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
-                            <InputValidation id={`${this.state.fields.uuid}_decision`}
-                                type='date'
-                                value={this.state.fields.decision}
-                                onChange={this.handleFieldChange}
-                                validationRule={this.validationRules.decision}
-                                fieldName={t('acte.fields.decision')}
-                                isValidDate={(current) => current.isBefore(new moment())} />
-                        </FormField>
-                    )}
-                    {renderIf(this.props.mode !== 'ACTE_BATCH')(
-                        <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}>
-                            <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
-                                value={groupOptionValue}
-                                onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
-                                options={groupOptions}
-                                fluid selection />
-                        </FormField>
-                    )}
                     {renderIf(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH')(
                         <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')}>
                             <InputValidation id={`${this.state.fields.uuid}_nature`}

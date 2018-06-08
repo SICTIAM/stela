@@ -103,6 +103,7 @@
             "expiredDate": "Expire le",
             "status": "Status"
         },
+        "no_certificate": "Aucun certificat",
         "sesile": {
             "title": "Connexion Sesile",
             "serviceOrganisationNumber": "Service organisationel",

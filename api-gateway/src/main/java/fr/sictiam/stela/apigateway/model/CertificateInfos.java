@@ -1,5 +1,7 @@
 package fr.sictiam.stela.apigateway.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 public class CertificateInfos {
@@ -16,7 +18,9 @@ public class CertificateInfos {
     private String issuerOrganization; // x-ssl-client-i-dn-o
     private String issuerEmaill; // x-ssl-client-i-dn-email
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate issuedDate; // x-ssl-client-not-before
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expiredDate; // x-ssl-client-not-after
 
     private CertificateStatus status; // x-ssl-status

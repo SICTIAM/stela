@@ -50,12 +50,9 @@ public class CertUtilService {
     }
 
     private LocalDate timestampZToLocalDate(String timestampZ) {
-        LOGGER.debug("Timestamp to convert: {}", timestampZ);
         if (StringUtils.isEmpty(timestampZ)) return null;
-        LocalDate localDate = LocalDateTime
+        return LocalDateTime
                 .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))
                 .toLocalDate();
-        LOGGER.debug("Date converted: {}", localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        return localDate;
     }
 }

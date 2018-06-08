@@ -73,7 +73,7 @@
       "publicWebsite": "Affichage sur site internet",
       "objet": "Objet",
       "status": "Status",
-      "group": "Groupe de dépôt"
+      "group": "Visible pour"
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"
@@ -157,7 +157,7 @@
       "batch_title_placeholder": "Nouvel acte...",
       "PJ_types": "Types de pièce jointe...",
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",
-      "every_group": "Tout groupe"
+      "every_group": "Toute la collectivité"
     }
   },
   "admin": {

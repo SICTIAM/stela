@@ -143,7 +143,7 @@ class Acte extends Component {
                                 {lastMetierHistory && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
                             </Label>
                             <div style={{ textAlign: 'right' }}>
-                                <Dropdown basic trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
+                                <Dropdown basic direction='left' trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
                                     <Dropdown.Menu>
                                         <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
                                             {t('acte.page.download_original')}
