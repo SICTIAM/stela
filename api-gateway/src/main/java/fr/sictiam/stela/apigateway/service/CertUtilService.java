@@ -10,10 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -55,7 +53,7 @@ public class CertUtilService {
         LOGGER.debug("Timestamp to convert: {}", timestampZ);
         if (StringUtils.isEmpty(timestampZ)) return null;
         LocalDate localDate = LocalDateTime
-                .ofInstant(Instant.ofEpochSecond(Long.parseLong(timestampZ.replace("Z", ""))), ZoneOffset.UTC)
+                .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))
                 .toLocalDate();
         LOGGER.debug("Date converted: {}", localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         return localDate;
