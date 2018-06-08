@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class CertUtilService {
@@ -43,15 +44,20 @@ public class CertUtilService {
                 request.getHeader("x-ssl-client-i-dn-cn"),
                 request.getHeader("x-ssl-client-i-dn-o"),
                 request.getHeader("x-ssl-client-i-dn-email"),
-                timestampToLocalDate(request.getHeader("x-ssl-client-not-before").replace("Z", "")),
-                timestampToLocalDate(request.getHeader("x-ssl-client-not-after").replace("Z", "")),
+                timestampZToLocalDate(request.getHeader("x-ssl-client-not-before")),
+                timestampZToLocalDate(request.getHeader("x-ssl-client-not-after")),
                 StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? CertificateStatus.NONE
                         : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
     }
 
-    private LocalDate timestampToLocalDate(String timestamp) {
-        if (StringUtils.isEmpty(timestamp)) return null;
-        return LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(timestamp)), ZoneOffset.UTC).toLocalDate();
+    private LocalDate timestampZToLocalDate(String timestampZ) {
+        LOGGER.debug("Timestamp to convert: {}", timestampZ);
+        if (StringUtils.isEmpty(timestampZ)) return null;
+        LocalDate localDate = LocalDateTime
+                .ofInstant(Instant.ofEpochSecond(Long.parseLong(timestampZ.replace("Z", ""))), ZoneOffset.UTC)
+                .toLocalDate();
+        LOGGER.debug("Date converted: {}", localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        return localDate;
     }
 }
