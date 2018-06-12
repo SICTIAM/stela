@@ -155,6 +155,18 @@ const notifications = {
             message: 'notifications.profile.updated',
             level: 'success',
             position: 'br'
+        },
+        certificateNotValid: {
+            title: 'notifications.profile.title',
+            message: 'notifications.profile.certificateNotValid',
+            level: 'error',
+            position: 'br'
+        },
+        certificateConflict: {
+            title: 'notifications.profile.title',
+            message: 'notifications.profile.certificateConflict',
+            level: 'error',
+            position: 'br'
         }
     }
 }

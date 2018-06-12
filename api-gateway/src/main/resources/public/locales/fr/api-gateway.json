@@ -89,16 +89,17 @@
         },
         "certificate": {
             "title": "Informations du certificat",
+            "pair": "Appairer le certificat",
             "serial": "Numéro de série",
             "issuer": "Émetteur",
             "subject": "Propriétaire",
             "subjectCommonName": "Nom",
             "subjectOrganization": "Organisation",
             "subjectOrganizationUnit": "Unité d'organisation",
-            "subjectEmaill": "Email",
+            "subjectEmail": "Email",
             "issuerCommonName": "Nom",
             "issuerOrganization": "Organisation",
-            "issuerEmaill": "Email",
+            "issuerEmail": "Email",
             "issuedDate": "Émis le",
             "expiredDate": "Expire le",
             "status": "Status"
@@ -199,7 +200,9 @@
         },
         "profile": {
             "title": "Profil",
-            "updated": "Votre profil a bien été mis à jour"
+            "updated": "Votre profil a bien été mis à jour",
+            "certificateNotValid": "Le certificat n'est pas valide",
+            "certificateConflict": "Le certificat est déjà enregistré sure un autre utilisateur"
         }
     },
     "local_authority": {

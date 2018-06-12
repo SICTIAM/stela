@@ -1,10 +1,21 @@
-package fr.sictiam.stela.apigateway.model;
+package fr.sictiam.stela.admin.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import java.time.LocalDate;
 
-public class CertificateInfos {
+@Entity
+public class Certificate {
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String uuid;
 
     private String serial; // x-ssl-client-m-serial
     private String issuer; // x-ssl-client-issuer-dn
@@ -23,14 +34,12 @@ public class CertificateInfos {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expiredDate; // x-ssl-client-not-after
 
-    private CertificateStatus status; // x-ssl-status
-
-    public CertificateInfos() {
+    public Certificate() {
     }
 
-    public CertificateInfos(String serial, String issuer, String subjectCommonName, String subjectOrganization,
+    public Certificate(String serial, String issuer, String subjectCommonName, String subjectOrganization,
             String subjectOrganizationUnit, String subjectEmail, String issuerCommonName, String issuerOrganization,
-            String issuerEmail, LocalDate issuedDate, LocalDate expiredDate, CertificateStatus status) {
+            String issuerEmail, LocalDate issuedDate, LocalDate expiredDate) {
         this.serial = serial;
         this.issuer = issuer;
         this.subjectCommonName = subjectCommonName;
@@ -42,7 +51,10 @@ public class CertificateInfos {
         this.issuerEmail = issuerEmail;
         this.issuedDate = issuedDate;
         this.expiredDate = expiredDate;
-        this.status = status;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String getSerial() {
@@ -89,13 +101,9 @@ public class CertificateInfos {
         return expiredDate;
     }
 
-    public CertificateStatus getStatus() {
-        return status;
-    }
-
     @Override
     public String toString() {
-        return "CertificateInfos{" +
+        return "Certificate{" +
                 "serial='" + serial + '\'' +
                 ", issuer='" + issuer + '\'' +
                 ", subjectCommonName='" + subjectCommonName + '\'' +
@@ -107,7 +115,6 @@ public class CertificateInfos {
                 ", issuerEmail='" + issuerEmail + '\'' +
                 ", issuedDate=" + issuedDate +
                 ", expiredDate=" + expiredDate +
-                ", status=" + status +
                 '}';
     }
 }

@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.UI.Views;
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -50,6 +52,9 @@ public class Agent {
     @OneToMany(mappedBy = "agent", fetch = FetchType.EAGER)
     @JsonView(Views.AgentViewPrivate.class)
     private Set<Profile> profiles;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Certificate certificate;
 
     private Boolean imported;
 
@@ -124,6 +129,14 @@ public class Agent {
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
+    }
+
+    public Certificate getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
     }
 
     public Boolean getImported() {

@@ -42,17 +42,17 @@ public class CertUtilService {
                 request.getHeader("x-ssl-client-i-dn-cn"),
                 request.getHeader("x-ssl-client-i-dn-o"),
                 request.getHeader("x-ssl-client-i-dn-email"),
-                timestampZToLocalDate(request.getHeader("x-ssl-client-not-before")),
-                timestampZToLocalDate(request.getHeader("x-ssl-client-not-after")),
+                haDateToLocalDate(request.getHeader("x-ssl-client-not-before")),
+                haDateToLocalDate(request.getHeader("x-ssl-client-not-after")),
                 StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? CertificateStatus.NONE
                         : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
     }
 
-    private LocalDate timestampZToLocalDate(String timestampZ) {
+    private LocalDate haDateToLocalDate(String timestampZ) {
         if (StringUtils.isEmpty(timestampZ)) return null;
         return LocalDateTime
-                .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))
+                .parse(timestampZ, DateTimeFormatter.ofPattern("yyMMddHHmmssZ"))
                 .toLocalDate();
     }
 }

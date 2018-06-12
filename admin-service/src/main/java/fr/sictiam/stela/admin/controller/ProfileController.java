@@ -3,11 +3,13 @@ package fr.sictiam.stela.admin.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
+import fr.sictiam.stela.admin.model.WorkGroup;
+import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.ProfileService;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,9 +35,11 @@ public class ProfileController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileController.class);
 
     private final ProfileService profileService;
+    private final AgentService agentService;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, AgentService agentService) {
         this.profileService = profileService;
+        this.agentService = agentService;
     }
 
     @PutMapping("/{uuid}/rights")
@@ -102,5 +107,19 @@ public class ProfileController {
     @JsonView(Views.ProfileView.class)
     public ResponseEntity<List<Profile>> getProfiles(@PathVariable String uuid) {
         return new ResponseEntity<>(profileService.getProfilesByLocalAuthorityUuid(uuid), HttpStatus.OK);
+    }
+
+    @PostMapping("/certificate")
+    public ResponseEntity pairCertificate(HttpServletRequest request,
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
+        if (!"VALID".equals(request.getHeader("x-ssl-status"))) {
+            return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
+        }
+        if (agentService.isCertificateTaken(request)) {
+            return new ResponseEntity(HttpStatus.CONFLICT);
+        }
+        Profile profile = profileService.getByUuid(profileUuid);
+        agentService.pairCertificate(request, profile.getAgent().getUuid());
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
