@@ -1,25 +1,29 @@
 package fr.sictiam.stela.apigateway.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 public class CertificateInfos {
 
-    private String serial; // HTTP_X_SSL_CLIENT_M_SERIAL
-    private String issuer; // HTTP_X_SSL_CLIENT_I_DN
+    private String serial; // x-ssl-client-m-serial
+    private String issuer; // x-ssl-client-issuer-dn
 
-    private String subjectCommonName; // HTTP_X_SSL_CLIENT_S_DN_CN
-    private String subjectOrganization; //HTTP_X_SSL_CLIENT_S_DN_O
-    private String subjectOrganizationUnit; // HTTP_X_SSL_CLIENT_S_DN_OU
-    private String subjectEmaill; // HTTP_X_SSL_CLIENT_S_DN_EMAIL
+    private String subjectCommonName; // x-ssl-client-s-dn-cn
+    private String subjectOrganization; // x-ssl-client-s-dn-o
+    private String subjectOrganizationUnit; // x-ssl-client-s-dn-ou
+    private String subjectEmaill; // x-ssl-client-s-dn-email
 
-    private String issuerCommonName; // HTTP_X_SSL_CLIENT_I_DN_CN
-    private String issuerOrganization; //HTTP_X_SSL_CLIENT_I_DN_O
-    private String issuerEmaill; // HTTP_X_SSL_CLIENT_I_DN_EMAIL
+    private String issuerCommonName; // x-ssl-client-i-dn-cn
+    private String issuerOrganization; // x-ssl-client-i-dn-o
+    private String issuerEmaill; // x-ssl-client-i-dn-email
 
-    private LocalDate issuedDate; // HTTP_X_SSL_CLIENT_NOT_BEFORE
-    private LocalDate expiredDate; // HTTP_X_SSL_CLIENT_NOT_AFTER
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate issuedDate; // x-ssl-client-not-before
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate expiredDate; // x-ssl-client-not-after
 
-    private CertificateStatus status; // X-Ssl-Status
+    private CertificateStatus status; // x-ssl-status
 
     public CertificateInfos() {
     }
@@ -87,5 +91,23 @@ public class CertificateInfos {
 
     public CertificateStatus getStatus() {
         return status;
+    }
+
+    @Override
+    public String toString() {
+        return "CertificateInfos{" +
+                "serial='" + serial + '\'' +
+                ", issuer='" + issuer + '\'' +
+                ", subjectCommonName='" + subjectCommonName + '\'' +
+                ", subjectOrganization='" + subjectOrganization + '\'' +
+                ", subjectOrganizationUnit='" + subjectOrganizationUnit + '\'' +
+                ", subjectEmaill='" + subjectEmaill + '\'' +
+                ", issuerCommonName='" + issuerCommonName + '\'' +
+                ", issuerOrganization='" + issuerOrganization + '\'' +
+                ", issuerEmaill='" + issuerEmaill + '\'' +
+                ", issuedDate=" + issuedDate +
+                ", expiredDate=" + expiredDate +
+                ", status=" + status +
+                '}';
     }
 }

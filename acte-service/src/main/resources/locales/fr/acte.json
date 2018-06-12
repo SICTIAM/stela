@@ -29,7 +29,7 @@
       "REPONSE_COURRIER_SIMPLE_ARCHIVE_CREATED": "Archive créée pour la réponse au courrier simple",
       "ACK_LETTRE_OBSERVATION_ARCHIVE_CREATED": "AR lettre d'observation",
       "ACK_PIECE_COMPLEMENTAIRE_ARCHIVE_CREATED": "AR pièces complémentaires",
-      "REPONSE_LETTRE_OBSEVATION_ASKED": "Réponse à la lettre d'observation enrregistré",
+      "REPONSE_LETTRE_OBSEVATION_ASKED": "Réponse à la lettre d'observation enregistrée",
       "REJET_LETTRE_OBSERVATION_ASKED": "Refus transmission à la lettre d'observation enregistré",
       "REFUS_PIECES_COMPLEMENTAIRE_ASKED": "Refus transmission des pièces complémentaires enregistré",
       "PIECE_COMPLEMENTAIRE_ASKED": "Pièces complémentaires déposées",
@@ -40,7 +40,7 @@
     "flux_status": {
       "TRANSMISSION_ACTE_SENT": "Envoyé",
       "AR_LETTRE_OBSERVATION_SENT": "AR pour lettre d'observation transmis",
-      "AR_PIECE_COMPLEMENTAIRE_SENT": "AR pour pieces complémentaires transmis",
+      "AR_PIECE_COMPLEMENTAIRE_SENT": "AR pour pièces complémentaires transmis",
       "REPONSE_COURRIER_SIMPLE_SENT": "Réponse au courrier simple transmise",
       "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission à la lettre d'observation transmis",
       "TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Pièces complémentaires transmises",
@@ -51,7 +51,7 @@
       "NO_CERTIFICATE_CHAIN_FOUND": "Aucun certificat valide",
       "OUT_OF_BOUNDS_NO_POE": "La date de signature est invalide pour ce certificat",
       "REVOKED_NO_POE ": "Le certificat a été revoqué",
-      "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correct",
+      "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correcte",
       "CHAIN_CONSTRAINTS_FAILURE ": "La signature est invalide"
     },
     "nature": {
@@ -73,13 +73,13 @@
       "publicWebsite": "Affichage sur site internet",
       "objet": "Objet",
       "status": "Status",
-      "group": "Groupe de dépôt"
+      "group": "Visible pour"
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"
     },
     "list": {
-      "title": "Liste des Actes",
+      "title": "Liste des actes",
       "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
       "download_selected_ACKs": "Télécharger les justificatifs d'AR de la sélection",
       "download_all_CSV": "Télécharger toute la liste des actes",
@@ -157,7 +157,7 @@
       "batch_title_placeholder": "Nouvel acte...",
       "PJ_types": "Types de pièce jointe...",
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",
-      "every_group": "Tout groupe"
+      "every_group": "Toute la collectivité"
     }
   },
   "admin": {
@@ -187,7 +187,7 @@
           "additional_options": {
             "title": "Options de migration supplémentaires",
             "email": "Recevoir un rapport d'import par mail",
-            "siren": "Récupérer les actes lié à un autre SIREN",
+            "siren": "Récupérer les actes liés à un autre SIREN",
             "month": "Nombre de mois d'actes à récupérer"
           },
           "users_migration": {

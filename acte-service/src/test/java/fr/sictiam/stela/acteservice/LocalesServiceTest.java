@@ -44,6 +44,6 @@ public class LocalesServiceTest {
                 variables);
 
         assertThat(text,
-                is("Bonjour John Doe, <br/> Votre acte a bien été reçu par préfecture <br/> Cordialement le Sictiam"));
+                is("Bonjour John Doe, <br/> Votre acte a bien été reçu par la préfecture <br/> Cordialement le Sictiam"));
     }
 }

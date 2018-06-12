@@ -162,7 +162,7 @@ export default class StelaTable extends Component {
                 )}
 
                 {options(
-                    <Dropdown style={this.floatRightStyle} trigger={trigger} icon={false} basic>
+                    <Dropdown direction='left' style={this.floatRightStyle} trigger={trigger} icon={false} basic>
                         <Dropdown.Menu>
                             {selectOptions}
                         </Dropdown.Menu>

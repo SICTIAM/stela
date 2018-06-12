@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import renderIf from 'render-if'
-import { Menu, Segment, Grid } from 'semantic-ui-react'
+import { Menu, Segment } from 'semantic-ui-react'
 
 import NewActeForm from './NewActeForm'
 import NewActeBatchedForm from './NewActeBatchedForm'
@@ -57,14 +57,6 @@ class NewActeSwitch extends Component {
         return (
             <Page title={t('acte.new.title')}>
                 <Segment>
-                    <Grid>
-                        <Grid.Column width={12}></Grid.Column>
-                        <Grid.Column width={4} style={{ textAlign: 'right' }}>
-                            {renderIf(this.state.status)(
-                                <span style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.status}`)}</span>
-                            )}
-                        </Grid.Column>
-                    </Grid>
                     <Menu tabular>
                         {renderIf(this.state.fields.mode === 'ACTE' || !this.props.uuid)(
                             <Menu.Item id='ACTE' active={this.state.fields.mode === 'ACTE'} onClick={this.handleModeChange}>
@@ -80,6 +72,11 @@ class NewActeSwitch extends Component {
                             <Menu.Item id='ACTE_BATCH' active={this.state.fields.mode === 'ACTE_BATCH'} onClick={this.handleModeChange}>
                                 {t('acte.new.acte_batch')}
                             </Menu.Item>
+                        )}
+                        {renderIf(this.state.status)(
+                            <Menu.Menu position='right'>
+                                <span className='item' style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.status}`)}</span>
+                            </Menu.Menu>
                         )}
                     </Menu>
                     {renderIf(this.state.fields.mode === 'ACTE')(

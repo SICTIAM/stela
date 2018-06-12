@@ -4,14 +4,20 @@ import fr.sictiam.stela.apigateway.model.CertificateInfos;
 import fr.sictiam.stela.apigateway.model.CertificateStatus;
 import fr.sictiam.stela.apigateway.model.util.AuthorizationContextClasses;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class CertUtilService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CertUtilService.class);
 
     @Value("${application.certVerificationEnabled}")
     boolean certVerificationEnabled;
@@ -27,21 +33,26 @@ public class CertUtilService {
 
     public CertificateInfos getCertInfosFromHeaders(HttpServletRequest request) {
         return new CertificateInfos(
-                request.getHeader("HTTP_X_SSL_CLIENT_M_SERIAL"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_CN"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_O"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_OU"),
-                request.getHeader("HTTP_X_SSL_CLIENT_S_DN_EMAIL"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN_CN"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN_O"),
-                request.getHeader("HTTP_X_SSL_CLIENT_I_DN_EMAIL"),
-                StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_NOT_BEFORE")) ? null
-                        : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_BEFORE")),
-                StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")) ? null
-                        : LocalDate.parse(request.getHeader("HTTP_X_SSL_CLIENT_NOT_AFTER")),
-                StringUtils.isEmpty(request.getHeader("X-Ssl-Status")) ? null
-                        : CertificateStatus.valueOf(request.getHeader("X-Ssl-Status"))
+                request.getHeader("x-ssl-client-m-serial"),
+                request.getHeader("x-ssl-client-issuer-dn"),
+                request.getHeader("x-ssl-client-s-dn-cn"),
+                request.getHeader("x-ssl-client-s-dn-o"),
+                request.getHeader("x-ssl-client-s-dn-ou"),
+                request.getHeader("x-ssl-client-s-dn-email"),
+                request.getHeader("x-ssl-client-i-dn-cn"),
+                request.getHeader("x-ssl-client-i-dn-o"),
+                request.getHeader("x-ssl-client-i-dn-email"),
+                timestampZToLocalDate(request.getHeader("x-ssl-client-not-before")),
+                timestampZToLocalDate(request.getHeader("x-ssl-client-not-after")),
+                StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? CertificateStatus.NONE
+                        : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
+    }
+
+    private LocalDate timestampZToLocalDate(String timestampZ) {
+        if (StringUtils.isEmpty(timestampZ)) return null;
+        return LocalDateTime
+                .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))
+                .toLocalDate();
     }
 }

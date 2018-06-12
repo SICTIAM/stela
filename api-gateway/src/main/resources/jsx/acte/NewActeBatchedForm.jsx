@@ -300,22 +300,28 @@ class NewActeBatchedForm extends Component {
                 <Segment>
                     <Header size='medium'>{t('acte.new.common_fields')}</Header>
                     <Form>
-                        <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')}>
-                            <Dropdown id='groupUuid'
-                                value={groupOptionValue}
-                                onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
-                                options={groupOptions}
-                                fluid selection />
-                        </FormField>
-                        <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
-                            <InputValidation id={'decision'}
-                                type='date'
-                                value={this.state.fields.decision}
-                                onChange={this.handleFieldChange}
-                                validationRule={this.validationRules.decision}
-                                fieldName={t('acte.fields.decision')}
-                                isValidDate={(current) => current.isBefore(new moment())} />
-                        </FormField>
+                        <Grid columns={2} style={{ marginBottom: 'auto' }}>
+                            <Grid.Column>
+                                <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
+                                    <InputValidation id={'decision'}
+                                        type='date'
+                                        value={this.state.fields.decision}
+                                        onChange={this.handleFieldChange}
+                                        validationRule={this.validationRules.decision}
+                                        fieldName={t('acte.fields.decision')}
+                                        isValidDate={(current) => current.isBefore(new moment())} />
+                                </FormField>
+                            </Grid.Column>
+                            <Grid.Column>
+                                <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')}>
+                                    <Dropdown id='groupUuid'
+                                        value={groupOptionValue}
+                                        onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                        options={groupOptions}
+                                        fluid selection />
+                                </FormField>
+                            </Grid.Column>
+                        </Grid>
                         <FormField htmlFor={'nature'} label={t('acte.fields.nature')}>
                             <InputValidation id={'nature'}
                                 type='dropdown'

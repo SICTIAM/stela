@@ -29,8 +29,8 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        CertificateStatus certificateStatus = StringUtils.isEmpty(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"))
-                ? CertificateStatus.NONE : CertificateStatus.valueOf(request.getHeader("HTTP_X_SSL_CLIENT_STATUS"));
+        CertificateStatus certificateStatus = StringUtils.isEmpty(request.getHeader("x-ssl-status"))
+                ? CertificateStatus.NONE : CertificateStatus.valueOf(request.getHeader("x-ssl-status"));
         JsonNode token = getToken(request);
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {

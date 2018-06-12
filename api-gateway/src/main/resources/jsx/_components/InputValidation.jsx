@@ -42,8 +42,7 @@ export default class InputValidation extends Component {
                 {this.props.type === 'date' &&
                     <InputDatetime {...rest}
                         timeFormat={false}
-                        onChange={date => onChange(this.props.id, date)}
-                        onBlur={this.validateValue} />}
+                        onChange={date => onChange(this.props.id, date, this.validateValue)} />}
 
                 {this.props.type === 'file' &&
                     <InputFile htmlFor={this.props.id} label={this.props.label}>
