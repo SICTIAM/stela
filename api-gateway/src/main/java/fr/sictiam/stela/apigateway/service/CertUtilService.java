@@ -52,7 +52,7 @@ public class CertUtilService {
     private LocalDate haDateToLocalDate(String timestampZ) {
         if (StringUtils.isEmpty(timestampZ)) return null;
         return LocalDateTime
-                .parse(timestampZ, DateTimeFormatter.ofPattern("yyMMddHHmmssZ"))
+                .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))
                 .toLocalDate();
     }
 }
