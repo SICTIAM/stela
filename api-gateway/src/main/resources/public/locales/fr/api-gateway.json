@@ -37,8 +37,8 @@
             "mandatoryfield": "Le champ est obligatoire",
             "malformedfield": "Le champ n'est pas formé correctement",
             "mandatoryfile": "Fichier obligatoire",
-            "badextension": "L'extension du fichier un incorrect",
-            "date_begin_before_date_end": "La date de début doit se trouver avant la date de fin"
+            "badextension": "L'extension du fichier est incorrecte",
+            "date_begin_before_date_end": "La date de début doit être antérieure à la date de fin"
         }
     },
     "list": {
@@ -80,11 +80,11 @@
         "notifications_title": "Notifications",
         "localAuthorityNotifications": "Être notifié de l'évolution du flux de ma collectivité",
         "notifications": {
-            "ACTES_ACK_RECEIVED": "Reception de l'AR d'un acte",
+            "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
             "ACTES_SENT": "Envoi réussi d'un acte",
             "ACTES_CANCELLED": "Annulation d'un acte",
             "ACTES_NACK_RECEIVED": "Réception d'une anomalie d'un acte",
-            "PES_ACK_RECEIVED": "Reception de l'AR d'un PES",
+            "PES_ACK_RECEIVED": "Réception de l'AR d'un PES",
             "PES_SENT": "Envoi réussi d'un PES"
         },
         "certificate": {
@@ -106,13 +106,13 @@
         "no_certificate": "Aucun certificat",
         "sesile": {
             "title": "Connexion Sesile",
-            "serviceOrganisationNumber": "Service organisationel",
+            "serviceOrganisationNumber": "Service organisationnel",
             "type": "Type de classeur",
             "visibility": "Visibilité",
             "visibilities": {
                 "0": "Privé",
                 "1": "Public",
-                "3": "Service organisationel"
+                "3": "Service organisationnel"
             },
             "validationLimit": "Délai de validation (jours)",
             "secret": "Secret",
@@ -173,7 +173,7 @@
             "history_not_found": "Historique d'acte inexistant",
             "no_history_file": "Aucun fichier pour cet historique",
             "not_found": "Acte inexistant",
-            "no_content": "Le résultat de cette requette ne contient aucun contenu"
+            "no_content": "Le résultat de cette requête n'a aucun résultat"
         },
         "pes": {
             "title": "Module PES",
@@ -182,7 +182,7 @@
                 "virus": "Le dépot PES a échoué car il contenait un virus",
                 "error": {
                     "bad_file_name": "Le nom de fichier est incorrect",
-                    "non_extractable_pes": "Erreur lors du traitement du pes",
+                    "non_extractable_pes": "Erreur lors du traitement du PES",
                     "existing_file_name": "Le nom de fichier est deja utilisé"
                 },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
