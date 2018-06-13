@@ -85,6 +85,9 @@ subprojects {
             if (project.hasProperty('prod')) {
                 tagVersion = 'prod'
             }
+            if (project.hasProperty('dev')) {
+                tagVersion = 'dev'
+            }
             applicationName = 'stela-poc/' + jar.baseName
             dockerfile = file('src/main/docker/Dockerfile')
             doFirst {
