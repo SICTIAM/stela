@@ -40,8 +40,7 @@ class CertificateInfos extends Component {
         if (this.state.certificate.status === 'VALID') {
             fetchWithAuthzHandling({ url: '/api/admin/profile/certificate', method: 'POST', context: this.context })
                 .then(checkStatus)
-                .then(response => response.json())
-                .then(json => this.setState({ pes: json, fetched: true }, this.getAgentInfos))
+                .then(() => this.context._addNotification(notifications.profile.certificatePairedSuccess))
                 .catch(response => {
                     if (response.status === 412) {
                         this.context._addNotification(notifications.profile.certificateNotValid)
@@ -58,14 +57,19 @@ class CertificateInfos extends Component {
     render() {
         const { t } = this.context
         const { certificate } = this.state
+        const { pairedCertificate } = this.props
         const isPresent = certificate.status && certificate.status !== 'NONE'
         const isValid = certificate.status === 'VALID'
         const segmentStyle = isValid ? { paddingTop: '1em' } : {}
         const headerStyle = isValid ? { marginTop: '0.5em' } : {}
+        const isCertificatePaired = certificate.serial === pairedCertificate.serial && certificate.issuer === pairedCertificate.issuer
         return (
             <Segment style={segmentStyle}>
-                {isValid &&
+                {(isValid && !isCertificatePaired) &&
                     <Button primary compact basic style={{ float: 'right' }} onClick={this.pairCertificate}>{t('profile.certificate.pair')}</Button>
+                }
+                {isCertificatePaired &&
+                    <span style={{ float: 'right', fontStyle: 'italic' }} onClick={this.pairCertificate}>{t('profile.certificate.paired')}</span>
                 }
                 < h2 style={headerStyle}>{t('profile.certificate.title')}</h2>
 

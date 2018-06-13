@@ -10,15 +10,13 @@ class ErrorPage extends Component {
         t: PropTypes.func
     }
     state = {
-        certInfos: {
-            status: ''
-        }
+        certStatus: ''
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
+        fetchWithAuthzHandling({ url: '/api/admin/certificate/verified-status' })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ certInfos: json }))
+            .then(json => this.setState({ certStatus: json }))
             .catch(response => {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.title', text))
             })
@@ -26,7 +24,7 @@ class ErrorPage extends Component {
     render() {
         const { t } = this.context
         const errorContent = this.props.error === 'certificate_required'
-            ? t(`error.certificate_required.${this.state.certInfos.status}`)
+            ? t(`error.certificate_required.${this.state.certStatus}`)
             : t(`error.${this.props.error}.content`)
         return (
             <div>

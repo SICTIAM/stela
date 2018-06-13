@@ -36,7 +36,8 @@ class Profile extends Component {
             email: '',
             family_name: '',
             given_name: '',
-            profiles: []
+            profiles: [],
+            certificate: {}
         },
         allNotifications: []
     }
@@ -143,7 +144,7 @@ class Profile extends Component {
                 {allLocalAuthorityProfiles}
 
                 {!this.props.uuid &&
-                    <CertificateInfos />
+                    <CertificateInfos pairedCertificate={agent.certificate} />
                 }
 
             </Page >

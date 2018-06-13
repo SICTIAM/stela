@@ -16,7 +16,7 @@ import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.acteservice.model.util.CertificateStatus;
+import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
@@ -420,11 +420,12 @@ public class ActeRestController {
     @PostMapping
     ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestAttribute("STELA-Certificate-Status") CertificateStatus certificateStatus,
+            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate,
+            @RequestAttribute("STELA-Certificate") Certificate certificate,
             @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
             @RequestParam("annexes") MultipartFile... annexes) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
-                || !certUtilService.checkCert(certificateStatus)) {
+                || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);

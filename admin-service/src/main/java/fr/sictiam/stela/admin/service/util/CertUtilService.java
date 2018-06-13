@@ -1,10 +1,7 @@
-package fr.sictiam.stela.apigateway.service;
+package fr.sictiam.stela.admin.service.util;
 
-import fr.sictiam.stela.apigateway.model.Certificate;
-import fr.sictiam.stela.apigateway.model.CertificateStatus;
-import fr.sictiam.stela.apigateway.model.util.AuthorizationContextClasses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.sictiam.stela.admin.model.Certificate;
+import fr.sictiam.stela.admin.model.CertificateStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -18,18 +15,20 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class CertUtilService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CertUtilService.class);
-
     @Value("${application.certVerificationEnabled}")
     boolean certVerificationEnabled;
 
-    public boolean checkCert(String acr) {
-        return !certVerificationEnabled || AuthorizationContextClasses.EIDAS_SUBSTANTIAL.getValue().equals(acr);
+    public boolean checkCert(Certificate certificate, Certificate pairedCertificate) {
+        return !certVerificationEnabled || (
+                CertificateStatus.VALID.equals(certificate.getStatus()) && pairedCertificate != null
+                        && certificate.equals(pairedCertificate)
+        );
     }
 
-    public boolean checkCert(HttpServletRequest request) {
-        Certificate certificateInfos = getCertInfosFromHeaders(request);
-        return !certVerificationEnabled || CertificateStatus.VALID.equals(certificateInfos.getStatus());
+    public CertificateStatus getVerifiedStatus(Certificate certificate, Certificate pairedCertificate) {
+        if (!CertificateStatus.VALID.equals(certificate.getStatus())) return certificate.getStatus();
+        if (!certificate.equals(pairedCertificate)) return CertificateStatus.NOT_PAIRED;
+        return certificate.getStatus();
     }
 
     public Certificate getCertInfosFromHeaders(HttpServletRequest request) {

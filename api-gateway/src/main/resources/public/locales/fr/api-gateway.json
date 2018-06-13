@@ -90,6 +90,7 @@
         "certificate": {
             "title": "Informations du certificat",
             "pair": "Appairer le certificat",
+            "paired": "Certificat appairé",
             "serial": "Numéro de série",
             "issuer": "Émetteur",
             "subject": "Propriétaire",
@@ -201,8 +202,9 @@
         "profile": {
             "title": "Profil",
             "updated": "Votre profil a bien été mis à jour",
+            "certificatePairedSuccess": "Le certificat à bien été appairé",
             "certificateNotValid": "Le certificat n'est pas valide",
-            "certificateConflict": "Le certificat est déjà enregistré sure un autre utilisateur"
+            "certificateConflict": "Le certificat est déjà enregistré sur un autre utilisateur"
         }
     },
     "local_authority": {
@@ -322,6 +324,7 @@
             "EXPIRED": "Votre certificat est expiré",
             "REVOKED": "Votre certificat est révoqué",
             "OTHER": "Votre certificat est invalide",
+            "NOT_PAIRED": "Votre certificat n'est pas appairé",
             "NONE": "Aucun certificat détecté",
             "VALID": "Votre certificat est valide"
         }
