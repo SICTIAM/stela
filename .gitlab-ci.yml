@@ -12,6 +12,7 @@ services:
 stages:
   - test
   - registry
+  - registry-dev
   - registry-prod
 # Disabled for now as it does not work and it's a pita to know why
 #  - integrationTest
@@ -41,14 +42,6 @@ registry:
   only:
     - develop
 
-registry-prod:
-  stage: registry-prod
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
-  only:
-    - master
-
 registry-dev:
   stage: registry-dev
   script:
@@ -56,3 +49,11 @@ registry-dev:
     - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pdev
   only:
     - /^dev\/.*/
+
+registry-prod:
+  stage: registry-prod
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
+    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
+  only:
+    - master
