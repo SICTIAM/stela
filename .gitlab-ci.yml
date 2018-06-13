@@ -48,3 +48,11 @@ registry-prod:
     - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pprod
   only:
     - master
+
+registry-dev:
+  stage: registry-dev
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
+    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Pdev
+  only:
+    - /^dev\/.*/
