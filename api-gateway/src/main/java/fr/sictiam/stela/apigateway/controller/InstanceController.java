@@ -1,16 +1,13 @@
 package fr.sictiam.stela.apigateway.controller;
 
-import fr.sictiam.stela.apigateway.model.CertificateInfos;
+import fr.sictiam.stela.apigateway.model.Certificate;
 import fr.sictiam.stela.apigateway.service.CertUtilService;
 import fr.sictiam.stela.apigateway.service.LocalAuthorityInstanceService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
-import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,9 +26,6 @@ public class InstanceController {
     @Value("${application.urlWithSlug}")
     String applicationUrlWithSlug;
 
-    @Value("${application.certVerificationEnabled}")
-    boolean certVerificationEnabled;
-
     @Autowired
     private LocalAuthorityInstanceService localAuthorityInstanceService;
 
@@ -46,21 +40,8 @@ public class InstanceController {
         response.sendRedirect(loginUrlToRedirectTo);
     }
 
-    @GetMapping(value = "/isAuthenticatedWithCertificate")
-    public boolean isAuthenticatedWithCertificate() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
-        return !certVerificationEnabled
-                || certUtilService.checkCert(authenticationOpen.getAcr());
-    }
-
-    @GetMapping(value = "/hasValidCertificate")
-    public Boolean hasValidCertificate(HttpServletRequest request) {
-        return !certVerificationEnabled || certUtilService.checkCert(request);
-    }
-
     @GetMapping(value = "/certInfos")
-    public CertificateInfos getCertInfos(HttpServletRequest request) {
+    public Certificate getCertInfos(HttpServletRequest request) {
         return certUtilService.getCertInfosFromHeaders(request);
     }
 

@@ -54,6 +54,7 @@ public class Agent {
     private Set<Profile> profiles;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonView(Views.AgentViewPublic.class)
     private Certificate certificate;
 
     private Boolean imported;

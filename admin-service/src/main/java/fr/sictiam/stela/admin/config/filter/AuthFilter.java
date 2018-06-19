@@ -2,12 +2,12 @@ package fr.sictiam.stela.admin.config.filter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.ProfileService;
+import fr.sictiam.stela.admin.service.util.CertUtilService;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,19 +22,22 @@ import java.io.IOException;
 @Component
 public class AuthFilter extends OncePerRequestFilter {
 
-    @Autowired
-    AgentService agentService;
-
-    @Autowired
-    ProfileService profileService;
-
     @Value("${application.jwt.secret}")
     String SECRET;
+
+    private final CertUtilService certUtilService;
+    private final ProfileService profileService;
+
+    public AuthFilter(CertUtilService certUtilService, ProfileService profileService) {
+        this.certUtilService = certUtilService;
+        this.profileService = profileService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        Certificate certificate = certUtilService.getCertInfosFromHeaders(request);
         JsonNode token = getToken(request);
 
         Profile profile = null;
@@ -44,10 +47,16 @@ public class AuthFilter extends OncePerRequestFilter {
         }
 
         if (profile != null) {
+            ObjectMapper om = new ObjectMapper();
+            Certificate pairedCertificate = token.get("agent").get("certificate").isNull() ? null
+                    : om.treeToValue(token.get("agent").get("certificate"), Certificate.class);
+
             request.setAttribute("STELA-Current-Profile-Is-Local-Authority-Admin", token.get("admin").asBoolean());
             request.setAttribute("STELA-Current-Profile-UUID", profile.getUuid());
             request.setAttribute("STELA-Sub", profile.getAgent().getSub());
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
+            request.setAttribute("STELA-Current-Profile-Paired-Certificate", pairedCertificate);
+            request.setAttribute("STELA-Certificate", certificate);
         }
 
         filterChain.doFilter(request, response);

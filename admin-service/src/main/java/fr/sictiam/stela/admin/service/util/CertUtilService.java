@@ -1,7 +1,7 @@
-package fr.sictiam.stela.pesservice.service.util;
+package fr.sictiam.stela.admin.service.util;
 
-import fr.sictiam.stela.pesservice.model.util.Certificate;
-import fr.sictiam.stela.pesservice.model.util.CertificateStatus;
+import fr.sictiam.stela.admin.model.Certificate;
+import fr.sictiam.stela.admin.model.CertificateStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,6 +23,12 @@ public class CertUtilService {
                 CertificateStatus.VALID.equals(certificate.getStatus()) && pairedCertificate != null
                         && certificate.equals(pairedCertificate)
         );
+    }
+
+    public CertificateStatus getVerifiedStatus(Certificate certificate, Certificate pairedCertificate) {
+        if (!CertificateStatus.VALID.equals(certificate.getStatus())) return certificate.getStatus();
+        if (!certificate.equals(pairedCertificate)) return CertificateStatus.NOT_PAIRED;
+        return certificate.getStatus();
     }
 
     public Certificate getCertInfosFromHeaders(HttpServletRequest request) {
