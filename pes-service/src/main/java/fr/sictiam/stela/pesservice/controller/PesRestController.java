@@ -121,11 +121,12 @@ public class PesRestController {
     @PostMapping
     public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Certificate") Certificate certificate,
+            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))
-                || !certUtilService.checkCert(certificate)) {
+                || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         ObjectMapper mapper = new ObjectMapper();

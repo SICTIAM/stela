@@ -18,8 +18,11 @@ public class CertUtilService {
     @Value("${application.certVerificationEnabled}")
     boolean certVerificationEnabled;
 
-    public boolean checkCert(Certificate certificate) {
-        return !certVerificationEnabled || CertificateStatus.VALID.equals(certificate.getStatus());
+    public boolean checkCert(Certificate certificate, Certificate pairedCertificate) {
+        return !certVerificationEnabled || (
+                CertificateStatus.VALID.equals(certificate.getStatus()) && pairedCertificate != null
+                        && certificate.equals(pairedCertificate)
+        );
     }
 
     public Certificate getCertInfosFromHeaders(HttpServletRequest request) {

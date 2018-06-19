@@ -1,10 +1,14 @@
 package fr.sictiam.stela.pesservice.model.util;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
 
 import java.time.LocalDate;
 
 public class Certificate {
+
+    private String uuid;
 
     private String serial; // x-ssl-client-m-serial
     private String issuer; // x-ssl-client-issuer-dn
@@ -19,8 +23,10 @@ public class Certificate {
     private String issuerEmail; // x-ssl-client-i-dn-email
 
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate issuedDate; // x-ssl-client-not-before
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate expiredDate; // x-ssl-client-not-after
 
     private CertificateStatus status; // x-ssl-status
@@ -43,6 +49,10 @@ public class Certificate {
         this.issuedDate = issuedDate;
         this.expiredDate = expiredDate;
         this.status = status;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String getSerial() {
