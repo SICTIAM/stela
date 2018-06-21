@@ -1,16 +1,12 @@
 package fr.sictiam.stela.acteservice.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.lowagie.text.DocumentException;
+import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.Flux;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
@@ -22,6 +18,8 @@ import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
 import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import fr.sictiam.stela.acteservice.service.util.ZipGeneratorUtil;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -58,9 +56,12 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,12 +86,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final ActeRepository acteRepository;
     private final ActeHistoryRepository acteHistoryRepository;
     private final AttachmentRepository attachmentRepository;
+    private final ActeExportRepository acteExportRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
     private final LocalesService localesService;
     private final ArchiveService archiveService;
     private final PdfGeneratorUtil pdfGeneratorUtil;
     private final ZipGeneratorUtil zipGeneratorUtil;
+    private final ExternalRestService externalRestService;
 
     @Value("${application.miat.url}")
     private String acteUrl;
@@ -106,7 +109,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
             AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
             LocalAuthorityService localAuthorityService, ArchiveService archiveService,
-            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService) {
+            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService, ExternalRestService externalRestService, ActeExportRepository acteExportRepository) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -116,6 +119,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         this.pdfGeneratorUtil = pdfGeneratorUtil;
         this.zipGeneratorUtil = zipGeneratorUtil;
         this.localesService = localesService;
+        this.externalRestService = externalRestService;
+        this.acteExportRepository = acteExportRepository;
     }
 
     public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
@@ -391,6 +396,47 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public void notSent(String acteUuid, Flux flux) {
         ActeHistory acteHistory = new ActeHistory(acteUuid, StatusType.NOT_SENT, flux);
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+    }
+
+    public ActeExport persistActeExport(String acteUuid, String fileName, ZonedDateTime transmissionDateTime, byte[] file) {
+        Acte acte = acteRepository.findByUuid(acteUuid).get();
+        JsonNode node = null;
+        try {
+           node = externalRestService.getProfile(acte.getProfileUuid());
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
+        
+        ActeExport acteExport = new ActeExport();
+        acteExport.setFileName(fileName);
+        acteExport.setTransmissionDateTime(transmissionDateTime);
+        if(node != null) {
+            acteExport.setAgentFirstName(node.get("agent").get("givenName").asText());
+            acteExport.setAgentName(node.get("agent").get("familyName").asText());
+            acteExport.setAgentEmail(node.get("agent").get("email").asText());
+        }
+
+        acteExport.setSiren(acte.getLocalAuthority().getSiren());
+        acteExport.setDepartment(acte.getLocalAuthority().getDepartment());
+        acteExport.setDistrict(acte.getLocalAuthority().getDistrict());
+
+        try {
+            TarArchiveInputStream tarInput = new TarArchiveInputStream(new ByteArrayInputStream(file));
+            TarArchiveEntry entry;
+            StringBuilder fileNameList = new StringBuilder();
+            while (null!=(entry=tarInput.getNextTarEntry())) {
+                LOGGER.info("File found in archive:" + entry.getName());
+                fileNameList.append(entry.getName());
+                fileNameList.append(";");
+            }
+            fileNameList.deleteCharAt(fileNameList.length());
+            acteExport.setFilesNameList(fileNameList.toString());
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
+
+        acteExportRepository.save(acteExport);
+        return acteExport;
     }
 
     public void sendReponseCourrierSimple(String uuid, MultipartFile file) throws IOException {
@@ -732,4 +778,5 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         acte.getActeHistories().add(event.getActeHistory());
         acteRepository.save(acte);
     }
+
 }
