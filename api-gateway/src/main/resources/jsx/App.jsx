@@ -180,6 +180,7 @@ class AppRoute extends Component {
         fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
             .then(response => response.json())
             .then(certificate => this.setState({ certificate }))
+            .catch(error => console.log(error))
     }
     render() {
         const params = this.state
