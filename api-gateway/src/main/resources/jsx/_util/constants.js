@@ -45,4 +45,6 @@ const materialCodeBudgetaire = "7-1-"
 // It also corresponds to the number of months of actes that must be migrated.
 const monthBeforeArchiving = 6
 
-module.exports = { modules, natures, status, anomalies, sesileVisibility, materialCodeBudgetaire, monthBeforeArchiving }
+const daysBeforeResendPes = 2
+
+module.exports = { modules, natures, status, anomalies, sesileVisibility, materialCodeBudgetaire, monthBeforeArchiving, daysBeforeResendPes }

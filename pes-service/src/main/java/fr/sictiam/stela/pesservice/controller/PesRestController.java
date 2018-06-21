@@ -111,10 +111,7 @@ public class PesRestController {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        PesAller pes = pesAllerService.getByUuid(uuid);
-        pesAllerService.send(pes);
-        StatusType statusType = StatusType.MANUAL_RESENT;
-        pesAllerService.updateStatus(pes.getUuid(), statusType);
+        pesAllerService.manualResend(uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

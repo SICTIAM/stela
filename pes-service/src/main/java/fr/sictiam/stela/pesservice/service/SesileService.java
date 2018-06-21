@@ -531,7 +531,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
-            boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription();
+            boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
+                    pes.getLocalAuthority().getSesileSubscription() : false;
             if (pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
             } else if (!sesileSubscription) {

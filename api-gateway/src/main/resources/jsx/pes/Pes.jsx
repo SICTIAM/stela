@@ -9,7 +9,7 @@ import { Field, Page, FieldValue } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
-import { anomalies } from '../_util/constants'
+import { anomalies, daysBeforeResendPes } from '../_util/constants'
 
 class Pes extends Component {
     static contextTypes = {
@@ -72,6 +72,10 @@ class Pes extends Component {
         const { t } = this.context
         const { pes, fetched, agent } = this.state
         const lastHistory = pes.pesHistories[pes.pesHistories.length - 1]
+        const canResend = lastHistory && (lastHistory.status === 'MAX_RETRY_REACH' || (
+            (lastHistory.status === 'SENT' || lastHistory.status === 'RESENT' || lastHistory.status === 'MANUAL_RESENT') &&
+            moment(lastHistory.date).isSameOrBefore(moment().subtract(daysBeforeResendPes, 'second'))
+        ))
         return (
             <Page title={pes.objet}>
                 {fetched &&
@@ -80,7 +84,7 @@ class Pes extends Component {
                         <Segment>
                             <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`pes.status.${lastHistory.status}`)}</Label>
                             <div style={{ textAlign: 'right' }}>
-                                {(lastHistory && lastHistory.status === 'MAX_RETRY_REACH') &&
+                                {canResend &&
                                     <Button type='submit' primary basic onClick={this.reSendFlux}>{t('pes.page.re_send')}</Button>
                                 }
                             </div>

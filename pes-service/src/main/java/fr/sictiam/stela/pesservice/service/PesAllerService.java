@@ -283,7 +283,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         List<Predicate> subQueryPredicates = new ArrayList<Predicate>();
         subQueryPredicates
                 .add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
-        subquery.where(subQueryPredicates.toArray(new Predicate[] {}));
+        subquery.where(subQueryPredicates.toArray(new Predicate[]{}));
 
         Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable2 = subquery2.from(PesHistory.class);
@@ -291,13 +291,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
         List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
         subQueryPredicates2.add(cb.equal(historyTable2.get("status"), StatusType.SENT));
-        subquery2.where(subQueryPredicates2.toArray(new Predicate[] {}));
+        subquery2.where(subQueryPredicates2.toArray(new Predicate[]{}));
 
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
 
         mainQueryPredicates.add(cb.not(cb.exists(subquery)));
         mainQueryPredicates.add(cb.exists(subquery2));
-        query.where(mainQueryPredicates.toArray(new Predicate[] {}));
+        query.where(mainQueryPredicates.toArray(new Predicate[]{}));
         TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
         List<PesAller> resultList = typedQuery.getResultList();
 
@@ -316,6 +316,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
     public PesHistory getHistoryByUuid(String uuid) {
         return pesHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
+    }
+
+    public void manualResend(String pesUuid) {
+        PesAller pes = getByUuid(pesUuid);
+        send(pes);
+        StatusType statusType = StatusType.MANUAL_RESENT;
+        updateStatus(pes.getUuid(), statusType);
     }
 
     public void send(PesAller pes) throws PesSendException {
