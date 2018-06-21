@@ -321,6 +321,7 @@
         },
         "certificate_required": {
             "title": "Certificat électronique requis",
+            "default": "Un certificat est requis pour accéder à cette fonctionnalité",
             "EXPIRED": "Votre certificat est expiré",
             "REVOKED": "Votre certificat est révoqué",
             "OTHER": "Votre certificat est invalide",

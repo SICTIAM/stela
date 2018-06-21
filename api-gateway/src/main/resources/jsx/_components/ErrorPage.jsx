@@ -7,10 +7,11 @@ import { notifications } from '../_util/Notifications'
 
 class ErrorPage extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        t: PropTypes.func,
+        _addNotification: PropTypes.func
     }
     state = {
-        certStatus: ''
+        certStatus: 'default'
     }
     componentDidMount() {
         fetchWithAuthzHandling({ url: '/api/admin/certificate/verified-status' })
