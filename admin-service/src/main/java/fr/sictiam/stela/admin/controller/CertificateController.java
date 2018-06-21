@@ -54,8 +54,8 @@ public class CertificateController {
 
     @GetMapping("/is-valid")
     public Boolean hasValidCertificate(
-            @RequestAttribute("STELA-Certificate") Certificate certificate,
-            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate) {
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate) {
         LOGGER.debug("certificate: {}", certificate.toString());
         LOGGER.debug("pairedCertificate: {}", pairedCertificate.toString());
         return !certVerificationEnabled || certUtilService.checkCert(certificate, pairedCertificate);
@@ -63,8 +63,8 @@ public class CertificateController {
 
     @GetMapping("/verified-status")
     public CertificateStatus getVerifiedStatus(
-            @RequestAttribute("STELA-Certificate") Certificate certificate,
-            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate) {
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate) {
         return certUtilService.getVerifiedStatus(certificate, pairedCertificate);
     }
 }
