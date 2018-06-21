@@ -8,6 +8,8 @@ import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.util.CertUtilService;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,6 +23,8 @@ import java.io.IOException;
 
 @Component
 public class AuthFilter extends OncePerRequestFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthFilter.class);
 
     @Value("${application.jwt.secret}")
     String SECRET;
@@ -36,7 +40,7 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
+        LOGGER.debug("DEBUG doFilterInternal BEGIN");
         Certificate certificate = certUtilService.getCertInfosFromHeaders(request);
         JsonNode token = getToken(request);
 
@@ -46,10 +50,13 @@ public class AuthFilter extends OncePerRequestFilter {
             profile = profileService.getByUuid(token.get("uuid").asText());
         }
 
+        LOGGER.debug("DEBUG doFilterInternal MIDDLE");
         if (profile != null) {
             ObjectMapper om = new ObjectMapper();
-            Certificate pairedCertificate = token.get("agent").get("certificate").isNull() ? null
-                    : om.treeToValue(token.get("agent").get("certificate"), Certificate.class);
+            Certificate pairedCertificate =
+                    token.get("agent").get("certificate") != null && !token.get("agent").get("certificate").isNull()
+                            ? om.treeToValue(token.get("agent").get("certificate"), Certificate.class)
+                            : null;
 
             request.setAttribute("STELA-Current-Profile-Is-Local-Authority-Admin", token.get("admin").asBoolean());
             request.setAttribute("STELA-Current-Profile-UUID", profile.getUuid());
@@ -57,6 +64,8 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
             request.setAttribute("STELA-Current-Profile-Paired-Certificate", pairedCertificate);
             request.setAttribute("STELA-Certificate", certificate);
+
+            LOGGER.debug("DEBUG doFilterInternal END");
         }
 
         filterChain.doFilter(request, response);
