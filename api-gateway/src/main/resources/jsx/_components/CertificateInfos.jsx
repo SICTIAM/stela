@@ -62,7 +62,7 @@ class CertificateInfos extends Component {
         const isValid = certificate.status === 'VALID'
         const segmentStyle = isValid ? { paddingTop: '1em' } : {}
         const headerStyle = isValid ? { marginTop: '0.5em' } : {}
-        const isCertificatePaired = certificate.serial === pairedCertificate.serial && certificate.issuer === pairedCertificate.issuer
+        const isCertificatePaired = pairedCertificate && certificate.serial === pairedCertificate.serial && certificate.issuer === pairedCertificate.issuer
         return (
             <Segment style={segmentStyle}>
                 {(isValid && !isCertificatePaired) &&
@@ -71,7 +71,7 @@ class CertificateInfos extends Component {
                 {isCertificatePaired &&
                     <span style={{ float: 'right', fontStyle: 'italic' }} onClick={this.pairCertificate}>{t('profile.certificate.paired')}</span>
                 }
-                < h2 style={headerStyle}>{t('profile.certificate.title')}</h2>
+                <h2 style={headerStyle}>{t('profile.certificate.title')}</h2>
 
                 {isPresent &&
                     <Fragment>
