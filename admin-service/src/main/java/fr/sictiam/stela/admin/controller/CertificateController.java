@@ -52,7 +52,7 @@ public class CertificateController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @GetMapping(value = "/is-valid")
+    @GetMapping("/is-valid")
     public Boolean hasValidCertificate(
             @RequestAttribute("STELA-Certificate") Certificate certificate,
             @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate) {
@@ -61,7 +61,7 @@ public class CertificateController {
         return !certVerificationEnabled || certUtilService.checkCert(certificate, pairedCertificate);
     }
 
-    @GetMapping(value = "/verified-status")
+    @GetMapping("/verified-status")
     public CertificateStatus getVerifiedStatus(
             @RequestAttribute("STELA-Certificate") Certificate certificate,
             @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate) {
