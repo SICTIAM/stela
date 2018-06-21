@@ -40,7 +40,7 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        LOGGER.debug("DEBUG doFilterInternal BEGIN");
+
         Certificate certificate = certUtilService.getCertInfosFromHeaders(request);
         JsonNode token = getToken(request);
 
@@ -50,13 +50,11 @@ public class AuthFilter extends OncePerRequestFilter {
             profile = profileService.getByUuid(token.get("uuid").asText());
         }
 
-        LOGGER.debug("DEBUG doFilterInternal MIDDLE");
         if (profile != null) {
             ObjectMapper om = new ObjectMapper();
             Certificate pairedCertificate =
                     token.get("agent").get("certificate") != null && !token.get("agent").get("certificate").isNull()
-                            ? om.treeToValue(token.get("agent").get("certificate"), Certificate.class)
-                            : null;
+                            ? om.treeToValue(token.get("agent").get("certificate"), Certificate.class) : null;
 
             request.setAttribute("STELA-Current-Profile-Is-Local-Authority-Admin", token.get("admin").asBoolean());
             request.setAttribute("STELA-Current-Profile-UUID", profile.getUuid());
@@ -68,7 +66,6 @@ public class AuthFilter extends OncePerRequestFilter {
             LOGGER.debug("DEBUG doFilterInternal END");
         }
 
-        filterChain.doFilter(request, response);
     }
 
     JsonNode getToken(HttpServletRequest request) throws IOException {

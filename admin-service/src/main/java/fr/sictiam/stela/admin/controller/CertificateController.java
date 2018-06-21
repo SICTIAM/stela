@@ -56,8 +56,6 @@ public class CertificateController {
     public Boolean hasValidCertificate(
             @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
             @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate) {
-        LOGGER.debug("certificate: {}", certificate.toString());
-        LOGGER.debug("pairedCertificate: {}", pairedCertificate.toString());
         return !certVerificationEnabled || certUtilService.checkCert(certificate, pairedCertificate);
     }
 

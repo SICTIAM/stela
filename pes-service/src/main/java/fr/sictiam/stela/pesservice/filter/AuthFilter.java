@@ -41,8 +41,9 @@ public class AuthFilter extends OncePerRequestFilter {
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
             ObjectMapper om = new ObjectMapper();
-            Certificate pairedCertificate = token.get("agent").get("certificate").isNull() ? null
-                    : om.treeToValue(token.get("agent").get("certificate"), Certificate.class);
+            Certificate pairedCertificate =
+                    token.get("agent").get("certificate") != null && !token.get("agent").get("certificate").isNull()
+                            ? om.treeToValue(token.get("agent").get("certificate"), Certificate.class) : null;
 
             Set<Right> rights = new HashSet<>();
             token.get("groups").forEach(group -> group.get("rights").forEach(right -> {
