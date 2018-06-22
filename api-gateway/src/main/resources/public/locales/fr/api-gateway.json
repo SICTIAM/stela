@@ -12,6 +12,7 @@
     "last_localAuthorities": "Dernières collectivités utilisées",
     "alert": "Alerte",
     "at": "à",
+    "loading": "Chargement",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
@@ -307,6 +308,7 @@
         "CONVOCATION": "Convocation"
     },
     "error": {
+        "default": "Une erreur s'est produite",
         "401": {
             "title": "Erreur 401",
             "content": "Vous devez être authentifié pour accéder à cette page"

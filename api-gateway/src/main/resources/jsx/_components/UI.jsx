@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
-import { Form, Grid, Card, Icon, List, Header, Step } from 'semantic-ui-react'
+import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment } from 'semantic-ui-react'
 
 import { bytesToSize } from '../_util/utils'
 
@@ -82,6 +82,26 @@ InputTextControlled.contextTypes = {
     t: PropTypes.func
 }
 
+const LoadingContent = ({ children, fetchStatus }, { t }) =>
+    fetchStatus &&
+    <Fragment>
+        {fetchStatus === 'fetched' &&
+            children
+        }
+        {fetchStatus === 'loading' &&
+            <Segment>
+                <Loader active inline='centered'>{t('api-gateway:loading')}</Loader>
+            </Segment>
+        }
+        {(fetchStatus !== 'fetched' && fetchStatus !== 'loading') &&
+            <p>{t(fetchStatus)}</p>
+        }
+    </Fragment>
+
+LoadingContent.contextTypes = {
+    t: PropTypes.func
+}
+
 const MigrationSteps = ({ icon, title, description, status, onClick, reset, disabled = false }, { t }) => (
     <Step.Group fluid>
         <Step disabled={disabled} style={{ width: '50%', justifyContent: 'flex-start' }}>
@@ -136,5 +156,6 @@ module.exports = {
     ListItem,
     Page,
     InputTextControlled,
-    MigrationSteps
+    MigrationSteps,
+    LoadingContent
 }

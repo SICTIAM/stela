@@ -8,7 +8,7 @@ import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
-import { Page, FormFieldInline, FormField } from '../_components/UI'
+import { Page, FormFieldInline, FormField, LoadingContent } from '../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
@@ -31,7 +31,8 @@ class PesList extends Component {
         column: '',
         direction: '',
         limit: 25,
-        offset: 0
+        offset: 0,
+        fetchStatus: ''
     }
     componentDidMount() {
         const itemPerPage = localStorage.getItem('itemPerPage')
@@ -57,13 +58,15 @@ class PesList extends Component {
         this.setState({ search: search })
     }
     submitForm = () => {
+        this.setState({ fetchStatus: 'loading' })
         const headers = { 'Accept': 'application/json' }
         const data = this.getSearchData()
         fetchWithAuthzHandling({ url: '/api/pes', method: 'GET', query: data, headers: headers })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ pess: json.results, totalCount: json.totalCount }))
+            .then(json => this.setState({ pess: json.results, totalCount: json.totalCount, fetchStatus: 'fetched' }))
             .catch(response => {
+                this.setState({ fetchStatus: 'error.default' })
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
@@ -112,60 +115,62 @@ class PesList extends Component {
                 updateItemPerPage={this.updateItemPerPage} />
         return (
             <Page title={t('pes.list.title')}>
-                <Segment>
-                    <AdvancedSearch
-                        isDefaultOpen={false}
-                        fieldId='multifield'
-                        fieldValue={search.multifield}
-                        fieldOnChange={this.handleFieldChange}
-                        onSubmit={this.submitForm}>
+                <LoadingContent fetchStatus={this.state.fetchStatus}>
+                    <Segment>
+                        <AdvancedSearch
+                            isDefaultOpen={false}
+                            fieldId='multifield'
+                            fieldValue={search.multifield}
+                            fieldOnChange={this.handleFieldChange}
+                            onSubmit={this.submitForm}>
 
-                        <Form onSubmit={this.submitForm}>
-                            <FormFieldInline htmlFor='objet' label={t('pes.fields.objet')} >
-                                <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='creationFrom' label={t('pes.fields.creation')}>
-                                <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                    <FormField htmlFor='creationFrom' label={t('api-gateway:form.from')}>
-                                        <InputDatetime id='creationFrom'
-                                            timeFormat={false}
-                                            value={search.decisionFrom}
-                                            onChange={date => this.handleFieldChange('creationFrom', date)} />
-                                    </FormField>
-                                    <FormField htmlFor='creationTo' label={t('api-gateway:form.to')}>
-                                        <InputDatetime id='creationTo'
-                                            timeFormat={false}
-                                            value={search.creationTo}
-                                            onChange={date => this.handleFieldChange('creationTo', date)} />
-                                    </FormField>
-                                </Form.Group>
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='status' label={t('pes.fields.status')}>
-                                <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
-                                    <option value=''>{t('api-gateway:form.all')}</option>
-                                    {statusOptions}
-                                </select>
-                            </FormFieldInline>
-                            <div style={{ textAlign: 'right' }}>
-                                <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
-                            </div>
-                        </Form>
-                    </AdvancedSearch>
+                            <Form onSubmit={this.submitForm}>
+                                <FormFieldInline htmlFor='objet' label={t('pes.fields.objet')} >
+                                    <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                                </FormFieldInline>
+                                <FormFieldInline htmlFor='creationFrom' label={t('pes.fields.creation')}>
+                                    <Form.Group style={{ marginBottom: 0 }} widths='equal'>
+                                        <FormField htmlFor='creationFrom' label={t('api-gateway:form.from')}>
+                                            <InputDatetime id='creationFrom'
+                                                timeFormat={false}
+                                                value={search.decisionFrom}
+                                                onChange={date => this.handleFieldChange('creationFrom', date)} />
+                                        </FormField>
+                                        <FormField htmlFor='creationTo' label={t('api-gateway:form.to')}>
+                                            <InputDatetime id='creationTo'
+                                                timeFormat={false}
+                                                value={search.creationTo}
+                                                onChange={date => this.handleFieldChange('creationTo', date)} />
+                                        </FormField>
+                                    </Form.Group>
+                                </FormFieldInline>
+                                <FormFieldInline htmlFor='status' label={t('pes.fields.status')}>
+                                    <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                        <option value=''>{t('api-gateway:form.all')}</option>
+                                        {statusOptions}
+                                    </select>
+                                </FormFieldInline>
+                                <div style={{ textAlign: 'right' }}>
+                                    <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                                </div>
+                            </Form>
+                        </AdvancedSearch>
 
-                    <StelaTable
-                        data={this.state.pess}
-                        metaData={metaData}
-                        header={true}
-                        search={false}
-                        link='/pes/'
-                        linkProperty='uuid'
-                        noDataMessage={t('pes.list.empty')}
-                        keyProperty='uuid'
-                        pagination={pagination}
-                        sort={this.sort}
-                        direction={this.state.direction}
-                        column={this.state.column} />
-                </Segment>
+                        <StelaTable
+                            data={this.state.pess}
+                            metaData={metaData}
+                            header={true}
+                            search={false}
+                            link='/pes/'
+                            linkProperty='uuid'
+                            noDataMessage={t('pes.list.empty')}
+                            keyProperty='uuid'
+                            pagination={pagination}
+                            sort={this.sort}
+                            direction={this.state.direction}
+                            column={this.state.column} />
+                    </Segment>
+                </LoadingContent>
             </Page>
         )
     }

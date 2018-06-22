@@ -11,7 +11,7 @@ import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
 import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-import { FormFieldInline, FormField, Page } from '../_components/UI'
+import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
 class ActeList extends Component {
@@ -36,7 +36,8 @@ class ActeList extends Component {
             decisionTo: ''
         },
         limit: 25,
-        offset: 0
+        offset: 0,
+        fetchStatus: ''
     }
     componentDidMount() {
         const itemPerPage = localStorage.getItem('itemPerPage')
@@ -74,13 +75,15 @@ class ActeList extends Component {
         this.setState({ limit }, this.submitForm)
     }
     submitForm = () => {
+        this.setState({ fetchStatus: 'loading' })
         const headers = { 'Accept': 'application/json' }
         const data = this.getSearchData()
         fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ actes: json.results, totalCount: json.totalCount }))
+            .then(json => this.setState({ actes: json.results, totalCount: json.totalCount, fetchStatus: 'fetched' }))
             .catch(response => {
+                this.setState({ fetchStatus: 'error.default' })
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
@@ -146,71 +149,73 @@ class ActeList extends Component {
                 updateItemPerPage={this.updateItemPerPage} />
         return (
             <Page title={t('acte.list.title')}>
-                <Segment>
-                    <AdvancedSearch
-                        isDefaultOpen={false}
-                        fieldId='multifield'
-                        fieldValue={search.multifield}
-                        fieldOnChange={this.handleFieldChange}
-                        onSubmit={this.submitForm}>
+                <LoadingContent fetchStatus={this.state.fetchStatus}>
+                    <Segment>
+                        <AdvancedSearch
+                            isDefaultOpen={false}
+                            fieldId='multifield'
+                            fieldValue={search.multifield}
+                            fieldOnChange={this.handleFieldChange}
+                            onSubmit={this.submitForm}>
 
-                        <Form onSubmit={this.submitForm}>
-                            <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
-                                <input id='number' value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                                <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
-                                <Form.Group style={{ marginBottom: 0 }} widths='equal'>
-                                    <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
-                                        <InputDatetime id='decisionFrom'
-                                            timeFormat={false}
-                                            value={search.decisionFrom}
-                                            onChange={date => this.handleFieldChange('decisionFrom', date)} />
-                                    </FormField>
-                                    <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
-                                        <InputDatetime id='decisionTo'
-                                            timeFormat={false}
-                                            value={search.decisionTo}
-                                            onChange={date => this.handleFieldChange('decisionTo', date)} />
-                                    </FormField>
-                                </Form.Group>
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
-                                <select id='nature' value={search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
-                                    <option value=''>{t('api-gateway:form.all_feminine')}</option>
-                                    {natureOptions}
-                                </select>
-                            </FormFieldInline>
-                            <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                                <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
-                                    <option value=''>{t('api-gateway:form.all')}</option>
-                                    {statusOptions}
-                                </select>
-                            </FormFieldInline>
-                            <div style={{ textAlign: 'right' }}>
-                                <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
-                            </div>
-                        </Form>
-                    </AdvancedSearch>
+                            <Form onSubmit={this.submitForm}>
+                                <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
+                                    <input id='number' value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
+                                </FormFieldInline>
+                                <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
+                                    <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                                </FormFieldInline>
+                                <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
+                                    <Form.Group style={{ marginBottom: 0 }} widths='equal'>
+                                        <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
+                                            <InputDatetime id='decisionFrom'
+                                                timeFormat={false}
+                                                value={search.decisionFrom}
+                                                onChange={date => this.handleFieldChange('decisionFrom', date)} />
+                                        </FormField>
+                                        <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
+                                            <InputDatetime id='decisionTo'
+                                                timeFormat={false}
+                                                value={search.decisionTo}
+                                                onChange={date => this.handleFieldChange('decisionTo', date)} />
+                                        </FormField>
+                                    </Form.Group>
+                                </FormFieldInline>
+                                <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
+                                    <select id='nature' value={search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
+                                        <option value=''>{t('api-gateway:form.all_feminine')}</option>
+                                        {natureOptions}
+                                    </select>
+                                </FormFieldInline>
+                                <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
+                                    <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                        <option value=''>{t('api-gateway:form.all')}</option>
+                                        {statusOptions}
+                                    </select>
+                                </FormFieldInline>
+                                <div style={{ textAlign: 'right' }}>
+                                    <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                                </div>
+                            </Form>
+                        </AdvancedSearch>
 
-                    <StelaTable
-                        data={this.state.actes}
-                        metaData={metaData}
-                        header={true}
-                        select={true}
-                        search={false}
-                        selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
-                        link='/actes/'
-                        linkProperty='uuid'
-                        noDataMessage='Aucun acte'
-                        keyProperty='uuid'
-                        pagination={pagination}
-                        sort={this.sort}
-                        direction={this.state.direction}
-                        column={this.state.column} />
-                </Segment >
+                        <StelaTable
+                            data={this.state.actes}
+                            metaData={metaData}
+                            header={true}
+                            select={true}
+                            search={false}
+                            selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
+                            link='/actes/'
+                            linkProperty='uuid'
+                            noDataMessage='Aucun acte'
+                            keyProperty='uuid'
+                            pagination={pagination}
+                            sort={this.sort}
+                            direction={this.state.direction}
+                            column={this.state.column} />
+                    </Segment >
+                </LoadingContent>
             </Page>
         )
     }

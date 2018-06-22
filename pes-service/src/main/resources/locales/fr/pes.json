@@ -16,7 +16,7 @@
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",
       "SIGNATURE_MISSING": "Signature manquante",
-      "SIGNATURE_SENDING_ERROR" : "Erreur lors de l'envoi vers le parapheur, veuillez vérifier la configuration du profil déposant ou de la collectivité"
+      "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur, veuillez vérifier la configuration du profil déposant ou de la collectivité"
     },
     "fields": {
       "objet": "Objet",
@@ -31,6 +31,7 @@
     },
     "page": {
       "non_existing_pes": "PES non existant",
+      "error_loading_pes": "Erreur lors de la récuparation du PES",
       "title_anomaly": "Anomalie envoyée par le Ministère",
       "historic": "Historique",
       "linked_file": "Fichier joint",
