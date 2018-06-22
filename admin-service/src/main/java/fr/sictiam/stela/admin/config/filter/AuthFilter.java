@@ -62,10 +62,9 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
             request.setAttribute("STELA-Current-Profile-Paired-Certificate", pairedCertificate);
             request.setAttribute("STELA-Certificate", certificate);
-
-            LOGGER.debug("DEBUG doFilterInternal END");
         }
 
+        filterChain.doFilter(request, response);
     }
 
     JsonNode getToken(HttpServletRequest request) throws IOException {
