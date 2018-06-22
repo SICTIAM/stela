@@ -38,7 +38,7 @@ class CertificateInfos extends Component {
     }
     pairCertificate = () => {
         if (this.state.certificate.status === 'VALID') {
-            fetchWithAuthzHandling({ url: '/api/admin/profile/certificate', method: 'POST', context: this.context })
+            fetchWithAuthzHandling({ url: '/api/admin/certificate', method: 'POST', context: this.context })
                 .then(checkStatus)
                 .then(() => this.context._addNotification(notifications.profile.certificatePairedSuccess))
                 .catch(response => {
