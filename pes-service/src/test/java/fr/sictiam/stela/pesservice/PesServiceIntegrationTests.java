@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -321,6 +322,15 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         }
 
         assertThat(pesService.getBlockedFlux(), empty());
+    }
+
+    @Test
+    public void testBlockedFlux() throws IOException {
+        PesAller pes = samplePesAller();
+        pes.setPesHistories(new TreeSet<>());
+        pes.getPesHistories().add(new PesHistory(pes.getUuid(), StatusType.SENT));
+        pesService.save(pes);
+        assertThat(pesService.getBlockedFlux(), not(empty()));
     }
 
     @Test
