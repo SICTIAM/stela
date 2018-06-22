@@ -10,7 +10,7 @@ import Defere from './Defere'
 import LettreObservation from './LettreObservation'
 import DemandePiecesComplementaires from './DemandePiecesComplementaires'
 import DraggablePosition from '../_components/DraggablePosition'
-import { Field, Page, FieldValue, LoadingContent } from '../_components/UI'
+import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
@@ -92,7 +92,9 @@ class Acte extends Component {
         const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
-                <FieldValue><a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a></FieldValue>
+                <FieldValue>
+                    <LinkFile url={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`} text={annexe.filename} />
+                </FieldValue>
             </List.Item>
         )
         const stampPosition = (
@@ -187,7 +189,7 @@ class Acte extends Component {
                             </Grid.Column>
                             <Grid.Column width={12}>
                                 <FieldValue id="acteAttachment">
-                                    <a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a>
+                                    <LinkFile url={`/api/acte/${acte.uuid}/file`} text={acte.acteAttachment.filename} />
                                 </FieldValue>
                             </Grid.Column>
                         </Grid>

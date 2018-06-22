@@ -5,7 +5,7 @@ import { Button, Segment, Label } from 'semantic-ui-react'
 import moment from 'moment'
 
 import History from '../_components/History'
-import { Field, Page, FieldValue, LoadingContent } from '../_components/UI'
+import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
@@ -107,7 +107,7 @@ class Pes extends Component {
                         }
                         <Field htmlFor='attachment' label={t('pes.fields.attachment')}>
                             <FieldValue id='attachment'>
-                                <a target='_blank' href={`/api/pes/${pes.uuid}/file`}>{pes.attachment.filename}</a>
+                                <LinkFile url={`/api/pes/${pes.uuid}/file`} text={pes.attachment.filename} />
                             </FieldValue>
                         </Field>
                     </Segment>

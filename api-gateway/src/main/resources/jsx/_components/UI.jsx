@@ -102,6 +102,12 @@ LoadingContent.contextTypes = {
     t: PropTypes.func
 }
 
+const LinkFile = ({ url, text }) =>
+    <Fragment>
+        <a target='_blank' href={url}>{text}</a>
+        <a target='_blank' href={url + '?disposition=attachment'}><Icon style={{ marginLeft: '0.5em' }} name='download' /></a>
+    </Fragment>
+
 const MigrationSteps = ({ icon, title, description, status, onClick, reset, disabled = false }, { t }) => (
     <Step.Group fluid>
         <Step disabled={disabled} style={{ width: '50%', justifyContent: 'flex-start' }}>
@@ -157,5 +163,6 @@ module.exports = {
     Page,
     InputTextControlled,
     MigrationSteps,
-    LoadingContent
+    LoadingContent,
+    LinkFile
 }

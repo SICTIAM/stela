@@ -175,13 +175,14 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/AR_{uuid}.pdf")
     public ResponseEntity downloadACKPdf(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition,
             HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) String lng) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         try {
             byte[] pdf = acteService.getACKPdfs(new ActeUuidsAndSearchUI(Collections.singletonList(uuid)), lng);
-            outputFile(response, pdf, "AR_" + uuid + ".pdf");
+            outputFile(response, pdf, "AR_" + uuid + ".pdf", disposition);
             return new ResponseEntity(HttpStatus.OK);
         } catch (IOException | DocumentException e) {
             LOGGER.error("Error while generating the ACK PDF: {}", e);
@@ -194,6 +195,7 @@ public class ActeRestController {
     public ResponseEntity downloadMergedStampedAttachments(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition,
             HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -202,7 +204,8 @@ public class ActeRestController {
         try {
             byte[] pdf = acteService.getMergedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, pdf,
-                    "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
+                    "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf",
+                    disposition);
             return new ResponseEntity(HttpStatus.OK);
         } catch (IOException | DocumentException e) {
             LOGGER.error("Error while merging PDFs: {}", e);
@@ -215,6 +218,7 @@ public class ActeRestController {
     public ResponseEntity downloadZipedStampedAttachments(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition,
             HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -223,7 +227,8 @@ public class ActeRestController {
         try {
             byte[] zip = acteService.getZipedStampedAttachments(acteUuidsAndSearchUI, currentLocalAuthority);
             outputFile(response, zip,
-                    "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip");
+                    "actes_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".zip",
+                    disposition);
             return new ResponseEntity(HttpStatus.OK);
         } catch (IOException | DocumentException e) {
             LOGGER.error("Error while creating zip file: {}", e);
@@ -235,6 +240,7 @@ public class ActeRestController {
     @PostMapping("/ARs.pdf")
     public ResponseEntity downloadACKsPdf(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             HttpServletResponse response, @RequestBody ActeUuidsAndSearchUI acteUuidsAndSearchUI,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition,
             @RequestParam(required = false) String lng) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -242,7 +248,8 @@ public class ActeRestController {
         try {
             byte[] pdf = acteService.getACKPdfs(acteUuidsAndSearchUI, lng);
             outputFile(response, pdf,
-                    "ARs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf");
+                    "ARs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")) + ".pdf",
+                    disposition);
             return new ResponseEntity(HttpStatus.OK);
         } catch (DocumentException | IOException e) {
             LOGGER.error("Error while generating the ACKs PDF: {}", e);
@@ -267,12 +274,13 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/file")
     public ResponseEntity getActeAttachment(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String uuid) {
+            HttpServletResponse response, @PathVariable String uuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Acte acte = acteService.getByUuid(uuid);
-        outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename());
+        outputFile(response, acte.getActeAttachment().getFile(), acte.getActeAttachment().getFilename(), disposition);
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -333,7 +341,7 @@ public class ActeRestController {
         if (StringUtils.isNotBlank(uuid)) {
             try {
                 byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
-                outputFile(response, thumbnail, "thumbnail-" + uuid + ".png");
+                outputFile(response, thumbnail, "thumbnail-" + uuid + ".png", "inline");
                 return new ResponseEntity(HttpStatus.OK);
             } catch (IOException e) {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
@@ -347,6 +355,7 @@ public class ActeRestController {
     @GetMapping("/{uuid}/file/stamped")
     public ResponseEntity getStampedActeAttachment(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition,
             HttpServletResponse response, @PathVariable String uuid, @RequestParam(required = false) Integer x,
             @RequestParam(required = false) Integer y) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
@@ -368,19 +377,20 @@ public class ActeRestController {
                 return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-        outputFile(response, pdf, acte.getActeAttachment().getFilename());
+        outputFile(response, pdf, acte.getActeAttachment().getFilename(), disposition);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
     public ResponseEntity getFileHistory(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String historyUuid) {
+            HttpServletResponse response, @PathVariable String historyUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         ActeHistory acteHistory = acteService.getHistoryByUuid(historyUuid);
         if (acteHistory.getFile() != null) {
-            outputFile(response, acteHistory.getFile(), acteHistory.getFileName());
+            outputFile(response, acteHistory.getFile(), acteHistory.getFileName(), disposition);
             return new ResponseEntity(HttpStatus.OK);
         } else
             throw new FileNotFoundException();
@@ -398,12 +408,13 @@ public class ActeRestController {
 
     @GetMapping("/{uuid}/annexe/{annexeUuid}")
     public ResponseEntity getAnnexe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String annexeUuid) {
+            HttpServletResponse response, @PathVariable String annexeUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Attachment annexe = acteService.getAnnexeByUuid(annexeUuid);
-        outputFile(response, annexe.getFile(), annexe.getFilename());
+        outputFile(response, annexe.getFile(), annexe.getFilename(), disposition);
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -495,11 +506,11 @@ public class ActeRestController {
         }
     }
 
-    private void outputFile(HttpServletResponse response, byte[] file, String filename) {
+    private void outputFile(HttpServletResponse response, byte[] file, String filename, String disposition) {
         try {
             InputStream fileInputStream = new ByteArrayInputStream(file);
 
-            response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
+            response.setHeader("Content-Disposition", String.format(disposition + "; filename=" + filename));
             response.addHeader("Content-Type", getContentType(filename));
 
             IOUtils.copy(fileInputStream, response.getOutputStream());

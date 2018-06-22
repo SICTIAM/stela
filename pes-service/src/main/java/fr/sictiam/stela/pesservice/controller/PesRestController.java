@@ -150,24 +150,26 @@ public class PesRestController {
 
     @GetMapping("/{uuid}/file")
     public ResponseEntity getPesAttachment(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String uuid) {
+            HttpServletResponse response, @PathVariable String uuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         PesAller pesAller = pesAllerService.getByUuid(uuid);
-        outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename());
+        outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename(), disposition);
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
     public ResponseEntity getFileHistory(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String historyUuid) {
+            HttpServletResponse response, @PathVariable String historyUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         PesHistory pesHistory = pesAllerService.getHistoryByUuid(historyUuid);
         if (pesHistory.getFile() != null) {
-            outputFile(response, pesHistory.getFile(), pesHistory.getFileName());
+            outputFile(response, pesHistory.getFile(), pesHistory.getFileName(), disposition);
             return new ResponseEntity<Object>(HttpStatus.OK);
         } else
             throw new FileNotFoundException();
@@ -204,20 +206,21 @@ public class PesRestController {
 
     @GetMapping("/pes-retour/{uuid}/file")
     public ResponseEntity getPesRetourAttachment(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            HttpServletResponse response, @PathVariable String uuid) {
+            HttpServletResponse response, @PathVariable String uuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         PesRetour pesRetour = pesRetourService.getByUuid(uuid);
-        outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename());
+        outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename(), disposition);
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
-    private void outputFile(HttpServletResponse response, byte[] file, String filename) {
+    private void outputFile(HttpServletResponse response, byte[] file, String filename, String disposition) {
         try {
             InputStream fileInputStream = new ByteArrayInputStream(file);
 
-            response.setHeader("Content-Disposition", String.format("inline" + "; filename=" + filename));
+            response.setHeader("Content-Disposition", String.format(disposition + "; filename=" + filename));
             response.addHeader("Content-Type", getContentType(filename));
 
             IOUtils.copy(fileInputStream, response.getOutputStream());
