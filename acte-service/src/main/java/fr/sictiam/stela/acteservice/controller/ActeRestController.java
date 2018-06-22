@@ -420,8 +420,8 @@ public class ActeRestController {
     @PostMapping
     ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate,
-            @RequestAttribute("STELA-Certificate") Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
             @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
             @RequestParam("annexes") MultipartFile... annexes) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))

@@ -124,8 +124,8 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}")
     ResponseEntity<?> submitDraft(@PathVariable String draftUuid,
-            @RequestAttribute("STELA-Certificate") Certificate certificate,
-            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate,
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
@@ -160,8 +160,8 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
     ResponseEntity<?> submitActeDraft(@PathVariable String uuid,
-            @RequestAttribute("STELA-Certificate") Certificate certificate,
-            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate,
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))

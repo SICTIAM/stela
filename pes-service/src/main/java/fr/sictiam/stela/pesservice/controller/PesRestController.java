@@ -117,8 +117,8 @@ public class PesRestController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("STELA-Certificate") Certificate certificate,
-            @RequestAttribute("STELA-Current-Profile-Paired-Certificate") Certificate pairedCertificate,
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("pesAller") String pesAllerJson, @RequestParam("file") MultipartFile file) {
