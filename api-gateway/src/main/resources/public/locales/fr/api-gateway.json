@@ -104,7 +104,7 @@
             "issuerEmail": "Email",
             "issuedDate": "Émis le",
             "expiredDate": "Expire le",
-            "status": "Status"
+            "status": "Statut"
         },
         "no_certificate": "Aucun certificat",
         "sesile": {
