@@ -1,14 +1,15 @@
 package fr.sictiam.stela.apigateway.service;
 
-import fr.sictiam.stela.apigateway.model.CertificateInfos;
+import fr.sictiam.stela.apigateway.model.Certificate;
 import fr.sictiam.stela.apigateway.model.CertificateStatus;
 import fr.sictiam.stela.apigateway.model.util.AuthorizationContextClasses;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,12 +28,12 @@ public class CertUtilService {
     }
 
     public boolean checkCert(HttpServletRequest request) {
-        CertificateInfos certificateInfos = getCertInfosFromHeaders(request);
+        Certificate certificateInfos = getCertInfosFromHeaders(request);
         return !certVerificationEnabled || CertificateStatus.VALID.equals(certificateInfos.getStatus());
     }
 
-    public CertificateInfos getCertInfosFromHeaders(HttpServletRequest request) {
-        return new CertificateInfos(
+    public Certificate getCertInfosFromHeaders(HttpServletRequest request) {
+        return new Certificate(
                 request.getHeader("x-ssl-client-m-serial"),
                 request.getHeader("x-ssl-client-issuer-dn"),
                 request.getHeader("x-ssl-client-s-dn-cn"),
@@ -42,14 +43,14 @@ public class CertUtilService {
                 request.getHeader("x-ssl-client-i-dn-cn"),
                 request.getHeader("x-ssl-client-i-dn-o"),
                 request.getHeader("x-ssl-client-i-dn-email"),
-                timestampZToLocalDate(request.getHeader("x-ssl-client-not-before")),
-                timestampZToLocalDate(request.getHeader("x-ssl-client-not-after")),
+                haDateToLocalDate(request.getHeader("x-ssl-client-not-before")),
+                haDateToLocalDate(request.getHeader("x-ssl-client-not-after")),
                 StringUtils.isEmpty(request.getHeader("x-ssl-status")) ? CertificateStatus.NONE
                         : CertificateStatus.valueOf(request.getHeader("x-ssl-status"))
         );
     }
 
-    private LocalDate timestampZToLocalDate(String timestampZ) {
+    private LocalDate haDateToLocalDate(String timestampZ) {
         if (StringUtils.isEmpty(timestampZ)) return null;
         return LocalDateTime
                 .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))

@@ -31,13 +31,16 @@ public class RetryTask {
 
     @Scheduled(cron = "${application.retry.cron}")
     public void resendBlockedFlux() {
+        LOGGER.info("Executing resendBlockedFlux task...");
         List<PesAller> pesList = pesAllerService.getBlockedFlux();
+        LOGGER.info("{} PES at waiting an ACK", pesList.size());
         pesList.forEach(pes -> {
 
             PesHistory hist = pesAllerService.getLastSentHistory(pes.getUuid());
 
             if (LocalDateTime.now().isAfter(hist.getDate().plusHours(frequency))) {
                 try {
+                    LOGGER.info("Resending PES {}...", pes.getUuid());
                     pesAllerService.send(pes);
 
                     StatusType statusType = StatusType.RESENT;
@@ -48,7 +51,7 @@ public class RetryTask {
                     pesAllerService.updateStatus(pes.getUuid(), statusType);
                 } catch (PesSendException e) {
                     pesAllerService.updateStatus(pes.getUuid(), StatusType.FILE_ERROR, e.getClass().getName());
-                    LOGGER.error(e.getMessage());
+                    LOGGER.error("Error while trying to resend PES: {}", pes.getUuid(), e.getMessage());
                 }
             }
 

@@ -3,13 +3,13 @@ package fr.sictiam.stela.admin.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.AgentConnection;
 import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.UI.AgentResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
-import fr.sictiam.stela.admin.model.UserMigration;
 import fr.sictiam.stela.admin.service.AgentConnectionService;
 import fr.sictiam.stela.admin.service.AgentService;
 import io.jsonwebtoken.Jwts;
@@ -62,6 +62,7 @@ public class AgentController {
         agentConnectionService.save(new AgentConnection(profile));
         try {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
             String body = mapper.writerWithView(Views.ProfileView.class).writeValueAsString(profile);
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);

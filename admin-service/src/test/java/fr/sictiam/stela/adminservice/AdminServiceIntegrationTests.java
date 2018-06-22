@@ -1,7 +1,10 @@
 package fr.sictiam.stela.adminservice;
 
 import fr.sictiam.stela.admin.AdminServiceApplication;
+import fr.sictiam.stela.admin.dao.AgentRepository;
+import fr.sictiam.stela.admin.dao.CertificateRepository;
 import fr.sictiam.stela.admin.model.Agent;
+import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
@@ -20,12 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -39,6 +44,12 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
 
     @Autowired
     AgentService agentService;
+
+    @Autowired
+    AgentRepository agentRepository;
+
+    @Autowired
+    CertificateRepository certificateRepository;
 
     @Autowired
     WorkGroupService workGroupService;
@@ -81,5 +92,37 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
         assertThat(localAuthority.getName(), is("Test"));
         assertThat(localAuthority.getGroups(), hasSize(1));
         assertThat(localAuthority.getGroups().stream().findFirst().get().getName(), is("GlobalGroup"));
+    }
+
+    @Test
+    public void testCertificate() {
+        Certificate certificate = new Certificate(
+                "1C5B96E1CD9241D8227D340DD97F9172CB60F623",
+                "/C=FR/ST=Alpes-Maritimes/L=Vallauris/O=SICTIAM/CN=Certificats SICTIAM/emailAddress=internet@sictiam.fr",
+                "Franck BOUCHER",
+                "SICTIAM",
+                "SICTIAM",
+                "f.boucher@sictiam.fr",
+                "Certificats SICTIAM",
+                "SICTIAM",
+                "internet@sictiam.fr",
+                LocalDate.now(),
+                LocalDate.now()
+        );
+        Agent agent = agentService.findBySub("sub").get();
+        assertThat(agent.getCertificate(), nullValue());
+
+        agent.setCertificate(certificate);
+        agentRepository.save(agent);
+
+        agent = agentService.findBySub("sub").get();
+        assertThat(agent.getCertificate(), notNullValue());
+        assertThat(agent.getCertificate().getSerial(), is("1C5B96E1CD9241D8227D340DD97F9172CB60F623"));
+        assertThat(certificateRepository.findByUuid(agent.getCertificate().getUuid()).isPresent(), is(true));
+
+        String certificateUuid = agent.getCertificate().getUuid();
+        agent.setCertificate(null);
+        agentRepository.save(agent);
+        assertThat(certificateRepository.findByUuid(certificateUuid).isPresent(), is(false));
     }
 }

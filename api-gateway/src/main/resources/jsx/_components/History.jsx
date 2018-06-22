@@ -6,6 +6,7 @@ import moment from 'moment'
 import { Feed, Segment } from 'semantic-ui-react'
 
 import { getHistoryStatusTranslationKey } from '../_util/utils'
+import { LinkFile } from './UI'
 
 class History extends Component {
     static contextTypes = {
@@ -36,7 +37,7 @@ class History extends Component {
                     )}
                     {renderIf(status.fileName)(
                         <Feed.Extra>
-                            {t(`${moduleName}:${moduleName}.page.linked_file`)}: <a target='_blank' href={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`}>{status.fileName}</a>
+                            {t(`${moduleName}:${moduleName}.page.linked_file`)}: <LinkFile url={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`} text={status.fileName} />
                         </Feed.Extra>
                     )}
                 </Feed.Content>

@@ -52,8 +52,17 @@ export default class StelaTable extends Component {
         marginBottom: '1em',
         marginLeft: '1em'
     }
+    componentDidMount = () => {
+        if (this.props.data) {
+            const checkboxes = {}
+            if (this.props.select) {
+                this.props.data.map(data => checkboxes[data[this.props.keyProperty]] = false)
+            }
+            this.setState({ data: this.props.data, originalData: this.props.data, checkboxes: checkboxes })
+        }
+    }
     componentWillReceiveProps = (nextProps) => {
-        if (nextProps.data && !this.state.dataReceived) {
+        if (nextProps.data) {
             const checkboxes = {}
             if (nextProps.select) {
                 nextProps.data.map(data => checkboxes[data[nextProps.keyProperty]] = false)

@@ -8,7 +8,7 @@ import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
-import fr.sictiam.stela.acteservice.model.util.CertificateStatus;
+import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.util.CertUtilService;
@@ -124,11 +124,12 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}")
     ResponseEntity<?> submitDraft(@PathVariable String draftUuid,
-            @RequestAttribute("STELA-Certificate-Status") CertificateStatus certificateStatus,
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
-                || !certUtilService.checkCert(certificateStatus)) {
+                || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Optional opt = draftService.sumitDraft(draftUuid, profileUuid);
@@ -159,11 +160,12 @@ public class ActeDraftRestController {
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
     ResponseEntity<?> submitActeDraft(@PathVariable String uuid,
-            @RequestAttribute("STELA-Certificate-Status") CertificateStatus certificateStatus,
+            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
+            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
-                || !certUtilService.checkCert(certificateStatus)) {
+                || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);

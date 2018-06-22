@@ -10,7 +10,7 @@ import Defere from './Defere'
 import LettreObservation from './LettreObservation'
 import DemandePiecesComplementaires from './DemandePiecesComplementaires'
 import DraggablePosition from '../_components/DraggablePosition'
-import { Field, Page, FieldValue } from '../_components/UI'
+import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
@@ -42,17 +42,19 @@ class Acte extends Component {
                 y: 10
             }
         },
-        acteFetched: false,
+        fetchStatus: '',
         republished: false
     }
     componentDidMount() {
+        this.setState({ fetchStatus: 'loading' })
         const uuid = this.props.uuid
         if (uuid !== '') {
             fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, acteFetched: true }))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }))
                 .catch(response => {
+                    this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'error.default' })
                     response.json().then(json => {
                         this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
@@ -86,13 +88,13 @@ class Acte extends Component {
     render() {
         const { t } = this.context
         const { acteACK, lastMetierHistory } = this.state.acteUI
-        const acteFetched = renderIf(this.state.acteFetched)
-        const acteNotFetched = renderIf(!this.state.acteFetched)
         const acte = this.state.acteUI.acte
         const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
-                <FieldValue><a target='_blank' href={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`}>{annexe.filename}</a></FieldValue>
+                <FieldValue>
+                    <LinkFile url={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`} text={annexe.filename} />
+                </FieldValue>
             </List.Item>
         )
         const stampPosition = (
@@ -121,103 +123,98 @@ class Acte extends Component {
         const isDemandePiecesComplementaires = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED')
         return (
             <Page title={acte.objet}>
-                {acteFetched(
-                    <div>
-                        <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
+                <LoadingContent fetchStatus={this.state.fetchStatus}>
+                    <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
 
-                        {isDefere &&
-                            <Defere acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                        }
-                        {isDemandePiecesComplementaires &&
-                            <DemandePiecesComplementaires acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                        }
-                        {isLettreObservation &&
-                            <LettreObservation acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                        }
-                        {isCourrierSimple &&
-                            <CourrierSimple acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                        }
+                    {isDefere &&
+                        <Defere acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                    }
+                    {isDemandePiecesComplementaires &&
+                        <DemandePiecesComplementaires acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                    }
+                    {isLettreObservation &&
+                        <LettreObservation acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                    }
+                    {isCourrierSimple &&
+                        <CourrierSimple acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
+                    }
 
-                        <Segment>
-                            <Label className='labelStatus' color={lastMetierHistory ? this.getStatusColor(lastMetierHistory.status) : 'blue'} ribbon>
-                                {lastMetierHistory && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
-                            </Label>
-                            <div style={{ textAlign: 'right' }}>
-                                <Dropdown basic direction='left' trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
-                                    <Dropdown.Menu>
-                                        <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
-                                            {t('acte.page.download_original')}
+                    <Segment>
+                        <Label className='labelStatus' color={lastMetierHistory ? this.getStatusColor(lastMetierHistory.status) : 'blue'} ribbon>
+                            {lastMetierHistory && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
+                        </Label>
+                        <div style={{ textAlign: 'right' }}>
+                            <Dropdown basic direction='left' trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
+                                <Dropdown.Menu>
+                                    <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
+                                        {t('acte.page.download_original')}
+                                    </a>
+
+                                    {(acteACK) &&
+                                        <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
+                                            {t('acte.page.download_justificative')}
                                         </a>
+                                    }
+                                    {(acteACK) &&
+                                        <Dropdown.Item>
+                                            <Popup content={stampPosition} on='click' position='left center'
+                                                trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
+                                            />
+                                        </Dropdown.Item>
+                                    }
+                                </Dropdown.Menu>
+                            </Dropdown>
+                            {(lastHistory && anomalies.includes(lastHistory.status) && !this.state.republished) &&
+                                <Button basic color={'orange'} onClick={this.republish}>{t('acte.page.republish')}</Button>
+                            }
 
-                                        {(acteACK) &&
-                                            <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
-                                                {t('acte.page.download_justificative')}
-                                            </a>
-                                        }
-                                        {(acteACK) &&
-                                            <Dropdown.Item>
-                                                <Popup content={stampPosition} on='click' position='left center'
-                                                    trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
-                                                />
-                                            </Dropdown.Item>
-                                        }
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                                {(lastHistory && anomalies.includes(lastHistory.status) && !this.state.republished) &&
-                                    <Button basic color={'orange'} onClick={this.republish}>{t('acte.page.republish')}</Button>
-                                }
+                            <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
+                        </div>
 
-                                <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
-                            </div>
+                        <Field htmlFor="number" label={t('acte.fields.number')}>
+                            <FieldValue id="number">{acte.number}</FieldValue>
+                        </Field>
+                        <Field htmlFor="decision" label={t('acte.fields.decision')}>
+                            <FieldValue id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</FieldValue>
+                        </Field>
+                        <Field htmlFor="nature" label={t('acte.fields.nature')}>
+                            <FieldValue id="nature">{t(`acte.nature.${acte.nature}`)}</FieldValue>
+                        </Field>
+                        <Field htmlFor="code" label={t('acte.fields.code')}>
+                            <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
+                        </Field>
+                        <Grid>
+                            <Grid.Column width={4}>
+                                <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
+                            </Grid.Column>
+                            <Grid.Column width={12}>
+                                <FieldValue id="acteAttachment">
+                                    <LinkFile url={`/api/acte/${acte.uuid}/file`} text={acte.acteAttachment.filename} />
+                                </FieldValue>
+                            </Grid.Column>
+                        </Grid>
+                        <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
+                            {renderIf(annexes.length > 0)(
+                                <List id="annexes">
+                                    {annexes}
+                                </List>
+                            )}
+                        </Field>
+                        <Field htmlFor="public" label={t('acte.fields.public')}>
+                            <Checkbox id="public" checked={acte.public} disabled />
+                        </Field>
 
-                            <Field htmlFor="number" label={t('acte.fields.number')}>
-                                <FieldValue id="number">{acte.number}</FieldValue>
-                            </Field>
-                            <Field htmlFor="decision" label={t('acte.fields.decision')}>
-                                <FieldValue id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</FieldValue>
-                            </Field>
-                            <Field htmlFor="nature" label={t('acte.fields.nature')}>
-                                <FieldValue id="nature">{t(`acte.nature.${acte.nature}`)}</FieldValue>
-                            </Field>
-                            <Field htmlFor="code" label={t('acte.fields.code')}>
-                                <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
-                            </Field>
-                            <Grid>
-                                <Grid.Column width={4}>
-                                    <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
-                                </Grid.Column>
-                                <Grid.Column width={12}>
-                                    <FieldValue id="acteAttachment">
-                                        <a target='_blank' href={`/api/acte/${acte.uuid}/file`}>{acte.acteAttachment.filename}</a>
-                                    </FieldValue>
-                                </Grid.Column>
-                            </Grid>
-                            <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
-                                {renderIf(annexes.length > 0)(
-                                    <List id="annexes">
-                                        {annexes}
-                                    </List>
-                                )}
-                            </Field>
-                            <Field htmlFor="public" label={t('acte.fields.public')}>
-                                <Checkbox id="public" checked={acte.public} disabled />
-                            </Field>
-
-                            <Grid>
-                                <Grid.Column width={4}><label htmlFor="publicWebsite">{t('acte.fields.publicWebsite')}</label></Grid.Column>
-                                <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
-                            </Grid>
-                        </Segment>
-                        <History
-                            title={t('acte.page.historic')}
-                            moduleName='acte'
-                            emptyMessage={t('acte.page.no_history')}
-                            history={this.state.acteUI.acte.acteHistories} />
-                    </div>
-                )}
-                {acteNotFetched(
-                    <p>{t('acte.page.non_existing_act')}</p>
-                )}
+                        <Grid>
+                            <Grid.Column width={4}><label htmlFor="publicWebsite">{t('acte.fields.publicWebsite')}</label></Grid.Column>
+                            <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
+                        </Grid>
+                    </Segment>
+                    <History
+                        title={t('acte.page.historic')}
+                        moduleName='acte'
+                        emptyMessage={t('acte.page.no_history')}
+                        history={this.state.acteUI.acte.acteHistories} />
+                </LoadingContent>
             </Page>
         )
     }

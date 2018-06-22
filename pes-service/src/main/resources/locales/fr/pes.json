@@ -4,8 +4,8 @@
       "CREATED": "Déposé",
       "SENT": "Envoyé",
       "NOT_SENT": "Non envoyé",
-      "ACK_RECEIVED": "AR Ministère",
-      "NACK_RECEIVED": "Anomalie Ministère",
+      "ACK_RECEIVED": "AR trésorerie",
+      "NACK_RECEIVED": "Anomalie trésorerie",
       "PES_RETOUR_RECEIVED": "PES Retour reçu",
       "MAX_RETRY_REACH": "Nombre de tentatives de renvoi automatique excédé",
       "FILE_ERROR": "Erreur sur le fichier PES",
@@ -16,7 +16,7 @@
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",
       "SIGNATURE_MISSING": "Signature manquante",
-      "SIGNATURE_SENDING_ERROR" : "Erreur lors de l'envoi vers le parapheur, veuillez vérifier la configuration du profil déposant ou de la collectivité"
+      "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur, veuillez vérifier la configuration du profil déposant ou de la collectivité"
     },
     "fields": {
       "objet": "Objet",
@@ -31,7 +31,8 @@
     },
     "page": {
       "non_existing_pes": "PES non existant",
-      "title_anomaly": "Anomalie envoyée par le Ministère",
+      "error_loading_pes": "Erreur lors de la récuparation du PES",
+      "title_anomaly": "Anomalie envoyée par la trésorerie",
       "historic": "Historique",
       "linked_file": "Fichier joint",
       "no_history": "Aucun historique pour ce PES",
@@ -76,7 +77,7 @@
           "title": "Paramétrage des collectivités",
           "general_informations": "Informations générales",
           "HELIOS_transmission": "Transmission Helios",
-          "serverCode": "Code serveur ministère",
+          "serverCode": "Code serveur trésorerie",
           "sirens": "Liste des SIRENs autorisés",
           "genericProfileUuid": "Agent garant",
           "no_siren": "Aucun SIREN",

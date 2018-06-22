@@ -518,16 +518,20 @@ class NewActeForm extends Component {
                         </Card.Group>
                     )}
                     {renderIf(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
-                        <div>
-                            <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')}>
-                                <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} toggle />
-                            </FormField>
-                            {renderIf(this.state.depositFields.publicWebsiteField)(
-                                <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}>
-                                    <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
+                        <Grid columns={3} style={{ marginBottom: 'auto' }}>
+                            <Grid.Column>
+                                <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')}>
+                                    <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} toggle />
                                 </FormField>
+                            </Grid.Column>
+                            {renderIf(this.state.depositFields.publicWebsiteField)(
+                                <Grid.Column>
+                                    <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}>
+                                        <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
+                                    </FormField>
+                                </Grid.Column>
                             )}
-                        </div>
+                        </Grid>
                     )}
                     {renderIf(this.props.mode !== 'ACTE_BATCH')(
                         <div style={{ textAlign: 'right' }}>

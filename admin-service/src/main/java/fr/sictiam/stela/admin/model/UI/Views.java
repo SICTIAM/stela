@@ -31,7 +31,7 @@ public class Views {
     }
 
     public interface ProfileView extends ProfileViewPublic, ProfileViewPrivate, ProfileViewChain,
-            LocalAuthorityViewPublic, WorkGroupViewPublic, AgentViewPublic {
+            LocalAuthorityViewPublic, WorkGroupViewPublic, AgentViewPublic, CertificateViewPublic {
 
     }
 
@@ -48,7 +48,8 @@ public class Views {
     }
 
     public interface AgentView
-            extends AgentViewPublic, AgentViewPrivate, LocalAuthorityViewPublic, ProfileViewPublic, ProfileViewPrivate {
+            extends AgentViewPublic, AgentViewPrivate, LocalAuthorityViewPublic, ProfileViewPublic, ProfileViewPrivate,
+            CertificateViewPublic {
 
     }
 
@@ -57,6 +58,10 @@ public class Views {
     }
 
     public interface AgentViewPrivate {
+
+    }
+
+    public interface CertificateViewPublic {
 
     }
 

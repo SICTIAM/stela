@@ -73,7 +73,7 @@
       "publicWebsite": "Affichage sur site internet",
       "objet": "Objet",
       "status": "Status",
-      "group": "Visible pour"
+      "group": "Visible par"
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"

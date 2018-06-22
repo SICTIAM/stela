@@ -12,6 +12,7 @@
     "last_localAuthorities": "Dernières collectivités utilisées",
     "alert": "Alerte",
     "at": "à",
+    "loading": "Chargement",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
@@ -89,19 +90,21 @@
         },
         "certificate": {
             "title": "Informations du certificat",
+            "pair": "Appairer le certificat",
+            "paired": "Certificat appairé",
             "serial": "Numéro de série",
             "issuer": "Émetteur",
             "subject": "Propriétaire",
             "subjectCommonName": "Nom",
             "subjectOrganization": "Organisation",
             "subjectOrganizationUnit": "Unité d'organisation",
-            "subjectEmaill": "Email",
+            "subjectEmail": "Email",
             "issuerCommonName": "Nom",
             "issuerOrganization": "Organisation",
-            "issuerEmaill": "Email",
+            "issuerEmail": "Email",
             "issuedDate": "Émis le",
             "expiredDate": "Expire le",
-            "status": "Status"
+            "status": "Statut"
         },
         "no_certificate": "Aucun certificat",
         "sesile": {
@@ -199,7 +202,10 @@
         },
         "profile": {
             "title": "Profil",
-            "updated": "Votre profil a bien été mis à jour"
+            "updated": "Votre profil a bien été mis à jour",
+            "certificatePairedSuccess": "Le certificat à bien été appairé",
+            "certificateNotValid": "Le certificat n'est pas valide",
+            "certificateConflict": "Le certificat est déjà enregistré sur un autre utilisateur"
         }
     },
     "local_authority": {
@@ -302,6 +308,7 @@
         "CONVOCATION": "Convocation"
     },
     "error": {
+        "default": "Une erreur s'est produite",
         "401": {
             "title": "Erreur 401",
             "content": "Vous devez être authentifié pour accéder à cette page"
@@ -316,9 +323,11 @@
         },
         "certificate_required": {
             "title": "Certificat électronique requis",
+            "default": "Un certificat est requis pour accéder à cette fonctionnalité",
             "EXPIRED": "Votre certificat est expiré",
             "REVOKED": "Votre certificat est révoqué",
             "OTHER": "Votre certificat est invalide",
+            "NOT_PAIRED": "Votre certificat n'est pas appairé",
             "NONE": "Aucun certificat détecté",
             "VALID": "Votre certificat est valide"
         }

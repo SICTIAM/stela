@@ -97,6 +97,7 @@ public class ReceiverTask {
         XPath path = xpf.newXPath();
         Document document = builder.parse(byteArrayInputStream);
         String fileName = path.evaluate("/PES_ACQUIT/Enveloppe/Parametres/NomFic/@V", document);
+        LOGGER.debug("NomFic : " + fileName);
 
         PesAller pesAller = pesService.getByFileName(fileName).orElseThrow(PesNotFoundException::new);
 

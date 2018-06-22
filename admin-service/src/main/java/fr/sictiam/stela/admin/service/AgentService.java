@@ -1,8 +1,10 @@
 package fr.sictiam.stela.admin.service;
 
 import fr.sictiam.stela.admin.dao.AgentRepository;
+import fr.sictiam.stela.admin.dao.CertificateRepository;
 import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.Agent;
+import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
@@ -10,6 +12,7 @@ import fr.sictiam.stela.admin.model.UserGatewayRequest;
 import fr.sictiam.stela.admin.model.UserMigration;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,9 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -53,14 +59,17 @@ public class AgentService {
 
     private final AgentRepository agentRepository;
     private final ProfileRepository profileRepository;
+    private final CertificateRepository certificateRepository;
     private final LocalAuthorityService localAuthorityService;
     private final WorkGroupService workGroupService;
     private RestTemplate restTemplate = new RestTemplate();
 
     public AgentService(AgentRepository agentRepository, ProfileRepository profileRepository,
-            LocalAuthorityService localAuthorityService, WorkGroupService workGroupService) {
+            CertificateRepository certificateRepository, LocalAuthorityService localAuthorityService,
+            WorkGroupService workGroupService) {
         this.agentRepository = agentRepository;
         this.profileRepository = profileRepository;
+        this.certificateRepository = certificateRepository;
         this.localAuthorityService = localAuthorityService;
         this.workGroupService = workGroupService;
     }
@@ -198,5 +207,48 @@ public class AgentService {
 
     public Long countAll() {
         return agentRepository.countAll();
+    }
+
+    public boolean isCertificateTaken(HttpServletRequest request) {
+        Certificate currentCertificate = getCertInfosFromHeaders(request);
+        Optional<Certificate> certificateOpt = certificateRepository
+                .findBySerialAndIssuer(currentCertificate.getSerial(), currentCertificate.getIssuer());
+        return certificateOpt.isPresent();
+    }
+
+    public void pairCertificate(HttpServletRequest request, String agendUuid) {
+        Agent agent = findByUuid(agendUuid).orElseThrow(NotFoundException::new);
+        if (agent.getCertificate() != null) {
+            Certificate certifiacte = certificateRepository.findByUuid(agent.getCertificate().getUuid()).get();
+            agent.setCertificate(null);
+            agent = agentRepository.save(agent);
+            certificateRepository.delete(certifiacte);
+        }
+        Certificate currentCertificate = getCertInfosFromHeaders(request);
+        agent.setCertificate(currentCertificate);
+        agentRepository.save(agent);
+    }
+
+    public Certificate getCertInfosFromHeaders(HttpServletRequest request) {
+        return new Certificate(
+                request.getHeader("x-ssl-client-m-serial"),
+                request.getHeader("x-ssl-client-issuer-dn"),
+                request.getHeader("x-ssl-client-s-dn-cn"),
+                request.getHeader("x-ssl-client-s-dn-o"),
+                request.getHeader("x-ssl-client-s-dn-ou"),
+                request.getHeader("x-ssl-client-s-dn-email"),
+                request.getHeader("x-ssl-client-i-dn-cn"),
+                request.getHeader("x-ssl-client-i-dn-o"),
+                request.getHeader("x-ssl-client-i-dn-email"),
+                haDateToLocalDate(request.getHeader("x-ssl-client-not-before")),
+                haDateToLocalDate(request.getHeader("x-ssl-client-not-after"))
+        );
+    }
+
+    private LocalDate haDateToLocalDate(String timestampZ) {
+        if (org.springframework.util.StringUtils.isEmpty(timestampZ)) return null;
+        return LocalDateTime
+                .parse(timestampZ.replace("Z", ""), DateTimeFormatter.ofPattern("yyMMddHHmmss"))
+                .toLocalDate();
     }
 }
