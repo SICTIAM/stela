@@ -4,9 +4,11 @@ import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment } from 'sem
 
 import { bytesToSize } from '../_util/utils'
 
-const FormField = ({ htmlFor, label, children, inline }) =>
+const FormField = ({ htmlFor, label, children, inline, helpText }) =>
     <Form.Field inline={inline ? true : false}>
-        <label htmlFor={htmlFor}>{label}</label>
+        <label htmlFor={htmlFor}>{label}
+            {helpText && <Tooltip icon='question' text={helpText} />}
+        </label>
         {children}
     </Form.Field>
 
@@ -108,6 +110,12 @@ const LinkFile = ({ url, text }) =>
         <a target='_blank' href={url + '?disposition=attachment'}><Icon style={{ marginLeft: '0.5em' }} name='download' /></a>
     </Fragment>
 
+/* Home made tooltip, to replace with React SemanticUI Popup once fixed: https://github.com/Semantic-Org/Semantic-UI-React/issues/1126 */
+const Tooltip = ({ icon, text }) =>
+    <i className={`tooltip ${icon} small circular icon`} style={{ marginLeft: '0.5em' }}>
+        <span className='tooltiptext'>{text}</span>
+    </i>
+
 const MigrationSteps = ({ icon, title, description, status, onClick, reset, disabled = false }, { t }) => (
     <Step.Group fluid>
         <Step disabled={disabled} style={{ width: '50%', justifyContent: 'flex-start' }}>
@@ -164,5 +172,6 @@ module.exports = {
     InputTextControlled,
     MigrationSteps,
     LoadingContent,
-    LinkFile
+    LinkFile,
+    Tooltip
 }

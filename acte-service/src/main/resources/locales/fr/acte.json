@@ -75,6 +75,18 @@
       "status": "Status",
       "group": "Visible par"
     },
+    "help_text": {
+      "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
+      "decision": "Date de l'assemblée délibérante au format jj/mm/aaaa",
+      "nature": "Choix de la nature de l'acte (délibération, arrêté, ...)",
+      "code": "Choix du code matière de l'acte. Thèmes nationaux définis par la norme ACTES et dépendant de votre Préfecture ou Sous-Préfecture",
+      "acteAttachment": "Fichier de l'acte aux formats : {{acceptFile}}",
+      "annexes": "Fichiers annexes de l'acte aux formats : {{acceptAnnexes}}",
+      "public": "Affichage de cet acte dans le registre des délibéraions",
+      "publicWebsite": "Affichage de cet acte sur votre site internet si vous avez activé cette option",
+      "objet": "L'objet/titre de l'acte (texte libre)",
+      "group": "Groupe de visibilité auquel associer la télétransmission de l'acte"
+    },
     "history": {
       "message": "Anomalie envoyée par le MIAT"
     },
