@@ -26,6 +26,11 @@
       "status": "Status",
       "agent": "Déposé par"
     },
+    "help_text": {
+      "objet": "L'objet/titre de l'enveloppe (texte libre)'",
+      "comment": "Commentaire(s) éventuel(s) sur l'envoi du courrier",
+      "attachment": "Fichier de l'enveloppe aux formats : {{acceptFile}}"
+    },
     "new": {
       "title": "Télétransmission d'une enveloppe"
     },

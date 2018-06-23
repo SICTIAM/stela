@@ -72,11 +72,12 @@ class NewPes extends Component {
     }
     render() {
         const { t } = this.context
+        const acceptFile = '.xml'
         return (
             <Page title={t('pes.new.title')}>
                 <Segment>
                     <Form onSubmit={this.submit}>
-                        <FormField htmlFor='objet' label={t('pes.fields.objet')}>
+                        <FormField htmlFor='objet' label={t('pes.fields.objet')} helpText={t('pes.help_text.objet')}>
                             <InputValidation id='objet'
                                 placeholder={t('pes.fields.objet') + '...'}
                                 value={this.state.fields.objet}
@@ -84,10 +85,10 @@ class NewPes extends Component {
                                 validationRule={this.validationRules.objet}
                                 fieldName={t('pes.fields.objet')} />
                         </FormField>
-                        <FormField htmlFor='attachment' label={t('pes.fields.attachment')}>
+                        <FormField htmlFor='attachment' label={t('pes.fields.attachment')} helpText={t('pes.help_text.attachment', { acceptFile })}>
                             <InputValidation id='attachment'
                                 type='file'
-                                accept='.xml'
+                                accept={acceptFile}
                                 onChange={this.handleFileChange}
                                 value={this.state.fields.attachment}
                                 validationRule={this.validationRules.attachment}
@@ -97,7 +98,7 @@ class NewPes extends Component {
                         {this.state.attachment &&
                             <File attachment={{ filename: this.state.attachment.name }} onDelete={this.deleteFile} />
                         }
-                        <FormField htmlFor='comment' label={t('pes.fields.comment')}>
+                        <FormField htmlFor='comment' label={t('pes.fields.comment')} helpText={t('pes.help_text.comment')}>
                             <InputTextControlled component={TextArea}
                                 id='comment'
                                 maxLength={250}

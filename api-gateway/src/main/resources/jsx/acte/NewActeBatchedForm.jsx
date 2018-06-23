@@ -302,7 +302,7 @@ class NewActeBatchedForm extends Component {
                     <Form>
                         <Grid columns={2} style={{ marginBottom: 'auto' }}>
                             <Grid.Column>
-                                <FormField htmlFor={'decision'} label={t('acte.fields.decision')}>
+                                <FormField htmlFor={'decision'} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
                                     <InputValidation id={'decision'}
                                         type='date'
                                         value={this.state.fields.decision}
@@ -313,7 +313,7 @@ class NewActeBatchedForm extends Component {
                                 </FormField>
                             </Grid.Column>
                             <Grid.Column>
-                                <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')}>
+                                <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')} helpText={t('acte.help_text.group')}>
                                     <Dropdown id='groupUuid'
                                         value={groupOptionValue}
                                         onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
@@ -322,7 +322,7 @@ class NewActeBatchedForm extends Component {
                                 </FormField>
                             </Grid.Column>
                         </Grid>
-                        <FormField htmlFor={'nature'} label={t('acte.fields.nature')}>
+                        <FormField htmlFor={'nature'} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
                             <InputValidation id={'nature'}
                                 type='dropdown'
                                 value={this.state.fields.nature}
