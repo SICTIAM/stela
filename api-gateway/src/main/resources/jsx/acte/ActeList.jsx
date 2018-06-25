@@ -41,8 +41,8 @@ class ActeList extends Component {
     }
     componentDidMount() {
         const itemPerPage = localStorage.getItem('itemPerPage')
-        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
-        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
+        if (!itemPerPage) localStorage.setItem('itemPerPage', 25)
+        else this.setState({ limit: 25 }, this.submitForm)
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search

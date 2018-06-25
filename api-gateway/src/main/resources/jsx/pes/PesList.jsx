@@ -36,8 +36,8 @@ class PesList extends Component {
     }
     componentDidMount() {
         const itemPerPage = localStorage.getItem('itemPerPage')
-        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
-        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
+        if (!itemPerPage) localStorage.setItem('itemPerPage', 25)
+        else this.setState({ limit: 25 }, this.submitForm)
         fetchWithAuthzHandling({ url: '/api/pes/statuses' })
             .then(response => response.json())
             .then(json => this.setState({ pesStatuses: json }))

@@ -23,9 +23,7 @@ class Pagination extends Component {
         const { t } = this.context
         const { columns, pageCount, handlePageClick, itemPerPage } = this.props
         const options = [
-            { key: 25, text: 25, value: 25 },
-            { key: 50, text: 50, value: 50 },
-            { key: 100, text: 100, value: 100 }
+            { key: 25, text: 25, value: 25 }
         ]
         return (
             <Table.Footer>
