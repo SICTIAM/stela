@@ -2,6 +2,7 @@ package fr.sictiam.stela.acteservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
@@ -57,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,6 +112,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ActeHistoryRepository acteHistoryRepository;
+
+    @Autowired
+    private ActeExportRepository acteExportRepository;
 
     @Autowired
     private NotificationService notificationService;
@@ -638,6 +643,26 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         adminService.updateAdmin(admin);
         assertThat(adminService.isMiatAvailable(), is(false));
     }
+
+    /*@Test
+    public void persistActeExportTest() {
+        // create and Save Acte
+        Acte acte = new Acte();
+        setActeValues(acte);
+        acte.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
+        acte.setLocalAuthority(localAuthority);
+        acteRepository.save(acte);
+
+        ZonedDateTime transmissionDateTime = ZonedDateTime.now();
+
+        ActeExport expectedActeExport = new ActeExport(transmissionDateTime, fileName, filesNameList, siren, department, district, agentName, agentFirstName, agentEmail);
+        ActeExport tmpCreatedActeExport = acteService.persistActeExport(acte.getUuid(), fileName, transmissionDateTime, file);
+        ActeExport retrievedActeExport = acteExportRepository.findByFileName(fileName);
+
+        assertEquals(tmpCreatedActeExport, retrievedActeExport);
+        assertEquals(expectedActeExport, retrievedActeExport);
+    }*/
 
     private MultiValueMap<String, Object> acteWithAttachments() {
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
