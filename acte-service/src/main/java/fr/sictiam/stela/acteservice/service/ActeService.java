@@ -6,7 +6,15 @@ import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
-import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.Acte;
+import fr.sictiam.stela.acteservice.model.ActeExport;
+import fr.sictiam.stela.acteservice.model.ActeHistory;
+import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.Flux;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.PendingMessage;
+import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
@@ -20,6 +28,7 @@ import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import fr.sictiam.stela.acteservice.service.util.ZipGeneratorUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -57,8 +66,8 @@ import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -398,45 +407,35 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
     }
 
-    public ActeExport persistActeExport(String acteUuid, String fileName, ZonedDateTime transmissionDateTime, byte[] file) {
-        Acte acte = acteRepository.findByUuid(acteUuid).get();
-        JsonNode node = null;
+    public void persistActeExport(PendingMessage pendingMessage) {
+        LOGGER.info("Persisting acte sent infos");
+        Acte acte = acteRepository.findByUuid(pendingMessage.getActeUuid()).get();
+        ActeExport acteExport = new ActeExport(pendingMessage.getActeUuid(), ZonedDateTime.now(),
+                pendingMessage.getFileName(), acte.getLocalAuthority().getSiren(),
+                acte.getLocalAuthority().getDepartment(), acte.getLocalAuthority().getDistrict());
         try {
-           node = externalRestService.getProfile(acte.getProfileUuid());
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        }
-        
-        ActeExport acteExport = new ActeExport();
-        acteExport.setFileName(fileName);
-        acteExport.setTransmissionDateTime(transmissionDateTime);
-        if(node != null) {
-            acteExport.setAgentFirstName(node.get("agent").get("givenName").asText());
-            acteExport.setAgentName(node.get("agent").get("familyName").asText());
+            JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
+            acteExport.setAgentFirstName(node.get("agent").get("given_name").asText());
+            acteExport.setAgentName(node.get("agent").get("family_name").asText());
             acteExport.setAgentEmail(node.get("agent").get("email").asText());
+        } catch (Exception e) {
+            LOGGER.error("Error while retrieving profile infos : {}", e.getMessage());
         }
-
-        acteExport.setSiren(acte.getLocalAuthority().getSiren());
-        acteExport.setDepartment(acte.getLocalAuthority().getDepartment());
-        acteExport.setDistrict(acte.getLocalAuthority().getDistrict());
-
         try {
-            TarArchiveInputStream tarInput = new TarArchiveInputStream(new ByteArrayInputStream(file));
+            InputStream inputStream = new ByteArrayInputStream(pendingMessage.getFile());
+            TarArchiveInputStream tarArchiveInputStream =
+                    new TarArchiveInputStream(new GzipCompressorInputStream(inputStream));
             TarArchiveEntry entry;
-            StringBuilder fileNameList = new StringBuilder();
-            while (null!=(entry=tarInput.getNextTarEntry())) {
+            List<String> fileNameList = new ArrayList<>();
+            while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
                 LOGGER.info("File found in archive:" + entry.getName());
-                fileNameList.append(entry.getName());
-                fileNameList.append(";");
+                fileNameList.add(entry.getName());
             }
-            fileNameList.deleteCharAt(fileNameList.length());
-            acteExport.setFilesNameList(fileNameList.toString());
+            acteExport.setFilesNameList(String.join(";", fileNameList));
         } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error while extracting .tar.gz : {}", e.getMessage());
         }
-
         acteExportRepository.save(acteExport);
-        return acteExport;
     }
 
     public void sendReponseCourrierSimple(String uuid, MultipartFile file) throws IOException {

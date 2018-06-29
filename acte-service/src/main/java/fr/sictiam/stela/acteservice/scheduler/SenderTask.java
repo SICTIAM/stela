@@ -18,11 +18,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 
-import java.time.ZonedDateTime;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.time.ZonedDateTime;
 
 @Component
 public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
@@ -75,8 +73,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                 sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
 
                 if (HttpStatus.OK.equals(sendStatus)) {
-                    ZonedDateTime transmissionDateTime = ZonedDateTime.now();
-                    acteService.persistActeExport(pendingMessage.getActeUuid(), pendingMessage.getFileName(), transmissionDateTime, pendingMessage.getFile());
+                    acteService.persistActeExport(pendingMessage);
                     acteService.sent(pendingMessage.getActeUuid(), pendingMessage.getFlux());
                     pendingMessageService.remove(pendingQueue.poll());
                     currentSizeUsed.addAndGet(pendingMessage.getFile().length);

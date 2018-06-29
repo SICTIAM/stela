@@ -1,14 +1,12 @@
 package fr.sictiam.stela.acteservice.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
 @Entity
 public class ActeExport {
@@ -16,6 +14,7 @@ public class ActeExport {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
+    private String acteUuid;
     private ZonedDateTime transmissionDateTime;
     private String fileName;
     private String filesNameList; //String with separator between each file name
@@ -26,25 +25,26 @@ public class ActeExport {
     private String agentFirstName;
     private String agentEmail;
 
-    public  ActeExport() {
+    public ActeExport() {
 
     }
 
-    public ActeExport(ZonedDateTime transmissionDateTime, String fileName, String filesNameList, String siren, String department, String district, String agentName, String agentFirstName, String agentEmail) {
-        this.uuid = uuid;
+    public ActeExport(String acteUuid, ZonedDateTime transmissionDateTime, String fileName, String siren,
+            String department, String district) {
+        this.acteUuid = acteUuid;
         this.transmissionDateTime = transmissionDateTime;
         this.fileName = fileName;
-        this.filesNameList = filesNameList;
         this.siren = siren;
         this.department = department;
         this.district = district;
-        this.agentName = agentName;
-        this.agentFirstName = agentFirstName;
-        this.agentEmail = agentEmail;
     }
 
     public String getUuid() {
         return uuid;
+    }
+
+    public String getActeUuid() {
+        return acteUuid;
     }
 
     public ZonedDateTime getTransmissionDateTime() {
@@ -117,29 +117,5 @@ public class ActeExport {
 
     public void setAgentEmail(String agentEmail) {
         this.agentEmail = agentEmail;
-    }
-
-    @Override
-    public boolean equals(Object that){
-        if(this == that) return true;//if both of them points the same address in memory
-
-        if(!(that instanceof ActeExport)) return false; // if "that" is not an ActeExport or a childclass
-
-        ActeExport thatActeExport = (ActeExport) that; // than we can cast it to People safely
-
-        return this.transmissionDateTime.equals(thatActeExport.getTransmissionDateTime()) &&
-                this.fileName.equals(thatActeExport.getFileName()) &&
-                this.filesNameList.equals(thatActeExport.getFilesNameList()) &&
-                this.siren.equals(thatActeExport.getSiren()) &&
-                this.department.equals(thatActeExport.getDepartment()) &&
-                this.district.equals(thatActeExport.getDistrict()) &&
-                this.agentName.equals(thatActeExport.getAgentName())&&
-                this.agentFirstName.equals(thatActeExport.getAgentFirstName()) &&
-                this.agentEmail.equals(thatActeExport.getAgentEmail());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(transmissionDateTime, fileName, filesNameList, siren, department, district, agentName, agentFirstName, agentEmail);
     }
 }
