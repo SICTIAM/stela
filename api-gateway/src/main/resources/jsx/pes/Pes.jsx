@@ -42,7 +42,7 @@ class Pes extends Component {
                 .then(response => response.json())
                 .then(json => this.setState({ pes: json, fetchStatus: 'fetched' }, this.getAgentInfos))
                 .catch(response => {
-                    this.setState({ fetchStatus: response.status === 404 ? 'pes.page.non_existing_pes' : 'error.default' })
+                    this.setState({ fetchStatus: response.status === 404 ? 'pes.page.non_existing_pes' : 'api-gateway:error.default' })
                     response.json().then(json => {
                         this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
                     })
