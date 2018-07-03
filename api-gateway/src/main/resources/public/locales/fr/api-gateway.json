@@ -39,6 +39,11 @@
             "malformedfield": "Le champ n'est pas formé correctement",
             "mandatoryfile": "Fichier obligatoire",
             "badextension": "L'extension du fichier est incorrecte",
+            "badbudgetfile": "Erreur lors de l'analyse du fichier",
+            "badstampbudgetfile": "Erreur lors du calcul de l'empreinte du fichier",
+            "budgetfilenotsealed": "Le fichier budgétaire n'est pas scellé",
+            "badsealbudgetfile": "Le fichier budgétaire n'est pas correctement scellé",
+            "budgetfilemalformed": "Le fichier budgétaire n'est pas correctement formé, impossible de l'analyser",
             "date_begin_before_date_end": "La date de début doit être antérieure à la date de fin"
         }
     },
