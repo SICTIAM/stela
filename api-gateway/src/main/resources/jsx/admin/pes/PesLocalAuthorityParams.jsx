@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox } from 'semantic-ui-react'
@@ -6,7 +6,7 @@ import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 
 class PesLocalAuthorityParams extends Component {
     static contextTypes = {
@@ -25,7 +25,15 @@ class PesLocalAuthorityParams extends Component {
             secret: '',
             genericProfileUuid: '',
             sesileSubscription: false,
-            sirens: []
+            sirens: [],
+            archiveSettings: {
+                archiveActivated: false,
+                pastellUrl: '',
+                daysBeforeArchiving: '',
+                pastellEntity: '',
+                pastellLogin: '',
+                pastellPassword: ''
+            }
         },
         serverCodes: [],
         profiles: [],
@@ -52,7 +60,7 @@ class PesLocalAuthorityParams extends Component {
         fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ fields: json }))
+            .then(json => this.loadData(json))
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
@@ -68,6 +76,19 @@ class PesLocalAuthorityParams extends Component {
                 })
             })
 
+    }
+    loadData = (fields) => {
+        if (fields.archiveSettings === null) {
+            fields.archiveSettings = {
+                archiveActivated: false,
+                pastellUrl: '',
+                daysBeforeArchiving: '',
+                pastellEntity: '',
+                pastellLogin: '',
+                pastellPassword: ''
+            }
+        }
+        this.setState({ fields })
     }
     onkeyPress = (event) => {
         // prevent from sending the form on 'Enter'
@@ -91,6 +112,11 @@ class PesLocalAuthorityParams extends Component {
         fields.serverCode = value
         this.setState({ fields: fields })
     }
+    handleFieldChange = (field, value) => {
+        const fields = this.state.fields
+        updateField(fields, field, value)
+        this.setState({ fields: fields }, this.validateForm)
+    }
     sesileSubscriptionChange = (checked) => {
         const fields = this.state.fields
         fields.sesileSubscription = checked
@@ -110,9 +136,9 @@ class PesLocalAuthorityParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
-        const { serverCode, sirens, secret, token, sesileSubscription, genericProfileUuid } = this.state.fields
+        const { serverCode, sirens, secret, token, sesileSubscription, genericProfileUuid, archiveSettings } = this.state.fields
 
-        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, genericProfileUuid, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
+        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, genericProfileUuid, archiveSettings, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -189,6 +215,43 @@ class PesLocalAuthorityParams extends Component {
                                         onChange={this.sesileConfigurationChange} />
                                 </Field>
                             </div>
+                        }
+
+                        <h2>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
+                        <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
+                            <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated} onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
+                        </Field>
+                        {this.state.fields.archiveSettings.archiveActivated &&
+                            <Fragment>
+                                <Field htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
+                                    <Input id='daysBeforeArchiving'
+                                        type='number'
+                                        value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
+                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
+                                </Field>
+                                <Field htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
+                                    <Input id='pastellUrl' fluid
+                                        placeholder='https://...'
+                                        value={this.state.fields.archiveSettings.pastellUrl || ''}
+                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
+                                </Field>
+                                <Field htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
+                                    <Input id='pastellEntity'
+                                        value={this.state.fields.archiveSettings.pastellEntity || ''}
+                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
+                                </Field>
+                                <Field htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
+                                    <Input id='pastellLogin'
+                                        value={this.state.fields.archiveSettings.pastellLogin || ''}
+                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
+                                </Field>
+                                <Field htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
+                                    <Input id='pastellPassword'
+                                        type='password'
+                                        value={this.state.fields.archiveSettings.pastellPassword || ''}
+                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
+                                </Field>
+                            </Fragment>
                         }
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary type='submit'>{t('api-gateway:form.update')}</Button>

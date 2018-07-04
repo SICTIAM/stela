@@ -86,7 +86,7 @@
           "sirens": "Liste des SIRENs autorisés",
           "genericProfileUuid": "Agent garant",
           "no_siren": "Aucun SIREN",
-          "archive_parameters": "Préférence d'archivage",
+          "archive_parameters": "Préférences d'archivage",
           "paull_parameters": "Fonctionnalités PAULL",
           "sesile": {
             "subscription": "Abonnement à Sesile",

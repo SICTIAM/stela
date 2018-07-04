@@ -82,9 +82,22 @@ class ActeLocalAuthorityParams extends Component {
                 })
             })
     }
+    defaultData = (fields) => {
+        if (fields.archiveSettings === null) {
+            fields.archiveSettings = {
+                archiveActivated: false,
+                pastellUrl: '',
+                daysBeforeArchiving: '',
+                pastellEntity: '',
+                pastellLogin: '',
+                pastellPassword: ''
+            }
+        }
+        return fields
+    }
     updateState = ({ uuid, name, siren, nomenclatureDate, ...rest }) => {
         const constantFields = { uuid, name, siren, nomenclatureDate }
-        const fields = { ...rest }
+        const fields = this.defaultData({ ...rest })
         this.setState({ constantFields, fields, localAuthorityFetched: true }, this.validateForm)
     }
     handleFieldChange = (field, value) => {
@@ -205,6 +218,18 @@ class ActeLocalAuthorityParams extends Component {
                                 <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                             </Field>
 
+                            <h2>{t('admin.modules.acte.local_authority_settings.paull_parameters')}</h2>
+                            <Field htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
+                                <Dropdown compact search selection
+                                    id='genericProfileUuid'
+                                    field='genericProfileUuid'
+                                    className='simpleInput'
+                                    options={profiles}
+                                    value={this.state.fields.genericProfileUuid}
+                                    onChange={this.handleStateChange}
+                                    placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
+                            </Field>
+
                             <h2>{t('admin.modules.acte.local_authority_settings.archive_parameters')}</h2>
                             <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
                                 <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated} onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
@@ -242,17 +267,6 @@ class ActeLocalAuthorityParams extends Component {
                                 </Fragment>
                             }
 
-                            <h2>{t('admin.modules.acte.local_authority_settings.paull_parameters')}</h2>
-                            <Field htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
-                                <Dropdown compact search selection
-                                    id='genericProfileUuid'
-                                    field='genericProfileUuid'
-                                    className='simpleInput'
-                                    options={profiles}
-                                    value={this.state.fields.genericProfileUuid}
-                                    onChange={this.handleStateChange}
-                                    placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
-                            </Field>
                             <div style={{ textAlign: 'right' }}>
                                 <Button basic primary style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('api-gateway:form.update')}</Button>
                             </div>

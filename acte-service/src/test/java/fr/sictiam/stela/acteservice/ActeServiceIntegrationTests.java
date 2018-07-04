@@ -654,7 +654,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void sendActeToPastell() {
+    public void sendActeToPastell() throws IOException {
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
         Acte acte = new Acte();
         acte = setActeValues(acte);
@@ -666,14 +666,10 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         SortedSet<ActeHistory> acteHistories = new TreeSet<>();
         acteHistories.add(new ActeHistory(acte.getUuid(), StatusType.SENT,
                 LocalDateTime.now(), null, Flux.TRANSMISSION_ACTE));
-        try {
-            MultipartFile xmlFile = getMultipartResourceFile("data/006-210600235-20180522-684-AI-1-2_5279.xml",
-                    "application/xml");
-            acteHistories.add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
-                    LocalDateTime.now(), xmlFile.getBytes(), "ACK.xml"));
-        } catch (IOException e) {
-            LOGGER.error("Unable to load XML file: {}", e.toString());
-        }
+        MultipartFile xmlFile = getMultipartResourceFile("data/006-210600235-20180522-684-AI-1-2_5279.xml",
+                "application/xml");
+        acteHistories.add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
+                LocalDateTime.now(), xmlFile.getBytes(), "ACK.xml"));
         acte.setActeHistories(acteHistories);
         acte = acteRepository.save(acte);
 

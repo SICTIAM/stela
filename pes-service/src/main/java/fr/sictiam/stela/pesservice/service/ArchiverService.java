@@ -3,7 +3,9 @@ package fr.sictiam.stela.pesservice.service;
 import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
+import fr.sictiam.stela.pesservice.model.Archive;
 import fr.sictiam.stela.pesservice.model.ArchiveSettings;
+import fr.sictiam.stela.pesservice.model.ArchiveStatus;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
@@ -20,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -49,60 +52,107 @@ public class ArchiverService {
         this.restTemplate = restTemplate;
     }
 
-
-    public void archiveActesTask() {
+    public void archivePesTask() {
+        LOGGER.info("Running archivePesTask job...");
         List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
         localAuthorities.forEach(localAuthority -> {
             if (localAuthority.getArchiveSettings() != null &&
                     localAuthority.getArchiveSettings().isArchiveActivated()) {
-                List<PesAller> pesAllers = pesAllerRepository.findAllByLocalAuthorityUuidAndArchivedFalse(
+                List<PesAller> pesAllers = pesAllerRepository.findAllByLocalAuthorityUuidAndArchiveNull(
                         localAuthority.getUuid());
                 pesAllers.forEach(pesAller -> {
-                    if (pesAller.getPesHistories().last().getDate().isBefore(LocalDateTime.now().minusMonths(2))) {
+                    if (pesAller.getPesHistories().last().getDate()
+                            .isBefore(LocalDateTime.now().minusDays(localAuthority.getArchiveSettings().getDaysBeforeArchiving()))) {
+
                         archivePes(pesAller, localAuthority.getArchiveSettings());
-                        pesAller = deletePesFile(pesAller);
-                        pesAller.setArchived(true);
-                        pesAllerRepository.save(pesAller);
                     }
                 });
             }
         });
+        LOGGER.info("Ending archivePesTask job");
+    }
+
+    public void checkArchivesStatusTask() {
+        LOGGER.info("Running checkArchivesStatusTask job...");
+        List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
+        localAuthorities.forEach(localAuthority -> {
+            if (localAuthority.getArchiveSettings() != null &&
+                    localAuthority.getArchiveSettings().isArchiveActivated()) {
+                List<PesAller> pesAllers = pesAllerRepository.findAllByLocalAuthorityUuidAndArchive_Status(
+                        localAuthority.getUuid(), ArchiveStatus.SENT);
+                pesAllers.forEach(pesAller -> checkStatus(pesAller, localAuthority.getArchiveSettings()));
+            }
+        });
+        LOGGER.info("Ending checkArchivesStatusTask job");
     }
 
     public void archivePes(PesAller pesAller, ArchiveSettings archiveSettings) {
-
-        LOGGER.info("Creating new Pastell document");
-        AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
-        LOGGER.info("Création: {}", asalaeDocument);
-
-        LOGGER.info("Sending pes data to Pastell");
-        AsalaeResultForm updatedAsalaeResultForm = updateAsalaeDocument(asalaeDocument, pesAller, archiveSettings);
-        logAsalaeResultForm(updatedAsalaeResultForm);
-
-
-        LOGGER.info("Sending pes file to Pastell");
-        updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "arrete",
-                pesAller.getAttachment().getFilename(), pesAller.getAttachment().getFile(), archiveSettings);
-        logAsalaeResultForm(updatedAsalaeResultForm);
-
         Optional<PesHistory> historyAR = pesAller.getPesHistories().stream()
                 .filter(pesHistory -> pesHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 .findFirst();
-        if (historyAR.isPresent()) {
+
+        if (historyAR.isPresent() && historyAR.get().getFile() != null) {
+            LOGGER.info("Archiving pes {}...", pesAller.getUuid());
+            LOGGER.info("Creating new Pastell document");
+            AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
+            LOGGER.info("Création: {}", asalaeDocument);
+
+            LOGGER.info("Sending pes data to Pastell");
+            AsalaeResultForm updatedAsalaeResultForm = updateAsalaeDocument(asalaeDocument, pesAller, archiveSettings);
+            logAsalaeResultForm(updatedAsalaeResultForm);
+
+
+            LOGGER.info("Sending pes file to Pastell");
+            updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "fichier_pes",
+                    pesAller.getAttachment().getFilename(), pesAller.getAttachment().getFile(), archiveSettings);
+            logAsalaeResultForm(updatedAsalaeResultForm);
+
             LOGGER.info("Sending ACK file to Pastell");
-            updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "aractes",
+            updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "fichier_reponse",
                     historyAR.get().getFileName(), historyAR.get().getFile(), archiveSettings);
             logAsalaeResultForm(updatedAsalaeResultForm);
+
+            LOGGER.info("Archiving Pastell document to Asalae");
+            ResponseEntity<AsalaeResultForm> response = sendAction(updatedAsalaeResultForm.getContent(),
+                    "send-archive", archiveSettings);
+            updatedAsalaeResultForm = response.getBody();
+            if (updatedAsalaeResultForm != null) {
+                logAsalaeResultForm(updatedAsalaeResultForm);
+            } else {
+                LOGGER.error("Request result is null");
+            }
+            Archive archive = new Archive(asalaeDocument.getInfo().getId_d());
+            archive.setStatus(response.getStatusCode().is2xxSuccessful() ? ArchiveStatus.SENT : ArchiveStatus.NOT_SENT);
+            pesAller.setArchive(archive);
+            PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.SENT_TO_SAE);
+            pesAller.getPesHistories().add(pesHistory);
+            pesAllerRepository.save(pesAller);
+        }
+    }
+
+    private PesAller checkStatus(PesAller pesAller, ArchiveSettings archiveSettings) {
+        LOGGER.info("Checking archive status for pes {}...", pesAller.getUuid());
+
+        AsalaeDocument asalaeDocument = getAsalaeDocument(pesAller.getArchive().getAsalaeDocumentId(), archiveSettings);
+        LOGGER.info("{}", asalaeDocument.toString());
+
+        if (asalaeDocument.getAction_possible().contains("validation-sae")) {
+            sendAction(asalaeDocument, "validation-sae", archiveSettings);
         }
 
-        LOGGER.info("Archiving Pastell document to Asalae");
-        updatedAsalaeResultForm = sendAsalaeDocumentToSAE(updatedAsalaeResultForm.getContent(), "send-archive",
-                archiveSettings);
-        if (updatedAsalaeResultForm != null) {
-            logAsalaeResultForm(updatedAsalaeResultForm);
-        } else {
-            LOGGER.error("Request result is null");
+        asalaeDocument = getAsalaeDocument(pesAller.getArchive().getAsalaeDocumentId(), archiveSettings);
+        if (asalaeDocument.getData().containsKey("has_archive") && asalaeDocument.getData().containsKey("url_archive") &&
+                !StringUtils.isEmpty(asalaeDocument.getData().get("url_archive"))) {
+            pesAller.getArchive().setStatus(ArchiveStatus.ARCHIVED);
+            pesAller.getArchive().setArchiveUrl((String) (asalaeDocument.getData().get("url_archive")));
+            PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.ACCEPTED_BY_SAE,
+                    (String) (asalaeDocument.getData().get("url_archive")));
+            pesAller.getPesHistories().add(pesHistory);
+            pesAller = pesAllerRepository.save(pesAller);
+            pesAller = deletePesFiles(pesAller);
         }
+        return pesAller;
+
     }
 
     private void logAsalaeResultForm(AsalaeResultForm asalaeResultForm) {
@@ -117,12 +167,26 @@ public class ArchiverService {
                 .append(archiveSettings.getPastellEntity())
                 .append("/document");
         LinkedMultiValueMap<String, Object> params = new LinkedMultiValueMap<String, Object>() {{
-            add("type", "actes-generique");
+            add("type", "helios-generique");
         }};
         HttpHeaders headers = createAuthHeaders(archiveSettings.getPastellLogin(), archiveSettings.getPastellPassword());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
         ResponseEntity<AsalaeDocument> response = restTemplate.exchange(url.toString(), HttpMethod.POST, request,
+                AsalaeDocument.class);
+        return response.getBody();
+    }
+
+    private AsalaeDocument getAsalaeDocument(String docId, ArchiveSettings archiveSettings) {
+        StringBuilder url = new StringBuilder();
+        url.append(archiveSettings.getPastellUrl())
+                .append("/api/v2/entite/")
+                .append(archiveSettings.getPastellEntity())
+                .append("/document/")
+                .append(docId);
+        HttpHeaders headers = createAuthHeaders(archiveSettings.getPastellLogin(), archiveSettings.getPastellPassword());
+        HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(headers);
+        ResponseEntity<AsalaeDocument> response = restTemplate.exchange(url.toString(), HttpMethod.GET, request,
                 AsalaeDocument.class);
         return response.getBody();
     }
@@ -135,10 +199,10 @@ public class ArchiverService {
                 .append(archiveSettings.getPastellEntity())
                 .append("/document/")
                 .append(asalaeDocument.getInfo().getId_d());
-        LinkedMultiValueMap<String, Object> acteParams = pesToPastellParams(pesAller);
+        LinkedMultiValueMap<String, Object> pesParams = pesToPastellParams(pesAller);
         HttpHeaders headers = createAuthHeaders(archiveSettings.getPastellLogin(), archiveSettings.getPastellPassword());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(acteParams, headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(pesParams, headers);
         ResponseEntity<AsalaeResultForm> response = restTemplate.exchange(url.toString(), HttpMethod.PATCH, request,
                 AsalaeResultForm.class);
         return response.getBody();
@@ -166,9 +230,9 @@ public class ArchiverService {
         return response.getBody();
     }
 
-    public AsalaeResultForm sendAsalaeDocumentToSAE(AsalaeDocument asalaeDocument, String action,
+    public ResponseEntity<AsalaeResultForm> sendAction(AsalaeDocument asalaeDocument, String action,
             ArchiveSettings archiveSettings) {
-        LOGGER.info("Sending Asalae document {} to SAE...", asalaeDocument.getInfo().getId_d());
+        LOGGER.info("Sending action \"{}\" Asalae document {} to SAE...", action, asalaeDocument.getInfo().getId_d());
         if (asalaeDocument.getAction_possible().contains(action)) {
             StringBuilder url = new StringBuilder();
             url.append(archiveSettings.getPastellUrl())
@@ -180,19 +244,27 @@ public class ArchiverService {
                     .append(action);
             HttpHeaders headers = createAuthHeaders(archiveSettings.getPastellLogin(), archiveSettings.getPastellPassword());
             HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(headers);
-            ResponseEntity<AsalaeResultForm> response = restTemplate.exchange(url.toString(), HttpMethod.POST, request,
-                    AsalaeResultForm.class);
-            return response.getBody();
+            try {
+                return restTemplate.exchange(url.toString(), HttpMethod.POST, request, AsalaeResultForm.class);
+            } catch (Exception e) {
+                if (action.equals("validation-sae")) {
+                    LOGGER.info("Received {}, archive probably not accepted yet", e.getMessage());
+                } else {
+                    LOGGER.error("Error while trying to send action: {}", e.getMessage());
+                }
+                return null;
+            }
         } else {
-            LOGGER.error("Action \"send-archive\" not available for this document, document not sent");
+            LOGGER.error("Action \"{}\" not available for this document, document not sent", action);
             return null;
         }
     }
 
-    public PesAller deletePesFile(PesAller pesAller) {
+    public PesAller deletePesFiles(PesAller pesAller) {
         String pesAttachmentUuid = pesAller.getAttachment().getUuid();
 
         pesAller.setAttachment(null);
+
         pesAller.getPesHistories().forEach(pesHistory -> {
             pesHistory.setFile(null);
             pesHistory.setFileName(null);
@@ -211,11 +283,13 @@ public class ArchiverService {
 
         LinkedMultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
         // Asalae properties
-        params.add("type", "actes-generique");
+        params.add("type", "helios-generique");
         params.add("envoi_sae", "true");
 
-        // PES Data
-        // TODO
+        // Pes Data
+        params.add("objet", pesAller.getObjet());
+        params.add("id_coll", pesAller.getColCode());
+        params.add("cod_bud", pesAller.getBudCode());
 
         if (historyAR.isPresent())
             params.add("date_tdt_postage", historyAR.get().getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));

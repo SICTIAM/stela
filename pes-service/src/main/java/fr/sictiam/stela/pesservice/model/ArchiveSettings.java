@@ -10,17 +10,19 @@ public class ArchiveSettings {
     private String pastellEntity;
     private String pastellLogin;
     private String pastellPassword;
+    private Integer daysBeforeArchiving;
 
     public ArchiveSettings() {
     }
 
     public ArchiveSettings(boolean archiveActivated, String pastellUrl, String pastellEntity, String pastellLogin,
-            String pastellPassword) {
+            String pastellPassword, int daysBeforeArchiving) {
         this.archiveActivated = archiveActivated;
         this.pastellUrl = pastellUrl;
         this.pastellEntity = pastellEntity;
         this.pastellLogin = pastellLogin;
         this.pastellPassword = pastellPassword;
+        this.daysBeforeArchiving = daysBeforeArchiving;
     }
 
     public boolean isArchiveActivated() {
@@ -61,5 +63,13 @@ public class ArchiveSettings {
 
     public void setPastellPassword(String pastellPassword) {
         this.pastellPassword = pastellPassword;
+    }
+
+    public Integer getDaysBeforeArchiving() {
+        return daysBeforeArchiving;
+    }
+
+    public void setDaysBeforeArchiving(Integer daysBeforeArchiving) {
+        this.daysBeforeArchiving = daysBeforeArchiving;
     }
 }

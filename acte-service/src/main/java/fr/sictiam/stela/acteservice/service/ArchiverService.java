@@ -65,6 +65,7 @@ public class ArchiverService {
                 actes.forEach(acte -> {
                     if (acte.getActeHistories().last().getDate()
                             .isBefore(LocalDateTime.now().minusDays(localAuthority.getArchiveSettings().getDaysBeforeArchiving()))) {
+
                         archiveActe(acte, localAuthority.getArchiveSettings());
                     }
                 });
@@ -81,25 +82,19 @@ public class ArchiverService {
                     localAuthority.getArchiveSettings().isArchiveActivated()) {
                 List<Acte> actes = acteRepository.findAllByDraftNullAndLocalAuthorityUuidAndArchive_Status(
                         localAuthority.getUuid(), ArchiveStatus.SENT);
-                actes.forEach(acte -> {
-                    acte = checkStatus(acte, localAuthority.getArchiveSettings());
-                    if (ArchiveStatus.ARCHIVED.equals(acte.getArchive().getStatus())) {
-                        acte = deleteActeFiles(acte);
-                        acteRepository.save(acte);
-                    }
-                });
+                actes.forEach(acte -> checkStatus(acte, localAuthority.getArchiveSettings()));
             }
         });
         LOGGER.info("Ending checkArchivesStatusTask job");
     }
 
     public void archiveActe(Acte acte, ArchiveSettings archiveSettings) {
-        LOGGER.info("Archiving acte {}...", acte.getUuid());
         Optional<ActeHistory> historyAR = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 .findFirst();
 
         if (historyAR.isPresent() && historyAR.get().getFile() != null) {
+            LOGGER.info("Archiving acte {}...", acte.getUuid());
             LOGGER.info("Creating new Pastell document");
             AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
             LOGGER.info("Création: {}", asalaeDocument);
@@ -135,8 +130,6 @@ public class ArchiverService {
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.SENT_TO_SAE);
             acte.getActeHistories().add(acteHistory);
             acteRepository.save(acte);
-        } else {
-            LOGGER.info("No AR found for this acte, not archiving");
         }
     }
 

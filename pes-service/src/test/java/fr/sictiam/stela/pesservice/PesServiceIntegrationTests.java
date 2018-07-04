@@ -8,6 +8,8 @@ import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.Admin;
+import fr.sictiam.stela.pesservice.model.ArchiveSettings;
+import fr.sictiam.stela.pesservice.model.ArchiveStatus;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -356,33 +359,62 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
 
     @Test
+    public void sendPesToPastell() throws IOException {
+        PesAller pesAller = samplePesAller("30000-recettes-2018-AN-7");
+        pesAller = setPesAllerValues(pesAller);
+        pesAller.setPesHistories(Collections.emptySortedSet());
+        pesAller = pesRepository.save(pesAller);
+        pesAller = setHistories(pesAller);
+
+        ArchiveSettings archiveSettings =
+                new ArchiveSettings(true, "https://pastell.partenaires.libriciel.fr", "13", "stela", "stela05", 2);
+        archiverService.archivePes(pesAller, archiveSettings);
+        pesAller = pesService.getByUuid(pesAller.getUuid());
+
+        assertThat(pesAller.getArchive(), notNullValue());
+        assertThat(pesAller.getArchive().getStatus(), is(ArchiveStatus.SENT));
+        assertThat(pesAller.getPesHistories().last().getStatus(), is(StatusType.SENT_TO_SAE));
+    }
+
+    @Test
     public void deletePESFileTest() {
 
         try {
             PesAller pesAller = sampleSignedPesAller();
+            pesAller = setHistories(pesAller);
+
             String pesAttachmentUuid = pesAller.getAttachment().getUuid();
+            String arUuid = pesAller.getPesHistories().stream()
+                    .filter(pesHistory -> pesHistory.getStatus().equals(StatusType.ACK_RECEIVED))
+                    .findFirst().get().getUuid();
 
             assertThat(pesService.getByUuid(pesAller.getUuid()).getAttachment(), notNullValue());
             assertThat(attachmentRepository.findByUuid(pesAttachmentUuid).isPresent(), is(true));
+            assertThat(pesHistoryRepository.findByUuid(arUuid).get().getFile(), notNullValue());
 
-            archiverService.deletePesFile(pesAller);
+            archiverService.deletePesFiles(pesAller);
             assertThat(pesService.getByUuid(pesAller.getUuid()).getAttachment(), nullValue());
             assertThat(attachmentRepository.findByUuid(pesAttachmentUuid).isPresent(), is(false));
+            assertThat(pesHistoryRepository.findByUuid(arUuid).get().getFile(), nullValue());
         } catch (IOException e) {
             LOGGER.error("Error while trying to create a new PesAller");
         }
     }
 
     private PesAller samplePesAller() throws IOException {
+        return samplePesAller("28000-2017-P-RN-22-1516807373820");
+    }
+
+    private PesAller samplePesAller(String filename) throws IOException {
         PesAller pes = new PesAller();
         pes = setPesAllerValues(pes);
-        pes.setFileName("28000-2017-P-RN-22-1516807373820");
-        InputStream in = new ClassPathResource("data/28000-2017-P-RN-22-1516807373820.xml").getInputStream();
+        pes.setFileName(filename);
+        InputStream in = new ClassPathResource("data/" + filename + ".xml").getInputStream();
 
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        Attachment pesSent = new Attachment(targetArray, "28000-2017-P-RN-22-1516807373820.xml", in.available());
+        Attachment pesSent = new Attachment(targetArray, filename + ".xml", in.available());
         pes.setAttachment(pesSent);
         pes = pesService.save(pes);
         return pes;
@@ -406,6 +438,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     private PesAller setPesAllerValues(PesAller pesAller) {
         Optional<LocalAuthority> localAuthority = localAuthorityService.getByName("SICTIAM-Test");
         pesAller.setPj(false);
+        pesAller.setObjet("objet");
         pesAller.setComment("comment");
         pesAller.setCreation(LocalDateTime.now());
         pesAller.setLocalAuthority(localAuthority.get());
@@ -470,6 +503,19 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(secondParser.getSubject(), is(subject));
         assertThat(secondMsg.getContent(), instanceOf(MimeMultipart.class));
         assertThat(secondParser.getHtmlContent(), is(body));
+    }
+
+    private PesAller setHistories(PesAller pesAller) throws IOException {
+        SortedSet<PesHistory> acteHistories = new TreeSet<>();
+        acteHistories.add(new PesHistory(pesAller.getUuid(), StatusType.SENT,
+                LocalDateTime.now(), null));
+        InputStream in = new ClassPathResource("data/006102_180625141825-ACK-F2521211_A00FLRNS_OK.xml").getInputStream();
+        byte[] targetArray = new byte[in.available()];
+        in.read(targetArray);
+        acteHistories.add(new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
+                LocalDateTime.now(), targetArray, "006102_180625141825-ACK-F2521211_A00FLRNS_OK.xml"));
+        pesAller.setPesHistories(acteHistories);
+        return pesRepository.save(pesAller);
     }
 
     private Optional<PesHistory> getPesHistoryForStatus(String pesUuid, StatusType status) {

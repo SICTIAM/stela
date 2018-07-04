@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 public class PesAller {
@@ -67,7 +68,8 @@ public class PesAller {
 
     private boolean imported;
 
-    private boolean archived;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Archive archive;
 
     public PesAller() {
     }
@@ -115,7 +117,7 @@ public class PesAller {
     }
 
     public SortedSet<PesHistory> getPesHistories() {
-        return pesHistories;
+        return pesHistories != null ? pesHistories : new TreeSet<>();
     }
 
     public void setPesHistories(SortedSet<PesHistory> pesHistories) {
@@ -250,11 +252,15 @@ public class PesAller {
         this.imported = imported;
     }
 
-    public boolean isArchived() {
-        return archived;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
-    public void setArchived(boolean archived) {
-        this.archived = archived;
+    public Archive getArchive() {
+        return archive;
+    }
+
+    public void setArchive(Archive archive) {
+        this.archive = archive;
     }
 }
