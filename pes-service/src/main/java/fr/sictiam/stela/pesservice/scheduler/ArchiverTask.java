@@ -17,12 +17,12 @@ public class ArchiverTask {
         this.archiverService = archiverService;
     }
 
-    @Scheduled(cron = "0 2 * * * *")
+    @Scheduled(cron = "${application.archiverCrons.archiveTask}")
     public void archiveTask() {
         archiverService.archivePesTask();
     }
 
-    @Scheduled(cron = "0 1 * * * *")
+    @Scheduled(cron = "${application.archiverCrons.checkArchivesTask}")
     public void checkArchivesTask() {
         archiverService.checkArchivesStatusTask();
     }
