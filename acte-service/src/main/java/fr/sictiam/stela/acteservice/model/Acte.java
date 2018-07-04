@@ -28,21 +28,21 @@ public class Acte {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
-    @NotNull(groups = { RestValidation.class })
-    @Size(max = 15, groups = { RestValidation.class })
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
+    @Size(max = 15, groups = {RestValidation.class})
+    @Pattern(regexp = "^[A-Z0-9_]+$", groups = {RestValidation.class})
     private String number;
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     private LocalDate decision;
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     private ActeNature nature;
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     private String code;
     private String codeLabel;
     @Column(length = 512)
-    @NotNull(groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
     @Size(max = 500)
     private String objet;
     private boolean isPublic;
@@ -73,6 +73,9 @@ public class Acte {
             + " WHEN nature = '5' THEN 'AU' ELSE '' END)  from local_authority la where la.uuid=local_authority_uuid)")
     private String miatId;
     private boolean imported;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Archive archive;
 
     public Acte() {
     }
@@ -246,6 +249,14 @@ public class Acte {
 
     public void setImported(boolean imported) {
         this.imported = imported;
+    }
+
+    public Archive getArchive() {
+        return archive;
+    }
+
+    public void setArchive(Archive archive) {
+        this.archive = archive;
     }
 
     public boolean empty() {

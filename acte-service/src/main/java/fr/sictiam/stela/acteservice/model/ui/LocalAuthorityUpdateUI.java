@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.model.ui;
 
+import fr.sictiam.stela.acteservice.model.ArchiveSettings;
 import fr.sictiam.stela.acteservice.model.StampPosition;
 
 import javax.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ public class LocalAuthorityUpdateUI {
     private Boolean canPublishWebSite;
     private StampPosition stampPosition;
     private String genericProfileUuid;
+    private ArchiveSettings archiveSettings;
 
     public LocalAuthorityUpdateUI() {
     }
@@ -54,5 +56,9 @@ public class LocalAuthorityUpdateUI {
 
     public void setGenericProfileUuid(String genericProfileUuid) {
         this.genericProfileUuid = genericProfileUuid;
+    }
+
+    public ArchiveSettings getArchiveSettings() {
+        return archiveSettings;
     }
 }

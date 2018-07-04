@@ -41,9 +41,27 @@ const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) 
     })
 }
 
+const updateField = (object, field, value) => {
+    const treeField = field.split('.')
+    const fieldName = treeField.shift()
+    if (treeField.length !== 0) updateField(object[fieldName], treeField.join('.'), value)
+    else {
+        object[field] = value
+    }
+}
+
+const updateChekboxField = (object, field) => {
+    const treeField = field.split('.')
+    const fieldName = treeField.shift()
+    if (treeField.length !== 0) updateChekboxField(object[fieldName], treeField.join('.'))
+    else {
+        object[field] = !object[field]
+    }
+}
+
 const handleFieldCheckboxChange = (that, field, callback) => {
     const fields = that.state.fields
-    fields[field] = !fields[field]
+    updateChekboxField(fields, field)
     that.setState({ fields: fields }, callback)
 }
 
@@ -94,5 +112,7 @@ module.exports = {
     getHistoryStatusTranslationKey,
     getRightsFromGroups,
     rightsFeatureResolver,
-    rightsModuleResolver
+    rightsModuleResolver,
+    updateField,
+    updateChekboxField
 }

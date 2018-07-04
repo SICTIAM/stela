@@ -32,6 +32,10 @@ public class LocalAuthorityService {
         return localAuthorityRepository.save(localAuthority);
     }
 
+    public List<LocalAuthority> getAll() {
+        return localAuthorityRepository.findAllByActiveTrueOrderByName();
+    }
+
     public void delete(LocalAuthority localAuthority) {
         localAuthorityRepository.delete(localAuthority);
     }

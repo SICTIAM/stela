@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.model.ui;
 
+import fr.sictiam.stela.pesservice.model.ArchiveSettings;
 import fr.sictiam.stela.pesservice.model.ServerCode;
 import fr.sictiam.stela.pesservice.validation.SirenCollection;
 
@@ -15,6 +16,7 @@ public class LocalAuthorityUpdateUI {
     private String token;
     private String secret;
     private String genericProfileUuid;
+    private ArchiveSettings archiveSettings;
 
     public LocalAuthorityUpdateUI() {
     }
@@ -45,5 +47,9 @@ public class LocalAuthorityUpdateUI {
 
     public void setGenericProfileUuid(String genericProfileUuid) {
         this.genericProfileUuid = genericProfileUuid;
+    }
+
+    public ArchiveSettings getArchiveSettings() {
+        return archiveSettings;
     }
 }

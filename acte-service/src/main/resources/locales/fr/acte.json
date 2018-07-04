@@ -36,7 +36,9 @@
       "PIECE_COMPLEMENTAIRE_ASKED": "Pièces complémentaires déposées",
       "REPONSE_COURRIER_SIMPLE_ASKED": "Réponse au courrier simple déposée",
       "ACK_PIECE_COMPLEMENTAIRE": "AR pièces complémentaires",
-      "ACK_LETTRE_OBSERVATION": "AR lettre d'observation"
+      "ACK_LETTRE_OBSERVATION": "AR lettre d'observation",
+      "SENT_TO_SAE": "Acte transmis au SAE",
+      "ACCEPTED_BY_SAE": "Archive acceptée par le SAE"
     },
     "flux_status": {
       "TRANSMISSION_ACTE_SENT": "Envoyé",
@@ -197,12 +199,15 @@
       "acte": {
         "title": "Module Acte",
         "local_authority_settings": {
-          "title": "Paramétrage des collectivités",
+          "title": "Paramétrage des du module Acte de la collectivité",
           "general_informations": "Informations générales",
           "MIAT_transmission": "Transmission MIAT",
           "askClassification": "Demander une mise à jour",
           "askClassificationForce": "Forcer la mise à jour",
-          "askClassifications": "Demander la mise à jour des nomenclatures"
+          "askClassifications": "Demander la mise à jour des nomenclatures",
+          "deposit_parameters": "Préférences de dépôt",
+          "archive_parameters": "Préférences d'archivage",
+          "paull_parameters": "Fonctionnalités PAULL"
         },
         "module_settings": {
           "title": "Paramètres du module Acte",

@@ -154,6 +154,14 @@ public class ActeHistory implements Comparable<ActeHistory> {
         this.flux = flux;
     }
 
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     @Override
     public int compareTo(ActeHistory acteHistory) {
         return this.date.compareTo(acteHistory.getDate());
