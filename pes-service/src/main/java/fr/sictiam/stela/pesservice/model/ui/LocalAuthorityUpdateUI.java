@@ -13,6 +13,7 @@ public class LocalAuthorityUpdateUI {
     private List<String> sirens;
 
     private Boolean sesileSubscription;
+    private Boolean sesileNewVersion;
     private String token;
     private String secret;
     private String genericProfileUuid;
@@ -31,6 +32,10 @@ public class LocalAuthorityUpdateUI {
 
     public Boolean getSesileSubscription() {
         return sesileSubscription;
+    }
+
+    public Boolean getSesileNewVersion() {
+        return sesileNewVersion;
     }
 
     public String getToken() {
