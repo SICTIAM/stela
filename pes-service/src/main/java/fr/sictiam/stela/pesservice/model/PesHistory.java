@@ -42,6 +42,13 @@ public class PesHistory implements Comparable<PesHistory> {
         this.date = LocalDateTime.now();
     }
 
+    public PesHistory(String pesUuid, StatusType status, String message) {
+        this.pesUuid = pesUuid;
+        this.status = status;
+        this.date = LocalDateTime.now();
+        this.message = message;
+    }
+
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date, String message) {
         this.pesUuid = pesUuid;
         this.status = status;
@@ -97,6 +104,14 @@ public class PesHistory implements Comparable<PesHistory> {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     @Override

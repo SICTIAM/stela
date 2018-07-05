@@ -14,13 +14,13 @@ const notifications = {
         },
         sent: {
             title: 'notifications.acte.title',
-            message: 'notifications.acte.sent.republished',
+            message: 'notifications.acte.sent.success',
             level: 'success',
             position: 'br'
         },
         republished: {
             title: 'notifications.acte.title',
-            message: 'notifications.acte.sent.success',
+            message: 'notifications.acte.sent.republished',
             level: 'success',
             position: 'br'
         },

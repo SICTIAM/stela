@@ -73,6 +73,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
                 sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
 
                 if (HttpStatus.OK.equals(sendStatus)) {
+                    acteService.persistActeExport(pendingMessage);
                     acteService.sent(pendingMessage.getActeUuid(), pendingMessage.getFlux());
                     pendingMessageService.remove(pendingQueue.poll());
                     currentSizeUsed.addAndGet(pendingMessage.getFile().length);

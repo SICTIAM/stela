@@ -2,9 +2,11 @@ package fr.sictiam.stela.acteservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
+import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
@@ -12,6 +14,7 @@ import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.AdminService;
+import fr.sictiam.stela.acteservice.service.ArchiverService;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.ExternalRestService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
@@ -64,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -112,6 +117,9 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private ActeHistoryRepository acteHistoryRepository;
 
     @Autowired
+    private ActeExportRepository acteExportRepository;
+
+    @Autowired
     private NotificationService notificationService;
 
     @Autowired
@@ -119,6 +127,12 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ExternalRestService externalRestService;
+
+    @Autowired
+    private ArchiverService archiverService;
+
+    @Autowired
+    private AttachmentRepository attachmentRepository;
 
     @Rule
     public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
@@ -639,6 +653,61 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(adminService.isMiatAvailable(), is(false));
     }
 
+    @Test
+    public void sendActeToPastell() throws IOException {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
+        Acte acte = new Acte();
+        acte = setActeValues(acte);
+        acte.setCreation(LocalDateTime.now());
+        acte.setLocalAuthority(localAuthority);
+        acte.setActeHistories(Collections.emptySortedSet());
+        acte = acteRepository.save(acte);
+
+        SortedSet<ActeHistory> acteHistories = new TreeSet<>();
+        acteHistories.add(new ActeHistory(acte.getUuid(), StatusType.SENT,
+                LocalDateTime.now(), null, Flux.TRANSMISSION_ACTE));
+        MultipartFile xmlFile = getMultipartResourceFile("data/006-210600235-20180522-684-AI-1-2_5279.xml",
+                "application/xml");
+        acteHistories.add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
+                LocalDateTime.now(), xmlFile.getBytes(), "ACK.xml"));
+        acte.setActeHistories(acteHistories);
+        acte = acteRepository.save(acte);
+
+        ArchiveSettings archiveSettings =
+                new ArchiveSettings(true, "https://pastell.partenaires.libriciel.fr", "13", "stela", "stela05", 2);
+        archiverService.archiveActe(acte, archiveSettings);
+        acte = acteService.getByUuid(acte.getUuid());
+
+        assertThat(acte.getArchive(), notNullValue());
+        assertThat(acte.getArchive().getStatus(), is(ArchiveStatus.SENT));
+        assertThat(acte.getActeHistories().last().getStatus(), is(StatusType.SENT_TO_SAE));
+    }
+
+    @Test
+    public void deleteActeFilesTest() {
+        LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
+        Acte acte = new Acte();
+        acte = setActeValues(acte);
+        acte.setCreation(LocalDateTime.now());
+        acte.setLocalAuthority(localAuthority);
+        acte.setActeHistories(Collections.emptySortedSet());
+        acte = acteRepository.save(acte);
+
+        String acteAttachmentUuid = acte.getActeAttachment().getUuid();
+        String annexeUuid = acte.getAnnexes().get(0).getUuid();
+
+        assertThat(acteService.getByUuid(acte.getUuid()).getActeAttachment(), notNullValue());
+        assertThat(acteService.getByUuid(acte.getUuid()).getAnnexes(), not(empty()));
+        assertThat(attachmentRepository.findByUuid(acteAttachmentUuid).isPresent(), is(true));
+        assertThat(attachmentRepository.findByUuid(annexeUuid).isPresent(), is(true));
+
+        archiverService.deleteActeFiles(acte);
+        assertThat(acteService.getByUuid(acte.getUuid()).getActeAttachment(), nullValue());
+        assertThat(acteService.getByUuid(acte.getUuid()).getAnnexes(), empty());
+        assertThat(attachmentRepository.findByUuid(acteAttachmentUuid).isPresent(), is(false));
+        assertThat(attachmentRepository.findByUuid(annexeUuid).isPresent(), is(false));
+    }
+
     private MultiValueMap<String, Object> acteWithAttachments() {
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
         params.add("acte", acte());
@@ -663,7 +732,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     private Acte setActeValues(Acte acte) {
-        acte.setNumber(RandomStringUtils.randomAlphabetic(15));
+        acte.setNumber(RandomStringUtils.randomAlphabetic(15).toUpperCase());
         acte.setDecision(LocalDate.now());
         acte.setNature(ActeNature.ARRETES_INDIVIDUELS);
         acte.setCode("1-1-1-0-0");
@@ -676,6 +745,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
             Attachment attachment = new Attachment(multipartFile.getBytes(), multipartFile.getOriginalFilename(),
                     multipartFile.getSize());
             acte.setActeAttachment(attachment);
+            acte.setAnnexes(Collections.singletonList(attachment));
         } catch (IOException e) {
             LOGGER.error("Error while trying to load an acteAttachment");
         }

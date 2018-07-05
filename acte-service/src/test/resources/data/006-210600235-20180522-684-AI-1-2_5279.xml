@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<actes:ARActe xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" xmlns:insee="http://xml.insee.fr/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" actes:DateReception="2018-05-28" actes:IDActe="006-210600235-20180522-684-AI" xsi:schemaLocation="http://www.interieur.gouv.fr/ACTES#v1.1-20040216 actesv1_1.xsd">
+    <actes:ActeRecu actes:CodeNatureActe="3" actes:Date="2018-05-22" actes:NumeroInterne="684">
+        <actes:CodeMatiere1 actes:CodeMatiere="4"/>
+        <actes:CodeMatiere2 actes:CodeMatiere="2"/>
+        <actes:Objet>Contrat ? dur?e d?termin?e - Jean Dupont</actes:Objet>
+        <actes:ClassificationDateVersion>2017-04-19</actes:ClassificationDateVersion>
+        <actes:Document>
+            <actes:NomFichier>99_DE-006-210600235-20180522-684-AI-1-1_1.pdf</actes:NomFichier>
+        </actes:Document>
+        <actes:Annexes actes:Nombre="0"/>
+        <actes:DocumentPapier>0</actes:DocumentPapier>
+    </actes:ActeRecu>
+    <actes:ClassificationDateVersionEnCours>2017-04-19</actes:ClassificationDateVersionEnCours>
+</actes:ARActe>

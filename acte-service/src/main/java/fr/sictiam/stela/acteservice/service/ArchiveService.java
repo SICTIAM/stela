@@ -138,12 +138,13 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     private List<String> checkAttachmentSignature(Attachment attachment) throws CertificateException, IOException {
         List<String> messages = new ArrayList<>();
         if (FilenameUtils.isExtension(attachment.getFilename(), "pdf")) {
-            DetailedReport report = PadesUtils.validatePdf(attachment.getFile());
+            DetailedReport report = PadesUtils.validatePAdESSignature(attachment.getFile());
             if (PadesUtils.isSigned(report)) {
                 List<PdfSignatureResult> pdfSignatureResults = PadesUtils.getSignatureResults(report);
                 pdfSignatureResults.forEach(signatureResult -> {
                     if (!(Indication.TOTAL_PASSED.equals(signatureResult.getStatus())
                             || Indication.PASSED.equals(signatureResult.getStatus()))) {
+                        LOGGER.info("DSS validation response : {}", signatureResult.getReason());
                         messages.add(localesService.getMessage("fr", "acte",
                                 "$.acte.signature." + signatureResult.getReason()));
                     }

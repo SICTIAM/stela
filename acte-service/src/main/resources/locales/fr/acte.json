@@ -7,6 +7,7 @@
       "ANTIVIRUS_OK": "Antivirus OK",
       "ANTIVIRUS_KO": "Antivirus KO",
       "SENT": "Envoyé",
+      "SIGNATURE_ERROR": "Erreur signature",
       "NOT_SENT": "Non envoyé",
       "ACK_RECEIVED": "AR Ministère",
       "NACK_RECEIVED": "Anomalie Ministère",
@@ -35,7 +36,9 @@
       "PIECE_COMPLEMENTAIRE_ASKED": "Pièces complémentaires déposées",
       "REPONSE_COURRIER_SIMPLE_ASKED": "Réponse au courrier simple déposée",
       "ACK_PIECE_COMPLEMENTAIRE": "AR pièces complémentaires",
-      "ACK_LETTRE_OBSERVATION": "AR lettre d'observation"
+      "ACK_LETTRE_OBSERVATION": "AR lettre d'observation",
+      "SENT_TO_SAE": "Acte transmis au SAE",
+      "ACCEPTED_BY_SAE": "Archive acceptée par le SAE"
     },
     "flux_status": {
       "TRANSMISSION_ACTE_SENT": "Envoyé",
@@ -49,10 +52,29 @@
     },
     "signature": {
       "NO_CERTIFICATE_CHAIN_FOUND": "Aucun certificat valide",
-      "OUT_OF_BOUNDS_NO_POE": "La date de signature est invalide pour ce certificat",
-      "REVOKED_NO_POE ": "Le certificat a été revoqué",
-      "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correcte",
-      "CHAIN_CONSTRAINTS_FAILURE ": "La signature est invalide"
+      "OUT_OF_BOUNDS_NO_POE": "La date de signature est invalide pour ce certificat (NO_POE)",
+      "REVOKED_NO_POE": "Le certificat a été revoqué (NO_POE)",
+      "CRYPTO_CONSTRAINTS_FAILURE_NO_POE": "La signature n'est pas cryptographiquement correcte (NO_POE)",
+      "CHAIN_CONSTRAINTS_FAILURE ": "La signature est invalide",
+      "NO_SIGNING_CERTIFICATE_FOUND": "Aucun certificat trouvé",
+      "FORMAT_FAILURE": "Erreur de format",
+      "POLICY_PROCESSING_ERROR": "Erreur de traitement",
+      "SIGNATURE_POLICY_NOT_AVAILABLE": "Politique de signature non disponible",
+      "TRY_LATER": "Essayez plus tard",
+      "REVOKED_CA_NO_POE": "Autorité de certification revoquée (NO_POE)",
+      "CHAIN_CONSTRAINTS_FAILURE": "La signature est invalide",
+      "CRYPTO_CONSTRAINTS_FAILURE": "La signature n'est pas cryptographiquement correcte",
+      "SIGNED_DATA_NOT_FOUND": "Aucune donnée de signature trouvée",
+      "HASH_FAILURE": "Echec de hachage",
+      "SIG_CRYPTO_FAILURE": "SIG_CRYPTO_FAILURE",
+      "SIG_CONSTRAINTS_FAILURE": "SIG_CONSTRAINTS_FAILURE",
+      "NOT_YET_VALID": "Le certificat n'est pas encore valide",
+      "TIMESTAMP_ORDER_FAILURE": "Erreur timestamp",
+      "REVOKED": "Le certificat a été revoqué",
+      "EXPIRED": "Le certificat est expiré",
+      "NO_POE": "Aucune preuve d'admissibilité",
+      "CERTIFICATE_CHAIN_GENERAL_FAILURE": "Erreur sur la chaine de certification",
+      "UNEXPECTED_ERROR": "Erreur inatendue"
     },
     "nature": {
       "DELIBERATIONS": "Délibérations",
@@ -177,12 +199,15 @@
       "acte": {
         "title": "Module Acte",
         "local_authority_settings": {
-          "title": "Paramétrage des collectivités",
+          "title": "Paramétrage des du module Acte de la collectivité",
           "general_informations": "Informations générales",
           "MIAT_transmission": "Transmission MIAT",
           "askClassification": "Demander une mise à jour",
           "askClassificationForce": "Forcer la mise à jour",
-          "askClassifications": "Demander la mise à jour des nomenclatures"
+          "askClassifications": "Demander la mise à jour des nomenclatures",
+          "deposit_parameters": "Préférences de dépôt",
+          "archive_parameters": "Préférences d'archivage",
+          "paull_parameters": "Fonctionnalités PAULL"
         },
         "module_settings": {
           "title": "Paramètres du module Acte",

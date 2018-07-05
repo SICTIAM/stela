@@ -55,7 +55,7 @@ class NewActeForm extends Component {
         acteFetched: false
     }
     validationRules = {
-        number: ['required', 'max:15', 'regex:/^[a-zA-Z0-9_]+$/'],
+        number: ['required', 'max:15', 'regex:/^[A-Z0-9_]+$/'],
         objet: 'required|max:500',
         nature: 'required',
         code: 'required',
@@ -271,7 +271,14 @@ class NewActeForm extends Component {
                     this.loadActe(json, this.validateForm)
                 })
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                    if (response.status === 400) {
+                        response.json().then(json =>
+                            this.context._addNotification(notifications.defaultError, 'notifications.acte.title',
+                                json.errors[0].defaultMessage))
+                    } else {
+                        response.text().then(text =>
+                            this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                    }
                     this.props.setStatus('', this.state.fields.uuid)
                     this.validateForm()
                 })

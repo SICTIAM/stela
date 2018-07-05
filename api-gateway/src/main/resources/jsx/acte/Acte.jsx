@@ -54,7 +54,7 @@ class Acte extends Component {
                 .then(response => response.json())
                 .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }))
                 .catch(response => {
-                    this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'error.default' })
+                    this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
                         this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })

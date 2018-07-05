@@ -1,8 +1,8 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import renderIf from 'render-if'
 import { translate } from 'react-i18next'
-import { Checkbox, Form, Button, Dropdown, Segment } from 'semantic-ui-react'
+import { Checkbox, Form, Button, Dropdown, Segment, Input } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
@@ -10,7 +10,7 @@ import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../../_util/utils'
+import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 
 class ActeLocalAuthorityParams extends Component {
     static contextTypes = {
@@ -36,7 +36,15 @@ class ActeLocalAuthorityParams extends Component {
                 x: 10,
                 y: 10
             },
-            genericProfileUuid: ''
+            genericProfileUuid: '',
+            archiveSettings: {
+                archiveActivated: false,
+                pastellUrl: '',
+                daysBeforeArchiving: '',
+                pastellEntity: '',
+                pastellLogin: '',
+                pastellPassword: ''
+            }
         },
         localAuthorityFetched: false,
         isFormValid: false,
@@ -72,17 +80,29 @@ class ActeLocalAuthorityParams extends Component {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
-                history.push('/admin/actes/parametrage-collectivite')
             })
     }
-    updateState = ({ uuid, name, siren, department, district, nature, nomenclatureDate, canPublishRegistre, canPublishWebSite, stampPosition, genericProfileUuid }) => {
+    defaultData = (fields) => {
+        if (fields.archiveSettings === null) {
+            fields.archiveSettings = {
+                archiveActivated: false,
+                pastellUrl: '',
+                daysBeforeArchiving: '',
+                pastellEntity: '',
+                pastellLogin: '',
+                pastellPassword: ''
+            }
+        }
+        return fields
+    }
+    updateState = ({ uuid, name, siren, nomenclatureDate, ...rest }) => {
         const constantFields = { uuid, name, siren, nomenclatureDate }
-        const fields = { department, district, nature, canPublishRegistre, canPublishWebSite, stampPosition, genericProfileUuid }
-        this.setState({ constantFields: constantFields, fields: fields, localAuthorityFetched: true }, this.validateForm)
+        const fields = this.defaultData({ ...rest })
+        this.setState({ constantFields, fields, localAuthorityFetched: true }, this.validateForm)
     }
     handleFieldChange = (field, value) => {
         const fields = this.state.fields
-        fields[field] = value
+        updateField(fields, field, value)
         this.setState({ fields: fields }, this.validateForm)
     }
     handleStateChange = (event, { id, value }) => {
@@ -143,7 +163,7 @@ class ActeLocalAuthorityParams extends Component {
             localAuthorityFetched(
                 <Page title={this.state.constantFields.name}>
                     <Segment>
-                        <h2>{t('admin.modules.acte.module_settings.title')}</h2>
+                        <h2>{t('admin.modules.acte.local_authority_settings.title')}</h2>
 
                         <Form onSubmit={this.submitForm}>
                             <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
@@ -179,6 +199,8 @@ class ActeLocalAuthorityParams extends Component {
                                     fieldName={t('api-gateway:local_authority.nature')}
                                     className='simpleInput' />
                             </Field>
+
+                            <h2>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
                             <Field htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
                                 <DraggablePosition
                                     label={t('acte.stamp_pad.pad_label')}
@@ -195,6 +217,8 @@ class ActeLocalAuthorityParams extends Component {
                             <Field htmlFor='canPublishWebSite' label={t('api-gateway:local_authority.canPublishWebSite')}>
                                 <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite} onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                             </Field>
+
+                            <h2>{t('admin.modules.acte.local_authority_settings.paull_parameters')}</h2>
                             <Field htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
                                 <Dropdown compact search selection
                                     id='genericProfileUuid'
@@ -205,6 +229,44 @@ class ActeLocalAuthorityParams extends Component {
                                     onChange={this.handleStateChange}
                                     placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
                             </Field>
+
+                            <h2>{t('admin.modules.acte.local_authority_settings.archive_parameters')}</h2>
+                            <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
+                                <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated} onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
+                            </Field>
+                            {this.state.fields.archiveSettings.archiveActivated &&
+                                <Fragment>
+                                    <Field htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
+                                        <Input id='daysBeforeArchiving'
+                                            type='number'
+                                            value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
+                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
+                                    </Field>
+                                    <Field htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
+                                        <Input id='pastellUrl' fluid
+                                            placeholder='https://...'
+                                            value={this.state.fields.archiveSettings.pastellUrl || ''}
+                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
+                                    </Field>
+                                    <Field htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
+                                        <Input id='pastellEntity'
+                                            value={this.state.fields.archiveSettings.pastellEntity || ''}
+                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
+                                    </Field>
+                                    <Field htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
+                                        <Input id='pastellLogin'
+                                            value={this.state.fields.archiveSettings.pastellLogin || ''}
+                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
+                                    </Field>
+                                    <Field htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
+                                        <Input id='pastellPassword'
+                                            type='password'
+                                            value={this.state.fields.archiveSettings.pastellPassword || ''}
+                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
+                                    </Field>
+                                </Fragment>
+                            }
+
                             <div style={{ textAlign: 'right' }}>
                                 <Button basic primary style={{ marginTop: '1em' }} disabled={!this.state.isFormValid} type='submit'>{t('api-gateway:form.update')}</Button>
                             </div>

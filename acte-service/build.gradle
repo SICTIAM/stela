@@ -29,6 +29,7 @@ dependencies {
     compile('org.apache.pdfbox:pdfbox-tools:2.0.8')
     compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('mysql:mysql-connector-java:5.1.29')
+    compile('xom:xom:1.2.5')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework:spring-mock:2.0.8')
     testCompile('org.springframework.boot:spring-boot-starter-test')

@@ -83,7 +83,7 @@ class ActeList extends Component {
             .then(response => response.json())
             .then(json => this.setState({ actes: json.results, totalCount: json.totalCount, fetchStatus: 'fetched' }))
             .catch(response => {
-                this.setState({ fetchStatus: 'error.default' })
+                this.setState({ fetchStatus: 'api-gateway:error.default' })
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }

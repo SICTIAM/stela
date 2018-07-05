@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 public class PesAller {
@@ -28,8 +29,8 @@ public class PesAller {
     private LocalDateTime creation;
 
     @Column(length = 512)
-    @NotNull(groups = { RestValidation.class })
-    @Size(max = 500, groups = { RestValidation.class })
+    @NotNull(groups = {RestValidation.class})
+    @Size(max = 500, groups = {RestValidation.class})
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -44,7 +45,7 @@ public class PesAller {
 
     private String profileUuid;
 
-    @Size(max = 250, groups = { RestValidation.class })
+    @Size(max = 250, groups = {RestValidation.class})
     private String comment;
 
     private String fileType;
@@ -66,6 +67,9 @@ public class PesAller {
     private Integer serviceOrganisationNumber;
 
     private boolean imported;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Archive archive;
 
     public PesAller() {
     }
@@ -113,7 +117,7 @@ public class PesAller {
     }
 
     public SortedSet<PesHistory> getPesHistories() {
-        return pesHistories;
+        return pesHistories != null ? pesHistories : new TreeSet<>();
     }
 
     public void setPesHistories(SortedSet<PesHistory> pesHistories) {
@@ -246,5 +250,17 @@ public class PesAller {
 
     public void setImported(boolean imported) {
         this.imported = imported;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public Archive getArchive() {
+        return archive;
+    }
+
+    public void setArchive(Archive archive) {
+        this.archive = archive;
     }
 }

@@ -2,7 +2,11 @@ package fr.sictiam.stela.acteservice.validation;
 
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeNature;
+import fr.sictiam.stela.acteservice.model.dsc.DocumentBudgetaire;
+import nu.xom.ParsingException;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -13,11 +17,16 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Validation;
+import javax.xml.parsers.ParserConfigurationException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ValidationUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationUtil.class);
+
     public static List<ObjectError> validateActeWithFile(Acte acte, MultipartFile file, MultipartFile... annexes) {
 
         List<ObjectError> errorCopy = validateActe(acte);
@@ -51,6 +60,33 @@ public class ValidationUtil {
         if (!FilenameUtils.isExtension(file.getOriginalFilename(), extensions)) {
             ObjectError objectError = new FieldError("acte", field, "form.validation.badextension");
             errorCopy.add(objectError);
+        }
+        if (ActeNature.DOCUMENTS_BUDGETAIRES_ET_FINANCIERS.equals(acteNature)
+                && FilenameUtils.isExtension(file.getOriginalFilename(), new String[]{"xml"})) {
+            LOGGER.info("Budget file detected, verifying the seal...");
+            try {
+                DocumentBudgetaire documentBudgetaire = DocumentBudgetaire.buildFromBytes(file.getBytes());
+                if (!documentBudgetaire.isSealed()) {
+                    LOGGER.info("The budget file is not sealed, refusing the updload");
+                    errorCopy.add(new FieldError("acte", field, "form.validation.budgetfilenotsealed"));
+                } else {
+                    if (documentBudgetaire.checkSealIfExist()) {
+                        LOGGER.info("Budget file is correctly sealed");
+                    } else {
+                        LOGGER.info("The budget file is not correctly sealed, refusing the updload");
+                        errorCopy.add(new FieldError("acte", field, "form.validation.badsealbudgetfile"));
+                    }
+                }
+            } catch (IOException | ParsingException e) {
+                LOGGER.error("Error while trying to validate budget file: {}", e.getMessage());
+                errorCopy.add(new FieldError("acte", field, "form.validation.badbudgetfile"));
+            } catch (ParserConfigurationException e) {
+                LOGGER.error("Error while trying to calculate the stamp file : {}", e.getMessage());
+                errorCopy.add(new FieldError("acte", field, "form.validation.badstampbudgetfile"));
+            } catch (Exception e) {
+                LOGGER.error("Budget file malformed: {}", e.getMessage());
+                errorCopy.add(new FieldError("acte", field, "form.validation.budgetfilemalformed"));
+            }
         }
         return errorCopy;
     }

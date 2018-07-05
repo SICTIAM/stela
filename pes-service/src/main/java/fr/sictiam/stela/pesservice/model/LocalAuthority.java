@@ -25,9 +25,11 @@ public class LocalAuthority {
     private ServerCode serverCode;
     private Boolean active;
     private Boolean sesileSubscription;
+    private Boolean sesileNewVersion;
     private String token;
     private String secret;
     private String genericProfileUuid;
+    private ArchiveSettings archiveSettings;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "sirens", joinColumns = @JoinColumn(name = "local_authority_uuid"))
@@ -99,6 +101,14 @@ public class LocalAuthority {
         this.sesileSubscription = sesileSubscription;
     }
 
+    public Boolean getSesileNewVersion() {
+        return sesileNewVersion;
+    }
+
+    public void setSesileNewVersion(Boolean sesileNewVersion) {
+        this.sesileNewVersion = sesileNewVersion;
+    }
+
     public String getToken() {
         return token;
     }
@@ -129,6 +139,14 @@ public class LocalAuthority {
 
     public void setMigration(Migration migration) {
         this.migration = migration;
+    }
+
+    public ArchiveSettings getArchiveSettings() {
+        return archiveSettings;
+    }
+
+    public void setArchiveSettings(ArchiveSettings archiveSettings) {
+        this.archiveSettings = archiveSettings;
     }
 
     @Override
