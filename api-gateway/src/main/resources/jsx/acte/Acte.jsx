@@ -15,7 +15,7 @@ import Anomaly from '../_components/Anomaly'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
-import { anomalies } from '../_util/constants'
+import { anomalies, hoursBeforeResendActe } from '../_util/constants'
 import ActeCancelButton from './ActeCancelButton'
 
 class Acte extends Component {
@@ -121,6 +121,10 @@ class Acte extends Component {
         const isDefere = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEFERE_RECEIVED')
         const isLettreObservation = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'LETTRE_OBSERVATION_RECEIVED')
         const isDemandePiecesComplementaires = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED')
+        const canRepublish = lastHistory && !this.state.republished && (anomalies.includes(lastHistory.status) ||
+            (lastHistory.status === 'SENT' && moment(lastHistory.date).isSameOrBefore(moment().subtract(hoursBeforeResendActe, 'hour'))))
+
+
         return (
             <Page title={acte.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
@@ -164,7 +168,7 @@ class Acte extends Component {
                                     }
                                 </Dropdown.Menu>
                             </Dropdown>
-                            {(lastHistory && anomalies.includes(lastHistory.status) && !this.state.republished) &&
+                            {canRepublish &&
                                 <Button basic color={'orange'} onClick={this.republish}>{t('acte.page.republish')}</Button>
                             }
 
