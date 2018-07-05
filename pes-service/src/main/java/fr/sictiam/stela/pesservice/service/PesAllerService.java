@@ -326,6 +326,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public void send(PesAller pes) throws PesSendException {
+        LOGGER.info("Sending PES {} ({})...", pes.getObjet(), pes.getUuid());
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pes.getAttachment().getFile());
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();
@@ -336,6 +337,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
                     + "#" + pes.getBudCode());
             ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
         } catch (IOException e) {
+            LOGGER.error("Error sending PES on FTP: {}", e.getMessage());
             throw new PesSendException();
         }
     }
