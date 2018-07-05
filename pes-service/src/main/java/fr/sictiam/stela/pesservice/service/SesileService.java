@@ -69,9 +69,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    // TODO: Make configurable for SESILE v4
     @Value("${application.sesile.apiUrl}")
     String sesileUrl;
+
+    @Value("${application.sesile.apiV4Url}")
+    String sesileV4Url;
 
     private final ExternalRestService externalRestService;
 
@@ -386,7 +388,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return signatureValidation;
     }
 
-    public ResponseEntity<Document> addFileToclasseur(LocalAuthority localauthority, byte[] file, String fileName,
+    public ResponseEntity<Document> addFileToclasseur(LocalAuthority localAuthority, byte[] file, String fileName,
             int classeur) {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
@@ -403,11 +405,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         map.add("file", contentsAsResource);
         HttpHeaders headers = new HttpHeaders();
-        headers.addAll(getHeaders(localauthority));
+        headers.addAll(getHeaders(localAuthority));
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        return restTemplate.exchange(sesileUrl + "/api/classeur/{classeur}/newDocuments", HttpMethod.POST,
+        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{classeur}/newDocuments", HttpMethod.POST,
                 requestEntity, Document.class, classeur);
     }
 
@@ -418,15 +420,19 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return headers;
     }
 
-    public List<ServiceOrganisation> getServiceOrganisations(LocalAuthority localauthority, String profileUuid)
+    public List<ServiceOrganisation> getServiceOrganisations(LocalAuthority localAuthority, String profileUuid)
             throws IOException {
         JsonNode profile = externalRestService.getProfile(profileUuid);
         String email = profile.get("agent").get("email").asText();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
-        List<ServiceOrganisation> organisations = Arrays
-                .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
-                        ServiceOrganisation[].class, email).getBody());
-        List<ClasseurType> types = Arrays.asList(getTypes(localauthority).getBody());
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
+        List<ServiceOrganisation> organisations = Arrays.asList(
+                localAuthority.getSesileNewVersion() ?
+                        restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
+                                requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
+                        restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET,
+                                requestEntity, ServiceOrganisation[].class, email).getBody()
+        );
+        List<ClasseurType> types = Arrays.asList(getTypes(localAuthority).getBody());
         organisations.forEach(organisation -> {
             organisation.setTypes(types.stream().filter(type -> organisation.getType_classeur().contains(type.getId()))
                     .collect(Collectors.toList()));
@@ -435,23 +441,23 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     }
 
-    public List<ServiceOrganisation> getServiceGenericOrganisations(LocalAuthority localauthority, String email) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
+    public List<ServiceOrganisation> getServiceGenericOrganisations(LocalAuthority localAuthority, String email) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         // TODO: Add a new call with SIREN for SESILE v4
         List<ServiceOrganisation> organisations = Arrays
-                .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                .asList(restTemplate.exchange(getSesileUrl(localAuthority) + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
                         ServiceOrganisation[].class, email).getBody());
 
         return organisations;
 
     }
 
-    public List<ServiceOrganisation> getHeliosServiceOrganisations(LocalAuthority localauthority, String email) {
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localauthority));
+    public List<ServiceOrganisation> getHeliosServiceOrganisations(LocalAuthority localAuthority, String email) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         List<ServiceOrganisation> organisations = Arrays
-                .asList(restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                .asList(restTemplate.exchange(getSesileUrl(localAuthority) + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
                         ServiceOrganisation[].class, email).getBody());
-        List<Integer> types = Arrays.asList(getTypes(localauthority).getBody()).stream()
+        List<Integer> types = Arrays.asList(getTypes(localAuthority).getBody()).stream()
                 .filter(type -> type.getNom().equals("Helios")).map(type -> type.getId()).collect(Collectors.toList());
 
         organisations = organisations.stream()
@@ -463,7 +469,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        return restTemplate.exchange(sesileUrl + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
+        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                 classeur);
     }
 
@@ -475,7 +481,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
 
         return restTemplate
-                .exchange(sesileUrl + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
+                .exchange(getSesileUrl(localAuthority) + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
                 .getBody();
     }
 
@@ -483,19 +489,19 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             throws RestClientException, UnsupportedEncodingException {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
 
-        return restTemplate.exchange(sesileUrl + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
+        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
                 String.class, document).getBody().getBytes("ISO-8859-1");
     }
 
     public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
         LOGGER.debug(classeur.toString());
         HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(localAuthority));
-        return restTemplate.exchange(sesileUrl + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
+        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
     }
 
     public ResponseEntity<ClasseurType[]> getTypes(LocalAuthority localAuthority) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        return restTemplate.exchange(sesileUrl + "/api/classeur/types/", HttpMethod.GET, requestEntity,
+        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/types/", HttpMethod.GET, requestEntity,
                 ClasseurType[].class);
     }
 
@@ -525,6 +531,10 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public GenericDocument saveGenericDocument(GenericDocument genericDocument) {
         return genericDocumentRepository.save(genericDocument);
+    }
+
+    private String getSesileUrl(LocalAuthority localAuthority) {
+        return localAuthority.getSesileNewVersion() ? sesileV4Url : sesileUrl;
     }
 
     @Override

@@ -90,6 +90,7 @@
           "paull_parameters": "Fonctionnalités PAULL",
           "sesile": {
             "subscription": "Abonnement à Sesile",
+            "newVersion": "Sesile nouvelle version",
             "secret": "Secret",
             "token": "Token"
           }

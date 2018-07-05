@@ -25,6 +25,7 @@ class PesLocalAuthorityParams extends Component {
             secret: '',
             genericProfileUuid: '',
             sesileSubscription: false,
+            sesileNewVersion: false,
             sirens: [],
             archiveSettings: {
                 archiveActivated: false,
@@ -136,9 +137,10 @@ class PesLocalAuthorityParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
-        const { serverCode, sirens, secret, token, sesileSubscription, genericProfileUuid, archiveSettings } = this.state.fields
+        // TODO: Improve code quality
+        const { serverCode, sirens, secret, token, sesileSubscription, sesileNewVersion, genericProfileUuid, archiveSettings } = this.state.fields
 
-        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, genericProfileUuid, archiveSettings, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
+        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, sesileNewVersion, genericProfileUuid, archiveSettings, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -199,7 +201,12 @@ class PesLocalAuthorityParams extends Component {
                                 onChange={((e, { checked }) => this.sesileSubscriptionChange(checked))} />
                         </Field>
                         {(this.state.fields.sesileSubscription) &&
-                            <div>
+                            <Fragment>
+                                <Field htmlFor='sesileNewVersion' label={t('admin.modules.pes.local_authority_settings.sesile.newVersion')}>
+                                    <Checkbox toggle id='sesileNewVersion'
+                                        checked={this.state.fields.sesileNewVersion}
+                                        onChange={e => handleFieldCheckboxChange(this, 'sesileNewVersion')} />
+                                </Field>
                                 <Field htmlFor='token' label={t('admin.modules.pes.local_authority_settings.sesile.token')}>
                                     <Input id='token' style={{ width: '25em' }}
                                         placeholder={t('admin.modules.pes.local_authority_settings.sesile.token')}
@@ -214,7 +221,7 @@ class PesLocalAuthorityParams extends Component {
                                         required={this.state.fields.sesileSubscription}
                                         onChange={this.sesileConfigurationChange} />
                                 </Field>
-                            </div>
+                            </Fragment>
                         }
 
                         <h2>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>

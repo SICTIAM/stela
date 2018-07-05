@@ -25,6 +25,7 @@ public class LocalAuthority {
     private ServerCode serverCode;
     private Boolean active;
     private Boolean sesileSubscription;
+    private Boolean sesileNewVersion;
     private String token;
     private String secret;
     private String genericProfileUuid;
@@ -98,6 +99,14 @@ public class LocalAuthority {
 
     public void setSesileSubscription(Boolean sesileSubscription) {
         this.sesileSubscription = sesileSubscription;
+    }
+
+    public Boolean getSesileNewVersion() {
+        return sesileNewVersion;
+    }
+
+    public void setSesileNewVersion(Boolean sesileNewVersion) {
+        this.sesileNewVersion = sesileNewVersion;
     }
 
     public String getToken() {
