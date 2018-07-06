@@ -16,6 +16,7 @@
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",
       "SIGNATURE_MISSING": "Signature manquante",
+      "CLASSEUR_WITHDRAWN": "Le classeur a été retiré dans SESILE",
       "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur, veuillez vérifier la configuration du profil déposant ou de la collectivité"
     },
     "fields": {

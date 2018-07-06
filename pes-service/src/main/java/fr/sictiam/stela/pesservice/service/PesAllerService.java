@@ -229,7 +229,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     List<PesAller> getPendingSinature() {
-        return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrue();
+        return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrueAndArchiveNull();
     }
 
     public void updateStatus(String pesUuid, StatusType updatedStatus) {

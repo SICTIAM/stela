@@ -13,6 +13,7 @@ public class SesileCheckTask {
 
     @Scheduled(cron = "${application.sesile.cron}")
     public void checkSignature() {
+        sesileService.checkPesWithdrawn();
         sesileService.checkPesSigned();
     }
 

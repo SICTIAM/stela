@@ -12,7 +12,7 @@ public interface PesAllerRepository extends JpaRepository<PesAller, String> {
 
     List<PesAller> findAllByLocalAuthorityUuidAndArchiveNull(String uuid);
 
-    List<PesAller> findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrue();
+    List<PesAller> findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrueAndArchiveNull();
 
     List<PesAller> findAllByLocalAuthorityUuidAndArchive_Status(String uuid, ArchiveStatus archiveStatus);
 }
