@@ -23,6 +23,7 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
+import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
@@ -133,28 +134,43 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         }
     }
 
-    public void checkPesSigned() {
+    public void checkPesWithdrawn() {
+        LOGGER.info("Cheking for PES being withdrawn...");
         List<PesAller> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
-
-            if (pes.getSesileDocumentId() != null
-                    && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
-
-                try {
-                    byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
-                    Pair<StatusType, String> signatureResult = getSignatureStatus(file);
-                    StatusType status = signatureResult.component1();
-                    String errorMessage = signatureResult.component2();
-                    pes.setSigned(status.equals(StatusType.PENDING_SEND));
-                    pes.getAttachment().setFile(file);
-
-                    pesService.save(pes);
-                    pesService.updateStatus(pes.getUuid(), status, errorMessage);
-
-                } catch (RestClientException | UnsupportedEncodingException e) {
-                    LOGGER.debug(e.getMessage());
+            if (pes.getPesHistories().stream()
+                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
+                if (pes.getSesileClasseurId() != null
+                        && checkClasseurWithdrawn(pes.getLocalAuthority(), pes.getSesileClasseurId())) {
+                    pesService.updateStatus(pes.getUuid(), StatusType.CLASSEUR_WITHDRAWN);
                 }
+            }
+        });
+    }
 
+    public void checkPesSigned() {
+        LOGGER.info("Cheking for new PES signatures...");
+        List<PesAller> pesAllers = pesService.getPendingSinature();
+        pesAllers.forEach(pes -> {
+            if (pes.getPesHistories().stream()
+                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
+                if (pes.getSesileDocumentId() != null
+                        && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
+                    try {
+                        byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
+                        Pair<StatusType, String> signatureResult = getSignatureStatus(file);
+                        StatusType status = signatureResult.component1();
+                        String errorMessage = signatureResult.component2();
+                        pes.setSigned(status.equals(StatusType.PENDING_SEND));
+                        pes.getAttachment().setFile(file);
+
+                        pesService.save(pes);
+                        pesService.updateStatus(pes.getUuid(), status, errorMessage);
+
+                    } catch (RestClientException | UnsupportedEncodingException e) {
+                        LOGGER.debug(e.getMessage());
+                    }
+                }
             }
         });
     }
@@ -475,6 +491,10 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public boolean checkDocumentSigned(LocalAuthority localAuthority, int document) {
         return getDocument(localAuthority, document).isSigned();
+    }
+
+    public boolean checkClasseurWithdrawn(LocalAuthority localAuthority, int classeurId) {
+        return checkClasseurStatus(localAuthority, classeurId).getBody().getStatus().equals(ClasseurStatus.WITHDRAWN);
     }
 
     public Document getDocument(LocalAuthority localAuthority, int document) {

@@ -54,10 +54,12 @@ public class ReceiverTask {
 
     @Scheduled(fixedRate = 60000)
     public void receive() throws IOException {
+        LOGGER.info("Starting receiver task...");
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
         FTPClient ftpClient = ftpSession.getClientInstance();
 
         FTPFile[] files = ftpClient.listFiles();
+        LOGGER.info("{} files found on FTP server", files.length);
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
                 String fileName = ftpFile.getName();
@@ -75,6 +77,7 @@ public class ReceiverTask {
                             }
                         } catch (IOException | ParserConfigurationException | XPathExpressionException
                                 | SAXException e) {
+                            LOGGER.error("Error while reading the file: {}", e.getMessage());
                             FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
                         } finally {
                             inputStream.close();
