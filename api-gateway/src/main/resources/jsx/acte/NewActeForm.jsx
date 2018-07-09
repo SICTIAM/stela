@@ -369,8 +369,8 @@ class NewActeForm extends Component {
     }
     submitForm = () => {
         const fields = this.state.fields
-        fields['draft'] = false
-        this.setState({ fields })
+        //fields['draft'] = false
+        //this.setState({ fields })
         fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
@@ -379,7 +379,11 @@ class NewActeForm extends Component {
                 history.push('/actes/' + acteUuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                if (response.status === 400) {
+                    response.json().then(json => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.errors[0].defaultMessage))
+                } else {
+                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                }
             })
     }
     render() {

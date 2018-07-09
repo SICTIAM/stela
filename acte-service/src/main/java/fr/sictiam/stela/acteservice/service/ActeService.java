@@ -50,6 +50,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -176,6 +177,18 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         String siren = idActeSplit[1];
         String number = idActeSplit[3];
         return acteRepository.findByNumberAndLocalAuthoritySiren(number, siren).orElseThrow(ActeNotFoundException::new);
+    }
+
+    public boolean isNumberAvailable(String number, String localAuthorityUuid) {
+        return !acteRepository.findFirstByNumberAndLocalAuthority_UuidAndDraftNull(number, localAuthorityUuid).isPresent();
+    }
+
+    public List<ObjectError> metierValidation(Acte acte, List<ObjectError> errors) {
+        if (errors == null) errors = new ArrayList<>();
+        if (!isNumberAvailable(acte.getNumber(), acte.getLocalAuthority().getUuid())) {
+            errors.add(new ObjectError("number", "notifications.acte.sent.error.number_unavailable"));
+        }
+        return errors;
     }
 
     public Acte receiveAREvent(String iDActe, StatusType statusType, Attachment attachment) {
