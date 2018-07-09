@@ -95,7 +95,8 @@
       "publicWebsite": "Affichage sur site internet",
       "objet": "Objet",
       "status": "Status",
-      "group": "Visible par"
+      "group": "Visible par",
+      "agent": "Déposé par"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",

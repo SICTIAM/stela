@@ -42,6 +42,7 @@ class Acte extends Component {
                 y: 10
             }
         },
+        agent: '',
         fetchStatus: '',
         republished: false
     }
@@ -52,7 +53,7 @@ class Acte extends Component {
             fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
@@ -60,6 +61,11 @@ class Acte extends Component {
                     })
                 })
         }
+    }
+    getAgentInfos = () => {
+        fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })
+            .then(response => response.json())
+            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
     }
     handleChangeDeltaPosition = (stampPosition) => {
         const { acteUI } = this.state
@@ -187,6 +193,11 @@ class Acte extends Component {
                         <Field htmlFor="code" label={t('acte.fields.code')}>
                             <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
                         </Field>
+                        {this.state.agent &&
+                            <Field htmlFor='agent' label={t('acte.fields.agent')}>
+                                <FieldValue id='agent'>{this.state.agent}</FieldValue>
+                            </Field>
+                        }
                         <Grid>
                             <Grid.Column width={4}>
                                 <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
