@@ -4,6 +4,7 @@ import { translate } from 'react-i18next'
 import renderIf from 'render-if'
 import { Button } from 'semantic-ui-react'
 
+import ConfirmModal from '../_components/ConfirmModal'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 
@@ -35,7 +36,9 @@ class ActeCancelButton extends Component {
         const { t } = this.context
         return (
             renderIf(this.props.isCancellable && this.props.uuid !== '' && !this.state.requestSent)(
-                <Button basic onClick={this.cancelDeposit} color='red'>{t('acte.page.cancel_deposit')}</Button>
+                <ConfirmModal onConfirm={this.cancelDeposit} text={t('acte.page.cancel_deposit_confirm')}>
+                    <Button basic color='red'>{t('acte.page.cancel_deposit')}</Button>
+                </ConfirmModal>
             )
         )
     }

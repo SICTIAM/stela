@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { translate } from 'react-i18next'
-import { Segment, List, Button, Icon, Confirm, Grid } from 'semantic-ui-react'
+import { Segment, List, Button, Icon, Grid } from 'semantic-ui-react'
 
 import StelaTable from '../../_components/StelaTable'
 import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
+import ConfirmModal from '../../_components/ConfirmModal'
 import { Field, FieldValue, ListItem, Page } from '../../_components/UI'
 import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
 
@@ -27,10 +28,7 @@ class LocalAuthority extends Component {
             siren: '',
             activatedModules: [],
             groups: []
-        },
-        isConfirmModalOpen: false,
-        confirmModalType: '',
-        moduleToEdit: ''
+        }
     }
     componentDidMount() {
         const uuid = this.props.uuid
@@ -52,13 +50,13 @@ class LocalAuthority extends Component {
     activateModule = (moduleName) => this.editModule(moduleName, 'POST', () => {
         const { fields } = this.state
         if (!fields.activatedModules.includes(moduleName)) fields.activatedModules.push(moduleName)
-        this.setState({ fields, isConfirmModalOpen: false })
+        this.setState({ fields })
     })
     deactivateModule = (moduleName) => this.editModule(moduleName, 'DELETE', () => {
         const { fields } = this.state
         const i = fields.activatedModules.indexOf(moduleName)
         if (i > -1) fields.activatedModules.splice(i, 1)
-        this.setState({ fields, isConfirmModalOpen: false })
+        this.setState({ fields })
     })
     editModule = (moduleName, method, callback) => {
         const uuid = this.props.uuid
@@ -69,15 +67,6 @@ class LocalAuthority extends Component {
             .catch(response => {
                 response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.admin.title', text))
             })
-    }
-    alertModal = (moduleToEdit, confirmModalType) => {
-        this.setState({ isConfirmModalOpen: true, moduleToEdit, confirmModalType })
-    }
-    closeConfirmModal = () => this.setState({ isConfirmModalOpen: false })
-    confirmModal = () => {
-        const { confirmModalType, moduleToEdit } = this.state
-        confirmModalType === 'activation' && this.activateModule(moduleToEdit)
-        confirmModalType === 'deactivation' && this.deactivateModule(moduleToEdit)
     }
     removeGroup = (event, uuid) => {
         event.preventDefault()
@@ -97,8 +86,6 @@ class LocalAuthority extends Component {
     }
     render() {
         const { t } = this.context
-        const { isConfirmModalOpen, confirmModalType, moduleToEdit } = this.state
-        const confirmModalMessage = t(`admin.local_authority.confirmModal.${confirmModalType}`, { moduleName: t(`modules.${moduleToEdit}`) })
         const moduleList = modules.map(moduleName => {
             const isActivated = this.state.fields.activatedModules.includes(moduleName)
             const isActivatedUrl = this.props.uuid
@@ -109,12 +96,18 @@ class LocalAuthority extends Component {
                 <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='setting' iconColor={isActivated ? 'green' : 'red'}>
                     {isActivated &&
                         <List.Content floated='right'>
-                            <Button basic color='red' compact onClick={() => this.alertModal(moduleName, 'deactivation')}>{t('form.deactivate')}</Button>
+                            <ConfirmModal onConfirm={() => this.deactivateModule(moduleName)}
+                                text={t(`admin.local_authority.confirmModal.deactivation`, { moduleName: t(`modules.${moduleName}`) })}>
+                                <Button basic color='red' compact>{t('form.deactivate')}</Button>
+                            </ConfirmModal>
                         </List.Content>
                     }
                     {!isActivated &&
                         <List.Content floated='right'>
-                            <Button basic color='green' compact onClick={() => this.alertModal(moduleName, 'activation')}>{t('form.activate')}</Button>
+                            <ConfirmModal onConfirm={() => this.activateModule(moduleName)}
+                                text={t(`admin.local_authority.confirmModal.activation`, { moduleName: t(`modules.${moduleName}`) })}>
+                                <Button basic color='green' compact>{t('form.activate')}</Button>
+                            </ConfirmModal>
                         </List.Content>
                     }
                     {isActivated &&
@@ -160,13 +153,6 @@ class LocalAuthority extends Component {
                             <List divided relaxed verticalAlign='middle'>
                                 {moduleList}
                             </List>
-                            <Confirm
-                                open={isConfirmModalOpen}
-                                content={confirmModalMessage}
-                                confirmButton={t('form.confirm')}
-                                cancelButton={t('form.cancel')}
-                                onCancel={this.closeConfirmModal}
-                                onConfirm={this.confirmModal} />
                         </Segment>
                     </Grid.Column>
                 </Grid>

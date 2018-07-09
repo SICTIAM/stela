@@ -137,9 +137,11 @@
       "no_history": "Aucun historique pour cet acte",
       "linked_file": "Fichier joint",
       "cancel_deposit": "Annuler le dépôt",
+      "cancel_deposit_confirm": "Voulez-vous vraiment demander l'annulation de cet acte ?",
       "download_original": "Télécharger le fichier original",
       "download_justificative": "Télécharger le justificatif",
       "republish": "Redéposer",
+      "republish_confirm": "Voulez-vous vraiment redéposer cet acte ?",
       "courrier_simple": {
         "received": "Le ministère a envoyé un courrier simple pour cet acte",
         "to_send": "Répondre au courrier simple",

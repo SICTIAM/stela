@@ -12,6 +12,7 @@ import DemandePiecesComplementaires from './DemandePiecesComplementaires'
 import DraggablePosition from '../_components/DraggablePosition'
 import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
+import ConfirmModal from '../_components/ConfirmModal'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
@@ -175,7 +176,9 @@ class Acte extends Component {
                                 </Dropdown.Menu>
                             </Dropdown>
                             {canRepublish &&
-                                <Button basic color={'orange'} onClick={this.republish}>{t('acte.page.republish')}</Button>
+                                <ConfirmModal onConfirm={this.republish} text={t('acte.page.republish_confirm')}>
+                                    <Button basic color={'orange'}>{t('acte.page.republish')}</Button>
+                                </ConfirmModal>
                             }
 
                             <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
