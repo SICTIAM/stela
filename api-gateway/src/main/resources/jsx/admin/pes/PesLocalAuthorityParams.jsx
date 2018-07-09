@@ -103,8 +103,9 @@ class PesLocalAuthorityParams extends Component {
             this.setState({ newSiren: '', fields: fields })
         }
     }
-    onRemoveSiren = (index) => {
+    onRemoveSiren = (siren) => {
         const fields = this.state.fields
+        const index = fields.sirens.indexOf(siren)
         fields.sirens.splice(index, 1)
         this.setState({ fields: fields })
     }

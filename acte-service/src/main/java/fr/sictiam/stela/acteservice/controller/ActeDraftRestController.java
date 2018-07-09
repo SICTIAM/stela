@@ -9,6 +9,7 @@ import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.model.util.Certificate;
+import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.util.CertUtilService;
@@ -36,13 +37,15 @@ public class ActeDraftRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeDraftRestController.class);
 
     private final DraftService draftService;
+    private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
     private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeDraftRestController(DraftService draftService, LocalAuthorityService localAuthorityService,
+    public ActeDraftRestController(DraftService draftService, ActeService acteService, LocalAuthorityService localAuthorityService,
             CertUtilService certUtilService) {
         this.draftService = draftService;
+        this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
         this.certUtilService = certUtilService;
     }
@@ -170,6 +173,7 @@ public class ActeDraftRestController {
         }
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);
         List<ObjectError> errors = ValidationUtil.validateActe(acteDraft);
+        errors = acteService.metierValidation(acteDraft, errors);
         if (!errors.isEmpty()) {
             CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
             return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);

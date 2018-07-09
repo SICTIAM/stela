@@ -135,7 +135,8 @@
                 "success": "Le dépot de l'acte a bien été effectué",
                 "error": {
                     "empty_acte": "L'acte envoyé est vide",
-                    "non_extrayable_act": "Impossible de récupérer les données de l'acte"
+                    "non_extrayable_act": "Impossible de récupérer les données de l'acte",
+                    "number_unavailable": "Le numéro d'acte est déjà pris"
                 }
             },
             "republished": {
