@@ -563,12 +563,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;
+            Pair<StatusType, String> signatureResult = getSignatureStatus(pes.getAttachment().getFile());
+            pes.setSigned(signatureResult.component1().equals(StatusType.PENDING_SEND));
+            pesService.save(pes);
             if (pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
-            } else if (!sesileSubscription) {
-                Pair<StatusType, String> signatureResult = getSignatureStatus(pes.getAttachment().getFile());
-                pes.setSigned(signatureResult.component1().equals(StatusType.PENDING_SEND));
-                pesService.save(pes);
+            } else if (!sesileSubscription || pes.isSigned()) {
                 pesService.updateStatus(pes.getUuid(), signatureResult.component1(), signatureResult.component2());
             } else {
                 submitToSignature(pes);
