@@ -42,7 +42,8 @@
       "historic": "Historique",
       "linked_file": "Fichier joint",
       "no_history": "Aucun historique pour ce PES",
-      "re_send": "Renvoyer le flux manuellement"
+      "re_send": "Renvoyer le flux manuellement",
+      "re_send_confirm": "Voulez-vous vraiment renvoyer le flux manuellement ?"
     },
     "signature_errors": {
       "INVALID_SCHEMA": "Schema XML Helios invalide",

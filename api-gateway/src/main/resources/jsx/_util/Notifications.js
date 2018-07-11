@@ -20,7 +20,7 @@ const notifications = {
         },
         republished: {
             title: 'notifications.acte.title',
-            message: 'notifications.acte.sent.republished',
+            message: 'notifications.acte.republished.success',
             level: 'success',
             position: 'br'
         },

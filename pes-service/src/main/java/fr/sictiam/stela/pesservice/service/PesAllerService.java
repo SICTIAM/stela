@@ -189,8 +189,6 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
             pesAller.setColCode(path.evaluate("/PES_Aller/EnTetePES/CodCol/@V", document));
             pesAller.setPostId(path.evaluate("/PES_Aller/EnTetePES/IdPost/@V", document));
             pesAller.setBudCode(path.evaluate("/PES_Aller/EnTetePES/CodBud/@V", document));
-            pesAller.setPj("PES_PJ".equals(pesAller.getFileType()));
-            pesAller.setSigned("PES_PJ".equals(pesAller.getFileType()));
 
         } catch (IOException | XPathExpressionException | ParserConfigurationException | SAXException e) {
             throw new PesCreationException();

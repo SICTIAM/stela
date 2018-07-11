@@ -7,6 +7,7 @@ import moment from 'moment'
 import History from '../_components/History'
 import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
+import ConfirmModal from '../_components/ConfirmModal'
 import { notifications } from '../_util/Notifications'
 import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
 import { anomalies, hoursBeforeResendPes } from '../_util/constants'
@@ -86,7 +87,9 @@ class Pes extends Component {
                         <Label className='labelStatus' color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>{lastHistory && t(`pes.status.${lastHistory.status}`)}</Label>
                         <div style={{ textAlign: 'right' }}>
                             {canResend &&
-                                <Button type='submit' primary basic onClick={this.reSendFlux}>{t('pes.page.re_send')}</Button>
+                                <ConfirmModal onConfirm={this.reSendFlux} text={t('pes.page.re_send_confirm')}>
+                                    <Button type='submit' primary basic>{t('pes.page.re_send')}</Button>
+                                </ConfirmModal>
                             }
                         </div>
                         <Field htmlFor='objet' label={t('pes.fields.objet')}>

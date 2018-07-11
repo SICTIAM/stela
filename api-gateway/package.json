@@ -26,8 +26,8 @@
     "react-router-dom": "^4.2.2",
     "react-rte": "^0.16.1",
     "render-if": "^0.1.1",
-    "semantic-ui-css": "^2.3.1",
-    "semantic-ui-react": "^0.80.0",
+    "semantic-ui-css": "^2.3.3",
+    "semantic-ui-react": "^0.80.2",
     "validatorjs": "^3.13.5"
   },
   "devDependencies": {

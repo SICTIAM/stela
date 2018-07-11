@@ -95,7 +95,8 @@
       "publicWebsite": "Affichage sur site internet",
       "objet": "Objet",
       "status": "Status",
-      "group": "Visible par"
+      "group": "Visible par",
+      "agent": "Déposé par"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
@@ -104,7 +105,7 @@
       "code": "Choix du code matière de l'acte. Thèmes nationaux définis par la norme ACTES et dépendant de votre Préfecture ou Sous-Préfecture",
       "acteAttachment": "Fichier de l'acte aux formats : {{acceptFile}}",
       "annexes": "Fichiers annexes de l'acte aux formats : {{acceptAnnexes}}",
-      "public": "Affichage de cet acte dans le registre des délibéraions",
+      "public": "Affichage de cet acte dans le registre des délibérations",
       "publicWebsite": "Affichage de cet acte sur votre site internet si vous avez activé cette option",
       "objet": "L'objet/titre de l'acte (texte libre)",
       "group": "Groupe de visibilité auquel associer la télétransmission de l'acte"
@@ -136,9 +137,11 @@
       "no_history": "Aucun historique pour cet acte",
       "linked_file": "Fichier joint",
       "cancel_deposit": "Annuler le dépôt",
+      "cancel_deposit_confirm": "Voulez-vous vraiment demander l'annulation de cet acte ?",
       "download_original": "Télécharger le fichier original",
       "download_justificative": "Télécharger le justificatif",
       "republish": "Redéposer",
+      "republish_confirm": "Voulez-vous vraiment redéposer cet acte ?",
       "courrier_simple": {
         "received": "Le ministère a envoyé un courrier simple pour cet acte",
         "to_send": "Répondre au courrier simple",

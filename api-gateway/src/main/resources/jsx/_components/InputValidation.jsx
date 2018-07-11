@@ -77,7 +77,7 @@ export default class InputValidation extends Component {
 
                 <div>
                     {renderIf(!this.state.isValid)(
-                        <Label basic color='red' pointing>{this.state.errorMessage}</Label>
+                        <Label color='red' pointing>{this.state.errorMessage}</Label>
                     )}
                 </div>
             </div>

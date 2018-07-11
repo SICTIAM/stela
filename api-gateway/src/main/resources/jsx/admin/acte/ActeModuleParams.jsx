@@ -160,7 +160,7 @@ class ActeModuleParams extends Component {
                                 </div>
                                 {this.state.dateValidation &&
                                     <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <Label basic color='red' pointing>{this.state.dateValidation}</Label>
+                                        <Label color='red' pointing>{this.state.dateValidation}</Label>
                                     </div>}
                             </Form.Group>
                         </Field>

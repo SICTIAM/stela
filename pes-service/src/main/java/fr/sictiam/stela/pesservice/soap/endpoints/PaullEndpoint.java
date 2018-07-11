@@ -142,6 +142,7 @@ public class PaullEndpoint {
                         LocalDate deadline = LocalDate.parse(depotPESAllerStruct1.getValidation(), dateFormatter);
                         pesAller.setValidationLimit(deadline);
                     }
+                    pesAller.setPj(depotPESAllerStruct1.getPESPJ() == 1);
                     pesAller = pesAllerService.populateFromByte(pesAller, file);
                     if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                         returnMessage = "DUPLICATE_FILE";
