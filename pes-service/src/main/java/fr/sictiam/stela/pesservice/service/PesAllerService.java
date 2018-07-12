@@ -289,7 +289,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
         List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
         subQueryPredicates2
-                .add(historyTable.get("status").in(Arrays.asList(StatusType.SENT, StatusType.RESENT, StatusType.MANUAL_RESENT)));
+                .add(historyTable2.get("status").in(Arrays.asList(StatusType.SENT, StatusType.RESENT, StatusType.MANUAL_RESENT)));
         subquery2.where(subQueryPredicates2.toArray(new Predicate[]{}));
 
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
