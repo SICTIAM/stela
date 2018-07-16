@@ -203,7 +203,11 @@ public class MigrationService {
             byte[] archiveBytes = null;
             if (StringUtils.isNotBlank(acteMigration.getArchivePath())) {
                 archiveBytes = downloadFile(sshClient, acteMigration.getArchivePath());
+            } else {
+                LOGGER.warn("ArchivePath is blank");
             }
+            if (archiveBytes == null) LOGGER.warn("ArchiveBytes is null");
+
             Attachment acteAttachment = getAttachmentFromArchive(acteMigration.getActeAttachment(), archiveBytes, 0);
             SortedSet<ActeHistory> acteHistories = new TreeSet<>();
 
@@ -235,15 +239,21 @@ public class MigrationService {
             if (acteMigration.getCreation() != null) {
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CREATED,
                         acteMigration.getCreation(), null, Flux.TRANSMISSION_ACTE));
+            } else {
+                LOGGER.warn("Acte creation date is null");
             }
             if (acteMigration.getSendDate() != null) {
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.SENT,
                         acteMigration.getSendDate(), null, Flux.TRANSMISSION_ACTE));
+            } else {
+                LOGGER.warn("Acte send date is null");
             }
             if (acteMigration.getDateAR() != null) {
                 byte[] bytesAR = getFileFromTarGz(archiveBytes, acteMigration.getFilenameAR());
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
                         acteMigration.getDateAR(), bytesAR, acteMigration.getFilenameAR()));
+            } else {
+                LOGGER.warn("Acte AR date is null");
             }
             if (acteMigration.getDateANO() != null) {
                 byte[] archiveANOBytes = null;
