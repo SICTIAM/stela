@@ -202,9 +202,10 @@ public class MigrationService {
 
             byte[] archiveBytes = null;
             if (StringUtils.isNotBlank(acteMigration.getArchivePath())) {
+                log(migrationLog, "ArchivePath is '" + acteMigration.getArchivePath() + "'", false);
                 archiveBytes = downloadFile(sshClient, acteMigration.getArchivePath());
             } else {
-                LOGGER.warn("ArchivePath is blank");
+                log(migrationLog, "ArchivePath is blank", false);
             }
             if (archiveBytes == null) LOGGER.warn("ArchiveBytes is null");
 
@@ -240,20 +241,22 @@ public class MigrationService {
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CREATED,
                         acteMigration.getCreation(), null, Flux.TRANSMISSION_ACTE));
             } else {
-                LOGGER.warn("Acte creation date is null");
+                log(migrationLog, "Acte creation date is null", false);
             }
             if (acteMigration.getSendDate() != null) {
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.SENT,
                         acteMigration.getSendDate(), null, Flux.TRANSMISSION_ACTE));
             } else {
-                LOGGER.warn("Acte send date is null");
+                log(migrationLog, "Acte send date is null", false);
             }
             if (acteMigration.getDateAR() != null) {
+                log(migrationLog, "FilenameAR is '" + acteMigration.getFilenameAR() + "'", false);
                 byte[] bytesAR = getFileFromTarGz(archiveBytes, acteMigration.getFilenameAR());
+                if (bytesAR == null) log(migrationLog, "bytesAR is null", false);
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
                         acteMigration.getDateAR(), bytesAR, acteMigration.getFilenameAR()));
             } else {
-                LOGGER.warn("Acte AR date is null");
+                log(migrationLog, "Acte AR date is null", false);
             }
             if (acteMigration.getDateANO() != null) {
                 byte[] archiveANOBytes = null;
