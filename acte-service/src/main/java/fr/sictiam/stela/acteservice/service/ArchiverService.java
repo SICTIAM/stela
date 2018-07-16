@@ -67,8 +67,12 @@ public class ArchiverService {
                             .isBefore(LocalDateTime.now().minusDays(localAuthority.getArchiveSettings().getDaysBeforeArchiving()))) {
 
                         archiveActe(acte, localAuthority.getArchiveSettings());
+                    } else {
+                        LOGGER.info("Acte {} not old enough", acte.getUuid());
                     }
                 });
+            } else {
+                LOGGER.info("LocalAuthority {} ({}) archiving not activated", localAuthority.getName(), localAuthority.getUuid());
             }
         });
         LOGGER.info("Ending archiveActesTask job");
