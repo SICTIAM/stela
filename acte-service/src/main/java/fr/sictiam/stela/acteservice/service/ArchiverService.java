@@ -60,8 +60,10 @@ public class ArchiverService {
         localAuthorities.forEach(localAuthority -> {
             if (localAuthority.getArchiveSettings() != null &&
                     localAuthority.getArchiveSettings().isArchiveActivated()) {
+                LOGGER.info("Retrieving actes for localeAuthority {} ({})", localAuthority.getName(), localAuthority.getUuid());
                 List<Acte> actes = acteRepository.findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(
                         localAuthority.getUuid());
+                LOGGER.info("{} actes", actes.size());
                 actes.forEach(acte -> {
                     if (acte.getActeHistories().last().getDate()
                             .isBefore(LocalDateTime.now().minusDays(localAuthority.getArchiveSettings().getDaysBeforeArchiving()))) {
@@ -93,12 +95,12 @@ public class ArchiverService {
     }
 
     public void archiveActe(Acte acte, ArchiveSettings archiveSettings) {
+        LOGGER.info("Archiving acte {}...", acte.getUuid());
         Optional<ActeHistory> historyAR = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 .findFirst();
 
         if (historyAR.isPresent() && historyAR.get().getFile() != null) {
-            LOGGER.info("Archiving acte {}...", acte.getUuid());
             LOGGER.info("Creating new Pastell document");
             AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
             LOGGER.info("Création: {}", asalaeDocument);
@@ -134,6 +136,8 @@ public class ArchiverService {
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.SENT_TO_SAE);
             acte.getActeHistories().add(acteHistory);
             acteRepository.save(acte);
+        } else {
+            LOGGER.info("No AR found for this acte");
         }
     }
 
