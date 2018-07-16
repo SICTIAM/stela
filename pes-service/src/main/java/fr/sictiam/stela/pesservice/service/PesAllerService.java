@@ -292,6 +292,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
         mainQueryPredicates.add(cb.not(pesTable.get("uuid").in(subquery)));
         mainQueryPredicates.add(pesTable.get("uuid").in(subquery2));
+        mainQueryPredicates.add(cb.equal(pesTable.get("imported"), false));
 
         query.where(mainQueryPredicates.toArray(new Predicate[]{}));
         TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
