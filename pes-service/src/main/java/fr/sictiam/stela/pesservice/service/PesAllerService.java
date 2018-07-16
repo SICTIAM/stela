@@ -267,6 +267,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         return pesAllerRepository.findByFileName(fileName);
     }
 
+    // FIXME: only works when PES have 1 only status, cd PesServiceIntegrationTests.testBlockedFluxMultiStatus
     public List<PesAller> getBlockedFlux() {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -276,26 +277,22 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
 
         Subquery<PesHistory> subquery = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable = subquery.from(PesHistory.class);
-        subquery.select(historyTable);
-
-        List<Predicate> subQueryPredicates = new ArrayList<Predicate>();
-        subQueryPredicates
-                .add(historyTable.get("status").in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
-        subquery.where(subQueryPredicates.toArray(new Predicate[]{}));
+        subquery
+                .select(historyTable.get("pesUuid")).distinct(true)
+                .where(historyTable.get("status")
+                        .in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
 
         Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable2 = subquery2.from(PesHistory.class);
-        subquery2.select(historyTable2);
-
-        List<Predicate> subQueryPredicates2 = new ArrayList<Predicate>();
-        subQueryPredicates2
-                .add(historyTable2.get("status").in(Arrays.asList(StatusType.SENT, StatusType.RESENT, StatusType.MANUAL_RESENT)));
-        subquery2.where(subQueryPredicates2.toArray(new Predicate[]{}));
+        subquery2
+                .select(historyTable2.get("pesUuid")).distinct(true)
+                .where(historyTable2.get("status")
+                        .in(Arrays.asList(StatusType.SENT, StatusType.RESENT, StatusType.MANUAL_RESENT)));
 
         List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
+        mainQueryPredicates.add(cb.not(pesTable.get("uuid").in(subquery)));
+        mainQueryPredicates.add(pesTable.get("uuid").in(subquery2));
 
-        mainQueryPredicates.add(cb.not(cb.exists(subquery)));
-        mainQueryPredicates.add(cb.exists(subquery2));
         query.where(mainQueryPredicates.toArray(new Predicate[]{}));
         TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
         List<PesAller> resultList = typedQuery.getResultList();

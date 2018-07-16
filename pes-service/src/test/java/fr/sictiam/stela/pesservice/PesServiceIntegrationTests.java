@@ -337,10 +337,22 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void testBlockedFlux() throws IOException {
+    public void testBlockedFlux1Status() throws IOException {
         PesAller pes = samplePesAller();
         pes.setPesHistories(new TreeSet<>());
         pes.getPesHistories().add(new PesHistory(pes.getUuid(), StatusType.SENT));
+        pesService.save(pes);
+        assertThat(pesService.getBlockedFlux(), not(empty()));
+    }
+
+    @Test
+    public void testBlockedFluxMultiStatus() throws IOException {
+        PesAller pes = samplePesAller();
+        pes.setPesHistories(new TreeSet<>());
+        pes.getPesHistories().add(new PesHistory(pes.getUuid(), StatusType.CREATED));
+        pes.getPesHistories().add(new PesHistory(pes.getUuid(), StatusType.PENDING_SEND));
+        pes.getPesHistories().add(new PesHistory(pes.getUuid(), StatusType.SENT));
+        pes.getPesHistories().add(new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT));
         pesService.save(pes);
         assertThat(pesService.getBlockedFlux(), not(empty()));
     }
