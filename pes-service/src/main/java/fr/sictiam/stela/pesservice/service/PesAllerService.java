@@ -280,7 +280,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         subquery
                 .select(historyTable.get("pesUuid")).distinct(true)
                 .where(historyTable.get("status")
-                        .in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED)));
+                        .in(Arrays.asList(StatusType.MAX_RETRY_REACH, StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED)));
 
         Subquery<PesHistory> subquery2 = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable2 = subquery2.from(PesHistory.class);
