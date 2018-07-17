@@ -202,7 +202,6 @@ public class MigrationService {
 
             byte[] archiveBytes = null;
             if (StringUtils.isNotBlank(acteMigration.getArchivePath())) {
-                log(migrationLog, "ArchivePath is '" + acteMigration.getArchivePath() + "'", false);
                 archiveBytes = downloadFile(sshClient, acteMigration.getArchivePath());
             } else {
                 log(migrationLog, "ArchivePath is blank", false);
@@ -252,13 +251,11 @@ public class MigrationService {
             if (acteMigration.getDateAR() != null) {
                 byte[] archiveARBytes = null;
                 if (StringUtils.isNotBlank(acteMigration.getArchivePathAR())) {
-                    log(migrationLog, "ArchivePathAR is '" + acteMigration.getArchivePathAR() + "'", false);
                     archiveARBytes = downloadFile(sshClient, acteMigration.getArchivePathAR());
                 } else {
                     log(migrationLog, "ArchivePathAR is blank", false);
                 }
 
-                log(migrationLog, "FilenameAR is '" + acteMigration.getFilenameAR() + "'", false);
                 byte[] bytesAR = getFileFromTarGz(archiveARBytes, acteMigration.getFilenameAR());
                 if (bytesAR == null) log(migrationLog, "bytesAR is null", false);
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
