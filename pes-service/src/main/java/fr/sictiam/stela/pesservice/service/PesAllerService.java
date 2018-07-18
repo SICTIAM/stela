@@ -268,12 +268,12 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     // FIXME: only works when PES have 1 only status, cd PesServiceIntegrationTests.testBlockedFluxMultiStatus
-    public List<PesAller> getBlockedFlux() {
+    public List<String> getBlockedFlux() {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PesAller> query = cb.createQuery(PesAller.class);
+        CriteriaQuery<String> query = cb.createQuery(String.class);
         Root<PesAller> pesTable = query.from(PesAller.class);
-        query.select(pesTable);
+        query.select(pesTable.get("uuid"));
 
         Subquery<PesHistory> subquery = query.subquery(PesHistory.class);
         Root<PesHistory> historyTable = subquery.from(PesHistory.class);
@@ -289,14 +289,14 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
                 .where(historyTable2.get("status")
                         .in(Arrays.asList(StatusType.SENT, StatusType.RESENT, StatusType.MANUAL_RESENT)));
 
-        List<Predicate> mainQueryPredicates = new ArrayList<Predicate>();
+        List<Predicate> mainQueryPredicates = new ArrayList<>();
         mainQueryPredicates.add(cb.not(pesTable.get("uuid").in(subquery)));
         mainQueryPredicates.add(pesTable.get("uuid").in(subquery2));
         mainQueryPredicates.add(cb.equal(pesTable.get("imported"), false));
 
         query.where(mainQueryPredicates.toArray(new Predicate[]{}));
-        TypedQuery<PesAller> typedQuery = entityManager.createQuery(query);
-        List<PesAller> resultList = typedQuery.getResultList();
+        TypedQuery<String> typedQuery = entityManager.createQuery(query);
+        List<String> resultList = typedQuery.getResultList();
 
         return resultList;
     }

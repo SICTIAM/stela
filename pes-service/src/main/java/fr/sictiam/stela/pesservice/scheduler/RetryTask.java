@@ -32,26 +32,27 @@ public class RetryTask {
     @Scheduled(cron = "${application.retry.cron}")
     public void resendBlockedFlux() {
         LOGGER.info("Executing resendBlockedFlux task...");
-        List<PesAller> pesList = pesAllerService.getBlockedFlux();
-        LOGGER.info("{} PES at waiting an ACK", pesList.size());
-        pesList.forEach(pes -> {
+        List<String> pesUuids = pesAllerService.getBlockedFlux();
+        LOGGER.info("{} PES at waiting an ACK", pesUuids.size());
+        pesUuids.forEach(uuid -> {
 
-            PesHistory hist = pesAllerService.getLastSentHistory(pes.getUuid());
+            PesHistory hist = pesAllerService.getLastSentHistory(uuid);
 
             if (LocalDateTime.now().isAfter(hist.getDate().plusHours(frequency))) {
                 try {
-                    LOGGER.info("Resending PES {}...", pes.getUuid());
-                    pesAllerService.send(pes);
+                    LOGGER.info("Resending PES {}...", uuid);
+                    PesAller pesAller = pesAllerService.getByUuid(uuid);
+                    pesAllerService.send(pesAller);
 
                     StatusType statusType = StatusType.RESENT;
-                    if (maxRetry <= (pes.getPesHistories().stream()
+                    if (maxRetry <= (pesAller.getPesHistories().stream()
                             .filter(pesHistory -> pesHistory.getStatus().equals(StatusType.RESENT)).count() + 1)) {
                         statusType = StatusType.MAX_RETRY_REACH;
                     }
-                    pesAllerService.updateStatus(pes.getUuid(), statusType);
+                    pesAllerService.updateStatus(uuid, statusType);
                 } catch (PesSendException e) {
-                    pesAllerService.updateStatus(pes.getUuid(), StatusType.FILE_ERROR, e.getClass().getName());
-                    LOGGER.error("Error while trying to resend PES: {}", pes.getUuid(), e.getMessage());
+                    pesAllerService.updateStatus(uuid, StatusType.FILE_ERROR, e.getClass().getName());
+                    LOGGER.error("Error while trying to resend PES: {}", uuid, e.getMessage());
                 }
             }
 
