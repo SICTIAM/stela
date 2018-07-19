@@ -8,6 +8,7 @@ import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Archive;
 import fr.sictiam.stela.acteservice.model.ArchiveSettings;
 import fr.sictiam.stela.acteservice.model.ArchiveStatus;
+import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.asalae.AsalaeDocument;
@@ -115,6 +116,12 @@ public class ArchiverService {
                     acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile(), archiveSettings);
             logAsalaeResultForm(updatedAsalaeResultForm);
 
+            LOGGER.info("Sending annexes files to Pastell");
+            for (Attachment annexe : acte.getAnnexes()) {
+                updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "autre_document_attache",
+                        annexe.getFilename(), annexe.getFile(), archiveSettings);
+                logAsalaeResultForm(updatedAsalaeResultForm);
+            }
 
             LOGGER.info("Sending ACK file to Pastell");
             updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "aractes",
