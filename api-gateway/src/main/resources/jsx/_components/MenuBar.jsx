@@ -96,7 +96,7 @@ class MenuBar extends Component {
                     </Menu.Item>
 
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
-                        {t('made_with_love')}
+                        Créé avec ❤ par le <a style={{ color: 'unset', fontWeight: 'bold' }} href='https://www.sictiam.fr/' target='_blank'>SICTIAM</a>
                     </Menu.Item>
                 </div>
 
