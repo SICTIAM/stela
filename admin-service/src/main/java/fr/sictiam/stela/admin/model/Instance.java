@@ -15,6 +15,7 @@ public class Instance {
     private String uuid;
 
     private String welcomeMessage;
+    private String legalNotice;
 
     public Instance() {
     }
@@ -29,5 +30,13 @@ public class Instance {
 
     public void setWelcomeMessage(String welcomeMessage) {
         this.welcomeMessage = welcomeMessage;
+    }
+
+    public String getLegalNotice() {
+        return legalNotice;
+    }
+
+    public void setLegalNotice(String legalNotice) {
+        this.legalNotice = legalNotice;
     }
 }

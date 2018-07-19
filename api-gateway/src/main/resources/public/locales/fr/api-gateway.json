@@ -13,6 +13,7 @@
     "alert": "Alerte",
     "at": "à",
     "loading": "Chargement",
+    "legal_notice": "Mentions légales",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
@@ -75,6 +76,7 @@
             "title": "Informations",
             "help": "Aide",
             "contact": "Contact",
+            "legal_notice": "Mentions légales",
             "cgu": "CGU"
         },
         "admin": "Admin"
@@ -271,7 +273,8 @@
         "creation_generic": "Compte générique",
         "instance_params": {
             "title": "Paramètres de l'instance",
-            "welcome_message": "Message de bienvenue"
+            "welcome_message": "Message de bienvenue",
+            "legal_notice": "Mentions légales"
         },
         "local_authority": {
             "general_informations": "Informations générales",

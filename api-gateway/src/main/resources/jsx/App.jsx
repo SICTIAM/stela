@@ -19,6 +19,7 @@ import TopBar from './_components/TopBar'
 import Home from './Home'
 import AlertMessage from './_components/AlertMessage'
 import { UserProfile, AdminProfile } from './Profile'
+import LegalNotice from './LegalNotice'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
 import ActeList from './acte/ActeList'
@@ -188,6 +189,7 @@ class AppRoute extends Component {
                 <PublicRoute exact path='/' component={Home} />
 
                 <Route path='/choix-collectivite' component={SelectLocalAuthority} />
+                <PublicRoute path='/mentions-legales' component={LegalNotice} menu={MenuBar} />
 
                 <AuthRoute path='/profil' component={UserProfile} menu={MenuBar} />
 

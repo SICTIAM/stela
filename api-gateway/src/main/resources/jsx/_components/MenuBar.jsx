@@ -84,9 +84,8 @@ class MenuBar extends Component {
                         <Icon name='help' size='large' />
                         <Menu.Header>{t('menu.informations.title')}</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item>{t('menu.informations.help')}</Menu.Item>
                             <Menu.Item>{t('menu.informations.contact')}</Menu.Item>
-                            <Menu.Item>{t('menu.informations.cgu')}</Menu.Item>
+                            <Menu.Item as={NavLink} to="/mentions-legales">{t('menu.informations.legal_notice')}</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>

@@ -16,25 +16,36 @@ class AdminInstance extends Component {
         _addNotification: PropTypes.func
     }
     state = {
-        welcomeMessage: ''
+        fields: {
+            welcomeMessage: '',
+            legalNotice: ''
+        }
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/instance/welcome-message' })
+        fetchWithAuthzHandling({ url: '/api/admin/instance' })
             .then(checkStatus)
-            .then(response => response.text())
-            .then(text => this.setState({ welcomeMessage: text }))
+            .then(response => response.json())
+            .then(text => this.setState({ fields: text }))
             .catch(response => {
                 response.json().then(json => {
                     this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
                 })
             })
     }
-    onWelcomeMessageChange = (welcomeMessage) => {
-        this.setState({ welcomeMessage })
+    handleFieldChange = (field, value) => {
+        const fields = this.state.fields
+        fields[field] = value
+        this.setState({ fields })
+    }
+    onWelcomeMessageChange = ( welcomeMessage ) => {
+        const { fields } = this.state
+        fields.welcomeMessage = welcomeMessage
+        this.setState({ fields })
     }
     submitForm = () => {
-        const headers = { 'Content-Type': 'text/plain' }
-        fetchWithAuthzHandling({ url: '/api/admin/instance/welcome-message', method: 'PUT', body: this.state.welcomeMessage, headers: headers, context: this.context })
+        const headers = { 'Content-Type': 'application/json' }
+        const body = JSON.stringify(this.state.fields)
+        fetchWithAuthzHandling({ url: '/api/admin/instance', method: 'PUT', body, headers, context: this.context })
             .then(checkStatus)
             .then(() => this.context._addNotification(notifications.admin.instanceParamsUpdated))
             .catch(response => {
@@ -46,11 +57,18 @@ class AdminInstance extends Component {
         return (
             <Page title={t('admin.instance_params.title')}>
                 <Segment>
-                    <h2>{t('admin.instance_params.welcome_message')}</h2>
                     <Form onSubmit={this.submitForm}>
+
+                        <h2>{t('admin.instance_params.welcome_message')}</h2>
                         <TextEditor
-                            onChange={this.onWelcomeMessageChange}
-                            text={this.state.welcomeMessage} />
+                            onChange={value => this.handleFieldChange('welcomeMessage', value)}
+                            text={this.state.fields.welcomeMessage} />
+
+                        <h2>{t('admin.instance_params.legal_notice')}</h2>
+                        <TextEditor
+                            onChange={value => this.handleFieldChange('legalNotice', value)}
+                            text={this.state.fields.legalNotice} />
+
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary style={{ marginTop: '2em' }} type='submit'>{t('form.update')}</Button>
                         </div>
