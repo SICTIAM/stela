@@ -236,6 +236,16 @@ public class MigrationService {
             );
             acte = acteRepository.save(acte);
 
+            List<String> annexeFilenames = Arrays.asList(acteMigration.getAnnexes().split(";"));
+            if (annexeFilenames.size() > 0) {
+                for (String annexeFilename : annexeFilenames) {
+                    if (StringUtils.isNotBlank(annexeFilename)) {
+                        acte.getAnnexes().add(getAttachmentFromArchive(annexeFilename, archiveBytes, 0));
+                    }
+                }
+                acte = acteRepository.save(acte);
+            }
+
             if (acteMigration.getCreation() != null) {
                 acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CREATED,
                         acteMigration.getCreation(), null, Flux.TRANSMISSION_ACTE));
