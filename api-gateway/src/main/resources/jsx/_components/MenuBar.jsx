@@ -84,8 +84,8 @@ class MenuBar extends Component {
                         <Icon name='help' size='large' />
                         <Menu.Header>{t('menu.informations.title')}</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item>{t('menu.informations.contact')}</Menu.Item>
                             <Menu.Item as={NavLink} to="/mentions-legales">{t('menu.informations.legal_notice')}</Menu.Item>
+                            <a className='item' href='https://support.sictiam.fr/declarer-un-incident/' target='_blank'>{t('menu.informations.contact')}</a>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>
