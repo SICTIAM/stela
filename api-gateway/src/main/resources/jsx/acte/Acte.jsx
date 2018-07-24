@@ -213,13 +213,13 @@ class Acte extends Component {
                                 </Grid.Column>
                             </Grid>
                         }
-                        <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
-                            {renderIf(annexes.length > 0)(
+                        {renderIf(annexes.length > 0)(
+                            <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
-                            )}
-                        </Field>
+                            </Field>
+                        )}
                         <Field htmlFor="public" label={t('acte.fields.public')}>
                             <Checkbox id="public" checked={acte.public} disabled />
                         </Field>

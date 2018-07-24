@@ -267,7 +267,6 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         return pesAllerRepository.findByFileName(fileName);
     }
 
-    // FIXME: only works when PES have 1 only status, cd PesServiceIntegrationTests.testBlockedFluxMultiStatus
     public List<String> getBlockedFlux() {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();

@@ -1,7 +1,9 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import fr.sictiam.stela.acteservice.model.ui.Views;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
@@ -27,34 +29,48 @@ public class Acte {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ActePublicView.class)
     private String uuid;
     @NotNull(groups = {RestValidation.class})
     @Size(max = 15, groups = {RestValidation.class})
     @Pattern(regexp = "^[A-Z0-9_]+$", groups = {RestValidation.class})
+    @JsonView(Views.ActePublicView.class)
     private String number;
+    @JsonView(Views.ActePublicView.class)
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @NotNull(groups = {RestValidation.class})
+    @JsonView(Views.ActePublicView.class)
     private LocalDate decision;
     @NotNull(groups = {RestValidation.class})
+    @JsonView(Views.ActePublicView.class)
     private ActeNature nature;
     @NotNull(groups = {RestValidation.class})
+    @JsonView(Views.ActePublicView.class)
     private String code;
+    @JsonView(Views.ActePublicView.class)
     private String codeLabel;
     @Column(length = 512)
     @NotNull(groups = {RestValidation.class})
     @Size(max = 500)
+    @JsonView(Views.ActePublicView.class)
     private String objet;
+    @JsonView(Views.ActePublicView.class)
     private boolean isPublic;
+    @JsonView(Views.ActePublicView.class)
     private boolean isPublicWebsite;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonView(Views.ActePublicView.class)
     private Attachment acteAttachment;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonView(Views.ActePublicView.class)
     private List<Attachment> annexes;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("date ASC")
+    @JsonView(Views.ActePublicView.class)
     private SortedSet<ActeHistory> acteHistories;
     @ManyToOne
+    @JsonView(Views.ActePublicView.class)
     private LocalAuthority localAuthority;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Draft draft;

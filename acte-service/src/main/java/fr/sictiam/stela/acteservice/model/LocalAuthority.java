@@ -1,6 +1,8 @@
 package fr.sictiam.stela.acteservice.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.acteservice.model.migration.Migration;
+import fr.sictiam.stela.acteservice.model.ui.Views;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
@@ -17,11 +19,17 @@ import java.util.List;
 public class LocalAuthority {
 
     @Id
+    @JsonView(Views.LocalAuthorityPublicView.class)
     private String uuid;
+    @JsonView(Views.LocalAuthorityPublicView.class)
     private String name;
+    @JsonView(Views.LocalAuthorityPublicView.class)
     private String siren;
+    @JsonView(Views.LocalAuthorityPublicView.class)
     private String department;
+    @JsonView(Views.LocalAuthorityPublicView.class)
     private String district;
+    @JsonView(Views.LocalAuthorityPublicView.class)
     private String nature;
     private LocalDate nomenclatureDate;
     private byte[] nomenclatureFile;

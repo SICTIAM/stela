@@ -32,23 +32,22 @@ class MenuBar extends Component {
             <Menu style={{ backgroundColor: 'white' }} className='mainMenu anatra' fixed='left' secondary vertical >
 
                 <div className='mainMenus'>
-                    {(isLoggedIn && rightsModuleResolver(rights, 'ACTES')) &&
-                        < Menu.Item style={{ width: '100%' }}>
-                            <Icon name='checkmark box' size='large' />
-                            <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
-                            <Menu.Menu>
-                                {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
-                                    < Menu.Item as={NavLink} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
-                                }
-                                {rightsFeatureResolver(rights, ['ACTES_DEPOSIT', 'ACTES_DISPLAY']) &&
-                                    <Menu.Item as={NavLink} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
-                                }
-                                {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
-                                    <Menu.Item as={NavLink} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
-                                }
-                            </Menu.Menu>
-                        </Menu.Item>
-                    }
+                    <Menu.Item style={{ width: '100%' }}>
+                        <Icon name='checkmark box' size='large' />
+                        <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
+                        <Menu.Menu>
+                            {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
+                                <Menu.Item as={NavLink} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
+                            }
+                            {rightsFeatureResolver(rights, ['ACTES_DEPOSIT', 'ACTES_DISPLAY']) &&
+                                <Menu.Item as={NavLink} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
+                            }
+                            <Menu.Item as={NavLink} to="/registre-des-deliberations">Registre des délibérations</Menu.Item>
+                            {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
+                                <Menu.Item as={NavLink} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
+                            }
+                        </Menu.Menu>
+                    </Menu.Item>
 
                     {(isLoggedIn && rightsModuleResolver(rights, 'PES')) &&
                         <Menu.Item style={{ width: '100%' }}>

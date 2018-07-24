@@ -279,12 +279,63 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
+        List<Predicate> predicates = getAllQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
                 decisionFrom, decisionTo, status, currentLocalAuthUuid, groups);
         query.select(builder.count(acteRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
         return entityManager.createQuery(query).getSingleResult();
+    }
+
+    public Long countAllPublicWithQuery(String multifield, String number, String objet, String siren,
+            LocalDate decisionFrom, LocalDate decisionTo) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<Acte> acteRoot = query.from(Acte.class);
+
+        List<Predicate> predicates = getAllPublicQueryPredicates(builder, acteRoot, multifield, number, objet, siren,
+                decisionFrom, decisionTo);
+        query.select(builder.count(acteRoot));
+        query.where(predicates.toArray(new Predicate[predicates.size()]));
+
+        return entityManager.createQuery(query).getSingleResult();
+    }
+
+    public List<Acte> getAllPublicWithQuery(String multifield, String number, String objet, String siren,
+            LocalDate decisionFrom, LocalDate decisionTo, Integer limit, Integer offset, String column,
+            String direction) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
+        Root<Acte> acteRoot = query.from(Acte.class);
+
+        String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
+        List<Predicate> predicates = getAllPublicQueryPredicates(builder, acteRoot, multifield, number, objet, siren,
+                decisionFrom, decisionTo);
+
+        Subquery<ActeHistory> subquery = query.subquery(ActeHistory.class);
+        Root<ActeHistory> historyTable = subquery.from(ActeHistory.class);
+        subquery
+                .select(historyTable.get("acteUuid")).distinct(true)
+                .where(historyTable.get("status")
+                        .in(Collections.singleton(StatusType.ACK_RECEIVED)));
+
+        Subquery<ActeHistory> subquery2 = query.subquery(ActeHistory.class);
+        Root<ActeHistory> historyTable2 = subquery2.from(ActeHistory.class);
+        subquery2
+                .select(historyTable2.get("acteUuid")).distinct(true)
+                .where(historyTable2.get("status")
+                        .in(Arrays.asList(StatusType.CANCELLED, StatusType.CANCELLATION_ARCHIVE_CREATED, StatusType.CANCELLATION_ASKED)));
+
+        predicates.add(acteRoot.get("uuid").in(subquery));
+        predicates.add(builder.not(acteRoot.get("uuid").in(subquery2)));
+
+
+        query.where(predicates.toArray(new Predicate[predicates.size()]))
+                .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
+                        ? builder.asc(acteRoot.get(columnAttribute))
+                        : builder.desc(acteRoot.get(columnAttribute)));
+
+        return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
     public List<Acte> getAllWithQuery(String multifield, String number, String objet, ActeNature nature,
@@ -295,7 +346,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         Root<Acte> acteRoot = query.from(Acte.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
-        List<Predicate> predicates = getQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
+        List<Predicate> predicates = getAllQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
                 decisionFrom, decisionTo, status, currentLocalAuthUuid, groups);
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
@@ -305,57 +356,99 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<Acte> acteRoot, String multifield,
+    private List<Predicate> getAllPublicQueryPredicates(CriteriaBuilder builder, Root<Acte> acteRoot, String multifield,
+            String number, String objet, String siren, LocalDate decisionFrom, LocalDate decisionTo) {
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(getNotDraftPredicate(builder, acteRoot));
+        predicates.add(getPublicPredicate(builder, acteRoot));
+        predicates.add(getNaturePredicate(builder, acteRoot,
+                Arrays.asList(ActeNature.DELIBERATIONS, ActeNature.ARRETES_REGLEMENTAIRES)));
+        if (StringUtils.isNotBlank(multifield)) predicates.add(getObjetMultifield(builder, acteRoot, multifield));
+        if (StringUtils.isNotBlank(number)) predicates.add(getNumberPredicate(builder, acteRoot, number));
+        if (StringUtils.isNotBlank(objet)) predicates.add(getObjetPredicate(builder, acteRoot, objet));
+        if (decisionFrom != null && decisionTo != null)
+            predicates.add(getDecisionPredicate(builder, acteRoot, decisionFrom, decisionTo));
+        if (StringUtils.isNotBlank(siren)) {
+            Join<LocalAuthority, Acte> LocalAuthorityJoin = acteRoot.join("localAuthority");
+            LocalAuthorityJoin.on(builder.equal(LocalAuthorityJoin.get("siren"), siren));
+        }
+        return predicates;
+    }
+
+    private List<Predicate> getAllQueryPredicates(CriteriaBuilder builder, Root<Acte> acteRoot, String multifield,
             String number, String objet, ActeNature nature, LocalDate decisionFrom, LocalDate decisionTo,
             StatusType status, String currentLocalAuthUuid, Set<String> groups) {
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(builder.and(builder.isNull(acteRoot.get("draft"))));
-        if (StringUtils.isNotBlank(multifield)) {
-            predicates.add(builder.or(
-                    builder.like(builder.lower(acteRoot.get("number")), "%" + multifield.toLowerCase() + "%"),
-                    builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%")));
-        }
-        if (StringUtils.isNotBlank(number))
-            predicates.add(
-                    builder.and(builder.like(builder.lower(acteRoot.get("number")), "%" + number.toLowerCase() + "%")));
-        if (StringUtils.isNotBlank(objet))
-            predicates.add(
-                    builder.and(builder.like(builder.lower(acteRoot.get("objet")), "%" + objet.toLowerCase() + "%")));
+        predicates.add(getNotDraftPredicate(builder, acteRoot));
+        predicates.add(getGroupPredicate(builder, acteRoot, groups));
+        if (StringUtils.isNotBlank(multifield)) predicates.add(getObjetMultifield(builder, acteRoot, multifield));
+        if (StringUtils.isNotBlank(number)) predicates.add(getNumberPredicate(builder, acteRoot, number));
+        if (StringUtils.isNotBlank(objet)) predicates.add(getObjetPredicate(builder, acteRoot, objet));
+        if (nature != null) predicates.add(getNaturePredicate(builder, acteRoot, Collections.singletonList(nature)));
+        if (status != null) predicates.add(getStatusPredicate(builder, acteRoot, status));
+        if (decisionFrom != null && decisionTo != null)
+            predicates.add(getDecisionPredicate(builder, acteRoot, decisionFrom, decisionTo));
         if (StringUtils.isNotBlank(currentLocalAuthUuid)) {
             Join<LocalAuthority, Acte> LocalAuthorityJoin = acteRoot.join("localAuthority");
             LocalAuthorityJoin.on(builder.equal(LocalAuthorityJoin.get("uuid"), currentLocalAuthUuid));
         }
-        if (!CollectionUtils.isEmpty(groups)) {
-            predicates.add(builder.or(acteRoot.get("groupUuid").in(groups),
-                    builder.equal(acteRoot.get("groupUuid"), ""), builder.isNull(acteRoot.get("groupUuid"))));
-        } else {
-            predicates.add(builder.or(builder.equal(acteRoot.get("groupUuid"), ""),
-                    builder.isNull(acteRoot.get("groupUuid"))));
-        }
-
-        if (nature != null)
-            predicates.add(builder.and(builder.equal(acteRoot.get("nature"), nature)));
-        if (decisionFrom != null && decisionTo != null)
-            predicates.add(builder.and(builder.between(acteRoot.get("decision"), decisionFrom, decisionTo)));
-
-        if (status != null) {
-            // TODO: Find a way to do a self left join using a CriteriaQuery instead of a
-            // native one
-            Query q = entityManager.createNativeQuery(
-                    "select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '"
-                            + status + "'");
-            List<String> acteHistoriesActeUuids = q.getResultList();
-            if (acteHistoriesActeUuids.size() > 0)
-                predicates.add(builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids)));
-            else
-                predicates.add(builder.and(acteRoot.get("uuid").isNull()));
-        }
-
         return predicates;
     }
 
-    public List<ActeHistory> getPrefectureReturns(String currentLocalAuthUuid, LocalDateTime date) {
+    private Predicate getObjetMultifield(CriteriaBuilder builder, Root<Acte> acteRoot, String multifield) {
+        return builder.or(
+                builder.like(builder.lower(acteRoot.get("number")), "%" + multifield.toLowerCase() + "%"),
+                builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%"));
+    }
 
+    private Predicate getNumberPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, String number) {
+        return builder.and(builder.like(builder.lower(acteRoot.get("number")), "%" + number.toLowerCase() + "%"));
+    }
+
+    private Predicate getObjetPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, String objet) {
+        return builder.and(builder.like(builder.lower(acteRoot.get("objet")), "%" + objet.toLowerCase() + "%"));
+    }
+
+    private Predicate getNotDraftPredicate(CriteriaBuilder builder, Root<Acte> acteRoot) {
+        return builder.and(builder.isNull(acteRoot.get("draft")));
+    }
+
+    private Predicate getPublicPredicate(CriteriaBuilder builder, Root<Acte> acteRoot) {
+        return builder.and(builder.isTrue(acteRoot.get("isPublic")));
+    }
+
+    private Predicate getNaturePredicate(CriteriaBuilder builder, Root<Acte> acteRoot, List<ActeNature> natures) {
+        List<Predicate> naturesPredicate = natures.stream()
+                .map(nature -> builder.equal(acteRoot.get("nature"), nature))
+                .collect(Collectors.toList());
+        return builder.or(naturesPredicate.toArray(new Predicate[naturesPredicate.size()]));
+    }
+
+    private Predicate getGroupPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, Set<String> groups) {
+        if (!CollectionUtils.isEmpty(groups)) {
+            return builder.or(acteRoot.get("groupUuid").in(groups),
+                    builder.equal(acteRoot.get("groupUuid"), ""), builder.isNull(acteRoot.get("groupUuid")));
+        } else {
+            return builder.or(builder.equal(acteRoot.get("groupUuid"), ""), builder.isNull(acteRoot.get("groupUuid")));
+        }
+    }
+
+    private Predicate getDecisionPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, LocalDate decisionFrom,
+            LocalDate decisionTo) {
+        return builder.and(builder.between(acteRoot.get("decision"), decisionFrom, decisionTo));
+    }
+
+    private Predicate getStatusPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, StatusType status) {
+        // TODO: Find a way to do a self left join using a CriteriaQuery instead of a native one
+        Query q = entityManager.createNativeQuery(
+                "select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '"
+                        + status + "'");
+        List<String> acteHistoriesActeUuids = q.getResultList();
+        if (acteHistoriesActeUuids.size() > 0) return builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids));
+        else return builder.and(acteRoot.get("uuid").isNull());
+    }
+
+    public List<ActeHistory> getPrefectureReturns(String currentLocalAuthUuid, LocalDateTime date) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<ActeHistory> query = cb.createQuery(ActeHistory.class);
         Root<ActeHistory> acteHistoryTable = query.from(ActeHistory.class);
@@ -382,7 +475,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         List<ActeHistory> resultList = typedQuery.getResultList();
 
         return resultList;
-
     }
 
     public Acte getByUuid(String uuid) {
