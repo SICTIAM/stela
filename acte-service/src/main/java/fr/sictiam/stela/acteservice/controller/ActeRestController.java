@@ -18,7 +18,6 @@ import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.ArchiverService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
@@ -69,29 +68,15 @@ public class ActeRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeRestController.class);
 
     private final ActeService acteService;
-    private final ArchiverService archiverService;
     private final LocalAuthorityService localAuthorityService;
     private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeRestController(ActeService acteService, ArchiverService archiverService, LocalAuthorityService localAuthorityService,
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService,
             CertUtilService certUtilService) {
         this.acteService = acteService;
-        this.archiverService = archiverService;
         this.localAuthorityService = localAuthorityService;
         this.certUtilService = certUtilService;
-    }
-
-    @GetMapping("/archive-send")
-    public ResponseEntity archiveSendTemp() {
-        archiverService.archiveActesTask();
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @GetMapping("/archive-check")
-    public ResponseEntity archiveCheckTemp() {
-        archiverService.checkArchivesStatusTask();
-        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping
