@@ -19,9 +19,12 @@ import TopBar from './_components/TopBar'
 import Home from './Home'
 import AlertMessage from './_components/AlertMessage'
 import { UserProfile, AdminProfile } from './Profile'
+import LegalNotice from './LegalNotice'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
+import ActePublic from './acte/ActePublic'
 import ActeList from './acte/ActeList'
+import ActePublicList from './acte/ActePublicList'
 import DraftList from './acte/DraftList'
 import NewActeSwitch from './acte/NewActeSwitch'
 import PesRetourList from './pes/PesRetourList'
@@ -131,7 +134,7 @@ const PublicRoute = ({ component: Component, ...rest }) => (
             <div className='wrapperContainer'>
                 <MenuBar />
                 <Container className='mainContainer'>
-                    <Component {...props} />
+                    <Component {...props} {...props.match.params} />
                 </Container>
             </div>
         </div>
@@ -185,11 +188,14 @@ class AppRoute extends Component {
         const params = this.state
         return (
             <Switch>
-                <PublicRoute exact path='/' component={Home} />
+                <PublicRoute exact path='/' {...params} component={Home} />
 
-                <Route path='/choix-collectivite' component={SelectLocalAuthority} />
+                <Route path='/choix-collectivite' {...params} component={SelectLocalAuthority} />
+                <PublicRoute path='/mentions-legales' {...params} component={LegalNotice} menu={MenuBar} />
+                <PublicRoute path='/registre-des-deliberations/:uuid' {...params} component={ActePublic} menu={MenuBar} />
+                <PublicRoute path='/registre-des-deliberations' {...params} component={ActePublicList} menu={MenuBar} />
 
-                <AuthRoute path='/profil' component={UserProfile} menu={MenuBar} />
+                <AuthRoute path='/profil' {...params} component={UserProfile} menu={MenuBar} />
 
                 <Route exact path='/actes'>
                     <Redirect to='/actes/liste' />

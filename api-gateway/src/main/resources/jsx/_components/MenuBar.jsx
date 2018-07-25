@@ -18,37 +18,48 @@ class MenuBar extends Component {
                 activatedModules: []
             },
             groups: []
-        }
+        },
+        reportUrl: ''
     }
     componentDidMount() {
         fetchWithAuthzHandling({ url: '/api/admin/profile' })
             .then(response => response.json())
             .then(profile => this.setState({ profile }, this.fetchAllRights))
+        fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
+            .then(response => response.text())
+            .then(reportUrl => this.setState({ reportUrl }))
+    }
+    mailToContact = () => {
+        fetchWithAuthzHandling({ url: '/api/admin/instance/contact-email' })
+            .then(response => response.text())
+            .then(contactEmail => {
+                if (contactEmail) window.location.href = 'mailto:' + contactEmail
+            })
     }
     render() {
         const { isLoggedIn, t } = this.context
+        const { reportUrl } = this.state
         const rights = getRightsFromGroups(this.state.profile.groups)
         return (
             <Menu style={{ backgroundColor: 'white' }} className='mainMenu anatra' fixed='left' secondary vertical >
 
                 <div className='mainMenus'>
-                    {(isLoggedIn && rightsModuleResolver(rights, 'ACTES')) &&
-                        < Menu.Item style={{ width: '100%' }}>
-                            <Icon name='checkmark box' size='large' />
-                            <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
-                            <Menu.Menu>
-                                {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
-                                    < Menu.Item as={NavLink} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
-                                }
-                                {rightsFeatureResolver(rights, ['ACTES_DEPOSIT', 'ACTES_DISPLAY']) &&
-                                    <Menu.Item as={NavLink} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
-                                }
-                                {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
-                                    <Menu.Item as={NavLink} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
-                                }
-                            </Menu.Menu>
-                        </Menu.Item>
-                    }
+                    <Menu.Item style={{ width: '100%' }}>
+                        <Icon name='checkmark box' size='large' />
+                        <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
+                        <Menu.Menu>
+                            {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
+                                <Menu.Item as={NavLink} to="/actes/nouveau">{t('menu.acte.submit_an_act')}</Menu.Item>
+                            }
+                            {rightsFeatureResolver(rights, ['ACTES_DEPOSIT', 'ACTES_DISPLAY']) &&
+                                <Menu.Item as={NavLink} to="/actes/liste">{t('menu.acte.list')}</Menu.Item>
+                            }
+                            <Menu.Item as={NavLink} to="/registre-des-deliberations">Registre des délibérations</Menu.Item>
+                            {rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) &&
+                                <Menu.Item as={NavLink} to="/actes/brouillons">{t('menu.acte.drafts')}</Menu.Item>
+                            }
+                        </Menu.Menu>
+                    </Menu.Item>
 
                     {(isLoggedIn && rightsModuleResolver(rights, 'PES')) &&
                         <Menu.Item style={{ width: '100%' }}>
@@ -84,9 +95,11 @@ class MenuBar extends Component {
                         <Icon name='help' size='large' />
                         <Menu.Header>{t('menu.informations.title')}</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item>{t('menu.informations.help')}</Menu.Item>
-                            <Menu.Item>{t('menu.informations.contact')}</Menu.Item>
-                            <Menu.Item>{t('menu.informations.cgu')}</Menu.Item>
+                            {(isLoggedIn && reportUrl) &&
+                                <a className='item' href={reportUrl} target='_blank'>{t('menu.informations.report')}</a>
+                            }
+                            <a className='item' onClick={this.mailToContact}>{t('menu.informations.contact')}</a>
+                            <Menu.Item as={NavLink} to="/mentions-legales">{t('menu.informations.legal_notice')}</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>
@@ -97,7 +110,7 @@ class MenuBar extends Component {
                     </Menu.Item>
 
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
-                        {t('made_with_love')}
+                        Créé avec ❤ par le <a style={{ color: 'unset', fontWeight: 'bold' }} href='https://www.sictiam.fr/' target='_blank'>SICTIAM</a>
                     </Menu.Item>
                 </div>
 

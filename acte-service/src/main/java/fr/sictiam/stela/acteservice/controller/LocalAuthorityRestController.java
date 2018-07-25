@@ -143,8 +143,8 @@ public class LocalAuthorityRestController {
             @PathVariable String migrationType,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren,
-            @RequestParam(value = "year", required = false) String year) {
-        return migration(migrationType, isLocalAuthorityAdmin, currentLocalAuthUuid, email, siren, year);
+            @RequestParam(value = "month", required = false) String month) {
+        return migration(migrationType, isLocalAuthorityAdmin, currentLocalAuthUuid, email, siren, month);
     }
 
     @PostMapping("/{uuid}/migration/{migrationType}")
@@ -153,12 +153,12 @@ public class LocalAuthorityRestController {
             @PathVariable String uuid, @PathVariable String migrationType,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren,
-            @RequestParam(value = "year", required = false) String year) {
-        return migration(migrationType, isLocalAuthorityAdmin, uuid, email, siren, year);
+            @RequestParam(value = "month", required = false) String month) {
+        return migration(migrationType, isLocalAuthorityAdmin, uuid, email, siren, month);
     }
 
     private ResponseEntity migration(String migrationType, boolean isLocalAuthorityAdmin, String localAuthUuid,
-            String email, String siren, String year) {
+            String email, String siren, String month) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -173,7 +173,7 @@ public class LocalAuthorityRestController {
             if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationData().equals(MigrationStatus.NOT_DONE)) {
                 return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
             }
-            CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, email, year));
+            CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, email, month));
         } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }

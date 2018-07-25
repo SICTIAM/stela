@@ -18,13 +18,19 @@ public class InstanceService {
     }
 
     public String getWelcomeMessage() {
-        return instanceRepository.findAll().get(0).getWelcomeMessage();
+        return getInstance().getWelcomeMessage();
     }
 
-    public void updateWelcomeMessage(String welcomeMessage) {
-        Instance instance = getInstance();
-        instance.setWelcomeMessage(welcomeMessage);
-        updateInstance(instance);
+    public String getLegalNotice() {
+        return getInstance().getLegalNotice();
+    }
+
+    public String getContactEmail() {
+        return getInstance().getContactEmail();
+    }
+
+    public String getReportUrl() {
+        return getInstance().getReportUrl();
     }
 
     public Instance getInstance() {

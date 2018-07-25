@@ -8,6 +8,7 @@ import fr.sictiam.stela.acteservice.model.ActeHistory;
 import fr.sictiam.stela.acteservice.model.Archive;
 import fr.sictiam.stela.acteservice.model.ArchiveSettings;
 import fr.sictiam.stela.acteservice.model.ArchiveStatus;
+import fr.sictiam.stela.acteservice.model.Attachment;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.asalae.AsalaeDocument;
@@ -60,15 +61,21 @@ public class ArchiverService {
         localAuthorities.forEach(localAuthority -> {
             if (localAuthority.getArchiveSettings() != null &&
                     localAuthority.getArchiveSettings().isArchiveActivated()) {
+                LOGGER.info("Retrieving actes for localeAuthority {} ({})", localAuthority.getName(), localAuthority.getUuid());
                 List<Acte> actes = acteRepository.findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(
                         localAuthority.getUuid());
+                LOGGER.info("{} actes", actes.size());
                 actes.forEach(acte -> {
                     if (acte.getActeHistories().last().getDate()
                             .isBefore(LocalDateTime.now().minusDays(localAuthority.getArchiveSettings().getDaysBeforeArchiving()))) {
 
                         archiveActe(acte, localAuthority.getArchiveSettings());
+                    } else {
+                        LOGGER.info("Acte {} not old enough", acte.getUuid());
                     }
                 });
+            } else {
+                LOGGER.info("LocalAuthority {} ({}) archiving not activated", localAuthority.getName(), localAuthority.getUuid());
             }
         });
         LOGGER.info("Ending archiveActesTask job");
@@ -89,12 +96,12 @@ public class ArchiverService {
     }
 
     public void archiveActe(Acte acte, ArchiveSettings archiveSettings) {
+        LOGGER.info("Archiving acte {}...", acte.getUuid());
         Optional<ActeHistory> historyAR = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 .findFirst();
 
         if (historyAR.isPresent() && historyAR.get().getFile() != null) {
-            LOGGER.info("Archiving acte {}...", acte.getUuid());
             LOGGER.info("Creating new Pastell document");
             AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
             LOGGER.info("Création: {}", asalaeDocument);
@@ -109,6 +116,12 @@ public class ArchiverService {
                     acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile(), archiveSettings);
             logAsalaeResultForm(updatedAsalaeResultForm);
 
+            LOGGER.info("Sending annexes files to Pastell");
+            for (Attachment annexe : acte.getAnnexes()) {
+                updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "autre_document_attache",
+                        annexe.getFilename(), annexe.getFile(), archiveSettings);
+                logAsalaeResultForm(updatedAsalaeResultForm);
+            }
 
             LOGGER.info("Sending ACK file to Pastell");
             updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "aractes",
@@ -130,6 +143,8 @@ public class ArchiverService {
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.SENT_TO_SAE);
             acte.getActeHistories().add(acteHistory);
             acteRepository.save(acte);
+        } else {
+            LOGGER.info("No AR found for this acte");
         }
     }
 

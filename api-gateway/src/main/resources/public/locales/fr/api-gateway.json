@@ -13,6 +13,7 @@
     "alert": "Alerte",
     "at": "à",
     "loading": "Chargement",
+    "legal_notice": "Mentions légales",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
@@ -74,7 +75,9 @@
         "informations": {
             "title": "Informations",
             "help": "Aide",
+            "report": "Déclarer un incident",
             "contact": "Contact",
+            "legal_notice": "Mentions légales",
             "cgu": "CGU"
         },
         "admin": "Admin"
@@ -271,7 +274,11 @@
         "creation_generic": "Compte générique",
         "instance_params": {
             "title": "Paramètres de l'instance",
-            "welcome_message": "Message de bienvenue"
+            "general_settings": "Paramètres généraux",
+            "contact_email": "Email de contact",
+            "report_url": "URL pour déclarer un incident",
+            "welcome_message": "Message de bienvenue",
+            "legal_notice": "Mentions légales"
         },
         "local_authority": {
             "general_informations": "Informations générales",

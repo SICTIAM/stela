@@ -6,4 +6,25 @@ public class Views {
 
     }
 
+    public interface ActePublicView extends AttachmentFullView, LocalAuthorityPublicView, SearchResultFullView,
+            ActeHistoryFullView {
+
+    }
+
+    public interface AttachmentFullView {
+
+    }
+
+    public interface LocalAuthorityPublicView {
+
+    }
+
+    public interface SearchResultFullView {
+
+    }
+
+    public interface ActeHistoryFullView {
+
+    }
+
 }

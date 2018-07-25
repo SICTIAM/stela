@@ -201,23 +201,25 @@ class Acte extends Component {
                                 <FieldValue id='agent'>{this.state.agent}</FieldValue>
                             </Field>
                         }
-                        <Grid>
-                            <Grid.Column width={4}>
-                                <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
-                            </Grid.Column>
-                            <Grid.Column width={12}>
-                                <FieldValue id="acteAttachment">
-                                    <LinkFile url={`/api/acte/${acte.uuid}/file`} text={acte.acteAttachment.filename} />
-                                </FieldValue>
-                            </Grid.Column>
-                        </Grid>
-                        <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
-                            {renderIf(annexes.length > 0)(
+                        {acte.acteAttachment &&
+                            <Grid>
+                                <Grid.Column width={4}>
+                                    <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
+                                </Grid.Column>
+                                <Grid.Column width={12}>
+                                    <FieldValue id="acteAttachment">
+                                        <LinkFile url={`/api/acte/${acte.uuid}/file`} text={acte.acteAttachment.filename} />
+                                    </FieldValue>
+                                </Grid.Column>
+                            </Grid>
+                        }
+                        {renderIf(annexes.length > 0)(
+                            <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
-                            )}
-                        </Field>
+                            </Field>
+                        )}
                         <Field htmlFor="public" label={t('acte.fields.public')}>
                             <Checkbox id="public" checked={acte.public} disabled />
                         </Field>

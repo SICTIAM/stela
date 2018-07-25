@@ -1,8 +1,10 @@
 package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.acteservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -20,17 +22,23 @@ public class ActeHistory implements Comparable<ActeHistory> {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ActeHistoryFullView.class)
     private String uuid;
+    @JsonView(Views.ActeHistoryFullView.class)
     private String acteUuid;
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.ActeHistoryFullView.class)
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonView(Views.ActeHistoryFullView.class)
     private LocalDateTime date;
     // Error messages can be quite lengthy
     @Column(length = 1024)
+    @JsonView(Views.ActeHistoryFullView.class)
     private String message;
     @JsonIgnore
     private byte[] file;
+    @JsonView(Views.ActeHistoryFullView.class)
     private String fileName;
 
     @Enumerated(EnumType.STRING)

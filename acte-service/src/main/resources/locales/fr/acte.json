@@ -93,6 +93,7 @@
       "annexes": "Fichiers annexes",
       "public": "Affichage dans le registre",
       "publicWebsite": "Affichage sur site internet",
+      "localAuthority": "Collectivité",
       "objet": "Objet",
       "status": "Status",
       "group": "Visible par",
@@ -112,6 +113,9 @@
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"
+    },
+    "list_public": {
+      "title": "Registre des délibérations"
     },
     "list": {
       "title": "Liste des actes",
