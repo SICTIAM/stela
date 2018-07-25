@@ -5103,13 +5103,13 @@ sax@^1.2.1, sax@~1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-semantic-ui-css@^2.3.1:
+semantic-ui-css@^2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/semantic-ui-css/-/semantic-ui-css-2.3.3.tgz#134794cde03344092f2728ff61bf9203cf172834"
   dependencies:
     jquery x.*
 
-semantic-ui-react@^0.80.0:
+semantic-ui-react@^0.80.2:
   version "0.80.2"
   resolved "https://registry.yarnpkg.com/semantic-ui-react/-/semantic-ui-react-0.80.2.tgz#a584f6dc485b0617438adc4baf6d1858e54bb930"
   dependencies:

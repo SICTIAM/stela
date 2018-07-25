@@ -19,7 +19,7 @@ class MenuBar extends Component {
             },
             groups: []
         },
-        reportUrl: '',
+        reportUrl: ''
     }
     componentDidMount() {
         fetchWithAuthzHandling({ url: '/api/admin/profile' })
