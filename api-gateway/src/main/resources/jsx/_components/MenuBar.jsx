@@ -18,15 +18,27 @@ class MenuBar extends Component {
                 activatedModules: []
             },
             groups: []
-        }
+        },
+        reportUrl: '',
     }
     componentDidMount() {
         fetchWithAuthzHandling({ url: '/api/admin/profile' })
             .then(response => response.json())
             .then(profile => this.setState({ profile }, this.fetchAllRights))
+        fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
+            .then(response => response.text())
+            .then(reportUrl => this.setState({ reportUrl }))
+    }
+    mailToContact = () => {
+        fetchWithAuthzHandling({ url: '/api/admin/instance/contact-email' })
+            .then(response => response.text())
+            .then(contactEmail => {
+                if (contactEmail) window.location.href = 'mailto:' + contactEmail
+            })
     }
     render() {
         const { isLoggedIn, t } = this.context
+        const { reportUrl } = this.state
         const rights = getRightsFromGroups(this.state.profile.groups)
         return (
             <Menu style={{ backgroundColor: 'white' }} className='mainMenu anatra' fixed='left' secondary vertical >
@@ -83,8 +95,11 @@ class MenuBar extends Component {
                         <Icon name='help' size='large' />
                         <Menu.Header>{t('menu.informations.title')}</Menu.Header>
                         <Menu.Menu>
+                            {(isLoggedIn && reportUrl) &&
+                                <a className='item' href={reportUrl} target='_blank'>{t('menu.informations.report')}</a>
+                            }
+                            <a className='item' onClick={this.mailToContact}>{t('menu.informations.contact')}</a>
                             <Menu.Item as={NavLink} to="/mentions-legales">{t('menu.informations.legal_notice')}</Menu.Item>
-                            <a className='item' href='https://support.sictiam.fr/declarer-un-incident/' target='_blank'>{t('menu.informations.contact')}</a>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>

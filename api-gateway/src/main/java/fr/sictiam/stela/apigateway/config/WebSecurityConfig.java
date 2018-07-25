@@ -49,7 +49,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
         http.addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                     .antMatchers("/api/acte/public/**").permitAll()
-                    .antMatchers("/api/admin/instance/welcome-message").permitAll()
+                    .antMatchers("/api/admin/instance/**").permitAll()
                     .antMatchers("/api/admin/local-authority/all").permitAll()
                     .antMatchers("/api/admin/ozwillo/**").permitAll()
                     .antMatchers("/api/api-gateway/isMainDomain").permitAll()

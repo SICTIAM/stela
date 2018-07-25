@@ -14,6 +14,8 @@ public class Instance {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
 
+    private String contactEmail;
+    private String reportUrl;
     private String welcomeMessage;
     private String legalNotice;
 
@@ -22,6 +24,22 @@ public class Instance {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getReportUrl() {
+        return reportUrl;
+    }
+
+    public void setReportUrl(String reportUrl) {
+        this.reportUrl = reportUrl;
     }
 
     public String getWelcomeMessage() {

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/instance")
+@RequestMapping("/api/admin/instance") // '/api/admin/instance/**' is fully authorized
 public class InstanceController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceController.class);
@@ -48,5 +48,15 @@ public class InstanceController {
     @GetMapping("/legal-notice")
     public ResponseEntity<String> getLegalNotice() {
         return new ResponseEntity<>(instanceService.getLegalNotice(), HttpStatus.OK);
+    }
+
+    @GetMapping("/contact-email")
+    public ResponseEntity<String> getContactEmail() {
+        return new ResponseEntity<>(instanceService.getContactEmail(), HttpStatus.OK);
+    }
+
+    @GetMapping("/report-url")
+    public ResponseEntity<String> getReportUrl() {
+        return new ResponseEntity<>(instanceService.getReportUrl(), HttpStatus.OK);
     }
 }

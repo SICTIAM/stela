@@ -25,6 +25,14 @@ public class InstanceService {
         return getInstance().getLegalNotice();
     }
 
+    public String getContactEmail() {
+        return getInstance().getContactEmail();
+    }
+
+    public String getReportUrl() {
+        return getInstance().getReportUrl();
+    }
+
     public Instance getInstance() {
         return instanceRepository.findAll().get(0);
     }
