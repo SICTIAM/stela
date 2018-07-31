@@ -68,6 +68,7 @@ public class FTPUploaderService {
                 ftpClient.disconnect();
                 LOGGER.error("Error while trying to login to FTP server, reply: {}", reply);
             }
+            ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             return ftpClient;
         } catch (IOException e) {
