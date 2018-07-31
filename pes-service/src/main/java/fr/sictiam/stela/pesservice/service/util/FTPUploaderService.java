@@ -39,7 +39,7 @@ public class FTPUploaderService {
             ftpClient.sendSiteCommand("P_MSG " + pesAller.getFileType() + "#" + pesAller.getColCode()
                     + "#" + pesAller.getPostId() + "#" + pesAller.getBudCode());
 
-            LOGGER.info("Uploading file {} to FTP server");
+            LOGGER.info("Uploading file {} to FTP server", pesAller.getAttachment().getFilename());
             InputStream input = new ByteArrayInputStream(pesAller.getAttachment().getFile());
             ftpClient.storeFile(pesAller.getAttachment().getFilename(), input);
             int reply = ftpClient.getReplyCode();
