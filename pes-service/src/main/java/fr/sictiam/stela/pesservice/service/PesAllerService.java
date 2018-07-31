@@ -12,8 +12,8 @@ import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
+import fr.sictiam.stela.pesservice.service.util.FTPUploaderService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
-import org.springframework.integration.ftp.session.FtpSession;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -72,6 +71,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
     private final DefaultFtpSessionFactory defaultFtpSessionFactory;
+    private final FTPUploaderService ftpUploaderService;
 
     @Value("${application.clamav.port}")
     private Integer clamavPort;
@@ -84,13 +84,13 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     @Autowired
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
-            DefaultFtpSessionFactory defaultFtpSessionFactory) {
+            DefaultFtpSessionFactory defaultFtpSessionFactory, FTPUploaderService ftpUploaderService) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
         this.defaultFtpSessionFactory = defaultFtpSessionFactory;
-
+        this.ftpUploaderService = ftpUploaderService;
     }
 
     @PostConstruct
@@ -322,16 +322,16 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public void send(PesAller pes) throws PesSendException {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pes.getAttachment().getFile());
+        /*ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pes.getAttachment().getFile());
         FtpSession ftpSession = defaultFtpSessionFactory.getSession();
-        FTPClient ftpClient = ftpSession.getClientInstance();
+        FTPClient ftpClient = ftpSession.getClientInstance();*/
         try {
-            ftpClient.setControlKeepAliveTimeout(300);
-            ftpClient.sendSiteCommand("P_DEST " + pes.getLocalAuthority().getServerCode().name());
+            /*ftpClient.sendSiteCommand("P_DEST " + pes.getLocalAuthority().getServerCode().name());
             ftpClient.sendSiteCommand("P_APPLI GHELPES2");
             ftpClient.sendSiteCommand("P_MSG " + pes.getFileType() + "#" + pes.getColCode() + "#" + pes.getPostId()
                     + "#" + pes.getBudCode());
-            ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());
+            ftpSession.write(byteArrayInputStream, pes.getAttachment().getFilename());*/
+            ftpUploaderService.uploadFile(pes);
         } catch (IOException e) {
             throw new PesSendException();
         }
