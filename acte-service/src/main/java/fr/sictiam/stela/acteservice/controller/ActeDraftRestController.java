@@ -75,11 +75,12 @@ public class ActeDraftRestController {
 
     @GetMapping("/drafts")
     public ResponseEntity<List<DraftUI>> getDrafts(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        List<DraftUI> drafts = draftService.getDraftUIs();
+        List<DraftUI> drafts = draftService.getDraftUIs(currentLocalAuthUuid);
         return new ResponseEntity<>(drafts, HttpStatus.OK);
     }
 
@@ -94,20 +95,30 @@ public class ActeDraftRestController {
     }
 
     @GetMapping("/drafts/{uuid}")
-    public ResponseEntity<DraftUI> getDraftByUuid(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+    public ResponseEntity<DraftUI> getDraftByUuid(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(uuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         DraftUI draft = draftService.getDraftActesUI(uuid);
         return new ResponseEntity<>(draft, HttpStatus.OK);
     }
 
     @GetMapping("/drafts/{draftUuid}/{uuid}")
-    public ResponseEntity<Acte> getActeDraftByUuid(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @PathVariable String uuid) {
+    public ResponseEntity<Acte> getActeDraftByUuid(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @PathVariable String draftUuid, @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Acte acte = draftService.getActeDraftByUuid(uuid);
         return new ResponseEntity<>(acte, HttpStatus.OK);
@@ -116,9 +127,12 @@ public class ActeDraftRestController {
     @PutMapping("/drafts/{draftUuid}/{uuid}")
     ResponseEntity<String> saveActeDraft(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestBody Acte acte) {
+            @RequestBody Acte acte, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         Acte result = draftService.saveOrUpdateActeDraft(acte, currentLocalAuthority);
@@ -129,11 +143,15 @@ public class ActeDraftRestController {
     ResponseEntity<?> submitDraft(@PathVariable String draftUuid,
             @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
             @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
                 || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Optional opt = draftService.sumitDraft(draftUuid, profileUuid);
         if (opt.isPresent())
@@ -143,9 +161,13 @@ public class ActeDraftRestController {
 
     @PatchMapping("/drafts/{draftUuid}")
     ResponseEntity<?> upddateDraftFields(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestBody DraftUI draftUI) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestBody DraftUI draftUI, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.upddateDraftFields(draftUI);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -153,23 +175,31 @@ public class ActeDraftRestController {
 
     @DeleteMapping("/drafts/{draftUuid}")
     ResponseEntity<?> deleteDraft(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.deleteDrafts(Collections.singletonList(draftUuid));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/drafts/{draftUuid}/{uuid}")
-    ResponseEntity<?> submitActeDraft(@PathVariable String uuid,
+    ResponseEntity<?> submitActeDraft(@PathVariable String draftUuid, @PathVariable String uuid,
             @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
             @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
                 || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);
         List<ObjectError> errors = ValidationUtil.validateActe(acteDraft);
@@ -192,6 +222,9 @@ public class ActeDraftRestController {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        if (!draftService.canAccessDraft(uuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         ActeDraftUI acte = draftService.newActeForDraft(uuid, currentLocalAuthority);
         return new ResponseEntity<>(acte, HttpStatus.OK);
@@ -199,9 +232,14 @@ public class ActeDraftRestController {
 
     @DeleteMapping("/drafts/{uuid}/{acteUuid}")
     public ResponseEntity<?> deleteActeDraft(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable("uuid") String uuid,
             @PathVariable("acteUuid") String acteUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(uuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.deleteActeDraftByUuid(acteUuid);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -210,9 +248,12 @@ public class ActeDraftRestController {
     @PutMapping("/drafts/{draftUuid}/{uuid}/leave")
     public ResponseEntity<?> leaveActeDraft(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestBody Acte acte) {
+            @RequestBody Acte acte, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
         draftService.leaveActeDraft(acte, currentLocalAuthority);
@@ -222,10 +263,13 @@ public class ActeDraftRestController {
     @PostMapping("/drafts/{draftUuid}/{uuid}/file")
     public ResponseEntity<?> saveActeDraftFile(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @PathVariable String uuid, @RequestParam("file") MultipartFile file,
+            @PathVariable String uuid, @PathVariable String draftUuid, @RequestParam("file") MultipartFile file,
             @RequestParam(value = "nature", required = false) ActeNature nature) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         List<ObjectError> objectErrors = ValidationUtil.validateFile(file, nature, true, "acteAttachment");
         if (!objectErrors.isEmpty()) {
@@ -244,10 +288,13 @@ public class ActeDraftRestController {
     @PostMapping("/drafts/{draftUuid}/{uuid}/annexe")
     public ResponseEntity<?> saveActeDraftAnnexe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @PathVariable String uuid, @RequestParam("file") MultipartFile file,
+            @PathVariable String uuid, @PathVariable String draftUuid, @RequestParam("file") MultipartFile file,
             @RequestParam(value = "nature", required = false) ActeNature nature) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         List<ObjectError> objectErrors = ValidationUtil.validateFile(file, nature, false, "acte.extensions");
         if (!objectErrors.isEmpty()) {
@@ -265,9 +312,13 @@ public class ActeDraftRestController {
 
     @PutMapping("/drafts/{draftUuid}/{acteUuid}/file/type/{uuid}")
     public ResponseEntity updateFileAttachmentType(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @PathVariable String acteUuid, @PathVariable String uuid) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String acteUuid, @PathVariable String uuid, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.updateActeFileAttachmentType(acteUuid, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -276,9 +327,13 @@ public class ActeDraftRestController {
     @PutMapping("/drafts/{draftUuid}/{acteUuid}/annexe/{annexeUuid}/type/{uuid}")
     public ResponseEntity updateAnnexeAttachmentType(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights, @PathVariable String annexeUuid,
-            @PathVariable String uuid) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.updateAttachmentType(annexeUuid, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -286,9 +341,13 @@ public class ActeDraftRestController {
 
     @DeleteMapping("/drafts/{draftUuid}/types")
     public ResponseEntity removeAttachmentTypes(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.removeAttachmentTypes(draftUuid);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -296,9 +355,13 @@ public class ActeDraftRestController {
 
     @DeleteMapping("/drafts/{draftUuid}/{uuid}/file")
     public ResponseEntity<?> deleteActeDraftFile(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @PathVariable String uuid) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.deleteActeDraftFile(uuid);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -306,9 +369,13 @@ public class ActeDraftRestController {
 
     @DeleteMapping("/drafts/{draftUuid}/{acteUuid}/annexe/{uuid}")
     public ResponseEntity<?> deleteActeDraftAnnexe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @PathVariable String acteUuid, @PathVariable String uuid) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String acteUuid, @PathVariable String uuid, @PathVariable String draftUuid) {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftService.deleteActeDraftAnnexe(acteUuid, uuid);
         return new ResponseEntity<>(HttpStatus.OK);

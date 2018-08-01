@@ -11,5 +11,7 @@ public interface ActeDraftRepository extends JpaRepository<Draft, String> {
 
     List<Draft> findAllByOrderByLastModifiedDesc();
 
+    List<Draft> findAllByLocalAuthorityUuidOrderByLastModifiedDesc(String localAuthorityUuid);
+
     List<Draft> findAllByLastModifiedBefore(LocalDateTime date);
 }
