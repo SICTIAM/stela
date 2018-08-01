@@ -850,7 +850,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                     String.class);
             httpStatus = result.getStatusCode();
         } catch (Exception e) {
-            LOGGER.error("Miat main server unavailable!");
+            LOGGER.error("Miat main server unavailable: {}", e.getMessage());
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
@@ -860,7 +860,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         String.class);
                 httpStatus = result.getStatusCode();
             } catch (Exception e) {
-                LOGGER.error("Miat rescue server unavailable!");
+                LOGGER.error("Miat rescue server unavailable: {}", e.getMessage());
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             }
         }
