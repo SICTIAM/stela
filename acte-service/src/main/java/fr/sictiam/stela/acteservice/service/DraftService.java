@@ -141,7 +141,7 @@ public class DraftService {
 
     public Acte newDraft(LocalAuthority currentLocalAuthority, ActeMode mode) {
         Acte acte = getEmptyActe(currentLocalAuthority, mode);
-        acte.setDraft(new Draft(LocalDateTime.now(), mode));
+        acte.setDraft(new Draft(LocalDateTime.now(), mode, currentLocalAuthority.getUuid()));
         return acteRepository.save(acte);
     }
 
@@ -264,8 +264,8 @@ public class DraftService {
         return acteRepository.findAllByDraftNotNullOrderByDraft_LastModifiedDesc();
     }
 
-    public List<DraftUI> getDraftUIs() {
-        List<Draft> drafts = acteDraftRepository.findAllByOrderByLastModifiedDesc();
+    public List<DraftUI> getDraftUIs(String currentLocalAuthUuid) {
+        List<Draft> drafts = acteDraftRepository.findAllByLocalAuthorityUuidOrderByLastModifiedDesc(currentLocalAuthUuid);
         List<DraftUI> draftUIs = new ArrayList<>();
         for (Draft draft : drafts) {
             List<ActeDraftUI> acteUuids = getActeDrafts(draft.getUuid()).stream()
@@ -276,6 +276,14 @@ public class DraftService {
                         draft.getDecision(), draft.getNature(), draft.getGroupUuid()));
         }
         return draftUIs;
+    }
+
+    public boolean canAccessDraft(String draftUuid, String currentLocalAuthority) {
+        Draft draft = getDraftByUuid(draftUuid);
+        if (draft != null) {
+            return currentLocalAuthority.equals(draft.getLocalAuthorityUuid());
+        }
+        return false;
     }
 
     public DraftUI getDraftActesUI(String uuid) {

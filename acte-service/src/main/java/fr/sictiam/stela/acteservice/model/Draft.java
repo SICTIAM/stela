@@ -24,13 +24,15 @@ public class Draft {
     private LocalDate decision;
     private ActeNature nature;
     private String groupUuid;
+    private String localAuthorityUuid;
 
     public Draft() {
     }
 
-    public Draft(LocalDateTime lastModified, ActeMode mode) {
+    public Draft(LocalDateTime lastModified, ActeMode mode, String localAuthorityUuid) {
         this.lastModified = lastModified;
         this.mode = mode;
+        this.localAuthorityUuid = localAuthorityUuid;
     }
 
     public String getUuid() {
@@ -71,5 +73,13 @@ public class Draft {
 
     public void setGroupUuid(String groupUuid) {
         this.groupUuid = groupUuid;
+    }
+
+    public String getLocalAuthorityUuid() {
+        return localAuthorityUuid;
+    }
+
+    public void setLocalAuthorityUuid(String localAuthorityUuid) {
+        this.localAuthorityUuid = localAuthorityUuid;
     }
 }
