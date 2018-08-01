@@ -433,13 +433,13 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Test
     public void createRetrieveAndLeaveDraft() {
-        assertThat(draftService.getDraftUIs(), empty());
-        assertThat(draftService.getActeDrafts(), empty());
-
         LocalAuthority localAuthority = localAuthorityService.getByName("SICTIAM TEST").get();
 
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), empty());
+        assertThat(draftService.getActeDrafts(), empty());
+
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
-        DraftUI draft = draftService.getDraftUIs().get(0);
+        DraftUI draft = draftService.getDraftUIs(localAuthority.getUuid()).get(0);
         assertThat(draft.getUuid(), is(acte.getDraft().getUuid()));
 
         acte.setObjet("Object draft");
@@ -449,7 +449,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         acte.setObjet("");
         draftService.leaveActeDraft(acte, localAuthority);
 
-        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), empty());
         assertThat(draftService.getActeDrafts(), empty());
     }
 
@@ -459,7 +459,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         Acte acte = draftService.newDraft(localAuthority, ActeMode.ACTE);
         draftService.leaveActeDraft(setActeValues(acte), localAuthority);
 
-        List<DraftUI> draftUIs = draftService.getDraftUIs();
+        List<DraftUI> draftUIs = draftService.getDraftUIs(localAuthority.getUuid());
         assertThat(draftUIs, hasSize(1));
         assertThat(draftUIs.get(0).getActes(), hasSize(1));
         assertThat(acte.getUuid(), is(draftUIs.get(0).getActes().get(0).getUuid()));
@@ -467,7 +467,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
         acte = draftService.getActeDraftByUuid(acte.getUuid());
         draftService.submitActeDraft(acte);
-        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), empty());
         assertThat(acteService.getByUuid(acte.getUuid()), notNullValue());
     }
 
@@ -482,14 +482,14 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draftService.leaveActeDraft(setActeValues(acte2), localAuthority);
         draftService.leaveActeDraft(setActeValues(acte3), localAuthority);
 
-        assertEquals(3, draftService.getDraftUIs().size());
-        assertThat(draftService.getDraftUIs(), hasSize(3));
+        assertEquals(3, draftService.getDraftUIs(localAuthority.getUuid()).size());
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), hasSize(3));
         draftService.deleteDrafts(Collections.singletonList(acte1.getDraft().getUuid()));
-        assertThat(draftService.getDraftUIs(), hasSize(2));
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), hasSize(2));
         draftService.deleteActeDraftByUuid(acte2.getUuid());
-        assertThat(draftService.getDraftUIs(), hasSize(1));
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), hasSize(1));
         draftService.deleteDrafts(Collections.emptyList());
-        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), empty());
     }
 
     @Test
@@ -538,7 +538,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()), notNullValue());
 
         draftService.leaveActeDraft(draftService.getActeDraftByUuid(draft.getActes().get(0).getUuid()), localAuthority);
-        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), empty());
         assertThat(draftService.getActeDrafts(), empty());
 
         draft = draftService.newBatchedDraft(localAuthority);
@@ -552,7 +552,7 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         draftService.saveActeDraft(setActeValues(acte2), localAuthority);
 
         draftService.sumitDraft(draft.getUuid(), "4f146466-ea58-4e5c-851c-46db18ac173b");
-        assertThat(draftService.getDraftUIs(), empty());
+        assertThat(draftService.getDraftUIs(localAuthority.getUuid()), empty());
         assertThat(draftService.getActeDrafts(), empty());
         assertThat(acteRepository.findAll(), hasSize(2));
     }
