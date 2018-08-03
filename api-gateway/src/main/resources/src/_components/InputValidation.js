@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Label, Dropdown } from 'semantic-ui-react'
-import renderIf from 'render-if'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
@@ -76,9 +75,9 @@ export default class InputValidation extends Component {
                         fluid selection />}
 
                 <div>
-                    {renderIf(!this.state.isValid)(
+                    {!this.state.isValid &&
                         <Label color='red' pointing>{this.state.errorMessage}</Label>
-                    )}
+                    }
                 </div>
             </div>
         )

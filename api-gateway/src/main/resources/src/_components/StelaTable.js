@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import renderIf from 'render-if'
 import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
 import history from '../_util/history'
@@ -142,15 +141,15 @@ export default class StelaTable extends Component {
         const column = this.props.column ? this.props.column : this.state.column
         const direction = this.getDirectionClass()
 
-        const title = renderIf(this.props.headerTitle !== '')
-        const header = renderIf(this.props.header)
-        const search = renderIf(this.props.search)
-        const isEmpty = renderIf(data.length === 0)
-        const isFilled = renderIf(data.length > 0)
-        const select = renderIf(this.props.select)
-        const pagination = renderIf(this.props.pagination)
-        const options = renderIf(this.props.selectOptions.length > 0 && this.state.originalData.length > 0)
-        const additionalElements = renderIf(this.props.additionalElements.length > 0)
+        const title = this.props.headerTitle !== ''
+        const header = this.props.header
+        const search = this.props.search
+        const isEmpty = data.length === 0
+        const isFilled = data.length > 0
+        const select = this.props.select
+        const pagination = this.props.pagination
+        const options = this.props.selectOptions.length > 0 && this.state.originalData.length > 0
+        const additionalElements = this.props.additionalElements.length > 0
 
         const undisplayedColumnsProperties = this.props.metaData.filter(metaData => !metaData.displayed).map(metaData => metaData.property)
         const displayedColumns = this.props.metaData.filter(metaData => metaData.displayed)
@@ -166,61 +165,60 @@ export default class StelaTable extends Component {
 
         return (
             <div className={this.props.className}>
-                {search(
+                {search &&
                     <Input className='tableColor' style={this.floatRightStyle} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
-                )}
+                }
 
-                {options(
+                {options &&
                     <Dropdown direction='left' style={this.floatRightStyle} trigger={trigger} icon={false} basic>
                         <Dropdown.Menu>
                             {selectOptions}
                         </Dropdown.Menu>
                     </Dropdown>
-                )}
+                }
 
-                {additionalElements(
+                {additionalElements &&
                     this.props.additionalElements.map((element, index) =>
                         <span key={'element-' + index} style={this.floatRightStyle}>{element}</span>
                     )
-                )}
+                }
 
                 <Table selectable sortable={this.props.header} basic={this.props.basic} celled={this.props.celled} fixed>
-                    {title(
+                    {title &&
                         <Table.Header>
                             <Table.Row>
                                 <Table.HeaderCell colSpan={displayedColumns.length}>{this.props.headerTitle}</Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                    )}
-                    {header(
+                    }
+                    {header &&
                         <Table.Header>
                             <Table.Row>
                                 {this.props.metaData.map((metaData, index) =>
-                                    renderIf(!undisplayedColumnsProperties.includes(metaData.property))(
-                                        <Table.HeaderCell key={index + '-' + metaData.displayName}
-                                            sorted={column === metaData.property ? direction : null}
-                                            onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
-                                            {metaData.displayName}
-                                        </Table.HeaderCell>
-                                    )
+                                    !undisplayedColumnsProperties.includes(metaData.property) &&
+                                    <Table.HeaderCell key={index + '-' + metaData.displayName}
+                                        sorted={column === metaData.property ? direction : null}
+                                        onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
+                                        {metaData.displayName}
+                                    </Table.HeaderCell>
                                 )}
-                                {select(
+                                {select &&
                                     <Table.HeaderCell style={{ width: '40px' }} onClick={this.handleChekAll}>
                                         <Checkbox checked={this.state.checkAll} onClick={this.handleChekAll} />
                                     </Table.HeaderCell>
-                                )}
+                                }
                             </Table.Row>
                         </Table.Header>
-                    )}
+                    }
                     <Table.Body>
-                        {isEmpty(
+                        {isEmpty &&
                             <Table.Row>
                                 <Table.Cell colSpan={displayedColumns.length}>
                                     <p style={{ fontStyle: 'italic', textAlign: 'center' }}>{this.props.noDataMessage}</p>
                                 </Table.Cell>
                             </Table.Row>
-                        )}
-                        {isFilled(
+                        }
+                        {isFilled &&
                             data.map(row =>
                                 <Table.Row key={row[this.props.keyProperty]}>
                                     {displayedColumns.map((displayedColumn, index) =>
@@ -233,17 +231,17 @@ export default class StelaTable extends Component {
                                                 : row[displayedColumn.property]}
                                         </Table.Cell>
                                     )}
-                                    {select(
+                                    {select &&
                                         <Table.Cell style={{ width: '40px' }}>
                                             <Checkbox checked={this.state.checkboxes[row[this.props.keyProperty]]}
                                                 onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
                                         </Table.Cell>
-                                    )}
+                                    }
                                 </Table.Row>
                             )
-                        )}
+                        }
                     </Table.Body>
-                    {pagination(this.props.pagination)}
+                    {pagination && this.props.pagination}
                 </Table>
             </div>
         )

@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import renderIf from 'render-if'
 import { Accordion, Icon, Segment, Grid, Button, Header, Form, Dropdown } from 'semantic-ui-react'
 import moment from 'moment'
 import Validator from 'validatorjs'
@@ -338,11 +337,11 @@ class NewActeBatchedForm extends Component {
                     <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>{t('acte.new.add_an_acte')}</Button>
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
-                    {renderIf(this.state.fields.uuid)(
+                    {this.state.fields.uuid &&
                         <Button style={{ marginRight: '1em' }} onClick={this.initDelete} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
                             {t('api-gateway:form.delete_draft')}
                         </Button>
-                    )}
+                    }
                     <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
                 </div>
             </div>
