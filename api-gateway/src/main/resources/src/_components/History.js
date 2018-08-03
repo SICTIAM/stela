@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import renderIf from 'render-if'
 import moment from 'moment'
 import { Feed, Segment } from 'semantic-ui-react'
 
@@ -21,8 +20,8 @@ class History extends Component {
         const { t } = this.context
         const { title, moduleName, emptyMessage, history } = this.props
 
-        const historyEmpty = renderIf(history.length === 0)
-        const historyNotEmpty = renderIf(history.length > 0)
+        const historyEmpty = history.length === 0
+        const historyNotEmpty = history.length > 0
 
         const histories = history.map(status =>
             <Feed.Event key={status.uuid}>
@@ -32,28 +31,28 @@ class History extends Component {
                     <Feed.Summary>
                         {t(getHistoryStatusTranslationKey(moduleName, status))}
                     </Feed.Summary>
-                    {renderIf(status.message)(
+                    {status.message &&
                         <Feed.Extra>{status.message}</Feed.Extra>
-                    )}
-                    {renderIf(status.fileName)(
+                    }
+                    {status.fileName &&
                         <Feed.Extra>
                             {t(`${moduleName}:${moduleName}.page.linked_file`)}: <LinkFile url={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`} text={status.fileName} />
                         </Feed.Extra>
-                    )}
+                    }
                 </Feed.Content>
             </Feed.Event>
         )
         return (
             <Segment>
                 <h2>{title}</h2>
-                {historyNotEmpty(
+                {historyNotEmpty &&
                     <Feed >
                         {histories}
                     </Feed>
-                )}
-                {historyEmpty(
+                }
+                {historyEmpty &&
                     <p>{emptyMessage}</p>
-                )}
+                }
             </Segment>
         )
     }

@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import renderIf from 'render-if'
 import moment from 'moment'
 import { Grid, Segment, List, Checkbox, Label, Dropdown, Button, Popup } from 'semantic-ui-react'
 
@@ -213,13 +212,13 @@ class Acte extends Component {
                                 </Grid.Column>
                             </Grid>
                         }
-                        {renderIf(annexes.length > 0)(
+                        {annexes.length > 0 &&
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
                             </Field>
-                        )}
+                        }
                         <Field htmlFor="public" label={t('acte.fields.public')}>
                             <Checkbox id="public" checked={acte.public} disabled />
                         </Field>

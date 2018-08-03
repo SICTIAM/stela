@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import renderIf from 'render-if'
 import { Button } from 'semantic-ui-react'
 
 import ConfirmModal from '../_components/ConfirmModal'
@@ -35,11 +34,10 @@ class ActeCancelButton extends Component {
     render() {
         const { t } = this.context
         return (
-            renderIf(this.props.isCancellable && this.props.uuid !== '' && !this.state.requestSent)(
-                <ConfirmModal onConfirm={this.cancelDeposit} text={t('acte.page.cancel_deposit_confirm')}>
-                    <Button basic color='red'>{t('acte.page.cancel_deposit')}</Button>
-                </ConfirmModal>
-            )
+            (this.props.isCancellable && this.props.uuid !== '' && !this.state.requestSent) &&
+            <ConfirmModal onConfirm={this.cancelDeposit} text={t('acte.page.cancel_deposit_confirm')}>
+                <Button basic color='red'>{t('acte.page.cancel_deposit')}</Button>
+            </ConfirmModal>
         )
     }
 }

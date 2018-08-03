@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import renderIf from 'render-if'
 import moment from 'moment'
 import { Grid, Segment, List, Label, Dropdown, Button, Popup } from 'semantic-ui-react'
 
@@ -132,13 +131,13 @@ class ActePublic extends Component {
                                 </Grid.Column>
                             </Grid>
                         }
-                        {renderIf(annexes.length > 0)(
+                        {annexes.length > 0 &&
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
                             </Field>
-                        )}
+                        }
                     </Segment>
                 </LoadingContent>
             </Page>

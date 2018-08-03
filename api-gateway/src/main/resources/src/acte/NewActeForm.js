@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import renderIf from 'render-if'
 import { Button, Form, Checkbox, Card, Dropdown, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
@@ -434,128 +433,127 @@ class NewActeForm extends Component {
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".xml" : ".pdf, .jpg, .png"
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".pdf, .jpg, .png" : ".pdf, .xml, .jpg, .png"
         return (
-            renderIf(this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid)(
-                <Form onSubmit={this.saveAndSubmitForm}>
-                    <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
+            (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) &&
+            <Form onSubmit={this.saveAndSubmitForm}>
+                <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
+                    <Grid.Column>
+                        <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')} helpText={t('acte.help_text.number')}>
+                            <InputValidation id={`${this.state.fields.uuid}_number`}
+                                placeholder={t('acte.fields.number') + '...'}
+                                value={this.state.fields.number}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.number}
+                                fieldName={t('acte.fields.number')} />
+                        </FormField>
+                    </Grid.Column>
+                    {this.props.mode !== 'ACTE_BATCH' &&
                         <Grid.Column>
-                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')} helpText={t('acte.help_text.number')}>
-                                <InputValidation id={`${this.state.fields.uuid}_number`}
-                                    placeholder={t('acte.fields.number') + '...'}
-                                    value={this.state.fields.number}
+                            <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
+                                <InputValidation id={`${this.state.fields.uuid}_decision`}
+                                    type='date'
+                                    value={this.state.fields.decision}
                                     onChange={this.handleFieldChange}
-                                    validationRule={this.validationRules.number}
-                                    fieldName={t('acte.fields.number')} />
+                                    validationRule={this.validationRules.decision}
+                                    fieldName={t('acte.fields.decision')}
+                                    isValidDate={(current) => current.isBefore(new moment())} />
                             </FormField>
                         </Grid.Column>
-                        {renderIf(this.props.mode !== 'ACTE_BATCH')(
+                    }
+                    {this.props.mode !== 'ACTE_BATCH' &&
+                        <Grid.Column>
+                            <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')} helpText={t('acte.help_text.group')}>
+                                <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
+                                    value={groupOptionValue}
+                                    onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                    options={groupOptions}
+                                    fluid selection />
+                            </FormField>
+                        </Grid.Column>
+                    }
+                </Grid>
+                <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}>
+                    <InputValidation id={`${this.state.fields.uuid}_objet`}
+                        placeholder={t('acte.fields.objet') + '...'}
+                        value={this.state.fields.objet}
+                        onChange={this.handleFieldChange}
+                        validationRule={this.validationRules.objet}
+                        fieldName={t('acte.fields.objet')} />
+                </FormField>
+                {(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH') &&
+                    <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
+                        <InputValidation id={`${this.state.fields.uuid}_nature`}
+                            type='dropdown'
+                            value={this.state.fields.nature}
+                            onChange={this.handleFieldChange}
+                            validationRule={this.validationRules.nature}
+                            fieldName={t('acte.fields.nature')}
+                            options={natureOptions} />
+                    </FormField>
+                }
+                <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
+                    <InputValidation id={`${this.state.fields.uuid}_code`}
+                        type='dropdown' search
+                        value={this.state.fields.code}
+                        onChange={this.handleFieldChange}
+                        validationRule={this.validationRules.code}
+                        fieldName={t('acte.fields.code')}
+                        options={codeOptions} />
+                </FormField>
+                <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')} helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
+                    <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
+                        type='file'
+                        accept={acceptFile}
+                        onChange={this.saveDraftFile}
+                        value={this.state.fields.acteAttachment}
+                        validationRule={this.validationRules.acteAttachment}
+                        label={t('api-gateway:form.add_a_file')}
+                        fieldName={t('acte.fields.acteAttachment')} />
+                </FormField>
+                {this.state.fields.acteAttachment &&
+                    <File
+                        key={`${this.state.fields.uuid}_acteAttachment`}
+                        attachment={this.state.fields.acteAttachment}
+                        onDelete={this.deleteDraftFile}
+                        extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
+                }
+                <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')} helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
+                    <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
+                        <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes} onChange={e => this.saveDraftAnnexe(e.target.files[0])}
+                            style={{ display: 'none' }} />
+                    </InputFile>
+                </FormField>
+                {this.state.fields.annexes.length > 0 &&
+                    <Card.Group>
+                        {annexes}
+                    </Card.Group>
+                }
+                {(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') &&
+                    <Grid columns={3} style={{ marginBottom: 'auto' }}>
+                        <Grid.Column>
+                            <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')} helpText={t('acte.help_text.public')}>
+                                <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} toggle />
+                            </FormField>
+                        </Grid.Column>
+                        {this.state.depositFields.publicWebsiteField &&
                             <Grid.Column>
-                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
-                                    <InputValidation id={`${this.state.fields.uuid}_decision`}
-                                        type='date'
-                                        value={this.state.fields.decision}
-                                        onChange={this.handleFieldChange}
-                                        validationRule={this.validationRules.decision}
-                                        fieldName={t('acte.fields.decision')}
-                                        isValidDate={(current) => current.isBefore(new moment())} />
+                                <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')} helpText={t('acte.help_text.publicWebsite')}>
+                                    <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
                                 </FormField>
                             </Grid.Column>
-                        )}
-                        {renderIf(this.props.mode !== 'ACTE_BATCH')(
-                            <Grid.Column>
-                                <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')} helpText={t('acte.help_text.group')}>
-                                    <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
-                                        value={groupOptionValue}
-                                        onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
-                                        options={groupOptions}
-                                        fluid selection />
-                                </FormField>
-                            </Grid.Column>
-                        )}
+                        }
                     </Grid>
-                    <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}>
-                        <InputValidation id={`${this.state.fields.uuid}_objet`}
-                            placeholder={t('acte.fields.objet') + '...'}
-                            value={this.state.fields.objet}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.objet}
-                            fieldName={t('acte.fields.objet')} />
-                    </FormField>
-                    {renderIf(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH')(
-                        <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
-                            <InputValidation id={`${this.state.fields.uuid}_nature`}
-                                type='dropdown'
-                                value={this.state.fields.nature}
-                                onChange={this.handleFieldChange}
-                                validationRule={this.validationRules.nature}
-                                fieldName={t('acte.fields.nature')}
-                                options={natureOptions} />
-                        </FormField>
-                    )}
-                    <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
-                        <InputValidation id={`${this.state.fields.uuid}_code`}
-                            type='dropdown' search
-                            value={this.state.fields.code}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.code}
-                            fieldName={t('acte.fields.code')}
-                            options={codeOptions} />
-                    </FormField>
-                    <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')} helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
-                        <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
-                            type='file'
-                            accept={acceptFile}
-                            onChange={this.saveDraftFile}
-                            value={this.state.fields.acteAttachment}
-                            validationRule={this.validationRules.acteAttachment}
-                            label={t('api-gateway:form.add_a_file')}
-                            fieldName={t('acte.fields.acteAttachment')} />
-                    </FormField>
-                    {renderIf(this.state.fields.acteAttachment)(
-                        <File
-                            key={`${this.state.fields.uuid}_acteAttachment`}
-                            attachment={this.state.fields.acteAttachment}
-                            onDelete={this.deleteDraftFile}
-                            extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
-                    )}
-                    <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')} helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
-                        <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
-                            <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes} onChange={e => this.saveDraftAnnexe(e.target.files[0])}
-                                style={{ display: 'none' }} />
-                        </InputFile>
-                    </FormField>
-                    {renderIf(this.state.fields.annexes.length > 0)(
-                        <Card.Group>
-                            {annexes}
-                        </Card.Group>
-                    )}
-                    {renderIf(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS')(
-                        <Grid columns={3} style={{ marginBottom: 'auto' }}>
-                            <Grid.Column>
-                                <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')} helpText={t('acte.help_text.public')}>
-                                    <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} toggle />
-                                </FormField>
-                            </Grid.Column>
-                            {renderIf(this.state.depositFields.publicWebsiteField)(
-                                <Grid.Column>
-                                    <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')} helpText={t('acte.help_text.publicWebsite')}>
-                                        <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
-                                    </FormField>
-                                </Grid.Column>
-                            )}
-                        </Grid>
-                    )}
-                    {renderIf(this.props.mode !== 'ACTE_BATCH')(
-                        <div style={{ textAlign: 'right' }}>
-                            {renderIf(this.state.fields.uuid)(
-                                <Button style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
-                                    {t('api-gateway:form.delete_draft')}
-                                </Button>
-                            )}
-                            <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
-                        </div>
-                    )}
-                </Form>
-            )
+                }
+                {this.props.mode !== 'ACTE_BATCH' &&
+                    <div style={{ textAlign: 'right' }}>
+                        {this.state.fields.uuid &&
+                            <Button style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
+                                {t('api-gateway:form.delete_draft')}
+                            </Button>
+                        }
+                        <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
+                    </div>
+                }
+            </Form>
         )
     }
 }
