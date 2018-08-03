@@ -29,6 +29,9 @@ processResources {
     exclude 'build/', 'node_modules/', 'src/', '.env.development', '.gitignore/', 'package.json/', 'yarn.lock/'
 }
 
+task yarnInstall(type: YarnTask) {
+    args = ['--cwd', './src/main/resources', 'install',]
+}
 task frontBundle(type: YarnTask) {
     args = ['--cwd', './src/main/resources', 'run', 'build']
 }
@@ -39,4 +42,4 @@ task copyFrontBuild(type: Copy) {
 
 bootJar.dependsOn(copyFrontBuild)
 copyFrontBuild.dependsOn(frontBundle)
-frontBundle.dependsOn(npmInstall)
+frontBundle.dependsOn(yarnInstall)
