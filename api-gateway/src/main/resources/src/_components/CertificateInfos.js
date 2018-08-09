@@ -4,7 +4,7 @@ import { Segment, Header, Button } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import moment from 'moment'
 
-import { fetchWithAuthzHandling, checkStatus } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { Field, FieldValue } from './UI'
 
@@ -13,7 +13,8 @@ class CertificateInfos extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         certificate: {
@@ -32,23 +33,25 @@ class CertificateInfos extends Component {
         }
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
             .then(response => response.json())
             .then(certificate => this.setState({ certificate }))
     }
     pairCertificate = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.state.certificate.status === 'VALID') {
-            fetchWithAuthzHandling({ url: '/api/admin/certificate', method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/admin/certificate', method: 'POST', context: this.context })
                 .then(checkStatus)
-                .then(() => this.context._addNotification(notifications.profile.certificatePairedSuccess))
+                .then(() => _addNotification(notifications.profile.certificatePairedSuccess))
                 .catch(response => {
                     if (response.status === 412) {
-                        this.context._addNotification(notifications.profile.certificateNotValid)
+                        _addNotification(notifications.profile.certificateNotValid)
                     } else if (response.status === 409) {
-                        this.context._addNotification(notifications.profile.certificateConflict)
+                        _addNotification(notifications.profile.certificateConflict)
                     } else {
                         response.json().then(json => {
-                            this.context._addNotification(notifications.defaultError, 'notifications.profile.title', json.message)
+                            _addNotification(notifications.defaultError, 'notifications.profile.title', json.message)
                         })
                     }
                 })

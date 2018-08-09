@@ -12,14 +12,15 @@ import {
 } from 'semantic-ui-react';
 
 import { notifications } from '../_util/Notifications';
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils';
+import { checkStatus } from '../_util/utils';
 import history from '../_util/history';
 
 class TopBar extends Component {
   static contextTypes = {
     isLoggedIn: PropTypes.bool,
     user: PropTypes.object,
-    t: PropTypes.func
+    t: PropTypes.func,
+    _fetchWithAuthzHandling: PropTypes.func
   };
   state = {
     isMainDomain: true,
@@ -34,41 +35,29 @@ class TopBar extends Component {
     profiles: []
   };
   componentDidMount() {
-    fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
+    const { _fetchWithAuthzHandling } = this.context
+    _fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
       .then(checkStatus)
-      .then(response => console.log(response))
       .then(response => response.json())
       .then(isMainDomain => this.setState({ isMainDomain }))
-      .catch(e => console.log(e));
   }
   fetchUserInfo = () => {
-    fetchWithAuthzHandling({ url: '/api/admin/profile' })
+    const { _fetchWithAuthzHandling, _addNotification } = this.context
+    _fetchWithAuthzHandling({ url: '/api/admin/profile' })
       .then(checkStatus)
       .then(response => response.json())
       .then(json => {
         if (json.uuid) this.setState({ currentProfile: json, isUpdated: true });
       })
       .catch(response => {
-        response.json().then(json => {
-          this.context._addNotification(
-            notifications.defaultError,
-            'notifications.admin.title',
-            json.message
-          );
-        });
+        response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message));
       });
-    fetchWithAuthzHandling({ url: '/api/admin/agent/profiles' })
+    _fetchWithAuthzHandling({ url: '/api/admin/agent/profiles' })
       .then(checkStatus)
       .then(response => response.json())
       .then(json => this.setState({ profiles: json }))
       .catch(response => {
-        response.json().then(json => {
-          this.context._addNotification(
-            notifications.defaultError,
-            'notifications.admin.title',
-            json.message
-          );
-        });
+        response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message));
       });
   };
   login = () => {
@@ -159,7 +148,7 @@ class TopBar extends Component {
                           />{' '}
                           {t(
                             `top_bar.${
-                              this.props.admin ? 'back_to_app' : 'admin'
+                            this.props.admin ? 'back_to_app' : 'admin'
                             }`
                           )}
                         </span>

@@ -8,14 +8,15 @@ import Pagination from '../../_components/Pagination'
 import { modules } from '../../_util/constants'
 import { Page } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 
 class LocalAuthorityList extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         localAuthorities: [],
@@ -35,20 +36,22 @@ class LocalAuthorityList extends Component {
         this.setState({ offset }, this.fetchLocalAuthorities)
     }
     fetchLocalAuthorities = () => {
+        const { _fetchWithAuthzHandling } = this.context
         const { limit, offset, column, direction } = this.state
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority', query: { limit, offset, column, direction } })
+        _fetchWithAuthzHandling({ url: '/api/admin/local-authority', query: { limit, offset, column, direction } })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ localAuthorities: json.results, totalCount: json.totalCount }))
     }
     askAllClassificationUpdate = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = '/api/acte/ask-classification/all'
-        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(notifications.admin.classificationAsked))
+            .then(() => _addNotification(notifications.admin.classificationAsked))
             .catch((response) => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }

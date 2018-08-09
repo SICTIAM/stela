@@ -7,11 +7,12 @@ import debounce from 'debounce'
 import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import { Page } from '../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class AgentList extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        t: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         agents: [],
@@ -25,10 +26,11 @@ class AgentList extends Component {
         selected: {}
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling } = this.context
         const itemPerPage = localStorage.getItem('itemPerPage')
         if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
         else this.setState({ limit: parseInt(itemPerPage, 10) }, this.fetchAgents)
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
+        _fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => { this.setState({ localAuthorities: json }) })
@@ -41,10 +43,11 @@ class AgentList extends Component {
         this.setState({ search }, this.fetchAgents)
     }, 500)
     fetchAgents = () => {
+        const { _fetchWithAuthzHandling } = this.context
         const { limit, offset, column, direction, search } = this.state
         const params = { limit, offset, column, direction, search }
         if (this.state.selected.uuid) params.localAuthorityUuid = this.state.selected.uuid
-        fetchWithAuthzHandling({ url: '/api/admin/agent/all', query: params })
+        _fetchWithAuthzHandling({ url: '/api/admin/agent/all', query: params })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ agents: json.results, totalCount: json.totalCount }))

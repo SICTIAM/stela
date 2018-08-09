@@ -4,17 +4,13 @@ import { NavLink } from 'react-router-dom';
 import { Menu, Icon } from 'semantic-ui-react';
 import { translate } from 'react-i18next';
 
-import {
-  fetchWithAuthzHandling,
-  getRightsFromGroups,
-  rightsFeatureResolver,
-  rightsModuleResolver
-} from '../_util/utils';
+import { getRightsFromGroups, rightsFeatureResolver, rightsModuleResolver } from '../_util/utils';
 
 class MenuBar extends Component {
   static contextTypes = {
     isLoggedIn: PropTypes.bool,
-    t: PropTypes.func
+    t: PropTypes.func,
+    _fetchWithAuthzHandling: PropTypes.func
   };
   state = {
     profile: {
@@ -27,15 +23,17 @@ class MenuBar extends Component {
     reportUrl: ''
   };
   componentDidMount() {
-    fetchWithAuthzHandling({ url: '/api/admin/profile' })
+    const { _fetchWithAuthzHandling } = this.context
+    _fetchWithAuthzHandling({ url: '/api/admin/profile' })
       .then(response => response.json())
       .then(profile => this.setState({ profile }, this.fetchAllRights));
-    fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
+    _fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
       .then(response => response.text())
       .then(reportUrl => this.setState({ reportUrl }));
   }
   mailToContact = () => {
-    fetchWithAuthzHandling({ url: '/api/admin/instance/contact-email' })
+    const { _fetchWithAuthzHandling } = this.context
+    _fetchWithAuthzHandling({ url: '/api/admin/instance/contact-email' })
       .then(response => response.text())
       .then(contactEmail => {
         if (contactEmail) window.location.href = 'mailto:' + contactEmail;
@@ -67,10 +65,10 @@ class MenuBar extends Component {
                 'ACTES_DEPOSIT',
                 'ACTES_DISPLAY'
               ]) && (
-                <Menu.Item as={NavLink} to="/actes/liste">
-                  {t('menu.acte.list')}
-                </Menu.Item>
-              )}
+                  <Menu.Item as={NavLink} to="/actes/liste">
+                    {t('menu.acte.list')}
+                  </Menu.Item>
+                )}
               <Menu.Item as={NavLink} to="/registre-des-deliberations">
                 Registre des délibérations
               </Menu.Item>
@@ -97,18 +95,18 @@ class MenuBar extends Component {
                     'PES_DEPOSIT',
                     'PES_DISPLAY'
                   ]) && (
-                    <Menu.Item as={NavLink} to="/pes/liste">
-                      {t('menu.pes.PES_Aller_list')}
-                    </Menu.Item>
-                  )}
+                      <Menu.Item as={NavLink} to="/pes/liste">
+                        {t('menu.pes.PES_Aller_list')}
+                      </Menu.Item>
+                    )}
                   {rightsFeatureResolver(rights, [
                     'PES_DEPOSIT',
                     'PES_DISPLAY'
                   ]) && (
-                    <Menu.Item as={NavLink} to="/pes/retour/liste">
-                      {t('menu.pes.PES_Retour_list')}
-                    </Menu.Item>
-                  )}
+                      <Menu.Item as={NavLink} to="/pes/retour/liste">
+                        {t('menu.pes.PES_Retour_list')}
+                      </Menu.Item>
+                    )}
                 </Menu.Menu>
               </Menu.Item>
             )}

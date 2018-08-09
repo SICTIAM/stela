@@ -8,14 +8,15 @@ import moment from 'moment'
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page, InputTextControlled } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 
 class PesModuleParams extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         isFormValid: true,
@@ -33,7 +34,8 @@ class PesModuleParams extends Component {
         unavailabilityHeliosEndDate: 'required|date',
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/pes/admin' })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/pes/admin' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -43,7 +45,7 @@ class PesModuleParams extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.pes.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.pes.title', json.message)
                 })
             })
     }
@@ -78,13 +80,14 @@ class PesModuleParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: '/api/pes/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/pes/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(notifications.admin.moduleUpdated))
+            .then(() => _addNotification(notifications.admin.moduleUpdated))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
             })
     }
     render() {

@@ -1,16 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Form,
-  Grid,
-  Card,
-  Icon,
-  List,
-  Header,
-  Step,
-  Loader,
-  Segment
-} from 'semantic-ui-react';
+import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment } from 'semantic-ui-react';
 
 import { bytesToSize } from '../_util/utils';
 

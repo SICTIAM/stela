@@ -7,14 +7,15 @@ import NewActeForm from './NewActeForm'
 import NewActeBatchedForm from './NewActeBatchedForm'
 import { Page } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class NewActeSwitch extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -25,14 +26,15 @@ class NewActeSwitch extends Component {
         status: ''
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.props.uuid) {
-            fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.props.uuid}` })
+            _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.props.uuid}` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
         } else {

@@ -14,13 +14,14 @@ import {
   FormField,
   LoadingContent
 } from '../_components/UI';
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils';
+import { checkStatus } from '../_util/utils';
 import { notifications } from '../_util/Notifications';
 
 class PesList extends Component {
   static contextTypes = {
     t: PropTypes.func,
-    _addNotification: PropTypes.func
+    _addNotification: PropTypes.func,
+    _fetchWithAuthzHandling: PropTypes.func
   };
   state = {
     pess: [],
@@ -40,10 +41,11 @@ class PesList extends Component {
     fetchStatus: ''
   };
   componentDidMount() {
+    const { _fetchWithAuthzHandling } = this.context
     const itemPerPage = localStorage.getItem('itemPerPage');
     if (!itemPerPage) localStorage.setItem('itemPerPage', 25);
     else this.setState({ limit: 25 }, this.submitForm);
-    fetchWithAuthzHandling({ url: '/api/pes/statuses' })
+    _fetchWithAuthzHandling({ url: '/api/pes/statuses' })
       .then(response => response.json())
       .then(json => this.setState({ pesStatuses: json }));
   }
@@ -65,35 +67,17 @@ class PesList extends Component {
     this.setState({ search: search });
   };
   submitForm = () => {
+    const { _fetchWithAuthzHandling, _addNotification } = this.context
     this.setState({ fetchStatus: 'loading' });
     const headers = { Accept: 'application/json' };
     const data = this.getSearchData();
-    fetchWithAuthzHandling({
-      url: '/api/pes',
-      method: 'GET',
-      query: data,
-      headers: headers
-    })
+    _fetchWithAuthzHandling({ url: '/api/pes', method: 'GET', query: data, headers: headers })
       .then(checkStatus)
       .then(response => response.json())
-      .then(json =>
-        this.setState({
-          pess: json.results,
-          totalCount: json.totalCount,
-          fetchStatus: 'fetched'
-        })
-      )
+      .then(json => this.setState({ pess: json.results, totalCount: json.totalCount, fetchStatus: 'fetched' }))
       .catch(response => {
         this.setState({ fetchStatus: 'api-gateway:error.default' });
-        response
-          .text()
-          .then(text =>
-            this.context._addNotification(
-              notifications.defaultError,
-              'notifications.pes.title',
-              text
-            )
-          );
+        response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text));
       });
   };
   handlePageClick = data => {

@@ -9,14 +9,15 @@ import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 
 class ActeLocalAuthorityParams extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         constantFields: {
@@ -56,9 +57,9 @@ class ActeLocalAuthorityParams extends Component {
     }
     componentDidMount() {
         const uuid = this.props.uuid
-
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const adminUrl = uuid ? `/api/admin/local-authority/${uuid}` : '/api/admin/local-authority/current'
-        fetchWithAuthzHandling({ url: adminUrl })
+        _fetchWithAuthzHandling({ url: adminUrl })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -66,18 +67,18 @@ class ActeLocalAuthorityParams extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
 
         const url = uuid ? '/api/acte/localAuthority/' + uuid : '/api/acte/localAuthority/current'
-        fetchWithAuthzHandling({ url })
+        _fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.updateState(json))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
@@ -125,31 +126,33 @@ class ActeLocalAuthorityParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = JSON.stringify(this.state.fields)
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + this.state.constantFields.uuid, method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/acte/localAuthority/' + this.state.constantFields.uuid, method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
-                this.context._addNotification(notifications.admin.localAuthorityUpdate)
+                _addNotification(notifications.admin.localAuthorityUpdate)
                 this.updateState(json)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     askClassificationUpdate = (event, force = false) => {
         event.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/ask-classification${force ? '-force' : ''}/${this.props.uuid || 'current'}`
-        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(notifications.admin.classificationAsked))
+            .then(() => _addNotification(notifications.admin.classificationAsked))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }

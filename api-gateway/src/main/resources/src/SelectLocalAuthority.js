@@ -3,13 +3,14 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Grid, Header, Form, Segment, Dropdown, Card } from 'semantic-ui-react'
 
-import { checkStatus, fetchWithAuthzHandling } from './_util/utils'
+import { checkStatus } from './_util/utils'
 import { notifications } from './_util/Notifications'
 
 class SelectLocalAuthority extends Component {
     static contextTypes = {
         isLoggedIn: PropTypes.bool,
-        t: PropTypes.func
+        t: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         localAuthorities: [],
@@ -17,16 +18,15 @@ class SelectLocalAuthority extends Component {
         selected: {}
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
                 this.setState({ localAuthorities: json })
             })
             .catch(response => {
-                response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                })
+                response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message))
             })
 
         const lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths')

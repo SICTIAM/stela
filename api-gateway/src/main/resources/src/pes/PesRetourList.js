@@ -9,13 +9,14 @@ import AdvancedSearch from '../_components/AdvancedSearch';
 import InputDatetime from '../_components/InputDatetime';
 import Pagination from '../_components/Pagination';
 import { Page, FormFieldInline, FormField } from '../_components/UI';
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils';
+import { checkStatus } from '../_util/utils';
 import { notifications } from '../_util/Notifications';
 
 class PesRetourList extends Component {
   static contextTypes = {
     t: PropTypes.func,
-    _addNotification: PropTypes.func
+    _addNotification: PropTypes.func,
+    _fetchWithAuthzHandling: PropTypes.func
   };
   state = {
     pesRetours: [],
@@ -50,29 +51,15 @@ class PesRetourList extends Component {
     this.setState({ search: search });
   };
   submitForm = () => {
+    const { _fetchWithAuthzHandling, _addNotification } = this.context
     const headers = { Accept: 'application/json' };
     const data = this.getSearchData();
-    fetchWithAuthzHandling({
-      url: '/api/pes/pes-retour',
-      method: 'GET',
-      query: data,
-      headers: headers
-    })
+    _fetchWithAuthzHandling({ url: '/api/pes/pes-retour', method: 'GET', query: data, headers: headers })
       .then(checkStatus)
       .then(response => response.json())
-      .then(json =>
-        this.setState({ pesRetours: json.results, totalCount: json.totalCount })
-      )
+      .then(json => this.setState({ pesRetours: json.results, totalCount: json.totalCount }))
       .catch(response => {
-        response
-          .text()
-          .then(text =>
-            this.context._addNotification(
-              notifications.defaultError,
-              'notifications.pes.title',
-              text
-            )
-          );
+        response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text));
       });
   };
   handlePageClick = data => {

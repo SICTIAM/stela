@@ -102,7 +102,17 @@ const rightsModuleResolver = (userRights, moduleName) => {
     return false
 }
 
-module.exports = {
+const getLocalAuthoritySlug = () => {
+    const authorizedPaths = ['/mentions-legales', '/registre-des-deliberations']
+    const { pathname } = window.location
+    const pathnameArray = pathname.split('/')
+    if (pathnameArray.length > 1 && pathname !== '/' && !authorizedPaths.some(i => i.startsWith(pathname))) {
+        return pathnameArray[1]
+    }
+    return null
+}
+
+export {
     checkStatus,
     fetchWithAuthzHandling,
     handleFieldCheckboxChange,
@@ -114,5 +124,6 @@ module.exports = {
     rightsFeatureResolver,
     rightsModuleResolver,
     updateField,
-    updateChekboxField
+    updateChekboxField,
+    getLocalAuthoritySlug
 }

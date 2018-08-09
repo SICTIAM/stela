@@ -1,30 +1,23 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { translate } from 'react-i18next';
-import {
-  Button,
-  Segment,
-  Label,
-  Input,
-  Header,
-  Checkbox,
-  Dropdown
-} from 'semantic-ui-react';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import { translate } from 'react-i18next'
+import { Button, Segment, Label, Input, Header, Checkbox, Dropdown } from 'semantic-ui-react'
 
-import { Field, Page } from './_components/UI';
-import { notifications } from './_util/Notifications';
-import AccordionSegment from './_components/AccordionSegment';
-import CertificateInfos from './_components/CertificateInfos';
-import { fetchWithAuthzHandling, checkStatus } from './_util/utils';
-import { modules, sesileVisibility } from './_util/constants';
+import { Field, Page } from './_components/UI'
+import { notifications } from './_util/Notifications'
+import AccordionSegment from './_components/AccordionSegment'
+import CertificateInfos from './_components/CertificateInfos'
+import { checkStatus } from './_util/utils'
+import { modules, sesileVisibility } from './_util/constants'
 
 class Profile extends Component {
   static contextTypes = {
     csrfToken: PropTypes.string,
     csrfTokenHeaderName: PropTypes.string,
     t: PropTypes.func,
-    _addNotification: PropTypes.func
-  };
+    _addNotification: PropTypes.func,
+    _fetchWithAuthzHandling: PropTypes.func
+  }
   state = {
     activeProfile: {
       uuid: '',
@@ -48,70 +41,52 @@ class Profile extends Component {
       certificate: {}
     },
     allNotifications: []
-  };
+  }
   componentDidMount() {
-    const { uuid } = this.props;
+    const { uuid } = this.props
+    const { _fetchWithAuthzHandling } = this.context
     if (!uuid)
-      fetchWithAuthzHandling({ url: '/api/admin/profile' })
+      _fetchWithAuthzHandling({ url: '/api/admin/profile' })
         .then(response => response.json())
-        .then(json => this.setState({ activeProfile: json }));
-    fetchWithAuthzHandling({
-      url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent'
-    })
+        .then(json => this.setState({ activeProfile: json }))
+    _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
       .then(response => response.json())
-      .then(json => this.setState({ agent: json }));
-    fetchWithAuthzHandling({
-      url: '/api/api-gateway/profile/all-notifications'
-    })
+      .then(json => this.setState({ agent: json }))
+    _fetchWithAuthzHandling({ url: '/api/api-gateway/profile/all-notifications' })
       .then(response => response.json())
-      .then(json => this.setState({ allNotifications: json }));
+      .then(json => this.setState({ allNotifications: json }))
   }
   onChange = (uuidProfile, id, value, callback) => {
     const { agent } = this.state;
-    const profile = agent.profiles.find(
-      profile => profile.uuid === uuidProfile
-    );
-    profile[id] = value;
-    this.setState({ agent }, callback);
-  };
+    const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
+    profile[id] = value
+    this.setState({ agent }, callback)
+  }
   onLocalAuthorityNotificationsChange = (uuidProfile, module, checked) => {
-    const { agent } = this.state;
-    const profile = agent.profiles.find(
-      profile => profile.uuid === uuidProfile
-    );
-    checked
-      ? profile.localAuthorityNotifications.push(module)
-      : profile.localAuthorityNotifications.splice(
-          profile.localAuthorityNotifications.indexOf(module),
-          1
-        );
-    this.setState({ agent });
-  };
+    const { agent } = this.state
+    const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
+    checked ? profile.localAuthorityNotifications.push(module)
+      : profile.localAuthorityNotifications.splice(profile.localAuthorityNotifications.indexOf(module), 1)
+    this.setState({ agent })
+  }
   onCheckboxChange = (uuidProfile, statusType, checked) => {
-    const { agent } = this.state;
-    const profile = agent.profiles.find(
-      profile => profile.uuid === uuidProfile
-    );
-    const notification = profile.notificationValues.find(
-      notification => notification.name === statusType
-    );
-    notification
-      ? (notification.active = checked)
-      : profile.notificationValues.push({ name: statusType, active: checked });
-    this.setState({ agent });
-  };
+    const { agent } = this.state
+    const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
+    const notification = profile.notificationValues.find(notification => notification.name === statusType)
+    notification ? (notification.active = checked) : profile.notificationValues.push({ name: statusType, active: checked })
+    this.setState({ agent })
+  }
   updateProfile = uuid => {
-    const profile = this.state.agent.profiles.find(
-      profile => profile.uuid === uuid
-    );
+    const { _fetchWithAuthzHandling, _addNotification } = this.context
+    const profile = this.state.agent.profiles.find(profile => profile.uuid === uuid)
     const profileUI = {
       uuid: profile.uuid,
       email: profile.email,
       notificationValues: profile.notificationValues,
       localAuthorityNotifications: profile.localAuthorityNotifications
-    };
-    const headers = { 'Content-Type': 'application/json' };
-    fetchWithAuthzHandling({
+    }
+    const headers = { 'Content-Type': 'application/json' }
+    _fetchWithAuthzHandling({
       url: `/api/admin/profile/${uuid}`,
       body: JSON.stringify(profileUI),
       headers: headers,
@@ -119,51 +94,31 @@ class Profile extends Component {
       context: this.context
     })
       .then(checkStatus)
-      .then(() => this.context._addNotification(notifications.profile.updated))
+      .then(() => _addNotification(notifications.profile.updated))
       .catch(response => {
-        response
-          .text()
-          .then(text =>
-            this.context._addNotification(
-              notifications.defaultError,
-              'notifications.acte.title',
-              text
-            )
-          );
-      });
-  };
+        response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
+      })
+  }
   render() {
-    const { t } = this.context;
-    const { activeProfile, agent, allNotifications } = this.state;
+    const { t } = this.context
+    const { activeProfile, agent, allNotifications } = this.state
     const currentLocalAuthorityProfile = agent.profiles.find(
-      profile =>
-        profile.localAuthority.uuid === activeProfile.localAuthority.uuid
-    );
-    const allLocalAuthorityProfiles = this.props.uuid
-      ? []
+      profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid
+    )
+    const allLocalAuthorityProfiles = this.props.uuid ? []
       : [
-          <LocalAuthorityProfile
-            key={
-              currentLocalAuthorityProfile
-                ? currentLocalAuthorityProfile.uuid
-                : 'current'
-            }
-            profile={currentLocalAuthorityProfile}
-            onChange={this.onChange}
-            updateProfile={this.updateProfile}
-            allNotifications={allNotifications}
-            onCheckboxChange={this.onCheckboxChange}
-            onLocalAuthorityNotificationsChange={
-              this.onLocalAuthorityNotificationsChange
-            }
-          />
-        ];
+        <LocalAuthorityProfile
+          key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
+          profile={currentLocalAuthorityProfile}
+          onChange={this.onChange}
+          updateProfile={this.updateProfile}
+          allNotifications={allNotifications}
+          onCheckboxChange={this.onCheckboxChange}
+          onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
+        />
+      ]
     agent.profiles
-      .filter(
-        profile =>
-          this.props.uuid ||
-          profile.localAuthority.uuid !== activeProfile.localAuthority.uuid
-      )
+      .filter(profile => this.props.uuid || profile.localAuthority.uuid !== activeProfile.localAuthority.uuid)
       .map(profile =>
         allLocalAuthorityProfiles.push(
           <LocalAuthorityProfile
@@ -174,12 +129,10 @@ class Profile extends Component {
             updateProfile={this.updateProfile}
             allNotifications={allNotifications}
             onCheckboxChange={this.onCheckboxChange}
-            onLocalAuthorityNotificationsChange={
-              this.onLocalAuthorityNotificationsChange
-            }
+            onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
           />
         )
-      );
+      )
     return (
       <Page title={t('profile.title')}>
         <Segment style={{ borderTop: '2px solid #663399' }}>
@@ -231,7 +184,8 @@ class LocalAuthorityProfile extends Component {
   static contextTypes = {
     t: PropTypes.func,
     csrfToken: PropTypes.string,
-    csrfTokenHeaderName: PropTypes.string
+    csrfTokenHeaderName: PropTypes.string,
+    _fetchWithAuthzHandling: PropTypes.func
   };
   static propTypes = {
     profile: PropTypes.object.isRequired,
@@ -278,6 +232,7 @@ class LocalAuthorityProfile extends Component {
     this.setState({ sesileConfiguration: sesileConf });
   };
   updateSesileConfiguration = () => {
+    const { _fetchWithAuthzHandling } = this.context
     const { profile } = this.props;
     if (
       profile.uuid &&
@@ -286,7 +241,7 @@ class LocalAuthorityProfile extends Component {
       const headers = { 'Content-Type': 'application/json' };
       const sesileConf = this.state.sesileConfiguration;
       sesileConf.profileUuid = profile.uuid;
-      fetchWithAuthzHandling({
+      _fetchWithAuthzHandling({
         url: `/api/pes/sesile/configuration`,
         body: JSON.stringify(sesileConf),
         headers: headers,
@@ -309,11 +264,12 @@ class LocalAuthorityProfile extends Component {
   };
 
   fetchSesileInformation = () => {
+    const { _fetchWithAuthzHandling } = this.context
     const { profile } = this.props;
-    fetchWithAuthzHandling({
+    _fetchWithAuthzHandling({
       url: `/api/pes/sesile/organisations/${profile.localAuthority.uuid}/${
         profile.uuid
-      }`
+        }`
     })
       .then(response => response.json())
       .then(json => {
@@ -330,7 +286,7 @@ class LocalAuthorityProfile extends Component {
             )
           );
       });
-    fetchWithAuthzHandling({
+    _fetchWithAuthzHandling({
       url: `/api/pes/sesile/configuration/${profile.uuid}`
     })
       .then(response => response.json())
@@ -351,12 +307,13 @@ class LocalAuthorityProfile extends Component {
   };
 
   componentDidMount() {
+    const { _fetchWithAuthzHandling } = this.context
     const { profile } = this.props;
     if (
       profile.uuid &&
       profile.localAuthority.activatedModules.includes('PES')
     ) {
-      fetchWithAuthzHandling({
+      _fetchWithAuthzHandling({
         url: `/api/pes/sesile/subscription/${profile.localAuthority.uuid}`
       })
         .then(response => response.text())
@@ -424,16 +381,16 @@ class LocalAuthorityProfile extends Component {
     const currentService = this.state.sesileConfiguration
       .serviceOrganisationNumber
       ? this.state.serviceOrganisationAvailable.find(
-          service =>
-            parseInt(service.id, 10) ===
-            this.state.sesileConfiguration.serviceOrganisationNumber
-        )
+        service =>
+          parseInt(service.id, 10) ===
+          this.state.sesileConfiguration.serviceOrganisationNumber
+      )
       : undefined;
 
     const typesAvailable = currentService
       ? currentService.types.map(type => {
-          return { key: type.id, value: type.id, text: type.nom };
-        })
+        return { key: type.id, value: type.id, text: type.nom };
+      })
       : [];
 
     const sesileConnection = profile.localAuthority.activatedModules.map(

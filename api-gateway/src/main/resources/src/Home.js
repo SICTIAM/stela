@@ -4,18 +4,18 @@ import { translate } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import { Segment } from 'semantic-ui-react'
 
-import { fetchWithAuthzHandling } from './_util/utils'
-
 class Home extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
-        csrfTokenHeaderName: PropTypes.string
+        csrfTokenHeaderName: PropTypes.string,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         welcomeMessage: ''
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/instance/welcome-message' })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/instance/welcome-message' })
             .then(response => response.text())
             .then(json => this.setState({ welcomeMessage: json }))
     }

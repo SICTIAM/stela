@@ -5,14 +5,15 @@ import { Button, Grid, Segment, Header } from 'semantic-ui-react'
 
 import { File, InputFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class CourrierSimple extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         acteUuid: '',
@@ -29,16 +30,17 @@ class CourrierSimple extends Component {
         this.setState({ file: null })
     }
     sendResponse = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = new FormData()
         data.append('file', this.state.file)
-        fetchWithAuthzHandling({ url: `/api/acte/${this.props.acteUuid}/courrier-simple`, method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/${this.props.acteUuid}/courrier-simple`, method: 'POST', body: data, context: this.context })
             .then(checkStatus)
             .then(() => {
-                this.context._addNotification(notifications.acte.courrierSimpleAsked)
+                _addNotification(notifications.acte.courrierSimpleAsked)
                 this.setState({ asked: true })
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
     render() {

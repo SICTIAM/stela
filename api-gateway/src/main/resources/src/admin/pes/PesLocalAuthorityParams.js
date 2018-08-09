@@ -6,14 +6,15 @@ import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 
 class PesLocalAuthorityParams extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -43,9 +44,9 @@ class PesLocalAuthorityParams extends Component {
     }
     componentDidMount() {
         const uuid = this.props.uuid
-
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const adminUrl = uuid ? `/api/admin/local-authority/${uuid}` : '/api/admin/local-authority/current'
-        fetchWithAuthzHandling({ url: adminUrl })
+        _fetchWithAuthzHandling({ url: adminUrl })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -53,27 +54,27 @@ class PesLocalAuthorityParams extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
 
         const url = uuid ? '/api/pes/localAuthority/' + uuid : '/api/pes/localAuthority/current'
-        fetchWithAuthzHandling({ url })
+        _fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.loadData(json))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
                 })
             })
-        fetchWithAuthzHandling({ url: '/api/pes/localAuthority/server-codes' })
+        _fetchWithAuthzHandling({ url: '/api/pes/localAuthority/server-codes' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ serverCodes: json }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.pes.title', json.message)
                 })
             })
 
@@ -138,6 +139,7 @@ class PesLocalAuthorityParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         // TODO: Improve code quality
         const { serverCode, sirens, secret, token, sesileSubscription, sesileNewVersion, genericProfileUuid, archiveSettings } = this.state.fields
 
@@ -146,11 +148,11 @@ class PesLocalAuthorityParams extends Component {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        fetchWithAuthzHandling({ url: '/api/pes/localAuthority/' + this.state.fields.uuid, method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/pes/localAuthority/' + this.state.fields.uuid, method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(notifications.admin.localAuthorityUpdate))
+            .then(() => _addNotification(notifications.admin.localAuthorityUpdate))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
     render() {

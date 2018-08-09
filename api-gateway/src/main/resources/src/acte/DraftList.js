@@ -6,7 +6,7 @@ import { Segment } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
 import { Page } from '../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
 class DraftList extends Component {
@@ -14,30 +14,31 @@ class DraftList extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         actes: []
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/acte/drafts' })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/acte/drafts' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ actes: json }))
     }
     deleteDrafts = (selectedUuids) => {
-        const headers = {
-            'Content-Type': 'application/json'
-        }
-        fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify(selectedUuids), headers: headers, method: 'DELETE', context: this.context })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        const headers = { 'Content-Type': 'application/json' }
+        _fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify(selectedUuids), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
-                this.context._addNotification(notifications.acte.draftsDeleted)
+                _addNotification(notifications.acte.draftsDeleted)
                 const actes = selectedUuids.length > 0 ? this.state.actes.filter(acte => !selectedUuids.includes(acte.uuid)) : []
                 this.setState({ actes })
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     render() {

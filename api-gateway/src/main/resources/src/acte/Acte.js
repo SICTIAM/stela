@@ -14,7 +14,7 @@ import Anomaly from '../_components/Anomaly'
 import ConfirmModal from '../_components/ConfirmModal'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
+import { checkStatus, getHistoryStatusTranslationKey } from '../_util/utils'
 import { anomalies, hoursBeforeResendActe } from '../_util/constants'
 import ActeCancelButton from './ActeCancelButton'
 
@@ -23,7 +23,8 @@ class Acte extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         acteUI: {
@@ -47,23 +48,25 @@ class Acte extends Component {
         republished: false
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.setState({ fetchStatus: 'loading' })
         const uuid = this.props.uuid
         if (uuid !== '') {
-            fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
+            _fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
         }
     }
     getAgentInfos = () => {
-        fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })
             .then(response => response.json())
             .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
     }
@@ -78,16 +81,17 @@ class Acte extends Component {
         else return 'blue'
     }
     republish = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const uuid = this.props.uuid
         if (uuid !== '') {
-            fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/republish', method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/republish', method: 'POST', context: this.context })
                 .then(checkStatus)
                 .then(() => {
-                    this.context._addNotification(notifications.acte.republished)
+                    _addNotification(notifications.acte.republished)
                     this.setState({ republished: true })
                 })
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(notifications.acte.republishedError))
+                    response.text().then(text => _addNotification(notifications.acte.republishedError))
                 })
         }
     }

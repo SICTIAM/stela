@@ -9,7 +9,7 @@ import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
-import { checkStatus, fetchWithAuthzHandling, getHistoryStatusTranslationKey } from '../_util/utils'
+import { checkStatus, getHistoryStatusTranslationKey } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
 import { natures, status } from '../_util/constants'
@@ -19,7 +19,8 @@ class ActeList extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         actes: [],
@@ -75,16 +76,17 @@ class ActeList extends Component {
         this.setState({ limit }, this.submitForm)
     }
     submitForm = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.setState({ fetchStatus: 'loading' })
         const headers = { 'Accept': 'application/json' }
         const data = this.getSearchData()
-        fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers })
+        _fetchWithAuthzHandling({ url: '/api/acte', method: 'GET', query: data, headers: headers })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ actes: json.results, totalCount: json.totalCount, fetchStatus: 'fetched' }))
             .catch(response => {
                 this.setState({ fetchStatus: 'api-gateway:error.default' })
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
@@ -92,9 +94,10 @@ class ActeList extends Component {
     downloadACKs = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
     downloadCSV = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.csv', 'actes.csv')
     downloadFromSelectionOrSearch = (selectedUuids, url, filename) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const ActeUuidsAndSearchUI = Object.assign({ uuids: selectedUuids }, this.getSearchData())
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => {
                 if (response.status === 204) throw response
@@ -103,8 +106,8 @@ class ActeList extends Component {
             .then(response => response.blob())
             .then(blob => FileSaver.saveAs(blob, filename))
             .catch(response => {
-                if (response.status === 204) this.context._addNotification(notifications.acte.noContent)
-                else response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                if (response.status === 204) _addNotification(notifications.acte.noContent)
+                else response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     render() {

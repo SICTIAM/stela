@@ -7,14 +7,15 @@ import { Grid, Segment, List, Label, Dropdown, Button, Popup } from 'semantic-ui
 import DraggablePosition from '../_components/DraggablePosition'
 import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class ActePublic extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -32,17 +33,18 @@ class ActePublic extends Component {
         fetchStatus: ''
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.setState({ fetchStatus: 'loading' })
         const uuid = this.props.uuid
         if (uuid !== '') {
-            fetchWithAuthzHandling({ url: '/api/acte/public/' + uuid })
+            _fetchWithAuthzHandling({ url: '/api/acte/public/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json, fetchStatus: 'fetched' }))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
         }

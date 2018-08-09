@@ -9,14 +9,15 @@ import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
 import ConfirmModal from '../../_components/ConfirmModal'
 import { Field, FieldValue, ListItem, Page } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 
 class LocalAuthority extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         uuid: ''
@@ -31,9 +32,10 @@ class LocalAuthority extends Component {
         }
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const uuid = this.props.uuid
         const url = uuid ? '/api/admin/local-authority/' + uuid : '/api/admin/local-authority/current'
-        fetchWithAuthzHandling({ url })
+        _fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -43,7 +45,7 @@ class LocalAuthority extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
@@ -59,28 +61,30 @@ class LocalAuthority extends Component {
         this.setState({ fields })
     })
     editModule = (moduleName, method, callback) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const uuid = this.props.uuid
         const url = uuid ? `/api/admin/local-authority/${uuid}/${moduleName}` : `/api/admin/local-authority/current/${moduleName}`
-        fetchWithAuthzHandling({ url, method: method, context: this.context })
+        _fetchWithAuthzHandling({ url, method: method, context: this.context })
             .then(checkStatus)
             .then(callback)
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.admin.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.admin.title', text))
             })
     }
     removeGroup = (event, uuid) => {
         event.preventDefault()
-        fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}`, method: 'DELETE', context: this.context })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
                 fields.groups = fields.groups.filter(group => group.uuid !== uuid)
                 this.setState({ fields })
-                this.context._addNotification(notifications.admin.groupDeleted)
+                _addNotification(notifications.admin.groupDeleted)
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
