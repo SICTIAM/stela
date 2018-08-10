@@ -9,7 +9,7 @@ import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
-import { checkStatus, getHistoryStatusTranslationKey } from '../_util/utils'
+import { checkStatus, getHistoryStatusTranslationKey, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
 import { natures, status } from '../_util/constants'
@@ -113,6 +113,7 @@ class ActeList extends Component {
     render() {
         const { t } = this.context
         const { search } = this.state
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const natureOptions = natures.map(nature =>
             <option key={nature} value={nature}>{t(`acte.nature.${nature}`)}</option>
         )
@@ -209,7 +210,7 @@ class ActeList extends Component {
                             select={true}
                             search={false}
                             selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
-                            link='/actes/'
+                            link={`/${localAuthoritySlug}/actes/`}
                             linkProperty='uuid'
                             noDataMessage='Aucun acte'
                             keyProperty='uuid'

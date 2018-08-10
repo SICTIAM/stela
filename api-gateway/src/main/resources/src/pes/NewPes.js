@@ -9,7 +9,7 @@ import { Page, FormField, File, InputTextControlled } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 
 class NewPes extends Component {
     static contextTypes = {
@@ -53,6 +53,7 @@ class NewPes extends Component {
         this.setState({ isFormValid })
     }, 500)
     submit = () => {
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.state.isFormValid) {
             this.setState({ isSubmitButtonLoading: true })
@@ -64,7 +65,7 @@ class NewPes extends Component {
                 .then(response => response.text())
                 .then(pesUuid => {
                     _addNotification(notifications.pes.sent)
-                    history.push('/pes/' + pesUuid)
+                    history.push(`/${localAuthoritySlug}/pes/${pesUuid}`)
                 })
                 .catch(response => {
                     this.setState({ isSubmitButtonLoading: false })

@@ -10,7 +10,7 @@ import history from '../_util/history'
 import { notifications } from '../_util/Notifications'
 import { FormField } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 import NewActeForm from './NewActeForm'
 import { natures } from '../_util/constants'
 
@@ -247,6 +247,7 @@ class NewActeBatchedForm extends Component {
     }
     initDelete = () => this.setState({ shouldUnmount: false }, this.deleteDraft)
     deleteDraft = () => {
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.context })
@@ -254,7 +255,7 @@ class NewActeBatchedForm extends Component {
             .then(response => response.text())
             .then(acteUuid => {
                 _addNotification(notifications.acte.draftDeleted)
-                history.push('/actes')
+                history.push(`/${localAuthoritySlug}/actes/liste`)
             })
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))

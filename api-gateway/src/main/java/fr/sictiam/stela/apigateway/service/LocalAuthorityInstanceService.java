@@ -44,7 +44,7 @@ public class LocalAuthorityInstanceService {
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
         if (RequestContextHolder.getRequestAttributes() != null) {
             HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
-            String slugName = SlugUtils.getSlugNameFromRequest(request);
+            String slugName = SlugUtils.getSlugNameFromParamsOrHeaders(request);
             WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
             Mono<LocalAuthorityInstance> localAuthorityInstanceMono = webClient.get()
                     .uri("/api/admin/local-authority/instance/{slugName}", slugName).retrieve()

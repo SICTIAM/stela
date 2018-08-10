@@ -6,7 +6,7 @@ import { Segment } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
 import { Page } from '../_components/UI'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
 class DraftList extends Component {
@@ -43,6 +43,7 @@ class DraftList extends Component {
     }
     render() {
         const { t } = this.context
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const numberDisplay = (actes) => actes[0].number
         const objetDisplay = (actes) => actes[0].objet
         const natureDisplay = (actes) => actes[0].nature ? t(`acte.nature.${actes[0].nature}`) : ''
@@ -65,7 +66,7 @@ class DraftList extends Component {
                         header={true}
                         select={true}
                         selectOptions={[deleteSelection]}
-                        link='/actes/brouillons/'
+                        link={`/${localAuthoritySlug}/actes/brouillons/`}
                         linkProperty='uuid'
                         noDataMessage={t('acte.drafts.no_draft')}
                         keyProperty='uuid' />

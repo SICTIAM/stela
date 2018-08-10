@@ -12,7 +12,7 @@ import {
 } from 'semantic-ui-react';
 
 import { notifications } from '../_util/Notifications';
-import { checkStatus } from '../_util/utils';
+import { checkStatus, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils';
 import history from '../_util/history';
 
 class TopBar extends Component {
@@ -61,20 +61,20 @@ class TopBar extends Component {
       });
   };
   login = () => {
-    if (!this.state.isMainDomain) window.location.href = '/login';
+    if (!this.state.isMainDomain) {
+      const localAuthoritySlug = getLocalAuthoritySlug()
+      window.location.href = '/api/api-gateway/loginWithSlug/' + localAuthoritySlug
+    }
     else history.push('/choix-collectivite');
   };
   render() {
     const { isLoggedIn, t, user } = this.context;
+    const multiPath = getMultiPahtFromSlug()
     const listProfile = this.state.profiles.map(
       profile =>
         profile.uuid !== this.state.currentProfile.uuid && (
-          <Dropdown.Item
-            key={profile.uuid}
-            onClick={() =>
-              (window.location.href = '/api/api-gateway/switch/' + profile.uuid)
-            }
-            value={profile.uuid}
+          <Dropdown.Item key={profile.uuid} value={profile.uuid}
+            onClick={() => window.location.href = '/api/api-gateway/switch/' + profile.uuid}
           >
             <Icon name="building" size="large" /> {profile.localAuthority.name}
           </Dropdown.Item>
@@ -104,12 +104,9 @@ class TopBar extends Component {
         fixed="top"
         secondary
       >
-        <Menu.Item className="appTitle" as={Link} to="/" header>
+        <Menu.Item className="appTitle" as={Link} to={`${multiPath}/`} header>
           <h1 style={{ textAlign: 'center' }}>
-            <img
-              src={process.env.PUBLIC_URL + '/img/logo_stela.png'}
-              alt="STELA"
-            />
+            <img src={process.env.PUBLIC_URL + '/img/logo_stela.png'} alt="STELA" />
           </h1>
         </Menu.Item>
 
@@ -125,41 +122,21 @@ class TopBar extends Component {
               )}
             {isLoggedIn && (
               <Menu.Item>
-                <Popup
-                  style={{ padding: 0 }}
-                  trigger={trigger}
-                  on="click"
-                  position="bottom center"
-                >
+                <Popup style={{ padding: 0 }} trigger={trigger} on="click" position="bottom center">
                   <Menu vertical>
-                    <Menu.Item as={Link} to="/profil">
-                      <span>
-                        <Icon name="user" /> {t('top_bar.profile')}
-                      </span>
+                    <Menu.Item as={Link} to={`${multiPath}/profil`}>
+                      <span><Icon name="user" /> {t('top_bar.profile')}</span>
                     </Menu.Item>
                     {this.state.currentProfile.admin && (
-                      <Menu.Item
-                        as={Link}
-                        to={this.props.admin ? '/' : '/admin'}
-                      >
+                      <Menu.Item as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
                         <span>
-                          <Icon
-                            name={this.props.admin ? 'reply' : 'settings'}
-                          />{' '}
-                          {t(
-                            `top_bar.${
-                            this.props.admin ? 'back_to_app' : 'admin'
-                            }`
-                          )}
+                          <Icon name={this.props.admin ? 'reply' : 'settings'} />{' '}
+                          {t(`top_bar.${this.props.admin ? 'back_to_app' : 'admin'}`)}
                         </span>
                       </Menu.Item>
                     )}
-                    <Menu.Item
-                      onClick={() => (window.location.href = '/logout')}
-                    >
-                      <span>
-                        <Icon name="sign out" /> {t('top_bar.log_out')}
-                      </span>
+                    <Menu.Item onClick={() => (window.location.href = '/logout')}>
+                      <span><Icon name="sign out" /> {t('top_bar.log_out')}</span>
                     </Menu.Item>
                   </Menu>
                 </Popup>

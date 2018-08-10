@@ -80,9 +80,6 @@ public class OzwilloProvisioningService {
     @Value("${application.url}")
     private String applicationUrl;
 
-    @Value("${application.urlWithSlug}")
-    private String applicationUrlWithSlug;
-
     private final LocalAuthorityService localAuthorityService;
     private final OzwilloServiceProperties ozwilloServiceProperties;
     private final RestTemplate restTemplate;
@@ -272,10 +269,9 @@ public class OzwilloProvisioningService {
                 this.targetAudience = Collections.singletonList("PUBLIC_BODIES");
                 this.visibility = "VISIBLE";
                 this.accessControl = "RESTRICTED";
-                String applicationInstanceUrl = applicationUrlWithSlug.replace("%SLUG%",
-                        new Slugify().slugify(organization.getName()));
-                this.serviceUri = applicationInstanceUrl + "/login";
-                this.redirectUris = Collections.singletonList(applicationInstanceUrl + "/callback");
+                String localAuthoritySlugParam = "localAuthoritySlug=" + new Slugify().slugify(organization.getName());
+                this.serviceUri = applicationUrl + "/login?" + localAuthoritySlugParam;
+                this.redirectUris = Collections.singletonList(applicationUrl + "/callback?" + localAuthoritySlugParam);
             }
 
             @Override

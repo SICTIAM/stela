@@ -9,7 +9,7 @@ import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
 
@@ -123,6 +123,7 @@ class ActePublicList extends Component {
     render() {
         const { t } = this.context
         const { search } = this.state
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const ackDisplay = (acteHistories) => {
             const historyAR = acteHistories.find(acteHistory => acteHistory.status === 'ACK_RECEIVED')
             return historyAR && moment(historyAR.date).format('DD/MM/YYYY')
@@ -196,7 +197,7 @@ class ActePublicList extends Component {
                             metaData={metaData}
                             header={true}
                             search={false}
-                            link='/registre-des-deliberations/'
+                            link={`/${localAuthoritySlug}/registre-des-deliberations/`}
                             linkProperty='uuid'
                             noDataMessage='Aucun acte'
                             keyProperty='uuid'

@@ -4,6 +4,7 @@ import fr.sictiam.stela.apigateway.model.Certificate;
 import fr.sictiam.stela.apigateway.service.CertUtilService;
 import fr.sictiam.stela.apigateway.service.LocalAuthorityInstanceService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class InstanceController {
     @Value("${application.urlWithSlug}")
     String applicationUrlWithSlug;
 
+    @Value("${application.url}")
+    String applicationUrl;
+
     @Autowired
     private LocalAuthorityInstanceService localAuthorityInstanceService;
 
@@ -36,8 +40,12 @@ public class InstanceController {
     public void loginWithSlug(@PathVariable String slugName, HttpServletResponse response, HttpServletRequest request)
             throws IOException {
         request.getSession().invalidate();
-        String loginUrlToRedirectTo = applicationUrlWithSlug.replace("%SLUG%", slugName) + "/login";
-        response.sendRedirect(loginUrlToRedirectTo);
+        StringBuilder loginUrlToRedirectTo = new StringBuilder(applicationUrl);
+        loginUrlToRedirectTo.append("/login");
+        if (StringUtils.isNotBlank(slugName)) {
+            loginUrlToRedirectTo.append("?localAuthoritySlug=").append(slugName);
+        }
+        response.sendRedirect(loginUrlToRedirectTo.toString());
     }
 
     @GetMapping(value = "/certInfos")

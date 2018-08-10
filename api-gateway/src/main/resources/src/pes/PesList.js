@@ -8,13 +8,8 @@ import StelaTable from '../_components/StelaTable';
 import Pagination from '../_components/Pagination';
 import AdvancedSearch from '../_components/AdvancedSearch';
 import InputDatetime from '../_components/InputDatetime';
-import {
-  Page,
-  FormFieldInline,
-  FormField,
-  LoadingContent
-} from '../_components/UI';
-import { checkStatus } from '../_util/utils';
+import { Page, FormFieldInline, FormField, LoadingContent } from '../_components/UI';
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils';
 import { notifications } from '../_util/Notifications';
 
 class PesList extends Component {
@@ -102,6 +97,7 @@ class PesList extends Component {
   render() {
     const { t } = this.context;
     const { search } = this.state;
+    const localAuthoritySlug = getLocalAuthoritySlug()
     const statusOptions = this.state.pesStatuses.map(statusItem => (
       <option key={statusItem} value={statusItem}>
         {t(`pes.status.${statusItem}`)}
@@ -240,7 +236,7 @@ class PesList extends Component {
               metaData={metaData}
               header={true}
               search={false}
-              link="/pes/"
+              link={`/${localAuthoritySlug}/pes/`}
               linkProperty="uuid"
               noDataMessage={t('pes.list.empty')}
               keyProperty="uuid"

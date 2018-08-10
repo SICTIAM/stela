@@ -115,12 +115,14 @@ class AppRoute extends Component {
     return (
       <Switch>
         <PublicRoute exact path="/" {...params} component={Home} />
-        <AuthRoute path="/:localAuthoritySlug" {...params} allowedRights={[]} component={Home} menu={MenuBar} />
+        <Route exact path="/choix-collectivite" {...params} component={SelectLocalAuthority} />
+        <PublicRoute path="/mentions-legales" {...params} component={LegalNotice} menu={MenuBar} />
+        <PublicRoute path="/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />
+        <PublicRoute path="/registre-des-deliberations" {...params} component={ActePublicList} menu={MenuBar} />
 
-        <Route path="/choix-collectivite" {...params} component={SelectLocalAuthority} />
-        <PublicRoute path="/:localAuthoritySlug/mentions-legales" {...params} component={LegalNotice} menu={MenuBar} />
-        <PublicRoute path="/:localAuthoritySlug/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />
-        <PublicRoute path="/:localAuthoritySlug/registre-des-deliberations" {...params} component={ActePublicList} menu={MenuBar} />
+        <AuthRoute path="/:localAuthoritySlug/mentions-legales" {...params} component={LegalNotice} menu={MenuBar} />
+        <AuthRoute path="/:localAuthoritySlug/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />
+        <AuthRoute path="/:localAuthoritySlug/registre-des-deliberations" {...params} component={ActePublicList} menu={MenuBar} />
 
         <AuthRoute path="/:localAuthoritySlug/profil" {...params} component={UserProfile} menu={MenuBar} />
 
@@ -173,6 +175,8 @@ class AppRoute extends Component {
         <AuthRoute path="/:localAuthoritySlug/admin/pes/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
 
         <PublicRoute path="/:localAuthoritySlug/admin/*" component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
+
+        <AuthRoute path="/:localAuthoritySlug" {...params} allowedRights={[]} component={Home} menu={MenuBar} />
         <PublicRoute path="/*" component={() => <ErrorPage error={404} />} menu={MenuBar} />
       </Switch>
     )

@@ -10,7 +10,7 @@ import { FormField, File, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, handleFieldCheckboxChange } from '../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug } from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
 
 class NewActeForm extends Component {
@@ -356,6 +356,7 @@ class NewActeForm extends Component {
     }
     deteleDraft = (event) => {
         event.preventDefault()
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const draftUuid = this.state.fields.draft.uuid
         const { fields } = this.state
@@ -366,7 +367,7 @@ class NewActeForm extends Component {
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.draftDeleted)
-                history.push('/actes/liste')
+                history.push(`/${localAuthoritySlug}/actes/liste`)
             })
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -378,6 +379,7 @@ class NewActeForm extends Component {
         else this.submitForm()
     }
     submitForm = () => {
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const fields = this.state.fields
         //fields['draft'] = false
@@ -387,7 +389,7 @@ class NewActeForm extends Component {
             .then(response => response.text())
             .then(acteUuid => {
                 _addNotification(notifications.acte.sent)
-                history.push('/actes/' + acteUuid)
+                history.push(`/${localAuthoritySlug}/actes/${acteUuid}`)
             })
             .catch(response => {
                 if (response.status === 400) {

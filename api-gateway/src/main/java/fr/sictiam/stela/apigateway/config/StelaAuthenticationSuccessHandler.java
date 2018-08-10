@@ -42,7 +42,7 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
             LOGGER.debug("Authentication succeded and user authorized for this instance, returning to home page");
 
             Agent agent = new Agent(authenticationOpen.getUserInfo(), authenticationOpen.isAppAdmin(),
-                    SlugUtils.getSlugNameFromRequest(request));
+                    SlugUtils.getSlugNameFromParamsOrHeaders(request));
             ResponseEntity<String> agentProfile = restTemplate
                     .postForEntity(discoveryUtils.adminServiceUrl() + "/api/admin/agent", agent, String.class);
 
@@ -55,7 +55,7 @@ public class StelaAuthenticationSuccessHandler implements AuthenticationSuccessH
             // Kind of a hack since back end and front end are two different apps in dev
             // profile
             // and the backend has no other way to know where is the front end
-            response.sendRedirect(applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromRequest(request)));
+            response.sendRedirect(applicationUrlWithSlug.replace("%SLUG%", SlugUtils.getSlugNameFromParamsOrHeaders(request)));
         } else {
             LOGGER.info("Authentication succeded but user not authorized for this instance !");
             response.sendError(401);

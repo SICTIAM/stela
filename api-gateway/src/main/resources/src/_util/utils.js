@@ -112,6 +112,11 @@ const getLocalAuthoritySlug = () => {
     return null
 }
 
+const getMultiPahtFromSlug = () => {
+    const localAuthoritySlug = getLocalAuthoritySlug()
+    return localAuthoritySlug ? `/${localAuthoritySlug}` : ''
+}
+
 export {
     checkStatus,
     fetchWithAuthzHandling,
@@ -125,5 +130,6 @@ export {
     rightsModuleResolver,
     updateField,
     updateChekboxField,
-    getLocalAuthoritySlug
+    getLocalAuthoritySlug,
+    getMultiPahtFromSlug
 }

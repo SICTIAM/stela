@@ -63,6 +63,7 @@ class SelectLocalAuthority extends Component {
 
         const lastLocalAuthorities = this.state.lastUsedLocalAuths.map(localAuthority =>
             <Card
+                key={localAuthority.uuid}
                 href={'/api/api-gateway/loginWithSlug/' + localAuthority.slugName}
                 header={localAuthority.name}
                 meta={localAuthority.siren}
