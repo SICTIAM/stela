@@ -94,7 +94,7 @@ public class OzwilloProvisioningService {
 
     /**
      * Handle Ozwillo request to create a new instance.
-     *
+     * <p>
      * See http://doc.ozwillo.com/#s3-1-ozwillo-request for full details.
      */
     public void createNewInstance(ProvisioningRequest provisioningRequest) {
@@ -121,12 +121,12 @@ public class OzwilloProvisioningService {
 
     /**
      * Provider acknoledgement sent to Ozwillo's kernel.
-     *
+     * <p>
      * A sample response is like this :
      * {"instance_id":"bce53130-af7d-44a0-8a87-291a37f22e4c","destruction_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/delete","destruction_secret":"secret","status_changed_uri":"https://sictiam.stela3-dev.sictiam.fr/api/admin/ozwillo/status","status_changed_secret":"secret","services":[{"local_id":"back-office","name":"STELA
      * - SICTIAM","description":"Tiers de
      * télétransmission","tos_uri":"https://stela.fr/tos","policy_uri":"https://stela.fr/policy","icon":"https://stela.fr/icon.png","contacts":["admin@stela.fr","demat@sictiam.fr"],"payment_option":"PAID","target_audience":"PUBLIC_BODY","visibility":"VISIBLE","access_control":"RESTRICTED","service_uri":"https://sictiam.stela3-dev.sictiam.fr/login","redirect_uris":["https://sictiam.stela3-dev.sictiam.fr/login"]}]}
-     *
+     * <p>
      * See http://doc.ozwillo.com/#s3-3-provider-acknowledgement for full details.
      */
     private void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest,
@@ -175,7 +175,7 @@ public class OzwilloProvisioningService {
 
     /**
      * Handle status change of an instance.
-     *
+     * <p>
      * See http://doc.ozwillo.com/#s3-status-change for full details.
      */
     public void changeInstanceStatus(StatusChangeRequest statusChangeRequest) {
@@ -267,8 +267,8 @@ public class OzwilloProvisioningService {
                 this.contacts = ozwilloServiceProperties.contacts;
                 this.paymentOption = "PAID";
                 this.targetAudience = Collections.singletonList("PUBLIC_BODIES");
-                this.visibility = "VISIBLE";
-                this.accessControl = "RESTRICTED";
+                this.visibility = "NEVER_VISIBLE";
+                this.accessControl = "ALWAYS_RESTRICTED";
                 String localAuthoritySlugParam = "localAuthoritySlug=" + new Slugify().slugify(organization.getName());
                 this.serviceUri = applicationUrl + "/login?" + localAuthoritySlugParam;
                 this.redirectUris = Collections.singletonList(applicationUrl + "/callback?" + localAuthoritySlugParam);

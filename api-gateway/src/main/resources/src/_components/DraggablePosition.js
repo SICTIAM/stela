@@ -57,7 +57,12 @@ class DraggablePosition extends Component {
         const pixelPosition = this.getPixelPosition(position)
         const percentBound = paddingPercent / 100
         const revertPercentBound = (100 - paddingPercent) / 100
-        const globalStyle = { height: `${this.props.height}px`, width: `${this.props.width}px`, ...this.globalStyle, ...this.styles.draggablePositionBox }
+        const globalStyle = {
+            height: `${this.props.height}px`,
+            width: `${this.props.width}px`,
+            ...this.globalStyle,
+            ...this.styles.draggablePositionBox
+        }
         const box = { color: labelColor, cursor: 'pointer', width: `${boxWidth}px`, height: `${boxHeight}px`, textAlign: 'center' }
         const bounds = {
             top: height * percentBound,
@@ -67,12 +72,12 @@ class DraggablePosition extends Component {
         }
         return (
             <div style={{ ...style, width: this.props.width }}>
-                {this.props.showPercents &&
+                {this.props.showPercents && (
                     <p style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span>{t('acte.stamp_pad.width')}: {position.x}%</span>
                         <span>{t('acte.stamp_pad.height')}: {position.y}%</span>
                     </p>
-                }
+                )}
                 <div style={{ ...globalStyle, ...backgroundImageStyle }}>
                     <Draggable position={pixelPosition} bounds={bounds} onDrag={this.handleDrag}>
                         <div style={{ ...box, ...this.styles.draggablePositionBox }}>

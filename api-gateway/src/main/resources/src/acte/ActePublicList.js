@@ -135,10 +135,13 @@ class ActePublicList extends Component {
         const localAuthorityDisplay = (localAuthority) => localAuthority.name
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
-            { property: 'localAuthority', displayed: true, displayName: t('acte.fields.localAuthority'), searchable: true, sortable: true, displayComponent: localAuthorityDisplay },
-            { property: 'acteHistories', displayed: true, displayName: t('acte:acte.status.ACK_RECEIVED'), searchable: false, sortable: false, displayComponent: ackDisplay },
+            { property: 'localAuthority', displayed: true, displayName: t('acte.fields.localAuthority'), searchable: true, sortable: true,
+                displayComponent: localAuthorityDisplay },
+            { property: 'acteHistories', displayed: true, displayName: t('acte:acte.status.ACK_RECEIVED'), searchable: false, sortable: false,
+                displayComponent: ackDisplay },
             { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true },
-            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay, sortable: true },
+            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay,
+                sortable: true },
         ]
         const displayedColumns = metaData.filter(metaData => metaData.displayed)
         const pageCount = Math.ceil(this.state.totalCount / this.state.limit)

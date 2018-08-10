@@ -65,18 +65,24 @@ class CertificateInfos extends Component {
         const isValid = certificate.status === 'VALID'
         const segmentStyle = isValid ? { paddingTop: '1em' } : {}
         const headerStyle = isValid ? { marginTop: '0.5em' } : {}
-        const isCertificatePaired = pairedCertificate && certificate.serial === pairedCertificate.serial && certificate.issuer === pairedCertificate.issuer
+        const isCertificatePaired = pairedCertificate
+            && certificate.serial === pairedCertificate.serial
+            && certificate.issuer === pairedCertificate.issuer
         return (
             <Segment style={segmentStyle}>
-                {(isValid && !isCertificatePaired) &&
-                    <Button primary compact basic style={{ float: 'right' }} onClick={this.pairCertificate}>{t('profile.certificate.pair')}</Button>
-                }
-                {isCertificatePaired &&
-                    <span style={{ float: 'right', fontStyle: 'italic' }} onClick={this.pairCertificate}>{t('profile.certificate.paired')}</span>
-                }
+                {(isValid && !isCertificatePaired) && (
+                    <Button primary compact basic style={{ float: 'right' }} onClick={this.pairCertificate}>
+                        {t('profile.certificate.pair')}
+                    </Button>
+                )}
+                {isCertificatePaired && (
+                    <span style={{ float: 'right', fontStyle: 'italic' }} onClick={this.pairCertificate}>
+                        {t('profile.certificate.paired')}
+                    </span>
+                )}
                 <h2 style={headerStyle}>{t('profile.certificate.title')}</h2>
 
-                {isPresent &&
+                {isPresent && (
                     <Fragment>
                         <Field htmlFor="serial" label={t('profile.certificate.serial')}>
                             <FieldValue id="serial">{certificate.serial}</FieldValue>
@@ -119,10 +125,10 @@ class CertificateInfos extends Component {
                             <FieldValue id="issuerEmail">{certificate.issuerEmail}</FieldValue>
                         </Field>
                     </Fragment>
-                }
-                {!isPresent &&
+                )}
+                {!isPresent && (
                     <p>{t('profile.no_certificate')}</p>
-                }
+                )}
             </Segment>
         )
     }

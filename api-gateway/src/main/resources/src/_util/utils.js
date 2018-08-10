@@ -8,7 +8,7 @@ const checkStatus = (response) => {
 }
 
 const capitalizeFirstLetter = (string) => {
-    return string[0].toUpperCase() + string.slice(1);
+    return string[0].toUpperCase() + string.slice(1)
 }
 
 const bytesToSize = (bytes) => {
@@ -21,7 +21,7 @@ const bytesToSize = (bytes) => {
 
 // TODO: add 403 controls
 const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
-    const httpMethod = method || "GET"
+    const httpMethod = method || 'GET'
     const data = body || undefined
     const params = query || {}
     const queryParams = '?' + Object.keys(params)
@@ -74,7 +74,8 @@ const handleFieldChange = (that, e, callback) => {
 }
 
 const getHistoryStatusTranslationKey = (moduleName, history) => {
-    return `${moduleName}:${moduleName}.${history.status === 'SENT' && history.flux !== 'TRANSMISSION_ACTE' && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
+    return `${moduleName}:${moduleName}.${history.status === 'SENT' && history.flux !== 'TRANSMISSION_ACTE'
+        && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
 }
 
 const getRightsFromGroups = (groups) => {

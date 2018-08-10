@@ -87,7 +87,7 @@ export default class StelaTable extends Component {
             const unsearchableColumns = this.props.metaData.filter(metaData => !metaData.searchable).map(metaData => metaData.property)
             let newData = this.state.originalData
                 .filter(row => Object.entries(row)
-                    .filter(column => !unsearchableColumns.includes(column[0]) && column[1].toString().search(new RegExp(value, "i")) !== -1)
+                    .filter(column => !unsearchableColumns.includes(column[0]) && column[1].toString().search(new RegExp(value, 'i')) !== -1)
                     .length > 0)
             if (this.state.column != null && this.state.direction != null)
                 newData = newData.sort(this.dynamicSort(this.state.column, this.state.direction))

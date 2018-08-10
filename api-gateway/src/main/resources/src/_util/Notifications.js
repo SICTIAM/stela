@@ -177,4 +177,4 @@ const notifications = {
     }
 }
 
-module.exports = { notifications }
+export { notifications }

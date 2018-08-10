@@ -123,11 +123,14 @@ class Group extends Component {
                         <Field htmlFor='rights' label={t('group.rights')}>
                             <div style={{ marginBottom: '0.5em' }}>{rights.length > 0 ? rights : t('admin.group.no_rights')}</div>
                             <div style={{ marginBottom: '1em' }}>
-                                <Dropdown id='groups' value='' placeholder={t('admin.group.add_right') + '...'} fluid selection options={rightsOptions} onChange={this.handleRightChange} />
+                                <Dropdown id='groups' value='' placeholder={t('admin.group.add_right') + '...'}
+                                    fluid selection options={rightsOptions} onChange={this.handleRightChange} />
                             </div>
                         </Field>
                         <div style={{ textAlign: 'right' }}>
-                            <Button basic primary onClick={this.submitForm} type='submit'>{t(this.props.uuid ? 'form.update' : 'form.create')}</Button>
+                            <Button basic primary onClick={this.submitForm} type='submit'>
+                                {t(this.props.uuid ? 'form.update' : 'form.create')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

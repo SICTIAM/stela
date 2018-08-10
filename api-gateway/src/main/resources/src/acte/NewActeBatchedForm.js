@@ -185,7 +185,8 @@ class NewActeBatchedForm extends Component {
         this.setState({ draftStatus: 'saving' }, this.updateStatus)
         const draftData = this.getDraftData()
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${draftData.uuid}`, body: JSON.stringify(draftData), headers: headers, method: 'PATCH', context: this.context })
+        const url= `/api/acte/drafts/${draftData.uuid}`
+        _fetchWithAuthzHandling({ url, body: JSON.stringify(draftData), headers: headers, method: 'PATCH', context: this.context })
             .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus))
             .catch(response => {
@@ -343,12 +344,15 @@ class NewActeBatchedForm extends Component {
                     <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>{t('acte.new.add_an_acte')}</Button>
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
-                    {this.state.fields.uuid &&
-                        <Button style={{ marginRight: '1em' }} onClick={this.initDelete} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
+                    {this.state.fields.uuid && (
+                        <Button style={{ marginRight: '1em' }} onClick={this.initDelete} compact basic color='red'
+                            disabled={isFormSaving} loading={isFormSaving}>
                             {t('api-gateway:form.delete_draft')}
                         </Button>
-                    }
-                    <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
+                    )}
+                    <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>
+                        {t('api-gateway:form.submit')}
+                    </Button>
                 </div>
             </div>
         )

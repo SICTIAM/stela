@@ -79,7 +79,9 @@ class AlertMessage extends Component {
         const { t } = this.context
         const { alertMessageModules, alertMessageModulesDismissed } = this.state
         const currentModule = this.getCurrentModule()
-        if (alertMessageModules[currentModule] && alertMessageModules[currentModule].alertMessageDisplayed && alertMessageModulesDismissed[currentModule] === false)
+        if (alertMessageModules[currentModule]
+            && alertMessageModules[currentModule].alertMessageDisplayed
+            && alertMessageModulesDismissed[currentModule] === false) {
             return (
                 <Message
                     className='error'
@@ -88,6 +90,7 @@ class AlertMessage extends Component {
                     content={alertMessageModules[currentModule] ? alertMessageModules[currentModule].alertMessage : ''}
                 />
             )
+        }
         return null
     }
 }

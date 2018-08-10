@@ -80,12 +80,12 @@ class AgentList extends Component {
         ]
         const displayedColumns = metaData.filter(metaData => metaData.displayed)
         const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
-        const localAuthoritiesOptions = [{ key: "0", value: "", text: t('admin.all_local_authorities') }]
+        const localAuthoritiesOptions = [{ key: '0', value: '', text: t('admin.all_local_authorities') }]
         this.state.localAuthorities.map(localAuthority =>
             localAuthoritiesOptions.push({ key: localAuthority.uuid, value: localAuthority.uuid, text: localAuthority.name }))
         const selectLocalAuthorities =
             <Dropdown placeholder={t('admin.all_local_authorities')} search selection
-                value={this.state.selected.uuid ? this.state.selected.uuid : ""}
+                value={this.state.selected.uuid ? this.state.selected.uuid : ''}
                 options={localAuthoritiesOptions}
                 onChange={this.onSelectChange} />
         const pagination =

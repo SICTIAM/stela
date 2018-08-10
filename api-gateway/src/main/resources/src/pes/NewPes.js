@@ -98,9 +98,9 @@ class NewPes extends Component {
                                 label={t('api-gateway:form.add_a_file')}
                                 fieldName={t('pes.fields.attachment')} />
                         </FormField>
-                        {this.state.attachment &&
+                        {this.state.attachment && (
                             <File attachment={{ filename: this.state.attachment.name }} onDelete={this.deleteFile} />
-                        }
+                        )}
                         <FormField htmlFor='comment' label={t('pes.fields.comment')} helpText={t('pes.help_text.comment')}>
                             <InputTextControlled component={TextArea}
                                 id='comment'

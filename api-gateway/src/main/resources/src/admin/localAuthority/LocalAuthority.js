@@ -98,32 +98,32 @@ class LocalAuthority extends Component {
             const migrationUrl = isActivatedUrl + '/migration'
             return (
                 <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='setting' iconColor={isActivated ? 'green' : 'red'}>
-                    {isActivated &&
+                    {isActivated && (
                         <List.Content floated='right'>
                             <ConfirmModal onConfirm={() => this.deactivateModule(moduleName)}
-                                text={t(`admin.local_authority.confirmModal.deactivation`, { moduleName: t(`modules.${moduleName}`) })}>
+                                text={t('admin.local_authority.confirmModal.deactivation', { moduleName: t(`modules.${moduleName}`) })}>
                                 <Button basic color='red' compact>{t('form.deactivate')}</Button>
                             </ConfirmModal>
                         </List.Content>
-                    }
-                    {!isActivated &&
+                    )}
+                    {!isActivated && (
                         <List.Content floated='right'>
                             <ConfirmModal onConfirm={() => this.activateModule(moduleName)}
-                                text={t(`admin.local_authority.confirmModal.activation`, { moduleName: t(`modules.${moduleName}`) })}>
+                                text={t('admin.local_authority.confirmModal.activation', { moduleName: t(`modules.${moduleName}`) })}>
                                 <Button basic color='green' compact>{t('form.activate')}</Button>
                             </ConfirmModal>
                         </List.Content>
-                    }
-                    {isActivated &&
+                    )}
+                    {isActivated && (
                         <List.Content floated='right'>
                             <Link to={isActivatedUrl} className='ui button compact basic primary'>{t('form.configure')}</Link>
                         </List.Content>
-                    }
-                    {isActivated &&
+                    )}
+                    {isActivated && (
                         <List.Content floated='right'>
                             <Link to={migrationUrl} className='ui button compact basic primary'>{t('migration.title')}</Link>
                         </List.Content>
-                    }
+                    )}
                 </ListItem>
             )
         })

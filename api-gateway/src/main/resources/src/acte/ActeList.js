@@ -126,19 +126,38 @@ class ActeList extends Component {
         }
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
-        const downloadACKsSelectOption = { title: t('acte.list.download_selected_ACKs'), titleNoSelection: t('acte.list.download_all_ACKs'), action: this.downloadACKs }
-        const downloadCSVSelectOption = { title: t('acte.list.download_selected_CSV'), titleNoSelection: t('acte.list.download_all_CSV'), action: this.downloadCSV }
-        const downloadMergedStampedsSelectOption = { title: t('acte.list.download_selected_merged_stamped'), titleNoSelection: t('acte.list.download_all_merged_stamped'), action: this.downloadMergedStamp }
-        const downloadZipedStampedsSelectOption = { title: t('acte.list.download_selected_ziped_stamped'), titleNoSelection: t('acte.list.download_all_ziped_stamped'), action: this.downloadZipedStamp }
+        const downloadACKsSelectOption = {
+            title: t('acte.list.download_selected_ACKs'),
+            titleNoSelection: t('acte.list.download_all_ACKs'),
+            action: this.downloadACKs
+        }
+        const downloadCSVSelectOption = {
+            title: t('acte.list.download_selected_CSV'),
+            titleNoSelection: t('acte.list.download_all_CSV'),
+            action: this.downloadCSV
+        }
+        const downloadMergedStampedsSelectOption = {
+            title: t('acte.list.download_selected_merged_stamped'),
+            titleNoSelection: t('acte.list.download_all_merged_stamped'),
+            action: this.downloadMergedStamp
+        }
+        const downloadZipedStampedsSelectOption = {
+            title: t('acte.list.download_selected_ziped_stamped'),
+            titleNoSelection: t('acte.list.download_all_ziped_stamped'),
+            action: this.downloadZipedStamp
+        }
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
             { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true },
             { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true },
-            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay, sortable: true },
-            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay, sortable: true },
+            { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay,
+                sortable: true },
+            { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay,
+                sortable: true },
             { property: 'code', displayed: false, searchable: false },
             { property: 'creation', displayed: false, searchable: false },
-            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay, sortable: false },
+            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay,
+                sortable: false },
             { property: 'public', displayed: false, searchable: false },
             { property: 'publicWebsite', displayed: false, searchable: false },
         ]
@@ -209,7 +228,12 @@ class ActeList extends Component {
                             header={true}
                             select={true}
                             search={false}
-                            selectOptions={[downloadMergedStampedsSelectOption, downloadZipedStampedsSelectOption, downloadACKsSelectOption, downloadCSVSelectOption]}
+                            selectOptions={[
+                                downloadMergedStampedsSelectOption,
+                                downloadZipedStampedsSelectOption,
+                                downloadACKsSelectOption,
+                                downloadCSVSelectOption
+                            ]}
                             link={`/${localAuthoritySlug}/actes/`}
                             linkProperty='uuid'
                             noDataMessage='Aucun acte'

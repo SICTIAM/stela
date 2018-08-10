@@ -20,12 +20,14 @@ class AccordionSegment extends Component {
         const { isOpen } = this.state
         return (
             <div style={{ marginBottom: '1em' }}>
-                <Header style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }} onClick={this.toggle} attached='top' block>
+                <Header style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
+                    onClick={this.toggle} attached='top' block>
                     {this.props.title}
                     <Icon name={'caret ' + (isOpen ? 'down' : 'left')} />
                 </Header>
-                {isOpen &&
-                    <Segment attached='bottom'>{this.props.content}</Segment>}
+                {isOpen && (
+                    <Segment attached='bottom'>{this.props.content}</Segment>
+                )}
             </div>
         )
     }

@@ -32,12 +32,14 @@ class History extends Component {
                         {t(getHistoryStatusTranslationKey(moduleName, status))}
                     </Feed.Summary>
                     {status.message &&
-                        <Feed.Extra>{status.message}</Feed.Extra>
+                    <Feed.Extra>{status.message}</Feed.Extra>
                     }
                     {status.fileName &&
-                        <Feed.Extra>
-                            {t(`${moduleName}:${moduleName}.page.linked_file`)}: <LinkFile url={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`} text={status.fileName} />
-                        </Feed.Extra>
+                    <Feed.Extra>
+                        {t(`${moduleName}:${moduleName}.page.linked_file`)}:
+                        <LinkFile text={status.fileName}
+                            url={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`} />
+                    </Feed.Extra>
                     }
                 </Feed.Content>
             </Feed.Event>
@@ -45,14 +47,12 @@ class History extends Component {
         return (
             <Segment>
                 <h2>{title}</h2>
-                {historyNotEmpty &&
-                    <Feed >
-                        {histories}
-                    </Feed>
-                }
-                {historyEmpty &&
+                {historyNotEmpty && (
+                    <Feed>{histories}</Feed>
+                )}
+                {historyEmpty && (
                     <p>{emptyMessage}</p>
-                }
+                )}
             </Segment>
         )
     }

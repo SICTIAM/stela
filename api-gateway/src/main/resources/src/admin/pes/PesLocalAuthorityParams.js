@@ -131,7 +131,7 @@ class PesLocalAuthorityParams extends Component {
         this.setState({ fields: fields })
     }
     validateSiren = (siren) => {
-        const validation = new Validator({ siren: siren.replace(/\s/g, "") }, { siren: 'required|digits:9' })
+        const validation = new Validator({ siren: siren.replace(/\s/g, '') }, { siren: 'required|digits:9' })
         return validation.passes()
     }
     handleNewSirenChange = (value) => {
@@ -143,12 +143,14 @@ class PesLocalAuthorityParams extends Component {
         // TODO: Improve code quality
         const { serverCode, sirens, secret, token, sesileSubscription, sesileNewVersion, genericProfileUuid, archiveSettings } = this.state.fields
 
-        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, sesileNewVersion, genericProfileUuid, archiveSettings, sirens: sirens.map(siren => siren.replace(/\s/g, "")) })
+        const data = JSON.stringify({ serverCode, token, secret, sesileSubscription, sesileNewVersion, genericProfileUuid, archiveSettings,
+            sirens: sirens.map(siren => siren.replace(/\s/g, '')) })
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        _fetchWithAuthzHandling({ url: '/api/pes/localAuthority/' + this.state.fields.uuid, method: 'PATCH', body: data, headers: headers, context: this.context })
+        const url = `/api/pes/localAuthority/${this.state.fields.uuid}`
+        _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.localAuthorityUpdate))
             .catch(response => {
@@ -161,8 +163,13 @@ class PesLocalAuthorityParams extends Component {
             <Label basic key={index}>{siren} <Icon name='delete' onClick={() => this.onRemoveSiren(siren)} /></Label>
         )
         const serverCodes = this.state.serverCodes.map(serverCode => { return { key: serverCode, value: serverCode, text: serverCode } })
-        const profiles = this.state.profiles.map(profile => { return { key: profile.uuid, value: profile.uuid, text: `${profile.agent.given_name} ${profile.agent.family_name}` } })
-
+        const profiles = this.state.profiles.map(profile => {
+            return {
+                key: profile.uuid,
+                value: profile.uuid,
+                text: `${profile.agent.given_name} ${profile.agent.family_name}`
+            }
+        })
         return (
             <Page title={this.state.fields.name} >
                 <Segment>
@@ -179,13 +186,17 @@ class PesLocalAuthorityParams extends Component {
                                 placeholder={`${t('admin.modules.pes.local_authority_settings.serverCode')}...`} />
                         </Field>
                         <Field htmlFor='sirens' label={t('admin.modules.pes.local_authority_settings.sirens')}>
-                            <div style={{ marginBottom: '0.5em' }}>{listSiren.length > 0 ? listSiren : t('admin.modules.pes.local_authority_settings.no_siren')}</div>
+                            <div style={{ marginBottom: '0.5em' }}>
+                                {listSiren.length > 0 ? listSiren : t('admin.modules.pes.local_authority_settings.no_siren')}
+                            </div>
                             <input id='sirens'
                                 onKeyPress={this.onkeyPress}
                                 value={this.state.newSiren}
                                 onChange={(e) => this.handleNewSirenChange(e.target.value)}
                                 className='simpleInput' />
-                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>{t('api-gateway:form.add')}</Button>
+                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>
+                                {t('api-gateway:form.add')}
+                            </Button>
                         </Field>
 
                         <h2>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
@@ -203,7 +214,7 @@ class PesLocalAuthorityParams extends Component {
                                 checked={this.state.fields.sesileSubscription}
                                 onChange={((e, { checked }) => this.sesileSubscriptionChange(checked))} />
                         </Field>
-                        {(this.state.fields.sesileSubscription) &&
+                        {(this.state.fields.sesileSubscription) && (
                             <Fragment>
                                 <Field htmlFor='sesileNewVersion' label={t('admin.modules.pes.local_authority_settings.sesile.newVersion')}>
                                     <Checkbox toggle id='sesileNewVersion'
@@ -225,13 +236,14 @@ class PesLocalAuthorityParams extends Component {
                                         onChange={this.sesileConfigurationChange} />
                                 </Field>
                             </Fragment>
-                        }
+                        )}
 
                         <h2>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
                         <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
-                            <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated} onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
+                            <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated}
+                                onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
                         </Field>
-                        {this.state.fields.archiveSettings.archiveActivated &&
+                        {this.state.fields.archiveSettings.archiveActivated && (
                             <Fragment>
                                 <Field htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
                                     <Input id='daysBeforeArchiving'
@@ -262,7 +274,7 @@ class PesLocalAuthorityParams extends Component {
                                         onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
                                 </Field>
                             </Fragment>
-                        }
+                        )}
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary type='submit'>{t('api-gateway:form.update')}</Button>
                         </div>

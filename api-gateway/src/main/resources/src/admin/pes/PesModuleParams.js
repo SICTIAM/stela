@@ -105,21 +105,26 @@ class PesModuleParams extends Component {
                         <Field htmlFor='unavailabilityHelios' label={t('admin.modules.pes.module_settings.unavailabilityHelios')}>
                             <Form.Group style={{ marginBottom: 0, flexDirection: 'column' }} className='test'>
                                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <label htmlFor='unavailabilityHeliosStartDate' style={{ marginRight: '0.5em' }}>{t('api-gateway:form.from')}</label>
+                                    <label htmlFor='unavailabilityHeliosStartDate' style={{ marginRight: '0.5em' }}>
+                                        {t('api-gateway:form.from')}
+                                    </label>
                                     <InputDatetime id='unavailabilityHeliosStartDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityHeliosStartDate}
                                         onChange={date => this.handleFieldChange('unavailabilityHeliosStartDate', date)} />
-                                    <label htmlFor='unavailabilityHeliosEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>{t('api-gateway:form.to')}</label>
+                                    <label htmlFor='unavailabilityHeliosEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>
+                                        {t('api-gateway:form.to')}
+                                    </label>
                                     <InputDatetime id='unavailabilityHeliosEndDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityHeliosEndDate}
                                         onChange={date => this.handleFieldChange('unavailabilityHeliosEndDate', date)} />
                                 </div>
-                                {this.state.dateValidation &&
+                                {this.state.dateValidation && (
                                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                                         <Label color='red' pointing>{this.state.dateValidation}</Label>
-                                    </div>}
+                                    </div>
+                                )}
                             </Form.Group>
                         </Field>
                         <Field htmlFor='alertMessageDisplayed' label={t('admin.modules.pes.module_settings.alertMessageDisplayed')}>
@@ -136,7 +141,9 @@ class PesModuleParams extends Component {
                                 onChange={this.handleFieldChange} />
                         </Field>
                         <div style={{ textAlign: 'right' }}>
-                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>{t('api-gateway:form.update')}</Button>
+                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>
+                                {t('api-gateway:form.update')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

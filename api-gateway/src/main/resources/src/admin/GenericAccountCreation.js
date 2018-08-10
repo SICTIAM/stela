@@ -44,7 +44,7 @@ class GenericAccountCreation extends Component {
 
         const body = JSON.stringify(genericAccount)
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/admin/generic_account`, method: 'POST', body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/admin/generic_account', method: 'POST', body, headers, context: this.context })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.admin.generic_account_created)

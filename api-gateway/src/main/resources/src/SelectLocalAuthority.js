@@ -72,7 +72,7 @@ class SelectLocalAuthority extends Component {
         )
         return (
             <div style={{ marginTop: '5em' }}>
-                {lastLocalAuthorities.length > 0 &&
+                {lastLocalAuthorities.length > 0 && (
                     <Grid textAlign='center' verticalAlign='middle' >
                         <Header as='h2'>{t('last_localAuthorities')}</Header>
                         <Grid.Row >
@@ -81,7 +81,7 @@ class SelectLocalAuthority extends Component {
                             </Card.Group>
                         </Grid.Row>
                     </Grid>
-                }
+                )}
                 <Grid textAlign='center' verticalAlign='middle' >
                     <Grid.Row >
                         <Grid.Column style={{ maxWidth: 450 }}>

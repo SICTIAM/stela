@@ -64,11 +64,10 @@ class AgentProfile extends Component {
         const groupUuids = this.state.fields.groups.map(group => group.uuid)
         const body = JSON.stringify({ admin: this.state.fields.admin, groupUuids })
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/admin/profile/${this.state.fields.uuid}/rights`, method: 'PUT', body, headers, context: this.context })
+        const url = `/api/admin/profile/${this.state.fields.uuid}/rights`
+        _fetchWithAuthzHandling({ url, method: 'PUT', body, headers, context: this.context })
             .then(checkStatus)
-            .then(() =>
-                _addNotification(notifications.admin.agentProfileUpdated)
-            )
+            .then(() => _addNotification(notifications.admin.agentProfileUpdated))
             .catch(response => {
                 response.json().then(json => {
                     _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
@@ -117,7 +116,8 @@ class AgentProfile extends Component {
                         <Field htmlFor='groups' label={t('agent.groups')}>
                             <div style={{ marginBottom: '0.5em' }}>{groups.length > 0 ? groups : t('admin.agent.no_group')}</div>
                             <div style={{ marginBottom: '1em' }}>
-                                <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions} onChange={this.handleChange} />
+                                <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions}
+                                    onChange={this.handleChange} />
                             </div>
                         </Field>
                         <div style={{ textAlign: 'right' }}>

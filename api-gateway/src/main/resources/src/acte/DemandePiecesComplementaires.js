@@ -40,8 +40,9 @@ class DemandePiecesComplementaires extends Component {
     sendResponse = (reponseOrRejet) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = new FormData()
+        const url = `/api/acte/${this.props.acteUuid}/pieces-complementaires/${reponseOrRejet}`
         this.state.files.forEach(file => data.append('files', file))
-        _fetchWithAuthzHandling({ url: `/api/acte/${this.props.acteUuid}/pieces-complementaires/${reponseOrRejet}`, method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', body: data, context: this.context })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.piecesComplementairesAsked)
@@ -96,7 +97,8 @@ class DemandePiecesComplementaires extends Component {
                     {isReponseSent &&
                         <Grid.Column width={8}>
                             <Header size='small'>
-                                {t(`acte.page.pieces_complementaires.sent_${isReponseSent.status === 'REFUS_PIECES_COMPLEMENTAIRE_ASKED' ? 'rejet' : 'reponse'}`)}
+                                {t(`acte.page.pieces_complementaires.sent_${isReponseSent.status === 'REFUS_PIECES_COMPLEMENTAIRE_ASKED'
+                                    ? 'rejet' : 'reponse'}`)}
                             </Header>
                             {archiveCreatedHistory &&
                                 <File attachment={{ filename: archiveCreatedHistory.fileName }}
@@ -106,8 +108,13 @@ class DemandePiecesComplementaires extends Component {
                     }
                     {(!isReponseSent && !this.state.asked) &&
                         <Grid.Column width={3} style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
-                            <Button style={{ marginBottom: '1em' }} fluid disabled={this.state.files.length === 0} onClick={() => this.sendResponse('reponse')} basic primary>{t('acte.page.pieces_complementaires.submit_reponse')}</Button>
-                            <Button fluid disabled={this.state.files.length === 0} onClick={() => this.sendResponse('rejet')} basic negative>{t('acte.page.pieces_complementaires.submit_rejet')}</Button>
+                            <Button style={{ marginBottom: '1em' }} fluid disabled={this.state.files.length === 0}
+                                onClick={() => this.sendResponse('reponse')} basic primary>
+                                {t('acte.page.pieces_complementaires.submit_reponse')}
+                            </Button>
+                            <Button fluid disabled={this.state.files.length === 0} onClick={() => this.sendResponse('rejet')} basic negative>
+                                {t('acte.page.pieces_complementaires.submit_rejet')}
+                            </Button>
                         </Grid.Column>
                     }
                 </Grid>

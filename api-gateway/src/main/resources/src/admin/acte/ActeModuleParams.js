@@ -134,13 +134,17 @@ class ActeModuleParams extends Component {
                                 className='simpleInput' />
                         </Field>
                         <Field htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
-                            <div style={{ marginBottom: '0.5em' }}>{listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}</div>
+                            <div style={{ marginBottom: '0.5em' }}>
+                                {listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}
+                            </div>
                             <input id='additionalEmail'
                                 onKeyPress={this.onkeyPress}
                                 value={this.state.newEmail}
                                 onChange={(e) => this.setState({ newEmail: e.target.value })}
                                 className='simpleInput' />
-                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>{t('api-gateway:form.add')}</Button>
+                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>
+                                {t('api-gateway:form.add')}
+                            </Button>
                         </Field>
                         <Field htmlFor='miatAvailable' label={t('admin.modules.acte.module_settings.miatAvailable')}>
                             <Checkbox id="miatAvailable"
@@ -155,16 +159,19 @@ class ActeModuleParams extends Component {
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityMiatStartDate}
                                         onChange={date => this.handleFieldChange('unavailabilityMiatStartDate', date)} />
-                                    <label htmlFor='unavailabilityMiatEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>{t('api-gateway:form.to')}</label>
+                                    <label htmlFor='unavailabilityMiatEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>
+                                        {t('api-gateway:form.to')}
+                                    </label>
                                     <InputDatetime id='unavailabilityMiatEndDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityMiatEndDate}
                                         onChange={date => this.handleFieldChange('unavailabilityMiatEndDate', date)} />
                                 </div>
-                                {this.state.dateValidation &&
+                                {this.state.dateValidation && (
                                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                                         <Label color='red' pointing>{this.state.dateValidation}</Label>
-                                    </div>}
+                                    </div>
+                                )}
                             </Form.Group>
                         </Field>
                         <Field htmlFor='alertMessageDisplayed' label={t('admin.modules.acte.module_settings.alertMessageDisplayed')}>
@@ -181,7 +188,9 @@ class ActeModuleParams extends Component {
                                 onChange={this.handleFieldChange} />
                         </Field>
                         <div style={{ textAlign: 'right' }}>
-                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>{t('api-gateway:form.update')}</Button>
+                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>
+                                {t('api-gateway:form.update')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

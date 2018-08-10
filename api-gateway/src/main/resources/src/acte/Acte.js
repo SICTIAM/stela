@@ -130,59 +130,61 @@ class Acte extends Component {
         const isCourrierSimple = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.flux === 'COURRIER_SIMPLE')
         const isDefere = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEFERE_RECEIVED')
         const isLettreObservation = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'LETTRE_OBSERVATION_RECEIVED')
-        const isDemandePiecesComplementaires = this.state.acteUI.acte.acteHistories.some(acteHistory => acteHistory.status === 'DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED')
+        const isDemandePiecesComplementaires = this.state.acteUI.acte.acteHistories.some(acteHistory =>
+            acteHistory.status === 'DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED'
+        )
         const canRepublish = lastHistory && !this.state.republished && (anomalies.includes(lastHistory.status) ||
             (lastHistory.status === 'SENT' && moment(lastHistory.date).isSameOrBefore(moment().subtract(hoursBeforeResendActe, 'hour'))))
-
+        const dropdownButton = <Button basic color='blue'>{t('api-gateway:form.download')}</Button>
 
         return (
             <Page title={acte.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
                     <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
 
-                    {isDefere &&
+                    {isDefere && (
                         <Defere acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                    }
-                    {isDemandePiecesComplementaires &&
+                    )}
+                    {isDemandePiecesComplementaires && (
                         <DemandePiecesComplementaires acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                    }
-                    {isLettreObservation &&
+                    )}
+                    {isLettreObservation && (
                         <LettreObservation acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                    }
-                    {isCourrierSimple &&
+                    )}
+                    {isCourrierSimple && (
                         <CourrierSimple acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
-                    }
+                    )}
 
                     <Segment>
                         <Label className='labelStatus' color={lastMetierHistory ? this.getStatusColor(lastMetierHistory.status) : 'blue'} ribbon>
                             {lastMetierHistory && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
                         </Label>
                         <div style={{ textAlign: 'right' }}>
-                            <Dropdown basic direction='left' trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
+                            <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>
                                 <Dropdown.Menu>
                                     <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
                                         {t('acte.page.download_original')}
                                     </a>
 
-                                    {(acteACK) &&
+                                    {acteACK && (
                                         <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
                                             {t('acte.page.download_justificative')}
                                         </a>
-                                    }
-                                    {(acteACK) &&
+                                    )}
+                                    {acteACK && (
                                         <Dropdown.Item>
                                             <Popup content={stampPosition} on='click' position='left center'
                                                 trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
                                             />
                                         </Dropdown.Item>
-                                    }
+                                    )}
                                 </Dropdown.Menu>
                             </Dropdown>
-                            {canRepublish &&
+                            {canRepublish && (
                                 <ConfirmModal onConfirm={this.republish} text={t('acte.page.republish_confirm')}>
                                     <Button basic color={'orange'}>{t('acte.page.republish')}</Button>
                                 </ConfirmModal>
-                            }
+                            )}
 
                             <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
                         </div>
@@ -199,12 +201,12 @@ class Acte extends Component {
                         <Field htmlFor="code" label={t('acte.fields.code')}>
                             <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
                         </Field>
-                        {this.state.agent &&
+                        {this.state.agent && (
                             <Field htmlFor='agent' label={t('acte.fields.agent')}>
                                 <FieldValue id='agent'>{this.state.agent}</FieldValue>
                             </Field>
-                        }
-                        {acte.acteAttachment &&
+                        )}
+                        {acte.acteAttachment && (
                             <Grid>
                                 <Grid.Column width={4}>
                                     <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
@@ -215,14 +217,14 @@ class Acte extends Component {
                                     </FieldValue>
                                 </Grid.Column>
                             </Grid>
-                        }
-                        {annexes.length > 0 &&
+                        )}
+                        {annexes.length > 0 && (
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
                             </Field>
-                        }
+                        )}
                         <Field htmlFor="public" label={t('acte.fields.public')}>
                             <Checkbox id="public" checked={acte.public} disabled />
                         </Field>
