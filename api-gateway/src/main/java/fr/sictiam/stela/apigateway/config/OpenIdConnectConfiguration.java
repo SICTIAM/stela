@@ -2,8 +2,7 @@ package fr.sictiam.stela.apigateway.config;
 
 import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
 import fr.sictiam.stela.apigateway.service.LocalAuthorityInstanceService;
-import fr.sictiam.stela.apigateway.util.SlugUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.oasis_eu.spring.kernel.security.StaticOpenIdCConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,11 +62,11 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
         if (RequestContextHolder.getRequestAttributes() != null) {
             HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
-            String localAuthoritySlug = SlugUtils.getSlugNameFromParamsOrHeaders(request);
+            String instanceId = request.getParameter("instance_id");
             StringBuilder callBackUri = new StringBuilder(applicationUrl);
             callBackUri.append("/callback");
-            if (StringUtils.isNotBlank(localAuthoritySlug)) {
-                callBackUri.append("?localAuthoritySlug=").append(localAuthoritySlug);
+            if (StringUtils.isNotBlank(instanceId)) {
+                callBackUri.append("?instance_id=").append(instanceId);
             }
             return callBackUri.toString();
         }

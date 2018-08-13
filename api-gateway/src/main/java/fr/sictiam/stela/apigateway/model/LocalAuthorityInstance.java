@@ -15,4 +15,12 @@ public class LocalAuthorityInstance {
     public String getClientSecret() {
         return clientSecret;
     }
+
+    @Override
+    public String toString() {
+        return "LocalAuthorityInstance{" +
+                "clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                '}';
+    }
 }

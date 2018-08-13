@@ -78,7 +78,7 @@ const getHistoryStatusTranslationKey = (moduleName, history) => {
         && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
 }
 
-const getRightsFromGroups = (groups) => {
+const getRightsFromGroups = (groups = []) => {
     const rights = []
     groups.forEach(group =>
         group.rights.forEach(right => {

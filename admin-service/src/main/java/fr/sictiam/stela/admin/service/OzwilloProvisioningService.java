@@ -217,8 +217,7 @@ public class OzwilloProvisioningService {
             this.destructionSecret = ozwilloInstanceInfo.getDestructionSecret();
             this.statusChangedUri = applicationUrl + "/api/admin/ozwillo/status";
             this.statusChangedSecret = ozwilloInstanceInfo.getStatusChangedSecret();
-            this.services = Collections
-                    .singletonList(new Service(ozwilloServiceProperties, provisioningRequest.getOrganization()));
+            this.services = Collections.singletonList(new Service(ozwilloServiceProperties, provisioningRequest));
         }
 
         @Override
@@ -257,9 +256,9 @@ public class OzwilloProvisioningService {
             @JsonProperty("redirect_uris")
             private List<String> redirectUris;
 
-            Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest.Organization organization) {
+            Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest provisioningRequest) {
                 this.localId = ozwilloServiceProperties.localId;
-                this.name = ozwilloServiceProperties.name + " - " + organization.getName();
+                this.name = ozwilloServiceProperties.name + " - " + provisioningRequest.getOrganization().getName();
                 this.description = ozwilloServiceProperties.description;
                 this.tosUri = ozwilloServiceProperties.tosUri;
                 this.policyUri = ozwilloServiceProperties.policyUri;
@@ -269,9 +268,9 @@ public class OzwilloProvisioningService {
                 this.targetAudience = Collections.singletonList("PUBLIC_BODIES");
                 this.visibility = "NEVER_VISIBLE";
                 this.accessControl = "ALWAYS_RESTRICTED";
-                String localAuthoritySlugParam = "localAuthoritySlug=" + new Slugify().slugify(organization.getName());
-                this.serviceUri = applicationUrl + "/login?" + localAuthoritySlugParam;
-                this.redirectUris = Collections.singletonList(applicationUrl + "/callback?" + localAuthoritySlugParam);
+                String instanceIdParam = "instance_id=" + provisioningRequest.getInstanceId();
+                this.serviceUri = applicationUrl + "/login?" + instanceIdParam;
+                this.redirectUris = Collections.singletonList(applicationUrl + "/callback?" + instanceIdParam);
             }
 
             @Override

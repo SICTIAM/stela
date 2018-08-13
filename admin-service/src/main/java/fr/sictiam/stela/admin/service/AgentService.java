@@ -88,9 +88,9 @@ public class AgentService {
     }
 
     public Profile createAndAttach(Agent agent) {
-        final String slugName = agent.getSlugName();
-        LocalAuthority localAuthority = localAuthorityService.getBySlugName(slugName)
-                .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
+        final String instanceId = agent.getInstanceId();
+        LocalAuthority localAuthority = localAuthorityService.getByInstanceId(instanceId)
+                .orElseThrow(() -> new NotFoundException("No local authority found for instance_id " + instanceId));
         Agent agentFetched = createIfNotExists(agent);
         agentFetched.setSub(agent.getSub());
         agentFetched.setAdmin(agent.isAdmin());
