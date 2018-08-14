@@ -5,14 +5,15 @@ import { Segment, Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic
 
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 
 class AgentProfile extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         uuid: ''
@@ -35,40 +36,41 @@ class AgentProfile extends Component {
         newGroup: ''
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { localAuthorityUuid, uuid } = this.props
         if (uuid) {
-            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid || 'current'}/agent/${uuid}` })
+            _fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid || 'current'}/agent/${uuid}` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                     })
                 })
-            fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group` })
+            _fetchWithAuthzHandling({ url: `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ allGroups: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                     })
                 })
         }
     }
     submitForm = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const groupUuids = this.state.fields.groups.map(group => group.uuid)
         const body = JSON.stringify({ admin: this.state.fields.admin, groupUuids })
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `/api/admin/profile/${this.state.fields.uuid}/rights`, method: 'PUT', body, headers, context: this.context })
+        const url = `/api/admin/profile/${this.state.fields.uuid}/rights`
+        _fetchWithAuthzHandling({ url, method: 'PUT', body, headers, context: this.context })
             .then(checkStatus)
-            .then(() =>
-                this.context._addNotification(notifications.admin.agentProfileUpdated)
-            )
+            .then(() => _addNotification(notifications.admin.agentProfileUpdated))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
@@ -114,7 +116,8 @@ class AgentProfile extends Component {
                         <Field htmlFor='groups' label={t('agent.groups')}>
                             <div style={{ marginBottom: '0.5em' }}>{groups.length > 0 ? groups : t('admin.agent.no_group')}</div>
                             <div style={{ marginBottom: '1em' }}>
-                                <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions} onChange={this.handleChange} />
+                                <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions}
+                                    onChange={this.handleChange} />
                             </div>
                         </Field>
                         <div style={{ textAlign: 'right' }}>

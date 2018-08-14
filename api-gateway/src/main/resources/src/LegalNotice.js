@@ -4,20 +4,21 @@ import { translate } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import { Segment } from 'semantic-ui-react'
 
-import { fetchWithAuthzHandling } from './_util/utils'
 import { Page } from './_components/UI'
 
 class LegalNotice extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
-        t: PropTypes.func
+        t: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         legalNotice: ''
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/instance/legal-notice' })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/instance/legal-notice' })
             .then(response => response.text())
             .then(json => this.setState({ legalNotice: json }))
     }

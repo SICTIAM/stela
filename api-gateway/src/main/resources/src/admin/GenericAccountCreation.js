@@ -6,23 +6,24 @@ import history from '../_util/history'
 
 import { Field, Page } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class GenericAccountCreation extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         uuid: ''
     }
     state = {
         fields: {
-            software : '',
-            email : '',
-            password : '',
+            software: '',
+            email: '',
+            password: '',
             serial: '',
             vendor: '',
             localAuthorities: [],
@@ -30,27 +31,29 @@ class GenericAccountCreation extends Component {
         allLocalAuthorities: [],
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
-        .then(checkStatus)
-        .then(response => response.json())
-        .then(json => { this.setState({ allLocalAuthorities: json }) })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => { this.setState({ allLocalAuthorities: json }) })
     }
     submitForm = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const genericAccount = this.state.fields
-        genericAccount.localAuthorities = genericAccount.localAuthorities.map( localAuthority => localAuthority.uuid )
+        genericAccount.localAuthorities = genericAccount.localAuthorities.map(localAuthority => localAuthority.uuid)
 
         const body = JSON.stringify(genericAccount)
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling( { url: `/api/admin/generic_account`, method: 'POST', body, headers, context: this.context } )
-            .then( checkStatus )
-                .then(() => {
-                    this.context._addNotification( notifications.admin.generic_account_created )
-                    history.push( '/admin/ma-collectivite' )
-                }
+        _fetchWithAuthzHandling({ url: '/api/admin/generic_account', method: 'POST', body, headers, context: this.context })
+            .then(checkStatus)
+            .then(() => {
+                _addNotification(notifications.admin.generic_account_created)
+                history.push('/admin/ma-collectivite')
+            }
             )
             .catch(response => {
                 response.text().then(text => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', text)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', text)
                 })
             })
     }
@@ -71,7 +74,7 @@ class GenericAccountCreation extends Component {
         fields[field] = value
         this.setState({ fields: fields })
     }
-    
+
     render() {
         const { t } = this.context
         const localAuthorities = this.state.fields.localAuthorities.map(localAuthority =>
@@ -86,19 +89,19 @@ class GenericAccountCreation extends Component {
             <Page title={t('admin.generic_account.title')} >
                 <Segment>
                     <Form>
-                        <Field htmlFor='software' label={t( 'admin.generic_account.software' )}>
+                        <Field htmlFor='software' label={t('admin.generic_account.software')}>
                             <input id='software' required onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
                         </Field>
-                        <Field htmlFor='email' label={t( 'admin.generic_account.email' )}>
+                        <Field htmlFor='email' label={t('admin.generic_account.email')}>
                             <input id='email' required onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
                         </Field>
-                        <Field htmlFor='password' label={t( 'admin.generic_account.password' )}>
-                            <input id='password' required type="password" onChange={e => this.handleFieldChange(e.target.id, e.target.value)}/>
+                        <Field htmlFor='password' label={t('admin.generic_account.password')}>
+                            <input id='password' required type="password" onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
                         </Field>
-                        <Field htmlFor='serial' label={t( 'admin.generic_account.serial' )}>
+                        <Field htmlFor='serial' label={t('admin.generic_account.serial')}>
                             <input id='serial' onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
                         </Field>
-                        <Field htmlFor='vendor' label={t( 'admin.generic_account.vendor' )}>
+                        <Field htmlFor='vendor' label={t('admin.generic_account.vendor')}>
                             <input id='vendor' onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
                         </Field>
 

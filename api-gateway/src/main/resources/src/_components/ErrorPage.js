@@ -2,24 +2,26 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 
-import { fetchWithAuthzHandling, checkStatus } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
 class ErrorPage extends Component {
     static contextTypes = {
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         certStatus: 'default'
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/certificate/verified-status' })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/certificate/verified-status' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ certStatus: json }))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.title', text))
             })
     }
     render() {

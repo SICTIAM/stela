@@ -9,14 +9,15 @@ import InputValidation from '../../_components/InputValidation'
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page, InputTextControlled } from '../../_components/UI'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 
 class ActeModuleParams extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         newEmail: '',
@@ -38,7 +39,8 @@ class ActeModuleParams extends Component {
         unavailabilityMiatEndDate: 'required|date',
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/acte/admin' })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/acte/admin' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -48,7 +50,7 @@ class ActeModuleParams extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
                 })
             })
     }
@@ -104,13 +106,14 @@ class ActeModuleParams extends Component {
     }
     submitForm = (event) => {
         event.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: '/api/acte/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/acte/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(notifications.admin.moduleUpdated))
+            .then(() => _addNotification(notifications.admin.moduleUpdated))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
             })
     }
     render() {
@@ -131,13 +134,17 @@ class ActeModuleParams extends Component {
                                 className='simpleInput' />
                         </Field>
                         <Field htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
-                            <div style={{ marginBottom: '0.5em' }}>{listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}</div>
+                            <div style={{ marginBottom: '0.5em' }}>
+                                {listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}
+                            </div>
                             <input id='additionalEmail'
                                 onKeyPress={this.onkeyPress}
                                 value={this.state.newEmail}
                                 onChange={(e) => this.setState({ newEmail: e.target.value })}
                                 className='simpleInput' />
-                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>{t('api-gateway:form.add')}</Button>
+                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>
+                                {t('api-gateway:form.add')}
+                            </Button>
                         </Field>
                         <Field htmlFor='miatAvailable' label={t('admin.modules.acte.module_settings.miatAvailable')}>
                             <Checkbox id="miatAvailable"
@@ -152,16 +159,19 @@ class ActeModuleParams extends Component {
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityMiatStartDate}
                                         onChange={date => this.handleFieldChange('unavailabilityMiatStartDate', date)} />
-                                    <label htmlFor='unavailabilityMiatEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>{t('api-gateway:form.to')}</label>
+                                    <label htmlFor='unavailabilityMiatEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>
+                                        {t('api-gateway:form.to')}
+                                    </label>
                                     <InputDatetime id='unavailabilityMiatEndDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityMiatEndDate}
                                         onChange={date => this.handleFieldChange('unavailabilityMiatEndDate', date)} />
                                 </div>
-                                {this.state.dateValidation &&
+                                {this.state.dateValidation && (
                                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                                         <Label color='red' pointing>{this.state.dateValidation}</Label>
-                                    </div>}
+                                    </div>
+                                )}
                             </Form.Group>
                         </Field>
                         <Field htmlFor='alertMessageDisplayed' label={t('admin.modules.acte.module_settings.alertMessageDisplayed')}>
@@ -178,7 +188,9 @@ class ActeModuleParams extends Component {
                                 onChange={this.handleFieldChange} />
                         </Field>
                         <div style={{ textAlign: 'right' }}>
-                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>{t('api-gateway:form.update')}</Button>
+                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>
+                                {t('api-gateway:form.update')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

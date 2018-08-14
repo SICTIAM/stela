@@ -5,10 +5,10 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/local-authority")
@@ -38,6 +39,13 @@ public class LocalAuthorityController {
         this.localAuthorityService = localAuthorityService;
         this.profileService = profileService;
         this.workGroupService = workGroupService;
+    }
+
+    @GetMapping("/instance-id/{instaceId}")
+    public ResponseEntity<String> getSlugByInstanceId(@PathVariable String instaceId) {
+        Optional<LocalAuthority> opt = localAuthorityService.getByInstanceId(instaceId);
+        return opt.isPresent() ? new ResponseEntity<>(opt.get().getSlugName(), HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/current")
@@ -85,7 +93,7 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(localAuthorityService.getByUuid(uuid), HttpStatus.OK);
     }
 
-    @GetMapping("/instance/{slugName}")
+    @GetMapping("/instance/slug-name/{slugName}")
     public OzwilloInstanceInfo getInstanceInfoBySlugName(@PathVariable String slugName) {
         // as soon as an instance is stopped, consider it does no longer exist
         // even if it seems that, for a STOPPED instance, we don't even get to this
@@ -95,6 +103,14 @@ public class LocalAuthorityController {
                 .filter(localAuthority -> localAuthority.getStatus().equals(LocalAuthority.Status.RUNNING))
                 .map(LocalAuthority::getOzwilloInstanceInfo)
                 .orElseThrow(() -> new NotFoundException("No local authority found for slug " + slugName));
+    }
+
+    @GetMapping("/instance/instance-id/{instanceId}")
+    public OzwilloInstanceInfo getInstanceInfoByInstanceId(@PathVariable String instanceId) {
+        return localAuthorityService.getByInstanceId(instanceId)
+                .filter(localAuthority -> localAuthority.getStatus().equals(LocalAuthority.Status.RUNNING))
+                .map(LocalAuthority::getOzwilloInstanceInfo)
+                .orElseThrow(() -> new NotFoundException("No local authority found for instance_id " + instanceId));
     }
 
     @PostMapping("/current/{module}")

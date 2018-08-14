@@ -9,14 +9,15 @@ import { Page, FormField, File, InputTextControlled } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 
 class NewPes extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -52,21 +53,23 @@ class NewPes extends Component {
         this.setState({ isFormValid })
     }, 500)
     submit = () => {
+        const localAuthoritySlug = getLocalAuthoritySlug()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.state.isFormValid) {
             this.setState({ isSubmitButtonLoading: true })
             const data = new FormData()
             data.append('pesAller', JSON.stringify(this.state.fields))
             data.append('file', this.state.attachment)
-            fetchWithAuthzHandling({ url: '/api/pes', method: 'POST', body: data, context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/pes', method: 'POST', body: data, context: this.context })
                 .then(checkStatus)
                 .then(response => response.text())
                 .then(pesUuid => {
-                    this.context._addNotification(notifications.pes.sent)
-                    history.push('/pes/' + pesUuid)
+                    _addNotification(notifications.pes.sent)
+                    history.push(`/${localAuthoritySlug}/pes/${pesUuid}`)
                 })
                 .catch(response => {
                     this.setState({ isSubmitButtonLoading: false })
-                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                    response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
                 })
         }
     }
@@ -95,9 +98,9 @@ class NewPes extends Component {
                                 label={t('api-gateway:form.add_a_file')}
                                 fieldName={t('pes.fields.attachment')} />
                         </FormField>
-                        {this.state.attachment &&
+                        {this.state.attachment && (
                             <File attachment={{ filename: this.state.attachment.name }} onDelete={this.deleteFile} />
-                        }
+                        )}
                         <FormField htmlFor='comment' label={t('pes.fields.comment')} helpText={t('pes.help_text.comment')}>
                             <InputTextControlled component={TextArea}
                                 id='comment'

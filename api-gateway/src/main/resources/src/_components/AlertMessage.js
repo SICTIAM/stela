@@ -5,20 +5,22 @@ import { Message } from 'semantic-ui-react'
 import moment from 'moment'
 
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class AlertMessage extends Component {
     static contextTypes = {
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         alertMessageModules: {},
         alertMessageModulesDismissed: {}
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.clearStorageDate()
-        fetchWithAuthzHandling({ url: '/api/api-gateway/alert-messages' })
+        _fetchWithAuthzHandling({ url: '/api/api-gateway/alert-messages' })
             .then(checkStatus)
             .then(response => response.json())
             .then(alertMessageModules => {
@@ -33,7 +35,7 @@ class AlertMessage extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
                 })
             })
     }
@@ -77,7 +79,9 @@ class AlertMessage extends Component {
         const { t } = this.context
         const { alertMessageModules, alertMessageModulesDismissed } = this.state
         const currentModule = this.getCurrentModule()
-        if (alertMessageModules[currentModule] && alertMessageModules[currentModule].alertMessageDisplayed && alertMessageModulesDismissed[currentModule] === false)
+        if (alertMessageModules[currentModule]
+            && alertMessageModules[currentModule].alertMessageDisplayed
+            && alertMessageModulesDismissed[currentModule] === false) {
             return (
                 <Message
                     className='error'
@@ -86,6 +90,7 @@ class AlertMessage extends Component {
                     content={alertMessageModules[currentModule] ? alertMessageModules[currentModule].alertMessage : ''}
                 />
             )
+        }
         return null
     }
 }

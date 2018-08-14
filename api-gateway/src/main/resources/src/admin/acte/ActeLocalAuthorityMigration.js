@@ -5,7 +5,7 @@ import { Segment, Icon, Input } from 'semantic-ui-react'
 
 import { Page, Field, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 import { monthBeforeArchiving } from '../../_util/constants'
 
 class ActeLocalAuthorityMigration extends Component {
@@ -13,7 +13,8 @@ class ActeLocalAuthorityMigration extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         uuid: ''
@@ -37,14 +38,15 @@ class ActeLocalAuthorityMigration extends Component {
         status: 'init'
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}`
-        fetchWithAuthzHandling({ url })
+        _fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ fields: json }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
@@ -61,9 +63,10 @@ class ActeLocalAuthorityMigration extends Component {
         return data
     }
     migrate = (migrationType) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}`
         const data = this.getFormData()
-        fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -73,13 +76,14 @@ class ActeLocalAuthorityMigration extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
     reset = (migrationType) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}/reset`
-        fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -89,7 +93,7 @@ class ActeLocalAuthorityMigration extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }

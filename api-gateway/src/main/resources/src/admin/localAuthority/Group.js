@@ -7,14 +7,15 @@ import history from '../../_util/history'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
-import { checkStatus, fetchWithAuthzHandling } from '../../_util/utils'
+import { checkStatus } from '../../_util/utils'
 
 class Group extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         uuid: '',
@@ -33,26 +34,28 @@ class Group extends Component {
         name: 'required|max:250',
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { uuid } = this.props
         if (uuid) {
-            fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}` })
+            _fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                     })
                 })
         }
-        fetchWithAuthzHandling({ url: '/api/admin/profile' })
+        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
             .then(response => response.json())
             .then(profile =>
                 this.setState({ activatedModules: profile.localAuthority.activatedModules }, this.fetchAllRights)
             )
     }
     fetchAllRights = () => {
-        fetchWithAuthzHandling({ url: '/api/api-gateway/rights' })
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: '/api/api-gateway/rights' })
             .then(response => response.json())
             .then(rights => this.setState({ allRights: rights.filter(right => this.state.activatedModules.includes(right.split('_')[0])) }))
     }
@@ -73,6 +76,7 @@ class Group extends Component {
         this.setState({ fields })
     }
     submitForm = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { uuid, localAuthorityUuid } = this.props
         const body = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
@@ -80,16 +84,16 @@ class Group extends Component {
             ? `/api/admin/local-authority/group/${uuid}`
             : `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group`
         const method = uuid ? 'PATCH' : 'POST'
-        fetchWithAuthzHandling({ url, method, body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method, body, headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
                 if (!uuid) history.push(this.props.location.pathname + '/' + json.uuid)
-                this.context._addNotification(uuid ? notifications.admin.groupUpdated : notifications.admin.groupCreated)
+                _addNotification(uuid ? notifications.admin.groupUpdated : notifications.admin.groupCreated)
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
                 })
             })
     }
@@ -119,11 +123,14 @@ class Group extends Component {
                         <Field htmlFor='rights' label={t('group.rights')}>
                             <div style={{ marginBottom: '0.5em' }}>{rights.length > 0 ? rights : t('admin.group.no_rights')}</div>
                             <div style={{ marginBottom: '1em' }}>
-                                <Dropdown id='groups' value='' placeholder={t('admin.group.add_right') + '...'} fluid selection options={rightsOptions} onChange={this.handleRightChange} />
+                                <Dropdown id='groups' value='' placeholder={t('admin.group.add_right') + '...'}
+                                    fluid selection options={rightsOptions} onChange={this.handleRightChange} />
                             </div>
                         </Field>
                         <div style={{ textAlign: 'right' }}>
-                            <Button basic primary onClick={this.submitForm} type='submit'>{t(this.props.uuid ? 'form.update' : 'form.create')}</Button>
+                            <Button basic primary onClick={this.submitForm} type='submit'>
+                                {t(this.props.uuid ? 'form.update' : 'form.create')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

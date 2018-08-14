@@ -1,0 +1,10 @@
+{
+  "extends": ["react-app"],
+  "rules": {
+    "quotes": ["warn", "single"],
+    "semi": ["warn", "never"],
+    "indent": ["warn", 4],
+    "max-len": ["warn", { "code": 300 }],
+    "no-trailing-spaces": "error"
+  }
+}

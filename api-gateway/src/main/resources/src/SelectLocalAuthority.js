@@ -3,13 +3,14 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Grid, Header, Form, Segment, Dropdown, Card } from 'semantic-ui-react'
 
-import { checkStatus, fetchWithAuthzHandling } from './_util/utils'
+import { checkStatus } from './_util/utils'
 import { notifications } from './_util/Notifications'
 
 class SelectLocalAuthority extends Component {
     static contextTypes = {
         isLoggedIn: PropTypes.bool,
-        t: PropTypes.func
+        t: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         localAuthorities: [],
@@ -17,16 +18,15 @@ class SelectLocalAuthority extends Component {
         selected: {}
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/local-authority/all' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
                 this.setState({ localAuthorities: json })
             })
             .catch(response => {
-                response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.title', json.message)
-                })
+                response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message))
             })
 
         const lastUsedLocalAuths = localStorage.getItem('lastUsedLocalAuths')
@@ -63,6 +63,7 @@ class SelectLocalAuthority extends Component {
 
         const lastLocalAuthorities = this.state.lastUsedLocalAuths.map(localAuthority =>
             <Card
+                key={localAuthority.uuid}
                 href={'/api/api-gateway/loginWithSlug/' + localAuthority.slugName}
                 header={localAuthority.name}
                 meta={localAuthority.siren}
@@ -71,7 +72,7 @@ class SelectLocalAuthority extends Component {
         )
         return (
             <div style={{ marginTop: '5em' }}>
-                {lastLocalAuthorities.length > 0 &&
+                {lastLocalAuthorities.length > 0 && (
                     <Grid textAlign='center' verticalAlign='middle' >
                         <Header as='h2'>{t('last_localAuthorities')}</Header>
                         <Grid.Row >
@@ -80,7 +81,7 @@ class SelectLocalAuthority extends Component {
                             </Card.Group>
                         </Grid.Row>
                     </Grid>
-                }
+                )}
                 <Grid textAlign='center' verticalAlign='middle' >
                     <Grid.Row >
                         <Grid.Column style={{ maxWidth: 450 }}>

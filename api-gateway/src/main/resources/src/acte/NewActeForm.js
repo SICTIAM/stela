@@ -10,7 +10,7 @@ import { FormField, File, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, fetchWithAuthzHandling, handleFieldCheckboxChange } from '../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug } from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
 
 class NewActeForm extends Component {
@@ -18,7 +18,8 @@ class NewActeForm extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         mode: 'ACTE',
@@ -65,8 +66,9 @@ class NewActeForm extends Component {
         regex: this.context.t('api-gateway:form.validation.regex_alpha_num_underscore', { fieldName: this.context.t('acte.fields.number') })
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (!this.props.draftUuid && !this.props.uuid) this.fetchActe(`/api/acte/draft/${this.props.mode}`)
-        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/depositFields' })
+        _fetchWithAuthzHandling({ url: '/api/acte/localAuthority/depositFields' })
             .then(checkStatus)
             .then(response => response.json())
             .then(depositFields => {
@@ -76,25 +78,25 @@ class NewActeForm extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
-        fetchWithAuthzHandling({ url: '/api/acte/localAuthority/codes-matieres' })
+        _fetchWithAuthzHandling({ url: '/api/acte/localAuthority/codes-matieres' })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ codesMatieres: json }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
         if (this.props.mode !== 'ACTE_BATCH') {
-            fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
+            _fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ groups: json }))
                 .catch(response => {
-                    response.json().then(json => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message))
+                    response.json().then(json => _addNotification(notifications.defaultError, 'notifications.acte.title', json.message))
                 })
         }
     }
@@ -111,20 +113,23 @@ class NewActeForm extends Component {
         }
     }
     componentWillUnmount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.state.fields.draft && this.props.shouldUnmount) {
             const acteData = this.getActeData()
             const headers = { 'Content-Type': 'application/json' }
-            fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/leave`, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
+            const url = `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/leave`
+            _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
                 .then(checkStatus)
                 .catch(response => {
-                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                    response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 })
         }
         this.validateForm.clear()
         this.saveDraft.clear()
     }
     fetchActe = (url) => {
-        fetchWithAuthzHandling({ url })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -136,20 +141,21 @@ class NewActeForm extends Component {
             })
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
     }
     fetchAttachmentTypes = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const nature = this.state.fields.nature
         const materialCode = this.state.fields.code
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.context })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ attachmentTypes: json }))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     updateGroup = () => {
@@ -238,9 +244,11 @@ class NewActeForm extends Component {
         }
     }, 500)
     saveDraft = debounce((callback) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const acteData = this.getActeData()
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
+        const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
+        _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
@@ -250,18 +258,19 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }, 3000)
     saveDraftFile = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
     saveDraftAnnexe = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
     saveDraftAttachment = (file, url) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (file) {
             this.props.setStatus('saving', this.state.fields.uuid)
             const data = new FormData()
             data.append('file', file)
             data.append('nature', this.state.fields.nature)
-            fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.context })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => {
@@ -272,11 +281,11 @@ class NewActeForm extends Component {
                 .catch(response => {
                     if (response.status === 400) {
                         response.json().then(json =>
-                            this.context._addNotification(notifications.defaultError, 'notifications.acte.title',
+                            _addNotification(notifications.defaultError, 'notifications.acte.title',
                                 json.errors[0].defaultMessage))
                     } else {
                         response.text().then(text =>
-                            this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                            _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                     }
                     this.props.setStatus('', this.state.fields.uuid)
                     this.validateForm()
@@ -284,10 +293,12 @@ class NewActeForm extends Component {
         }
     }
     deleteDraftFile = () => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
-    deleteDraftAnnexe = (annexe) => this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexe.uuid}`, annexe.uuid)
+    deleteDraftAnnexe = (annexe) =>
+        this.deleteDraftAttachment(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexe.uuid}`, annexe.uuid)
     deleteDraftAttachment = (url, annexeUuid) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.props.setStatus('saving', this.state.fields.uuid)
-        fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
                 const fields = this.state.fields
@@ -301,14 +312,18 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 this.props.setStatus('', this.state.fields.uuid)
             })
     }
-    onFileAttachmentTypeChange = (code) => this.onAttachmentTypeChange(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file/type/${code}`, code)
-    onAnnexeAttachmentTypeChange = (code, annexeUuid) => this.onAttachmentTypeChange(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexeUuid}/type/${code}`, code, annexeUuid)
+    onFileAttachmentTypeChange = (code) =>
+        this.onAttachmentTypeChange(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file/type/${code}`, code)
+    onAnnexeAttachmentTypeChange = (code, annexeUuid) =>
+        this.onAttachmentTypeChange(`/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe/${annexeUuid}/type/${code}`,
+            code, annexeUuid)
     onAttachmentTypeChange = (url, code, annexeUuid) => {
-        fetchWithAuthzHandling({ url, method: 'PUT', context: this.context })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url, method: 'PUT', context: this.context })
             .then(checkStatus)
             .then(() => {
                 const fields = this.state.fields
@@ -322,7 +337,7 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 this.props.setStatus('', this.state.fields.uuid)
                 this.validateForm()
             })
@@ -335,30 +350,34 @@ class NewActeForm extends Component {
         this.props.setStatus('saved', this.state.fields.uuid)
     }
     fetchRemoveAttachmentTypes = () => {
-        fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.draft.uuid}/types`, method: 'DELETE', context: this.context })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.draft.uuid}/types`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(this.removeAttachmentTypes)
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 this.props.setStatus('', this.state.fields.uuid)
                 this.validateForm()
             })
     }
     deteleDraft = (event) => {
         event.preventDefault()
+        const localAuthoritySlug = getLocalAuthoritySlug()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const draftUuid = this.state.fields.draft.uuid
         const { fields } = this.state
         fields['draft'] = false
         this.setState({ fields })
         const headers = { 'Content-Type': 'application/json' }
-        fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.context })
+        const url = '/api/acte/drafts'
+        _fetchWithAuthzHandling({ url, body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
-                this.context._addNotification(notifications.acte.draftDeleted)
-                history.push('/actes/liste')
+                _addNotification(notifications.acte.draftDeleted)
+                history.push(`/${localAuthoritySlug}/actes/liste`)
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     saveAndSubmitForm = (event) => {
@@ -367,21 +386,25 @@ class NewActeForm extends Component {
         else this.submitForm()
     }
     submitForm = () => {
+        const localAuthoritySlug = getLocalAuthoritySlug()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const fields = this.state.fields
         //fields['draft'] = false
         //this.setState({ fields })
-        fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                this.context._addNotification(notifications.acte.sent)
-                history.push('/actes/' + acteUuid)
+                _addNotification(notifications.acte.sent)
+                history.push(`/${localAuthoritySlug}/actes/${acteUuid}`)
             })
             .catch(response => {
                 if (response.status === 400) {
-                    response.json().then(json => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.errors[0].defaultMessage))
+                    response.json().then(json =>
+                        _addNotification(notifications.defaultError, 'notifications.acte.title', json.errors[0].defaultMessage)
+                    )
                 } else {
-                    response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                    response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 }
             })
     }
@@ -397,11 +420,11 @@ class NewActeForm extends Component {
                 ? materialCode.code.startsWith(materialCodeBudgetaire)
                 : true)
             .map(materialCode =>
-                ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + " - " + materialCode.label })
+                ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + ' - ' + materialCode.label })
             )
         const attachmentTypeSource = this.props.mode === 'ACTE_BATCH' ? this.props.attachmentTypes : this.state.attachmentTypes
         const attachmentTypes = attachmentTypeSource.map(attachmentType =>
-            ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.code + " - " + attachmentType.label })
+            ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.code + ' - ' + attachmentType.label })
         )
         const groupOptions = this.state.groups.map(group =>
             ({ key: group.uuid, value: group.uuid, text: group.name })
@@ -409,19 +432,21 @@ class NewActeForm extends Component {
         // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
         groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
         const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
-        const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) &&
+        const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) && (
             <Dropdown fluid selection
                 placeholder={t('acte.new.PJ_types')}
                 options={attachmentTypes}
                 value={this.state.fields.acteAttachment.attachmentTypeCode}
                 onChange={(e, { value }) => this.onFileAttachmentTypeChange(value)} />
+        )
         const annexes = this.state.fields.annexes.map(annexe => {
-            const extraContent = attachmentTypes.length > 0 &&
+            const extraContent = attachmentTypes.length > 0 && (
                 <Dropdown fluid selection
                     placeholder={t('acte.new.PJ_types')}
                     options={attachmentTypes}
                     value={annexe.attachmentTypeCode}
                     onChange={(e, { value }) => this.onAnnexeAttachmentTypeChange(value, annexe.uuid)} />
+            )
             return (
                 <File
                     key={`${this.state.fields.uuid}_${annexe.uuid}`}
@@ -430,130 +455,146 @@ class NewActeForm extends Component {
                     extraContent={extraContent && extraContent} />
             )
         })
-        const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".xml" : ".pdf, .jpg, .png"
-        const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? ".pdf, .jpg, .png" : ".pdf, .xml, .jpg, .png"
+        const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.xml' : '.pdf, .jpg, .png'
+        const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.pdf, .jpg, .png' : '.pdf, .xml, .jpg, .png'
         return (
-            (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) &&
-            <Form onSubmit={this.saveAndSubmitForm}>
-                <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
-                    <Grid.Column>
-                        <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')} helpText={t('acte.help_text.number')}>
-                            <InputValidation id={`${this.state.fields.uuid}_number`}
-                                placeholder={t('acte.fields.number') + '...'}
-                                value={this.state.fields.number}
-                                onChange={this.handleFieldChange}
-                                validationRule={this.validationRules.number}
-                                fieldName={t('acte.fields.number')} />
-                        </FormField>
-                    </Grid.Column>
-                    {this.props.mode !== 'ACTE_BATCH' &&
+            (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) && (
+                <Form onSubmit={this.saveAndSubmitForm}>
+                    <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
                         <Grid.Column>
-                            <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
-                                <InputValidation id={`${this.state.fields.uuid}_decision`}
-                                    type='date'
-                                    value={this.state.fields.decision}
+                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}
+                                helpText={t('acte.help_text.number')}>
+                                <InputValidation id={`${this.state.fields.uuid}_number`}
+                                    placeholder={t('acte.fields.number') + '...'}
+                                    value={this.state.fields.number}
                                     onChange={this.handleFieldChange}
-                                    validationRule={this.validationRules.decision}
-                                    fieldName={t('acte.fields.decision')}
-                                    isValidDate={(current) => current.isBefore(new moment())} />
+                                    validationRule={this.validationRules.number}
+                                    fieldName={t('acte.fields.number')} />
                             </FormField>
                         </Grid.Column>
-                    }
-                    {this.props.mode !== 'ACTE_BATCH' &&
-                        <Grid.Column>
-                            <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')} helpText={t('acte.help_text.group')}>
-                                <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
-                                    value={groupOptionValue}
-                                    onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
-                                    options={groupOptions}
-                                    fluid selection />
-                            </FormField>
-                        </Grid.Column>
-                    }
-                </Grid>
-                <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}>
-                    <InputValidation id={`${this.state.fields.uuid}_objet`}
-                        placeholder={t('acte.fields.objet') + '...'}
-                        value={this.state.fields.objet}
-                        onChange={this.handleFieldChange}
-                        validationRule={this.validationRules.objet}
-                        fieldName={t('acte.fields.objet')} />
-                </FormField>
-                {(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH') &&
-                    <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
-                        <InputValidation id={`${this.state.fields.uuid}_nature`}
-                            type='dropdown'
-                            value={this.state.fields.nature}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.nature}
-                            fieldName={t('acte.fields.nature')}
-                            options={natureOptions} />
-                    </FormField>
-                }
-                <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
-                    <InputValidation id={`${this.state.fields.uuid}_code`}
-                        type='dropdown' search
-                        value={this.state.fields.code}
-                        onChange={this.handleFieldChange}
-                        validationRule={this.validationRules.code}
-                        fieldName={t('acte.fields.code')}
-                        options={codeOptions} />
-                </FormField>
-                <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')} helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
-                    <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
-                        type='file'
-                        accept={acceptFile}
-                        onChange={this.saveDraftFile}
-                        value={this.state.fields.acteAttachment}
-                        validationRule={this.validationRules.acteAttachment}
-                        label={t('api-gateway:form.add_a_file')}
-                        fieldName={t('acte.fields.acteAttachment')} />
-                </FormField>
-                {this.state.fields.acteAttachment &&
-                    <File
-                        key={`${this.state.fields.uuid}_acteAttachment`}
-                        attachment={this.state.fields.acteAttachment}
-                        onDelete={this.deleteDraftFile}
-                        extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
-                }
-                <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')} helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
-                    <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
-                        <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes} onChange={e => this.saveDraftAnnexe(e.target.files[0])}
-                            style={{ display: 'none' }} />
-                    </InputFile>
-                </FormField>
-                {this.state.fields.annexes.length > 0 &&
-                    <Card.Group>
-                        {annexes}
-                    </Card.Group>
-                }
-                {(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') &&
-                    <Grid columns={3} style={{ marginBottom: 'auto' }}>
-                        <Grid.Column>
-                            <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')} helpText={t('acte.help_text.public')}>
-                                <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled} checked={this.state.fields.public} onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} toggle />
-                            </FormField>
-                        </Grid.Column>
-                        {this.state.depositFields.publicWebsiteField &&
+                        {this.props.mode !== 'ACTE_BATCH' && (
                             <Grid.Column>
-                                <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')} helpText={t('acte.help_text.publicWebsite')}>
-                                    <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite} onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
+                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}
+                                    helpText={t('acte.help_text.decision')}>
+                                    <InputValidation id={`${this.state.fields.uuid}_decision`}
+                                        type='date'
+                                        value={this.state.fields.decision}
+                                        onChange={this.handleFieldChange}
+                                        validationRule={this.validationRules.decision}
+                                        fieldName={t('acte.fields.decision')}
+                                        isValidDate={(current) => current.isBefore(new moment())} />
                                 </FormField>
                             </Grid.Column>
-                        }
+                        )}
+                        {this.props.mode !== 'ACTE_BATCH' && (
+                            <Grid.Column>
+                                <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}
+                                    helpText={t('acte.help_text.group')}>
+                                    <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
+                                        value={groupOptionValue}
+                                        onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                        options={groupOptions}
+                                        fluid selection />
+                                </FormField>
+                            </Grid.Column>
+                        )}
                     </Grid>
-                }
-                {this.props.mode !== 'ACTE_BATCH' &&
-                    <div style={{ textAlign: 'right' }}>
-                        {this.state.fields.uuid &&
-                            <Button style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red' disabled={isFormSaving} loading={isFormSaving}>
-                                {t('api-gateway:form.delete_draft')}
+                    <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}>
+                        <InputValidation id={`${this.state.fields.uuid}_objet`}
+                            placeholder={t('acte.fields.objet') + '...'}
+                            value={this.state.fields.objet}
+                            onChange={this.handleFieldChange}
+                            validationRule={this.validationRules.objet}
+                            fieldName={t('acte.fields.objet')} />
+                    </FormField>
+                    {(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH') && (
+                        <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
+                            <InputValidation id={`${this.state.fields.uuid}_nature`}
+                                type='dropdown'
+                                value={this.state.fields.nature}
+                                onChange={this.handleFieldChange}
+                                validationRule={this.validationRules.nature}
+                                fieldName={t('acte.fields.nature')}
+                                options={natureOptions} />
+                        </FormField>
+                    )}
+                    <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
+                        <InputValidation id={`${this.state.fields.uuid}_code`}
+                            type='dropdown' search
+                            value={this.state.fields.code}
+                            onChange={this.handleFieldChange}
+                            validationRule={this.validationRules.code}
+                            fieldName={t('acte.fields.code')}
+                            options={codeOptions} />
+                    </FormField>
+                    <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
+                        helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
+                        <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
+                            type='file'
+                            accept={acceptFile}
+                            onChange={this.saveDraftFile}
+                            value={this.state.fields.acteAttachment}
+                            validationRule={this.validationRules.acteAttachment}
+                            label={t('api-gateway:form.add_a_file')}
+                            fieldName={t('acte.fields.acteAttachment')} />
+                    </FormField>
+                    {this.state.fields.acteAttachment && (
+                        <File
+                            key={`${this.state.fields.uuid}_acteAttachment`}
+                            attachment={this.state.fields.acteAttachment}
+                            onDelete={this.deleteDraftFile}
+                            extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
+                    )}
+                    <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
+                        helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
+                        <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
+                            <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                onChange={e => this.saveDraftAnnexe(e.target.files[0])} style={{ display: 'none' }} />
+                        </InputFile>
+                    </FormField>
+                    {this.state.fields.annexes.length > 0 && (
+                        <Card.Group>
+                            {annexes}
+                        </Card.Group>
+                    )}
+                    {(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
+                    && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') && (
+                            <Grid columns={3} style={{ marginBottom: 'auto' }}>
+                                <Grid.Column>
+                                    <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')}
+                                        helpText={t('acte.help_text.public')}>
+                                        <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled}
+                                            checked={this.state.fields.public} toggle
+                                            onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} />
+                                    </FormField>
+                                </Grid.Column>
+                                {this.state.depositFields.publicWebsiteField && (
+                                    <Grid.Column>
+                                        <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}
+                                            helpText={t('acte.help_text.publicWebsite')}>
+                                            <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite}
+                                                onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
+                                        </FormField>
+                                    </Grid.Column>
+                                )}
+                            </Grid>
+                        )
+                    }
+                    {this.props.mode !== 'ACTE_BATCH' && (
+                        <div style={{ textAlign: 'right' }}>
+                            {this.state.fields.uuid && (
+                                <Button style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red'
+                                    disabled={isFormSaving} loading={isFormSaving}>
+                                    {t('api-gateway:form.delete_draft')}
+                                </Button>
+                            )}
+                            <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>
+                                {t('api-gateway:form.submit')}
                             </Button>
-                        }
-                        <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>{t('api-gateway:form.submit')}</Button>
-                    </div>
-                }
-            </Form>
+                        </div>
+                    )}
+                </Form>
+            )
         )
     }
 }

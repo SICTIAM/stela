@@ -8,7 +8,7 @@ const checkStatus = (response) => {
 }
 
 const capitalizeFirstLetter = (string) => {
-    return string[0].toUpperCase() + string.slice(1);
+    return string[0].toUpperCase() + string.slice(1)
 }
 
 const bytesToSize = (bytes) => {
@@ -21,7 +21,7 @@ const bytesToSize = (bytes) => {
 
 // TODO: add 403 controls
 const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
-    const httpMethod = method || "GET"
+    const httpMethod = method || 'GET'
     const data = body || undefined
     const params = query || {}
     const queryParams = '?' + Object.keys(params)
@@ -74,10 +74,11 @@ const handleFieldChange = (that, e, callback) => {
 }
 
 const getHistoryStatusTranslationKey = (moduleName, history) => {
-    return `${moduleName}:${moduleName}.${history.status === 'SENT' && history.flux !== 'TRANSMISSION_ACTE' && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
+    return `${moduleName}:${moduleName}.${history.status === 'SENT' && history.flux !== 'TRANSMISSION_ACTE'
+        && moduleName === 'acte' ? `flux_status.${history.flux}_${history.status}` : `status.${history.status}`}`
 }
 
-const getRightsFromGroups = (groups) => {
+const getRightsFromGroups = (groups = []) => {
     const rights = []
     groups.forEach(group =>
         group.rights.forEach(right => {
@@ -102,7 +103,22 @@ const rightsModuleResolver = (userRights, moduleName) => {
     return false
 }
 
-module.exports = {
+const getLocalAuthoritySlug = () => {
+    const authorizedPaths = ['/mentions-legales', '/registre-des-deliberations']
+    const { pathname } = window.location
+    const pathnameArray = pathname.split('/')
+    if (pathnameArray.length > 1 && pathname !== '/' && !authorizedPaths.some(i => i.startsWith(pathname))) {
+        return pathnameArray[1]
+    }
+    return null
+}
+
+const getMultiPahtFromSlug = () => {
+    const localAuthoritySlug = getLocalAuthoritySlug()
+    return localAuthoritySlug ? `/${localAuthoritySlug}` : ''
+}
+
+export {
     checkStatus,
     fetchWithAuthzHandling,
     handleFieldCheckboxChange,
@@ -114,5 +130,7 @@ module.exports = {
     rightsFeatureResolver,
     rightsModuleResolver,
     updateField,
-    updateChekboxField
+    updateChekboxField,
+    getLocalAuthoritySlug,
+    getMultiPahtFromSlug
 }

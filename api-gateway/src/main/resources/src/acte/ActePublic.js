@@ -7,14 +7,15 @@ import { Grid, Segment, List, Label, Dropdown, Button, Popup } from 'semantic-ui
 import DraggablePosition from '../_components/DraggablePosition'
 import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class ActePublic extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -32,17 +33,18 @@ class ActePublic extends Component {
         fetchStatus: ''
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.setState({ fetchStatus: 'loading' })
         const uuid = this.props.uuid
         if (uuid !== '') {
-            fetchWithAuthzHandling({ url: '/api/acte/public/' + uuid })
+            _fetchWithAuthzHandling({ url: '/api/acte/public/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json, fetchStatus: 'fetched' }))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
         }
@@ -52,6 +54,7 @@ class ActePublic extends Component {
         const { t } = this.context
         const acte = this.state.fields
         const historyAR = acte.acteHistories.find(acteHistory => acteHistory.status === 'ACK_RECEIVED')
+        const dropDownButton = <Button basic color='blue'>{t('api-gateway:form.download')}</Button>
         const annexes = this.state.fields.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
                 <FieldValue>
@@ -84,7 +87,7 @@ class ActePublic extends Component {
                     <Segment>
                         <Label className='labelStatus' color={'green'} ribbon>{t('acte:acte.status.ACK_RECEIVED')}</Label>
                         <div style={{ textAlign: 'right' }}>
-                            <Dropdown basic direction='left' trigger={<Button basic color='blue'>{t('api-gateway:form.download')}</Button>} icon={false}>
+                            <Dropdown basic direction='left' trigger={dropDownButton} icon={false}>
                                 <Dropdown.Menu>
                                     <a className='item' href={`/api/acte/public/${acte.uuid}/file`} target='_blank'>
                                         {t('acte.page.download_original')}
@@ -119,7 +122,7 @@ class ActePublic extends Component {
                         <Field htmlFor="code" label={t('acte.fields.code')}>
                             <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
                         </Field>
-                        {acte.acteAttachment &&
+                        {acte.acteAttachment && (
                             <Grid>
                                 <Grid.Column width={4}>
                                     <label style={{ verticalAlign: 'middle' }} htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
@@ -130,14 +133,14 @@ class ActePublic extends Component {
                                     </FieldValue>
                                 </Grid.Column>
                             </Grid>
-                        }
-                        {annexes.length > 0 &&
+                        )}
+                        {annexes.length > 0 && (
                             <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
                             </Field>
-                        }
+                        )}
                     </Segment>
                 </LoadingContent>
             </Page>

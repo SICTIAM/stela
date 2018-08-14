@@ -5,14 +5,15 @@ import { Button, Grid, Segment, Header, Card } from 'semantic-ui-react'
 
 import { File, InputFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class DemandePiecesComplementaires extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     static defaultProps = {
         acteUuid: '',
@@ -37,16 +38,18 @@ class DemandePiecesComplementaires extends Component {
         }
     }
     sendResponse = (reponseOrRejet) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = new FormData()
+        const url = `/api/acte/${this.props.acteUuid}/pieces-complementaires/${reponseOrRejet}`
         this.state.files.forEach(file => data.append('files', file))
-        fetchWithAuthzHandling({ url: `/api/acte/${this.props.acteUuid}/pieces-complementaires/${reponseOrRejet}`, method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', body: data, context: this.context })
             .then(checkStatus)
             .then(() => {
-                this.context._addNotification(notifications.acte.piecesComplementairesAsked)
+                _addNotification(notifications.acte.piecesComplementairesAsked)
                 this.setState({ asked: true })
             })
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
     render() {
@@ -94,7 +97,8 @@ class DemandePiecesComplementaires extends Component {
                     {isReponseSent &&
                         <Grid.Column width={8}>
                             <Header size='small'>
-                                {t(`acte.page.pieces_complementaires.sent_${isReponseSent.status === 'REFUS_PIECES_COMPLEMENTAIRE_ASKED' ? 'rejet' : 'reponse'}`)}
+                                {t(`acte.page.pieces_complementaires.sent_${isReponseSent.status === 'REFUS_PIECES_COMPLEMENTAIRE_ASKED'
+                                    ? 'rejet' : 'reponse'}`)}
                             </Header>
                             {archiveCreatedHistory &&
                                 <File attachment={{ filename: archiveCreatedHistory.fileName }}
@@ -104,8 +108,13 @@ class DemandePiecesComplementaires extends Component {
                     }
                     {(!isReponseSent && !this.state.asked) &&
                         <Grid.Column width={3} style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
-                            <Button style={{ marginBottom: '1em' }} fluid disabled={this.state.files.length === 0} onClick={() => this.sendResponse('reponse')} basic primary>{t('acte.page.pieces_complementaires.submit_reponse')}</Button>
-                            <Button fluid disabled={this.state.files.length === 0} onClick={() => this.sendResponse('rejet')} basic negative>{t('acte.page.pieces_complementaires.submit_rejet')}</Button>
+                            <Button style={{ marginBottom: '1em' }} fluid disabled={this.state.files.length === 0}
+                                onClick={() => this.sendResponse('reponse')} basic primary>
+                                {t('acte.page.pieces_complementaires.submit_reponse')}
+                            </Button>
+                            <Button fluid disabled={this.state.files.length === 0} onClick={() => this.sendResponse('rejet')} basic negative>
+                                {t('acte.page.pieces_complementaires.submit_rejet')}
+                            </Button>
                         </Grid.Column>
                     }
                 </Grid>

@@ -20,15 +20,20 @@ public class WebConfig implements WebMvcConfigurer {
         return new TokenRefreshInterceptor();
     }
 
+    private final String localAuthority = "{localAuthoritySlug:^(?!api)\\w+}";
+
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/index.html");
-        registry.addViewController("/pes/**").setViewName("forward:/index.html");
-        registry.addViewController("/actes/**").setViewName("forward:/index.html");
-        registry.addViewController("/admin/**").setViewName("forward:/index.html");
-        registry.addViewController("/profil").setViewName("forward:/index.html");
-        registry.addViewController("/callback").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/pes/**").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/actes/**").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/admin/**").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/profil").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/callback").setViewName("forward:/index.html");
         registry.addViewController("/mentions-legales").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/mentions-legales").setViewName("forward:/index.html");
         registry.addViewController("/registre-des-deliberations/**").setViewName("forward:/index.html");
+        registry.addViewController("/" + localAuthority + "/registre-des-deliberations/**").setViewName("forward:/index.html");
+        registry.addViewController("/choix-collectivite").setViewName("forward:/index.html");
     }
 }

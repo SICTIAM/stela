@@ -7,14 +7,15 @@ import NewActeForm from './NewActeForm'
 import NewActeBatchedForm from './NewActeBatchedForm'
 import { Page } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class NewActeSwitch extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -25,14 +26,15 @@ class NewActeSwitch extends Component {
         status: ''
     }
     componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.props.uuid) {
-            fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.props.uuid}` })
+            _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.props.uuid}` })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => this.setState({ fields: json }))
                 .catch(response => {
                     response.json().then(json => {
-                        this.context._addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                        _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
         } else {
@@ -57,49 +59,49 @@ class NewActeSwitch extends Component {
             <Page title={t('acte.new.title')}>
                 <Segment>
                     <Menu tabular>
-                        {(this.state.fields.mode === 'ACTE' || !this.props.uuid) &&
+                        {(this.state.fields.mode === 'ACTE' || !this.props.uuid) && (
                             <Menu.Item id='ACTE' active={this.state.fields.mode === 'ACTE'} onClick={this.handleModeChange}>
                                 {t('acte.new.acte')}
                             </Menu.Item>
-                        }
-                        {(this.state.fields.mode === 'ACTE_BUDGETAIRE' || !this.props.uuid) &&
+                        )}
+                        {(this.state.fields.mode === 'ACTE_BUDGETAIRE' || !this.props.uuid) && (
                             <Menu.Item id='ACTE_BUDGETAIRE' active={this.state.fields.mode === 'ACTE_BUDGETAIRE'} onClick={this.handleModeChange}>
                                 {t('acte.new.acte_budgetaire')}
                             </Menu.Item>
-                        }
-                        {(this.state.fields.mode === 'ACTE_BATCH' || !this.props.uuid) &&
+                        )}
+                        {(this.state.fields.mode === 'ACTE_BATCH' || !this.props.uuid) && (
                             <Menu.Item id='ACTE_BATCH' active={this.state.fields.mode === 'ACTE_BATCH'} onClick={this.handleModeChange}>
                                 {t('acte.new.acte_batch')}
                             </Menu.Item>
-                        }
-                        {this.state.status &&
+                        )}
+                        {this.state.status && (
                             <Menu.Menu position='right'>
                                 <span className='item' style={{ fontStyle: 'italic' }}>{t(`acte.new.formStatus.${this.state.status}`)}</span>
                             </Menu.Menu>
-                        }
+                        )}
                     </Menu>
-                    {this.state.fields.mode === 'ACTE' &&
+                    {this.state.fields.mode === 'ACTE' && (
                         <NewActeForm
                             uuid={uuid}
                             draftUuid={this.props.uuid}
                             mode={this.state.fields.mode}
                             setStatus={this.setStatus}
                             status={this.state.status} />
-                    }
-                    {this.state.fields.mode === 'ACTE_BUDGETAIRE' &&
+                    )}
+                    {this.state.fields.mode === 'ACTE_BUDGETAIRE' && (
                         <NewActeForm
                             uuid={uuid}
                             draftUuid={this.props.uuid}
                             mode={this.state.fields.mode}
                             setStatus={this.setStatus}
                             status={this.state.status} />
-                    }
-                    {this.state.fields.mode === 'ACTE_BATCH' &&
+                    )}
+                    {this.state.fields.mode === 'ACTE_BATCH' && (
                         <NewActeBatchedForm
                             uuid={uuid}
                             setStatus={this.setStatus}
                             status={this.state.status} />
-                    }
+                    )}
                 </Segment>
             </Page>
         )

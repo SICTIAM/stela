@@ -6,14 +6,15 @@ import { Segment, Form, Button, Input } from 'semantic-ui-react'
 import TextEditor from '../_components/TextEditor'
 import { Page, Field } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, fetchWithAuthzHandling } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 class AdminInstance extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         t: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
         fields: {
@@ -24,13 +25,14 @@ class AdminInstance extends Component {
         }
     }
     componentDidMount() {
-        fetchWithAuthzHandling({ url: '/api/admin/instance' })
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/instance' })
             .then(checkStatus)
             .then(response => response.json())
             .then(fields => this.setState({ fields }))
             .catch(response => {
                 response.json().then(json => {
-                    this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
+                    _addNotification(notifications.defaultError, 'notifications.admin.instance.title', json.message)
                 })
             })
     }
@@ -45,13 +47,14 @@ class AdminInstance extends Component {
         this.setState({ fields })
     }
     submitForm = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         const headers = { 'Content-Type': 'application/json' }
         const body = JSON.stringify(this.state.fields)
-        fetchWithAuthzHandling({ url: '/api/admin/instance', method: 'PUT', body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/admin/instance', method: 'PUT', body, headers, context: this.context })
             .then(checkStatus)
-            .then(() => this.context._addNotification(notifications.admin.instanceParamsUpdated))
+            .then(() => _addNotification(notifications.admin.instanceParamsUpdated))
             .catch(response => {
-                response.text().then(text => this.context._addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
             })
     }
     render() {
