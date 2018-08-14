@@ -4,12 +4,15 @@ import { NavLink } from 'react-router-dom'
 import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
+import { getLocalAuthoritySlug } from '../_util/utils'
+
 class AdminMenuBar extends Component {
     static contextTypes = {
         t: PropTypes.func
     }
     render() {
         const { t } = this.context
+        const localAuthoritySlug = getLocalAuthoritySlug()
         return (
             <Menu style={{ backgroundColor: 'white' }} fixed='left' className='mainMenu rosso' secondary vertical>
                 <div className='mainMenus'>
@@ -18,11 +21,11 @@ class AdminMenuBar extends Component {
                         <Icon name='tasks' size='large' />
                         <Menu.Header>Général</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item as={NavLink} to='/admin/ma-collectivite'>{t('admin.my_local_authority')}</Menu.Item>
-                            <Menu.Item as={NavLink} to='/admin/agents'>{t('admin.users')}</Menu.Item>
-                            <Menu.Item as={NavLink} to='/admin/collectivite'>{t('admin.local_authorities')}</Menu.Item>
-                            <Menu.Item as={NavLink} to='/admin/parametrage-instance'>Paramètre d'instance</Menu.Item>
-                            <Menu.Item as={NavLink} to='/admin/creation-generique'>{t('admin.creation_generic')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/ma-collectivite`}>{t('admin.my_local_authority')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/agents`}>{t('admin.users')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/collectivite`}>{t('admin.local_authorities')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/parametrage-instance`}>Paramètre d'instance</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/creation-generique`}>{t('admin.creation_generic')}</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
 
@@ -30,7 +33,7 @@ class AdminMenuBar extends Component {
                         <Icon name='checkmark box' size='large' />
                         <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item as={NavLink} to='/admin/actes/parametrage-module'>Paramètres</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/actes/parametrage-module`}>Paramètres</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
 
@@ -38,7 +41,7 @@ class AdminMenuBar extends Component {
                         <Icon name='calculator' size='large' />
                         <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
                         <Menu.Menu>
-                            <Menu.Item as={NavLink} to='/admin/pes/parametrage-module'>Paramètres</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/pes/parametrage-module`}>Paramètres</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>

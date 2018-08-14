@@ -9,7 +9,7 @@ import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
 import ConfirmModal from '../../_components/ConfirmModal'
 import { Field, FieldValue, ListItem, Page } from '../../_components/UI'
-import { checkStatus } from '../../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -90,11 +90,12 @@ class LocalAuthority extends Component {
     }
     render() {
         const { t } = this.context
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const moduleList = modules.map(moduleName => {
             const isActivated = this.state.fields.activatedModules.includes(moduleName)
             const isActivatedUrl = this.props.uuid
-                ? `/admin/collectivite/${this.state.fields.uuid}/${moduleName.toLowerCase()}`
-                : `/admin/ma-collectivite/${moduleName.toLowerCase()}`
+                ? `/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/${moduleName.toLowerCase()}`
+                : `/${localAuthoritySlug}/admin/ma-collectivite/${moduleName.toLowerCase()}`
             const migrationUrl = isActivatedUrl + '/migration'
             return (
                 <ListItem key={moduleName} title={t(`modules.${moduleName}`)} icon='setting' iconColor={isActivated ? 'green' : 'red'}>
@@ -128,7 +129,7 @@ class LocalAuthority extends Component {
             )
         })
         const groupList = this.state.fields.groups.map(group =>
-            <ListItem as={Link} to={`/admin/${this.props.uuid ? `collectivite/${this.state.fields.uuid}` : 'ma-collectivite'}/groupes/${group.uuid}`}
+            <ListItem as={Link} to={`/${localAuthoritySlug}/admin/${this.props.uuid ? `collectivite/${this.state.fields.uuid}` : 'ma-collectivite'}/groupes/${group.uuid}`}
                 key={group.uuid} title={group.name} icon='users' style={{ cursor: 'pointer' }}>
                 <List.Content floated='right'>
                     <Icon onClick={e => this.removeGroup(e, group.uuid)} name='remove' color='red' size='large' style={{ cursor: 'pointer' }} />
@@ -172,7 +173,7 @@ class LocalAuthority extends Component {
                             { property: 'email', displayed: true, displayName: t('agent.email'), searchable: true },
                         ]}
                         header={true}
-                        link={this.props.uuid ? `/admin/collectivite/${this.state.fields.uuid}/agent/` : '/admin/ma-collectivite/agent/'}
+                        link={this.props.uuid ? `/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/agent/` : '/admin/ma-collectivite/agent/'}
                         linkProperty='uuid'
                         noDataMessage={t('admin.local_authority.no_user')}
                         keyProperty='uuid' />

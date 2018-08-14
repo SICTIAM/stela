@@ -6,7 +6,7 @@ import history from '../_util/history'
 
 import { Field, Page } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 
 class GenericAccountCreation extends Component {
     static contextTypes = {
@@ -40,6 +40,7 @@ class GenericAccountCreation extends Component {
     submitForm = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const genericAccount = this.state.fields
+        const localAuthoritySlug = getLocalAuthoritySlug()
         genericAccount.localAuthorities = genericAccount.localAuthorities.map(localAuthority => localAuthority.uuid)
 
         const body = JSON.stringify(genericAccount)
@@ -48,7 +49,7 @@ class GenericAccountCreation extends Component {
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.admin.generic_account_created)
-                history.push('/admin/ma-collectivite')
+                history.push(`/${localAuthoritySlug}/admin/ma-collectivite`)
             }
             )
             .catch(response => {

@@ -7,7 +7,7 @@ import debounce from 'debounce'
 import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import { Page } from '../_components/UI'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 
 class AgentList extends Component {
     static contextTypes = {
@@ -72,6 +72,7 @@ class AgentList extends Component {
     }
     render() {
         const { t } = this.context
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
             { property: 'family_name', displayed: true, displayName: t('agent.family_name'), searchable: true, sortable: true },
@@ -105,7 +106,7 @@ class AgentList extends Component {
                         fetchedSearch={this.search}
                         noDataMessage='Aucun agent'
                         keyProperty='uuid'
-                        link='/admin/agents/'
+                        link={`/${localAuthoritySlug}/admin/agents/`}
                         linkProperty='uuid'
                         pagination={pagination}
                         sort={this.sort}

@@ -8,7 +8,7 @@ import Pagination from '../../_components/Pagination'
 import { modules } from '../../_util/constants'
 import { Page } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
-import { checkStatus } from '../../_util/utils'
+import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 
 class LocalAuthorityList extends Component {
     static contextTypes = {
@@ -70,6 +70,7 @@ class LocalAuthorityList extends Component {
         activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
     render() {
         const { t } = this.context
+        const localAuthoritySlug = getLocalAuthoritySlug()
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
             { property: 'siren', displayed: true, displayName: t('local_authority.siren'), searchable: true, sortable: true },
@@ -108,7 +109,7 @@ class LocalAuthorityList extends Component {
                         metaData={metaData}
                         header={true}
                         search={false}
-                        link='/admin/collectivite/'
+                        link={`/${localAuthoritySlug}/admin/collectivite/`}
                         linkProperty='uuid'
                         noDataMessage='Aucune collectivité'
                         keyProperty='uuid'
