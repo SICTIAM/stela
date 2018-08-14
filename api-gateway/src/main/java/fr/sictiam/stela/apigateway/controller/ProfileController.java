@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/api-gateway")
 public class ProfileController {
 
-    @Value("${application.urlWithSlug}")
-    String applicationUrlWithSlug;
+    @Value("${application.url}")
+    String applicationUrl;
 
     @Value("${application.ozwilloPortalUrl}")
     String ozwilloPortalUrl;
@@ -40,12 +40,12 @@ public class ProfileController {
             HttpServletRequest request) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String slugForProfile = restTemplate.getForObject(
-                discoveryUtils.adminServiceUrl() + "/api/admin/profile/{uuid}/slug", String.class, profileUuid);
+        String instanceId = restTemplate.getForObject(
+                discoveryUtils.adminServiceUrl() + "/api/admin/profile/{uuid}/instance-id", String.class, profileUuid);
 
         request.getSession().invalidate();
 
-        String loginUrlToRedirectTo = applicationUrlWithSlug.replace("%SLUG%", slugForProfile) + "/login";
+        String loginUrlToRedirectTo = applicationUrl + "/login?instance_id=" + instanceId;
 
         response.sendRedirect(loginUrlToRedirectTo);
     }
