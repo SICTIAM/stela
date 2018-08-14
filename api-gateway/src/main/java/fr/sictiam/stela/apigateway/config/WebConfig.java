@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
         return new TokenRefreshInterceptor();
     }
 
-    private final String localAuthority = "{localAuthoritySlug:^(?!api)\\w+}";
+    private final String localAuthority = "{localAuthoritySlug:^(?!api|login|logout)\\w+}";
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
