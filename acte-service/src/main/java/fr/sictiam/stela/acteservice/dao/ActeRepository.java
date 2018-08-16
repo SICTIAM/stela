@@ -28,7 +28,7 @@ public interface ActeRepository extends JpaRepository<Acte, String> {
 
     Optional<Acte> findFirstByNumberAndLocalAuthority_UuidAndDraftNull(String number, String localAuthorityUuid);
 
-    Optional<Acte> findByNumberAndLocalAuthoritySiren(String number, String siren);
+    Optional<Acte> findByNumberAndLocalAuthoritySirenAndDraftNull(String number, String siren);
 
     List<Acte> findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(String uuid);
 
