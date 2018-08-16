@@ -68,6 +68,7 @@ class NewActeForm extends Component {
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (!this.props.draftUuid && !this.props.uuid) this.fetchActe(`/api/acte/draft/${this.props.mode}`)
+        if (this.props.draftUuid && this.props.uuid) this.fetchActe(`/api/acte/drafts/${this.props.draftUuid}/${this.props.uuid}`)
         _fetchWithAuthzHandling({ url: '/api/acte/localAuthority/depositFields' })
             .then(checkStatus)
             .then(response => response.json())
