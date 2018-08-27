@@ -223,7 +223,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         return pesAllerRepository.findById(uuid).orElseThrow(PesNotFoundException::new);
     }
 
-    List<PesAller> getPendingSinature() {
+    List<PesAller.Light> getPendingSinature() {
         return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrueAndArchiveNull();
     }
 

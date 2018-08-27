@@ -136,7 +136,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void checkPesWithdrawn() {
         LOGGER.info("Cheking for PES being withdrawn...");
-        List<PesAller> pesAllers = pesService.getPendingSinature();
+        List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
             if (pes.getPesHistories().stream()
                     .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
@@ -150,7 +150,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void checkPesSigned() {
         LOGGER.info("Cheking for new PES signatures...");
-        List<PesAller> pesAllers = pesService.getPendingSinature();
+        List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
             if (pes.getPesHistories().stream()
                     .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
@@ -161,18 +161,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                         Pair<StatusType, String> signatureResult = getSignatureStatus(file);
                         StatusType status = signatureResult.component1();
                         String errorMessage = signatureResult.component2();
-                        pes.setSigned(status.equals(StatusType.PENDING_SEND));
-                        pes.getAttachment().setFile(file);
-
-                        pesService.save(pes);
-                        pesService.updateStatus(pes.getUuid(), status, errorMessage);
-
+                        updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
                     } catch (RestClientException | UnsupportedEncodingException e) {
                         LOGGER.debug(e.getMessage());
                     }
                 }
             }
         });
+    }
+
+    private void updatePesWithSignature(String pesUuid, byte[] file, StatusType status, String errorMessage) {
+        PesAller pesAller = pesService.getByUuid(pesUuid);
+        pesAller.setSigned(status.equals(StatusType.PENDING_SEND));
+        pesAller.getAttachment().setFile(file);
+        pesService.save(pesAller);
+        pesService.updateStatus(pesUuid, status, errorMessage);
     }
 
     public SimplePesInformation computeSimplePesInformation(byte[] file) {

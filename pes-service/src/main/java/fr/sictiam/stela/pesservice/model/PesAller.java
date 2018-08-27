@@ -263,4 +263,28 @@ public class PesAller {
     public void setArchive(Archive archive) {
         this.archive = archive;
     }
+
+
+    public interface Light {
+        String getUuid();
+
+        String getObjet();
+
+        LocalDateTime getCreation();
+
+        LocalAuthority getLocalAuthority();
+
+        Attachment.Light getAttachment();
+
+        boolean isPj();
+
+        String getProfileUuid();
+
+        SortedSet<PesHistory> getPesHistories();
+
+        Integer getSesileClasseurId();
+
+        Integer getSesileDocumentId();
+    }
+
 }

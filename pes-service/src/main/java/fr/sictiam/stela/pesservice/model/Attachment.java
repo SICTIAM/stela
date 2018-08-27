@@ -67,4 +67,16 @@ public class Attachment {
     public LocalDateTime getDate() {
         return date;
     }
+
+
+    public interface Light {
+        String getUuid();
+
+        String getFilename();
+
+        long getSize();
+
+        LocalDateTime getDate();
+    }
+
 }
