@@ -274,8 +274,6 @@ public class PesAller {
 
         LocalAuthority getLocalAuthority();
 
-        Attachment.Light getAttachment();
-
         boolean isPj();
 
         String getProfileUuid();
