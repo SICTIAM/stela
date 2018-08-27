@@ -168,7 +168,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         PesAller pes = getByUuid(event.getPesHistory().getPesUuid());
         pes.getPesHistories().add(event.getPesHistory());
-        pesAllerRepository.save(pes);
+        pesAllerRepository.saveAndFlush(pes);
     }
 
     public PesAller populateFromByte(PesAller pesAller, byte[] file) {
@@ -214,7 +214,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
         pesAller.setProfileUuid(currentProfileUuid);
 
-        pesAller = pesAllerRepository.save(pesAller);
+        pesAller = pesAllerRepository.saveAndFlush(pesAller);
         updateStatus(pesAller.getUuid(), StatusType.CREATED);
         return pesAller;
     }
@@ -257,7 +257,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public PesAller save(PesAller pes) {
-        return pesAllerRepository.save(pes);
+        return pesAllerRepository.saveAndFlush(pes);
     }
 
     public Optional<PesAller> getByFileName(String fileName) {
