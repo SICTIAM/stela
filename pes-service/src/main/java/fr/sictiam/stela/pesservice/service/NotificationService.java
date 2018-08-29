@@ -114,6 +114,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                                 "$.pes." + event.getPesHistory().getStatus().name() + ".body", getAgentInfo(node)));
 
                 PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
+                pesService.updateHistory(pesHistory);
                 applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
             }
         }

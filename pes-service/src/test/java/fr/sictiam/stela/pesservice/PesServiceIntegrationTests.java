@@ -217,6 +217,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         PesAller pes = samplePesAller();
 
         pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
+        pesService.updateStatus(pes.getUuid(), StatusType.SENT);
 
         MockPesEventListener mockActeEventListener = new MockPesEventListener(StatusType.SENT);
         try {
@@ -250,15 +251,6 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         ackStream.read(targetArray);
         receiverTask.readACK(targetArray, "030004_180124163513-ACK-A2600191_A00DL4ZW_OK.xml");
 
-        MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
-        try {
-            synchronized (mockPesEventListener) {
-                mockPesEventListener.wait(4000);
-            }
-        } catch (Exception e) {
-            fail("Should not have thrown an exception");
-        }
-
         List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
         assertThat(pesHistories, hasSize(2));
         assertThat(pesHistories, hasItem(Matchers.<PesHistory>hasProperty("status", is(StatusType.ACK_RECEIVED))));
@@ -281,25 +273,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     public void retryTest() throws IOException {
         PesAller pes = samplePesAller();
         pesService.updateStatus(pes.getUuid(), StatusType.SENT);
-
-        MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
-        try {
-            synchronized (mockPesEventListener) {
-                mockPesEventListener.wait(4000);
-            }
-        } catch (Exception e) {
-            fail("Should not have thrown an exception");
-        }
         retryTask.resendBlockedFlux();
-
-        MockPesEventListener mockPesEventListener2 = new MockPesEventListener(StatusType.RESENT);
-        try {
-            synchronized (mockPesEventListener2) {
-                mockPesEventListener2.wait(4000);
-            }
-        } catch (Exception e) {
-            fail("Should not have thrown an exception");
-        }
 
         List<PesHistory> pesHistories = pesHistoryRepository.findBypesUuidOrderByDate(pes.getUuid());
         assertThat(pesHistories, hasSize(3));
@@ -313,25 +287,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         PesAller pes = samplePesAller();
         pesService.updateStatus(pes.getUuid(), StatusType.SENT);
 
-        MockPesEventListener mockPesEventListener = new MockPesEventListener(StatusType.NOTIFICATION_SENT);
-        try {
-            synchronized (mockPesEventListener) {
-                mockPesEventListener.wait(4000);
-            }
-        } catch (Exception e) {
-            fail("Should not have thrown an exception");
-        }
-
         pesService.updateStatus(pes.getUuid(), StatusType.MAX_RETRY_REACH);
-
-        MockPesEventListener mockPesEventListener2 = new MockPesEventListener(StatusType.MAX_RETRY_REACH);
-        try {
-            synchronized (mockPesEventListener2) {
-                mockPesEventListener2.wait(4000);
-            }
-        } catch (Exception e) {
-            fail("Should not have thrown an exception");
-        }
 
         assertThat(pesService.getBlockedFlux(), empty());
     }
