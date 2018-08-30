@@ -31,7 +31,6 @@ import xyz.capybara.clamav.commands.scan.result.ScanResult.OK;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -152,16 +151,7 @@ public class PesAllerService {
                     creationTo.plusDays(1).atStartOfDay())));
 
         if (status != null) {
-            // TODO: Find a way to do a self left join using a CriteriaQuery instead of a
-            // native one
-            Query q = entityManager.createNativeQuery(
-                    "select ah1.pes_uuid from pes_history ah1 left join pes_history ah2 on (ah1.pes_uuid = ah2.pes_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '"
-                            + status + "'");
-            List<String> pesHistoriesPesUuids = q.getResultList();
-            if (pesHistoriesPesUuids.size() > 0)
-                predicates.add(builder.and(pesRoot.get("uuid").in(pesHistoriesPesUuids)));
-            else
-                predicates.add(builder.and(pesRoot.get("uuid").isNull()));
+            predicates.add(builder.equal(pesRoot.get("lastHistoryStatus"), status));
         }
 
         return predicates;
