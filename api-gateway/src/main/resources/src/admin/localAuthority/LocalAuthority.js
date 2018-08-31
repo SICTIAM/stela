@@ -173,7 +173,7 @@ class LocalAuthority extends Component {
                             { property: 'email', displayed: true, displayName: t('agent.email'), searchable: true },
                         ]}
                         header={true}
-                        link={this.props.uuid ? `/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/agent/` : `${localAuthoritySlug}/admin/ma-collectivite/agent/`}
+                        link={this.props.uuid ? `/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/agent/` : `/${localAuthoritySlug}/admin/ma-collectivite/agent/`}
                         linkProperty='uuid'
                         noDataMessage={t('admin.local_authority.no_user')}
                         keyProperty='uuid' />
