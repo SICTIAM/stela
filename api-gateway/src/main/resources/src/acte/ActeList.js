@@ -11,7 +11,7 @@ import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
 import { checkStatus, getHistoryStatusTranslationKey, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
+import { FormFieldInline, FormField, Page, LoadingContent, StatusDisplay } from '../_components/UI'
 import { natures, status } from '../_util/constants'
 
 class ActeList extends Component {
@@ -122,7 +122,7 @@ class ActeList extends Component {
         )
         const statusDisplay = (histories) => {
             const lastHistory = histories[histories.length - 1]
-            return <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(getHistoryStatusTranslationKey('acte', lastHistory))}</span>
+            return <StatusDisplay status={t(getHistoryStatusTranslationKey('acte', lastHistory))} date={lastHistory.date}/>
         }
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
@@ -148,16 +148,16 @@ class ActeList extends Component {
         }
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
-            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true },
+            { property: 'number', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true, collapsing: true },
             { property: 'objet', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true },
             { property: 'decision', displayed: true, displayName: t('acte.fields.decision'), searchable: true, displayComponent: decisionDisplay,
-                sortable: true },
+                sortable: true, collapsing: true },
             { property: 'nature', displayed: true, displayName: t('acte.fields.nature'), searchable: true, displayComponent: natureDisplay,
-                sortable: true },
+                sortable: true, collapsing: true },
             { property: 'code', displayed: false, searchable: false },
             { property: 'creation', displayed: false, searchable: false },
             { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay,
-                sortable: false },
+                sortable: false, collapsing: true },
             { property: 'public', displayed: false, searchable: false },
             { property: 'publicWebsite', displayed: false, searchable: false },
         ]

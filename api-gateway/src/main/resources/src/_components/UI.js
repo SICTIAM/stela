@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment } from 'semantic-ui-react'
+import moment from 'moment'
 
 import { bytesToSize } from '../_util/utils'
 
@@ -83,6 +84,16 @@ const ListItem = ({ children, icon, iconColor, title, ...rest }) => (
         </List.Content>
     </List.Item>
 )
+
+const StatusDisplay = ({ status, date }, { t }) => (
+    <Fragment>
+        <span>{status}</span><br/>
+        <span style={{fontSize: '0.9em', color: 'rgba(0,0,0,.5)'}}>{moment(date).format('DD/MM/YYYY')}</span>
+    </Fragment>
+)
+StatusDisplay.contextTypes = {
+    t: PropTypes.func
+}
 
 const Page = ({ children, title, subtitle }) => (
     <div>
@@ -206,5 +217,6 @@ export {
     MigrationSteps,
     LoadingContent,
     LinkFile,
-    Tooltip
+    Tooltip,
+    StatusDisplay
 }

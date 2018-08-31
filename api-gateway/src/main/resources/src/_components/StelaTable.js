@@ -21,7 +21,8 @@ export default class StelaTable extends Component {
         direction: PropTypes.string,
         column: PropTypes.string,
         fetchedSearch: PropTypes.func,
-        additionalElements: PropTypes.array
+        additionalElements: PropTypes.array,
+        striped: PropTypes.bool
     }
     static defaultProps = {
         className: '',
@@ -36,7 +37,8 @@ export default class StelaTable extends Component {
         celled: true,
         direction: '',
         column: '',
-        additionalElements: []
+        additionalElements: [],
+        striped: true
     }
     state = {
         column: null,
@@ -183,7 +185,7 @@ export default class StelaTable extends Component {
                     )
                 }
 
-                <Table selectable sortable={this.props.header} basic={this.props.basic} celled={this.props.celled} fixed>
+                <Table selectable striped={this.props.striped} sortable={this.props.header} basic={this.props.basic} celled={this.props.celled}>
                     {title &&
                         <Table.Header>
                             <Table.Row>
@@ -224,7 +226,8 @@ export default class StelaTable extends Component {
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell onClick={() => this.handleLink(row[this.props.linkProperty])}
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}
-                                            key={index + '-' + row[displayedColumn.property]}>
+                                            key={index + '-' + row[displayedColumn.property]}
+                                            collapsing={!!displayedColumn.collapsing}>
                                             {displayedColumn.displayComponent ?
                                                 displayedColumn.property === '_self' ?
                                                     displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
