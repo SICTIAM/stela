@@ -71,7 +71,21 @@ public class PesAller {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Archive archive;
 
+    private LocalDateTime lastHistoryDate;
+    @Enumerated(EnumType.STRING)
+    private StatusType lastHistoryStatus;
+
     public PesAller() {
+    }
+
+    public PesAller(String uuid, LocalDateTime creation, String objet, String comment, LocalDateTime lastHistoryDate,
+            StatusType lastHistoryStatus) {
+        this.uuid = uuid;
+        this.creation = creation;
+        this.objet = objet;
+        this.comment = comment;
+        this.lastHistoryDate = lastHistoryDate;
+        this.lastHistoryStatus = lastHistoryStatus;
     }
 
     public PesAller(LocalDateTime creation, String objet, Attachment attachment, SortedSet<PesHistory> pesHistories,
@@ -263,4 +277,41 @@ public class PesAller {
     public void setArchive(Archive archive) {
         this.archive = archive;
     }
+
+    public LocalDateTime getLastHistoryDate() {
+        return lastHistoryDate;
+    }
+
+    public void setLastHistoryDate(LocalDateTime lastHistoryDate) {
+        this.lastHistoryDate = lastHistoryDate;
+    }
+
+    public StatusType getLastHistoryStatus() {
+        return lastHistoryStatus;
+    }
+
+    public void setLastHistoryStatus(StatusType lastHistoryStatus) {
+        this.lastHistoryStatus = lastHistoryStatus;
+    }
+
+    public interface Light {
+        String getUuid();
+
+        String getObjet();
+
+        LocalDateTime getCreation();
+
+        LocalAuthority getLocalAuthority();
+
+        boolean isPj();
+
+        String getProfileUuid();
+
+        SortedSet<PesHistory> getPesHistories();
+
+        Integer getSesileClasseurId();
+
+        Integer getSesileDocumentId();
+    }
+
 }

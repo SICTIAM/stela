@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -32,7 +31,6 @@ import xyz.capybara.clamav.commands.scan.result.ScanResult.OK;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -40,7 +38,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -58,7 +55,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
+public class PesAllerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesAllerService.class);
 
@@ -116,9 +113,14 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         CriteriaQuery<PesAller> query = builder.createQuery(PesAller.class);
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
+        query.select(builder.construct(PesAller.class, pesRoot.get("uuid"), pesRoot.get("creation"),
+                pesRoot.get("objet"), pesRoot.get("comment"), pesRoot.get("lastHistoryDate"),
+                pesRoot.get("lastHistoryStatus")));
+
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
         List<Predicate> predicates = getQueryPredicates(builder, pesRoot, multifield, objet, creationFrom, creationTo,
                 status, currentLocalAuthUuid);
+
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
                         ? builder.asc(pesRoot.get(columnAttribute))
@@ -149,26 +151,10 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
                     creationTo.plusDays(1).atStartOfDay())));
 
         if (status != null) {
-            // TODO: Find a way to do a self left join using a CriteriaQuery instead of a
-            // native one
-            Query q = entityManager.createNativeQuery(
-                    "select ah1.pes_uuid from pes_history ah1 left join pes_history ah2 on (ah1.pes_uuid = ah2.pes_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '"
-                            + status + "'");
-            List<String> pesHistoriesPesUuids = q.getResultList();
-            if (pesHistoriesPesUuids.size() > 0)
-                predicates.add(builder.and(pesRoot.get("uuid").in(pesHistoriesPesUuids)));
-            else
-                predicates.add(builder.and(pesRoot.get("uuid").isNull()));
+            predicates.add(builder.equal(pesRoot.get("lastHistoryStatus"), status));
         }
 
         return predicates;
-    }
-
-    @Override
-    public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        PesAller pes = getByUuid(event.getPesHistory().getPesUuid());
-        pes.getPesHistories().add(event.getPesHistory());
-        pesAllerRepository.save(pes);
     }
 
     public PesAller populateFromByte(PesAller pesAller, byte[] file) {
@@ -214,7 +200,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
         pesAller.setProfileUuid(currentProfileUuid);
 
-        pesAller = pesAllerRepository.save(pesAller);
+        pesAller = pesAllerRepository.saveAndFlush(pesAller);
         updateStatus(pesAller.getUuid(), StatusType.CREATED);
         return pesAller;
     }
@@ -223,28 +209,40 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
         return pesAllerRepository.findById(uuid).orElseThrow(PesNotFoundException::new);
     }
 
-    List<PesAller> getPendingSinature() {
+    List<PesAller.Light> getPendingSinature() {
         return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrueAndArchiveNull();
     }
 
     public void updateStatus(String pesUuid, StatusType updatedStatus) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus);
+        updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
     public void updateStatus(String pesUuid, StatusType updatedStatus, String messsage) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), messsage);
+        updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
     public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName);
+        updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
     public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName, String message) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName, message);
+        updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+    }
+
+    public void updateHistory(PesHistory newPesHistory) {
+        PesAller pes = getByUuid(newPesHistory.getPesUuid());
+        pes.setLastHistoryDate(newPesHistory.getDate());
+        pes.setLastHistoryStatus(newPesHistory.getStatus());
+        pes.getPesHistories().add(newPesHistory);
+        pesAllerRepository.saveAndFlush(pes);
     }
 
     public boolean checkVirus(byte[] file) throws ClamavException, IOException {
@@ -257,7 +255,7 @@ public class PesAllerService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public PesAller save(PesAller pes) {
-        return pesAllerRepository.save(pes);
+        return pesAllerRepository.saveAndFlush(pes);
     }
 
     public Optional<PesAller> getByFileName(String fileName) {

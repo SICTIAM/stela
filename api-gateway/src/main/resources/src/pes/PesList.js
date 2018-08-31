@@ -99,20 +99,16 @@ class PesList extends Component {
                 {t(`pes.status.${statusItem}`)}
             </option>
         ))
-        const statusDisplay = histories => {
-            if (histories.length === 0) return ''
-            const lastHistory = histories[histories.length - 1]
-            return (
-                <span>{moment(lastHistory.date).format('DD/MM/YYYY')} : {t(`pes.status.${lastHistory.status}`)}</span>
-            )
-        }
-        const creationDisplay = creation => moment(creation).format('DD/MM/YYYY')
+        const statusDisplay = (pes) => (
+            <span>{moment(pes.lastHistoryDate).format('DD/MM/YYYY')} : {t(`pes.status.${pes.lastHistoryStatus}`)}</span>
+        )
+        const creationDisplay = (creation) => moment(creation).format('DD/MM/YYYY')
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
             { property: 'creation', displayed: true, displayName: t('pes.fields.creation'), searchable: true, displayComponent: creationDisplay },
             { property: 'objet', displayed: true, displayName: t('pes.fields.objet'), searchable: true },
             { property: 'comment', displayed: true, displayName: t('pes.fields.comment'), searchable: true },
-            { property: 'pesHistories', displayed: true, displayName: t('pes.fields.status'), searchable: false, displayComponent: statusDisplay }
+            { property: '_self', displayed: true, displayName: t('pes.fields.status'), searchable: false, displayComponent: statusDisplay }
         ]
         const displayedColumns = metaData.filter(metaData => metaData.displayed)
         const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
