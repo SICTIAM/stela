@@ -222,7 +222,7 @@ export default class StelaTable extends Component {
                         }
                         {isFilled &&
                             data.map(row =>
-                                <Table.Row key={row[this.props.keyProperty]}>
+                                <Table.Row key={row[this.props.keyProperty]} negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}>
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell onClick={() => this.handleLink(row[this.props.linkProperty])}
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}

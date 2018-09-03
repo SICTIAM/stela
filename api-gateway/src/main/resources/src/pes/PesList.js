@@ -10,6 +10,7 @@ import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
 import { Page, FormFieldInline, FormField, LoadingContent, StatusDisplay } from '../_components/UI'
 import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import { anomalies } from '../_util/constants'
 import { notifications } from '../_util/Notifications'
 
 class PesList extends Component {
@@ -90,6 +91,7 @@ class PesList extends Component {
     updateItemPerPage = limit => {
         this.setState({ limit }, this.submitForm)
     }
+    negativeResolver = pes => anomalies.includes(pes.lastHistoryStatus)
     render() {
         const { t } = this.context
         const { search } = this.state
@@ -172,7 +174,8 @@ class PesList extends Component {
                             pagination={pagination}
                             sort={this.sort}
                             direction={this.state.direction}
-                            column={this.state.column} />
+                            column={this.state.column}
+                            negativeResolver={this.negativeResolver} />
                     </Segment>
                 </LoadingContent>
             </Page>

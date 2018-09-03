@@ -30,11 +30,15 @@ const status = [
 ]
 
 const anomalies = [
+    'SIGNATURE_INVALID',
+    'SIGNATURE_MISSING',
     'ANTIVIRUS_KO',
     'NOT_SENT',
     'NACK_RECEIVED',
+    'MAX_RETRY_REACH',
     'ARCHIVE_TOO_LARGE',
-    'FILE_ERROR'
+    'FILE_ERROR',
+    'SIGNATURE_SENDING_ERROR'
 ]
 
 const sesileVisibility = [0, 1, 3]

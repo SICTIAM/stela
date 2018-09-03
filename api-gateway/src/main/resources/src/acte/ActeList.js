@@ -12,7 +12,7 @@ import InputDatetime from '../_components/InputDatetime'
 import { checkStatus, getHistoryStatusTranslationKey, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent, StatusDisplay } from '../_components/UI'
-import { natures, status } from '../_util/constants'
+import { natures, status, anomalies } from '../_util/constants'
 
 class ActeList extends Component {
     static contextTypes = {
@@ -109,6 +109,10 @@ class ActeList extends Component {
                 if (response.status === 204) _addNotification(notifications.acte.noContent)
                 else response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
+    }
+    negativeResolver = acte => {
+        const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
+        return anomalies.includes(lastHistory.status)
     }
     render() {
         const { t } = this.context
@@ -241,7 +245,8 @@ class ActeList extends Component {
                             pagination={pagination}
                             sort={this.sort}
                             direction={this.state.direction}
-                            column={this.state.column} />
+                            column={this.state.column}
+                            negativeResolver={this.negativeResolver} />
                     </Segment >
                 </LoadingContent>
             </Page>
