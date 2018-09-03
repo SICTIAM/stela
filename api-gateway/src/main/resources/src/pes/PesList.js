@@ -106,7 +106,7 @@ class PesList extends Component {
             { property: 'creation', displayed: true, displayName: t('pes.fields.creation'), searchable: true, displayComponent: creationDisplay,
                 collapsing: true },
             { property: 'objet', displayed: true, displayName: t('pes.fields.objet'), searchable: true },
-            { property: 'comment', displayed: true, displayName: t('pes.fields.comment'), searchable: true },
+            { property: 'fileType', displayed: true, displayName: t('pes.fields.fileType'), searchable: false, collapsing: true },
             { property: '_self', displayed: true, displayName: t('pes.fields.status'), searchable: false, displayComponent: statusDisplay,
                 collapsing: true }
         ]

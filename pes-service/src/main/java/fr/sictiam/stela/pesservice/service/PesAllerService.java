@@ -114,7 +114,7 @@ public class PesAllerService {
         Root<PesAller> pesRoot = query.from(PesAller.class);
 
         query.select(builder.construct(PesAller.class, pesRoot.get("uuid"), pesRoot.get("creation"),
-                pesRoot.get("objet"), pesRoot.get("comment"), pesRoot.get("lastHistoryDate"),
+                pesRoot.get("objet"), pesRoot.get("fileType"), pesRoot.get("lastHistoryDate"),
                 pesRoot.get("lastHistoryStatus")));
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
