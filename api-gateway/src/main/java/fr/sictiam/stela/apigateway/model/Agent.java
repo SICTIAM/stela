@@ -23,19 +23,19 @@ public class Agent {
     private Boolean admin;
     @NotNull
     @NotEmpty
-    @JsonProperty(value = "slug_name")
-    private String slugName;
+    @JsonProperty(value = "instance_id")
+    private String instanceId;
 
     protected Agent() {
     }
 
-    public Agent(UserInfo userInfo, boolean admin, String slugName) {
+    public Agent(UserInfo userInfo, boolean admin, String instanceId) {
         this.sub = userInfo.getUserId();
         this.familyName = userInfo.getFamilyName();
         this.givenName = userInfo.getGivenName();
         this.email = userInfo.getEmail();
         this.admin = admin;
-        this.slugName = slugName;
+        this.instanceId = instanceId;
     }
 
     public String getFamilyName() {
@@ -58,7 +58,7 @@ public class Agent {
         return admin;
     }
 
-    public String getSlugName() {
-        return slugName;
+    public String getInstanceId() {
+        return instanceId;
     }
 }

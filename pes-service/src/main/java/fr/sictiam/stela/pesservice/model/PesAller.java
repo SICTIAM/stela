@@ -78,12 +78,12 @@ public class PesAller {
     public PesAller() {
     }
 
-    public PesAller(String uuid, LocalDateTime creation, String objet, String comment, LocalDateTime lastHistoryDate,
+    public PesAller(String uuid, LocalDateTime creation, String objet, String fileType, LocalDateTime lastHistoryDate,
             StatusType lastHistoryStatus) {
         this.uuid = uuid;
         this.creation = creation;
         this.objet = objet;
-        this.comment = comment;
+        this.fileType = fileType;
         this.lastHistoryDate = lastHistoryDate;
         this.lastHistoryStatus = lastHistoryStatus;
     }

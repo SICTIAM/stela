@@ -74,7 +74,7 @@ public class AdminServiceIntegrationTests extends BaseIntegrationTest {
         Agent agent = new Agent("John", "Doe", "john.doe@fbi.fr");
         agent.setSub("sub");
         agent.setAdmin(false);
-        agent.setSlugName("test");
+        agent.setInstanceId("test");
         agent = agentService.createAndAttach(agent).getAgent();
 
         Profile profile = profileService.createOrUpdate(new Profile(localAuthority, agent, false));

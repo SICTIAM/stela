@@ -176,7 +176,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         String[] idActeSplit = iDActe.split("-");
         String siren = idActeSplit[1];
         String number = idActeSplit[3];
-        return acteRepository.findByNumberAndLocalAuthoritySiren(number, siren).orElseThrow(ActeNotFoundException::new);
+        return acteRepository.findByNumberAndLocalAuthoritySirenAndDraftNull(number, siren).orElseThrow(ActeNotFoundException::new);
     }
 
     public boolean isNumberAvailable(String number, String localAuthorityUuid) {
@@ -201,7 +201,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public void receiveAnomalieActe(String siren, String number, String detail, Attachment attachment) {
-        Acte acte = acteRepository.findByNumberAndLocalAuthoritySiren(number, siren)
+        Acte acte = acteRepository.findByNumberAndLocalAuthoritySirenAndDraftNull(number, siren)
                 .orElseThrow(ActeNotFoundException::new);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, LocalDateTime.now(),
                 attachment.getFile(), attachment.getFilename(), detail);
@@ -850,7 +850,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                     String.class);
             httpStatus = result.getStatusCode();
         } catch (Exception e) {
-            LOGGER.error("Miat main server unavailable!");
+            LOGGER.error("Miat main server unavailable: {}", e.getMessage());
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
@@ -860,7 +860,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         String.class);
                 httpStatus = result.getStatusCode();
             } catch (Exception e) {
-                LOGGER.error("Miat rescue server unavailable!");
+                LOGGER.error("Miat rescue server unavailable: {}", e.getMessage());
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             }
         }

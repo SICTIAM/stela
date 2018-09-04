@@ -24,38 +24,22 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
-configure(tasks.processResources) {
-    // we don't want source JSX in the jar, we only need their transpiled, bundled version in build/
-    exclude 'jsx/'
-    exclude 'build/'
-    exclude 'styles/'
+processResources {
+    // we don't want the JS sources in the jar, we only need their transpiled, bundled version in build/
+    exclude 'build/', 'node_modules/', 'src/', '.env.development', '.gitignore/', 'package.json/', 'yarn.lock/'
 }
 
+task yarnInstall(type: YarnTask) {
+    args = ['--cwd', './src/main/resources', 'install',]
+}
 task frontBundle(type: YarnTask) {
-    args = ['run', 'build']
-    doLast {
-        copy {
-            from "${sourceSets.main.resources.srcDirs[0]}/build/static"
-            into "${sourceSets.main.output.resourcesDir}/public/static"
-        }
-        copy {
-            from "${sourceSets.main.resources.srcDirs[0]}/build/index.html"
-            into "${sourceSets.main.output.resourcesDir}/public/"
-        }
-        copy {
-            from "${sourceSets.main.resources.srcDirs[0]}/build/asset-manifest.json"
-            into "${sourceSets.main.output.resourcesDir}/public/"
-        }
-        copy {
-            from "${sourceSets.main.resources.srcDirs[0]}/build/manifest.json"
-            into "${sourceSets.main.output.resourcesDir}/public/"
-        }
-        copy {
-            from "${sourceSets.main.resources.srcDirs[0]}/build/browserconfig.xml"
-            into "${sourceSets.main.output.resourcesDir}/public/"
-        }
-    }
+    args = ['--cwd', './src/main/resources', 'run', 'build']
+}
+task copyFrontBuild(type: Copy) {
+    from "${sourceSets.main.resources.srcDirs[0]}/build/"
+    into "${sourceSets.main.output.resourcesDir}/public/"
 }
 
-bootJar.dependsOn(frontBundle)
-frontBundle.dependsOn(npmInstall)
+bootJar.dependsOn(copyFrontBuild)
+copyFrontBuild.dependsOn(frontBundle)
+frontBundle.dependsOn(yarnInstall)

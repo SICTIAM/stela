@@ -75,9 +75,9 @@ public class ProfileController {
         return profileService.getByLocalAuthoritySirenAndEmail(siren, email);
     }
 
-    @GetMapping("/{uuid}/slug")
-    public String getSlugForProfile(@PathVariable String uuid) {
-        return profileService.getByUuid(uuid).getLocalAuthority().getSlugName();
+    @GetMapping("/{uuid}/instance-id")
+    public String getInstanceIdForProfile(@PathVariable String uuid) {
+        return profileService.getByUuid(uuid).getLocalAuthority().getOzwilloInstanceInfo().getInstanceId();
     }
 
     // TODO: Fix Rights on this endpoint

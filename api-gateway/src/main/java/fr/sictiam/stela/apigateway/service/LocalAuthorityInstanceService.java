@@ -3,6 +3,7 @@ package fr.sictiam.stela.apigateway.service;
 import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import fr.sictiam.stela.apigateway.util.SlugUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,6 @@ public class LocalAuthorityInstanceService {
             return localAuthorityInstance;
         }
         return null;
-
     }
 
     public LocalAuthorityInstance findLocalAuthorityInstanceFromRequest() {
@@ -45,9 +45,14 @@ public class LocalAuthorityInstanceService {
         if (RequestContextHolder.getRequestAttributes() != null) {
             HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
             String slugName = SlugUtils.getSlugNameFromRequest(request);
+            String instanceIdParam = request.getParameter("instance_id");
             WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+
+            StringBuilder uri = new StringBuilder("/api/admin/local-authority/instance/");
+            if (StringUtils.isNotBlank(slugName)) uri.append("/slug-name/").append(slugName);
+            else uri.append("/instance-id/").append(instanceIdParam);
             Mono<LocalAuthorityInstance> localAuthorityInstanceMono = webClient.get()
-                    .uri("/api/admin/local-authority/instance/{slugName}", slugName).retrieve()
+                    .uri(uri.toString()).retrieve()
                     .onStatus(HttpStatus::is4xxClientError, response -> Mono.empty())
                     .bodyToMono(LocalAuthorityInstance.class);
 

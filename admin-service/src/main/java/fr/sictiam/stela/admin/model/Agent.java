@@ -46,8 +46,8 @@ public class Agent {
     @JsonView(Views.AgentViewPublic.class)
     private Boolean admin;
     @Transient
-    @JsonProperty(value = "slug_name")
-    private String slugName;
+    @JsonProperty(value = "instance_id")
+    private String instanceId;
 
     @OneToMany(mappedBy = "agent", fetch = FetchType.EAGER)
     @JsonView(Views.AgentViewPrivate.class)
@@ -116,12 +116,12 @@ public class Agent {
         this.admin = admin;
     }
 
-    public String getSlugName() {
-        return slugName;
+    public String getInstanceId() {
+        return instanceId;
     }
 
-    public void setSlugName(String slugName) {
-        this.slugName = slugName;
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     public Set<Profile> getProfiles() {
