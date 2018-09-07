@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
 import fr.sictiam.stela.pesservice.dao.PendingMessageRepository;
-import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.PendingMessage;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.StatusType;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -64,27 +64,28 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     }
 
     @Scheduled(fixedRate = 5000)
+    @Transactional
     public void senderTask() {
 
         if (!pendingQueue.isEmpty() && adminService.isHeliosAvailable()) {
             PendingMessage pendingMessage = pendingQueue.peek();
             PesAller pes = pesService.getByUuid(pendingMessage.getPesUuid());
-            Attachment attachment = pes.getAttachment();
+            LOGGER.debug("PES {}: {}", pes.getUuid(), pes.getObjet());
 
-            if ((attachment.getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
+            if ((pes.getAttachment().getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
 
                 StatusType sendStatus = null;
                 try {
                     pesService.send(pes);
                     sendStatus = StatusType.SENT;
                     pendingMessageRepository.delete(pendingQueue.poll());
-                    currentSizeUsed.addAndGet(attachment.getFile().length);
+                    currentSizeUsed.addAndGet(pes.getAttachment().getFile().length);
                 } catch (PesSendException e) {
                     LOGGER.error(e.getMessage());
                     sendStatus = StatusType.NOT_SENT;
                 }
-                pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus, attachment.getFile(),
-                        attachment.getFilename());
+                pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus, pes.getAttachment().getFile(),
+                        pes.getAttachment().getFilename());
 
             } else {
                 LOGGER.info("Hourly limit exceeded, waiting next hour");
