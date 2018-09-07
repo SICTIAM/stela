@@ -161,7 +161,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                         Pair<StatusType, String> signatureResult = getSignatureStatus(file);
                         StatusType status = signatureResult.component1();
                         String errorMessage = signatureResult.component2();
-                        updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
+                        // HACK: Prevent from incrementing SIGNATURE_MISSING when the PES is stuck on SESILE
+                        if (!StatusType.SIGNATURE_MISSING.equals(pes.getLastHistoryStatus())
+                                || !StatusType.SIGNATURE_MISSING.equals(signatureResult.component1())) {
+                            updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
+                        }
                     } catch (RestClientException | UnsupportedEncodingException e) {
                         LOGGER.debug(e.getMessage());
                     }

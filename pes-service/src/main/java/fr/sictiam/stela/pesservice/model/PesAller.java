@@ -312,6 +312,10 @@ public class PesAller {
         Integer getSesileClasseurId();
 
         Integer getSesileDocumentId();
+
+        LocalDateTime getLastHistoryDate();
+
+        StatusType getLastHistoryStatus();
     }
 
 }
