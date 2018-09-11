@@ -108,26 +108,12 @@ public class PesRetourService {
         List<PesRetour> pesRetours = pesRetourRepository.findByLocalAuthoritySirenAndCollectedFalse(siren);
 
         List<Map<String, String>> outputList = pesRetours.stream().map(pesRetour -> {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
-                TarGzUtils.addEntry(pesRetour.getAttachment().getFilename(), pesRetour.getAttachment().getFile(), taos);
-
-                taos.close();
-                baos.close();
-
-                ByteArrayOutputStream archive = TarGzUtils.compress(baos);
-                String archiveName = pesRetour.getAttachment().getFilename() + ".tar.gz";
-                String archiveBase64 = Base64.encode(archive.toByteArray());
-                Map<String, String> returnMap = new HashMap<>();
-                returnMap.put("chaine_archive", archiveBase64);
-                returnMap.put("filename", archiveName);
-                return returnMap;
-
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage());
-            }
-            return null;
+            String archiveName = pesRetour.getAttachment().getFilename();
+            String archiveBase64 = Base64.encode(pesRetour.getAttachment().getFile());
+            Map<String, String> returnMap = new HashMap<>();
+            returnMap.put("chaine_archive", archiveBase64);
+            returnMap.put("filename", archiveName);
+            return returnMap;
         }).filter(pesRetourMap -> pesRetourMap != null).collect(Collectors.toList());
         return outputList;
     }
@@ -136,26 +122,12 @@ public class PesRetourService {
         List<PesRetour> pesRetours = pesRetourRepository.findByLocalAuthoritySirenAndCollectedFalse(siren);
 
         List<GetTabPESRetourStruct> outputList = pesRetours.stream().map(pesRetour -> {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
-                TarGzUtils.addEntry(pesRetour.getAttachment().getFilename(), pesRetour.getAttachment().getFile(), taos);
-
-                taos.close();
-                baos.close();
-
-                ByteArrayOutputStream archive = TarGzUtils.compress(baos);
-                String archiveName = pesRetour.getAttachment().getFilename() + ".tar.gz";
-                String archiveBase64 = Base64.encode(archive.toByteArray());
-                GetTabPESRetourStruct tabPESRetourStruct = new GetTabPESRetourStruct();
-                tabPESRetourStruct.setChaineArchive(archiveBase64);
-                tabPESRetourStruct.setFilename(archiveName);
-                return tabPESRetourStruct;
-
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage());
-            }
-            return null;
+            String archiveName = pesRetour.getAttachment().getFilename();
+            String archiveBase64 = Base64.encode(pesRetour.getAttachment().getFile());
+            GetTabPESRetourStruct tabPESRetourStruct = new GetTabPESRetourStruct();
+            tabPESRetourStruct.setChaineArchive(archiveBase64);
+            tabPESRetourStruct.setFilename(archiveName);
+            return tabPESRetourStruct;
         }).filter(pesRetourMap -> pesRetourMap != null).collect(Collectors.toList());
         return outputList;
     }
