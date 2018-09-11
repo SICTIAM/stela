@@ -72,6 +72,12 @@ public class EmailCheckingTask {
     @Value("${application.email.password}")
     private String password;
 
+    @Value("${application.email.done_folder}")
+    private String doneFolder;
+
+    @Value("${application.email.error_folder}")
+    private String errorFolder;
+
     @PostConstruct
     public void init() {
 
@@ -90,10 +96,10 @@ public class EmailCheckingTask {
             store.connect(host, username, password);
             inbox = store.getFolder("INBOX");
 
-            archiveBox = store.getFolder("DONE");
+            archiveBox = store.getFolder(doneFolder);
             archiveBox.open(Folder.READ_WRITE);
 
-            errorBox = store.getFolder("ERROR");
+            errorBox = store.getFolder(errorFolder);
             errorBox.open(Folder.READ_WRITE);
 
         } catch (MessagingException | GeneralSecurityException e) {
