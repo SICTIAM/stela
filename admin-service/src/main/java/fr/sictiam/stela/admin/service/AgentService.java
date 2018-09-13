@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -85,6 +86,14 @@ public class AgentService {
 
     public Optional<Agent> findByUuid(String uuid) {
         return agentRepository.findByUuid(uuid);
+    }
+
+    public Set<Profile> getProfilesByUuid(String agentUuid) {
+        return profileRepository.findByAgent_UuidOrderByLocalAuthority_name(agentUuid);
+    }
+
+    public Set<Profile> getProfilesBySub(String agentUuid) {
+        return profileRepository.findByAgent_SubOrderByLocalAuthority_name(agentUuid);
     }
 
     public Profile createAndAttach(Agent agent) {

@@ -33,10 +33,10 @@ public class PesAller {
     @Size(max = 500, groups = {RestValidation.class})
     private String objet;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Attachment attachment;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("date ASC")
     private SortedSet<PesHistory> pesHistories;
 
@@ -68,7 +68,7 @@ public class PesAller {
 
     private boolean imported;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Archive archive;
 
     private LocalDateTime lastHistoryDate;
@@ -312,6 +312,10 @@ public class PesAller {
         Integer getSesileClasseurId();
 
         Integer getSesileDocumentId();
+
+        LocalDateTime getLastHistoryDate();
+
+        StatusType getLastHistoryStatus();
     }
 
 }

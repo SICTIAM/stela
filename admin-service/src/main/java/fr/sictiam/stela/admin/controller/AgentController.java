@@ -119,13 +119,13 @@ public class AgentController {
     @GetMapping("/{uuid}/profiles")
     @JsonView(Views.AgentView.class)
     public Set<Profile> getProfiles(@PathVariable String uuid) {
-        return agentService.findByUuid(uuid).get().getProfiles();
+        return agentService.getProfilesByUuid(uuid);
     }
 
     @GetMapping("/profiles")
     @JsonView(Views.AgentView.class)
     public Set<Profile> getCurrentProfiles(@RequestAttribute("STELA-Sub") String sub) {
-        return agentService.findBySub(sub).get().getProfiles();
+        return agentService.getProfilesBySub(sub);
     }
 
     @PostMapping("/migration/users/{localAuthorityUuid}")

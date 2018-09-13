@@ -194,13 +194,3 @@ span.fieldValue {
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
-
-/* Semantic UI bug introduced in 2.3 version, small fixe 
- * https://github.com/Semantic-Org/Semantic-UI/issues/6267
-*/
-.visible.transition {
-    margin-top: auto !important;
-    display: inline-block !important;
-    position: relative;
-    top: 20%;
-}
