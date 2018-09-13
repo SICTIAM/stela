@@ -182,7 +182,7 @@ class LocalAuthority extends Component {
                 <Segment>
                     <h2>{t('admin.local_authority.groups')}</h2>
                     <div style={{ textAlign: 'right' }}>
-                        <Link className='ui button basic primary' to={`/admin/collectivite/${this.state.fields.uuid}/groupes`}>
+                        <Link className='ui button basic primary' to={`/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/groupes`}>
                             {t('admin.local_authority.new_group')}
                         </Link>
                     </div>
