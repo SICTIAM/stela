@@ -52,6 +52,18 @@ public class Admin {
 
     }
 
+    public Admin(String mainEmail, List<String> additionalEmails, boolean miatAvailable,
+            LocalDateTime unavailabilityMiatStartDate, LocalDateTime unavailabilityMiatEndDate,
+            boolean alertMessageDisplayed, String alertMessage) {
+        this.mainEmail = mainEmail;
+        this.additionalEmails = additionalEmails;
+        this.miatAvailable = miatAvailable;
+        this.unavailabilityMiatStartDate = unavailabilityMiatStartDate;
+        this.unavailabilityMiatEndDate = unavailabilityMiatEndDate;
+        this.alertMessageDisplayed = alertMessageDisplayed;
+        this.alertMessage = alertMessage;
+    }
+
     public Admin(String uuid, String mainEmail, List<String> additionalEmails, boolean miatAvailable,
             LocalDateTime unavailabilityMiatStartDate, LocalDateTime unavailabilityMiatEndDate,
             boolean alertMessageDisplayed, String alertMessage) {
