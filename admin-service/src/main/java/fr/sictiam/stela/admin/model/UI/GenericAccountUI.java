@@ -4,17 +4,16 @@ import java.util.Set;
 
 public class GenericAccountUI {
 
+    private String uuid;
     private String software;
-
     private String email;
-
     private String password;
-
     private String serial;
-
     private String vendor;
+    private Set<String> localAuthoritySirens;
 
-    private Set<String> localAuthorities;
+    public GenericAccountUI() {
+    }
 
     public String getSoftware() {
         return software;
@@ -56,12 +55,12 @@ public class GenericAccountUI {
         this.vendor = vendor;
     }
 
-    public Set<String> getLocalAuthorities() {
-        return localAuthorities;
+    public Set<String> getLocalAuthoritySirens() {
+        return localAuthoritySirens;
     }
 
-    public void setLocalAuthorities(Set<String> localAuthorities) {
-        this.localAuthorities = localAuthorities;
+    public void setLocalAuthoritySirens(Set<String> localAuthoritySirens) {
+        this.localAuthoritySirens = localAuthoritySirens;
     }
 
 }

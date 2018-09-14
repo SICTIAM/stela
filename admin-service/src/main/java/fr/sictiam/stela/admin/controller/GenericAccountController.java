@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.GenericAccount;
 import fr.sictiam.stela.admin.model.PaullConnection;
 import fr.sictiam.stela.admin.model.UI.GenericAccountUI;
+import fr.sictiam.stela.admin.model.UI.SearchResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.GenericAccountService;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
@@ -15,14 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,13 +49,36 @@ public class GenericAccountController {
         return new ResponseEntity<>(genericAccountService.getByUuid(uuid), HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<SearchResultsUI> getAllGenericAccount(
+            @RequestParam(value = "search", required = false, defaultValue = "") String search,
+            @RequestParam(value = "software", required = false, defaultValue = "") String software,
+            @RequestParam(value = "email", required = false, defaultValue = "") String email,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "email") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<GenericAccount> genericAccounts = genericAccountService.getAllWithPagination(search, software, email,
+                limit, offset, column, direction);
+        Long count = genericAccountService.countAll(search, software, email);
+        return new ResponseEntity<>(new SearchResultsUI(count, genericAccounts), HttpStatus.OK);
+    }
+
     @GetMapping("/session/{sessionID}")
     public ResponseEntity<PaullConnection> getSession(@PathVariable String sessionID) {
         return new ResponseEntity<>(paullConnectionService.getBySessionID(sessionID), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody GenericAccountUI body) {
+    public ResponseEntity<?> create(@RequestBody GenericAccountUI body,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         GenericAccount genericAccount = new GenericAccount();
         try {
             BeanUtils.copyProperties(genericAccount, body);
@@ -83,11 +103,65 @@ public class GenericAccountController {
         }
 
         genericAccount.setPassword(passwordEncoder.encode(genericAccount.getPassword()));
-        genericAccount.setLocalAuthorities(body.getLocalAuthorities().stream()
+        genericAccount.setLocalAuthorities(body.getLocalAuthoritySirens().stream()
                 .map(uuid -> localAuthorityService.getByUuid(uuid)).collect(Collectors.toSet()));
         genericAccountService.save(genericAccount);
         return new ResponseEntity<>(HttpStatus.OK);
 
+    }
+
+    @PutMapping("/{uuid}")
+    public ResponseEntity<?> update(@PathVariable String uuid, @RequestBody GenericAccountUI body,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        GenericAccount genericAccount = genericAccountService.getByUuid(uuid);
+        String currentPassword = genericAccount.getPassword();
+        try {
+            BeanUtils.copyProperties(genericAccount, body);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            LOGGER.error("Error while updating properties: {}", e);
+            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        Optional<GenericAccount> genericAccountSearch = genericAccountService.getByEmail(genericAccount.getEmail());
+
+        if (genericAccountSearch.isPresent()
+                && !genericAccountSearch.get().getUuid().equals(genericAccount.getUuid())) {
+            return new ResponseEntity<Object>("notifications.admin.existing_account.email_conflict",
+                    HttpStatus.CONFLICT);
+        }
+
+        if (StringUtils.isNotBlank(genericAccount.getSerial()) && StringUtils.isNoneBlank(genericAccount.getVendor())) {
+            Optional<GenericAccount> genericAccountSearchCertificate = genericAccountService
+                    .getBySerialAndVendor(genericAccount.getSerial(), genericAccount.getVendor());
+            if (genericAccountSearchCertificate.isPresent()
+                    && !genericAccountSearch.get().getUuid().equals(genericAccount.getUuid())) {
+                return new ResponseEntity<Object>("notifications.admin.existing_account.certificate_conflict",
+                        HttpStatus.CONFLICT);
+            }
+        }
+
+        genericAccount.setPassword(StringUtils.isNotBlank(genericAccount.getPassword()) ?
+                passwordEncoder.encode(genericAccount.getPassword()) : currentPassword);
+        genericAccount.getLocalAuthorities().clear();
+        genericAccount.getLocalAuthorities().addAll(body.getLocalAuthoritySirens().stream()
+                .map(localAuthorityUuid -> localAuthorityService.getByUuid(localAuthorityUuid))
+                .collect(Collectors.toSet()));
+        genericAccountService.save(genericAccount);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity delete(@PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        
+        genericAccountService.deleteByUuid(uuid);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/authWithCertificate")
