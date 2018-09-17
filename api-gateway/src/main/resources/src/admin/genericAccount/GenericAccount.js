@@ -56,12 +56,10 @@ class GenericAccountCreation extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const genericAccount = this.state.fields
         const localAuthoritySlug = getLocalAuthoritySlug()
-        console.log(genericAccount.localAuthorities)
         genericAccount.localAuthoritySirens = genericAccount.localAuthorities.map(localAuthority => localAuthority.uuid)
         delete genericAccount.localAuthorities
 
         const body = JSON.stringify(genericAccount)
-        console.log(body)
         const headers = { 'Content-Type': 'application/json' }
         const method = this.props.uuid ? 'PUT' : 'POST'
         const url = `/api/admin/generic_account${this.props.uuid && `/${this.props.uuid}`}`
