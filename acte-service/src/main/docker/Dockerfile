@@ -3,5 +3,6 @@ VOLUME /tmp
 EXPOSE 9008 9009
 ADD stela-acte-service.jar app.jar
 RUN sh -c 'touch /app.jar'
+RUN apt-get update && apt-get install -y ca-certificates-java
 ENV JAVA_OPTS=""
 ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Xmx4096m -Djavax.net.debug=all -Djava.security.egd=file:/dev/./urandom -jar /app.jar" ]
