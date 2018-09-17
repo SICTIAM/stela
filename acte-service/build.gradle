@@ -30,6 +30,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('mysql:mysql-connector-java:5.1.29')
     compile('xom:xom:1.2.5')
+    compile('com.ozwillo:ozwillo-java-spring-integration:1.25.8')
+    compile('net.logstash.logback:logstash-logback-encoder:5.2')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework:spring-mock:2.0.8')
     testCompile('org.springframework.boot:spring-boot-starter-test')
