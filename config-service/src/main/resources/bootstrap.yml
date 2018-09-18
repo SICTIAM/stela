@@ -7,7 +7,7 @@ spring:
        git:
           uri: ssh://git@forge.sictiam.fr:6666/internet/stela-config.git
           cloneOnStart: true 
-          default-label: feature/4139-Mettre-en-place-un-meilleur-moyen-d-explorer-les-logs        
+          default-label: develop
 server:
   port: 8888
 
