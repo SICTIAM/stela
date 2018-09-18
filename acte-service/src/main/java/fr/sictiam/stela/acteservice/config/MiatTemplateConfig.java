@@ -44,7 +44,7 @@ public class MiatTemplateConfig {
             IOException, java.security.cert.CertificateException, UnrecoverableKeyException {
         TrustStrategy acceptingTrustStrategy = (x509Certificates, s) -> true;
 
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(new FileInputStream(ResourceUtils.getFile(keyStorePath)), keystorePassword.toCharArray());
         SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
                 .loadKeyMaterial(keyStore, keystorePassword.toCharArray())

@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
@@ -14,6 +15,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PesAller {
 
     public interface RestValidation {
