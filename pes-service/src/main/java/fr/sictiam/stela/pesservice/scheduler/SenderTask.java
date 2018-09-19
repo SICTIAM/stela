@@ -51,6 +51,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     }
 
     @Override
+    @Transactional
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.PENDING_SEND.equals(event.getPesHistory().getStatus())) {
             pendingQueue.add(pendingMessageRepository.save(new PendingMessage(event.getPesHistory())));

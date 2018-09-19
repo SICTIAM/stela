@@ -568,6 +568,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     @Override
+    @Transactional
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
