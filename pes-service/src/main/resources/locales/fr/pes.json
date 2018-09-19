@@ -2,6 +2,7 @@
   "pes": {
     "status": {
       "CREATED": "Déposé",
+      "RECREATED": "Redéposé",
       "SENT": "Envoyé",
       "NOT_SENT": "Non envoyé",
       "ACK_RECEIVED": "AR trésorerie",

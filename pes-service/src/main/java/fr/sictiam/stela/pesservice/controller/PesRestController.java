@@ -115,6 +115,16 @@ public class PesRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/republish/{uuid}")
+    public ResponseEntity<String> rePublishFlux(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @PathVariable String uuid) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        pesAllerService.manualRepublish(uuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<?> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,

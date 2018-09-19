@@ -39,6 +39,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
@@ -134,6 +135,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         }
     }
 
+    @Transactional
     public void checkPesWithdrawn() {
         LOGGER.info("Cheking for PES being withdrawn...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
@@ -148,6 +150,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         });
     }
 
+    @Transactional
     public void checkPesSigned() {
         LOGGER.info("Cheking for new PES signatures...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
@@ -565,8 +568,10 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     @Override
+    @Transactional
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
+        if (StatusType.CREATED.equals(event.getPesHistory().getStatus())
+                || StatusType.RECREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;

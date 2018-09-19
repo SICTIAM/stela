@@ -316,6 +316,11 @@ public class PesAllerService {
         updateStatus(pes.getUuid(), statusType);
     }
 
+    public void manualRepublish(String pesUuid) {
+        PesAller pes = getByUuid(pesUuid);
+        updateStatus(pes.getUuid(), StatusType.RECREATED);
+    }
+
     public void send(PesAller pes) throws PesSendException {
         LOGGER.info("Sending PES {} ({})...", pes.getObjet(), pes.getUuid());
         try {
