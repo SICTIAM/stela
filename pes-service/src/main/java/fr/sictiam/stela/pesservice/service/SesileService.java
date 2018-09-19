@@ -570,7 +570,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     @Override
     @Transactional
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        if (StatusType.CREATED.equals(event.getPesHistory().getStatus())) {
+        if (StatusType.CREATED.equals(event.getPesHistory().getStatus())
+                || StatusType.RECREATED.equals(event.getPesHistory().getStatus())) {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;
