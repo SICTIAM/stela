@@ -220,11 +220,17 @@ public class DraftService {
 
     public void removeAttachmentTypes(String draftUuid) {
         List<Acte> acteDrafts = getActeDrafts(draftUuid);
-        acteDrafts.forEach(acteDraft -> {
-            if (acteDraft.getActeAttachment() != null)
-                updateAttachmentType(acteDraft.getActeAttachment().getUuid(), "");
-            acteDraft.getAnnexes().forEach(attachment -> updateAttachmentType(attachment.getUuid(), ""));
-        });
+        acteDrafts.forEach(this::removeActeAttachmentTypes);
+    }
+
+    public void removeActeAttachmentTypesByUuid(String acteUuid) {
+        removeActeAttachmentTypes(getActeDraftByUuid(acteUuid));
+    }
+
+    public void removeActeAttachmentTypes(Acte acteDraft) {
+        if (acteDraft.getActeAttachment() != null)
+            updateAttachmentType(acteDraft.getActeAttachment().getUuid(), "");
+        acteDraft.getAnnexes().forEach(attachment -> updateAttachmentType(attachment.getUuid(), ""));
     }
 
     public void deleteActeDraftAnnexe(String acteUuid, String uuid) {

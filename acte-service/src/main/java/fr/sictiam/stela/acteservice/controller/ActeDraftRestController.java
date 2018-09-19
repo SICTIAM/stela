@@ -353,6 +353,20 @@ public class ActeDraftRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @DeleteMapping("/drafts/{draftUuid}/{uuid}/types")
+    public ResponseEntity removeActeAttachmentTypes(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid, @PathVariable String draftUuid) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        draftService.removeActeAttachmentTypesByUuid(uuid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @DeleteMapping("/drafts/{draftUuid}/{uuid}/file")
     public ResponseEntity<?> deleteActeDraftFile(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
