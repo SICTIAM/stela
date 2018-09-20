@@ -19,7 +19,6 @@ import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
 import org.springframework.integration.ftp.session.FtpSession;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -90,7 +89,6 @@ public class ReceiverTask {
         }
     }
 
-    @Transactional
     public void readACK(byte[] targetArray, String ackName)
             throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
 
@@ -118,7 +116,6 @@ public class ReceiverTask {
         }
     }
 
-    @Transactional
     public void readPesRetour(byte[] targetArray, String pesRetourName)
             throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
 

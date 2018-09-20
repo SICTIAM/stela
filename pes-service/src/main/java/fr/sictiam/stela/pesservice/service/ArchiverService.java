@@ -21,7 +21,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -53,7 +52,6 @@ public class ArchiverService {
         this.restTemplate = restTemplate;
     }
 
-    @Transactional
     public void archivePesTask() {
         LOGGER.info("Running archivePesTask job...");
         List<LocalAuthority> localAuthorities = localAuthorityService.getAll();
@@ -74,7 +72,6 @@ public class ArchiverService {
         LOGGER.info("Ending archivePesTask job");
     }
 
-    @Transactional
     public void checkArchivesStatusTask() {
         LOGGER.info("Running checkArchivesStatusTask job...");
         List<LocalAuthority> localAuthorities = localAuthorityService.getAll();

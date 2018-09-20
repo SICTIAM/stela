@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -51,7 +50,6 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     }
 
     @Override
-    @Transactional
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         if (StatusType.PENDING_SEND.equals(event.getPesHistory().getStatus())) {
             pendingQueue.add(pendingMessageRepository.save(new PendingMessage(event.getPesHistory())));
@@ -65,7 +63,6 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     }
 
     @Scheduled(fixedRate = 5000)
-    @Transactional
     public void senderTask() {
 
         if (!pendingQueue.isEmpty() && adminService.isHeliosAvailable()) {
