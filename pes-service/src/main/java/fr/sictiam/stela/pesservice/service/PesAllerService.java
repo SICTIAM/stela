@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -237,6 +238,7 @@ public class PesAllerService {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
+    @Transactional
     public void updateHistory(PesHistory newPesHistory) {
         PesAller pes = getByUuid(newPesHistory.getPesUuid());
         pes.setLastHistoryDate(newPesHistory.getDate());
