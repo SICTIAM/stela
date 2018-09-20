@@ -150,8 +150,8 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     }
 
     public String getAgentMail(JsonNode node) {
-        LOGGER.debug("Agent node: {}", node.toString());
-        return StringUtils.isNotBlank(node.get("email").asText()) ? node.get("email").asText()
+        return !node.get("email").isNull() && StringUtils.isNotBlank(node.get("email").asText())
+                ? node.get("email").asText()
                 : node.get("agent").get("email").asText();
     }
 
