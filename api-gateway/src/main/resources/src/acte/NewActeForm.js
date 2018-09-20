@@ -107,10 +107,14 @@ class NewActeForm extends Component {
             this.fetchActe(`/api/acte/drafts/${nextProps.draftUuid}/${nextProps.uuid}`)
         }
         if (nextProps.mode === 'ACTE_BATCH' && (fields.nature !== nextProps.nature || fields.decision !== nextProps.decision)) {
+            if (fields.nature !== nextProps.nature) this.removeAttachmentTypes()
+            const shouldFetchTypes = fields.nature !== nextProps.nature && nextProps.nature && fields.code
             fields.nature = nextProps.nature
             fields.decision = nextProps.decision
-            if (fields.nature !== nextProps.nature) this.removeAttachmentTypes()
-            this.setState({ fields }, this.validateForm)
+            this.setState({ fields }, () => {
+                if(shouldFetchTypes) this.fetchAttachmentTypes()
+                this.validateForm()
+            })
         }
     }
     componentWillUnmount() {
@@ -135,7 +139,7 @@ class NewActeForm extends Component {
             .then(response => response.json())
             .then(json => {
                 this.loadActe(json, () => {
-                    if (json.nature && json.code && this.props.mode !== 'ACTE_BATCH') this.fetchAttachmentTypes()
+                    if (json.nature && json.code) this.fetchAttachmentTypes()
                     this.updateGroup()
                     this.validateForm()
                 })
@@ -208,10 +212,10 @@ class NewActeForm extends Component {
             this.validateForm()
             this.saveDraft()
             if (callback) callback()
-            if ((field === 'nature' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.code !== '')
-                || (field === 'code' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.nature !== '')) {
+            if ((field === 'code' && this.state.fields.nature !== '')
+                || (field === 'nature' && this.props.mode !== 'ACTE_BATCH' && this.state.fields.code !== '')) {
                 this.fetchAttachmentTypes()
-                this.fetchRemoveAttachmentTypes()
+                this.fetchRemoveActeAttachmentTypes()
             }
         })
     }
@@ -350,9 +354,10 @@ class NewActeForm extends Component {
         this.setState({ fields }, this.validateForm)
         this.props.setStatus('saved', this.state.fields.uuid)
     }
-    fetchRemoveAttachmentTypes = () => {
+    fetchRemoveActeAttachmentTypes = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.draft.uuid}/types`, method: 'DELETE', context: this.context })
+        const url = `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/types`
+        _fetchWithAuthzHandling({ url, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(this.removeAttachmentTypes)
             .catch(response => {
@@ -423,8 +428,7 @@ class NewActeForm extends Component {
             .map(materialCode =>
                 ({ key: materialCode.code, value: materialCode.code, text: materialCode.code + ' - ' + materialCode.label })
             )
-        const attachmentTypeSource = this.props.mode === 'ACTE_BATCH' ? this.props.attachmentTypes : this.state.attachmentTypes
-        const attachmentTypes = attachmentTypeSource.map(attachmentType =>
+        const attachmentTypes = this.state.attachmentTypes.map(attachmentType =>
             ({ key: attachmentType.uuid, value: attachmentType.code, text: attachmentType.code + ' - ' + attachmentType.label })
         )
         const groupOptions = this.state.groups.map(group =>
