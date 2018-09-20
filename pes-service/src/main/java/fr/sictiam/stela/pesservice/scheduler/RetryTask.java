@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +30,6 @@ public class RetryTask {
     private Integer frequency;
 
     @Scheduled(cron = "${application.retry.cron}")
-    @Transactional
     public void resendBlockedFlux() {
         LOGGER.info("Executing resendBlockedFlux task...");
         List<String> pesUuids = pesAllerService.getBlockedFlux();

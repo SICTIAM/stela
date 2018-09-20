@@ -16,7 +16,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -51,7 +50,6 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    @Transactional
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
         List<StatusType> notificationTypes = Notification.notifications.stream().map(Notification::getStatusType)
                 .collect(Collectors.toList());
