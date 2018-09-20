@@ -143,12 +143,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     }
 
     public String getAgentMail(JsonNode node) {
-        // FIXME probleme if no profile email return null
-        LOGGER.debug("Agent node: {}", node.toString());
-        String email = StringUtils.isNotBlank(node.get("email").asText()) ? node.get("email").asText()
+        return !node.get("email").isNull() && StringUtils.isNotBlank(node.get("email").asText())
+                ? node.get("email").asText()
                 : node.get("agent").get("email").asText();
-        LOGGER.debug("Agent email selected: {}", email);
-        return email;
     }
 
     public Map<String, String> getAgentInfo(JsonNode node) {
