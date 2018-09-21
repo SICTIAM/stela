@@ -118,6 +118,12 @@ const getMultiPahtFromSlug = () => {
     return localAuthoritySlug ? `/${localAuthoritySlug}` : ''
 }
 
+const isPDF = (filename) => {
+    const tab = filename.toLowerCase().split('.')
+    if(tab.length === 0) return false
+    return tab[tab.length - 1] === 'pdf'
+}
+
 export {
     checkStatus,
     fetchWithAuthzHandling,
@@ -132,5 +138,6 @@ export {
     updateField,
     updateChekboxField,
     getLocalAuthoritySlug,
-    getMultiPahtFromSlug
+    getMultiPahtFromSlug,
+    isPDF
 }

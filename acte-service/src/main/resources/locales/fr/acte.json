@@ -139,6 +139,7 @@
       "historic": "Historique",
       "detail_anomaly": "Détail de l'anomalie",
       "no_history": "Aucun historique pour cet acte",
+      "original": "original",
       "linked_file": "Fichier joint",
       "cancel_deposit": "Annuler le dépôt",
       "cancel_deposit_confirm": "Voulez-vous vraiment demander l'annulation de cet acte ?",
@@ -177,7 +178,7 @@
     "stamp_pad": {
       "title": "Position du tampon",
       "choose_position": "Choisir la position",
-      "download_stamped_acte": "Télécharger l'acte visé",
+      "download_stamped_acte": "Télécharger l'acte visé précisément",
       "pad_label": "AR",
       "height": "Hauteur",
       "width": "Largeur"
