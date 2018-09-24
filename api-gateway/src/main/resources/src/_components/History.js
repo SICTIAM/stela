@@ -31,9 +31,12 @@ class History extends Component {
                     <Feed.Summary>
                         {t(getHistoryStatusTranslationKey(moduleName, status))}
                     </Feed.Summary>
-                    {status.message &&
-                    <Feed.Extra>{status.message}</Feed.Extra>
-                    }
+                    {/*status.message &&
+                        <Feed.Extra>{status.message}</Feed.Extra>
+                    */}
+                    {status.errors && status.errors.map(error =>
+                        <Feed.Extra>{error.title && `${error.title} : `}{error.message}</Feed.Extra>
+                    )}
                     {status.fileName &&
                     <Feed.Extra>
                         {t(`${moduleName}:${moduleName}.page.linked_file`)}:

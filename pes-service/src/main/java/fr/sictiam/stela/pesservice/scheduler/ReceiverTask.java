@@ -1,11 +1,7 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
-import fr.sictiam.stela.pesservice.model.Attachment;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesRetour;
-import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.*;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
@@ -20,12 +16,15 @@ import org.springframework.integration.ftp.session.FtpSession;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
@@ -33,7 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class ReceiverTask {
@@ -104,16 +103,43 @@ public class ReceiverTask {
 
         PesAller pesAller = pesService.getByFileName(fileName).orElseThrow(PesNotFoundException::new);
 
-        int etatAck = Integer.valueOf(path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/EtatAck/@V", document));
-        if (etatAck == 1) {
+
+        /* New code */
+
+        boolean etatAck = true;
+        List<PesHistoryError> errors = new ArrayList<>();
+        NodeList nodes = (NodeList)path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
+        for (int i = 0 ; i < nodes.getLength() ; i++) {
+            Node node = nodes.item(i);
+            etatAck = etatAck && path.evaluate("EtatAck/@V", node).equals("1");
+
+            NodeList innerNodes= (NodeList)path.evaluate("DetailPiece", node, XPathConstants.NODESET);
+            if (innerNodes.getLength() != 0) {
+                for (int j = 0 ; j < innerNodes.getLength() ; j++) {
+                    Node in = innerNodes.item(j);
+                    PesHistoryError e = new PesHistoryError(path.evaluate("Erreur/NumAnoAck/@V", in), path.evaluate("Erreur/LibelleAnoAck/@V", in));
+                    errors.add(e);
+                }
+            }
+            else {
+                PesHistoryError e = new PesHistoryError(path.evaluate("Erreur/NumAnoAck/@V", node), path.evaluate("Erreur/LibelleAnoAck/@V", node));
+                errors.add(e);
+            }
+        }
+
+        /* end */
+
+
+        if (etatAck) {
             pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
         } else {
             String errorTitle = path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/Erreur/NumAnoAck/@V", document);
 
             String errorMessage = errorTitle + " "
                     + path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/Erreur/LibelleAnoAck/@V", document);
-            pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errorMessage);
+            pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errors);
         }
+
     }
 
     public void readPesRetour(byte[] targetArray, String pesRetourName)

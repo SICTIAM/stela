@@ -2,11 +2,7 @@ package fr.sictiam.stela.pesservice.service;
 
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.model.Attachment;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.*;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
@@ -49,10 +45,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class PesAllerService {
@@ -219,8 +212,14 @@ public class PesAllerService {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public void updateStatus(String pesUuid, StatusType updatedStatus, String messsage) {
-        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), messsage);
+    public void updateStatus(String pesUuid, StatusType updatedStatus, String error) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), error);
+        updateHistory(pesHistory);
+        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+    }
+
+    public void updateStatus(String pesUuid, StatusType updatedStatus, List<PesHistoryError> errors) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), errors);
         updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
@@ -231,8 +230,8 @@ public class PesAllerService {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName, String message) {
-        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName, message);
+    public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName, List<PesHistoryError> errors) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName, errors);
         updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }

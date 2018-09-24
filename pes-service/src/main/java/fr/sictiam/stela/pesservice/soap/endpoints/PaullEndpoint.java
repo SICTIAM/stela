@@ -227,7 +227,7 @@ public class PaullEndpoint {
                         detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
                     } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                         detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
-                        detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getMessage());
+                        detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
                     }
                 }
 

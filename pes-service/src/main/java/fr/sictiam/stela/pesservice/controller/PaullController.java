@@ -244,7 +244,7 @@ public class PaullController {
                 data.put("dateAR", dateFormatter.format(peshistory.get().getDate()));
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                 data.put("dateAnomalie", dateFormatter.format(peshistory.get().getDate()));
-                data.put("motifAnomalie", peshistory.get().getMessage());
+                data.put("motifAnomalie", peshistory.get().getErrors().get(0).errorText());
             }
         }
         data.put("service", pesAller.getServiceOrganisationNumber());
