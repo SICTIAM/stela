@@ -212,8 +212,8 @@ public class PesAllerService {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public void updateStatus(String pesUuid, StatusType updatedStatus, String error) {
-        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), error);
+    public void updateStatus(String pesUuid, StatusType updatedStatus, String message) {
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), message);
         updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }

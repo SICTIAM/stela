@@ -36,6 +36,7 @@ public class PesHistory implements Comparable<PesHistory> {
     private String fileName;
     // Error messages can be quite lengthy
     @Column(length = 1024)
+    private String message;
     @Type(type="com.vladmihalcea.hibernate.type.json.JsonBinaryType")
     List<PesHistoryError> errors;
 
@@ -55,14 +56,11 @@ public class PesHistory implements Comparable<PesHistory> {
         this.errors = errors;
     }
 
-    public PesHistory(String pesUuid, StatusType status, String error) {
+    public PesHistory(String pesUuid, StatusType status, String message) {
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = LocalDateTime.now();
-        if (!StringUtils.isEmpty(error)) {
-            this.errors = new ArrayList<>();
-            errors.add(new PesHistoryError("", error, ""));
-        }
+        this.message = message;
     }
 
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date) {
@@ -78,14 +76,11 @@ public class PesHistory implements Comparable<PesHistory> {
         this.errors = errors;
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, String error) {
+    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, String message) {
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = date;
-        if (!StringUtils.isEmpty(error)) {
-            this.errors = new ArrayList<>();
-            errors.add(new PesHistoryError("", error, ""));
-        }
+        this.message = message;
     }
 
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
@@ -107,17 +102,14 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
-                      String error) {
+                      String message) {
 
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = date;
         this.file = file;
         this.fileName = fileName;
-        if (!StringUtils.isEmpty(error)) {
-            this.errors = new ArrayList<>();
-            errors.add(new PesHistoryError("", error, ""));
-        }
+        this.message = message;
     }
 
     public String getUuid() {
@@ -152,6 +144,10 @@ public class PesHistory implements Comparable<PesHistory> {
         this.fileName = fileName;
     }
 
+    public String getMessage () { return message; }
+
+    public void setMessage (String message) { this.message = message; }
+
     public List<PesHistoryError> getErrors () {
         return errors;
     }
@@ -161,6 +157,8 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     public void addError (PesHistoryError error) {
+        if (errors == null)
+            errors = new ArrayList<>();
         errors.add(error);
     }
 
@@ -172,6 +170,6 @@ public class PesHistory implements Comparable<PesHistory> {
     @Override
     public String toString() {
         return "ActeHistory{" + "uuid='" + uuid + '\'' + ", pesUuid='" + pesUuid + '\'' + ", status=" + status
-                + ", date=" + date + ", fileName='" + fileName + '\'' + '}';
+                + ", date=" + date + ", fileName='" + fileName + '\'' + ", message='" + message + "\'}";
     }
 }
