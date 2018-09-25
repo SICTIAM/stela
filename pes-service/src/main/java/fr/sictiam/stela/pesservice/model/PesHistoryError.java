@@ -15,39 +15,46 @@ public class PesHistoryError implements Serializable {
 
     private String source;
 
+    public PesHistoryError() {
+    }
+
     public PesHistoryError(String title, String message, String source) {
         this.title = title;
         this.message = message;
         this.source = source;
     }
 
-    public String getTitle () {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle (String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getMessage () {
+    public String getMessage() {
         return message;
     }
 
-    public void setMessage (String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
-    public String getSource () { return source; }
+    public String getSource() {
+        return source;
+    }
 
-    public void setSource (String source) { this.source = source; }
+    public void setSource(String source) {
+        this.source = source;
+    }
 
     @JsonIgnore
-    public String errorText () {
+    public String errorText() {
         return (!StringUtils.isEmpty(title) ? title + " : " : "") + (!StringUtils.isEmpty(message) ? message : "") + (!StringUtils.isEmpty(source) ? " (" + source + ")" : "");
     }
 
     @Override
-    public String toString () {
+    public String toString() {
         return "PesHistoryError { title='" + title + "\', message='" + message + "\' , source='" + message + "\' }";
     }
 }

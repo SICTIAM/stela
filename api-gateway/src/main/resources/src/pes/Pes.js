@@ -76,14 +76,6 @@ class Pes extends Component {
         const { t } = this.context
         const { pes, agent } = this.state
         const lastHistory = pes.pesHistories[pes.pesHistories.length - 1]
-        let history = {}
-        if (lastHistory && lastHistory.errors) {
-            const firstError = lastHistory.errors[0]
-            history = {
-                'status': lastHistory.status,
-                'message': firstError.title ? (`${firstError.title} : ` + firstError.message) : firstError.message
-            }
-        }
         const canResend = lastHistory && (
             lastHistory.status === 'MAX_RETRY_REACH' || (
                 (lastHistory.status === 'SENT' || lastHistory.status === 'RESENT' || lastHistory.status === 'MANUAL_RESENT') && (
@@ -96,7 +88,7 @@ class Pes extends Component {
         return (
             <Page title={pes.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
-                    <Anomaly header={t('pes.page.title_anomaly')} lastHistory={history} />
+                    <Anomaly header={t('pes.page.title_anomaly')} lastHistory={lastHistory} />
                     <Segment>
                         <Label className="labelStatus" color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>
                             {lastHistory && t(`pes.status.${lastHistory.status}`)}

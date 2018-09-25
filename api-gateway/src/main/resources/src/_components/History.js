@@ -5,7 +5,8 @@ import moment from 'moment'
 import { Feed, Segment } from 'semantic-ui-react'
 
 import { getHistoryStatusTranslationKey } from '../_util/utils'
-import { LinkFile } from './UI'
+import CollapsedList from './CollapsedList'
+import { LinkFile, PesErrorList } from './UI'
 
 class History extends Component {
     static contextTypes = {
@@ -34,9 +35,7 @@ class History extends Component {
                     {status.message &&
                         <Feed.Extra>{status.message}</Feed.Extra>
                     }
-                    {status.errors && status.errors.map((error, index) =>
-                        <Feed.Extra key={index}>{error.title && `${error.title} : `}{error.message}{error.source && ` (${error.source})`}</Feed.Extra>
-                    )}
+                    {status.errors && <CollapsedList items={PesErrorList(status.errors)}/>}
                     {status.fileName &&
                     <Feed.Extra>
                         {t(`${moduleName}:${moduleName}.page.linked_file`)}:

@@ -204,6 +204,11 @@ MigrationSteps.contextTypes = {
     t: PropTypes.func
 }
 
+const PesErrorList = ( errors ) =>
+    errors.map((error, index) =>
+        <div key={index}>{error.title && `${error.title} : `}{error.message}{error.source && ` (${error.source})`}</div>
+    )
+
 export {
     FormField,
     FormFieldInline,
@@ -218,5 +223,6 @@ export {
     LoadingContent,
     LinkFile,
     Tooltip,
-    StatusDisplay
+    StatusDisplay,
+    PesErrorList
 }
