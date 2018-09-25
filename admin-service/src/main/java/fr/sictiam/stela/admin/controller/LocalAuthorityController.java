@@ -172,6 +172,13 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(workGroupService.getAllByLocalAuthority(uuid), HttpStatus.OK);
     }
 
+    @GetMapping("/{uuid}/group/rights-on-module/{moduleName}")
+    @JsonView(Views.WorkGroupView.class)
+    public ResponseEntity<List<WorkGroup>> getAllGroupByLocalAuthorityAndModule(@PathVariable String uuid,
+            @PathVariable String moduleName) {
+        return new ResponseEntity<>(workGroupService.getAllByLocalAuthorityAndModule(uuid, moduleName), HttpStatus.OK);
+    }
+
     @GetMapping("/current/group")
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<List<WorkGroup>> getAllGroupForCurrent(

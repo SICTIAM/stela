@@ -40,6 +40,38 @@ public class ExternalRestService {
         return node;
     }
 
+    public JsonNode getProfileForEmail(String siren, String email) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> profile = webClient
+                .get().uri("/api/admin/profile/local-authority/{siren}/{email}", siren, email).retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.empty())
+                .bodyToMono(String.class);
+
+        Optional<String> opt = profile.blockOptional();
+        if (!opt.isPresent()) return null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
+
+    public JsonNode getGroupsForLocalAuthority(String uuid) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> profile = webClient
+                .get().uri("/api/admin/local-authority/{uuid}/group/rights-on-module/{moduleName}",
+                        uuid, "ACTES").retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response ->
+                        Mono.error(new RuntimeException("LocalAuthority not found")))
+                .bodyToMono(String.class);
+
+        Optional<String> opt = profile.blockOptional();
+        if (!opt.isPresent()) return null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
+
     public JsonNode getProfiles(String uuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> profiles = webClient.get().uri("/api/admin/profile/local-authority/{uuid}", uuid).retrieve()
