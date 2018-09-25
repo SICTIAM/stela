@@ -13,9 +13,12 @@ public class PesHistoryError implements Serializable {
 
     private String message;
 
-    public PesHistoryError(String title, String message) {
+    private String source;
+
+    public PesHistoryError(String title, String message, String source) {
         this.title = title;
         this.message = message;
+        this.source = source;
     }
 
     public String getTitle () {
@@ -34,13 +37,17 @@ public class PesHistoryError implements Serializable {
         this.message = message;
     }
 
+    public String getSource () { return source; }
+
+    public void setSource (String source) { this.source = source; }
+
     @JsonIgnore
     public String errorText () {
-        return (!StringUtils.isEmpty(title) ? title + " : " : "") + (!StringUtils.isEmpty(message) ? message : "");
+        return (!StringUtils.isEmpty(title) ? title + " : " : "") + (!StringUtils.isEmpty(message) ? message : "") + (!StringUtils.isEmpty(source) ? " (" + source + ")" : "");
     }
 
     @Override
     public String toString () {
-        return "PesHistoryError { title='" + title + "\', message='" + message + "\' }";
+        return "PesHistoryError { title='" + title + "\', message='" + message + "\' , source='" + message + "\' }";
     }
 }

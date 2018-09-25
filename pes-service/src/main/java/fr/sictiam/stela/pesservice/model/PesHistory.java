@@ -36,8 +36,6 @@ public class PesHistory implements Comparable<PesHistory> {
     private String fileName;
     // Error messages can be quite lengthy
     @Column(length = 1024)
-    @JsonIgnore
-    private String message;
     @Type(type="com.vladmihalcea.hibernate.type.json.JsonBinaryType")
     List<PesHistoryError> errors;
 
@@ -63,7 +61,7 @@ public class PesHistory implements Comparable<PesHistory> {
         this.date = LocalDateTime.now();
         if (!StringUtils.isEmpty(error)) {
             this.errors = new ArrayList<>();
-            errors.add(new PesHistoryError("", error));
+            errors.add(new PesHistoryError("", error, ""));
         }
     }
 
@@ -86,7 +84,7 @@ public class PesHistory implements Comparable<PesHistory> {
         this.date = date;
         if (!StringUtils.isEmpty(error)) {
             this.errors = new ArrayList<>();
-            errors.add(new PesHistoryError("", error));
+            errors.add(new PesHistoryError("", error, ""));
         }
     }
 
@@ -118,16 +116,8 @@ public class PesHistory implements Comparable<PesHistory> {
         this.fileName = fileName;
         if (!StringUtils.isEmpty(error)) {
             this.errors = new ArrayList<>();
-            errors.add(new PesHistoryError("", error));
+            errors.add(new PesHistoryError("", error, ""));
         }
-    }
-
-    public String getMessage () {
-        return message;
-    }
-
-    public void setMessage (String message) {
-        this.message = message;
     }
 
     public String getUuid() {

@@ -103,9 +103,6 @@ public class ReceiverTask {
 
         PesAller pesAller = pesService.getByFileName(fileName).orElseThrow(PesNotFoundException::new);
 
-
-        /* New code */
-
         boolean etatAck = true;
         List<PesHistoryError> errors = new ArrayList<>();
         NodeList nodes = (NodeList)path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
@@ -117,26 +114,28 @@ public class ReceiverTask {
             if (innerNodes.getLength() != 0) {
                 for (int j = 0 ; j < innerNodes.getLength() ; j++) {
                     Node in = innerNodes.item(j);
-                    PesHistoryError e = new PesHistoryError(path.evaluate("Erreur/NumAnoAck/@V", in), path.evaluate("Erreur/LibelleAnoAck/@V", in));
+                    PesHistoryError e = new PesHistoryError(
+                            path.evaluate("Erreur/NumAnoAck/@V", in),
+                            path.evaluate("Erreur/LibelleAnoAck/@V", in),
+                            path.evaluate("NumPiece/@V", in)
+                    );
                     errors.add(e);
                 }
             }
             else {
-                PesHistoryError e = new PesHistoryError(path.evaluate("Erreur/NumAnoAck/@V", node), path.evaluate("Erreur/LibelleAnoAck/@V", node));
+                PesHistoryError e = new PesHistoryError(
+                        path.evaluate("Erreur/NumAnoAck/@V", node),
+                        path.evaluate("Erreur/LibelleAnoAck/@V", node),
+                        path.evaluate("IdUnique/@V", node)
+                );
                 errors.add(e);
             }
         }
 
-        /* end */
-
-
         if (etatAck) {
             pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
-        } else {
-            String errorTitle = path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/Erreur/NumAnoAck/@V", document);
-
-            String errorMessage = errorTitle + " "
-                    + path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT/Erreur/LibelleAnoAck/@V", document);
+        }
+        else {
             pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errors);
         }
 
