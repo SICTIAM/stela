@@ -204,9 +204,9 @@ MigrationSteps.contextTypes = {
     t: PropTypes.func
 }
 
-const PesErrorList = ( errors ) =>
+const PesErrorList = ( errors, prefix = '' ) =>
     errors.map((error, index) =>
-        <div key={index}>{error.title && `${error.title} : `}{error.message}{error.source && ` (${error.source})`}</div>
+        <div key={`${prefix}-${index}`}>{error.title && `${error.title} : `}{error.message}{error.source && ` (${error.source})`}</div>
     )
 
 export {

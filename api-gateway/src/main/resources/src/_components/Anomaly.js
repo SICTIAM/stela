@@ -23,7 +23,7 @@ class Anomaly extends Component {
                         <p>{lastHistory.message}</p>
                     }
                     {lastHistory.errors &&
-                        <CollapsedList items={PesErrorList(lastHistory.errors)}/>
+                        <CollapsedList items={PesErrorList(lastHistory.errors, `anomaly-${lastHistory.uuid}`)}/>
                     }
                 </Message>
             )

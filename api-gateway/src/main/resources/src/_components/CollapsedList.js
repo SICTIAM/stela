@@ -12,15 +12,16 @@ class CollapsedList extends Component {
     }
     toggleCollapse = () => this.setState({collapsed: !this.state.collapsed})
     render() {
+        const { collapsed } = this.state
         const { items, linesBeforeCollapse, uncollapsedLines } = this.props
-        const lines = items.length > linesBeforeCollapse && this.state.collapsed ? items.slice(0, uncollapsedLines) : items
+        const lines = items.length > linesBeforeCollapse && collapsed ? items.slice(0, uncollapsedLines) : items
         return (
             <Fragment>
                 <div style={{ marginTop: '0.5em', marginBottom: '0.5em' }}>
                     {lines}
                 </div>
                 {items.length > linesBeforeCollapse &&
-                    <Icon onClick={this.toggleCollapse} className='collapsed-text-icon' circular name='ellipsis horizontal' />
+                    <Icon onClick={this.toggleCollapse} className='collapsed-text-icon' circular name={collapsed ? 'ellipsis horizontal' : 'angle up'} />
                 }
             </Fragment>
         )

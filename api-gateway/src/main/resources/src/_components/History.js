@@ -35,7 +35,7 @@ class History extends Component {
                     {status.message &&
                         <Feed.Extra>{status.message}</Feed.Extra>
                     }
-                    {status.errors && <CollapsedList items={PesErrorList(status.errors)}/>}
+                    {status.errors && <CollapsedList items={PesErrorList(status.errors, `history-${status.uuid}`)}/>}
                     {status.fileName &&
                     <Feed.Extra>
                         {t(`${moduleName}:${moduleName}.page.linked_file`)}:
