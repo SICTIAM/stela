@@ -6,7 +6,7 @@ import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
 
-import { FormField, File, InputFile } from '../_components/UI'
+import { FormField, File, InputFile, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
@@ -52,6 +52,7 @@ class NewActeForm extends Component {
         groups: [],
         codesMatieres: [],
         isFormValid: false,
+        formErrors: [],
         acteFetched: false
     }
     validationRules = {
@@ -228,6 +229,7 @@ class NewActeForm extends Component {
         return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
     }
     validateForm = debounce(() => {
+        const { t } = this.context
         const data = {
             number: this.state.fields.number,
             objet: this.state.fields.objet,
@@ -237,15 +239,26 @@ class NewActeForm extends Component {
             annexes: this.state.fields.annexes,
             code: this.state.fields.code
         }
+        const attributeNames = {
+            number: t('acte.fields.number'),
+            objet: t('acte.fields.objet'),
+            nature: t('acte.fields.nature'),
+            decision: t('acte.fields.decision'),
+            acteAttachment: t('acte.fields.acteAttachment'),
+            annexes: t('acte.fields.annexes'),
+            code: t('acte.fields.code')
+        }
         const validationRules = this.validationRules
         if (this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.mode === 'ACTE_BUDGETAIRE')
             validationRules.annexes = 'required'
         Validator.register('acteAttachmentType', this.validateActeAttachmentType, this.context.t('acte.new.PJ_types_validation'))
         const validation = new Validator(data, validationRules)
+        validation.setAttributeNames(attributeNames)
         const isFormValid = validation.passes()
-        this.setState({ isFormValid })
+        const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
+        this.setState({ isFormValid, formErrors })
         if (this.props.mode === 'ACTE_BATCH') {
-            this.props.setFormValidForId(isFormValid, this.state.fields.uuid)
+            this.props.setFormValidForId(isFormValid, this.state.fields.uuid, formErrors)
         }
     }, 500)
     saveDraft = debounce((callback) => {
@@ -462,6 +475,10 @@ class NewActeForm extends Component {
         })
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.xml' : '.pdf, .jpg, .png'
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.pdf, .jpg, .png' : '.pdf, .xml, .jpg, .png'
+        const submissionButton =
+            <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>
+                {t('api-gateway:form.submit')}
+            </Button>
         return (
             (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) && (
                 <Form onSubmit={this.saveAndSubmitForm}>
@@ -593,9 +610,12 @@ class NewActeForm extends Component {
                                     {t('api-gateway:form.delete_draft')}
                                 </Button>
                             )}
-                            <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>
-                                {t('api-gateway:form.submit')}
-                            </Button>
+                            {this.state.formErrors.length > 0 &&
+                                <ValidationPopup errorList={this.state.formErrors}>
+                                    {submissionButton}
+                                </ValidationPopup>
+                            }
+                            {this.state.formErrors.length === 0 && submissionButton}
                         </div>
                     )}
                 </Form>
