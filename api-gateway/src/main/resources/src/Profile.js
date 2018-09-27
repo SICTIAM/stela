@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Segment, Label, Input, Header, Checkbox, Dropdown } from 'semantic-ui-react'
 
-import { Field, Page } from './_components/UI'
+import { Field, Page, FieldValue } from './_components/UI'
 import { notifications } from './_util/Notifications'
 import AccordionSegment from './_components/AccordionSegment'
 import CertificateInfos from './_components/CertificateInfos'
@@ -129,13 +129,13 @@ class Profile extends Component {
             <Page title={t('profile.title')}>
                 <Segment style={{ borderTop: '2px solid #663399' }}>
                     <Field htmlFor="family_name" label={t('agent.family_name')}>
-                        <span id="family_name">{agent.family_name}</span>
+                        <FieldValue id="family_name">{agent.family_name}</FieldValue>
                     </Field>
                     <Field htmlFor="given_name" label={t('agent.given_name')}>
-                        <span id="given_name">{agent.given_name}</span>
+                        <FieldValue id="given_name">{agent.given_name}</FieldValue>
                     </Field>
                     <Field htmlFor="email" label={t('agent.email')}>
-                        <span id="email">{agent.email}</span>
+                        <FieldValue id="email">{agent.email}</FieldValue>
                     </Field>
                     {!this.props.uuid && (
                         <div style={{ textAlign: 'right' }}>

@@ -124,6 +124,8 @@ const isPDF = (filename) => {
     return tab[tab.length - 1] === 'pdf'
 }
 
+const toUniqueArray = array => [...new Set(array)]
+
 export {
     checkStatus,
     fetchWithAuthzHandling,
@@ -139,5 +141,6 @@ export {
     updateChekboxField,
     getLocalAuthoritySlug,
     getMultiPahtFromSlug,
-    isPDF
+    isPDF,
+    toUniqueArray
 }
