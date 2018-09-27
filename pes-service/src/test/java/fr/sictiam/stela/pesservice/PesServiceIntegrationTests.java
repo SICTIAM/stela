@@ -475,8 +475,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
     private PesAller setHistories(PesAller pesAller) throws IOException {
         SortedSet<PesHistory> acteHistories = new TreeSet<>();
-        acteHistories.add(new PesHistory(pesAller.getUuid(), StatusType.SENT,
-                LocalDateTime.now(), null));
+        acteHistories.add(new PesHistory(pesAller.getUuid(), StatusType.SENT, LocalDateTime.now()));
         InputStream in = new ClassPathResource("data/006102_180625141825-ACK-F2521211_A00FLRNS_OK.xml").getInputStream();
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);

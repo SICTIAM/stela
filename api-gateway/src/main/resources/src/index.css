@@ -194,3 +194,9 @@ span.fieldValue {
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
+
+i.collapsed-text-icon.circular.icon {
+    padding: unset !important;
+    height: unset !important;
+    cursor: pointer;
+}

@@ -223,11 +223,11 @@ public class MigrationService {
 
             if (pesMigration.getCreation() != null) {
                 pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.CREATED,
-                        pesMigration.getCreation(), null));
+                        pesMigration.getCreation()));
             }
             if (pesMigration.getSendDate() != null) {
                 pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.SENT,
-                        pesMigration.getSendDate(), null));
+                        pesMigration.getSendDate()));
             }
             if (pesMigration.getDateAR() != null) {
                 byte[] bytesAR = getFileFromTarGz(archiveBytes, pesMigration.getFilenameAR());

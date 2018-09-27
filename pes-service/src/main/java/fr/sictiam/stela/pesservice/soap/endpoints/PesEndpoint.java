@@ -326,7 +326,7 @@ public class PesEndpoint {
                 returnMap.put("dateAR", dateFormatter.format(peshistory.get().getDate()));
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                 returnMap.put("dateAnomalie", dateFormatter.format(peshistory.get().getDate()));
-                returnMap.put("motifAnomalie", peshistory.get().getMessage());
+                returnMap.put("motifAnomalie", peshistory.get().getErrors().get(0).errorText());
             }
         }
         returnObject.setJsonGetDetailsPESAller(soapReturnGenerator.generateReturn("OK", returnMap));
