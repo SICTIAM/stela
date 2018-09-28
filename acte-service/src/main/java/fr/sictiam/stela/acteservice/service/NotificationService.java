@@ -52,9 +52,9 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        List<StatusType> notificationTypes = Notification.notifications.stream().map(Notification::getStatusType)
+        List<String> notificationTypes = Notification.notifications.stream().map(n -> n.getType().toString())
                 .collect(Collectors.toList());
-        if (notificationTypes.contains(event.getActeHistory().getStatus())) {
+        if (notificationTypes.contains(event.getActeHistory().getStatus().toString())) {
             try {
                 proccessEvent(event);
             } catch (MessagingException e) {
@@ -68,8 +68,9 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     public void proccessEvent(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
 
-        Notification notification = Notification.notifications.stream()
-                .filter(notif -> notif.getStatusType().equals(event.getActeHistory().getStatus())).findFirst().get();
+        Notification notification = Notification.notifications.stream().filter(
+                n -> n.getType().toString().equals(event.getActeHistory().getStatus().toString())
+        ).findFirst().get();
 
         JsonNode profiles = externalRestService.getProfiles(acte.getLocalAuthority().getUuid());
 

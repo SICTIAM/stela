@@ -10,22 +10,43 @@ import static fr.sictiam.stela.acteservice.model.StatusType.SENT;
 
 public class Notification {
 
-    private StatusType statusType;
+    public enum Type {
+        SENT("SENT"),
+        ACK_RECEIVED("ACK_RECEIVED"),
+        NACK_RECEIVED("NACK_RECEIVED"),
+        CANCELLED("CANCELLED");
+
+        final String name;
+
+        Type(String s) {
+            name = s;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+    }
+
+    private Type type;
     private boolean deactivatable;
     private boolean defaultValue;
 
-    public static List<Notification> notifications = Arrays.asList(new Notification(ACK_RECEIVED, false, true),
-            new Notification(SENT, true, false), new Notification(CANCELLED, true, false),
-            new Notification(NACK_RECEIVED, true, true));
+    public static List<Notification> notifications = Arrays.asList(
+            new Notification(Type.ACK_RECEIVED, false, true),
+            new Notification(Type.SENT, true, false),
+            new Notification(Type.CANCELLED, true, false),
+            new Notification(Type.NACK_RECEIVED, true, true)
+    );
 
-    private Notification(StatusType statusType, boolean deactivatable, boolean defaultValue) {
-        this.statusType = statusType;
+    private Notification(Type type, boolean deactivatable, boolean defaultValue) {
+        this.type = type;
         this.deactivatable = deactivatable;
         this.defaultValue = defaultValue;
     }
 
-    public StatusType getStatusType() {
-        return statusType;
+    public Type getType() {
+        return type;
     }
 
     public boolean isDeactivatable() {

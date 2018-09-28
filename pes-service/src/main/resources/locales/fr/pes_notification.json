@@ -8,6 +8,9 @@
     	"subject":"[Stela V3] Pes transmis",
     	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre pes a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
     },
+    "DAILY_ERRORS": {
+      "subject": "[Stela V3] Pes en erreur"
+    },
     "copy" : {
     	"ACK_RECEIVED":{
     	"subject":"[Stela V3] Pes reçu sur votre collectivité",

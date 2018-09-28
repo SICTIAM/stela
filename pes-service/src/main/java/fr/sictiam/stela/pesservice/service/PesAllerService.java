@@ -308,6 +308,10 @@ public class PesAllerService {
         return pesHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
     }
 
+    public List<PesAller> findAllByLastHistoryStatus(StatusType status) {
+        return pesAllerRepository.findAllByLastHistoryStatus(status);
+    }
+
     public void manualResend(String pesUuid) {
         PesAller pes = getByUuid(pesUuid);
         send(pes);

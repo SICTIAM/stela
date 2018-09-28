@@ -22,6 +22,7 @@ import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +52,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        List<StatusType> notificationTypes = Notification.notifications.stream().map(Notification::getStatusType)
+        List<String> notificationTypes = Notification.notifications.stream().map(n -> n.getType().toString())
                 .collect(Collectors.toList());
-        if (notificationTypes.contains(event.getPesHistory().getStatus())) {
+        if (notificationTypes.contains(event.getPesHistory().getStatus().toString())) {
             try {
                 proccessEvent(event);
             } catch (MessagingException e) {
@@ -67,8 +68,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     public void proccessEvent(PesHistoryEvent event) throws MessagingException, IOException {
         PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
 
-        Notification notification = Notification.notifications.stream()
-                .filter(notif -> notif.getStatusType().equals(event.getPesHistory().getStatus())).findFirst().get();
+        Notification notification = Notification.notifications.stream().filter(
+                n -> n.getType().toString().equals(event.getPesHistory().getStatus().toString())
+        ).findFirst().get();
 
         JsonNode profiles = externalRestService.getProfiles(pes.getLocalAuthority().getUuid());
 
@@ -132,12 +134,31 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     }
 
     public void sendMail(String mail, String subject, String text) throws MessagingException, IOException {
-
         MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
         helper.setSubject(subject);
         helper.setText(text, true);
         helper.setTo(mail);
+
+        emailSender.send(message);
+    }
+
+    public void sendMail(String[] mails, String subject, String text) throws MessagingException, IOException {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+        helper.setSubject(subject);
+        helper.setText(text, true);
+        helper.setTo(mails);
+
+        emailSender.send(message);
+    }
+
+    public void sendMailBcc(String[] mails, String subject, String text) throws MessagingException, IOException {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+        helper.setSubject(subject);
+        helper.setText(text, true);
+        helper.setBcc(mails);
 
         emailSender.send(message);
     }

@@ -3,26 +3,43 @@ package fr.sictiam.stela.pesservice.model;
 import java.util.Arrays;
 import java.util.List;
 
-import static fr.sictiam.stela.pesservice.model.StatusType.ACK_RECEIVED;
-import static fr.sictiam.stela.pesservice.model.StatusType.SENT;
-
 public class Notification {
 
-    private StatusType statusType;
+    public enum Type {
+        SENT("SENT"),
+        ACK_RECEIVED("ACK_RECEIVED"),
+        DAILY_ERRORS("DAILY_ERRORS");
+
+        final String name;
+
+        Type(String s) {
+            name = s;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+    }
+
+    private Type type;
     private boolean deactivatable;
     private boolean defaultValue;
 
-    public static List<Notification> notifications = Arrays.asList(new Notification(SENT, true, false),
-            new Notification(ACK_RECEIVED, true, true));
+    public static List<Notification> notifications = Arrays.asList(
+            new Notification(Type.SENT, true, false),
+            new Notification(Type.ACK_RECEIVED, true, true),
+            new Notification(Type.DAILY_ERRORS, true, false)
+    );
 
-    private Notification(StatusType statusType, boolean deactivatable, boolean defaultValue) {
-        this.statusType = statusType;
+    private Notification(Type type, boolean deactivatable, boolean defaultValue) {
+        this.type = type;
         this.deactivatable = deactivatable;
         this.defaultValue = defaultValue;
     }
 
-    public StatusType getStatusType() {
-        return statusType;
+    public Type getType() {
+        return type;
     }
 
     public boolean isDeactivatable() {
@@ -33,3 +50,4 @@ public class Notification {
         return defaultValue;
     }
 }
+
