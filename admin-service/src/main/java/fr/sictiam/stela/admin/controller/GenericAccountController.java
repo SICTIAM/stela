@@ -89,7 +89,7 @@ public class GenericAccountController {
         Optional<GenericAccount> genericAccountSearch = genericAccountService.getByEmail(genericAccount.getEmail());
 
         if (genericAccountSearch.isPresent()) {
-            return new ResponseEntity<Object>("notifications.admin.existing_account.email_conflict",
+            return new ResponseEntity<Object>("notifications.admin.generic_account.email_conflict",
                     HttpStatus.CONFLICT);
         }
 
@@ -97,7 +97,7 @@ public class GenericAccountController {
             Optional<GenericAccount> genericAccountSearchCertificate = genericAccountService
                     .getBySerialAndVendor(genericAccount.getSerial(), genericAccount.getVendor());
             if (genericAccountSearchCertificate.isPresent()) {
-                return new ResponseEntity<Object>("notifications.admin.existing_account.certificate_conflict",
+                return new ResponseEntity<Object>("notifications.admin.generic_account.certificate_conflict",
                         HttpStatus.CONFLICT);
             }
         }
@@ -128,7 +128,7 @@ public class GenericAccountController {
 
         if (genericAccountSearch.isPresent()
                 && !genericAccountSearch.get().getUuid().equals(genericAccount.getUuid())) {
-            return new ResponseEntity<Object>("notifications.admin.existing_account.email_conflict",
+            return new ResponseEntity<Object>("notifications.admin.generic_account.email_conflict",
                     HttpStatus.CONFLICT);
         }
 
@@ -136,8 +136,8 @@ public class GenericAccountController {
             Optional<GenericAccount> genericAccountSearchCertificate = genericAccountService
                     .getBySerialAndVendor(genericAccount.getSerial(), genericAccount.getVendor());
             if (genericAccountSearchCertificate.isPresent()
-                    && !genericAccountSearch.get().getUuid().equals(genericAccount.getUuid())) {
-                return new ResponseEntity<Object>("notifications.admin.existing_account.certificate_conflict",
+                    && !genericAccountSearchCertificate.get().getUuid().equals(genericAccount.getUuid())) {
+                return new ResponseEntity<Object>("notifications.admin.generic_account.certificate_conflict",
                         HttpStatus.CONFLICT);
             }
         }
@@ -159,7 +159,7 @@ public class GenericAccountController {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        
+
         genericAccountService.deleteByUuid(uuid);
         return new ResponseEntity(HttpStatus.OK);
     }

@@ -162,10 +162,6 @@
             "admin": {
                 "title": "Admin module Acte",
                 "instance_params_updated": "Paramètres de l'instance enregistrés",
-                "existing_account": {
-                    "email_conflict": "Cet email est déjà utilisé pour un compte générique",
-                    "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
-                },
                 "local_authority": {
                     "classificationAsked": "Demande de classfication envoyée",
                     "update": {
@@ -203,9 +199,13 @@
         "admin": {
             "title": "Administration",
             "local_authority_not_found": "Collectivité non trouvée",
-            "generic_account_created": "Compte générique créé",
-            "generic_account_updated": "Compte générique mis à jour",
-            "generic_account_deleted": "Compte générique supprimé",
+            "generic_account": {
+                "created": "Compte générique créé",
+                "updated": "Compte générique mis à jour",
+                "deleted": "Compte générique supprimé",
+                "email_conflict": "Cet email est déjà utilisé pour un compte générique",
+                "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
+            },
             "agent_not_found": "Agent non trouvé",
             "group_created": "Le groupe a bien été créé",
             "group_updated": "Le groupe a bien été mis à jour",
