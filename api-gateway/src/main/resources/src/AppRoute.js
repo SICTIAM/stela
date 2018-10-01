@@ -25,7 +25,8 @@ import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminInstance from './admin/AdminInstance'
-import GenericAccountCreation from './admin/GenericAccountCreation'
+import GenericAccount from './admin/genericAccount/GenericAccount'
+import GenericAccountList from './admin/genericAccount/GenericAccountList'
 import AgentList from './admin/AgentList'
 import LocalAuthorityList from './admin/localAuthority/LocalAuthorityList'
 import LocalAuthority from './admin/localAuthority/LocalAuthority'
@@ -147,7 +148,9 @@ class AppRoute extends Component {
                 <Route exact path="/:localAuthoritySlug/admin" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/admin/ma-collectivite`} />
                 )} />
-                <AuthRoute path="/:localAuthoritySlug/admin/creation-generique" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccountCreation} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/compte-generique/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccount} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/compte-generique/liste" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccountList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/compte-generique/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={GenericAccount} menu={AdminMenuBar} admin={true} />
 
                 <AuthRoute path="/:localAuthoritySlug/admin/parametrage-instance" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminInstance} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/agents/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />

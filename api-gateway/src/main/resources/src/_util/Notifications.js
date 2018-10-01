@@ -101,8 +101,20 @@ const notifications = {
             position: 'br'
         },
         generic_account_created: {
-            title: 'notifications.acte.admin.title',
-            message: 'notifications.admin.generic_account_created',
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.generic_account.created',
+            level: 'success',
+            position: 'br'
+        },
+        generic_account_deleted: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.generic_account.deleted',
+            level: 'success',
+            position: 'br'
+        },
+        generic_account_updated: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.generic_account.updated',
             level: 'success',
             position: 'br'
         },

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import moment from 'moment'
@@ -14,7 +14,7 @@ import Anomaly from '../_components/Anomaly'
 import ConfirmModal from '../_components/ConfirmModal'
 import History from '../_components/History'
 import { notifications } from '../_util/Notifications'
-import { checkStatus, getHistoryStatusTranslationKey } from '../_util/utils'
+import { checkStatus, getHistoryStatusTranslationKey, isPDF } from '../_util/utils'
 import { anomalies, hoursBeforeResendActe } from '../_util/constants'
 import ActeCancelButton from './ActeCancelButton'
 
@@ -95,6 +95,12 @@ class Acte extends Component {
                 })
         }
     }
+    fileLinks = (url, filename) => {
+        const { t } = this.context
+        const { acteACK } =this.state.acteUI
+        return (acteACK && isPDF(filename)) ? <Fragment><LinkFile url={`${url}/stamped`} text={filename} /> (<LinkFile url={url} text={t('acte.page.original')} />)</Fragment>
+            : <LinkFile url={url} text={filename} />
+    }
     render() {
         const { t } = this.context
         const { acteACK, lastMetierHistory } = this.state.acteUI
@@ -103,7 +109,7 @@ class Acte extends Component {
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
                 <FieldValue>
-                    <LinkFile url={`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`} text={annexe.filename} />
+                    {this.fileLinks(`/api/acte/${acte.uuid}/annexe/${annexe.uuid}`, annexe.filename)}
                 </FieldValue>
             </List.Item>
         )
@@ -213,7 +219,7 @@ class Acte extends Component {
                                 </Grid.Column>
                                 <Grid.Column width={12}>
                                     <FieldValue id="acteAttachment">
-                                        <LinkFile url={`/api/acte/${acte.uuid}/file`} text={acte.acteAttachment.filename} />
+                                        {this.fileLinks(`/api/acte/${acte.uuid}/file`, acte.acteAttachment.filename)}
                                     </FieldValue>
                                 </Grid.Column>
                             </Grid>

@@ -399,7 +399,8 @@ public class DocumentBudgetaire {
             if (el != null) {
                 String md5 = el.getAttributeValue("md5");
                 String sha1 = el.getAttributeValue("sha1");
-                if (!md5.equals(empreinte.getMd5()) || !sha1.equals(empreinte.getSha1())) {
+                if (!md5.toLowerCase().equals(empreinte.getMd5().toLowerCase())
+                        || !sha1.toLowerCase().equals(empreinte.getSha1().toLowerCase())) {
                     logger.error("Le flux a été modifié depuis son scellement !");
                     return false;
                 }

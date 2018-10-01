@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
-import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment } from 'semantic-ui-react'
+import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment, Popup } from 'semantic-ui-react'
 import moment from 'moment'
 
 import { bytesToSize } from '../_util/utils'
@@ -204,6 +204,24 @@ MigrationSteps.contextTypes = {
     t: PropTypes.func
 }
 
+const ValidationPopup = ({ children, errorList }) =>
+    <Popup className='validation-popup' trigger={<span>{children}</span>} position='top right' verticalOffset={10}
+        content={<ErrorListPopup errorList={errorList} />}
+    />
+
+const ErrorListPopup = ({ errorList }) =>
+    <ul>
+        {errorList.map(error =>
+            <li>{error}</li>
+        )}
+    </ul>
+
+
+const PesErrorList = ( errors, prefix = '' ) =>
+    errors.map((error, index) =>
+        <div key={`${prefix}-${index}`}>{error.title && `${error.title} : `}{error.message}{error.source && ` (${error.source})`}</div>
+    )
+
 export {
     FormField,
     FormFieldInline,
@@ -218,5 +236,7 @@ export {
     LoadingContent,
     LinkFile,
     Tooltip,
-    StatusDisplay
+    StatusDisplay,
+    PesErrorList,
+    ValidationPopup
 }

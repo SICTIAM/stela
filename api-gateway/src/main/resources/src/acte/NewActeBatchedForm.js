@@ -8,9 +8,9 @@ import debounce from 'debounce'
 
 import history from '../_util/history'
 import { notifications } from '../_util/Notifications'
-import { FormField } from '../_components/UI'
+import { FormField, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug, toUniqueArray } from '../_util/utils'
 import NewActeForm from './NewActeForm'
 import { natures } from '../_util/constants'
 
@@ -32,12 +32,12 @@ class NewActeBatchedForm extends Component {
             nature: '',
             groupUuid: null
         },
-        attachmentTypes: [],
         groups: [],
         draftStatus: null,
         draftValid: false,
         statuses: {},
         formValid: {},
+        formErrors: {},
         isAllFormValid: false,
         shouldUnmount: true
     }
@@ -55,7 +55,6 @@ class NewActeBatchedForm extends Component {
                 this.loadDraft(json, () => {
                     this.updateGroup()
                     this.validateForm()
-                    if (json.nature) this.fetchAttachmentTypes()
                     this.setState({ active: this.state.fields.actes[0].uuid })
                 })
             )
@@ -120,27 +119,17 @@ class NewActeBatchedForm extends Component {
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
-                const { fields, statuses, formValid } = this.state
+                const { fields, statuses, formValid, formErrors } = this.state
                 fields.actes = fields.actes.filter(acte => acte.uuid !== uuid)
                 delete statuses[uuid]
                 delete formValid[uuid]
-                this.setState({ fields: fields, statuses: statuses, formValid: formValid }, this.updateAllFormValid)
+                delete formErrors[uuid]
+                this.setState({ fields, statuses, formValid, formErrors }, this.updateAllFormValid)
             })
             .catch(response => {
                 response.json().then(json => {
                     _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
-            })
-    }
-    fetchAttachmentTypes = () => {
-        const { _fetchWithAuthzHandling, _addNotification } = this.context
-        const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${this.state.fields.nature}`, headers: headers, context: this.context })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => this.setState({ attachmentTypes: json }))
-            .catch(response => {
-                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
     removeAttachmentTypes = () => {
@@ -165,10 +154,7 @@ class NewActeBatchedForm extends Component {
             this.updateStatus()
             this.validateForm()
             this.saveDraft()
-            if (field === 'nature') {
-                this.fetchAttachmentTypes()
-                this.removeAttachmentTypes()
-            }
+            if (field === 'nature') this.removeAttachmentTypes()
         })
     }
     validateForm = debounce(() => {
@@ -207,10 +193,11 @@ class NewActeBatchedForm extends Component {
         else if (statuses.includes('saved')) newStatus = 'saved'
         this.props.setStatus(newStatus)
     }
-    setFormValidForId = (isFormValidValue, uuid) => {
-        const { formValid } = this.state
+    setFormValidForId = (isFormValidValue, uuid, formErrorsValue) => {
+        const { formValid, formErrors } = this.state
         formValid[uuid] = isFormValidValue
-        this.setState({ formValid }, this.updateAllFormValid)
+        formErrors[uuid] = formErrorsValue
+        this.setState({ formValid, formErrors }, this.updateAllFormValid)
     }
     updateGroup = () => {
         if (this.state.fields.groupUuid === null) {
@@ -272,6 +259,8 @@ class NewActeBatchedForm extends Component {
         const groupOptions = this.state.groups.map(group =>
             ({ key: group.uuid, value: group.uuid, text: group.name })
         )
+        let errorList = []
+        Object.values(this.state.formErrors).forEach(acteErrors => errorList = toUniqueArray([...errorList, ...acteErrors]))
         // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
         groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
         const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
@@ -297,10 +286,13 @@ class NewActeBatchedForm extends Component {
                     setFormValidForId={this.setFormValidForId}
                     setField={this.setField}
                     shouldUnmount={this.shouldUnmount}
-                    attachmentTypes={this.state.attachmentTypes}
                 />
             </WrappedActeForm>
         )
+        const submissionButton =
+            <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving || wrappedActes.length === 0} loading={isFormSaving}>
+                {t('api-gateway:form.submit')}
+            </Button>
         return (
             <div>
                 <Segment>
@@ -350,9 +342,12 @@ class NewActeBatchedForm extends Component {
                             {t('api-gateway:form.delete_draft')}
                         </Button>
                     )}
-                    <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving} loading={isFormSaving}>
-                        {t('api-gateway:form.submit')}
-                    </Button>
+                    {errorList.length > 0 &&
+                        <ValidationPopup errorList={errorList}>
+                            {submissionButton}
+                        </ValidationPopup>
+                    }
+                    {errorList.length === 0 && submissionButton}
                 </div>
             </div>
         )

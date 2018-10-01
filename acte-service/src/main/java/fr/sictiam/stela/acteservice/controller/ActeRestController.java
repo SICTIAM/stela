@@ -417,6 +417,37 @@ public class ActeRestController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @GetMapping("/{uuid}/annexe/{annexeUuid}/stamped")
+    public ResponseEntity getStampedAnnexe(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            HttpServletResponse response, @PathVariable String annexeUuid, @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition,
+            @RequestParam(required = false) Integer x, @RequestParam(required = false) Integer y) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
+        Acte acte = acteService.getByUuid(uuid);
+        Attachment annexe = acteService.getAnnexeByUuid(annexeUuid);
+        String contentType = getContentType(annexe.getFilename());
+        byte[] pdf = new byte[0];
+        if (!acteService.isActeACK(uuid) || !contentType.equals("application/pdf")) {
+            pdf = annexe.getFile();
+        } else {
+            try {
+                pdf = acteService.getStampedAnnexe(acte, annexe, x, y, currentLocalAuthority);
+            } catch (IOException e) {
+                LOGGER.error("Error trying to open the acte attachment PDF: {}", e);
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (DocumentException e) {
+                LOGGER.error("Error trying to stamp the acte attachment PDF: {}", e);
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        outputFile(response, pdf, annexe.getFilename(), disposition);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @PostMapping("/{uuid}/status/cancel")
     public ResponseEntity cancel(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @PathVariable String uuid) {

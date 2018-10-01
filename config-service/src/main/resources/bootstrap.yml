@@ -7,7 +7,7 @@ spring:
        git:
           uri: ssh://git@forge.sictiam.fr:6666/internet/stela-config.git
           cloneOnStart: true 
-          default-label: develop        
+          default-label: develop
 server:
   port: 8888
 

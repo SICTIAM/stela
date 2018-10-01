@@ -24,6 +24,7 @@
         "submit": "Déposer",
         "create": "Créer",
         "update": "Mettre à jour",
+        "delete": "Supprimer",
         "delete_draft": "Supprimer le brouillon",
         "add_a_file": "Ajouter un fichier",
         "add": "Ajouter",
@@ -161,11 +162,6 @@
             "admin": {
                 "title": "Admin module Acte",
                 "instance_params_updated": "Paramètres de l'instance enregistrés",
-                "generic_account_created": "Compte générique créé",
-                "existing_account": {
-                    "email_conflict": "Cet email est déjà utilisé pour un compte générique",
-                    "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
-                },
                 "local_authority": {
                     "classificationAsked": "Demande de classfication envoyée",
                     "update": {
@@ -203,6 +199,13 @@
         "admin": {
             "title": "Administration",
             "local_authority_not_found": "Collectivité non trouvée",
+            "generic_account": {
+                "created": "Compte générique créé",
+                "updated": "Compte générique mis à jour",
+                "deleted": "Compte générique supprimé",
+                "email_conflict": "Cet email est déjà utilisé pour un compte générique",
+                "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
+            },
             "agent_not_found": "Agent non trouvé",
             "group_created": "Le groupe a bien été créé",
             "group_updated": "Le groupe a bien été mis à jour",
@@ -271,7 +274,6 @@
         "all_local_authorities": "Toutes les collectivités",
         "local_authorities": "Collectivités",
         "my_local_authority": "Ma collectivité",
-        "creation_generic": "Compte générique",
         "instance_params": {
             "title": "Paramètres de l'instance",
             "general_settings": "Paramètres généraux",
@@ -305,15 +307,24 @@
             "add_group": "Affecter un groupe..."
         },
         "generic_account": {
-            "title": "Creation de compte générique",
-            "no_localAuthorities": "Aucune collectivité",
-            "add_localAuthority": "Affecter une collectivité...",
-            "software": "Logiciel",
-            "email": "Email",
-            "password": "Mot de passe",
-            "serial": "Serial",
-            "vendor": "Vendor",
-            "localAuthorities": "Collectivités"
+            "title": "Comptes génériques",
+            "empty": "Aucun compte générique",
+            "delete_confirm": "Voulez-vous vraiment supprimer ce compte générique ?",
+            "keep_password": "Concerver le même mot de passe",
+            "add_new": "Ajouter un nouveau compte",
+            "new": {
+                "title": "Compte générique",
+                "no_localAuthorities": "Aucune collectivité",
+                "add_localAuthority": "Affecter une collectivité..."
+            },
+            "fields":{
+                "software": "Logiciel",
+                "email": "Email",
+                "password": "Mot de passe",
+                "serial": "Serial",
+                "vendor": "Vendor",
+                "localAuthorities": "Collectivités"
+            }
         },
         "group": {
             "no_rights": "Aucun droit",
