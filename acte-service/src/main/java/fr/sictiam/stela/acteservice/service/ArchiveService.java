@@ -210,7 +210,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             int deliveryNumber = getNextIncrement();
 
             // this is the base filename for the message and attachments
-            String baseFilename = generateActeBaseFilename(acte, flux);
+            String baseFilename = generateBaseFilename(acte, flux);
 
             String acteFilename = String.format("%s-%s_%d.%s",
                     !StringUtils.isEmpty(acte.getActeAttachment().getAttachmentTypeCode())
