@@ -1,38 +1,31 @@
 {
   "acte": {
     "ACK_RECEIVED":{
-    	"subject":"[Stela V3] Acte reçu",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a bien été reçu par la préfecture <br/> Cordialement le Sictiam"
+      "subject":"[Stela] Acte reçu"
     },
     "SENT":{
-    	"subject":"[Stela V3] Acte transmis",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
+      "subject":"[Stela] Acte transmis"
     },
     "NACK_RECEIVED":{
-    	"subject":"[Stela V3] Acte rejeté",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a été rejeté par la préfecture <br/> Cordialement le Sictiam"
+      "subject":"[Stela] Acte rejeté"
     },
     "CANCELLED":{
-    	"subject":"[Stela V3] Acte annulé",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre acte a bien été annulé <br/> Cordialement le Sictiam"
+      "subject":"[Stela] Acte annulé"
     },
     "copy":{
-    	"ACK_RECEIVED":{
-    	"subject":"[Stela V3] Acte reçu sur votre collectivité",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un acte a bien été reçu par la préfecture <br/> Cordialement le Sictiam"
-	    },
-	    "SENT":{
-	    	"subject":"[Stela V3] Acte transmis sur votre collectivité",
-	    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un acte a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
-	    },
-	    "NACK_RECEIVED":{
-	    	"subject":"[Stela V3] Acte rejeté sur votre collectivité",
-	    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un acte a été rejeté par la préfecture <br/> Cordialement le Sictiam"
-	    },
-	    "CANCELLED":{
-	    	"subject":"[Stela V3] Acte annulé sur votre collectivité",
-	    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un acte a bien été annulé <br/> Cordialement le Sictiam"
-	    }
-    }
+      "ACK_RECEIVED":{
+        "subject":"[Stela] Acte reçu sur votre collectivité"
+      },
+      "SENT":{
+        "subject":"[Stela] Acte transmis sur votre collectivité"
+      },
+      "NACK_RECEIVED":{
+        "subject":"[Stela] Acte rejeté sur votre collectivité"
+      },
+      "CANCELLED":{
+        "subject":"[Stela] Acte annulé sur votre collectivité"
+      }
+    },
+    "unittest": "Bonjour ${firstname} ${lastname}, le test unitaire est passé"
   }
 }

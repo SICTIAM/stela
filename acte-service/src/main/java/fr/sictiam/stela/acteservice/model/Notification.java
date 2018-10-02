@@ -31,18 +31,20 @@ public class Notification {
     private Type type;
     private boolean deactivatable;
     private boolean defaultValue;
+    private boolean notificationStatus;
 
     public static List<Notification> notifications = Arrays.asList(
-            new Notification(Type.ACK_RECEIVED, false, true),
-            new Notification(Type.SENT, true, false),
-            new Notification(Type.CANCELLED, true, false),
-            new Notification(Type.NACK_RECEIVED, true, true)
+            new Notification(Type.ACK_RECEIVED, false, true, true),
+            new Notification(Type.SENT, true, false, true),
+            new Notification(Type.CANCELLED, true, false, true),
+            new Notification(Type.NACK_RECEIVED, true, true, false)
     );
 
-    private Notification(Type type, boolean deactivatable, boolean defaultValue) {
+    private Notification(Type type, boolean deactivatable, boolean defaultValue, boolean notificationStatus) {
         this.type = type;
         this.deactivatable = deactivatable;
         this.defaultValue = defaultValue;
+        this.notificationStatus = notificationStatus;
     }
 
     public Type getType() {
@@ -55,5 +57,9 @@ public class Notification {
 
     public boolean isDefaultValue() {
         return defaultValue;
+    }
+
+    public boolean isNotificationStatus() {
+        return notificationStatus;
     }
 }

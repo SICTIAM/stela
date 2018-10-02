@@ -116,17 +116,22 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                             .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
+
                 Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
+                ctx.setVariable("pes", pes);
                 ctx.setVariable("baseUrl", applicationUrl);
+                ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
                 String msg = template.process("mails/" + event.getPesHistory().getStatus().name() + "_fr", ctx);
                 sendMail(getAgentMail(node),
                         localesService.getMessage("fr", "pes_notification",
                                 "$.pes." + event.getPesHistory().getStatus().name() + ".subject"),
                         msg);
 
-                PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
-                pesService.updateHistory(pesHistory);
-                applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+                if (notification.isNotificationStatus()) {
+                    PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
+                    pesService.updateHistory(pesHistory);
+                    applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+                }
             }
         }
 

@@ -3,19 +3,26 @@
     "ACK_RECEIVED":{
     	"subject":"[Stela] Pes reçu"
     },
+    "NACK_RECEIVED":{
+      "subject":"[Stela] Pes en erreur"
+    },
     "SENT":{
     	"subject":"[Stela] Pes transmis"
     },
     "DAILY_ERRORS": {
-      "subject": "[Stela] Pes en erreur"
+      "subject": "[Stela] Liste des Pes en erreur"
     },
     "copy" : {
       "ACK_RECEIVED":{
     	"subject":"[Stela] Pes reçu sur votre collectivité"
       },
+      "NACK_RECEIVED":{
+        "subject":"[Stela] Pes en erreur sur votre collectivité"
+      },
       "SENT":{
           "subject":"[Stela] Pes transmis sur votre collectivité"
       }
-    }
+    },
+    "unittest": "Bonjour ${firstname} ${lastname}, le test unitaire est passé"
   }
 }
