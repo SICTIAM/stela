@@ -228,9 +228,12 @@ public class LocalAuthorityService {
     @Transactional
     public void handleEvent(LocalAuthorityEvent event) throws IOException {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
-                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
+                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren(), event.getSlugName()));
 
         localAuthority.setActive(event.getActivatedModules().contains("ACTES"));
+
+        // Update existing local authorities with new slug name
+        localAuthority.setSlugName(event.getSlugName());
 
         createOrUpdate(localAuthority);
 

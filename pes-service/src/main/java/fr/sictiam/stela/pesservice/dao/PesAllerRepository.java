@@ -5,6 +5,7 @@ import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,5 +18,5 @@ public interface PesAllerRepository extends JpaRepository<PesAller, String> {
 
     List<PesAller> findAllByLocalAuthorityUuidAndArchive_Status(String uuid, ArchiveStatus archiveStatus);
 
-    List<PesAller> findAllByLastHistoryStatus(StatusType status);
+    List<PesAller> findAllByLastHistoryStatusAndLastHistoryDateGreaterThan(StatusType status, LocalDateTime date);
 }

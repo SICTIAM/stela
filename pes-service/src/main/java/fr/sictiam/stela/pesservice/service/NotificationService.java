@@ -11,11 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -23,10 +26,7 @@ import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -48,7 +48,13 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     JavaMailSender emailSender;
 
     @Autowired
+    TemplateEngine template;
+
+    @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Value("${application.url}")
+    private String applicationUrl;
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
@@ -86,12 +92,13 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                                         && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
+                        Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
+                        ctx.setVariable("baseUrl", applicationUrl);
+                        String msg = template.process("mails/copy_" + event.getPesHistory().getStatus().name() + "_fr", ctx);
                         sendMail(getAgentMail(profile),
                                 localesService.getMessage("fr", "pes_notification",
                                         "$.pes.copy." + event.getPesHistory().getStatus().name() + ".subject"),
-                                localesService.getMessage("fr", "pes_notification",
-                                        "$.pes.copy." + event.getPesHistory().getStatus().name() + ".body",
-                                        getAgentInfo(profile)));
+                                msg);
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
                     }
@@ -109,11 +116,13 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                             .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
+                Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
+                ctx.setVariable("baseUrl", applicationUrl);
+                String msg = template.process("mails/" + event.getPesHistory().getStatus().name() + "_fr", ctx);
                 sendMail(getAgentMail(node),
                         localesService.getMessage("fr", "pes_notification",
                                 "$.pes." + event.getPesHistory().getStatus().name() + ".subject"),
-                        localesService.getMessage("fr", "pes_notification",
-                                "$.pes." + event.getPesHistory().getStatus().name() + ".body", getAgentInfo(node)));
+                        msg);
 
                 PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
                 pesService.updateHistory(pesHistory);
@@ -135,7 +144,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     public void sendMail(String mail, String subject, String text) throws MessagingException, IOException {
         MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setSubject(subject);
         helper.setText(text, true);
         helper.setTo(mail);
@@ -145,7 +154,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     public void sendMail(String[] mails, String subject, String text) throws MessagingException, IOException {
         MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setSubject(subject);
         helper.setText(text, true);
         helper.setTo(mails);
@@ -155,7 +164,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     public void sendMailBcc(String[] mails, String subject, String text) throws MessagingException, IOException {
         MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setSubject(subject);
         helper.setText(text, true);
         helper.setBcc(mails);
@@ -169,8 +178,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                 : node.get("agent").get("email").asText();
     }
 
-    public Map<String, String> getAgentInfo(JsonNode node) {
-        Map<String, String> variables = new HashMap<>();
+    public Map<String, Object> getAgentInfo(JsonNode node) {
+        Map<String, Object> variables = new HashMap<>();
         variables.put("firstname", node.get("agent").get("given_name").asText());
         variables.put("lastname", node.get("agent").get("family_name").asText());
         return variables;

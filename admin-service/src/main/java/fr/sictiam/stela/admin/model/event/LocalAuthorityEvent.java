@@ -12,6 +12,7 @@ public class LocalAuthorityEvent extends Event {
     private String uuid;
     private String name;
     private String siren;
+    private String slugName;
 
     private Set<Module> activatedModules;
 
@@ -24,6 +25,7 @@ public class LocalAuthorityEvent extends Event {
         this.uuid = localAuthority.getUuid();
         this.name = localAuthority.getName();
         this.siren = localAuthority.getSiren();
+        this.slugName = localAuthority.getSlugName();
         this.activatedModules = localAuthority.getActivatedModules();
         this.groups = localAuthority.getGroups();
         this.profiles = localAuthority.getProfiles();
@@ -52,6 +54,10 @@ public class LocalAuthorityEvent extends Event {
     public void setSiren(String siren) {
         this.siren = siren;
     }
+
+    public String getSlugName() { return slugName; }
+
+    public void setSlugName(String slugName) { this.slugName = slugName; }
 
     public Set<Module> getActivatedModules() {
         return activatedModules;

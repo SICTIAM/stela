@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -60,6 +61,7 @@ public class PesAllerService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
     private final FTPUploaderService ftpUploaderService;
+    private final Environment environment;
 
     @Value("${application.clamav.port}")
     private Integer clamavPort;
@@ -72,12 +74,13 @@ public class PesAllerService {
     @Autowired
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
-            FTPUploaderService ftpUploaderService) {
+            FTPUploaderService ftpUploaderService, Environment environment) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
         this.ftpUploaderService = ftpUploaderService;
+        this.environment = environment;
     }
 
     @PostConstruct
@@ -308,10 +311,6 @@ public class PesAllerService {
         return pesHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
     }
 
-    public List<PesAller> findAllByLastHistoryStatus(StatusType status) {
-        return pesAllerRepository.findAllByLastHistoryStatus(status);
-    }
-
     public void manualResend(String pesUuid) {
         PesAller pes = getByUuid(pesUuid);
         send(pes);
@@ -332,5 +331,10 @@ public class PesAllerService {
             LOGGER.error("Error sending PES on FTP: {}", e.getMessage());
             throw new PesSendException();
         }
+    }
+
+    public List<PesAller> getPesInError(String localAuthorityUuid) {
+        int nbDays = Integer.parseInt(environment.getProperty("application.dailymail.retensiondays", "1"));
+        return pesAllerRepository.findAllByLastHistoryStatusAndLastHistoryDateGreaterThan(StatusType.NACK_RECEIVED, LocalDateTime.now().minusDays(nbDays));
     }
 }

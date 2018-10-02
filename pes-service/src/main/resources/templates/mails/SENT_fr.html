@@ -5,15 +5,9 @@
     </head>
     <body>
         <div>
-            <span>
-                Bonjour,<br/><br/>
-                les PES suivants sont en erreur &laquo; Anomalie trésorerie &raquo;
-            </span>
-            <ul>
-                <li th:each="pes: ${pesList}">
-                    <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/pes/' + ${pes.uuid}}" th:text="${pes.objet}"></a>
-                </li>
-            </ul>
+            Bonjour <span th:text="${firstname}" /> <span th:text="${lastname}" />,<br/>
+            Votre pes a bien été transmis à la préfecture.
+            <br/><br/>
         </div>
 
         <div>
