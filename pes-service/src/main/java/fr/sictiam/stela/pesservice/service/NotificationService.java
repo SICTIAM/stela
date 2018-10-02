@@ -86,8 +86,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                     && !pes.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (notification.isDeactivatable()
-                        || profileNotifications.stream()
+                if (profileNotifications.stream()
                                 .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                         && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
@@ -108,11 +107,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
         if (StringUtils.isNotBlank(pes.getProfileUuid())) {
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
-
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (notification.isDeactivatable()
-                    || notifications.stream()
+            if (notifications.stream()
                             .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
@@ -140,7 +137,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     public List<NotificationValue> getNotificationValues(JsonNode node) {
         List<NotificationValue> notifications = new ArrayList<>();
         node.get("notificationValues").forEach(notif -> {
-            if (StringUtils.startsWith(notif.get("active").asText(), "PES_"))
+            if (StringUtils.startsWith(notif.get("name").asText(), "PES_"))
                 notifications.add(new NotificationValue(notif.get("uuid").asText(),
                         StringUtils.removeStart(notif.get("name").asText(), "PES_"), notif.get("active").asBoolean()));
         });

@@ -87,8 +87,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                     && !acte.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (notification.isDeactivatable()
-                        || profileNotifications.stream()
+                if (profileNotifications.stream()
                                 .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
                                         && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
@@ -116,8 +115,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
             JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (notification.isDeactivatable()
-                    || notifications.stream()
+            if (notifications.stream()
                             .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
@@ -145,7 +143,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     public List<NotificationValue> getNotificationValues(JsonNode node) {
         List<NotificationValue> notifications = new ArrayList<>();
         node.get("notificationValues").forEach(notif -> {
-            if (StringUtils.startsWith(notif.get("active").asText(), "ACTES_"))
+            if (StringUtils.startsWith(notif.get("name").asText(), "ACTES_"))
                 notifications.add(new NotificationValue(notif.get("uuid").asText(),
                         StringUtils.removeStart(notif.get("name").asText(), "ACTES_"),
                         notif.get("active").asBoolean()));
