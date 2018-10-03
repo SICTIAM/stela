@@ -126,6 +126,11 @@ class MenuBar extends Component {
                             <Menu.Item as={NavLink} to={`${multiPath}/mentions-legales`}>
                                 {t('menu.informations.legal_notice')}
                             </Menu.Item>
+                            {(isLoggedIn && localAuthoritySlug) && (
+                                <Menu.Item as={NavLink} to={`${multiPath}/notes-de-mise-a-jour`}>
+                                    {t('release_notes')}
+                                </Menu.Item>
+                            )}
                         </Menu.Menu>
                     </Menu.Item>
                 </div>
