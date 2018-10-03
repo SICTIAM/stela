@@ -242,8 +242,8 @@ public class PesAllerService {
     public void updateHistory(PesHistory newPesHistory) {
         PesAller pes = getByUuid(newPesHistory.getPesUuid());
 
-        if (newPesHistory.getStatus() != StatusType.NOTIFICATION_SENT) {
-            // do not update last history Pes fields on status NOTIFICATION_SENT
+        if (newPesHistory.getStatus() != StatusType.NOTIFICATION_SENT && newPesHistory.getStatus() != StatusType.GROUP_NOTIFICATION_SENT) {
+            // do not update last history Pes fields on status NOTIFICATION_SENT|GROUP_NOTIFICATION_SENT
             pes.setLastHistoryDate(newPesHistory.getDate());
             pes.setLastHistoryStatus(newPesHistory.getStatus());
         }

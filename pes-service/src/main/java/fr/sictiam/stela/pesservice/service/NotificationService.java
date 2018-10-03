@@ -27,6 +27,7 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -80,6 +81,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
         JsonNode profiles = externalRestService.getProfiles(pes.getLocalAuthority().getUuid());
 
+        AtomicInteger notifcationSentNumber = new AtomicInteger(0);
         profiles.forEach(profile -> {
             if (StreamSupport.stream(profile.get("localAuthorityNotifications").spliterator(), false)
                     .anyMatch(value -> value.asText().equals("PES"))
@@ -99,12 +101,17 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                                 localesService.getMessage("fr", "pes_notification",
                                         "$.pes.copy." + event.getPesHistory().getStatus().name() + ".subject"),
                                 msg);
+                        notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
                     }
                 }
             }
         });
+        if (notifcationSentNumber.get() > 0) {
+            PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.GROUP_NOTIFICATION_SENT);
+            applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+        }
 
         if (StringUtils.isNotBlank(pes.getProfileUuid())) {
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
