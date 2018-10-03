@@ -6,7 +6,7 @@
     <body>
         <div>
             Bonjour <span th:text="${firstname}" /> <span th:text="${lastname}" />,<br/>
-            Votre acte <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/acte/' + ${acte.uuid}}" th:text="${acte.name}"></a> a bien été reçu par la préfecture.
+            Votre acte <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/actes/' + ${acte.uuid}}" th:text="${acte.objet}"></a> a bien été reçu par la préfecture.
             <br/><br/>
         </div>
 

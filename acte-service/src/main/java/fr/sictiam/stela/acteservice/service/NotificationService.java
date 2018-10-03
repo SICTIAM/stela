@@ -122,7 +122,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
 
                 Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
-                ctx.setVariable("pes", acte);
+                ctx.setVariable("acte", acte);
                 ctx.setVariable("baseUrl", applicationUrl);
                 ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
                 String msg = template.process("mails/" + event.getActeHistory().getStatus().name() + "_fr", ctx);
