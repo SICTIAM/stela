@@ -30,6 +30,7 @@ public class LocalAuthority {
     private String secret;
     private String genericProfileUuid;
     private ArchiveSettings archiveSettings;
+    private String slugName;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "sirens", joinColumns = @JoinColumn(name = "local_authority_uuid"))
@@ -47,10 +48,11 @@ public class LocalAuthority {
         this.active = active;
     }
 
-    public LocalAuthority(String uuid, String name, String siren) {
+    public LocalAuthority(String uuid, String name, String siren, String slugName) {
         this.uuid = uuid;
         this.name = name;
         this.siren = siren;
+        this.slugName = slugName;
     }
 
     public String getUuid() {
@@ -149,9 +151,17 @@ public class LocalAuthority {
         this.archiveSettings = archiveSettings;
     }
 
+    public String getSlugName() {
+        return slugName;
+    }
+
+    public void setSlugName(String slugName) {
+        this.slugName = slugName;
+    }
+
     @Override
     public String toString() {
-        return "LocalAuthority [uuid=" + uuid + ", name=" + name + ", siren=" + siren + ", serverCode=" + serverCode
+        return "LocalAuthority [uuid=" + uuid + ", name=" + name + ", slugName=" + slugName + ", siren=" + siren + ", serverCode=" + serverCode
                 + ", active=" + active + ", sirens=" + sirens + "]";
     }
 }

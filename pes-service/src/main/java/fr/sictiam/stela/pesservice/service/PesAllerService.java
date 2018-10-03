@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -60,6 +61,7 @@ public class PesAllerService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
     private final FTPUploaderService ftpUploaderService;
+    private final Environment environment;
 
     @Value("${application.clamav.port}")
     private Integer clamavPort;
@@ -72,12 +74,13 @@ public class PesAllerService {
     @Autowired
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
-            FTPUploaderService ftpUploaderService) {
+            FTPUploaderService ftpUploaderService, Environment environment) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
         this.ftpUploaderService = ftpUploaderService;
+        this.environment = environment;
     }
 
     @PostConstruct
@@ -238,8 +241,12 @@ public class PesAllerService {
 
     public void updateHistory(PesHistory newPesHistory) {
         PesAller pes = getByUuid(newPesHistory.getPesUuid());
-        pes.setLastHistoryDate(newPesHistory.getDate());
-        pes.setLastHistoryStatus(newPesHistory.getStatus());
+
+        if (newPesHistory.getStatus() != StatusType.NOTIFICATION_SENT && newPesHistory.getStatus() != StatusType.GROUP_NOTIFICATION_SENT) {
+            // do not update last history Pes fields on status NOTIFICATION_SENT|GROUP_NOTIFICATION_SENT
+            pes.setLastHistoryDate(newPesHistory.getDate());
+            pes.setLastHistoryStatus(newPesHistory.getStatus());
+        }
         pes.getPesHistories().add(newPesHistory);
         pesAllerRepository.saveAndFlush(pes);
     }
@@ -328,5 +335,10 @@ public class PesAllerService {
             LOGGER.error("Error sending PES on FTP: {}", e.getMessage());
             throw new PesSendException();
         }
+    }
+
+    public List<PesAller> getPesInError(String localAuthorityUuid) {
+        int nbDays = Integer.parseInt(environment.getProperty("application.dailymail.retensiondays", "1"));
+        return pesAllerRepository.findAllByLastHistoryStatusAndLastHistoryDateGreaterThan(StatusType.NACK_RECEIVED, LocalDateTime.now().minusDays(nbDays));
     }
 }

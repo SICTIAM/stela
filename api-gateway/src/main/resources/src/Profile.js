@@ -69,11 +69,11 @@ class Profile extends Component {
             : profile.localAuthorityNotifications.splice(profile.localAuthorityNotifications.indexOf(module), 1)
         this.setState({ agent })
     }
-    onCheckboxChange = (uuidProfile, statusType, checked) => {
+    onCheckboxChange = (uuidProfile, type, checked) => {
         const { agent } = this.state
         const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
-        const notification = profile.notificationValues.find(notification => notification.name === statusType)
-        notification ? (notification.active = checked) : profile.notificationValues.push({ name: statusType, active: checked })
+        const notification = profile.notificationValues.find(notification => notification.name === type)
+        notification ? (notification.active = checked) : profile.notificationValues.push({ name: type, active: checked })
         this.setState({ agent })
     }
     updateProfile = uuid => {
@@ -370,18 +370,18 @@ class LocalAuthorityProfile extends Component {
                             onChange={(e, { id, checked }) => onLocalAuthorityNotificationsChange(profile.uuid, id, checked)} />
                     </Field>
                     {allNotifications
-                        .filter(notification => notification.statusType.startsWith(`${activatedModule}_`))
+                        .filter(notification => notification.type.startsWith(`${activatedModule}_`))
                         .map(notification => {
-                            const notificationValue = profile.notificationValues.find(notif => notif.name === notification.statusType)
+                            const notificationValue = profile.notificationValues.find(notif => notif.name === notification.type)
                             return (
-                                <Field key={`${profile.uuid}-${notification.statusType}`} htmlFor={`${profile.uuid}-${notification.statusType}`}
-                                    label={t(`profile.notifications.${notification.statusType}`)}>
-                                    <Checkbox toggle id={`${profile.uuid}-${notification.statusType}`}
+                                <Field key={`${profile.uuid}-${notification.type}`} htmlFor={`${profile.uuid}-${notification.type}`}
+                                    label={t(`profile.notifications.${notification.type}`)}>
+                                    <Checkbox toggle id={`${profile.uuid}-${notification.type}`}
                                         checked={!notification.deactivatable || (
                                             notificationValue ? notificationValue.active : notification.defaultValue
                                         )}
                                         disabled={!notification.deactivatable}
-                                        onChange={(e, { checked }) => onCheckboxChange(profile.uuid, notification.statusType, checked)} />
+                                        onChange={(e, { checked }) => onCheckboxChange(profile.uuid, notification.type, checked)} />
                                 </Field>
                             )
                         })

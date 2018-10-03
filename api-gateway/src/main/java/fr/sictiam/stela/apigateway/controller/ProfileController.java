@@ -75,7 +75,7 @@ public class ProfileController {
 
     private List<Notification> mapNotififaction(String prefix, Notification[] notifications) {
         return Arrays.asList(notifications).stream()
-                .map(notification -> new Notification(prefix + notification.getStatusType(),
+                .map(notification -> new Notification(prefix + notification.getType(),
                         notification.isDeactivatable(), notification.isDefaultValue()))
                 .collect(Collectors.toList());
     }
