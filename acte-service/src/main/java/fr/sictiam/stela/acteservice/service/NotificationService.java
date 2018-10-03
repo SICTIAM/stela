@@ -87,7 +87,8 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                     && !acte.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (profileNotifications.stream()
+                if (!notification.isDeactivatable() ||
+                        profileNotifications.stream()
                                 .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
                                         && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
@@ -115,7 +116,8 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
             JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (notifications.stream()
+            if (!notification.isDeactivatable() ||
+                    notifications.stream()
                             .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {

@@ -30,7 +30,7 @@ public class Notification {
 
     public static List<Notification> notifications = Arrays.asList(
             new Notification(Type.SENT, true, false, true),
-            new Notification(Type.ACK_RECEIVED, true, true, true),
+            new Notification(Type.ACK_RECEIVED, false, true, true),
             new Notification(Type.NACK_RECEIVED, true, true,  false),
             new Notification(Type.DAILY_ERRORS, true, false, true)
     );

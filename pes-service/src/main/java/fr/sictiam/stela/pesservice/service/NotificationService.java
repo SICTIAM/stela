@@ -86,7 +86,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                     && !pes.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (profileNotifications.stream()
+                if (!notification.isDeactivatable() ||
+                        profileNotifications.stream()
                                 .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                         && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
@@ -109,7 +110,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (notifications.stream()
+            if (!notification.isDeactivatable() ||
+                    notifications.stream()
                             .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {

@@ -241,8 +241,12 @@ public class PesAllerService {
 
     public void updateHistory(PesHistory newPesHistory) {
         PesAller pes = getByUuid(newPesHistory.getPesUuid());
-        pes.setLastHistoryDate(newPesHistory.getDate());
-        pes.setLastHistoryStatus(newPesHistory.getStatus());
+
+        if (newPesHistory.getStatus() != StatusType.NOTIFICATION_SENT) {
+            // do not update last history Pes fields on status NOTIFICATION_SENT
+            pes.setLastHistoryDate(newPesHistory.getDate());
+            pes.setLastHistoryStatus(newPesHistory.getStatus());
+        }
         pes.getPesHistories().add(newPesHistory);
         pesAllerRepository.saveAndFlush(pes);
     }
