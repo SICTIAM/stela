@@ -467,9 +467,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public List<ServiceOrganisation> getServiceGenericOrganisations(LocalAuthority localAuthority, String email) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         // TODO: Add a new call with SIREN for SESILE v4
-        List<ServiceOrganisation> organisations = Arrays
-                .asList(restTemplate.exchange(getSesileUrl(localAuthority) + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
-                        ServiceOrganisation[].class, email).getBody());
+        List<ServiceOrganisation> organisations = Arrays.asList(
+                localAuthority.getSesileNewVersion() ?
+                        restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
+                                requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
+                        restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                                ServiceOrganisation[].class, email).getBody()
+        );
 
         return organisations;
 
@@ -477,9 +481,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public List<ServiceOrganisation> getHeliosServiceOrganisations(LocalAuthority localAuthority, String email) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        List<ServiceOrganisation> organisations = Arrays
-                .asList(restTemplate.exchange(getSesileUrl(localAuthority) + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
-                        ServiceOrganisation[].class, email).getBody());
+        List<ServiceOrganisation> organisations = Arrays.asList(
+                localAuthority.getSesileNewVersion() ?
+                        restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
+                                requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
+                        restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                                ServiceOrganisation[].class, email).getBody()
+        );
         List<Integer> types = Arrays.asList(getTypes(localAuthority).getBody()).stream()
                 .filter(type -> type.getNom().equals("Helios")).map(type -> type.getId()).collect(Collectors.toList());
 
