@@ -1,3 +1,4 @@
+import updatesFile from '../updates.md'
 
 const checkStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
@@ -126,6 +127,16 @@ const isPDF = (filename) => {
 
 const toUniqueArray = array => [...new Set(array)]
 
+const getUpdates = () =>
+    fetch(updatesFile)
+        .then(response => response.text())
+
+const getLastUpdate = () =>
+    fetch(updatesFile)
+        .then(response => response.text())
+        .then(updates => /(^#{3}(?:.|\n)*?)(?=#{3})/.exec(updates)[0])
+
+
 export {
     checkStatus,
     fetchWithAuthzHandling,
@@ -142,5 +153,7 @@ export {
     getLocalAuthoritySlug,
     getMultiPahtFromSlug,
     isPDF,
-    toUniqueArray
+    toUniqueArray,
+    getUpdates,
+    getLastUpdate
 }

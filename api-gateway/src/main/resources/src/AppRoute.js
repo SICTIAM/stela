@@ -12,6 +12,7 @@ import Home from './Home'
 import AlertMessage from './_components/AlertMessage'
 import { UserProfile, AdminProfile } from './Profile'
 import LegalNotice from './LegalNotice'
+import Updates from './Updates'
 import SelectLocalAuthority from './SelectLocalAuthority'
 import Acte from './acte/Acte'
 import ActePublic from './acte/ActePublic'
@@ -125,6 +126,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/mentions-legales" {...params} component={LegalNotice} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/registre-des-deliberations" {...params} component={ActePublicList} menu={MenuBar} />
+                <AuthRoute path="/:localAuthoritySlug/notes-de-mise-a-jour" {...params} component={Updates} menu={MenuBar} />
 
                 <AuthRoute path="/:localAuthoritySlug/profil" {...params} component={UserProfile} menu={MenuBar} />
 
