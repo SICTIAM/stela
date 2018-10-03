@@ -40,10 +40,10 @@ public class LocalesServiceTest {
         variables.put("firstname", firstName);
         variables.put("lastname", lastName);
 
-        String text = localService.getMessage("fr", "pes_notification", "$.pes." + statusType.name() + ".body",
+        String text = localService.getMessage("fr", "pes_notification", "$.pes.unittest",
                 variables);
 
         assertThat(text, is(
-                "Bonjour John Doe, <br/> Votre pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"));
+                "Bonjour John Doe, le test unitaire est passé"));
     }
 }

@@ -40,6 +40,7 @@ public class LocalAuthority {
     private String genericProfileUuid;
     private Migration migration;
     private ArchiveSettings archiveSettings;
+    private String slugName;
 
     @Embedded
     private StampPosition stampPosition;
@@ -84,10 +85,11 @@ public class LocalAuthority {
         this.active = active;
     }
 
-    public LocalAuthority(String uuid, String name, String siren) throws IOException {
+    public LocalAuthority(String uuid, String name, String siren, String slugName) throws IOException {
         this.uuid = uuid;
         this.name = name;
         this.siren = siren;
+        this.slugName = slugName;
         this.nomenclatureDate = LocalDate.of(2001, 1, 1);
 
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("examples/exemple_codes_matieres.xml");
@@ -228,9 +230,17 @@ public class LocalAuthority {
         this.archiveSettings = archiveSettings;
     }
 
+    public String getSlugName() {
+        return slugName;
+    }
+
+    public void setSlugName(String slugName) {
+        this.slugName = slugName;
+    }
+
     @Override
     public String toString() {
-        return "LocalAuthority{" + "uuid='" + uuid + '\'' + ", name='" + name + '\'' + ", siren='" + siren + '\''
+        return "LocalAuthority{" + "uuid='" + uuid + '\'' + ", name='" + name + '\'' + ", slugName='" + slugName+ '\'' + ", siren='" + siren + '\''
                 + ", department='" + department + '\'' + ", district='" + district + '\'' + ", nature='" + nature + '\''
                 + ", nomenclatureDate=" + nomenclatureDate + ", canPublishRegistre=" + canPublishRegistre
                 + ", canPublishWebSite=" + canPublishWebSite + '}';

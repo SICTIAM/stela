@@ -2,25 +2,25 @@ package fr.sictiam.stela.apigateway.model;
 
 public class Notification {
 
-    private String statusType;
+    private String type;
     private boolean deactivatable;
     private boolean defaultValue;
 
     public Notification() {
     }
 
-    public Notification(String statusType, boolean deactivatable, boolean defaultValue) {
-        this.statusType = statusType;
+    public Notification(String type, boolean deactivatable, boolean defaultValue) {
+        this.type = type;
         this.deactivatable = deactivatable;
         this.defaultValue = defaultValue;
     }
 
-    public String getStatusType() {
-        return statusType;
+    public String getType() {
+        return type;
     }
 
-    public void setStatusType(String statusType) {
-        this.statusType = statusType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public boolean isDeactivatable() {

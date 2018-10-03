@@ -11,21 +11,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -48,13 +48,19 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     JavaMailSender emailSender;
 
     @Autowired
+    TemplateEngine template;
+
+    @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Value("${application.url}")
+    private String applicationUrl;
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        List<StatusType> notificationTypes = Notification.notifications.stream().map(Notification::getStatusType)
+        List<String> notificationTypes = Notification.notifications.stream().map(n -> n.getType().toString())
                 .collect(Collectors.toList());
-        if (notificationTypes.contains(event.getActeHistory().getStatus())) {
+        if (notificationTypes.contains(event.getActeHistory().getStatus().toString())) {
             try {
                 proccessEvent(event);
             } catch (MessagingException e) {
@@ -68,8 +74,9 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     public void proccessEvent(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
 
-        Notification notification = Notification.notifications.stream()
-                .filter(notif -> notif.getStatusType().equals(event.getActeHistory().getStatus())).findFirst().get();
+        Notification notification = Notification.notifications.stream().filter(
+                n -> n.getType().toString().equals(event.getActeHistory().getStatus().toString())
+        ).findFirst().get();
 
         JsonNode profiles = externalRestService.getProfiles(acte.getLocalAuthority().getUuid());
 
@@ -80,18 +87,19 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                     && !acte.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (notification.isDeactivatable()
-                        || profileNotifications.stream()
+                if (!notification.isDeactivatable() ||
+                        profileNotifications.stream()
                                 .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
                                         && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
+                        Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
+                        ctx.setVariable("baseUrl", applicationUrl);
+                        String msg = template.process("mails/copy_" + event.getActeHistory().getStatus().name() + "_fr", ctx);
                         sendMail(getAgentMail(profile),
                                 localesService.getMessage("fr", "acte_notification",
                                         "$.acte.copy." + event.getActeHistory().getStatus().name() + ".subject"),
-                                localesService.getMessage("fr", "acte_notification",
-                                        "$.acte.copy." + event.getActeHistory().getStatus().name() + ".body",
-                                        getAgentInfo(profile)));
+                                msg);
                         notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
@@ -108,19 +116,27 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
             JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (notification.isDeactivatable()
-                    || notifications.stream()
+            if (!notification.isDeactivatable() ||
+                    notifications.stream()
                             .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
+
+
+                Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
+                ctx.setVariable("acte", acte);
+                ctx.setVariable("baseUrl", applicationUrl);
+                ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
+                String msg = template.process("mails/" + event.getActeHistory().getStatus().name() + "_fr", ctx);
                 sendMail(getAgentMail(node),
                         localesService.getMessage("fr", "acte_notification",
                                 "$.acte." + event.getActeHistory().getStatus().name() + ".subject"),
-                        localesService.getMessage("fr", "acte_notification",
-                                "$.acte." + event.getActeHistory().getStatus().name() + ".body", getAgentInfo(node)));
+                        msg);
 
-                ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
-                applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+                if (notification.isNotificationStatus()) {
+                    ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
+                    applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+                }
             }
         }
 
@@ -129,7 +145,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     public List<NotificationValue> getNotificationValues(JsonNode node) {
         List<NotificationValue> notifications = new ArrayList<>();
         node.get("notificationValues").forEach(notif -> {
-            if (StringUtils.startsWith(notif.get("active").asText(), "ACTES_"))
+            if (StringUtils.startsWith(notif.get("name").asText(), "ACTES_"))
                 notifications.add(new NotificationValue(notif.get("uuid").asText(),
                         StringUtils.removeStart(notif.get("name").asText(), "ACTES_"),
                         notif.get("active").asBoolean()));
@@ -139,12 +155,18 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     public void sendMail(String mail, String subject, String text) throws MessagingException, IOException {
 
+        String[] mails = { mail };
+        sendMail(mails, subject, text);
+    }
+
+    public void sendMail(String[] mails, String subject, String text) throws MessagingException, IOException {
+
         MimeMessage message = emailSender.createMimeMessage();
 
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setSubject(subject);
         helper.setText(text, true);
-        helper.setTo(mail);
+        helper.setTo(mails);
 
         emailSender.send(message);
     }
@@ -155,8 +177,8 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                 : node.get("agent").get("email").asText();
     }
 
-    public Map<String, String> getAgentInfo(JsonNode node) {
-        Map<String, String> variables = new HashMap<>();
+    public Map<String, Object> getAgentInfo(JsonNode node) {
+        Map<String, Object> variables = new HashMap<>();
         variables.put("firstname", node.get("agent").get("given_name").asText());
         variables.put("lastname", node.get("agent").get("family_name").asText());
         return variables;

@@ -3,26 +3,47 @@ package fr.sictiam.stela.pesservice.model;
 import java.util.Arrays;
 import java.util.List;
 
-import static fr.sictiam.stela.pesservice.model.StatusType.ACK_RECEIVED;
-import static fr.sictiam.stela.pesservice.model.StatusType.SENT;
-
 public class Notification {
 
-    private StatusType statusType;
-    private boolean deactivatable;
-    private boolean defaultValue;
+    public enum Type {
+        SENT("SENT"),
+        ACK_RECEIVED("ACK_RECEIVED"),
+        NACK_RECEIVED("NACK_RECEIVED"),
+        DAILY_ERRORS("DAILY_ERRORS");
 
-    public static List<Notification> notifications = Arrays.asList(new Notification(SENT, true, false),
-            new Notification(ACK_RECEIVED, true, true));
+        final String name;
 
-    private Notification(StatusType statusType, boolean deactivatable, boolean defaultValue) {
-        this.statusType = statusType;
-        this.deactivatable = deactivatable;
-        this.defaultValue = defaultValue;
+        Type(String s) {
+            name = s;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 
-    public StatusType getStatusType() {
-        return statusType;
+    private Type type;
+    private boolean deactivatable;
+    private boolean defaultValue;
+    private boolean notificationStatus;
+
+    public static List<Notification> notifications = Arrays.asList(
+            new Notification(Type.SENT, true, false, true),
+            new Notification(Type.ACK_RECEIVED, false, true, true),
+            new Notification(Type.NACK_RECEIVED, true, true,  false),
+            new Notification(Type.DAILY_ERRORS, true, false, true)
+    );
+
+    private Notification(Type type, boolean deactivatable, boolean defaultValue, boolean notificationStatus) {
+        this.type = type;
+        this.deactivatable = deactivatable;
+        this.defaultValue = defaultValue;
+        this.notificationStatus = notificationStatus;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     public boolean isDeactivatable() {
@@ -32,4 +53,9 @@ public class Notification {
     public boolean isDefaultValue() {
         return defaultValue;
     }
+
+    public boolean isNotificationStatus() {
+        return notificationStatus;
+    }
 }
+

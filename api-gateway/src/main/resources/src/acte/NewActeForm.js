@@ -408,14 +408,15 @@ class NewActeForm extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const fields = this.state.fields
-        //fields['draft'] = false
-        //this.setState({ fields })
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                _addNotification(notifications.acte.sent)
-                history.push(`/${localAuthoritySlug}/actes/${acteUuid}`)
+                fields['draft'] = false
+                this.setState({ fields }, () => {
+                    _addNotification(notifications.acte.sent)
+                    history.push(`/${localAuthoritySlug}/actes/${acteUuid}`)
+                })
             })
             .catch(response => {
                 if (response.status === 400) {

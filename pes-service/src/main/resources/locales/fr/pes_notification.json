@@ -1,22 +1,28 @@
 {
   "pes": {
     "ACK_RECEIVED":{
-    	"subject":"[Stela V3] Pes reçu",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"
+    	"subject":"[Stela] Pes reçu"
+    },
+    "NACK_RECEIVED":{
+      "subject":"[Stela] Pes en erreur"
     },
     "SENT":{
-    	"subject":"[Stela V3] Pes transmis",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Votre pes a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
+    	"subject":"[Stela] Pes transmis"
+    },
+    "DAILY_ERRORS": {
+      "subject": "[Stela] Liste des Pes en erreur"
     },
     "copy" : {
-    	"ACK_RECEIVED":{
-    	"subject":"[Stela V3] Pes reçu sur votre collectivité",
-    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un pes a bien été reçu par la préfecture <br/> Cordialement le Sictiam"
-    	},
-	    "SENT":{
-	    	"subject":"[Stela V3] Pes transmis sur votre collectivité",
-	    	"body": "Bonjour ${firstname} ${lastname}, <br/> Un pes a bien été transmis à la préfecture <br/> Cordialement le Sictiam"
-	    }
-    }
+      "ACK_RECEIVED":{
+    	"subject":"[Stela] Pes reçu sur votre collectivité"
+      },
+      "NACK_RECEIVED":{
+        "subject":"[Stela] Pes en erreur sur votre collectivité"
+      },
+      "SENT":{
+          "subject":"[Stela] Pes transmis sur votre collectivité"
+      }
+    },
+    "unittest": "Bonjour ${firstname} ${lastname}, le test unitaire est passé"
   }
 }

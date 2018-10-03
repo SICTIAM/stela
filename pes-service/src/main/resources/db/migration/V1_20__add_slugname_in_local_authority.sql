@@ -1,0 +1,1 @@
+ALTER TABLE local_authority ADD COLUMN slug_name character varying(255) NULL;

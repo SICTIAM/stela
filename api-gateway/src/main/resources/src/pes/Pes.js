@@ -31,7 +31,9 @@ class Pes extends Component {
             pesHistories: [],
             localAuthority: {},
             profileUuid: '',
-            pj: false
+            pj: false,
+            lastHistoryDate: '',
+            lastHistoryStatus: ''
         },
         agent: '',
         fetchStatus: ''
@@ -90,8 +92,8 @@ class Pes extends Component {
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
                     <Anomaly header={t('pes.page.title_anomaly')} lastHistory={lastHistory} />
                     <Segment>
-                        <Label className="labelStatus" color={lastHistory ? this.getStatusColor(lastHistory.status) : 'blue'} ribbon>
-                            {lastHistory && t(`pes.status.${lastHistory.status}`)}
+                        <Label className="labelStatus" color={pes.lastHistoryStatus ? this.getStatusColor(pes.lastHistoryStatus) : 'blue'} ribbon>
+                            {pes.lastHistoryStatus && t(`pes.status.${pes.lastHistoryStatus}`)}
                         </Label>
                         <div style={{ textAlign: 'right' }}>
                             {canResend && (
