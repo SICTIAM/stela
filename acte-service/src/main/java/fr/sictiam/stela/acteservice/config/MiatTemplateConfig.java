@@ -38,6 +38,9 @@ public class MiatTemplateConfig {
     @Value("${application.miat.keystorepath}")
     private String keyStorePath;
 
+    @Value("${application.miat.accessTimeout}")
+    private int accessTimeout;
+
     @Bean
     @Qualifier("miatRestTemplate")
     public RestTemplate getRestTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException,
@@ -55,6 +58,8 @@ public class MiatTemplateConfig {
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
         requestFactory.setHttpClient(httpClient);
+        requestFactory.setConnectionRequestTimeout(accessTimeout);
+        requestFactory.setConnectTimeout(accessTimeout);
 
         return new RestTemplate(requestFactory);
     }
