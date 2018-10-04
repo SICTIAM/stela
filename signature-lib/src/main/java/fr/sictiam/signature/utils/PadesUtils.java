@@ -74,7 +74,7 @@ public class PadesUtils {
         TrustedListsCertificateSource certificateSource = new TrustedListsCertificateSource();
 
         KeyStoreCertificateSource keyStoreCertificateSource = new KeyStoreCertificateSource(
-                new ClassPathResource("/signature/keystore.p12").getFile(), "PKCS12", "dss-password");
+                new ClassPathResource("signature/keystore.p12").getFile(), "PKCS12", "dss-password");
 
         TSLRepository tslRepository = new TSLRepository();
         tslRepository.setTrustedListsCertificateSource(certificateSource);
