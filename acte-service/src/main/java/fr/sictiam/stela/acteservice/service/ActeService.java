@@ -885,8 +885,15 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        Acte acte = getByUuid(event.getActeHistory().getActeUuid());
-        acte.getActeHistories().add(event.getActeHistory());
+        ActeHistory history = event.getActeHistory();
+        Acte acte = getByUuid(history.getActeUuid());
+        acte.getActeHistories().add(history);
+        if (history.getStatus() != StatusType.NOTIFICATION_SENT && history.getStatus() != StatusType.GROUP_NOTIFICATION_SENT) {
+            acte.setLastHistoryStatus(history.getStatus());
+            acte.setLastHistoryDate(history.getDate());
+            acte.setLastHistoryFlux(history.getFlux());
+        }
+
         acteRepository.save(acte);
     }
 

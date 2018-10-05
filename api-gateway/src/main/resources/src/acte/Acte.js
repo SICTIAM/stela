@@ -103,8 +103,12 @@ class Acte extends Component {
     }
     render() {
         const { t } = this.context
-        const { acteACK, lastMetierHistory } = this.state.acteUI
-        const acte = this.state.acteUI.acte
+        const { acteACK, acte } = this.state.acteUI
+        const lastMetierHistory = {
+            date: acte.lastHistoryDate,
+            status: acte.lastHistoryStatus,
+            flux: acte.lastHistoryFlux
+        }
         const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
         const annexes = this.state.acteUI.acte.annexes.map(annexe =>
             <List.Item key={annexe.uuid}>
@@ -162,8 +166,8 @@ class Acte extends Component {
                     )}
 
                     <Segment>
-                        <Label className='labelStatus' color={lastMetierHistory ? this.getStatusColor(lastMetierHistory.status) : 'blue'} ribbon>
-                            {lastMetierHistory && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
+                        <Label className='labelStatus' color={acte.lastHistoryStatus ? this.getStatusColor(acte.lastHistoryStatus) : 'blue'} ribbon>
+                            {acte.lastHistoryStatus && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
                         </Label>
                         <div style={{ textAlign: 'right' }}>
                             <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>

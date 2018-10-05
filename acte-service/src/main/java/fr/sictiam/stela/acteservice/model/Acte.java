@@ -93,6 +93,11 @@ public class Acte {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Archive archive;
 
+    @Enumerated(EnumType.STRING)
+    StatusType lastHistoryStatus;
+    LocalDateTime  lastHistoryDate;
+    Flux lastHistoryFlux;
+
     public Acte() {
     }
 
@@ -273,6 +278,30 @@ public class Acte {
 
     public void setArchive(Archive archive) {
         this.archive = archive;
+    }
+
+    public StatusType getLastHistoryStatus() {
+        return lastHistoryStatus;
+    }
+
+    public void setLastHistoryStatus(StatusType lastHistoryStatus) {
+        this.lastHistoryStatus = lastHistoryStatus;
+    }
+
+    public LocalDateTime getLastHistoryDate() {
+        return lastHistoryDate;
+    }
+
+    public void setLastHistoryDate(LocalDateTime lastHistoryDate) {
+        this.lastHistoryDate = lastHistoryDate;
+    }
+
+    public Flux getLastHistoryFlux() {
+        return lastHistoryFlux;
+    }
+
+    public void setLastHistoryFlux(Flux lastHistoryFlux) {
+        this.lastHistoryFlux = lastHistoryFlux;
     }
 
     public boolean empty() {

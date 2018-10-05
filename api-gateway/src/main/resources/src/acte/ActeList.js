@@ -124,9 +124,12 @@ class ActeList extends Component {
         const statusOptions = status.map(statusItem =>
             <option key={statusItem} value={statusItem}>{t(`acte.status.${statusItem}`)}</option>
         )
-        const statusDisplay = (histories) => {
-            const lastHistory = histories[histories.length - 1]
-            return <StatusDisplay status={t(getHistoryStatusTranslationKey('acte', lastHistory))} date={lastHistory.date}/>
+        const statusDisplay = (acte) => {
+            const lastHistory = {
+                status: acte.lastHistoryStatus,
+                flux: acte.lastHistoryFlux
+            }
+            return <StatusDisplay status={t(getHistoryStatusTranslationKey('acte', lastHistory))} date={acte.lastHistoryDate}/>
         }
         const natureDisplay = (nature) => t(`acte.nature.${nature}`)
         const decisionDisplay = (decision) => moment(decision).format('DD/MM/YYYY')
@@ -160,7 +163,7 @@ class ActeList extends Component {
                 sortable: true, collapsing: true },
             { property: 'code', displayed: false, searchable: false },
             { property: 'creation', displayed: false, searchable: false },
-            { property: 'acteHistories', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay,
+            { property: '_self', displayed: true, displayName: t('acte.fields.status'), searchable: true, displayComponent: statusDisplay,
                 sortable: false, collapsing: true },
             { property: 'public', displayed: false, searchable: false },
             { property: 'publicWebsite', displayed: false, searchable: false },
@@ -225,7 +228,6 @@ class ActeList extends Component {
                                 </div>
                             </Form>
                         </AdvancedSearch>
-
                         <StelaTable
                             data={this.state.actes}
                             metaData={metaData}

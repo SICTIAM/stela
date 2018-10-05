@@ -125,9 +125,8 @@ public class ActeRestController {
         }
         Acte acte = acteService.getByUuid(uuid);
         boolean isActeACK = acteService.isActeACK(uuid);
-        ActeHistory lastMetierHistory = acteService.getLastMetierHistory(uuid);
         StampPosition stampPosition = localAuthorityService.getByUuid(currentLocalAuthUuid).getStampPosition();
-        return new ResponseEntity<>(new ActeUI(acte, isActeACK, lastMetierHistory, stampPosition), HttpStatus.OK);
+        return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);
     }
 
     @PostMapping("/ask-classification/current")
