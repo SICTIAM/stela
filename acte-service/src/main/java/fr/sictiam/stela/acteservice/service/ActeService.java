@@ -51,6 +51,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -849,8 +850,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             ResponseEntity<String> result = miatRestTemplate.exchange(acteUrl, HttpMethod.POST, requestEntity,
                     String.class);
             httpStatus = result.getStatusCode();
+        } catch (ResourceAccessException e) {
+            LOGGER.error("Miat rescue server unavailable: {}", e.getMessage());
+            httpStatus = HttpStatus.NOT_FOUND;
         } catch (Exception e) {
-            LOGGER.error("Miat main server unavailable: {}", e.getMessage());
+            LOGGER.error("Miat main server unavailable (might be an error on our side): {}", e.getMessage());
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
@@ -859,8 +863,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 ResponseEntity<String> result = miatRestTemplate.exchange(rescueUrl, HttpMethod.POST, requestEntity,
                         String.class);
                 httpStatus = result.getStatusCode();
-            } catch (Exception e) {
+            } catch (ResourceAccessException e) {
                 LOGGER.error("Miat rescue server unavailable: {}", e.getMessage());
+                httpStatus = HttpStatus.NOT_FOUND;
+            } catch (Exception e) {
+                LOGGER.error("Miat rescue server unavailable (might be an error on our side): {}", e.getMessage());
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             }
         }

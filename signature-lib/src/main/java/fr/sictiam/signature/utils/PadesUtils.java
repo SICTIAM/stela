@@ -73,8 +73,9 @@ public class PadesUtils {
     private static TrustedListsCertificateSource getTrustedListsCertificateSource() throws IOException {
         TrustedListsCertificateSource certificateSource = new TrustedListsCertificateSource();
 
+        // FIXME: signature/keystore.p12 must be in the ressources directory of the module using this lib
         KeyStoreCertificateSource keyStoreCertificateSource = new KeyStoreCertificateSource(
-                new ClassPathResource("/signature/keystore.p12").getFile(), "PKCS12", "dss-password");
+                new ClassPathResource("signature/keystore.p12").getInputStream(), "PKCS12", "dss-password");
 
         TSLRepository tslRepository = new TSLRepository();
         tslRepository.setTrustedListsCertificateSource(certificateSource);
