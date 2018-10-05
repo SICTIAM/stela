@@ -226,14 +226,15 @@ class NewActeBatchedForm extends Component {
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                _addNotification(notifications.acte.sent)
-                history.push('/actes')
+                this.setState({ shouldUnmount: false }, () => {
+                    _addNotification(notifications.acte.sent)
+                    history.push('/actes')
+                })
             })
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
-    initDelete = () => this.setState({ shouldUnmount: false }, this.deleteDraft)
     deleteDraft = () => {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -242,8 +243,10 @@ class NewActeBatchedForm extends Component {
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
-                _addNotification(notifications.acte.draftDeleted)
-                history.push(`/${localAuthoritySlug}/actes/liste`)
+                this.setState({ shouldUnmount: false }, () => {
+                    _addNotification(notifications.acte.draftDeleted)
+                    history.push(`/${localAuthoritySlug}/actes/liste`)
+                })
             })
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -285,7 +288,7 @@ class NewActeBatchedForm extends Component {
                     status={this.state.status}
                     setFormValidForId={this.setFormValidForId}
                     setField={this.setField}
-                    shouldUnmount={this.shouldUnmount}
+                    shouldUnmount={this.state.shouldUnmount}
                 />
             </WrappedActeForm>
         )
@@ -337,7 +340,7 @@ class NewActeBatchedForm extends Component {
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
                     {this.state.fields.uuid && (
-                        <Button style={{ marginRight: '1em' }} onClick={this.initDelete} compact basic color='red'
+                        <Button style={{ marginRight: '1em' }} onClick={this.deleteDraft} compact basic color='red'
                             disabled={isFormSaving} loading={isFormSaving}>
                             {t('api-gateway:form.delete_draft')}
                         </Button>
