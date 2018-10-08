@@ -33,4 +33,11 @@ public class UserGatewayRequest {
         this.ozwilloInstanceInfo = ozwilloInstanceInfo;
     }
 
+    @Override
+    public String toString() {
+        return "UserGatewayRequest{" +
+                "emails=" + emails +
+                ", ozwilloInstanceInfo=" + ozwilloInstanceInfo +
+                '}';
+    }
 }
