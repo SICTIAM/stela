@@ -127,6 +127,7 @@ public class AgentService {
     }
 
     public void migrateUsers(MigrationWrapper migrationWrapper, String uuid) {
+        LOGGER.info("Receiving user to register for a migration...");
         WorkGroup workGroup = new WorkGroup(localAuthorityService.getByUuid(uuid),
                 migrationWrapper.getModuleName() + "-migration");
         workGroup.setRights(migrationWrapper.getRights());
@@ -167,11 +168,13 @@ public class AgentService {
             localAuthority.getProfiles().add(profile);
             localAuthorityService.createOrUpdate(localAuthority);
         }
+        LOGGER.info("Users registered, sending them to the Ozwillo user-gateway...");
 
         HttpHeaders headers = createHeaders(usersgwUser, usersgwPassword);
         UserGatewayRequest userGatewayRequest = new UserGatewayRequest(migrationWrapper.getUserMigrations().stream()
                 .map(userMigration -> userMigration.getEmail()).collect(Collectors.toList()),
                 localAuthority.getOzwilloInstanceInfo());
+        LOGGER.debug(userGatewayRequest.toString());
         HttpEntity<UserGatewayRequest> requestEntity = new HttpEntity<>(userGatewayRequest, headers);
         restTemplate.exchange(usersgwUrl, HttpMethod.POST, requestEntity, String.class);
 
