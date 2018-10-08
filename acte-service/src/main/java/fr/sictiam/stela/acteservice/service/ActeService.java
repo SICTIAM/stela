@@ -59,12 +59,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -346,6 +341,18 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
+        query.select(builder.construct(Acte.class,
+                acteRoot.get("uuid"),
+                acteRoot.get("objet"),
+                acteRoot.get("creation"),
+                acteRoot.get("decision"),
+                acteRoot.get("number"),
+                acteRoot.get("nature"),
+                acteRoot.get("lastHistoryDate"),
+                acteRoot.get("lastHistoryStatus"),
+                acteRoot.get("lastHistoryFlux")
+        ));
+
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
         List<Predicate> predicates = getAllQueryPredicates(builder, acteRoot, multifield, number, objet, nature,
                 decisionFrom, decisionTo, status, currentLocalAuthUuid, groups);
@@ -440,13 +447,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     private Predicate getStatusPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, StatusType status) {
-        // TODO: Find a way to do a self left join using a CriteriaQuery instead of a native one
-        Query q = entityManager.createNativeQuery(
-                "select ah1.acte_uuid from acte_history ah1 left join acte_history ah2 on (ah1.acte_uuid = ah2.acte_uuid and ah1.date < ah2.date) where ah2.date is null and ah1.status = '"
-                        + status + "'");
-        List<String> acteHistoriesActeUuids = q.getResultList();
-        if (acteHistoriesActeUuids.size() > 0) return builder.and(acteRoot.get("uuid").in(acteHistoriesActeUuids));
-        else return builder.and(acteRoot.get("uuid").isNull());
+        return builder.and(builder.equal(acteRoot.get("lastHistoryStatus"), status));
     }
 
     public List<ActeHistory> getPrefectureReturns(String currentLocalAuthUuid, LocalDateTime date) {
@@ -885,8 +886,15 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
-        Acte acte = getByUuid(event.getActeHistory().getActeUuid());
-        acte.getActeHistories().add(event.getActeHistory());
+        ActeHistory history = event.getActeHistory();
+        Acte acte = getByUuid(history.getActeUuid());
+        acte.getActeHistories().add(history);
+        if (history.getStatus() != StatusType.NOTIFICATION_SENT && history.getStatus() != StatusType.GROUP_NOTIFICATION_SENT) {
+            acte.setLastHistoryStatus(history.getStatus());
+            acte.setLastHistoryDate(history.getDate());
+            acte.setLastHistoryFlux(history.getFlux());
+        }
+
         acteRepository.save(acte);
     }
 

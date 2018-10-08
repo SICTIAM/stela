@@ -93,7 +93,25 @@ public class Acte {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Archive archive;
 
+    @Enumerated(EnumType.STRING)
+    StatusType lastHistoryStatus;
+    LocalDateTime  lastHistoryDate;
+    @Enumerated(EnumType.STRING)
+    Flux lastHistoryFlux;
+
     public Acte() {
+    }
+
+    public Acte (String uuid, String objet, LocalDateTime creation, LocalDate decision, String number, ActeNature nature, LocalDateTime lastHistoryDate, StatusType  lastHistoryStatus, Flux lastHistoryFlux) {
+        this.uuid = uuid;
+        this.objet = objet;
+        this.creation = creation;
+        this.decision = decision;
+        this.number = number;
+        this.nature = nature;
+        this.lastHistoryDate = lastHistoryDate;
+        this.lastHistoryStatus = lastHistoryStatus;
+        this.lastHistoryFlux = lastHistoryFlux;
     }
 
     public Acte(String number, LocalDate decision, ActeNature nature, String code, String objet, boolean isPublic,
@@ -273,6 +291,30 @@ public class Acte {
 
     public void setArchive(Archive archive) {
         this.archive = archive;
+    }
+
+    public StatusType getLastHistoryStatus() {
+        return lastHistoryStatus;
+    }
+
+    public void setLastHistoryStatus(StatusType lastHistoryStatus) {
+        this.lastHistoryStatus = lastHistoryStatus;
+    }
+
+    public LocalDateTime getLastHistoryDate() {
+        return lastHistoryDate;
+    }
+
+    public void setLastHistoryDate(LocalDateTime lastHistoryDate) {
+        this.lastHistoryDate = lastHistoryDate;
+    }
+
+    public Flux getLastHistoryFlux() {
+        return lastHistoryFlux;
+    }
+
+    public void setLastHistoryFlux(Flux lastHistoryFlux) {
+        this.lastHistoryFlux = lastHistoryFlux;
     }
 
     public boolean empty() {

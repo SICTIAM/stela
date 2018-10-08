@@ -8,13 +8,11 @@ public class ActeUI {
 
     private Acte acte;
     private boolean acteACK;
-    private ActeHistory lastMetierHistory;
     private StampPosition stampPosition;
 
-    public ActeUI(Acte acte, boolean acteACK, ActeHistory lastMetierHistory, StampPosition stampPosition) {
+    public ActeUI(Acte acte, boolean acteACK, StampPosition stampPosition) {
         this.acte = acte;
         this.acteACK = acteACK;
-        this.lastMetierHistory = lastMetierHistory;
         this.stampPosition = stampPosition;
     }
 
@@ -24,10 +22,6 @@ public class ActeUI {
 
     public boolean isActeACK() {
         return acteACK;
-    }
-
-    public ActeHistory getLastMetierHistory() {
-        return lastMetierHistory;
     }
 
     public StampPosition getStampPosition() {
