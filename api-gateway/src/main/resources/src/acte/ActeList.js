@@ -111,8 +111,7 @@ class ActeList extends Component {
             })
     }
     negativeResolver = acte => {
-        const lastHistory = acte.acteHistories[acte.acteHistories.length - 1]
-        return anomalies.includes(lastHistory.status)
+        return anomalies.includes(acte.lastHistoryStatus)
     }
     render() {
         const { t } = this.context

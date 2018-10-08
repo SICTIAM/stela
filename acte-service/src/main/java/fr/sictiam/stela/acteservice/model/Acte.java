@@ -96,9 +96,22 @@ public class Acte {
     @Enumerated(EnumType.STRING)
     StatusType lastHistoryStatus;
     LocalDateTime  lastHistoryDate;
+    @Enumerated(EnumType.STRING)
     Flux lastHistoryFlux;
 
     public Acte() {
+    }
+
+    public Acte (String uuid, String objet, LocalDateTime creation, LocalDate decision, String number, ActeNature nature, LocalDateTime lastHistoryDate, StatusType  lastHistoryStatus, Flux lastHistoryFlux) {
+        this.uuid = uuid;
+        this.objet = objet;
+        this.creation = creation;
+        this.decision = decision;
+        this.number = number;
+        this.nature = nature;
+        this.lastHistoryDate = lastHistoryDate;
+        this.lastHistoryStatus = lastHistoryStatus;
+        this.lastHistoryFlux = lastHistoryFlux;
     }
 
     public Acte(String number, LocalDate decision, ActeNature nature, String code, String objet, boolean isPublic,
