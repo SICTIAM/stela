@@ -275,4 +275,13 @@ public class LocalAuthorityController {
         localAuthorityService.removeModule(uuid, module);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @GetMapping("/certificate/{serial}/{issuer}")
+    public ResponseEntity<LocalAuthority> getByCertificate (
+            @PathVariable String serial,
+            @PathVariable String issuer) {
+        Optional<LocalAuthority> opt = localAuthorityService.getByCertificate(serial, issuer);
+        return opt.isPresent() ?  new ResponseEntity<>(opt.get(), HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }

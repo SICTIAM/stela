@@ -2,13 +2,16 @@ package fr.sictiam.stela.acteservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.ui.GenericAccount;
+import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -145,5 +148,15 @@ public class ExternalRestService {
         JsonNode node = objectMapper.readTree(opt.get());
 
         return node;
+    }
+
+    public LocalAuthority getLocalAuthorityByCertificate(Certificate certificate) throws IOException {
+
+        RestTemplate restTemplate = new RestTemplate();
+        LocalAuthority localAuthority = restTemplate.getForObject(
+                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/certificate/{serial}/{issuer}",
+                LocalAuthority.class, certificate.getSerial(), certificate.getIssuer());
+
+        return localAuthority;
     }
 }

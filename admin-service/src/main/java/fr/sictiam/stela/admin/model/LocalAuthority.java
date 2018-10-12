@@ -5,15 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.admin.model.UI.Views;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -54,7 +46,17 @@ public class LocalAuthority {
     @JsonView(Views.LocalAuthorityViewPrivate.class)
     private Set<Profile> profiles;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "local_authority_certificate", inverseJoinColumns = { @JoinColumn(name = "certificate_uuid") })
+    @JsonView(Views.LocalAuthorityViewPrivate.class)
+    private Set<Certificate> certificates;
+
     protected LocalAuthority() {
+        this.activatedModules = new HashSet<>();
+    }
+
+    public LocalAuthority(String uuid) {
+        this.uuid = uuid;
         this.activatedModules = new HashSet<>();
     }
 
@@ -136,6 +138,14 @@ public class LocalAuthority {
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
+    }
+
+    public Set<Certificate> getCertificates() {
+        return certificates;
+    }
+
+    public void setCertificates(Set<Certificate> certificates) {
+        this.certificates = certificates;
     }
 
     @Override

@@ -1,27 +1,25 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.AttachmentType;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.MaterialCode;
+import fr.sictiam.stela.acteservice.model.*;
+import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
+import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.ActeService;
+import fr.sictiam.stela.acteservice.service.ExternalRestService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -33,31 +31,64 @@ public class EditeurRestController {
 
     private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
+    private final ValidationService validationService;
+    private final ExternalRestService externalRestService;
 
-    public EditeurRestController(ActeService acteService, LocalAuthorityService localAuthorityService) {
+    public EditeurRestController(ActeService acteService, LocalAuthorityService localAuthorityService, ValidationService validationService, ExternalRestService externalRestService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
+        this.validationService = validationService;
+        this.externalRestService = externalRestService;
     }
 
-    @PostMapping
-    ResponseEntity<String> create(
+    @PostMapping()
+    ResponseEntity<?> create(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
             @RequestParam("number") String number,
             @RequestParam("objet") String objet,
             @RequestParam("nature") ActeNature nature,
             @RequestParam("code") String code,
-            @RequestParam("decision") LocalDate decision,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("fileType") String fileType,
+            @RequestParam("decision") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate decision,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "fileType", required = false) String fileType,
             @RequestParam(value = "annexes", required = false) MultipartFile[] annexes,
             @RequestParam(value = "annexeTypes", required = false) String[] annexeTypes,
-            @RequestParam(value = "public", required = false) Boolean isPublic,
-            @RequestParam(value = "publicWebsite", required = false) Boolean isPublicWebsite,
+            @RequestParam(value = "public", required = false, defaultValue = "false") Boolean isPublic,
+            @RequestParam(value = "publicWebsite", required = false, defaultValue = "false") Boolean isPublicWebsite,
             @RequestParam(value = "groupUuid", required = false) String groupUuid,
             @RequestParam(value = "email", required = false) String email)
             throws IOException {
 
-        // TODO: Retrieve localAuthority from auth
-        LocalAuthority localAuthority = new LocalAuthority();
+        // WIP : for tests
+        certificate = new Certificate("abcd", "moi", null, null, null, null, null, null, null, null, null, null);
+
+        LocalAuthority localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate);
+        LOGGER.warn("(GERALD) Found localAuthority " + localAuthority);
+
+        ActeParams acteParams = new ActeParams(
+                number,
+                objet,
+                nature,
+                code,
+                decision,
+                file,
+                fileType,
+                Arrays.asList(annexes != null ? annexes : new MultipartFile[]{}),
+                Arrays.asList(annexeTypes != null ? annexeTypes : new String[]{}),
+                isPublic,
+                isPublicWebsite,
+                groupUuid,
+                email,
+                localAuthority
+        );
+
+        List<ObjectError> errors = validationService.validateActeParams(acteParams);
+
+
+        if (!errors.isEmpty()) {
+            return new ResponseEntity<>(new CustomValidationUI(errors, "has failed"), HttpStatus.BAD_REQUEST);
+        }
+
         Acte acte = acteService.create(number, objet, nature, code, decision, isPublic, isPublicWebsite, groupUuid,
                 file, fileType, annexes, annexeTypes, email, localAuthority);
         return new ResponseEntity<>(acte.getUuid(), HttpStatus.OK);
