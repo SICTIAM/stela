@@ -160,7 +160,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private String getCodeForAnnexeFilename(String[] annexeTypes, String filename) {
         for (String annexeType : annexeTypes) {
             Matcher m = Pattern.compile("(.*):(.*)").matcher(annexeType); // [filename]:[code_type]
-            if (m.groupCount() > 1 && filename.equals(m.group(1))) return m.group(2);
+            if (m.find() && m.groupCount() > 1 && filename.equals(m.group(1))) return m.group(2);
         }
         return "CO_DE";
     }

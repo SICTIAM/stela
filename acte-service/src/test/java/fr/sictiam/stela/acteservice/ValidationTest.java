@@ -3,7 +3,7 @@ package fr.sictiam.stela.acteservice;
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.Admin;
-import fr.sictiam.stela.acteservice.validation.ValidationUtil;
+import fr.sictiam.stela.acteservice.service.ValidationService;
 import org.junit.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.ObjectError;
@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -64,7 +63,8 @@ public class ValidationTest {
     @Test
     public void testEmptyActeValidation() {
         Acte acte = new Acte();
-        List<ObjectError> errors = ValidationUtil.validateActe(acte);
+        ValidationService validationService = new ValidationService();
+        List<ObjectError> errors = validationService.validateActe(acte);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(5));
     }
@@ -72,10 +72,10 @@ public class ValidationTest {
     @Test
     public void testActeWithEmptyFileValidation() {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
-
+        ValidationService validationService = new ValidationService();
         MultipartFile file = new MockMultipartFile("file.csv", "file.csv", "application/test", new byte[0]);
         MultipartFile[] annexes = new MultipartFile[] {};
-        List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
+        List<ObjectError> errors = validationService.validateActeWithFile(acte, file, annexes);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(1));
         assertThat(errors.get(0).getDefaultMessage(), is("form.validation.mandatoryfile"));
@@ -84,10 +84,11 @@ public class ValidationTest {
     @Test
     public void testActeFileBadExtensionValidation() {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
+        ValidationService validationService = new ValidationService();
 
         MultipartFile file = new MockMultipartFile("file.csv", "file.csv", "application/test", new byte[256]);
         MultipartFile[] annexes = new MultipartFile[] {};
-        List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
+        List<ObjectError> errors = validationService.validateActeWithFile(acte, file, annexes);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(1));
         assertThat(errors.get(0).getDefaultMessage(), is("form.validation.badextension"));
@@ -96,10 +97,11 @@ public class ValidationTest {
     @Test
     public void testAnnexeBadExtension() {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
+        ValidationService validationService = new ValidationService();
 
         MultipartFile file = new MockMultipartFile("file.pdf", "file.pdf", "application/test", new byte[256]);
         MultipartFile[] annexes = new MultipartFile[] { new MockMultipartFile("file.csv", new byte[256]) };
-        List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
+        List<ObjectError> errors = validationService.validateActeWithFile(acte, file, annexes);
         assertThat(errors, not(empty()));
         assertThat(errors, hasSize(1));
         assertThat(errors.get(0).getDefaultMessage(), is("form.validation.badextension"));
@@ -109,11 +111,12 @@ public class ValidationTest {
     @Test
     public void testActeOk() {
         Acte acte = new Acte("003", LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS, "00", "00", true, true);
+        ValidationService validationService = new ValidationService();
 
         MultipartFile file = new MockMultipartFile("file.pdf", "file.pdf", "application/test", new byte[256]);
 
         MultipartFile[] annexes = new MultipartFile[] {};
-        List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
+        List<ObjectError> errors = validationService.validateActeWithFile(acte, file, annexes);
         assertThat(errors, empty());
 
     }

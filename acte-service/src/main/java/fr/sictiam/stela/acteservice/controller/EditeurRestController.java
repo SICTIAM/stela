@@ -8,6 +8,7 @@ import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.ExternalRestService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.ValidationService;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/editeur/api/acte")
@@ -42,7 +42,7 @@ public class EditeurRestController {
     }
 
     @PostMapping()
-    ResponseEntity<?> create(
+    ResponseEntity<?> create(HttpServletRequest request,
             @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
             @RequestParam("number") String number,
             @RequestParam("objet") String objet,
@@ -62,8 +62,10 @@ public class EditeurRestController {
         // WIP : for tests
         certificate = new Certificate("abcd", "moi", null, null, null, null, null, null, null, null, null, null);
 
-        LocalAuthority localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate);
-        LOGGER.warn("(GERALD) Found localAuthority " + localAuthority);
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
 
         ActeParams acteParams = new ActeParams(
                 number,
@@ -95,86 +97,153 @@ public class EditeurRestController {
     }
 
     @GetMapping("/codes-matieres")
-    ResponseEntity<List<MaterialCode>> getCodesMatieres() {
-        // TODO: Retrieve localAuthority from auth
-        LocalAuthority localAuthority = new LocalAuthority();
+    ResponseEntity<?> getCodesMatieres(@RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate) {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         return new ResponseEntity<>(localAuthorityService.getCodesMatieres(localAuthority.getUuid()), HttpStatus.OK);
     }
 
     @GetMapping("/attachment-types/{acteNature}/{materialCode}")
-    public ResponseEntity<Set<AttachmentType>> getAttachmentTypesForNature(@PathVariable ActeNature acteNature,
+    public ResponseEntity<?> getAttachmentTypesForNature(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable ActeNature acteNature,
             @PathVariable String materialCode) {
-        // TODO: Retrieve localAuthority from auth
-        LocalAuthority localAuthority = new LocalAuthority();
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         return new ResponseEntity<>(
                 localAuthorityService.getAttachmentTypeAvailable(acteNature, localAuthority.getUuid(), materialCode),
                 HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<Acte> getByUuid(@PathVariable String uuid) {
-        // TODO: Remove localAuthority infos
+    public ResponseEntity<?> getByUuid(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable String uuid) {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         Acte acte = acteService.getByUuid(uuid);
         return new ResponseEntity<>(acte, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<Acte>> getActeList(
+    public ResponseEntity<?> getActeList(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction) {
-        // TODO: Retrieve localAuthority from auth
-        LocalAuthority localAuthority = new LocalAuthority();
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         List<Acte> acteList = acteService.getAllWithQueryNoSearch(limit, offset, column, direction, localAuthority.getUuid());
         return new ResponseEntity<>(acteList, HttpStatus.OK);
     }
 
     @GetMapping("/group")
-    public ResponseEntity<JsonNode> getGroups() throws IOException {
-        // TODO: Retrieve localAuthority from auth
-        LocalAuthority localAuthority = new LocalAuthority();
+    public ResponseEntity<?> getGroups(@RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate) throws IOException {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         JsonNode node = acteService.getGroups(localAuthority.getUuid());
         return new ResponseEntity<>(node, HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/cancel")
-    public ResponseEntity cancelActe(@PathVariable String uuid) {
+    public ResponseEntity cancelActe(@RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+
+            @PathVariable String uuid) {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         acteService.cancel(uuid);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/courrier-simple")
-    public ResponseEntity sendCourrierSimple(@PathVariable String uuid, @RequestParam("file") MultipartFile file)
+    public ResponseEntity sendCourrierSimple(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable String uuid, @RequestParam("file") MultipartFile file)
             throws IOException {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         acteService.sendReponseCourrierSimple(uuid, file);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/pieces-complementaires")
-    public ResponseEntity sendPiecesComplementaires(@PathVariable String uuid, @RequestParam("files") MultipartFile[] files)
+    public ResponseEntity sendPiecesComplementaires(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable String uuid,
+            @RequestParam("files") MultipartFile[] files)
             throws IOException {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         acteService.sendReponsePiecesComplementaires(uuid, "reponse", files);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/pieces-complementaires/reject")
-    public ResponseEntity refusPiecesComplementaires(@PathVariable String uuid, @RequestParam("file") MultipartFile file)
+    public ResponseEntity refusPiecesComplementaires(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable String uuid,
+            @RequestParam("file") MultipartFile file)
             throws IOException {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         acteService.sendReponsePiecesComplementaires(uuid, "reject", new MultipartFile[]{file});
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/lettre-observation")
-    public ResponseEntity sendReponseObservations(@PathVariable String uuid, @RequestParam("file") MultipartFile file)
+    public ResponseEntity sendReponseObservations(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable String uuid,
+            @RequestParam("file") MultipartFile file)
             throws IOException {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         acteService.sendReponseLettreObservation(uuid, "reponse", file);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/lettre-observation/reject")
-    public ResponseEntity sendRefusObservations(@PathVariable String uuid, @RequestParam("file") MultipartFile file)
+    public ResponseEntity sendRefusObservations(
+            @RequestAttribute(value = "STELA-Certificate", required = true) Certificate certificate,
+            @PathVariable String uuid,
+            @RequestParam("file") MultipartFile file)
             throws IOException {
+        LocalAuthority localAuthority;
+        if (certificate == null ||
+                (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
+            return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
+
         acteService.sendReponseLettreObservation(uuid, "reject", file);
         return new ResponseEntity(HttpStatus.OK);
     }

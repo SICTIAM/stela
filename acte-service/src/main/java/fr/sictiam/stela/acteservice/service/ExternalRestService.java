@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -150,12 +152,24 @@ public class ExternalRestService {
         return node;
     }
 
-    public LocalAuthority getLocalAuthorityByCertificate(Certificate certificate) throws IOException {
+    public LocalAuthority getLocalAuthorityByCertificate(Certificate certificate) {
 
-        RestTemplate restTemplate = new RestTemplate();
-        LocalAuthority localAuthority = restTemplate.getForObject(
-                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/certificate/{serial}/{issuer}",
-                LocalAuthority.class, certificate.getSerial(), certificate.getIssuer());
+        LocalAuthority localAuthority = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            localAuthority = restTemplate.getForObject(
+                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/certificate/{serial}/{issuer}",
+                    LocalAuthority.class, certificate.getSerial(), certificate.getIssuer());
+        }
+        catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND)
+                LOGGER.warn("No local authority for this certificate {}|{}", certificate.getSerial(), certificate.getIssuer());
+            else
+                LOGGER.error("Failed to find local authority from a certificate : {}", e.getMessage());
+        }
+        catch (RestClientException e) {
+            LOGGER.error("Failed to find local authority from a certificate : {}", e.getMessage());
+        }
 
         return localAuthority;
     }
