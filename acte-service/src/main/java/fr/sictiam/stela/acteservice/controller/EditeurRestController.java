@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import javax.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -85,10 +87,14 @@ public class EditeurRestController {
         );
 
         List<ObjectError> errors = validationService.validateActeParams(acteParams);
-
-
-        if (!errors.isEmpty()) {
+        if (!errors.isEmpty())
             return new ResponseEntity<>(new CustomValidationUI(errors, "has failed"), HttpStatus.BAD_REQUEST);
+
+        // Check number existence here to send another return code
+        if (acteService.numberExist(acteParams.getNumber(), acteParams.getLocalAuthority().getUuid())) {
+            return new ResponseEntity<>(
+                    new CustomValidationUI(
+                            new FieldError("acte", "number", "Number " + acteParams.getNumber() + " already exists"), "conflict", HttpStatus.CONFLICT), HttpStatus.CONFLICT);
         }
 
         Acte acte = acteService.create(number, objet, nature, code, decision, isPublic, isPublicWebsite, groupUuid,

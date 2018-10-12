@@ -911,6 +911,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()));
     }
 
+    public boolean numberExist (String number, String localAuthorityUuid) {
+        return acteRepository.findByNumberAndLocalAuthorityUuid(number, localAuthorityUuid).size() > 0;
+    }
+
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         ActeHistory history = event.getActeHistory();
