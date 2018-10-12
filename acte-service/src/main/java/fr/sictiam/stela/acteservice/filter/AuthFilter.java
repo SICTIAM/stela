@@ -41,6 +41,9 @@ public class AuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         Certificate certificate = certUtilService.getCertInfosFromHeaders(request);
+        // Add automatically the certificate (for APIs without token)
+        request.setAttribute("STELA-Certificate", certificate);
+
         JsonNode token = getToken(request);
 
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
@@ -64,7 +67,6 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Profile-Paired-Certificate", pairedCertificate);
             request.setAttribute("STELA-Current-Local-Authority-UUID",
                     token.get("localAuthority").get("uuid").asText());
-            request.setAttribute("STELA-Certificate", certificate);
         }
 
         filterChain.doFilter(request, response);
