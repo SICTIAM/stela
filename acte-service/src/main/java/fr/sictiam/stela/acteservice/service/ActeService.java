@@ -354,6 +354,20 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
+    public List<Acte> getAllFull (Integer limit, Integer offset, String column, String direction,
+                                  String currentLocalAuthUuid) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
+        Root<Acte> acteRoot = query.from(Acte.class);
+
+        String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
+        query.orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
+                        ? builder.asc(acteRoot.get(columnAttribute))
+                        : builder.desc(acteRoot.get(columnAttribute)));
+
+        return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
+    }
+
     public List<Acte> getAllWithQueryNoSearch(Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
         return getAllWithQuery(null, null, null, null, null, null,

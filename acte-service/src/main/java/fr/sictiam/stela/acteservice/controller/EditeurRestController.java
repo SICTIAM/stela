@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import javax.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -60,9 +59,6 @@ public class EditeurRestController {
             @RequestParam(value = "groupUuid", required = false) String groupUuid,
             @RequestParam(value = "email", required = false) String email)
             throws IOException {
-
-        // WIP : for tests
-        certificate = new Certificate("abcd", "moi", null, null, null, null, null, null, null, null, null, null);
 
         LocalAuthority localAuthority;
         if (certificate == null ||
@@ -152,7 +148,7 @@ public class EditeurRestController {
                 (localAuthority = externalRestService.getLocalAuthorityByCertificate(certificate)) == null)
             return new ResponseEntity<>("Authentication failed", HttpStatus.UNAUTHORIZED);
 
-        List<Acte> acteList = acteService.getAllWithQueryNoSearch(limit, offset, column, direction, localAuthority.getUuid());
+        List<Acte> acteList = acteService.getAllFull(limit, offset, column, direction, localAuthority.getUuid());
         return new ResponseEntity<>(acteList, HttpStatus.OK);
     }
 
