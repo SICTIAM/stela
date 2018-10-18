@@ -65,7 +65,7 @@ public class PaullController {
         this.pesRetourService = pesRetourService;
     }
 
-    @JsonPropertyOrder({ "status", "status_message", "data" })
+    @JsonPropertyOrder({"status", "status_message", "data"})
     class PaullResponse {
 
         String status;
@@ -222,6 +222,9 @@ public class PaullController {
 
         ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
                 pesAller.getSesileClasseurId());
+        if (classeur.getStatusCode().isError()) {
+            return new ResponseEntity<Object>(generatePaullResponse(classeur.getStatusCode(), data), classeur.getStatusCode());
+        }
 
         JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
 
