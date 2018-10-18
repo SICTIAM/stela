@@ -6,6 +6,7 @@ import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.PesHistoryError;
 import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.migration.Migration;
@@ -194,59 +195,71 @@ public class MigrationService {
         log(migrationLog, pesMigrations.size() + " PES to migrate", false);
         for (PesMigration pesMigration : pesMigrations) {
 
-            byte[] archiveBytes = null;
-            if (StringUtils.isNotBlank(pesMigration.getArchivePath())) {
-                archiveBytes = downloadFile(sshClient, pesMigration.getArchivePath());
-            }
-            Attachment pesAllerAttachment = getAttachmentFromArchive(pesMigration.getPesAttachment(), archiveBytes,
-                    pesMigration.getPesAttachmentSize(), pesMigration.getCreation());
-            SortedSet<PesHistory> pesHistories = new TreeSet<>();
-
-            PesAller pesAller = new PesAller(
-                    pesMigration.getCreation(),
-                    pesMigration.getObjet(),
-                    pesAllerAttachment,
-                    pesHistories,
-                    localAuthority,
-                    null,
-                    pesMigration.getComment(),
-                    pesMigration.getFile_type(),
-                    pesMigration.getCol_code(),
-                    pesMigration.getPost_id(),
-                    pesMigration.getBud_code(),
-                    pesMigration.getFile_name(),
-                    "PES_PJ".equals(pesMigration.getFile_type()),
-                    "PES_PJ".equals(pesMigration.getFile_type()),
-                    null,
-                    true);
-            pesAller = pesAllerRepository.save(pesAller);
-
-            if (pesMigration.getCreation() != null) {
-                pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.CREATED,
-                        pesMigration.getCreation()));
-            }
-            if (pesMigration.getSendDate() != null) {
-                pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.SENT,
-                        pesMigration.getSendDate()));
-            }
-            if (pesMigration.getDateAR() != null) {
-                byte[] bytesAR = getFileFromTarGz(archiveBytes, pesMigration.getFilenameAR());
-                pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
-                        pesMigration.getDateAR(), bytesAR, pesMigration.getFilenameAR()));
-            }
-            if (pesMigration.getDateANO() != null) {
-                byte[] fileANOBytes = null;
-                if (StringUtils.isNotBlank(pesMigration.getPathFilenameANO())) {
-                    fileANOBytes = downloadFile(sshClient, pesMigration.getPathFilenameANO());
+            try {
+                byte[] archiveBytes = null;
+                if (StringUtils.isNotBlank(pesMigration.getArchivePath())) {
+                    archiveBytes = downloadFile(sshClient, pesMigration.getArchivePath());
                 }
-                pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.NACK_RECEIVED,
-                        pesMigration.getDateANO(), fileANOBytes, pesMigration.getPathFilenameANO(),
-                        pesMigration.getMessageANO()));
+                Attachment pesAllerAttachment = getAttachmentFromArchive(pesMigration.getPesAttachment(), archiveBytes,
+                        pesMigration.getPesAttachmentSize(), pesMigration.getCreation());
+                SortedSet<PesHistory> pesHistories = new TreeSet<>();
+
+                PesAller pesAller = new PesAller(
+                        pesMigration.getCreation(),
+                        pesMigration.getObjet(),
+                        pesAllerAttachment,
+                        pesHistories,
+                        localAuthority,
+                        null,
+                        pesMigration.getComment(),
+                        pesMigration.getFile_type(),
+                        pesMigration.getCol_code(),
+                        pesMigration.getPost_id(),
+                        pesMigration.getBud_code(),
+                        pesMigration.getFile_name(),
+                        "PES_PJ".equals(pesMigration.getFile_type()),
+                        "PES_PJ".equals(pesMigration.getFile_type()),
+                        null,
+                        true);
+                pesAller = pesAllerRepository.save(pesAller);
+
+                if (pesMigration.getCreation() != null) {
+                    pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.CREATED,
+                            pesMigration.getCreation()));
+                }
+                if (pesMigration.getSendDate() != null) {
+                    pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.SENT,
+                            pesMigration.getSendDate()));
+                }
+                if (pesMigration.getDateAR() != null) {
+                    byte[] bytesAR = getFileFromTarGz(archiveBytes, pesMigration.getFilenameAR());
+                    pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
+                            pesMigration.getDateAR(), bytesAR, pesMigration.getFilenameAR()));
+                }
+                if (pesMigration.getDateANO() != null) {
+                    byte[] fileANOBytes = null;
+                    if (StringUtils.isNotBlank(pesMigration.getPathFilenameANO())) {
+                        fileANOBytes = downloadFile(sshClient, pesMigration.getPathFilenameANO());
+                    }
+                    PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.NACK_RECEIVED,
+                            pesMigration.getDateANO(), fileANOBytes, pesMigration.getPathFilenameANO());
+                    pesHistory.addError(new PesHistoryError(null, pesMigration.getMessageANO(), null));
+                    pesAller.getPesHistories().add(pesHistory);
+                }
+
+                // Update lastHistory fields
+                PesHistory lastHistory = pesAller.getPesHistories().last();
+                pesAller.setLastHistoryStatus(lastHistory.getStatus());
+                pesAller.setLastHistoryDate(lastHistory.getDate());
+
+                pesAllerRepository.save(pesAller);
+                LOGGER.info("PES with message_id '{}' successfully migrated", pesMigration.getMessage_id());
+                log(migrationLog, "PES with message_id '" + pesMigration.getMessage_id() + "' successfully migrated", false);
+                i++;
             }
-            pesAllerRepository.save(pesAller);
-            LOGGER.info("PES with message_id '{}' successfully migrated", pesMigration.getMessage_id());
-            log(migrationLog, "PES with message_id '" + pesMigration.getMessage_id() + "' successfully migrated", false);
-            i++;
+            catch (Exception e) {
+                log(migrationLog, "Error during " + pesMigration.getMessage_id() + " migration : " + e.getMessage(), true);
+            }
         }
         log(migrationLog, i + " PES migrated", false);
     }
@@ -494,6 +507,9 @@ public class MigrationService {
 
     private void log(MigrationLog migrationLog, String str, boolean isError) {
         migrationLog.setLogs(migrationLog.getLogs() + "<br/>" + (isError ? "ERROR" : " INFO") + ": " + str);
-        if (!isError) LOGGER.info(str);
+        if (isError)
+            LOGGER.error(str);
+        else
+            LOGGER.info(str);
     }
 }
