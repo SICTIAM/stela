@@ -200,119 +200,123 @@ public class MigrationService {
         log(migrationLog, acteMigrations.size() + " Actes to migrate", false);
         for (ActeMigration acteMigration : acteMigrations) {
 
-            byte[] archiveBytes = null;
-            if (StringUtils.isNotBlank(acteMigration.getArchivePath())) {
-                archiveBytes = downloadFile(sshClient, acteMigration.getArchivePath());
-            } else {
-                log(migrationLog, "ArchivePath is blank", false);
-            }
-            if (archiveBytes == null) LOGGER.warn("ArchiveBytes is null");
-
-            Attachment acteAttachment = getAttachmentFromArchive(acteMigration.getActeAttachment(), archiveBytes, 0);
-
-            String code = String.format("%s-%s-%s-%s-%s",
-                    acteMigration.getCode_matiere1(),
-                    acteMigration.getCode_matiere2(),
-                    acteMigration.getCode_matiere3(),
-                    acteMigration.getCode_matiere4(),
-                    acteMigration.getCode_matiere5()
-            );
-            Acte acte = new Acte(
-                    acteMigration.getNumber(),
-                    acteMigration.getCreation(),
-                    acteMigration.getDecision(),
-                    ActeNature.code(Integer.parseInt(acteMigration.getNature())),
-                    code,
-                    acteMigration.getCode_label(),
-                    acteMigration.getObjet(),
-                    acteMigration.isIs_public(),
-                    acteMigration.isIs_public_website(),
-                    acteAttachment,
-                    new ArrayList<>(),
-                    new TreeSet<>(),
-                    localAuthority,
-                    true
-            );
-            acte = acteRepository.save(acte);
-
-            List<String> annexeFilenames = Arrays.asList(acteMigration.getAnnexes().split(";"));
-            if (annexeFilenames.size() > 0) {
-                for (String annexeFilename : annexeFilenames) {
-                    if (StringUtils.isNotBlank(annexeFilename)) {
-                        acte.getAnnexes().add(getAttachmentFromArchive(annexeFilename, archiveBytes, 0));
-                    }
-                }
-                acte = acteRepository.save(acte);
-            }
-
-            if (acteMigration.getCreation() != null) {
-                acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CREATED,
-                        acteMigration.getCreation(), null, Flux.TRANSMISSION_ACTE));
-            } else {
-                log(migrationLog, "Acte creation date is null", false);
-            }
-            if (acteMigration.getSendDate() != null) {
-                acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.SENT,
-                        acteMigration.getSendDate(), null, Flux.TRANSMISSION_ACTE));
-            } else {
-                log(migrationLog, "Acte send date is null", false);
-            }
-            if (acteMigration.getDateAR() != null) {
-                byte[] archiveARBytes = null;
-                if (StringUtils.isNotBlank(acteMigration.getArchivePathAR())) {
-                    archiveARBytes = downloadFile(sshClient, acteMigration.getArchivePathAR());
+            try {
+                byte[] archiveBytes = null;
+                if (StringUtils.isNotBlank(acteMigration.getArchivePath())) {
+                    archiveBytes = downloadFile(sshClient, acteMigration.getArchivePath());
                 } else {
-                    log(migrationLog, "ArchivePathAR is blank", false);
+                    log(migrationLog, "ArchivePath is blank", false);
+                }
+                if (archiveBytes == null) LOGGER.warn("ArchiveBytes is null");
+
+                Attachment acteAttachment = getAttachmentFromArchive(acteMigration.getActeAttachment(), archiveBytes, 0);
+
+                String code = String.format("%s-%s-%s-%s-%s",
+                        acteMigration.getCode_matiere1(),
+                        acteMigration.getCode_matiere2(),
+                        acteMigration.getCode_matiere3(),
+                        acteMigration.getCode_matiere4(),
+                        acteMigration.getCode_matiere5()
+                );
+                Acte acte = new Acte(
+                        acteMigration.getNumber(),
+                        acteMigration.getCreation(),
+                        acteMigration.getDecision(),
+                        ActeNature.code(Integer.parseInt(acteMigration.getNature())),
+                        code,
+                        acteMigration.getCode_label(),
+                        acteMigration.getObjet(),
+                        acteMigration.isIs_public(),
+                        acteMigration.isIs_public_website(),
+                        acteAttachment,
+                        new ArrayList<>(),
+                        new TreeSet<>(),
+                        localAuthority,
+                        true
+                );
+                acte = acteRepository.save(acte);
+
+                List<String> annexeFilenames = Arrays.asList(acteMigration.getAnnexes().split(";"));
+                if (annexeFilenames.size() > 0) {
+                    for (String annexeFilename : annexeFilenames) {
+                        if (StringUtils.isNotBlank(annexeFilename)) {
+                            acte.getAnnexes().add(getAttachmentFromArchive(annexeFilename, archiveBytes, 0));
+                        }
+                    }
+                    acte = acteRepository.save(acte);
                 }
 
-                byte[] bytesAR = getFileFromTarGz(archiveARBytes, acteMigration.getFilenameAR());
-                if (bytesAR == null) log(migrationLog, "bytesAR is null", false);
-                acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
-                        acteMigration.getDateAR(), bytesAR, acteMigration.getFilenameAR()));
-            } else {
-                log(migrationLog, "Acte AR date is null", false);
-            }
-            if (acteMigration.getDateANO() != null) {
-                byte[] archiveANOBytes = null;
-                if (StringUtils.isNotBlank(acteMigration.getArchivePathANO())) {
-                    archiveANOBytes = downloadFile(sshClient, acteMigration.getArchivePathANO());
+                if (acteMigration.getCreation() != null) {
+                    acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CREATED,
+                            acteMigration.getCreation(), null, Flux.TRANSMISSION_ACTE));
+                } else {
+                    log(migrationLog, "Acte creation date is null", false);
                 }
-                byte[] fileANOBytes = getFileFromTarGz(archiveANOBytes, acteMigration.getFilenameANO());
-                acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED,
-                        acteMigration.getDateANO(), fileANOBytes, acteMigration.getFilenameANO(),
-                        acteMigration.getMessageANO()));
-            }
-            if (acteMigration.getDateASKCANCEL() != null) {
-                byte[] archiveASKCANCELBytes = null;
-                if (StringUtils.isNotBlank(acteMigration.getArchivePathASKCANCEL())) {
-                    archiveASKCANCELBytes = downloadFile(sshClient, acteMigration.getArchivePathASKCANCEL());
+                if (acteMigration.getSendDate() != null) {
+                    acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.SENT,
+                            acteMigration.getSendDate(), null, Flux.TRANSMISSION_ACTE));
+                } else {
+                    log(migrationLog, "Acte send date is null", false);
                 }
-                byte[] fileASKCANCELBytes = getFileFromTarGz(archiveASKCANCELBytes, acteMigration.getFilenameASKCANCEL());
-                acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CANCELLATION_ASKED,
-                        acteMigration.getDateASKCANCEL(), fileASKCANCELBytes, acteMigration.getFilenameASKCANCEL(),
-                        Flux.ANNULATION_TRANSMISSION));
-            }
-            if (acteMigration.getDateARCANCEL() != null) {
-                byte[] archiveARCANCELBytes = null;
-                if (StringUtils.isNotBlank(acteMigration.getArchivePathARCANCEL())) {
-                    archiveARCANCELBytes = downloadFile(sshClient, acteMigration.getArchivePathARCANCEL());
-                }
-                byte[] fileARCANCELBytes = getFileFromTarGz(archiveARCANCELBytes, acteMigration.getFilenameARCANCEL());
-                acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CANCELLED,
-                        acteMigration.getDateARCANCEL(), fileARCANCELBytes, acteMigration.getArchivePathARCANCEL(),
-                        Flux.AR_ANNULATION_TRANSMISSION));
-            }
+                if (acteMigration.getDateAR() != null) {
+                    byte[] archiveARBytes = null;
+                    if (StringUtils.isNotBlank(acteMigration.getArchivePathAR())) {
+                        archiveARBytes = downloadFile(sshClient, acteMigration.getArchivePathAR());
+                    } else {
+                        log(migrationLog, "ArchivePathAR is blank", false);
+                    }
 
-            // Update lastHistory fields
-            ActeHistory lastHistory = acte.getActeHistories().last();
-            acte.setLastHistoryStatus(lastHistory.getStatus());
-            acte.setLastHistoryDate(lastHistory.getDate());
-            acte.setLastHistoryFlux(lastHistory.getFlux());
+                    byte[] bytesAR = getFileFromTarGz(archiveARBytes, acteMigration.getFilenameAR());
+                    if (bytesAR == null) log(migrationLog, "bytesAR is null", false);
+                    acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.ACK_RECEIVED,
+                            acteMigration.getDateAR(), bytesAR, acteMigration.getFilenameAR()));
+                } else {
+                    log(migrationLog, "Acte AR date is null", false);
+                }
+                if (acteMigration.getDateANO() != null) {
+                    byte[] archiveANOBytes = null;
+                    if (StringUtils.isNotBlank(acteMigration.getArchivePathANO())) {
+                        archiveANOBytes = downloadFile(sshClient, acteMigration.getArchivePathANO());
+                    }
+                    byte[] fileANOBytes = getFileFromTarGz(archiveANOBytes, acteMigration.getFilenameANO());
+                    acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED,
+                            acteMigration.getDateANO(), fileANOBytes, acteMigration.getFilenameANO(),
+                            acteMigration.getMessageANO()));
+                }
+                if (acteMigration.getDateASKCANCEL() != null) {
+                    byte[] archiveASKCANCELBytes = null;
+                    if (StringUtils.isNotBlank(acteMigration.getArchivePathASKCANCEL())) {
+                        archiveASKCANCELBytes = downloadFile(sshClient, acteMigration.getArchivePathASKCANCEL());
+                    }
+                    byte[] fileASKCANCELBytes = getFileFromTarGz(archiveASKCANCELBytes, acteMigration.getFilenameASKCANCEL());
+                    acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CANCELLATION_ASKED,
+                            acteMigration.getDateASKCANCEL(), fileASKCANCELBytes, acteMigration.getFilenameASKCANCEL(),
+                            Flux.ANNULATION_TRANSMISSION));
+                }
+                if (acteMigration.getDateARCANCEL() != null) {
+                    byte[] archiveARCANCELBytes = null;
+                    if (StringUtils.isNotBlank(acteMigration.getArchivePathARCANCEL())) {
+                        archiveARCANCELBytes = downloadFile(sshClient, acteMigration.getArchivePathARCANCEL());
+                    }
+                    byte[] fileARCANCELBytes = getFileFromTarGz(archiveARCANCELBytes, acteMigration.getFilenameARCANCEL());
+                    acte.getActeHistories().add(new ActeHistory(acte.getUuid(), StatusType.CANCELLED,
+                            acteMigration.getDateARCANCEL(), fileARCANCELBytes, acteMigration.getArchivePathARCANCEL(),
+                            Flux.AR_ANNULATION_TRANSMISSION));
+                }
 
-            acteRepository.save(acte);
-            LOGGER.info("Acte with form_id '{}' successfully migrated", acteMigration.getForm_id());
-            log(migrationLog, "Acte with form_id '" + acteMigration.getForm_id() + "' successfully migrated", false);
-            i++;
+                // Update lastHistory fields
+                ActeHistory lastHistory = acte.getActeHistories().last();
+                acte.setLastHistoryStatus(lastHistory.getStatus());
+                acte.setLastHistoryDate(lastHistory.getDate());
+                acte.setLastHistoryFlux(lastHistory.getFlux());
+
+                acteRepository.save(acte);
+                LOGGER.info("Acte with form_id '{}' successfully migrated", acteMigration.getForm_id());
+                log(migrationLog, "Acte with form_id '" + acteMigration.getForm_id() + "' successfully migrated", false);
+                i++;
+            } catch (Exception e) {
+                log(migrationLog, "Error during " + acteMigration.getObjet() + "-" + acteMigration.getNumber() + " migration : " + e.getMessage(), true);
+            }
         }
         log(migrationLog, i + " Actes migrated", false);
     }
@@ -573,6 +577,9 @@ public class MigrationService {
 
     private void log(MigrationLog migrationLog, String str, boolean isError) {
         migrationLog.setLogs(migrationLog.getLogs() + "<br/>" + (isError ? "ERROR" : " INFO") + ": " + str);
-        if (!isError) LOGGER.info(str);
+        if (isError)
+            LOGGER.error(str);
+        else
+            LOGGER.info(str);
     }
 }
