@@ -28,7 +28,8 @@ class LocalAuthority extends Component {
             name: '',
             siren: '',
             activatedModules: [],
-            groups: []
+            groups: [],
+            certificates: []
         }
     }
     componentDidMount() {
@@ -91,6 +92,8 @@ class LocalAuthority extends Component {
     render() {
         const { t } = this.context
         const localAuthoritySlug = getLocalAuthoritySlug()
+        const emailCertificateDisplay = email => email ||
+            <span style={{ fontStyle: 'italic' }}>{t('admin.local_authority.no_certificate_email')}</span>
         const moduleList = modules.map(moduleName => {
             const isActivated = this.state.fields.activatedModules.includes(moduleName)
             const isActivatedUrl = this.props.uuid
@@ -189,6 +192,31 @@ class LocalAuthority extends Component {
                     <List divided relaxed verticalAlign='middle'>
                         {groupList}
                     </List>
+                </Segment>
+
+
+                <Segment>
+                    <h2>{t('admin.local_authority.certificates')}</h2>
+                    <div style={{ textAlign: 'right' }}>
+                        <Link className='ui button basic primary' to={`/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/certificats/nouveau`}>
+                            {t('admin.local_authority.new_certificate')}
+                        </Link>
+                    </div>
+                    <StelaTable
+                        data={this.state.fields.certificates}
+                        search={false}
+                        metaData={[
+                            { property: 'uuid', displayed: false },
+                            { property: 'subjectCommonName', displayed: true, displayName: t('certificate.subjectCommonName'), displayComponent: emailCertificateDisplay },
+                            { property: 'subjectEmail', displayed: true, displayName: t('certificate.subjectEmail'), displayComponent: emailCertificateDisplay },
+                            { property: 'issuedDate', displayed: true, displayName: t('certificate.issuedDate') },
+                            { property: 'expiredDate', displayed: true, displayName: t('certificate.expiredDate') },
+                        ]}
+                        header={true}
+                        link={this.props.uuid ? `/${localAuthoritySlug}/admin/collectivite/${this.state.fields.uuid}/certificats/` : `/${localAuthoritySlug}/admin/ma-collectivite/certificats/`}
+                        linkProperty='uuid'
+                        noDataMessage={t('admin.local_authority.no_certificate')}
+                        keyProperty='uuid' />
                 </Segment>
             </Page>
         )

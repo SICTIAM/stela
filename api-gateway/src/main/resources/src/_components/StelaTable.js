@@ -166,7 +166,7 @@ export default class StelaTable extends Component {
         )
 
         return (
-            <div className={this.props.className}>
+            <div className={this.props.className} style={{ marginTop: '0.5em' }}>
                 {search &&
                     <Input className='tableColor' style={this.floatRightStyle} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
                 }

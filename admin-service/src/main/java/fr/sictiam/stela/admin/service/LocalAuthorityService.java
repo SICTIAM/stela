@@ -1,6 +1,10 @@
 package fr.sictiam.stela.admin.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europa.esig.dss.validation.policy.rules.Indication;
+import eu.europa.esig.dss.validation.reports.CertificateReports;
+import fr.sictiam.signature.utils.CertUtils;
+import fr.sictiam.stela.admin.dao.CertificateRepository;
 import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
@@ -9,6 +13,12 @@ import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import fr.sictiam.stela.admin.service.util.OffsetBasedPageRequest;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -19,13 +29,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +53,7 @@ import java.util.Optional;
 public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
+    private final CertificateRepository certificateRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
@@ -49,8 +69,10 @@ public class LocalAuthorityService {
     @Value("${application.amqp.admin.exchange}")
     private String exchange;
 
-    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
+    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
+            CertificateRepository certificateRepository) {
         this.localAuthorityRepository = localAuthorityRepository;
+        this.certificateRepository = certificateRepository;
     }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
@@ -123,6 +145,74 @@ public class LocalAuthorityService {
 
     public Optional<LocalAuthority> getByInstanceId(String instanceId) {
         return localAuthorityRepository.findByOzwilloInstanceInfo_InstanceId(instanceId);
+    }
+
+    public Certificate getCertificate(String uuid) {
+        return certificateRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_certificate_not_found"));
+    }
+
+    public void addCertificate(String uuid, MultipartFile file) throws IOException, IllegalArgumentException {
+        CertificateReports report = CertUtils.validateCertificate(file.getBytes());
+        Indication indication = CertUtils.getCertificateValidationResult(report);
+        LOGGER.info("DSS validation response : {}", indication);
+        if (Indication.TOTAL_PASSED.equals(indication) || Indication.PASSED.equals(indication)) {
+            Certificate certificate = buildCertificate(file);
+            certificate = certificateRepository.save(certificate);
+            LocalAuthority localAuthority = getByUuid(uuid);
+            localAuthority.getCertificates().add(certificate);
+            localAuthorityRepository.save(localAuthority);
+        } else throw new IllegalArgumentException();
+    }
+
+    private Certificate buildCertificate(MultipartFile file) {
+        try {
+            X509Certificate cert = CertUtils.getCertificateFromBytes(file.getBytes());
+            return new Certificate(
+                    cert.getSerialNumber().toString(),
+                    cert.getIssuerDN().getName(),
+                    getSubjectSpecificCertInfo(cert, BCStyle.CN),
+                    getSubjectSpecificCertInfo(cert, BCStyle.O),
+                    getSubjectSpecificCertInfo(cert, BCStyle.OU),
+                    getSubjectSpecificCertInfo(cert, BCStyle.E),
+                    getIssuerSpecificCertInfo(cert, BCStyle.CN),
+                    getIssuerSpecificCertInfo(cert, BCStyle.O),
+                    getSubjectSpecificCertInfo(cert, BCStyle.E),
+                    cert.getNotBefore().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                    cert.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            );
+        } catch (CertificateException e) {
+            LOGGER.error("Error while trying to retrieve certificate infos: {}", e.getMessage());
+        } catch (IOException e) {
+            LOGGER.error("Error while trying to read bytes from certificate file: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private String getSubjectSpecificCertInfo(X509Certificate cert, ASN1ObjectIdentifier bcStyle)
+            throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+        return getSpecificInfo(x500name, bcStyle);
+    }
+
+    private String getIssuerSpecificCertInfo(X509Certificate cert, ASN1ObjectIdentifier bcStyle)
+            throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(cert).getIssuer();
+        return getSpecificInfo(x500name, bcStyle);
+    }
+
+    private String getSpecificInfo(X500Name x500name, ASN1ObjectIdentifier bcStyle) {
+        RDN[] rdn = x500name.getRDNs(ASN1ObjectIdentifier.getInstance(bcStyle));
+        if (rdn.length == 0) return null;
+        return IETFUtils.valueToString(rdn[0].getFirst().getValue());
+    }
+
+    public void deleteCertificate(String uuid, String certificateUuid) {
+        LocalAuthority localAuthority = getByUuid(uuid);
+        Certificate certificate = certificateRepository.findByUuid(certificateUuid).get();
+        localAuthority.getCertificates().remove(certificate);
+        localAuthorityRepository.save(localAuthority);
+        certificateRepository.delete(certificate);
     }
 
     public Optional<LocalAuthority> getByCertificate(String serial, String issuer) {

@@ -1,6 +1,7 @@
 package fr.sictiam.stela.admin.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
@@ -20,7 +21,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -254,6 +257,70 @@ public class LocalAuthorityController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @GetMapping("/certificates/{uuid}")
+    public ResponseEntity<Certificate> getLocalAuthorityCertificate(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(localAuthorityService.getCertificate(uuid), HttpStatus.OK);
+    }
+
+    @PostMapping("/current/certificates")
+    public ResponseEntity addCurrentLocalAuthorityCertificate(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        LOGGER.debug("addCurrentLocalAuthorityCertificate");
+        LOGGER.debug(file.getOriginalFilename());
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        localAuthorityService.addCertificate(currentLocalAuthUuid, file);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/certificates")
+    public ResponseEntity addLocalAuthorityCertificate(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            localAuthorityService.addCertificate(uuid, file);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("certificate error", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return new ResponseEntity<>("certificate error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/current/certificates/{uuid}")
+    public ResponseEntity deleteCurrentLocalAuthorityCertificate(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        localAuthorityService.deleteCertificate(currentLocalAuthUuid, uuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{localAuthorityUuid}/certificates/{uuid}")
+    public ResponseEntity deleteLocalAuthorityCertificate(
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @PathVariable String localAuthorityUuid, @PathVariable String uuid) {
+        if (!isLocalAuthorityAdmin) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        localAuthorityService.deleteCertificate(localAuthorityUuid, uuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @PostMapping("/{uuid}/{module}")
     public ResponseEntity addModuleByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
@@ -277,11 +344,11 @@ public class LocalAuthorityController {
     }
 
     @GetMapping("/certificate/{serial}/{issuer}")
-    public ResponseEntity<LocalAuthority> getByCertificate (
+    public ResponseEntity<LocalAuthority> getByCertificate(
             @PathVariable String serial,
             @PathVariable String issuer) {
         Optional<LocalAuthority> opt = localAuthorityService.getByCertificate(serial, issuer);
-        return opt.isPresent() ?  new ResponseEntity<>(opt.get(), HttpStatus.OK) :
+        return opt.isPresent() ? new ResponseEntity<>(opt.get(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

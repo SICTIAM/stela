@@ -47,7 +47,7 @@ public class LocalAuthority {
     private Set<Profile> profiles;
 
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "local_authority_certificate", inverseJoinColumns = { @JoinColumn(name = "certificate_uuid") })
+    @JoinTable(name = "local_authority_certificate", inverseJoinColumns = {@JoinColumn(name = "certificate_uuid")})
     @JsonView(Views.LocalAuthorityViewPrivate.class)
     private Set<Certificate> certificates;
 
