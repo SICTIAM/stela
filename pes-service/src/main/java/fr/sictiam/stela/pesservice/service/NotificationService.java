@@ -25,8 +25,11 @@ import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -95,7 +98,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
                         Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
+                        ctx.setVariable("pes", pes);
                         ctx.setVariable("baseUrl", applicationUrl);
+                        ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
                         String msg = template.process("mails/copy_" + event.getPesHistory().getStatus().name() + "_fr", ctx);
                         sendMail(getAgentMail(profile),
                                 localesService.getMessage("fr", "pes_notification",
