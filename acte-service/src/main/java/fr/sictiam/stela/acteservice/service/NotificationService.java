@@ -25,7 +25,11 @@ import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -94,7 +98,9 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
                         Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
+                        ctx.setVariable("acte", acte);
                         ctx.setVariable("baseUrl", applicationUrl);
+                        ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
                         String msg = template.process("mails/copy_" + event.getActeHistory().getStatus().name() + "_fr", ctx);
                         sendMail(getAgentMail(profile),
                                 localesService.getMessage("fr", "acte_notification",
@@ -155,7 +161,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     public void sendMail(String mail, String subject, String text) throws MessagingException, IOException {
 
-        String[] mails = { mail };
+        String[] mails = {mail};
         sendMail(mails, subject, text);
     }
 

@@ -6,7 +6,7 @@
     <body>
         <div>
             Bonjour <span th:text="${firstname}" /> <span th:text="${lastname}" />,<br/>
-            Votre pes a bien été reçu par la préfecture.
+            Votre PES <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/pes/' + ${pes.uuid}}" th:text="${pes.objet}"></a> a bien été reçu par la préfecture.
             <br/><br/>
         </div>
 
