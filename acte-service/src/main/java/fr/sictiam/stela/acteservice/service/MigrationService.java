@@ -209,7 +209,6 @@ public class MigrationService {
             if (archiveBytes == null) LOGGER.warn("ArchiveBytes is null");
 
             Attachment acteAttachment = getAttachmentFromArchive(acteMigration.getActeAttachment(), archiveBytes, 0);
-            SortedSet<ActeHistory> acteHistories = new TreeSet<>();
 
             String code = String.format("%s-%s-%s-%s-%s",
                     acteMigration.getCode_matiere1(),
@@ -230,7 +229,7 @@ public class MigrationService {
                     acteMigration.isIs_public_website(),
                     acteAttachment,
                     new ArrayList<>(),
-                    acteHistories,
+                    new TreeSet<>(),
                     localAuthority,
                     true
             );
@@ -303,6 +302,13 @@ public class MigrationService {
                         acteMigration.getDateARCANCEL(), fileARCANCELBytes, acteMigration.getArchivePathARCANCEL(),
                         Flux.AR_ANNULATION_TRANSMISSION));
             }
+
+            // Update lastHistory fields
+            ActeHistory lastHistory = acte.getActeHistories().last();
+            acte.setLastHistoryStatus(lastHistory.getStatus());
+            acte.setLastHistoryDate(lastHistory.getDate());
+            acte.setLastHistoryFlux(lastHistory.getFlux());
+
             acteRepository.save(acte);
             LOGGER.info("Acte with form_id '{}' successfully migrated", acteMigration.getForm_id());
             log(migrationLog, "Acte with form_id '" + acteMigration.getForm_id() + "' successfully migrated", false);

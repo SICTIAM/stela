@@ -6,6 +6,7 @@ import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.PesHistoryError;
 import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.migration.Migration;
@@ -239,10 +240,17 @@ public class MigrationService {
                 if (StringUtils.isNotBlank(pesMigration.getPathFilenameANO())) {
                     fileANOBytes = downloadFile(sshClient, pesMigration.getPathFilenameANO());
                 }
-                pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.NACK_RECEIVED,
-                        pesMigration.getDateANO(), fileANOBytes, pesMigration.getPathFilenameANO(),
-                        pesMigration.getMessageANO()));
+                PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.NACK_RECEIVED,
+                        pesMigration.getDateANO(), fileANOBytes, pesMigration.getPathFilenameANO());
+                pesHistory.addError(new PesHistoryError(null, pesMigration.getMessageANO(), null));
+                pesAller.getPesHistories().add(pesHistory);
             }
+
+            // Update lastHistory fields
+            PesHistory lastHistory = pesAller.getPesHistories().last();
+            pesAller.setLastHistoryStatus(lastHistory.getStatus());
+            pesAller.setLastHistoryDate(lastHistory.getDate());
+
             pesAllerRepository.save(pesAller);
             LOGGER.info("PES with message_id '{}' successfully migrated", pesMigration.getMessage_id());
             log(migrationLog, "PES with message_id '" + pesMigration.getMessage_id() + "' successfully migrated", false);
