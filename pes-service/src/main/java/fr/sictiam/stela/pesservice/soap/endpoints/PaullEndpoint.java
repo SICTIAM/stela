@@ -93,7 +93,8 @@ public class PaullEndpoint {
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "depotPESAllerRequest")
-    public @ResponsePayload DepotPESAllerResponse depotPESAller(@RequestPayload DepotPESAllerRequest depotPesAller)
+    public @ResponsePayload
+    DepotPESAllerResponse depotPESAller(@RequestPayload DepotPESAllerRequest depotPesAller)
             throws IOException, Base64DecodingException {
         PaullSoapToken paullSoapToken = getToken(depotPesAller.getSessionId());
 
@@ -182,7 +183,8 @@ public class PaullEndpoint {
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getDetailsPESAllerRequest")
-    public @ResponsePayload GetDetailsPESAllerResponse getDetailsPESAller(
+    public @ResponsePayload
+    GetDetailsPESAllerResponse getDetailsPESAller(
             @RequestPayload GetDetailsPESAllerRequest getDetailsPESAllerRequest) throws IOException {
 
         PaullSoapToken paullSoapToken = getToken(getDetailsPESAllerRequest.getSessionId());
@@ -206,34 +208,39 @@ public class PaullEndpoint {
                 ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
                         pesAller.getSesileClasseurId());
 
-                JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                if (classeur.getStatusCode().isError()) {
+                    status = "NOK";
+                    returnMessage = classeur.getStatusCode() + ": " + classeur.getStatusCode().getReasonPhrase();
+                } else {
+                    JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-                detailsPESAllerStruct.setPESPJ(pesAller.isPj() ? "1" : "0");
-                detailsPESAllerStruct.setObjet(pesAller.getObjet());
-                detailsPESAllerStruct.setNomClasseur(classeur.getBody().getNom());
-                detailsPESAllerStruct.setUserName(node.get("email").asText());
-                detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
-                detailsPESAllerStruct.setDateDepot(dateFormatter.format(pesAller.getCreation()));
+                    detailsPESAllerStruct.setPESPJ(pesAller.isPj() ? "1" : "0");
+                    detailsPESAllerStruct.setObjet(pesAller.getObjet());
+                    detailsPESAllerStruct.setNomClasseur(classeur.getBody().getNom());
+                    detailsPESAllerStruct.setUserName(node.get("email").asText());
+                    detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
+                    detailsPESAllerStruct.setDateDepot(dateFormatter.format(pesAller.getCreation()));
 
-                List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
-                        getDetailsPESAllerRequest.getIdPesAller(),
-                        Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
+                    List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
+                            getDetailsPESAllerRequest.getIdPesAller(),
+                            Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
 
-                Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
+                    Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
 
-                if (peshistory.isPresent()) {
-                    if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
-                        detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
-                    } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
-                        detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
-                        detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
+                    if (peshistory.isPresent()) {
+                        if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
+                            detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
+                        } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
+                            detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
+                            detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
+                        }
                     }
-                }
 
-                detailsPESAllerStruct.setEtatclasseur(classeur.getBody().getStatus().ordinal() + "");
-                returnMessage = "SUCCESS";
-                status = "OK";
+                    detailsPESAllerStruct.setEtatclasseur(classeur.getBody().getStatus().ordinal() + "");
+                    returnMessage = "SUCCESS";
+                    status = "OK";
+                }
 
             } else {
                 returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
@@ -247,7 +254,8 @@ public class PaullEndpoint {
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getPESAllerRequest")
-    public @ResponsePayload GetPESAllerResponse getPESAller(@RequestPayload GetPESAllerRequest getPESAllerRequest)
+    public @ResponsePayload
+    GetPESAllerResponse getPESAller(@RequestPayload GetPESAllerRequest getPESAllerRequest)
             throws IOException {
 
         PaullSoapToken paullSoapToken = getToken(getPESAllerRequest.getSessionId());
@@ -284,7 +292,8 @@ public class PaullEndpoint {
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getPESRetourRequest")
-    public @ResponsePayload GetPESRetourResponse getPESRetour(@RequestPayload GetPESRetourRequest getPESRetourRequest)
+    public @ResponsePayload
+    GetPESRetourResponse getPESRetour(@RequestPayload GetPESRetourRequest getPESRetourRequest)
             throws IOException {
 
         PaullSoapToken paullSoapToken = getToken(getPESRetourRequest.getSessionId());
