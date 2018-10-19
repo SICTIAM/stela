@@ -128,8 +128,8 @@ public class Acte {
 
     public Acte(String number, LocalDateTime creation, LocalDate decision, ActeNature nature, String code,
             String codeLabel, String objet, boolean isPublic, boolean isPublicWebsite, Attachment acteAttachment,
-            List<Attachment> annexes, SortedSet<ActeHistory> acteHistories, LocalAuthority localAuthority,
-            boolean imported) {
+            List<Attachment> annexes, SortedSet<ActeHistory> acteHistories, LocalAuthority localAuthority, String groupUuid,
+            String profileUuid, boolean imported) {
         this.number = number;
         this.creation = creation;
         this.decision = decision;
@@ -143,6 +143,8 @@ public class Acte {
         this.annexes = annexes;
         this.acteHistories = acteHistories;
         this.localAuthority = localAuthority;
+        this.groupUuid = groupUuid;
+        this.profileUuid = profileUuid;
         this.imported = imported;
     }
 
