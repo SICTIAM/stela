@@ -136,7 +136,7 @@ public class MigrationService {
                     .replaceAll("\\{\\{groupIds}}", " AND gul2.groupid = " + groupId);
             ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
             List<UserMigration> userMigrations = toUsersMigration(resultSet, migrationLog);
-            MigrationWrapper migrationWrapper = new MigrationWrapper(userMigrations, "acte",
+            MigrationWrapper migrationWrapper = new MigrationWrapper(userMigrations, "pes",
                     new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())));
 
             RestTemplate restTemplate = new RestTemplate();
