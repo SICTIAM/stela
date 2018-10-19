@@ -36,6 +36,13 @@ public class Attachment {
         this.size = size;
     }
 
+    public Attachment(byte[] file, String filename, long size, String attachmentTypeCode) {
+        this.file = file;
+        this.filename = filename;
+        this.size = size;
+        this.attachmentTypeCode = attachmentTypeCode;
+    }
+
     public String getUuid() {
         return uuid;
     }

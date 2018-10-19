@@ -105,18 +105,6 @@
             "title": "Informations du certificat",
             "pair": "Appairer le certificat",
             "paired": "Certificat appairé",
-            "serial": "Numéro de série",
-            "issuer": "Émetteur",
-            "subject": "Propriétaire",
-            "subjectCommonName": "Nom",
-            "subjectOrganization": "Organisation",
-            "subjectOrganizationUnit": "Unité d'organisation",
-            "subjectEmail": "Email",
-            "issuerCommonName": "Nom",
-            "issuerOrganization": "Organisation",
-            "issuerEmail": "Email",
-            "issuedDate": "Émis le",
-            "expiredDate": "Expire le",
             "status": "Statut"
         },
         "no_certificate": "Aucun certificat",
@@ -203,6 +191,9 @@
         "admin": {
             "title": "Administration",
             "local_authority_not_found": "Collectivité non trouvée",
+            "local_authority_certificate_not_found": "Certificat de collectivité non trouvé",
+            "error_certificate": "Erreur lors de l'ajout du certificat",
+            "invalid_certificate": "Le certificat est invalide",
             "generic_account": {
                 "created": "Compte générique créé",
                 "updated": "Compte générique mis à jour",
@@ -214,7 +205,9 @@
             "group_created": "Le groupe a bien été créé",
             "group_updated": "Le groupe a bien été mis à jour",
             "group_deleted": "Le groupe a bien été supprimé",
-            "agent_profile_updated": "Les droits de l'agent ont bien été mis à jour"
+            "agent_profile_updated": "Les droits de l'agent ont bien été mis à jour",
+            "certificateCreated": "Le certificat a bien été ajouté",
+            "certificateDeleted": "Le certificat a bien été supprimé"
         },
         "profile": {
             "title": "Profil",
@@ -244,6 +237,20 @@
         "pastellEntity": "Entité Pastell",
         "pastellLogin": "Login Pastell",
         "pastellPassword": "Mot de passe Pastell"
+    },
+    "certificate": {
+        "serial": "Numéro de série",
+        "issuer": "Émetteur",
+        "subject": "Propriétaire",
+        "subjectCommonName": "Nom",
+        "subjectOrganization": "Organisation",
+        "subjectOrganizationUnit": "Unité d'organisation",
+        "subjectEmail": "Email",
+        "issuerCommonName": "Nom",
+        "issuerOrganization": "Organisation",
+        "issuerEmail": "Email",
+        "issuedDate": "Émis le",
+        "expiredDate": "Expire le"
     },
     "agent": {
         "family_name": "Nom",
@@ -297,7 +304,13 @@
                 "activation": "Voulez-vous vraiment activer le module {{moduleName}} pour cette collectivité ?",
                 "deactivation": "Voulez-vous vraiment désactiver le module {{moduleName}} pour cette collectivité ?"
             },
-            "new_group": "Ajouter un groupe"
+            "new_group": "Ajouter un groupe",
+            "certificates": "Certificats de la collectivité",
+            "certificate": "Certificat",
+            "new_certificate": "Ajouter un certificat",
+            "no_certificate": "Aucun certificat pour cette collectivité",
+            "no_certificate_email": "Aucun email",
+            "drop_new_certificate": "Déposer le nouveau certificat"
         },
         "modules": {
             "title": "Module",

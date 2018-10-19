@@ -159,6 +159,18 @@ const notifications = {
             message: 'notifications.admin.agent_profile_updated',
             level: 'success',
             position: 'br'
+        },
+        certificateCreated: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.certificateCreated',
+            level: 'success',
+            position: 'br'
+        },
+        certificateDeleted: {
+            title: 'notifications.admin.title',
+            message: 'notifications.admin.certificateDeleted',
+            level: 'success',
+            position: 'br'
         }
     },
     profile: {

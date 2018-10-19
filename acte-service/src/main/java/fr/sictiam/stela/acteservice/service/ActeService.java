@@ -19,7 +19,6 @@ import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
@@ -57,9 +56,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -78,6 +81,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -115,7 +120,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
             AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
             LocalAuthorityService localAuthorityService, ArchiveService archiveService,
-            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService, ExternalRestService externalRestService, ActeExportRepository acteExportRepository) {
+            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService,
+            ExternalRestService externalRestService, ActeExportRepository acteExportRepository) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -129,24 +135,34 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         this.acteExportRepository = acteExportRepository;
     }
 
-    public Acte create(LocalAuthority currentLocalAuthority, Acte acte, MultipartFile file, MultipartFile... annexes)
-            throws ActeNotSentException, IOException {
-        acte.setActeAttachment(new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize()));
-        List<Attachment> transformedAnnexes = new ArrayList<>();
+    public Acte create(String number, String objet, ActeNature nature, String code, LocalDate decision,
+            Boolean isPublic, Boolean isPublicWebsite, String groupUuid, MultipartFile file, String fileType,
+            MultipartFile[] annexes, String[] annexeTypes, String email, LocalAuthority localAuthority)
+            throws IOException {
+        Attachment acteFile = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize(), fileType);
+        List<Attachment> annexeFiles = new ArrayList<>();
         for (MultipartFile annexe : annexes) {
-            transformedAnnexes.add(new Attachment(annexe.getBytes(), annexe.getOriginalFilename(), annexe.getSize()));
+            annexeFiles.add(new Attachment(annexe.getBytes(), annexe.getOriginalFilename(), annexe.getSize(),
+                    getCodeForAnnexeFilename(annexeTypes, annexe.getOriginalFilename())));
         }
-        acte.setAnnexes(transformedAnnexes);
-        acte.setCreation(LocalDateTime.now());
-        acte.setLocalAuthority(currentLocalAuthority);
-        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
+        JsonNode node = externalRestService.getProfileForEmail(localAuthority.getSiren(), email);
+        String profileUuid = node != null ? node.get("uuid").asText() : localAuthority.getGenericProfileUuid();
 
-        if (!currentLocalAuthority.getCanPublishWebSite())
-            acte.setPublicWebsite(false);
-        if (!currentLocalAuthority.getCanPublishRegistre())
-            acte.setPublic(false);
-
+        Acte acte = new Acte(number, objet, nature, code, LocalDateTime.now(), decision, isPublic, isPublicWebsite,
+                groupUuid, acteFile, annexeFiles, profileUuid, localAuthority);
         return publishActe(acte);
+    }
+
+    private String getCodeForAnnexeFilename(String[] annexeTypes, String filename) {
+        for (String annexeType : annexeTypes) {
+            Matcher m = Pattern.compile("(.*):(.*)").matcher(annexeType); // [filename]:[code_type]
+            if (m.find() && m.groupCount() > 1 && filename.equals(m.group(1))) return m.group(2);
+        }
+        return "CO_DE";
+    }
+
+    public JsonNode getGroups(String localAuthorityUuid) throws IOException {
+        return externalRestService.getGroupsForLocalAuthority(localAuthorityUuid);
     }
 
     public Acte publishActe(Acte acte) {
@@ -332,6 +348,26 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         : builder.desc(acteRoot.get(columnAttribute)));
 
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
+    }
+
+    public List<Acte> getAllFull(Integer limit, Integer offset, String column, String direction,
+            String currentLocalAuthUuid) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
+        Root<Acte> acteRoot = query.from(Acte.class);
+
+        String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
+        query.orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
+                ? builder.asc(acteRoot.get(columnAttribute))
+                : builder.desc(acteRoot.get(columnAttribute)));
+
+        return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
+    }
+
+    public List<Acte> getAllWithQueryNoSearch(Integer limit, Integer offset, String column, String direction,
+            String currentLocalAuthUuid) {
+        return getAllWithQuery(null, null, null, null, null, null,
+                null, limit, offset, column, direction, currentLocalAuthUuid, Collections.emptySet());
     }
 
     public List<Acte> getAllWithQuery(String multifield, String number, String objet, ActeNature nature,
@@ -701,7 +737,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                         put("number", acte.getNumber());
                         put("decision", acte.getDecision().toString());
                         put("nature", acte.getNature().toString());
-                        put("code", acte.getCode() + " (" + acte.getCodeLabel() + ")");
+                        put("code", acte.getCode() +
+                                (StringUtils.isNotBlank(acte.getCodeLabel()) ? " (" + acte.getCodeLabel() + ")" : ""));
                         put("objet", acte.getObjet());
                         put("acteAttachment", acte.getActeAttachment().getFilename());
                     }
@@ -882,6 +919,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public Stream<ActeHistory> streamActeHistoriesByStatus(Acte acte, StatusType statusType) {
         return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()));
+    }
+
+    public boolean numberExist(String number, String localAuthorityUuid) {
+        return !acteRepository.findByNumberAndLocalAuthorityUuid(number, localAuthorityUuid).isEmpty();
     }
 
     @Override

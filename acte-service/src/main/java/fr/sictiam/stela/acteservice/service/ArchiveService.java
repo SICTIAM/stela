@@ -3,7 +3,7 @@ package fr.sictiam.stela.acteservice.service;
 import eu.europa.esig.dss.validation.policy.rules.Indication;
 import eu.europa.esig.dss.validation.reports.DetailedReport;
 import fr.sictiam.signature.utils.PadesUtils;
-import fr.sictiam.signature.utils.PdfSignatureResult;
+import fr.sictiam.signature.utils.SignatureResult;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.dao.EnveloppeCounterRepository;
@@ -140,8 +140,8 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         if (FilenameUtils.isExtension(attachment.getFilename(), "pdf")) {
             DetailedReport report = PadesUtils.validatePAdESSignature(attachment.getFile());
             if (PadesUtils.isSigned(report)) {
-                List<PdfSignatureResult> pdfSignatureResults = PadesUtils.getSignatureResults(report);
-                pdfSignatureResults.forEach(signatureResult -> {
+                List<SignatureResult> signatureResults = PadesUtils.getSignatureResults(report);
+                signatureResults.forEach(signatureResult -> {
                     if (!(Indication.TOTAL_PASSED.equals(signatureResult.getStatus())
                             || Indication.PASSED.equals(signatureResult.getStatus()))) {
                         LOGGER.info("DSS validation response : {}", signatureResult.getReason());

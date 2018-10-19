@@ -2,7 +2,8 @@ package fr.sictiam.stela.admin.model.UI;
 
 public class Views {
     public interface LocalAuthorityView extends LocalAuthorityViewPrivate, LocalAuthorityViewPublic,
-            WorkGroupViewPublic, WorkGroupViewChain, ProfileViewPublic, ProfileViewChain, AgentViewPublic {
+            WorkGroupViewPublic, WorkGroupViewChain, ProfileViewPublic, ProfileViewChain, AgentViewPublic,
+            CertificateViewPublic {
 
     }
 
