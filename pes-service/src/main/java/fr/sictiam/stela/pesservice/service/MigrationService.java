@@ -210,7 +210,7 @@ public class MigrationService {
                         pesAllerAttachment,
                         pesHistories,
                         localAuthority,
-                        null,
+                        localAuthority.getGenericProfileUuid(),
                         pesMigration.getComment(),
                         pesMigration.getFile_type(),
                         pesMigration.getCol_code(),

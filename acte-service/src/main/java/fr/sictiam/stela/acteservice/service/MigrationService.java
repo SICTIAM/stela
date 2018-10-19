@@ -161,7 +161,7 @@ public class MigrationService {
         processEmail(email, localAuthority.getName(), migrationLog);
     }
 
-    public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String profileUuid, String email, String month) {
+    public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String email, String month) {
 
         // siren 214400152
         MigrationLog migrationLog = new MigrationLog();
@@ -185,7 +185,7 @@ public class MigrationService {
                 .replaceAll("\\{\\{month}}", (StringUtils.isNotBlank(month) && Integer.parseInt(month) > 0) ? month : "1");
         ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
         List<ActeMigration> acteMigrations = toActesMigration(resultSet, migrationLog);
-        importActesMigrations(acteMigrations, localAuthority, profileUuid, sshClient, migrationLog);
+        importActesMigrations(acteMigrations, localAuthority, sshClient, migrationLog);
         closeShellConnexion(sshClient, migrationLog);
 
         localAuthority.getMigration().setMigrationData(MigrationStatus.DONE);
@@ -195,7 +195,7 @@ public class MigrationService {
     }
 
     private void importActesMigrations(List<ActeMigration> acteMigrations, LocalAuthority localAuthority,
-            String profileUuid, SSHClient sshClient, MigrationLog migrationLog) {
+            SSHClient sshClient, MigrationLog migrationLog) {
         int i = 0;
         log(migrationLog, acteMigrations.size() + " Actes to migrate", false);
 
@@ -243,7 +243,7 @@ public class MigrationService {
                         new TreeSet<>(),
                         localAuthority,
                         groupUuid,
-                        profileUuid,
+                        localAuthority.getGenericProfileUuid(),
                         true
                 );
                 acte = acteRepository.save(acte);
