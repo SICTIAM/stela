@@ -128,10 +128,6 @@ public class AgentService {
 
     public void migrateUsers(MigrationWrapper migrationWrapper, String uuid) {
         LOGGER.info("Receiving user to register for a migration...");
-        WorkGroup workGroup = new WorkGroup(localAuthorityService.getByUuid(uuid),
-                migrationWrapper.getModuleName() + "-migration");
-        workGroup.setRights(migrationWrapper.getRights());
-        workGroup = workGroupService.create(workGroup);
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
 
         for (UserMigration userMigration : migrationWrapper.getUserMigrations()) {
@@ -157,12 +153,6 @@ public class AgentService {
                 agent.getProfiles().add(profile);
             }
             agentRepository.save(agent);
-            profile = profileRepository.save(profile);
-
-            // FIXME: profiles are not realy added to the group
-            workGroup.getProfiles().add(profile);
-            workGroup = workGroupService.update(workGroup);
-            profile.getGroups().add(workGroup);
             profile = profileRepository.save(profile);
 
             localAuthority.getProfiles().add(profile);

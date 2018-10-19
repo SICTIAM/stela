@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/admin/local-authority")
@@ -195,13 +196,20 @@ public class LocalAuthorityController {
 
     @PostMapping("/{uuid}/group")
     @JsonView(Views.WorkGroupView.class)
-    public ResponseEntity<WorkGroup> newGroupByUuid(
+    public ResponseEntity<WorkGroup> newGroupFromFront(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @PathVariable String uuid, @RequestBody WorkGroupUI workGroupUI) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(workGroupService.createFromUI(workGroupUI, uuid), HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/group/{name}")
+    @JsonView(Views.WorkGroupView.class)
+    public ResponseEntity<String> newGroupFromModules(
+            @PathVariable String uuid, @PathVariable String name, @RequestBody Set<String> rights) {
+        return new ResponseEntity<>(workGroupService.createFromModules(name, rights, uuid).getUuid(), HttpStatus.OK);
     }
 
     @PostMapping("/current/group")

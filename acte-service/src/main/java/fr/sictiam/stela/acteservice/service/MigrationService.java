@@ -161,7 +161,7 @@ public class MigrationService {
         processEmail(email, localAuthority.getName(), migrationLog);
     }
 
-    public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String email, String month) {
+    public void migrateStela2Actes(LocalAuthority localAuthority, String siren, String profileUuid, String email, String month) {
 
         // siren 214400152
         MigrationLog migrationLog = new MigrationLog();
@@ -185,7 +185,7 @@ public class MigrationService {
                 .replaceAll("\\{\\{month}}", (StringUtils.isNotBlank(month) && Integer.parseInt(month) > 0) ? month : "1");
         ResultSet resultSet = executeMySQLQuery(proccessedQuery, migrationLog);
         List<ActeMigration> acteMigrations = toActesMigration(resultSet, migrationLog);
-        importActesMigrations(acteMigrations, localAuthority, sshClient, migrationLog);
+        importActesMigrations(acteMigrations, localAuthority, profileUuid, sshClient, migrationLog);
         closeShellConnexion(sshClient, migrationLog);
 
         localAuthority.getMigration().setMigrationData(MigrationStatus.DONE);
@@ -195,9 +195,19 @@ public class MigrationService {
     }
 
     private void importActesMigrations(List<ActeMigration> acteMigrations, LocalAuthority localAuthority,
-            SSHClient sshClient, MigrationLog migrationLog) {
+            String profileUuid, SSHClient sshClient, MigrationLog migrationLog) {
         int i = 0;
         log(migrationLog, acteMigrations.size() + " Actes to migrate", false);
+
+        // Create group in admin service
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/group/{name}",
+                new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
+                String.class,
+                localAuthority.getUuid(), "acte-migration");
+        String groupUuid = response.getBody();
+
         for (ActeMigration acteMigration : acteMigrations) {
 
             try {
@@ -232,6 +242,8 @@ public class MigrationService {
                         new ArrayList<>(),
                         new TreeSet<>(),
                         localAuthority,
+                        groupUuid,
+                        profileUuid,
                         true
                 );
                 acte = acteRepository.save(acte);

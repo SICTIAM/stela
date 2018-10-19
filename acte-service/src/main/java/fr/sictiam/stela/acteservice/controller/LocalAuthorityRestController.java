@@ -140,25 +140,27 @@ public class LocalAuthorityRestController {
     public ResponseEntity migrationFromCurrent(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid,
             @PathVariable String migrationType,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren,
             @RequestParam(value = "month", required = false) String month) {
-        return migration(migrationType, isLocalAuthorityAdmin, currentLocalAuthUuid, email, siren, month);
+        return migration(migrationType, isLocalAuthorityAdmin, currentLocalAuthUuid, profileUuid, email, siren, month);
     }
 
     @PostMapping("/{uuid}/migration/{migrationType}")
     public ResponseEntity migrationByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid,
             @PathVariable String uuid, @PathVariable String migrationType,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren,
             @RequestParam(value = "month", required = false) String month) {
-        return migration(migrationType, isLocalAuthorityAdmin, uuid, email, siren, month);
+        return migration(migrationType, isLocalAuthorityAdmin, uuid, profileUuid, email, siren, month);
     }
 
     private ResponseEntity migration(String migrationType, boolean isLocalAuthorityAdmin, String localAuthUuid,
-            String email, String siren, String month) {
+            String profileUuid, String email, String siren, String month) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -173,7 +175,7 @@ public class LocalAuthorityRestController {
             if (localAuthority.getMigration() != null && !localAuthority.getMigration().getMigrationData().equals(MigrationStatus.NOT_DONE)) {
                 return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
             }
-            CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, email, month));
+            CompletableFuture.runAsync(() -> migrationService.migrateStela2Actes(localAuthority, siren, profileUuid, email, month));
         } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
