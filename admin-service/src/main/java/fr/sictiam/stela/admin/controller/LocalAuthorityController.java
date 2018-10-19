@@ -175,7 +175,7 @@ public class LocalAuthorityController {
         return new ResponseEntity<>(workGroupService.getAllByLocalAuthority(uuid), HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/group/rights-on-module/{moduleName}")
+    @GetMapping("/{uuid}/{moduleName}/group")
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<List<WorkGroup>> getAllGroupByLocalAuthorityAndModule(@PathVariable String uuid,
             @PathVariable String moduleName) {
@@ -271,14 +271,11 @@ public class LocalAuthorityController {
     public ResponseEntity addCurrentLocalAuthorityCertificate(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestParam("file") MultipartFile file) throws IOException {
-        LOGGER.debug("addCurrentLocalAuthorityCertificate");
-        LOGGER.debug(file.getOriginalFilename());
+            @RequestParam("file") MultipartFile file) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        localAuthorityService.addCertificate(currentLocalAuthUuid, file);
-        return new ResponseEntity(HttpStatus.OK);
+        return addCertificate(currentLocalAuthUuid, file);
     }
 
     @PostMapping("/{uuid}/certificates")
@@ -288,13 +285,17 @@ public class LocalAuthorityController {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        return addCertificate(uuid, file);
+    }
+
+    private ResponseEntity addCertificate(String uuid, MultipartFile file) {
         try {
             localAuthorityService.addCertificate(uuid, file);
             return new ResponseEntity(HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("certificate error", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            return new ResponseEntity<>("certificate error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("admin.invalid_certificate", HttpStatus.NOT_ACCEPTABLE);
+        } catch (IOException e) {
+            return new ResponseEntity<>("admin.error_certificate", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

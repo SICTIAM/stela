@@ -63,7 +63,7 @@ public class ExternalRestService {
     public JsonNode getGroupsForLocalAuthority(String uuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> profile = webClient
-                .get().uri("/api/admin/local-authority/{uuid}/group/rights-on-module/{moduleName}",
+                .get().uri("/api/admin/local-authority/{uuid}/{moduleName}/group",
                         uuid, "ACTES").retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response ->
                         Mono.error(new RuntimeException("LocalAuthority not found")))
@@ -160,14 +160,12 @@ public class ExternalRestService {
             localAuthority = restTemplate.getForObject(
                     discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/certificate/{serial}/{issuer}",
                     LocalAuthority.class, certificate.getSerial(), certificate.getIssuer());
-        }
-        catch (HttpClientErrorException e) {
+        } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND)
                 LOGGER.warn("No local authority for this certificate {}|{}", certificate.getSerial(), certificate.getIssuer());
             else
                 LOGGER.error("Failed to find local authority from a certificate : {}", e.getMessage());
-        }
-        catch (RestClientException e) {
+        } catch (RestClientException e) {
             LOGGER.error("Failed to find local authority from a certificate : {}", e.getMessage());
         }
 

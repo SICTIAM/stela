@@ -92,7 +92,7 @@ class LocalAuthorityCertificate extends Component {
                     <Segment>
                         {fetchOnGoing ?
                             <div style={{ marginTop: '1em', marginBottom: '1em' }}><Loader active /></div>
-                            : <CustomDropzone title='Déposer le nouveau certificat' onDrop={this.onDrop} multiple={false} />
+                            : <CustomDropzone title={t('admin.local_authority.drop_new_certificate')} onDrop={this.onDrop} multiple={false} />
                         }
                     </Segment>
                 )}

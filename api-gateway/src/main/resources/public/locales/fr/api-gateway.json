@@ -191,7 +191,9 @@
         "admin": {
             "title": "Administration",
             "local_authority_not_found": "Collectivité non trouvée",
-            "local_authority_certificate_not_found": "Certificat de collectivité non trouvée",
+            "local_authority_certificate_not_found": "Certificat de collectivité non trouvé",
+            "error_certificate": "Erreur lors de l'ajout du certificat",
+            "invalid_certificate": "Le certificat est invalide",
             "generic_account": {
                 "created": "Compte générique créé",
                 "updated": "Compte générique mis à jour",
@@ -303,11 +305,12 @@
                 "deactivation": "Voulez-vous vraiment désactiver le module {{moduleName}} pour cette collectivité ?"
             },
             "new_group": "Ajouter un groupe",
-            "certificates": "Certificats pour applications métier",
+            "certificates": "Certificats de la collectivité",
             "certificate": "Certificat",
             "new_certificate": "Ajouter un certificat",
             "no_certificate": "Aucun certificat pour cette collectivité",
-            "no_certificate_email": "Aucun email"
+            "no_certificate_email": "Aucun email",
+            "drop_new_certificate": "Déposer le nouveau certificat"
         },
         "modules": {
             "title": "Module",

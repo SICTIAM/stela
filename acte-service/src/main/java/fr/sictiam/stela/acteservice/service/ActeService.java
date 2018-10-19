@@ -23,7 +23,6 @@ import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
-import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
 import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import fr.sictiam.stela.acteservice.service.util.ZipGeneratorUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -106,7 +105,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private final PdfGeneratorUtil pdfGeneratorUtil;
     private final ZipGeneratorUtil zipGeneratorUtil;
     private final ExternalRestService externalRestService;
-    private final DiscoveryUtils discoveryUtils;
 
     @Value("${application.miat.url}")
     private String acteUrl;
@@ -123,8 +121,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
             LocalAuthorityService localAuthorityService, ArchiveService archiveService,
             PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService,
-            ExternalRestService externalRestService, ActeExportRepository acteExportRepository,
-            DiscoveryUtils discoveryUtils) {
+            ExternalRestService externalRestService, ActeExportRepository acteExportRepository) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -136,7 +133,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         this.localesService = localesService;
         this.externalRestService = externalRestService;
         this.acteExportRepository = acteExportRepository;
-        this.discoveryUtils = discoveryUtils;
     }
 
     public Acte create(String number, String objet, ActeNature nature, String code, LocalDate decision,
@@ -354,16 +350,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    public List<Acte> getAllFull (Integer limit, Integer offset, String column, String direction,
-                                  String currentLocalAuthUuid) {
+    public List<Acte> getAllFull(Integer limit, Integer offset, String column, String direction,
+            String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Acte> query = builder.createQuery(Acte.class);
         Root<Acte> acteRoot = query.from(Acte.class);
 
         String columnAttribute = StringUtils.isEmpty(column) ? "creation" : column;
         query.orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
-                        ? builder.asc(acteRoot.get(columnAttribute))
-                        : builder.desc(acteRoot.get(columnAttribute)));
+                ? builder.asc(acteRoot.get(columnAttribute))
+                : builder.desc(acteRoot.get(columnAttribute)));
 
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
@@ -925,8 +921,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acte.getActeHistories().stream().filter(acteHistory -> statusType.equals(acteHistory.getStatus()));
     }
 
-    public boolean numberExist (String number, String localAuthorityUuid) {
-        return acteRepository.findByNumberAndLocalAuthorityUuid(number, localAuthorityUuid).size() > 0;
+    public boolean numberExist(String number, String localAuthorityUuid) {
+        return !acteRepository.findByNumberAndLocalAuthorityUuid(number, localAuthorityUuid).isEmpty();
     }
 
     @Override
