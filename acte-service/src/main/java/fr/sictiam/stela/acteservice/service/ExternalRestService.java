@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.GenericAccount;
 import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
@@ -19,9 +20,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ExternalRestService {
@@ -170,5 +175,15 @@ public class ExternalRestService {
         }
 
         return localAuthority;
+    }
+
+    public String createGroup(LocalAuthority localAuthority, String name, Right[] rights) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForObject(
+                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/group/{name}",
+                new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
+                String.class,
+                localAuthority.getUuid(), name);
     }
 }

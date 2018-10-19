@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -71,6 +70,7 @@ public class MigrationService {
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
     private final DiscoveryUtils discoveryUtils;
+    private final ExternalRestService externalRestService;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -104,11 +104,12 @@ public class MigrationService {
     private final String sql_local_authority_groups = getStringResourceFromStream("migration/local_authority_groups.sql");
 
     public MigrationService(ActeRepository acteRepository, LocalAuthorityRepository localAuthorityRepository,
-            NotificationService notificationService, DiscoveryUtils discoveryUtils) {
+            NotificationService notificationService, DiscoveryUtils discoveryUtils, ExternalRestService externalRestService) {
         this.acteRepository = acteRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
         this.discoveryUtils = discoveryUtils;
+        this.externalRestService = externalRestService;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -200,13 +201,12 @@ public class MigrationService {
         log(migrationLog, acteMigrations.size() + " Actes to migrate", false);
 
         // Create group in admin service
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/group/{name}",
-                new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
-                String.class,
-                localAuthority.getUuid(), "acte-migration");
-        String groupUuid = response.getBody();
+        String groupUuid = externalRestService.createGroup(
+                localAuthority,
+                "acte-migration",
+                Right.values()
+        );
+
 
         for (ActeMigration acteMigration : acteMigrations) {
 
