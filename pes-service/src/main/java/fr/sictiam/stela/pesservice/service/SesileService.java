@@ -23,6 +23,7 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
+import fr.sictiam.stela.pesservice.model.sesile.ClasseurSirenRequest;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
@@ -539,7 +540,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
         LOGGER.debug(classeur.toString());
-        HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(localAuthority));
+        HttpEntity<ClasseurRequest> requestEntity = localAuthority.getSesileNewVersion() ?
+                new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren()), getHeaders(localAuthority)) :
+                new HttpEntity<>(classeur, getHeaders(localAuthority));
         return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
     }
 
