@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.Notification;
 import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.service.*;
+import fr.sictiam.stela.pesservice.service.ExternalRestService;
+import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.LocalesService;
+import fr.sictiam.stela.pesservice.service.NotificationService;
+import fr.sictiam.stela.pesservice.service.PesAllerService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +21,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,9 +100,9 @@ public class DailyErrorTask {
         });
     }
 
-    private boolean hasNotifification (Notification.Type notification, JsonNode node) {
+    private boolean hasNotifification(Notification.Type notification, JsonNode node) {
 
-        for (int i = 0 ; i < node.get("notificationValues").size() ; i++) {
+        for (int i = 0; i < node.get("notificationValues").size(); i++) {
             JsonNode n = node.get("notificationValues").get(i);
             if (StringUtils.removeStart(n.get("name").asText(), "PES_").equals(notification.toString()) && n.get("active").asBoolean())
                 return true;
