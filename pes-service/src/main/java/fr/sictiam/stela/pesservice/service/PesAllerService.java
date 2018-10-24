@@ -339,6 +339,7 @@ public class PesAllerService {
 
     public List<PesAller> getPesInError(String localAuthorityUuid) {
         int nbDays = Integer.parseInt(environment.getProperty("application.dailymail.retensiondays", "1"));
-        return pesAllerRepository.findAllByLastHistoryStatusAndLastHistoryDateGreaterThan(StatusType.NACK_RECEIVED, LocalDateTime.now().minusDays(nbDays));
+        return pesAllerRepository.findAllByLocalAuthority_UuidAndLastHistoryStatusAndLastHistoryDateGreaterThan(
+                localAuthorityUuid, StatusType.NACK_RECEIVED, LocalDateTime.now().minusDays(nbDays));
     }
 }
