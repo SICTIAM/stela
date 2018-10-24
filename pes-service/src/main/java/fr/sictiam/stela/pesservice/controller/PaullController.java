@@ -13,6 +13,7 @@ import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.SesileService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -54,15 +55,17 @@ public class PaullController {
     private final PesAllerService pesAllerService;
     private final ExternalRestService externalRestService;
     private final PesRetourService pesRetourService;
+    private final StorageService storageService;
 
     public PaullController(SesileService sesileService, LocalAuthorityService localAuthorityService,
             PesAllerService pesAllerService, ExternalRestService externalRestService,
-            PesRetourService pesRetourService) {
+            PesRetourService pesRetourService, StorageService storageService) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
         this.pesAllerService = pesAllerService;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
+        this.storageService = storageService;
     }
 
     @JsonPropertyOrder({"status", "status_message", "data"})
@@ -273,7 +276,7 @@ public class PaullController {
 
         data.put("NomDocument", pesAller.getAttachment().getFilename());
 
-        data.put("Contenu", Base64.encode(pesAller.getAttachment().getFile()));
+        data.put("Contenu", Base64.encode(storageService.getAttachmentContent(pesAller.getAttachment())));
         return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
 
     }

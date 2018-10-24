@@ -39,12 +39,15 @@ public class PesRetourService {
 
     private final PesRetourRepository pesRetourRepository;
 
+    private final StorageService storageService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public PesRetourService(PesRetourRepository pesRetourRepository) {
+    public PesRetourService(PesRetourRepository pesRetourRepository, StorageService storageService) {
         this.pesRetourRepository = pesRetourRepository;
+        this.storageService = storageService;
     }
 
     public PesRetour getByUuid(String uuid) {
@@ -109,7 +112,7 @@ public class PesRetourService {
 
         List<Map<String, String>> outputList = pesRetours.stream().map(pesRetour -> {
             String archiveName = pesRetour.getAttachment().getFilename();
-            String archiveBase64 = Base64.encode(pesRetour.getAttachment().getFile());
+            String archiveBase64 = Base64.encode(storageService.getAttachmentContent(pesRetour.getAttachment()));
             Map<String, String> returnMap = new HashMap<>();
             returnMap.put("chaine_archive", archiveBase64);
             returnMap.put("filename", archiveName);
@@ -123,7 +126,7 @@ public class PesRetourService {
 
         List<GetTabPESRetourStruct> outputList = pesRetours.stream().map(pesRetour -> {
             String archiveName = pesRetour.getAttachment().getFilename();
-            String archiveBase64 = Base64.encode(pesRetour.getAttachment().getFile());
+            String archiveBase64 = Base64.encode(storageService.getAttachmentContent(pesRetour.getAttachment()));
             GetTabPESRetourStruct tabPESRetourStruct = new GetTabPESRetourStruct();
             tabPESRetourStruct.setChaineArchive(archiveBase64);
             tabPESRetourStruct.setFilename(archiveName);

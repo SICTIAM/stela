@@ -7,6 +7,7 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.AdminService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class SenderTask implements ApplicationListener<PesHistoryEvent> {
@@ -33,7 +35,7 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
     @Value("${application.archive.maxSizePerHour}")
     private Long maxSizePerHour;
 
-    private AtomicInteger currentSizeUsed = new AtomicInteger();
+    private AtomicLong currentSizeUsed = new AtomicLong();
 
     @Autowired
     private PesAllerService pesService;
@@ -43,6 +45,9 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
 
     @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private StorageService storageService;
 
     @PostConstruct
     public void initQueue() {
@@ -70,19 +75,20 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
             PesAller pes = pesService.getByUuid(pendingMessage.getPesUuid());
             LOGGER.debug("PES {}: {}", pes.getUuid(), pes.getObjet());
 
-            if ((pes.getAttachment().getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
+            if ((pes.getAttachment().getSize() + currentSizeUsed.get()) < maxSizePerHour) {
 
                 StatusType sendStatus = null;
                 try {
                     pesService.send(pes);
                     sendStatus = StatusType.SENT;
                     pendingMessageRepository.delete(pendingQueue.poll());
-                    currentSizeUsed.addAndGet(pes.getAttachment().getFile().length);
+                    currentSizeUsed.addAndGet(pes.getAttachment().getSize());
                 } catch (PesSendException e) {
                     LOGGER.error(e.getMessage());
                     sendStatus = StatusType.NOT_SENT;
                 }
-                pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus, pes.getAttachment().getFile(),
+                byte[] content = storageService.getAttachmentContent(pes.getAttachment());
+                pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus, content,
                         pes.getAttachment().getFilename());
 
             } else {

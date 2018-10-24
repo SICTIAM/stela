@@ -1,9 +1,11 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
+import com.netflix.discovery.converters.Auto;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.*;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
@@ -50,6 +52,9 @@ public class ReceiverTask {
 
     @Autowired
     private DefaultFtpSessionFactory defaultFtpSessionFactory;
+
+    @Autowired
+    private StorageService storageService;
 
     @Scheduled(fixedRate = 60000)
     public void receive() throws IOException {
@@ -155,7 +160,7 @@ public class ReceiverTask {
         Optional<LocalAuthority> localAuthorityOpt = localAuthorityService.getBySirenOrSirens(siret.substring(0, 9));
         if (localAuthorityOpt.isPresent()) {
             LocalAuthority localAuthority = localAuthorityOpt.get();
-            Attachment attachment = new Attachment(targetArray, pesRetourName, targetArray.length);
+            Attachment attachment = storageService.createAttachment(pesRetourName, targetArray);
             PesRetour pesRetour = new PesRetour(attachment, localAuthority);
             pesRetourRepository.save(pesRetour);
         } else {

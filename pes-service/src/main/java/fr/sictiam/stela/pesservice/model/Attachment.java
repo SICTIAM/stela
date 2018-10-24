@@ -19,10 +19,11 @@ public class Attachment {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
 
-    @JsonIgnore
-    private byte[] file;
     private String filename;
     private long size;
+
+    @JsonIgnore
+    transient private byte[] content;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
@@ -30,30 +31,27 @@ public class Attachment {
     public Attachment() {
     }
 
-    public Attachment(byte[] file, String filename, long size) {
-        this.file = file;
+    public Attachment(String filename, long size) {
         this.filename = filename;
         this.size = size;
-        this.date = LocalDateTime.now();
+        date = LocalDateTime.now();
     }
 
-    public Attachment(byte[] file, String filename, long size, LocalDateTime date) {
-        this.file = file;
+    public Attachment(String filename, long size, LocalDateTime date) {
         this.filename = filename;
+        this.size = size;
+        this.date = date;
+    }
+
+    public Attachment(String filename, byte[] content, long size, LocalDateTime date) {
+        this.filename = filename;
+        this.content = content;
         this.size = size;
         this.date = date;
     }
 
     public String getUuid() {
         return uuid;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
     }
 
     public String getFilename() {
@@ -68,6 +66,22 @@ public class Attachment {
         return date;
     }
 
+    public String getStorageKey() {
+        return "pes/" + uuid;
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public void updateContent(byte[] content) {
+        setContent(content);
+        size = content.length;
+    }
 
     public interface Light {
         String getUuid();

@@ -86,14 +86,17 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private final LocalesService localesService;
 
+    private final StorageService storageService;
+
     public SesileService(PesAllerService pesService, ExternalRestService externalRestService,
             SesileConfigurationRepository sesileConfigurationRepository, LocalesService localesService,
-            GenericDocumentRepository genericDocumentRepository) {
+            GenericDocumentRepository genericDocumentRepository, StorageService storageService) {
         this.pesService = pesService;
         this.externalRestService = externalRestService;
         this.sesileConfigurationRepository = sesileConfigurationRepository;
         this.localesService = localesService;
         this.genericDocumentRepository = genericDocumentRepository;
+        this.storageService = storageService;
     }
 
     public SesileConfiguration createOrUpdate(SesileConfiguration sesileConfiguration) {
@@ -123,7 +126,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                                     : sesileConfiguration.getServiceOrganisationNumber(),
                             sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));
 
-            Document document = addFileToclasseur(pes.getLocalAuthority(), pes.getAttachment().getFile(),
+            byte[] fileContent = storageService.getAttachmentContent(pes.getAttachment());
+            Document document = addFileToclasseur(pes.getLocalAuthority(), fileContent,
                     pes.getAttachment().getFilename(), classeur.getBody().getId()).getBody();
 
             pes.setSesileClasseurId(classeur.getBody().getId());
@@ -179,7 +183,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     private void updatePesWithSignature(String pesUuid, byte[] file, StatusType status, String errorMessage) {
         PesAller pesAller = pesService.getByUuid(pesUuid);
         pesAller.setSigned(status.equals(StatusType.PENDING_SEND));
-        pesAller.getAttachment().setFile(file);
+        storageService.updateAttachment(pesAller.getAttachment(), file);
         pesService.save(pesAller);
         pesService.updateStatus(pesUuid, status, errorMessage);
     }
@@ -591,7 +595,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;
-            Pair<StatusType, String> signatureResult = getSignatureStatus(pes.getAttachment().getFile());
+            Pair<StatusType, String> signatureResult = getSignatureStatus(storageService.getAttachmentContent(pes.getAttachment()));
             pes.setSigned(signatureResult.component1().equals(StatusType.PENDING_SEND));
             pesService.save(pes);
             if (pes.isPj()) {

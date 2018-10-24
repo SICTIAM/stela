@@ -14,6 +14,7 @@ import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.SesileService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.soap.model.paull.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import io.jsonwebtoken.Claims;
@@ -55,15 +56,17 @@ public class PaullEndpoint {
     private final LocalAuthorityService localAuthorityService;
     private final ExternalRestService externalRestService;
     private final SesileService sesileService;
+    private final StorageService storageService;
 
     public PaullEndpoint(PesAllerService pesAllerService, LocalAuthorityService localAuthorityService,
             SoapReturnGenerator soapReturnGenerator, ExternalRestService externalRestService,
-            PesRetourService pesRetourService, SesileService sesileService) {
+            PesRetourService pesRetourService, SesileService sesileService, StorageService storageService) {
         this.pesAllerService = pesAllerService;
         this.localAuthorityService = localAuthorityService;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
         this.sesileService = sesileService;
+        this.storageService = storageService;
     }
 
     PaullSoapToken getToken(String sessionID) {
@@ -130,7 +133,7 @@ public class PaullEndpoint {
                         returnMessage = "INVALID_DATAS";
                     }
 
-                    Attachment attachment = new Attachment(file, name, file.length);
+                    Attachment attachment = storageService.createAttachment(name, file);
                     pesAller.setAttachment(attachment);
                     pesAller.setCreation(LocalDateTime.now());
 
@@ -275,7 +278,7 @@ public class PaullEndpoint {
                 PesAller pesAller = pesAllerService.getByUuid(getPESAllerRequest.getIdPesAller());
 
                 pesAllerStruct.setFilename(pesAller.getAttachment().getFilename());
-                pesAllerStruct.setBase64(Base64.encode(pesAller.getAttachment().getFile()));
+                pesAllerStruct.setBase64(Base64.encode(storageService.getAttachmentContent(pesAller.getAttachment())));
 
                 returnMessage = "SUCCESS";
                 status = "OK";

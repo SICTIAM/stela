@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesExportRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
@@ -16,6 +17,7 @@ import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
+import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import fr.sictiam.stela.pesservice.service.util.FTPUploaderService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,6 +65,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
 
+
 @Service
 public class PesAllerService {
 
@@ -73,12 +76,15 @@ public class PesAllerService {
 
     private final PesAllerRepository pesAllerRepository;
     private final PesHistoryRepository pesHistoryRepository;
+    private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
     private final FTPUploaderService ftpUploaderService;
     private final Environment environment;
     private final ExternalRestService externalRestService;
     private final PesExportRepository pesExportRepository;
+    private final StorageService storageService;
+
 
     @Value("${application.clamav.port}")
     private Integer clamavPort;
@@ -91,7 +97,8 @@ public class PesAllerService {
     @Autowired
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
-            FTPUploaderService ftpUploaderService, Environment environment, ExternalRestService externalRestService,
+            FTPUploaderService ftpUploaderService, Environment environment, StorageService storageService,
+            AttachmentRepository attachmentRepository, ExternalRestService externalRestService,
             PesExportRepository pesExportRepository) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
@@ -101,6 +108,8 @@ public class PesAllerService {
         this.environment = environment;
         this.externalRestService = externalRestService;
         this.pesExportRepository = pesExportRepository;
+        this.storageService = storageService;
+        this.attachmentRepository = attachmentRepository;
     }
 
     @PostConstruct
@@ -122,7 +131,8 @@ public class PesAllerService {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo,
+    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate
+            creationTo,
             StatusType status, Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -145,7 +155,8 @@ public class PesAllerService {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesAller> pesRoot, String multifield,
+    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesAller> pesRoot, String
+            multifield,
             String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
             String currentLocalAuthUuid) {
         List<Predicate> predicates = new ArrayList<>();
@@ -199,13 +210,14 @@ public class PesAllerService {
     public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
 
         try {
-            Attachment attachment = new Attachment(file.getBytes(), file.getOriginalFilename(), file.getSize());
+            Attachment attachment = storageService.createAttachment(file);
+
             pesAller.setAttachment(attachment);
             pesAller.setCreation(LocalDateTime.now());
 
             populateFromByte(pesAller, file.getBytes());
 
-        } catch (IOException e) {
+        } catch (IOException | StorageException e) {
             throw new PesCreationException();
         }
         return pesAller;
@@ -241,20 +253,14 @@ public class PesAllerService {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public void updateStatus(String pesUuid, StatusType updatedStatus, List<PesHistoryError> errors) {
-        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), errors);
-        updateHistory(pesHistory);
-        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
-    }
-
     public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName) {
-        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName);
-        updateHistory(pesHistory);
-        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+        updateStatus(pesUuid, updatedStatus, file, fileName, null);
     }
 
-    public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String fileName, List<PesHistoryError> errors) {
-        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), file, fileName, errors);
+    public void updateStatus(String pesUuid, StatusType updatedStatus, byte[] file, String
+            fileName, List<PesHistoryError> errors) {
+        Attachment attachment = storageService.createAttachment(fileName, file);
+        PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus, LocalDateTime.now(), attachment, errors);
         updateHistory(pesHistory);
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
@@ -349,7 +355,7 @@ public class PesAllerService {
 
     private void persistPesExport(PesAller pes) {
         PesExport pesExport = new PesExport(pes.getUuid(), ZonedDateTime.now(), pes.getAttachment().getFilename(),
-                pes.getAttachment().getSize(), getSha1FromBytes(pes.getAttachment().getFile()), pes.getLocalAuthority().getSiren());
+                pes.getAttachment().getSize(), getSha1FromBytes(pes.getAttachment().getContent()), pes.getLocalAuthority().getSiren());
         try {
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
             pesExport.setAgentFirstName(node.get("agent").get("given_name").asText());

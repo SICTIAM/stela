@@ -1,0 +1,5 @@
+ALTER TABLE pes_history ADD COLUMN attachment_uuid character varying(255) NULL;
+ALTER TABLE pes_history ADD CONSTRAINT fk_attachment FOREIGN KEY (attachment_uuid) REFERENCES attachment(uuid);
+
+ALTER TABLE pending_message DROP date, DROP file, DROP file_name, DROP message;
+ALTER TABLE attachment DROP file;

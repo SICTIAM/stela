@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.service;
 
+import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
@@ -67,9 +68,12 @@ public class MigrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MigrationService.class);
 
     private final PesAllerRepository pesAllerRepository;
+    private final AttachmentRepository attachmentRepository;
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
+    private final StorageService storageService;
     private final DiscoveryUtils discoveryUtils;
+    private final PesAllerService pesAllerService;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -105,11 +109,15 @@ public class MigrationService {
     private final String sql_liaison_server = getStringResourceFromStream("migration/liaison_siren.sql");
 
     public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository,
-            NotificationService notificationService, DiscoveryUtils discoveryUtils) {
+                    NotificationService notificationService, DiscoveryUtils discoveryUtils, AttachmentRepository attachmentRepository,
+                    StorageService storageService, PesAllerService pesAllerService) {
         this.pesAllerRepository = pesAllerRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
         this.discoveryUtils = discoveryUtils;
+        this.attachmentRepository = attachmentRepository;
+        this.storageService = storageService;
+        this.pesAllerService = pesAllerService;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -233,16 +241,18 @@ public class MigrationService {
                 }
                 if (pesMigration.getDateAR() != null) {
                     byte[] bytesAR = getFileFromTarGz(archiveBytes, pesMigration.getFilenameAR());
+                    Attachment attachment = storageService.createAttachment(pesMigration.getFilenameAR(), bytesAR);
                     pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
-                            pesMigration.getDateAR(), bytesAR, pesMigration.getFilenameAR()));
+                            pesMigration.getDateAR(), attachment));
                 }
                 if (pesMigration.getDateANO() != null) {
                     byte[] fileANOBytes = null;
                     if (StringUtils.isNotBlank(pesMigration.getPathFilenameANO())) {
                         fileANOBytes = downloadFile(sshClient, pesMigration.getPathFilenameANO());
                     }
+                    Attachment attachment = storageService.createAttachment(pesMigration.getPathFilenameANO(), fileANOBytes);
                     PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.NACK_RECEIVED,
-                            pesMigration.getDateANO(), fileANOBytes, pesMigration.getPathFilenameANO());
+                            pesMigration.getDateANO(), attachment);
                     pesHistory.addError(new PesHistoryError(null, pesMigration.getMessageANO(), null));
                     pesAller.getPesHistories().add(pesHistory);
                 }
@@ -355,7 +365,7 @@ public class MigrationService {
 
     private Attachment getAttachmentFromArchive(String filename, byte[] archiveBytes, long size, LocalDateTime fileDate) {
         byte[] fileBytes = getFileFromTarGz(archiveBytes, filename);
-        return new Attachment(fileBytes, filename, size, fileDate);
+        return storageService.createAttachment(filename, fileBytes, fileDate);
     }
 
     private LocalDateTime getLocalDateTimeFromTimestamp(String timestamp) {
