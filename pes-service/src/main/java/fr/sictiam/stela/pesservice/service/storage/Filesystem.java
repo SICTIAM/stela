@@ -4,8 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,21 +18,19 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 @Service
-public class Filesystem implements StorageDriver {
+@Profile({ "dev", "dev-docker" })
+public class Filesystem implements StorageEngine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Filesystem.class);
 
-    private final Environment environment;
-
+    @Value("${application.storage.filesystem.path}")
     private String rootPath;
 
-    public Filesystem(Environment environment) throws StorageException {
+    public Filesystem() {
+    }
 
-        this.environment = environment;
-        rootPath = environment.getProperty("application.storage.filesystem.path");
-        if (rootPath == null)
-            throw new StorageException("Missing configuration property application.storage.filesystem.path");
-
+    @PostConstruct
+    public void init() {
         if (rootPath.endsWith("/"))
             rootPath = rootPath.substring(rootPath.length() - 1);
 
@@ -39,7 +40,6 @@ public class Filesystem implements StorageDriver {
                 Files.createDirectories(path);
             } catch (IOException e) {
                 LOGGER.error("Failed to create directory {}: {}", rootPath, e.getMessage());
-                throw new StorageException("Failed to create directory " + rootPath, e);
             }
         }
     }
@@ -81,6 +81,18 @@ public class Filesystem implements StorageDriver {
         } catch (IOException e) {
             LOGGER.error("Failed to write data in  {}/{}: {}", rootPath, key, e.getMessage());
             throw new StorageException("Failed to read " + key + ": " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean deleteObject(String key) throws StorageException {
+
+        Path path = Paths.get(rootPath, key);
+        try {
+            return Files.deleteIfExists(path);
+        } catch (IOException e) {
+            LOGGER.error("Failed to remove file {}: {}", path, e.getMessage());
+            throw new StorageException("Failed to remove file " + path + ": " + e.getMessage(), e);
         }
     }
 }
