@@ -60,6 +60,9 @@ public class PesRestController {
     @Value("${application.filenamepattern}")
     private String fileNamePattern;
 
+    @Value("${application.archive.maxSize}")
+    private Long maxSize;
+
     @Autowired
     private ReceiverTask receiverTask;
 
@@ -135,6 +138,9 @@ public class PesRestController {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.PES_DEPOSIT))
                 || !certUtilService.checkCert(certificate, pairedCertificate)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (file.getSize() > maxSize) {
+            return new ResponseEntity<>("notifications.pes.sent.error.file_too_big", HttpStatus.PAYLOAD_TOO_LARGE);
         }
         ObjectMapper mapper = new ObjectMapper();
         try {
