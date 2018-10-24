@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,7 +35,7 @@ public class PesHistory implements Comparable<PesHistory> {
     // Error messages can be quite lengthy
     @Column(length = 1024)
     private String message;
-    @Type(type="com.vladmihalcea.hibernate.type.json.JsonBinaryType")
+    @Type(type = "com.vladmihalcea.hibernate.type.json.JsonBinaryType")
     List<PesHistoryError> errors;
 
     public PesHistory() {
@@ -101,7 +100,7 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
-                      String message) {
+            String message) {
 
         this.pesUuid = pesUuid;
         this.status = status;
@@ -143,19 +142,23 @@ public class PesHistory implements Comparable<PesHistory> {
         this.fileName = fileName;
     }
 
-    public String getMessage () { return message; }
+    public String getMessage() {
+        return message;
+    }
 
-    public void setMessage (String message) { this.message = message; }
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-    public List<PesHistoryError> getErrors () {
-        return errors;
+    public List<PesHistoryError> getErrors() {
+        return errors != null ? errors : new ArrayList<>();
     }
 
     public void setErrors(List<PesHistoryError> errors) {
         this.errors = errors;
     }
 
-    public void addError (PesHistoryError error) {
+    public void addError(PesHistoryError error) {
         if (errors == null)
             errors = new ArrayList<>();
         errors.add(error);

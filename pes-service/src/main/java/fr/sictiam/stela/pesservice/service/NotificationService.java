@@ -62,7 +62,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
 
     @Override
     public void onApplicationEvent(@NotNull PesHistoryEvent event) {
-        List<String> notificationTypes = Notification.notifications.stream().map(n -> n.getType().toString())
+        List<String> notificationTypes = Notification.notifications.stream()
+                .map(n -> n.getType().toString())
                 .collect(Collectors.toList());
         if (notificationTypes.contains(event.getPesHistory().getStatus().toString())) {
             try {
@@ -78,9 +79,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
     public void proccessEvent(PesHistoryEvent event) throws MessagingException, IOException {
         PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
 
-        Notification notification = Notification.notifications.stream().filter(
-                n -> n.getType().toString().equals(event.getPesHistory().getStatus().toString())
-        ).findFirst().get();
+        Notification notification = Notification.notifications.stream()
+                .filter(n -> n.getType().toString().equals(event.getPesHistory().getStatus().toString()))
+                .findFirst().get();
 
         JsonNode profiles = externalRestService.getProfiles(pes.getLocalAuthority().getUuid());
 
@@ -99,6 +100,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                     try {
                         Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
                         ctx.setVariable("pes", pes);
+                        ctx.setVariable("errors", event.getPesHistory().getErrors());
                         ctx.setVariable("baseUrl", applicationUrl);
                         ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
                         String msg = template.process("mails/copy_" + event.getPesHistory().getStatus().name() + "_fr", ctx);
@@ -127,9 +129,9 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                             .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
                                     && notif.isActive())
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
-
                 Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
                 ctx.setVariable("pes", pes);
+                ctx.setVariable("errors", event.getPesHistory().getErrors());
                 ctx.setVariable("baseUrl", applicationUrl);
                 ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
                 String msg = template.process("mails/" + event.getPesHistory().getStatus().name() + "_fr", ctx);

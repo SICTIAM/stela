@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    </head>
-    <body>
-        <div>
-            Bonjour <span th:text="${firstname}" /> <span th:text="${lastname}" />,<br/>
-            Le PES <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/pes/' + ${pes.uuid}}" th:text="${pes.objet}"></a> est en erreur &laquo; Anomalie trésorerie &raquo;
-            <br/><br/>
-        </div>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<div>
+    Bonjour <span th:text="${firstname}"/> <span th:text="${lastname}"/>,<br/><br/>
+    Le PES <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/pes/' + ${pes.uuid}}" th:text="${pes.objet}"></a> est
+    en erreur &laquo; Anomalie trésorerie &raquo; :
+    <br/>
+    <ul>
+        <li th:each="error: ${errors}" th:if="${!#strings.isEmpty(error.title) && !#strings.isEmpty(error.message)}">
+            <span th:text="${error.title + ': ' + error.message + ' (' + error.source + ')'}"/>
+        </li>
+    </ul>
+</div>
 
-        <div>
-            <span>Cordialement,</span>
-        </div>
-        <div>
-            <span><i>L'équipe <a th:href="@{${baseUrl}}" th:text="Stela"></a></i></span>
-        </div>
-    </body>
+<div>
+    <span>Cordialement,</span>
+</div>
+<div>
+    <span><i>L'équipe <a th:href="@{${baseUrl}}" th:text="Stela"></a></i></span>
+</div>
+</body>
 </html>
