@@ -172,15 +172,6 @@ class Acte extends Component {
                         <div style={{ textAlign: 'right' }}>
                             <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>
                                 <Dropdown.Menu>
-                                    <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
-                                        {t('acte.page.download_original')}
-                                    </a>
-
-                                    {acteACK && (
-                                        <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
-                                            {t('acte.page.download_justificative')}
-                                        </a>
-                                    )}
                                     {acteACK && (
                                         <Dropdown.Item>
                                             <Popup content={stampPosition} on='click' position='left center'
@@ -188,6 +179,14 @@ class Acte extends Component {
                                             />
                                         </Dropdown.Item>
                                     )}
+                                    {acteACK && (
+                                        <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
+                                            {t('acte.page.download_justificative')}
+                                        </a>
+                                    )}
+                                    <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
+                                        {t('acte.page.download_original')}
+                                    </a>
                                 </Dropdown.Menu>
                             </Dropdown>
                             {canRepublish && (
