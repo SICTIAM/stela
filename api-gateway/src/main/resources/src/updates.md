@@ -1,3 +1,19 @@
+### 25/10/2018
+- Ajout du détail des anomalies PES dans les mails
+- Ajout d'un groupe de migration aux actes migrés de Stela 2
+- Correction des mots "status" en "statut" sur différentes pages
+- Mise en place de la vérification de la taille des PES, maximum 100 Mo
+- Réorganisation des liens de téléchargement d'un acte pour plus de praticité
+- Correction d'un bug qui empêchait le téléchargement du justificatif d'AR d'un acte
+- Correction d'un bug qui permettait de recevoir par mail la liste des PES en anomalie d'une autre collectivité
+- Correction d'un bug lors du dépôt d'un PES dans SESILE pour un agent multi-collectivité
+- Correction d'un bug qui pouvait stopper la migration des actes/pes lorsqu'une données de Stela2 était non compatible avec le modèle de données de Stela3
+
+### 18/10/2018
+- Ajout des liens vers les actes/pes dans tous les mails de Stela 3
+- Optimisation des performances et de la réactivité de la liste des actes
+- Correction d'un bug qui affichait les actes migrés avec aucun statut dans la liste des actes
+
 ### 03/10/2018
 - Réécriture de tous les mails envoyés par Stela et corrections des erreurs d'encodage
 - La notification par mail en cas d'AR trésorerie est maintenant obligatoire et non désactivable
