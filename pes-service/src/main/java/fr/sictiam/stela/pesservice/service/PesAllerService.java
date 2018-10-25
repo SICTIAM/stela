@@ -1,8 +1,16 @@
 package fr.sictiam.stela.pesservice.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.dao.PesExportRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.model.*;
+import fr.sictiam.stela.pesservice.model.Attachment;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesExport;
+import fr.sictiam.stela.pesservice.model.PesHistory;
+import fr.sictiam.stela.pesservice.model.PesHistoryError;
+import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
@@ -44,9 +52,16 @@ import javax.xml.xpath.XPathFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PesAllerService {
@@ -62,6 +77,8 @@ public class PesAllerService {
     private final LocalAuthorityService localAuthorityService;
     private final FTPUploaderService ftpUploaderService;
     private final Environment environment;
+    private final ExternalRestService externalRestService;
+    private final PesExportRepository pesExportRepository;
 
     @Value("${application.clamav.port}")
     private Integer clamavPort;
@@ -74,13 +91,16 @@ public class PesAllerService {
     @Autowired
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
-            FTPUploaderService ftpUploaderService, Environment environment) {
+            FTPUploaderService ftpUploaderService, Environment environment, ExternalRestService externalRestService,
+            PesExportRepository pesExportRepository) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
         this.ftpUploaderService = ftpUploaderService;
         this.environment = environment;
+        this.externalRestService = externalRestService;
+        this.pesExportRepository = pesExportRepository;
     }
 
     @PostConstruct
@@ -315,6 +335,32 @@ public class PesAllerService {
         return pesHistoryRepository.findByUuid(uuid).orElseThrow(HistoryNotFoundException::new);
     }
 
+    private String getSha1FromBytes(byte[] bytes) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            Formatter formatter = new Formatter();
+            for (byte b : md.digest(bytes)) formatter.format("%02x", b);
+            return formatter.toString();
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("Error while trying to get sha1 from file: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private void persistPesExport(PesAller pes) {
+        PesExport pesExport = new PesExport(pes.getUuid(), ZonedDateTime.now(), pes.getAttachment().getFilename(),
+                pes.getAttachment().getSize(), getSha1FromBytes(pes.getAttachment().getFile()), pes.getLocalAuthority().getSiren());
+        try {
+            JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
+            pesExport.setAgentFirstName(node.get("agent").get("given_name").asText());
+            pesExport.setAgentName(node.get("agent").get("family_name").asText());
+            pesExport.setAgentEmail(node.get("agent").get("email").asText());
+        } catch (Exception e) {
+            LOGGER.error("Error while retrieving profile infos : {}", e.getMessage());
+        }
+        pesExportRepository.save(pesExport);
+    }
+
     public void manualResend(String pesUuid) {
         PesAller pes = getByUuid(pesUuid);
         send(pes);
@@ -331,6 +377,7 @@ public class PesAllerService {
         LOGGER.info("Sending PES {} ({})...", pes.getObjet(), pes.getUuid());
         try {
             ftpUploaderService.uploadFile(pes);
+            persistPesExport(pes);
         } catch (IOException e) {
             LOGGER.error("Error sending PES on FTP: {}", e.getMessage());
             throw new PesSendException();
