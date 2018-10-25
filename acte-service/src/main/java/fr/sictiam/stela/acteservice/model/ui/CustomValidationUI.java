@@ -1,7 +1,10 @@
 package fr.sictiam.stela.acteservice.model.ui;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.ObjectError;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -15,12 +18,19 @@ public class CustomValidationUI {
 
     // reproduce bad request return
     public CustomValidationUI(List<ObjectError> errors, String message) {
+        this(errors, message, HttpStatus.BAD_REQUEST);
+    }
+
+    public CustomValidationUI(List<ObjectError> errors, String message, HttpStatus status) {
         this.timestamp = new Date().getTime();
-        this.status = 400;
-        this.error = "Bad Request";
+        this.status = status.value();
+        this.error = status.getReasonPhrase();
         this.errors = errors;
         this.message = message;
+    }
 
+    public CustomValidationUI(ObjectError error, String message, HttpStatus status) {
+        this(Collections.singletonList(error), message, status);
     }
 
     public long getTimestamp() {

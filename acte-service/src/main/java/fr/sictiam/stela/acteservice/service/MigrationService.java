@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -71,6 +70,7 @@ public class MigrationService {
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
     private final DiscoveryUtils discoveryUtils;
+    private final ExternalRestService externalRestService;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -104,11 +104,12 @@ public class MigrationService {
     private final String sql_local_authority_groups = getStringResourceFromStream("migration/local_authority_groups.sql");
 
     public MigrationService(ActeRepository acteRepository, LocalAuthorityRepository localAuthorityRepository,
-            NotificationService notificationService, DiscoveryUtils discoveryUtils) {
+            NotificationService notificationService, DiscoveryUtils discoveryUtils, ExternalRestService externalRestService) {
         this.acteRepository = acteRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
         this.discoveryUtils = discoveryUtils;
+        this.externalRestService = externalRestService;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -198,6 +199,15 @@ public class MigrationService {
             SSHClient sshClient, MigrationLog migrationLog) {
         int i = 0;
         log(migrationLog, acteMigrations.size() + " Actes to migrate", false);
+
+        // Create group in admin service
+        String groupUuid = externalRestService.createGroup(
+                localAuthority,
+                "acte-migration",
+                Right.values()
+        );
+
+
         for (ActeMigration acteMigration : acteMigrations) {
 
             try {
@@ -232,6 +242,8 @@ public class MigrationService {
                         new ArrayList<>(),
                         new TreeSet<>(),
                         localAuthority,
+                        groupUuid,
+                        localAuthority.getGenericProfileUuid(),
                         true
                 );
                 acte = acteRepository.save(acte);

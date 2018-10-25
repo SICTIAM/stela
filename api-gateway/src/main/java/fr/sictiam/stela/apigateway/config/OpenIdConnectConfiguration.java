@@ -33,7 +33,8 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
         return (path.contains("/api/") && !path.contains("/locales/")
                 && !path.contains("/api/admin/local-authority/all") && !path.contains("/api/api-gateway/loginWithSlug")
                 && !path.contains("/api/api-gateway/isMainDomain") && !path.contains("/api/admin/ozwillo")
-                && !path.contains("/api/admin/instance") && !path.contains("/api/acte/public"))
+                && !path.contains("/api/admin/instance") && !path.contains("/api/acte/public")
+                && !path.contains("/editeur/api/"))
                 && !path.contains("/ws/") && !path.contains("/externalws/") || path.contains("/index.html");
     }
 

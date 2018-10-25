@@ -140,6 +140,7 @@ public class LocalAuthorityRestController {
     public ResponseEntity migrationFromCurrent(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid,
             @PathVariable String migrationType,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "siren", required = false) String siren,

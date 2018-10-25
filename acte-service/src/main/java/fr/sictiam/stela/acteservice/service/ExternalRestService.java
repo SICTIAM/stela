@@ -2,21 +2,31 @@ package fr.sictiam.stela.acteservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.acteservice.model.LocalAuthority;
+import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.GenericAccount;
+import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ExternalRestService {
@@ -34,6 +44,38 @@ public class ExternalRestService {
                 .bodyToMono(String.class);
 
         Optional<String> opt = profile.blockOptional();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
+
+    public JsonNode getProfileForEmail(String siren, String email) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> profile = webClient
+                .get().uri("/api/admin/profile/local-authority/{siren}/{email}", siren, email).retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.empty())
+                .bodyToMono(String.class);
+
+        Optional<String> opt = profile.blockOptional();
+        if (!opt.isPresent()) return null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(opt.get());
+
+        return node;
+    }
+
+    public JsonNode getGroupsForLocalAuthority(String uuid) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> profile = webClient
+                .get().uri("/api/admin/local-authority/{uuid}/{moduleName}/group",
+                        uuid, "ACTES").retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response ->
+                        Mono.error(new RuntimeException("LocalAuthority not found")))
+                .bodyToMono(String.class);
+
+        Optional<String> opt = profile.blockOptional();
+        if (!opt.isPresent()) return null;
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode node = objectMapper.readTree(opt.get());
 
@@ -113,5 +155,35 @@ public class ExternalRestService {
         JsonNode node = objectMapper.readTree(opt.get());
 
         return node;
+    }
+
+    public LocalAuthority getLocalAuthorityByCertificate(Certificate certificate) {
+
+        LocalAuthority localAuthority = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            localAuthority = restTemplate.getForObject(
+                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/certificate/{serial}/{issuer}",
+                    LocalAuthority.class, certificate.getSerial(), certificate.getIssuer());
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND)
+                LOGGER.warn("No local authority for this certificate {}|{}", certificate.getSerial(), certificate.getIssuer());
+            else
+                LOGGER.error("Failed to find local authority from a certificate : {}", e.getMessage());
+        } catch (RestClientException e) {
+            LOGGER.error("Failed to find local authority from a certificate : {}", e.getMessage());
+        }
+
+        return localAuthority;
+    }
+
+    public String createGroup(LocalAuthority localAuthority, String name, Right[] rights) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForObject(
+                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/group/{name}",
+                new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
+                String.class,
+                localAuthority.getUuid(), name);
     }
 }

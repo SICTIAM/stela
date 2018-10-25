@@ -23,6 +23,7 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
+import fr.sictiam.stela.pesservice.model.sesile.ClasseurSirenRequest;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
@@ -41,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Element;
@@ -500,24 +502,32 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
-                classeur);
+        try {
+            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
+                    classeur);
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return new ResponseEntity<>(e.getStatusCode());
+        }
     }
 
-    public boolean checkDocumentSigned(LocalAuthority localAuthority, int document) {
-        return getDocument(localAuthority, document).isSigned();
+    public boolean checkDocumentSigned(LocalAuthority localAuthority, int documentId) {
+        Document document = getDocument(localAuthority, documentId);
+        return document != null && document.isSigned();
     }
 
     public boolean checkClasseurWithdrawn(LocalAuthority localAuthority, int classeurId) {
-        return checkClasseurStatus(localAuthority, classeurId).getBody().getStatus().equals(ClasseurStatus.WITHDRAWN);
+        ResponseEntity<Classeur> reponse = checkClasseurStatus(localAuthority, classeurId);
+        if (reponse.getStatusCode().isError()) return false;
+        return reponse.getBody().getStatus().equals(ClasseurStatus.WITHDRAWN);
     }
 
-    public Document getDocument(LocalAuthority localAuthority, int document) {
+    public Document getDocument(LocalAuthority localAuthority, int documentId) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-
-        return restTemplate
-                .exchange(getSesileUrl(localAuthority) + "/api/document/{id}", HttpMethod.GET, requestEntity, Document.class, document)
-                .getBody();
+        ResponseEntity<Document> document =
+                restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}", HttpMethod.GET,
+                        requestEntity, Document.class, documentId);
+        return document.getStatusCode().isError() ? null : document.getBody();
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document)
@@ -530,7 +540,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
         LOGGER.debug(classeur.toString());
-        HttpEntity<ClasseurRequest> requestEntity = new HttpEntity<>(classeur, getHeaders(localAuthority));
+        HttpEntity<ClasseurRequest> requestEntity = localAuthority.getSesileNewVersion() ?
+                new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren()), getHeaders(localAuthority)) :
+                new HttpEntity<>(classeur, getHeaders(localAuthority));
         return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
     }
 

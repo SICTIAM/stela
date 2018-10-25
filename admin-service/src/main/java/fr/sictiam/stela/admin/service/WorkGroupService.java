@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class WorkGroupService {
@@ -40,8 +42,23 @@ public class WorkGroupService {
         return create(workGroup);
     }
 
+    public WorkGroup createFromModules(String name, Set<String> rights, String localAuthorityUuid) {
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
+        WorkGroup workGroup = new WorkGroup(localAuthority, name);
+        workGroup.setRights(rights);
+        return create(workGroup);
+    }
+
     public List<WorkGroup> getAllByLocalAuthority(String localAuthorityUuid) {
         return workGroupRepository.findAllByLocalAuthority_Uuid(localAuthorityUuid);
+    }
+
+    public List<WorkGroup> getAllByLocalAuthorityAndModule(String localAuthorityUuid, String moduleName) {
+        List<WorkGroup> allGroups = getAllByLocalAuthority(localAuthorityUuid);
+        return allGroups.stream()
+                .filter(workGroup -> workGroup.getRights().stream()
+                        .anyMatch(right -> right.startsWith(moduleName + "_")))
+                .collect(Collectors.toList());
     }
 
     public WorkGroup getByUuid(String uuid) {

@@ -1,6 +1,5 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.DocumentException;
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.ActeHistory;
@@ -14,16 +13,11 @@ import fr.sictiam.stela.acteservice.model.StatusType;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
-import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
-import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotSentException;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.service.util.CertUtilService;
 import fr.sictiam.stela.acteservice.service.util.RightUtils;
-import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,14 +62,11 @@ public class ActeRestController {
 
     private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
-    private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService,
-            CertUtilService certUtilService) {
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
-        this.certUtilService = certUtilService;
     }
 
     @GetMapping
@@ -455,44 +445,6 @@ public class ActeRestController {
         }
         acteService.cancel(uuid);
         return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @PostMapping
-    ResponseEntity<Object> create(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate,
-            @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
-            @RequestParam("acte") String acteJson, @RequestParam("file") MultipartFile file,
-            @RequestParam("annexes") MultipartFile... annexes) {
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.ACTES_DEPOSIT))
-                || !certUtilService.checkCert(certificate, pairedCertificate)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            Acte acte = mapper.readValue(acteJson, Acte.class);
-
-            LOGGER.debug("Received acte : {}", acte.getObjet());
-            LOGGER.debug("Received main file {} with {} annexes", file.getOriginalFilename(), annexes.length);
-            List<ObjectError> errors = ValidationUtil.validateActeWithFile(acte, file, annexes);
-            if (!errors.isEmpty()) {
-                CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
-                return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
-            } else {
-                Acte result = acteService.create(currentLocalAuthority, acte, file, annexes);
-                return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
-            }
-
-        } catch (IOException e) {
-            LOGGER.error("IOException: Could not convert JSON to Acte: {}", e);
-            return new ResponseEntity<>("notifications.acte.sent.error.non_extractable_acte",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ActeNotSentException ns) {
-            LOGGER.error("ActeNotSentException: {}", ns);
-            return new ResponseEntity<>("notifications.acte.sent.error.acte_not_sent",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @GetMapping("/attachment-types/{acteNature}/{materialCode}")

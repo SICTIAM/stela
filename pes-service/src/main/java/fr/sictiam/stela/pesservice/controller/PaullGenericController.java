@@ -183,7 +183,7 @@ public class PaullGenericController {
         if (localAuthority.isPresent()) {
             ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
             Optional<GenericDocument> genericDocument = sesileService.getGenericDocument(idFlux);
-            if (classeurResponse.hasBody() && genericDocument.isPresent()) {
+            if (!classeurResponse.getStatusCode().isError() && classeurResponse.hasBody() && genericDocument.isPresent()) {
                 Classeur classeur = classeurResponse.getBody();
 
                 if (!classeur.getDocuments().isEmpty()) {
@@ -234,7 +234,7 @@ public class PaullGenericController {
         if (localAuthority.isPresent()) {
             ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
 
-            if (classeurResponse.hasBody()) {
+            if (!classeurResponse.getStatusCode().isError() && classeurResponse.hasBody()) {
                 Classeur classeur = classeurResponse.getBody();
 
                 if (!classeur.getDocuments().isEmpty()) {

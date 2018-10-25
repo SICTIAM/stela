@@ -4,20 +4,12 @@ import fr.sictiam.stela.acteservice.dao.ActeDraftRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentTypeRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeMode;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.Draft;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
-import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,16 +40,20 @@ public class DraftService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
 
+    private final ValidationService validationService;
+
     @Autowired
     public DraftService(ActeRepository acteRepository, ActeDraftRepository acteDraftRepository,
             AttachmentRepository attachmentRepository, AttachmentTypeRepository attachmentTypeRepository,
-            ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService) {
+            ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
+            ValidationService validationService) {
         this.acteRepository = acteRepository;
         this.acteDraftRepository = acteDraftRepository;
         this.attachmentRepository = attachmentRepository;
         this.attachmentTypeRepository = attachmentTypeRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.localAuthorityService = localAuthorityService;
+        this.validationService = validationService;
     }
 
     public Acte submitActeDraft(Acte acte) {
@@ -85,7 +81,7 @@ public class DraftService {
 
         CustomValidationUI customValidationUI = null;
         for (Acte acte : actes) {
-            List<ObjectError> errors = ValidationUtil.validateActe(acte);
+            List<ObjectError> errors = validationService.validateActe(acte);
             if (!errors.isEmpty()) {
                 if (customValidationUI == null) {
                     customValidationUI = new CustomValidationUI(errors, "has failed");

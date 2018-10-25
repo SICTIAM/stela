@@ -33,4 +33,6 @@ public interface ActeRepository extends JpaRepository<Acte, String> {
     List<Acte> findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(String uuid);
 
     List<Acte> findAllByDraftNullAndLocalAuthorityUuidAndArchive_Status(String uuid, ArchiveStatus archiveStatus);
+
+    List<Acte> findByNumberAndLocalAuthorityUuid(String number, String localAuthorityUuid);
 }

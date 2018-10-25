@@ -16,6 +16,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -95,14 +96,14 @@ public class Acte {
 
     @Enumerated(EnumType.STRING)
     StatusType lastHistoryStatus;
-    LocalDateTime  lastHistoryDate;
+    LocalDateTime lastHistoryDate;
     @Enumerated(EnumType.STRING)
     Flux lastHistoryFlux;
 
     public Acte() {
     }
 
-    public Acte (String uuid, String objet, LocalDateTime creation, LocalDate decision, String number, ActeNature nature, LocalDateTime lastHistoryDate, StatusType  lastHistoryStatus, Flux lastHistoryFlux) {
+    public Acte(String uuid, String objet, LocalDateTime creation, LocalDate decision, String number, ActeNature nature, LocalDateTime lastHistoryDate, StatusType lastHistoryStatus, Flux lastHistoryFlux) {
         this.uuid = uuid;
         this.objet = objet;
         this.creation = creation;
@@ -127,8 +128,8 @@ public class Acte {
 
     public Acte(String number, LocalDateTime creation, LocalDate decision, ActeNature nature, String code,
             String codeLabel, String objet, boolean isPublic, boolean isPublicWebsite, Attachment acteAttachment,
-            List<Attachment> annexes, SortedSet<ActeHistory> acteHistories, LocalAuthority localAuthority,
-            boolean imported) {
+            List<Attachment> annexes, SortedSet<ActeHistory> acteHistories, LocalAuthority localAuthority, String groupUuid,
+            String profileUuid, boolean imported) {
         this.number = number;
         this.creation = creation;
         this.decision = decision;
@@ -142,7 +143,28 @@ public class Acte {
         this.annexes = annexes;
         this.acteHistories = acteHistories;
         this.localAuthority = localAuthority;
+        this.groupUuid = groupUuid;
+        this.profileUuid = profileUuid;
         this.imported = imported;
+    }
+
+    public Acte(String number, String objet, ActeNature nature, String code, LocalDateTime creation, LocalDate decision,
+            Boolean isPublic, Boolean isPublicWebsite, String groupUuid, Attachment acteAttachment,
+            List<Attachment> annexes, String profileUuid, LocalAuthority localAuthority) {
+        this.number = number;
+        this.creation = creation;
+        this.decision = decision;
+        this.nature = nature;
+        this.code = code;
+        this.objet = objet;
+        this.isPublic = isPublic;
+        this.isPublicWebsite = isPublicWebsite;
+        this.groupUuid = groupUuid;
+        this.acteAttachment = acteAttachment;
+        this.annexes = annexes;
+        this.acteHistories = Collections.emptySortedSet();
+        this.profileUuid = profileUuid;
+        this.localAuthority = localAuthority;
     }
 
     public String getUuid() {

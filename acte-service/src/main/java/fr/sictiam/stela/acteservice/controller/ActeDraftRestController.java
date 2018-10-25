@@ -1,10 +1,6 @@
 package fr.sictiam.stela.acteservice.controller;
 
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeMode;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.Right;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeDraftUI;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
@@ -12,9 +8,9 @@ import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
+import fr.sictiam.stela.acteservice.service.ValidationService;
 import fr.sictiam.stela.acteservice.service.util.CertUtilService;
 import fr.sictiam.stela.acteservice.service.util.RightUtils;
-import fr.sictiam.stela.acteservice.validation.ValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +36,16 @@ public class ActeDraftRestController {
     private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
     private final CertUtilService certUtilService;
+    private final ValidationService validationService;
 
     @Autowired
     public ActeDraftRestController(DraftService draftService, ActeService acteService, LocalAuthorityService localAuthorityService,
-            CertUtilService certUtilService) {
+            CertUtilService certUtilService, ValidationService validationService) {
         this.draftService = draftService;
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
         this.certUtilService = certUtilService;
+        this.validationService = validationService;
     }
 
     @GetMapping("/draft/{mode}")
@@ -202,7 +200,7 @@ public class ActeDraftRestController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Acte acteDraft = draftService.getActeDraftByUuid(uuid);
-        List<ObjectError> errors = ValidationUtil.validateActe(acteDraft);
+        List<ObjectError> errors = validationService.validateActe(acteDraft);
         errors = acteService.metierValidation(acteDraft, errors);
         if (!errors.isEmpty()) {
             CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
@@ -271,7 +269,7 @@ public class ActeDraftRestController {
         if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        List<ObjectError> objectErrors = ValidationUtil.validateFile(file, nature, true, "acteAttachment");
+        List<ObjectError> objectErrors = validationService.validateFile(file, nature, true, "acteAttachment");
         if (!objectErrors.isEmpty()) {
             return new ResponseEntity<>(new CustomValidationUI(objectErrors, "has failed"), HttpStatus.BAD_REQUEST);
         }
@@ -296,7 +294,7 @@ public class ActeDraftRestController {
         if (!draftService.canAccessDraft(draftUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        List<ObjectError> objectErrors = ValidationUtil.validateFile(file, nature, false, "acte.extensions");
+        List<ObjectError> objectErrors = validationService.validateFile(file, nature, false, "acte.extensions");
         if (!objectErrors.isEmpty()) {
             return new ResponseEntity<>(new CustomValidationUI(objectErrors, "has failed"), HttpStatus.BAD_REQUEST);
         }
