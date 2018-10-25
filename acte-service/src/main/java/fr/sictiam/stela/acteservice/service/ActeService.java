@@ -730,7 +730,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         List<String> pages = new ArrayList<>();
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
         for (Acte acte : actes) {
-            if (acte.getActeHistories().last().getStatus().equals(StatusType.ACK_RECEIVED)) {
+            if (acte.getLastHistoryStatus().equals(StatusType.ACK_RECEIVED)) {
                 Map<String, String> mapString = new HashMap<String, String>() {
                     {
                         put("status", acte.getActeHistories().last().getStatus().toString());

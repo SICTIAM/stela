@@ -17,7 +17,6 @@ import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.service.util.CertUtilService;
 import fr.sictiam.stela.acteservice.service.util.RightUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -63,14 +62,11 @@ public class ActeRestController {
 
     private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
-    private final CertUtilService certUtilService;
 
     @Autowired
-    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService,
-            CertUtilService certUtilService) {
+    public ActeRestController(ActeService acteService, LocalAuthorityService localAuthorityService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
-        this.certUtilService = certUtilService;
     }
 
     @GetMapping
