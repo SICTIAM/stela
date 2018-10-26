@@ -2,6 +2,7 @@
   "pes": {
     "status": {
       "CREATED": "Déposé",
+      "CREATION_IN_PROGRESS": "En cours de transfert",
       "RECREATED": "Redéposé",
       "SENT": "Envoyé",
       "NOT_SENT": "Non envoyé",

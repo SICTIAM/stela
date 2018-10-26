@@ -62,6 +62,10 @@ public class StorageService {
         return attachment;
     }
 
+    public void storeAttachment(Attachment attachment) {
+        storeObject(attachment.getStorageKey(), attachment.getContent(), attachment.getFilename());
+    }
+
     public Attachment updateAttachment(Attachment attachment, byte[] content) {
         attachment.updateContent(content);
         storeObject(attachment.getStorageKey(), content, attachment.getFilename());
