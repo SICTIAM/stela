@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.service;
 
-import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import fr.sictiam.stela.pesservice.service.storage.StorageEngine;
@@ -17,9 +16,6 @@ import java.time.LocalDateTime;
 public class StorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageService.class);
-
-    @Autowired
-    private AttachmentRepository attachmentRepository;
 
     @Autowired
     private StorageEngine storageEngine;
@@ -61,7 +57,6 @@ public class StorageService {
 
     public Attachment createAttachment(String filename, byte[] content, LocalDateTime date) {
         Attachment attachment = new Attachment(filename, content, content.length, date);
-        attachmentRepository.saveAndFlush(attachment);
         storeObject(attachment.getStorageKey(), content, filename);
 
         return attachment;

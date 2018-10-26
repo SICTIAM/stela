@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 public class Attachment {
@@ -22,6 +23,8 @@ public class Attachment {
     private String filename;
     private long size;
 
+    private String storageKey;
+
     @JsonIgnore
     transient private byte[] content;
 
@@ -29,18 +32,7 @@ public class Attachment {
     private LocalDateTime date;
 
     public Attachment() {
-    }
-
-    public Attachment(String filename, long size) {
-        this.filename = filename;
-        this.size = size;
-        date = LocalDateTime.now();
-    }
-
-    public Attachment(String filename, long size, LocalDateTime date) {
-        this.filename = filename;
-        this.size = size;
-        this.date = date;
+        this(null, null, 0, LocalDateTime.now());
     }
 
     public Attachment(String filename, byte[] content, long size, LocalDateTime date) {
@@ -48,6 +40,7 @@ public class Attachment {
         this.content = content;
         this.size = size;
         this.date = date;
+        storageKey = "pes/" + UUID.randomUUID().toString();
     }
 
     public String getUuid() {
@@ -67,7 +60,7 @@ public class Attachment {
     }
 
     public String getStorageKey() {
-        return "pes/" + uuid;
+        return storageKey;
     }
 
     public byte[] getContent() {

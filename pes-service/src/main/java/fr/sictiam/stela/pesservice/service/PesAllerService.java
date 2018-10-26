@@ -12,6 +12,7 @@ import fr.sictiam.stela.pesservice.model.PesExport;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.PesHistoryError;
 import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.event.PesCreationEvent;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,7 +69,7 @@ import java.util.Optional;
 
 
 @Service
-public class PesAllerService {
+public class PesAllerService implements ApplicationListener<PesCreationEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesAllerService.class);
 
@@ -131,8 +133,7 @@ public class PesAllerService {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate
-            creationTo,
+    public List<PesAller> getAllWithQuery(String multifield, String objet, LocalDate creationFrom, LocalDate creationTo,
             StatusType status, Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -155,8 +156,7 @@ public class PesAllerService {
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
-    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesAller> pesRoot, String
-            multifield,
+    private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<PesAller> pesRoot, String multifield,
             String objet, LocalDate creationFrom, LocalDate creationTo, StatusType status,
             String currentLocalAuthUuid) {
         List<Predicate> predicates = new ArrayList<>();
@@ -210,18 +210,19 @@ public class PesAllerService {
     public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
 
         try {
-            Attachment attachment = storageService.createAttachment(file);
+            Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes(), file.getSize(), LocalDateTime.now());
 
             pesAller.setAttachment(attachment);
             pesAller.setCreation(LocalDateTime.now());
 
             populateFromByte(pesAller, file.getBytes());
 
+            // trigger event to store attachment
+            applicationEventPublisher.publishEvent(new PesCreationEvent(this, pesAller));
         } catch (IOException | StorageException e) {
             throw new PesCreationException();
         }
         return pesAller;
-
     }
 
     public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller) {
@@ -229,7 +230,7 @@ public class PesAllerService {
         pesAller.setProfileUuid(currentProfileUuid);
 
         pesAller = pesAllerRepository.saveAndFlush(pesAller);
-        updateStatus(pesAller.getUuid(), StatusType.CREATED);
+        updateStatus(pesAller.getUuid(), StatusType.CREATION_IN_PROGRESS);
         return pesAller;
     }
 
@@ -394,5 +395,12 @@ public class PesAllerService {
         int nbDays = Integer.parseInt(environment.getProperty("application.dailymail.retensiondays", "1"));
         return pesAllerRepository.findAllByLocalAuthority_UuidAndLastHistoryStatusAndLastHistoryDateGreaterThan(
                 localAuthorityUuid, StatusType.NACK_RECEIVED, LocalDateTime.now().minusDays(nbDays));
+    }
+
+    @Override
+    public void onApplicationEvent(PesCreationEvent event) {
+        Attachment attachment = event.getPesAller().getAttachment();
+        storageService.storeAttachment(attachment);
+        updateStatus(event.getPesAller().getUuid(), StatusType.CREATED);
     }
 }

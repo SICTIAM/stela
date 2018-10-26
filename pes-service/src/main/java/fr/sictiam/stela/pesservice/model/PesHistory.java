@@ -129,22 +129,6 @@ public class PesHistory implements Comparable<PesHistory> {
         return status;
     }
 
-    /*public byte[] getFile() {
-        return file;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }*/
-
     public String getMessage() {
         return message;
     }
