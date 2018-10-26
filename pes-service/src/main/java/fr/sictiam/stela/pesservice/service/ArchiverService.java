@@ -44,8 +44,8 @@ public class ArchiverService {
     private final StorageService storageService;
 
     public ArchiverService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
-            AttachmentRepository attachmentRepository, LocalAuthorityService localAuthorityService,
-            RestTemplate restTemplate, StorageService storageService) {
+                           AttachmentRepository attachmentRepository, LocalAuthorityService localAuthorityService,
+                           RestTemplate restTemplate, StorageService storageService) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -195,7 +195,7 @@ public class ArchiverService {
     }
 
     private AsalaeResultForm updateAsalaeDocument(AsalaeDocument asalaeDocument, PesAller pesAller,
-            ArchiveSettings archiveSettings) {
+                                                  ArchiveSettings archiveSettings) {
         StringBuilder url = new StringBuilder();
         url.append(archiveSettings.getPastellUrl())
                 .append("/api/v2/entite/")
@@ -212,7 +212,7 @@ public class ArchiverService {
     }
 
     private AsalaeResultForm updateFileAsalaeDocument(AsalaeDocument asalaeDocument, String fileType, String filename,
-            byte[] file, ArchiveSettings archiveSettings) {
+                                                      byte[] file, ArchiveSettings archiveSettings) {
         StringBuilder url = new StringBuilder();
         url.append(archiveSettings.getPastellUrl())
                 .append("/api/v2/entite/")
@@ -234,7 +234,7 @@ public class ArchiverService {
     }
 
     public ResponseEntity<AsalaeResultForm> sendAction(AsalaeDocument asalaeDocument, String action,
-            ArchiveSettings archiveSettings) {
+                                                       ArchiveSettings archiveSettings) {
         LOGGER.info("Sending action \"{}\" Asalae document {} to SAE...", action, asalaeDocument.getInfo().getId_d());
         if (asalaeDocument.getAction_possible().contains(action)) {
             StringBuilder url = new StringBuilder();
@@ -269,7 +269,7 @@ public class ArchiverService {
         pesAller.setAttachment(null);
 
         pesAller.getPesHistories().forEach(pesHistory -> {
-            // TODO : delete files on storage driver
+            storageService.deleteAttachmentContent(pesHistory.getAttachment());
             pesHistory.setAttachment(null);
             pesHistoryRepository.save(pesHistory);
         });
