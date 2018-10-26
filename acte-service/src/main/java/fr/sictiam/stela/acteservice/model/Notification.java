@@ -3,17 +3,13 @@ package fr.sictiam.stela.acteservice.model;
 import java.util.Arrays;
 import java.util.List;
 
-import static fr.sictiam.stela.acteservice.model.StatusType.ACK_RECEIVED;
-import static fr.sictiam.stela.acteservice.model.StatusType.CANCELLED;
-import static fr.sictiam.stela.acteservice.model.StatusType.NACK_RECEIVED;
-import static fr.sictiam.stela.acteservice.model.StatusType.SENT;
-
 public class Notification {
 
     public enum Type {
         SENT("SENT"),
         ACK_RECEIVED("ACK_RECEIVED"),
         NACK_RECEIVED("NACK_RECEIVED"),
+        ANOMALIES("ANOMALIES"),
         CANCELLED("CANCELLED");
 
         final String name;
@@ -37,6 +33,7 @@ public class Notification {
             new Notification(Type.ACK_RECEIVED, false, true, true),
             new Notification(Type.SENT, true, false, true),
             new Notification(Type.CANCELLED, true, false, true),
+            new Notification(Type.ANOMALIES, true, true, false),
             new Notification(Type.NACK_RECEIVED, true, true, false)
     );
 

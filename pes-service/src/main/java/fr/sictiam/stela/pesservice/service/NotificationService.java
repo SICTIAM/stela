@@ -69,9 +69,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                 || event.getPesHistory().getStatus().isAnomaly()) {
             try {
                 proccessEvent(event);
-            } catch (MessagingException e) {
-                LOGGER.error(e.getMessage());
-            } catch (IOException e) {
+            } catch (MessagingException | IOException e) {
                 LOGGER.error(e.getMessage());
             }
         }
