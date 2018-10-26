@@ -7,15 +7,9 @@
 <div>
     Bonjour <span th:text="${firstname}"/> <span th:text="${lastname}"/>,<br/><br/>
     Le PES <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/pes/' + ${pes.uuid}}" th:text="${pes.objet}"></a> est
-    en erreur &laquo; Anomalie trésorerie &raquo; :
-    <br/>
-    <ul>
-        <li th:each="error: ${errors}" th:if="${!#strings.isEmpty(error.title) && !#strings.isEmpty(error.message)}">
-            <span th:text="${error.title + ': ' + error.message + ' (' + error.source + ')'}"/>
-        </li>
-    </ul>
+    en erreur &laquo; Nombre de tentatives de renvoi automatique excédé &raquo;.
 </div>
-
+<br/>
 <div>
     <span>Cordialement,</span>
 </div>

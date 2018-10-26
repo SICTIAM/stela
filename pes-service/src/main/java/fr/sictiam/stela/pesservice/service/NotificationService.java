@@ -65,7 +65,8 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         List<String> notificationTypes = Notification.notifications.stream()
                 .map(n -> n.getType().toString())
                 .collect(Collectors.toList());
-        if (notificationTypes.contains(event.getPesHistory().getStatus().toString())) {
+        if (notificationTypes.contains(event.getPesHistory().getStatus().toString())
+                || event.getPesHistory().getStatus().isAnomaly()) {
             try {
                 proccessEvent(event);
             } catch (MessagingException e) {
@@ -80,7 +81,10 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
 
         Notification notification = Notification.notifications.stream()
-                .filter(n -> n.getType().toString().equals(event.getPesHistory().getStatus().toString()))
+                .filter(n -> n.getType().toString().equals(event.getPesHistory().getStatus().isAnomaly() ?
+                        Notification.Type.ANOMALIES.toString() :
+                        event.getPesHistory().getStatus().toString())
+                )
                 .findFirst().get();
 
         JsonNode profiles = externalRestService.getProfiles(pes.getLocalAuthority().getUuid());
@@ -92,22 +96,16 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                     && !pes.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (!notification.isDeactivatable() ||
+                if (!notification.isDeactivatable()
+                        || profileNotifications.stream()
+                        .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
+                                && notif.isActive())
+                        || (event.getPesHistory().getStatus().isAnomaly() &&
                         profileNotifications.stream()
-                                .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
-                                        && notif.isActive())
+                                .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
-                        Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
-                        ctx.setVariable("pes", pes);
-                        ctx.setVariable("errors", event.getPesHistory().getErrors());
-                        ctx.setVariable("baseUrl", applicationUrl);
-                        ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
-                        String msg = template.process("mails/copy_" + event.getPesHistory().getStatus().name() + "_fr", ctx);
-                        sendMail(getAgentMail(profile),
-                                localesService.getMessage("fr", "pes_notification",
-                                        "$.pes.copy." + event.getPesHistory().getStatus().name() + ".subject"),
-                                msg);
+                        sendMailWithMessage(pes, event, profile, false);
                         notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
@@ -124,22 +122,15 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (!notification.isDeactivatable() ||
+            if (!notification.isDeactivatable()
+                    || notifications.stream()
+                    .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
+                            && notif.isActive())
+                    || (event.getPesHistory().getStatus().isAnomaly() &&
                     notifications.stream()
-                            .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
-                                    && notif.isActive())
+                            .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
-                Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
-                ctx.setVariable("pes", pes);
-                ctx.setVariable("errors", event.getPesHistory().getErrors());
-                ctx.setVariable("baseUrl", applicationUrl);
-                ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
-                String msg = template.process("mails/" + event.getPesHistory().getStatus().name() + "_fr", ctx);
-                sendMail(getAgentMail(node),
-                        localesService.getMessage("fr", "pes_notification",
-                                "$.pes." + event.getPesHistory().getStatus().name() + ".subject"),
-                        msg);
-
+                sendMailWithMessage(pes, event, node, false);
                 if (notification.isNotificationStatus()) {
                     PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
                     pesService.updateHistory(pesHistory);
@@ -148,6 +139,23 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
             }
         }
 
+    }
+
+    private void sendMailWithMessage(PesAller pes, PesHistoryEvent event, JsonNode profileNode, boolean isCopy)
+            throws IOException, MessagingException {
+        Context ctx = new Context(Locale.FRENCH, getAgentInfo(profileNode));
+        ctx.setVariable("pes", pes);
+        ctx.setVariable("errors", event.getPesHistory().getErrors());
+        ctx.setVariable("baseUrl", applicationUrl);
+        ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
+        StatusType status = event.getPesHistory().getStatus();
+        String msg = template.process("mails/" + status.name() + "_fr", ctx);
+        sendMail(getAgentMail(profileNode),
+                localesService.getMessage("fr", "pes_notification",
+                        (isCopy ? "$.pes.copy." : "$.pes.")
+                                + (status.isAnomaly() ? Notification.Type.ANOMALIES.toString() : status.name())
+                                + ".subject"),
+                msg);
     }
 
     public List<NotificationValue> getNotificationValues(JsonNode node) {
