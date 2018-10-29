@@ -9,6 +9,7 @@ public class Notification {
         SENT("SENT"),
         ACK_RECEIVED("ACK_RECEIVED"),
         NACK_RECEIVED("NACK_RECEIVED"),
+        ANOMALIES("ANOMALIES"),
         DAILY_ERRORS("DAILY_ERRORS");
 
         final String name;
@@ -32,6 +33,7 @@ public class Notification {
             new Notification(Type.SENT, true, false, true),
             new Notification(Type.ACK_RECEIVED, false, true, true),
             new Notification(Type.NACK_RECEIVED, true, true,  false),
+            new Notification(Type.ANOMALIES, true, true,  false),
             new Notification(Type.DAILY_ERRORS, true, false, true)
     );
 

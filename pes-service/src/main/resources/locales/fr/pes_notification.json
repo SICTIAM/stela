@@ -6,6 +6,9 @@
     "NACK_RECEIVED":{
       "subject":"[Stela] Pes en erreur"
     },
+    "ANOMALIES":{
+      "subject":"[Stela] Pes en erreur"
+    },
     "SENT":{
     	"subject":"[Stela] Pes transmis"
     },
@@ -17,6 +20,9 @@
     	"subject":"[Stela] Pes reçu sur votre collectivité"
       },
       "NACK_RECEIVED":{
+        "subject":"[Stela] Pes en erreur sur votre collectivité"
+      },
+      "ANOMALIES":{
         "subject":"[Stela] Pes en erreur sur votre collectivité"
       },
       "SENT":{

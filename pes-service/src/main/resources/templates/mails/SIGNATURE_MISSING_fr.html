@@ -5,12 +5,11 @@
 </head>
 <body>
 <div>
-    Bonjour <span th:text="${firstname}"/> <span th:text="${lastname}"/>,<br/>
-    L'acte <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/actes/' + ${acte.uuid}}" th:text="${acte.objet}"></a> a
-    été annulé.
-    <br/><br/>
+    Bonjour <span th:text="${firstname}"/> <span th:text="${lastname}"/>,<br/><br/>
+    Le PES <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/pes/' + ${pes.uuid}}" th:text="${pes.objet}"></a> est
+    en erreur &laquo; Signature manquante &raquo;.
 </div>
-
+<br/>
 <div>
     <span>Cordialement,</span>
 </div>
