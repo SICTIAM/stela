@@ -1,6 +1,8 @@
 package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.sictiam.stela.acteservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.acteservice.model.ui.Views;
 import fr.sictiam.stela.acteservice.validation.EmailCollection;
 import org.hibernate.annotations.GenericGenerator;
@@ -40,8 +42,10 @@ public class Admin {
     @NotNull
     private boolean miatAvailable;
     @NotNull
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime unavailabilityMiatStartDate;
     @NotNull
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime unavailabilityMiatEndDate;
     @JsonView(Views.AdminAlertMessageView.class)
     private boolean alertMessageDisplayed;
