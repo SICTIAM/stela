@@ -1,6 +1,8 @@
 package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.sictiam.stela.acteservice.config.LocalDateSerializer;
 import fr.sictiam.stela.acteservice.model.migration.Migration;
 import fr.sictiam.stela.acteservice.model.ui.Views;
 
@@ -31,6 +33,7 @@ public class LocalAuthority {
     private String district;
     @JsonView(Views.LocalAuthorityPublicView.class)
     private String nature;
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate nomenclatureDate;
     private byte[] nomenclatureFile;
     private Boolean canPublishRegistre;
@@ -240,7 +243,7 @@ public class LocalAuthority {
 
     @Override
     public String toString() {
-        return "LocalAuthority{" + "uuid='" + uuid + '\'' + ", name='" + name + '\'' + ", slugName='" + slugName+ '\'' + ", siren='" + siren + '\''
+        return "LocalAuthority{" + "uuid='" + uuid + '\'' + ", name='" + name + '\'' + ", slugName='" + slugName + '\'' + ", siren='" + siren + '\''
                 + ", department='" + department + '\'' + ", district='" + district + '\'' + ", nature='" + nature + '\''
                 + ", nomenclatureDate=" + nomenclatureDate + ", canPublishRegistre=" + canPublishRegistre
                 + ", canPublishWebSite=" + canPublishWebSite + '}';

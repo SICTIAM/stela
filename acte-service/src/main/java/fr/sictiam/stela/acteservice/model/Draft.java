@@ -1,7 +1,10 @@
 package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import fr.sictiam.stela.acteservice.config.LocalDateSerializer;
+import fr.sictiam.stela.acteservice.config.LocalDateTimeSerializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -18,9 +21,11 @@ public class Draft {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String uuid;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime lastModified;
     private ActeMode mode;
     @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate decision;
     private ActeNature nature;
     private String groupUuid;

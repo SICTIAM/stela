@@ -2,7 +2,10 @@ package fr.sictiam.stela.acteservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.acteservice.config.LocalDateDeserializer;
+import fr.sictiam.stela.acteservice.config.LocalDateSerializer;
+import fr.sictiam.stela.acteservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.acteservice.model.ui.Views;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
@@ -38,8 +41,10 @@ public class Acte {
     @JsonView(Views.ActePublicView.class)
     private String number;
     @JsonView(Views.ActePublicView.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     @NotNull(groups = {RestValidation.class})
     @JsonView(Views.ActePublicView.class)
     private LocalDate decision;
@@ -96,6 +101,7 @@ public class Acte {
 
     @Enumerated(EnumType.STRING)
     StatusType lastHistoryStatus;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     LocalDateTime lastHistoryDate;
     @Enumerated(EnumType.STRING)
     Flux lastHistoryFlux;

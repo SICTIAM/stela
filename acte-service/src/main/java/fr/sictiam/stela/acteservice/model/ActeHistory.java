@@ -3,7 +3,9 @@ package fr.sictiam.stela.acteservice.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.acteservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.acteservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.acteservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -30,6 +32,7 @@ public class ActeHistory implements Comparable<ActeHistory> {
     @JsonView(Views.ActeHistoryFullView.class)
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonView(Views.ActeHistoryFullView.class)
     private LocalDateTime date;
     // Error messages can be quite lengthy

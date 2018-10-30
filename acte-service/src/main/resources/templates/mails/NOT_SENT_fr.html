@@ -6,8 +6,8 @@
 <body>
 <div>
     Bonjour <span th:text="${firstname}"/> <span th:text="${lastname}"/>,<br/>
-    L'acte <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/actes/' + ${acte.uuid}}" th:text="${acte.objet}"></a> a
-    été annulé.
+    L'acte <a th:href="@{${baseUrl} + '/' + ${localAuthority} +'/actes/' + ${acte.uuid}}" th:text="${acte.objet}"></a>
+    est en erreur &laquo; Non envoyé &raquo;.
     <br/><br/>
 </div>
 

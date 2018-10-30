@@ -64,12 +64,11 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         List<String> notificationTypes = Notification.notifications.stream().map(n -> n.getType().toString())
                 .collect(Collectors.toList());
-        if (notificationTypes.contains(event.getActeHistory().getStatus().toString())) {
+        if (notificationTypes.contains(event.getActeHistory().getStatus().toString())
+                || event.getActeHistory().getStatus().isAnomaly()) {
             try {
                 proccessEvent(event);
-            } catch (MessagingException e) {
-                LOGGER.error(e.getMessage());
-            } catch (IOException e) {
+            } catch (MessagingException | IOException e) {
                 LOGGER.error(e.getMessage());
             }
         }
@@ -79,7 +78,9 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
 
         Notification notification = Notification.notifications.stream().filter(
-                n -> n.getType().toString().equals(event.getActeHistory().getStatus().toString())
+                n -> n.getType().toString().equals(event.getActeHistory().getStatus().isAnomaly() ?
+                        Notification.Type.ANOMALIES.toString() :
+                        event.getActeHistory().getStatus().toString())
         ).findFirst().get();
 
         JsonNode profiles = externalRestService.getProfiles(acte.getLocalAuthority().getUuid());
@@ -91,21 +92,16 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                     && !acte.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (!notification.isDeactivatable() ||
+                if (!notification.isDeactivatable()
+                        || profileNotifications.stream()
+                        .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
+                                && notif.isActive())
+                        || (event.getActeHistory().getStatus().isAnomaly() &&
                         profileNotifications.stream()
-                                .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
-                                        && notif.isActive())
+                                .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
-                        Context ctx = new Context(Locale.FRENCH, getAgentInfo(profile));
-                        ctx.setVariable("acte", acte);
-                        ctx.setVariable("baseUrl", applicationUrl);
-                        ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
-                        String msg = template.process("mails/copy_" + event.getActeHistory().getStatus().name() + "_fr", ctx);
-                        sendMail(getAgentMail(profile),
-                                localesService.getMessage("fr", "acte_notification",
-                                        "$.acte.copy." + event.getActeHistory().getStatus().name() + ".subject"),
-                                msg);
+                        sendMailWithMessage(acte, event, profile, false);
                         notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
@@ -122,23 +118,15 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
             JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (!notification.isDeactivatable() ||
+            if (!notification.isDeactivatable()
+                    || notifications.stream()
+                    .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
+                            && notif.isActive())
+                    || (event.getActeHistory().getStatus().isAnomaly() &&
                     notifications.stream()
-                            .anyMatch(notif -> notif.getName().equals(event.getActeHistory().getStatus().toString())
-                                    && notif.isActive())
+                            .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
-
-
-                Context ctx = new Context(Locale.FRENCH, getAgentInfo(node));
-                ctx.setVariable("acte", acte);
-                ctx.setVariable("baseUrl", applicationUrl);
-                ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
-                String msg = template.process("mails/" + event.getActeHistory().getStatus().name() + "_fr", ctx);
-                sendMail(getAgentMail(node),
-                        localesService.getMessage("fr", "acte_notification",
-                                "$.acte." + event.getActeHistory().getStatus().name() + ".subject"),
-                        msg);
-
+                sendMailWithMessage(acte, event, node, false);
                 if (notification.isNotificationStatus()) {
                     ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
                     applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
@@ -146,6 +134,22 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
             }
         }
 
+    }
+
+    private void sendMailWithMessage(Acte acte, ActeHistoryEvent event, JsonNode profileNode, boolean isCopy)
+            throws IOException, MessagingException {
+        Context ctx = new Context(Locale.FRENCH, getAgentInfo(profileNode));
+        ctx.setVariable("acte", acte);
+        ctx.setVariable("baseUrl", applicationUrl);
+        ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
+        StatusType status = event.getActeHistory().getStatus();
+        String msg = template.process("mails/" + status.name() + "_fr", ctx);
+        sendMail(getAgentMail(profileNode),
+                localesService.getMessage("fr", "acte_notification",
+                        (isCopy ? "$.acte.copy." : "$.acte.")
+                                + (status.isAnomaly() ? Notification.Type.ANOMALIES.toString() : status.name())
+                                + ".subject"),
+                msg);
     }
 
     public List<NotificationValue> getNotificationValues(JsonNode node) {

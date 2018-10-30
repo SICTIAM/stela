@@ -1,29 +1,35 @@
 {
   "acte": {
-    "ACK_RECEIVED":{
-      "subject":"[Stela] Acte reçu"
+    "ACK_RECEIVED": {
+      "subject": "[Stela] Acte reçu"
     },
-    "SENT":{
-      "subject":"[Stela] Acte transmis"
+    "SENT": {
+      "subject": "[Stela] Acte transmis"
     },
-    "NACK_RECEIVED":{
-      "subject":"[Stela] Acte rejeté"
+    "NACK_RECEIVED": {
+      "subject": "[Stela] Acte rejeté"
     },
-    "CANCELLED":{
-      "subject":"[Stela] Acte annulé"
+    "ANOMALIES": {
+      "subject": "[Stela] Acte en erreur"
     },
-    "copy":{
-      "ACK_RECEIVED":{
-        "subject":"[Stela] Acte reçu sur votre collectivité"
+    "CANCELLED": {
+      "subject": "[Stela] Acte annulé"
+    },
+    "copy": {
+      "ACK_RECEIVED": {
+        "subject": "[Stela] Acte reçu sur votre collectivité"
       },
-      "SENT":{
-        "subject":"[Stela] Acte transmis sur votre collectivité"
+      "SENT": {
+        "subject": "[Stela] Acte transmis sur votre collectivité"
       },
-      "NACK_RECEIVED":{
-        "subject":"[Stela] Acte rejeté sur votre collectivité"
+      "NACK_RECEIVED": {
+        "subject": "[Stela] Acte rejeté sur votre collectivité"
       },
-      "CANCELLED":{
-        "subject":"[Stela] Acte annulé sur votre collectivité"
+      "ANOMALIES": {
+        "subject": "[Stela] Acte en erreur sur votre collectivité"
+      },
+      "CANCELLED": {
+        "subject": "[Stela] Acte annulé sur votre collectivité"
       }
     },
     "unittest": "Bonjour ${firstname} ${lastname}, le test unitaire est passé"

@@ -95,9 +95,11 @@
             "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
             "ACTES_SENT": "Envoi réussi d'un acte",
             "ACTES_CANCELLED": "Annulation d'un acte",
-            "ACTES_NACK_RECEIVED": "Réception d'une anomalie d'un acte",
+            "ACTES_NACK_RECEIVED": "Réception d'une anomalie de la Préfecture pour un acte",
+            "ACTES_ANOMALIES": "Toutes anomalies concernant un acte",
             "PES_ACK_RECEIVED": "Réception de l'AR d'un PES",
-            "PES_NACK_RECEIVED": "Réception d'une anomalie d'un PES",
+            "PES_NACK_RECEIVED": "Réception d'une anomalie de la trésorerie pour un PES",
+            "PES_ANOMALIES": "Toutes anomalies concernant un flux PES",
             "PES_SENT": "Envoi réussi d'un PES",
             "PES_DAILY_ERRORS": "Courriel quotidien des PES en erreur"
         },
