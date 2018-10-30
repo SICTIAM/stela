@@ -1,11 +1,13 @@
 package fr.sictiam.stela.pesservice.service.util;
 
 import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,9 @@ public class FTPUploaderService {
     @Value("${application.ftp.password}")
     private String password;
 
+    @Autowired
+    StorageService storageService;
+
     public void uploadFile(PesAller pesAller) throws IOException {
         try {
             FTPClient ftpClient = createFTPClient();
@@ -40,7 +45,7 @@ public class FTPUploaderService {
                     + "#" + pesAller.getPostId() + "#" + pesAller.getBudCode());
 
             LOGGER.info("Uploading file {} to FTP server", pesAller.getAttachment().getFilename());
-            InputStream input = new ByteArrayInputStream(pesAller.getAttachment().getFile());
+            InputStream input = new ByteArrayInputStream(storageService.getAttachmentContent(pesAller.getAttachment()));
             ftpClient.storeFile(pesAller.getAttachment().getFilename(), input);
             int reply = ftpClient.getReplyCode();
             LOGGER.info("Reply from FTP server: {}", reply);

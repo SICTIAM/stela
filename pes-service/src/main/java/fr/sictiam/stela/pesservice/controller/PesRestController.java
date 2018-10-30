@@ -13,6 +13,7 @@ import fr.sictiam.stela.pesservice.model.util.RightUtils;
 import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.FileNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.service.util.CertUtilService;
@@ -56,6 +57,7 @@ public class PesRestController {
     private final PesAllerService pesAllerService;
     private final PesRetourService pesRetourService;
     private final CertUtilService certUtilService;
+    private final StorageService storageService;
 
     @Value("${application.filenamepattern}")
     private String fileNamePattern;
@@ -67,10 +69,12 @@ public class PesRestController {
     private ReceiverTask receiverTask;
 
     @Autowired
-    public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService, CertUtilService certUtilService) {
+    public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService, CertUtilService certUtilService,
+            StorageService storageService) {
         this.pesAllerService = pesAllerService;
         this.pesRetourService = pesRetourService;
         this.certUtilService = certUtilService;
+        this.storageService = storageService;
     }
 
     @GetMapping
@@ -153,12 +157,10 @@ public class PesRestController {
                 CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
                 return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
             }
-            pesAller = pesAllerService.populateFromFile(pesAller, file);
-            if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
-                return new ResponseEntity<>("notifications.pes.sent.error.existing_file_name", HttpStatus.BAD_REQUEST);
-            }
-            PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller);
+
+            PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+
         } catch (IOException e) {
             throw new PesCreationException();
         }
@@ -172,8 +174,8 @@ public class PesRestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         PesAller pesAller = pesAllerService.getByUuid(uuid);
-        outputFile(response, pesAller.getAttachment().getFile(), pesAller.getAttachment().getFilename(), disposition);
-        return new ResponseEntity<Object>(HttpStatus.OK);
+        outputFile(response, storageService.getAttachmentContent(pesAller.getAttachment()), pesAller.getAttachment().getFilename(), disposition);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}/history/{historyUuid}/file")
@@ -184,9 +186,10 @@ public class PesRestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         PesHistory pesHistory = pesAllerService.getHistoryByUuid(historyUuid);
-        if (pesHistory.getFile() != null) {
-            outputFile(response, pesHistory.getFile(), pesHistory.getFileName(), disposition);
-            return new ResponseEntity<Object>(HttpStatus.OK);
+        byte[] content = storageService.getAttachmentContent(pesHistory.getAttachment());
+        if (content != null) {
+            outputFile(response, content, pesHistory.getAttachment().getFilename(), disposition);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else
             throw new FileNotFoundException();
     }
@@ -228,7 +231,7 @@ public class PesRestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         PesRetour pesRetour = pesRetourService.getByUuid(uuid);
-        outputFile(response, pesRetour.getAttachment().getFile(), pesRetour.getAttachment().getFilename(), disposition);
+        outputFile(response, storageService.getAttachmentContent(pesRetour.getAttachment()), pesRetour.getAttachment().getFilename(), disposition);
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 

@@ -1,5 +1,11 @@
 archivesBaseName = 'stela-pes-service'
 
+dependencyManagement {
+    imports {
+        mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.433'
+    }
+}
+
 dependencies {
     compile(project(':signature-lib')) {
         compile('org.bouncycastle:bcprov-jdk15on:1.58')
@@ -34,6 +40,7 @@ dependencies {
     compile('ch.qos.logback:logback-classic:1.2.3')
     compile('org.codehaus.janino:janino:3.0.6')
     compile('com.vladmihalcea:hibernate-types-52:2.3.0')
+    compile('com.amazonaws:aws-java-sdk-s3')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')

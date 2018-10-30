@@ -2,7 +2,6 @@ package fr.sictiam.stela.pesservice.soap.endpoints;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
@@ -14,6 +13,7 @@ import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.SesileService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.soap.model.paull.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import io.jsonwebtoken.Claims;
@@ -55,15 +55,17 @@ public class PaullEndpoint {
     private final LocalAuthorityService localAuthorityService;
     private final ExternalRestService externalRestService;
     private final SesileService sesileService;
+    private final StorageService storageService;
 
     public PaullEndpoint(PesAllerService pesAllerService, LocalAuthorityService localAuthorityService,
             SoapReturnGenerator soapReturnGenerator, ExternalRestService externalRestService,
-            PesRetourService pesRetourService, SesileService sesileService) {
+            PesRetourService pesRetourService, SesileService sesileService, StorageService storageService) {
         this.pesAllerService = pesAllerService;
         this.localAuthorityService = localAuthorityService;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
         this.sesileService = sesileService;
+        this.storageService = storageService;
     }
 
     PaullSoapToken getToken(String sessionID) {
@@ -130,8 +132,6 @@ public class PaullEndpoint {
                         returnMessage = "INVALID_DATAS";
                     }
 
-                    Attachment attachment = new Attachment(file, name, file.length);
-                    pesAller.setAttachment(attachment);
                     pesAller.setCreation(LocalDateTime.now());
 
                     if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
@@ -144,7 +144,7 @@ public class PaullEndpoint {
                         pesAller.setValidationLimit(deadline);
                     }
                     pesAller.setPj(depotPESAllerStruct1.getPESPJ() == 1);
-                    pesAller = pesAllerService.populateFromByte(pesAller, file);
+
                     if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                         returnMessage = "DUPLICATE_FILE";
                     } else {
@@ -162,7 +162,7 @@ public class PaullEndpoint {
                                 currentProfileUuid = jsonNode.get("uuid").asText();
                             }
                             PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid,
-                                    pesAller);
+                                    pesAller, name, file);
                             status = "OK";
                             returnMessage = "SUCCES";
                             depotPESAllerStruct.setIdPesAller(result.getUuid());
@@ -275,7 +275,7 @@ public class PaullEndpoint {
                 PesAller pesAller = pesAllerService.getByUuid(getPESAllerRequest.getIdPesAller());
 
                 pesAllerStruct.setFilename(pesAller.getAttachment().getFilename());
-                pesAllerStruct.setBase64(Base64.encode(pesAller.getAttachment().getFile()));
+                pesAllerStruct.setBase64(Base64.encode(storageService.getAttachmentContent(pesAller.getAttachment())));
 
                 returnMessage = "SUCCESS";
                 status = "OK";
