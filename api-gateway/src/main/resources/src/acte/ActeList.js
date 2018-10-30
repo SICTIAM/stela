@@ -38,12 +38,13 @@ class ActeList extends Component {
         },
         limit: 25,
         offset: 0,
+        currentPage: 0,
         fetchStatus: ''
     }
     componentDidMount() {
         const itemPerPage = localStorage.getItem('itemPerPage')
-        if (!itemPerPage) localStorage.setItem('itemPerPage', 25)
-        else this.setState({ limit: 25 }, this.submitForm)
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search
@@ -62,7 +63,7 @@ class ActeList extends Component {
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, () => this.submitForm())
+        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
     }
     sort = (clickedColumn) => {
         const { column, direction } = this.state
@@ -73,7 +74,7 @@ class ActeList extends Component {
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
     }
     updateItemPerPage = (limit) => {
-        this.setState({ limit }, this.submitForm)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     submitForm = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -175,7 +176,8 @@ class ActeList extends Component {
                 pageCount={pageCount}
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage} />
+                updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage} />
         return (
             <Page title={t('acte.list.title')}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>

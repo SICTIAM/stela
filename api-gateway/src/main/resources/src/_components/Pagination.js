@@ -21,9 +21,11 @@ class Pagination extends Component {
     }
     render() {
         const { t } = this.context
-        const { columns, pageCount, handlePageClick, itemPerPage } = this.props
+        const { columns, pageCount, handlePageClick, itemPerPage, currentPage } = this.props
         const options = [
-            { key: 25, text: 25, value: 25 }
+            { key: 25, text: 25, value: 25 },
+            { key: 50, text: 50, value: 50 },
+            { key: 100, text: 100, value: 100 }
         ]
         return (
             <Table.Footer>
@@ -42,7 +44,8 @@ class Pagination extends Component {
                             previousLinkClassName={'icon item'}
                             nextLinkClassName={'icon item'}
                             pageLinkClassName={'item'}
-                            activeClassName={'active'} />
+                            activeClassName={'active'}
+                            forcePage={currentPage} />
                     </Table.HeaderCell>
                 </Table.Row>
             </Table.Footer>
