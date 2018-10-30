@@ -1,5 +1,8 @@
 package fr.sictiam.stela.acteservice.model.ui;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.sictiam.stela.acteservice.config.LocalDateSerializer;
+import fr.sictiam.stela.acteservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.acteservice.model.ActeMode;
 import fr.sictiam.stela.acteservice.model.ActeNature;
 
@@ -11,8 +14,10 @@ public class DraftUI {
 
     private String uuid;
     private List<ActeDraftUI> actes;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime lastModified;
     private ActeMode mode;
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate decision;
     private ActeNature nature;
     private String groupUuid;
