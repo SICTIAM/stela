@@ -606,7 +606,7 @@ class NewActeForm extends Component {
                     {this.props.mode !== 'ACTE_BATCH' && (
                         <div style={{ textAlign: 'right' }}>
                             {this.state.fields.uuid && (
-                                <Button style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red'
+                                <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red'
                                     disabled={isFormSaving} loading={isFormSaving}>
                                     {t('api-gateway:form.delete_draft')}
                                 </Button>
