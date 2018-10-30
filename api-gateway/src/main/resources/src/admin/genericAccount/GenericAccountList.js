@@ -28,6 +28,7 @@ class GenericAccountList extends Component {
         column: '',
         direction: '',
         limit: 25,
+        currentPage: 0,
         offset: 0,
         fetchStatus: ''
     }
@@ -65,7 +66,7 @@ class GenericAccountList extends Component {
     }
     handlePageClick = data => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, () => this.submitForm())
+        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
     }
     sort = clickedColumn => {
         const { column, direction } = this.state
@@ -76,7 +77,7 @@ class GenericAccountList extends Component {
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
     }
     updateItemPerPage = limit => {
-        this.setState({ limit }, this.submitForm)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     render() {
         const { t } = this.context
@@ -96,6 +97,7 @@ class GenericAccountList extends Component {
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
                 updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage}
             />
         )
         return (

@@ -28,6 +28,7 @@ class PesRetourList extends Component {
         },
         totalCount: 0,
         limit: 25,
+        currentPage: 0,
         offset: 0
     }
     componentDidMount() {
@@ -62,10 +63,10 @@ class PesRetourList extends Component {
     }
     handlePageClick = data => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, () => this.submitForm())
+        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
     }
     updateItemPerPage = limit => {
-        this.setState({ limit }, this.submitForm)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     render() {
         const { t } = this.context
@@ -87,7 +88,8 @@ class PesRetourList extends Component {
                 pageCount={pageCount}
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage} />
+                updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage} />
         )
         return (
             <Page title={t('pes.retour.list.title')}>
