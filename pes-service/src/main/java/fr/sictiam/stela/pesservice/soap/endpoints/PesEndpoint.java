@@ -71,7 +71,7 @@ public class PesEndpoint {
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
         this.storageService = storageService;
-        this.objectFactory = new ObjectFactory();
+        objectFactory = new ObjectFactory();
     }
 
     public AuthHeader extractHeader(SoapHeaderElement soapHeaderElement) {
@@ -445,7 +445,7 @@ public class PesEndpoint {
                     } catch (UnsupportedEncodingException | Base64DecodingException e) {
                         LOGGER.error(e.getMessage());
                     }
-                    return storageService.createAttachment(name, byteArray);
+                    return new Attachment(name, byteArray);
                 }).collect(Collectors.toList());
 
                 Attachment mainAttachement = attachments.remove(0);
@@ -461,16 +461,16 @@ public class PesEndpoint {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "INVALID_DATAS"));
                     return returnObject;
                 }
-                pesAller.setAttachment(mainAttachement);
+
                 pesAller.setCreation(LocalDateTime.now());
-                pesAller = pesAllerService.populateFromByte(pesAller, mainAttachement.getContent());
+
                 if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "DUPLICATE_FILE"));
                     return returnObject;
                 }
 
                 pesAllerService.create(localAuthorityService.getByUuid(sendGroup).getGenericProfileUuid(), sendGroup,
-                        pesAller);
+                        pesAller, mainAttachement.getFilename(), mainAttachement.getContent());
 
                 returnObject.setRetour(soapReturnGenerator.generateReturn("OK", "_HELIOS_OK_INSERT"));
             }

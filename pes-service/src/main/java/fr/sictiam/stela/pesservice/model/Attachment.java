@@ -35,6 +35,10 @@ public class Attachment {
         this(null, null, 0, LocalDateTime.now());
     }
 
+    public Attachment(String filename, byte[] content) {
+        this(filename, content, content.length, LocalDateTime.now());
+    }
+
     public Attachment(String filename, byte[] content, long size, LocalDateTime date) {
         this.filename = filename;
         this.content = content;

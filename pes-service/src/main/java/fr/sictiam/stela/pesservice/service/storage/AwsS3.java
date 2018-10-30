@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.google.common.collect.ImmutableMap;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 @Service
 @Profile({ "integration", "prod", "test", "atd24" })
-public class AwsS3 implements StorageEngine {
+public class AwsS3 implements StorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsS3.class);
 
@@ -84,7 +85,6 @@ public class AwsS3 implements StorageEngine {
         storeObject(key, content, ImmutableMap.of("filename", filename));
     }
 
-    @Override
     public void storeObject(String key, byte[] content, Map<String, String> metaData) throws StorageException {
 
         try {

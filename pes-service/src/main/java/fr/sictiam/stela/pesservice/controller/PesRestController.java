@@ -70,7 +70,7 @@ public class PesRestController {
 
     @Autowired
     public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService, CertUtilService certUtilService,
-                             StorageService storageService) {
+            StorageService storageService) {
         this.pesAllerService = pesAllerService;
         this.pesRetourService = pesRetourService;
         this.certUtilService = certUtilService;
@@ -157,12 +157,10 @@ public class PesRestController {
                 CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
                 return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
             }
-            pesAller = pesAllerService.populateFromFile(pesAller, file);
-            if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
-                return new ResponseEntity<>("notifications.pes.sent.error.existing_file_name", HttpStatus.BAD_REQUEST);
-            }
-            PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller);
+
+            PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
+
         } catch (IOException e) {
             throw new PesCreationException();
         }

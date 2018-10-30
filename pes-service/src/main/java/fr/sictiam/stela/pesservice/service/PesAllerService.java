@@ -18,7 +18,6 @@ import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
-import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import fr.sictiam.stela.pesservice.service.util.FTPUploaderService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -207,32 +206,42 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
 
     }
 
-    public PesAller populateFromFile(PesAller pesAller, MultipartFile file) {
+    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller,
+            String filename, byte[] content) throws PesCreationException {
 
-        try {
-            Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes(), file.getSize(), LocalDateTime.now());
-
-            pesAller.setAttachment(attachment);
-            pesAller.setCreation(LocalDateTime.now());
-
-            populateFromByte(pesAller, file.getBytes());
-
-            // trigger event to store attachment
-            applicationEventPublisher.publishEvent(new PesCreationEvent(this, pesAller));
-        } catch (IOException | StorageException e) {
-            throw new PesCreationException();
-        }
-        return pesAller;
-    }
-
-    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller) {
         pesAller.setLocalAuthority(localAuthorityService.getByUuid(currentLocalAuthUuid));
         pesAller.setProfileUuid(currentProfileUuid);
 
+        Attachment attachment = new Attachment(filename, content, content.length, LocalDateTime.now());
+
+        pesAller.setAttachment(attachment);
+        pesAller.setCreation(LocalDateTime.now());
+
+        populateFromByte(pesAller, content);
+
+        if (getByFileName(pesAller.getFileName()).isPresent()) {
+            throw new PesCreationException("notifications.pes.sent.error.existing_file_name", null);
+        }
+
         pesAller = pesAllerRepository.saveAndFlush(pesAller);
         updateStatus(pesAller.getUuid(), StatusType.CREATION_IN_PROGRESS);
+        // trigger event to store attachment
+        applicationEventPublisher.publishEvent(new PesCreationEvent(this, pesAller));
+
         return pesAller;
     }
+
+    public PesAller create(String currentProfileUuid, String currentLocalAuthUuid, PesAller pesAller,
+            MultipartFile file) throws PesCreationException {
+
+        try {
+            return create(currentProfileUuid, currentLocalAuthUuid, pesAller, file.getOriginalFilename(), file.getBytes());
+        } catch (IOException e) {
+            LOGGER.error("Failed to read file content : {}", e.getMessage());
+            throw new PesCreationException("Failed to read file content", e);
+        }
+    }
+
 
     public PesAller getByUuid(String uuid) {
         return pesAllerRepository.findById(uuid).orElseThrow(PesNotFoundException::new);
@@ -400,6 +409,8 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
     @Override
     public void onApplicationEvent(PesCreationEvent event) {
         Attachment attachment = event.getPesAller().getAttachment();
+        LOGGER.error("GERALD Pes {} : {}", event.getPesAller().getUuid(), event.getPesAller().getObjet());
+        LOGGER.error("GERALD Attachment {} : {}", attachment.getUuid(), attachment.getFilename());
         storageService.storeAttachment(attachment);
         updateStatus(event.getPesAller().getUuid(), StatusType.CREATED);
     }

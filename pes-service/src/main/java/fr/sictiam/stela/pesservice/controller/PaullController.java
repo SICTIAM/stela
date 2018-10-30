@@ -68,7 +68,7 @@ public class PaullController {
         this.storageService = storageService;
     }
 
-    @JsonPropertyOrder({"status", "status_message", "data"})
+    @JsonPropertyOrder({ "status", "status_message", "data" })
     class PaullResponse {
 
         String status;
@@ -178,7 +178,7 @@ public class PaullController {
                 status = HttpStatus.BAD_REQUEST;
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
             }
-            pesAller = pesAllerService.populateFromFile(pesAller, multiFile);
+
             if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                 status = HttpStatus.BAD_REQUEST;
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
@@ -195,7 +195,7 @@ public class PaullController {
                     JsonNode jsonNode = externalRestService.getProfileByLocalAuthoritySirenAndEmail(siren, email);
                     currentProfileUuid = jsonNode.get("uuid").asText();
                 }
-                PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller);
+                PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, multiFile);
                 data.put("idFlux", result.getUuid());
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
             }

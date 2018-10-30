@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pesservice.service.storage;
 
 import com.google.common.collect.ImmutableMap;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 @Service
 @Profile({ "dev", "dev-docker" })
-public class Filesystem implements StorageEngine {
+public class Filesystem implements StorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Filesystem.class);
 
@@ -65,7 +66,6 @@ public class Filesystem implements StorageEngine {
         storeObject(key, content, ImmutableMap.of("filename", filename));
     }
 
-    @Override
     public void storeObject(String key, byte[] content, Map<String, String> metaData) throws StorageException {
 
         try {

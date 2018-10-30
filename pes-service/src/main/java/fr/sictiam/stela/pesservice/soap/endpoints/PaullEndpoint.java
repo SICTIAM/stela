@@ -2,7 +2,6 @@ package fr.sictiam.stela.pesservice.soap.endpoints;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
@@ -133,8 +132,6 @@ public class PaullEndpoint {
                         returnMessage = "INVALID_DATAS";
                     }
 
-                    Attachment attachment = storageService.createAttachment(name, file);
-                    pesAller.setAttachment(attachment);
                     pesAller.setCreation(LocalDateTime.now());
 
                     if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
@@ -147,7 +144,7 @@ public class PaullEndpoint {
                         pesAller.setValidationLimit(deadline);
                     }
                     pesAller.setPj(depotPESAllerStruct1.getPESPJ() == 1);
-                    pesAller = pesAllerService.populateFromByte(pesAller, file);
+
                     if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                         returnMessage = "DUPLICATE_FILE";
                     } else {
@@ -165,7 +162,7 @@ public class PaullEndpoint {
                                 currentProfileUuid = jsonNode.get("uuid").asText();
                             }
                             PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid,
-                                    pesAller);
+                                    pesAller, name, file);
                             status = "OK";
                             returnMessage = "SUCCES";
                             depotPESAllerStruct.setIdPesAller(result.getUuid());
