@@ -200,7 +200,8 @@ export default class StelaTable extends Component {
                                     !undisplayedColumnsProperties.includes(metaData.property) &&
                                     <Table.HeaderCell key={index + '-' + metaData.displayName}
                                         sorted={column === metaData.property ? direction : null}
-                                        onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
+                                        onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}
+                                        width= {metaData.width ? metaData.width : 0 }>
                                         {metaData.displayName}
                                     </Table.HeaderCell>
                                 )}
@@ -227,7 +228,8 @@ export default class StelaTable extends Component {
                                         <Table.Cell onClick={() => this.handleLink(row[this.props.linkProperty])}
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}
                                             key={index + '-' + row[displayedColumn.property]}
-                                            collapsing={!!displayedColumn.collapsing}>
+                                            collapsing={!!displayedColumn.collapsing}
+                                            verticalAlign= "top">
                                             {displayedColumn.displayComponent ?
                                                 displayedColumn.property === '_self' ?
                                                     displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
