@@ -90,7 +90,7 @@ class Pes extends Component {
         return (
             <Page title={pes.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
-                    <Anomaly header={t('pes.page.title_anomaly')} lastHistory={lastHistory} />
+                    <Anomaly header={lastHistory && t('pes.status.'+lastHistory.status)} lastHistory={lastHistory} />
                     <Segment>
                         <Label className="labelStatus" color={pes.lastHistoryStatus ? this.getStatusColor(pes.lastHistoryStatus) : 'blue'} ribbon>
                             {pes.lastHistoryStatus && t(`pes.status.${pes.lastHistoryStatus}`)}

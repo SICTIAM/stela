@@ -150,7 +150,7 @@ class Acte extends Component {
         return (
             <Page title={acte.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
-                    <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
+                    <Anomaly header={lastHistory && t('acte.status.'+lastHistory.status)}  lastHistory={lastHistory} />
 
                     {isDefere && (
                         <Defere acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
