@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container } from 'semantic-ui-react'
 
-import { getRightsFromGroups, rightsFeatureResolver } from './_util/utils'
+import { getRightsFromGroups, rightsFeatureResolver, checkStatus } from './_util/utils'
+import { notifications } from './_util/Notifications'
 
 import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
@@ -92,15 +93,17 @@ AuthRoute.contextTypes = {
 
 class AppRoute extends Component {
     static contextTypes = {
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _addNotification: PropTypes.func
     }
     state = {
         userRights: [],
         certificate: false
     }
     componentDidMount() {
-        const { _fetchWithAuthzHandling } = this.context
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile' })
+            .then(checkStatus)
             .then(response => response.json())
             .then(profile => {
                 const userRights = getRightsFromGroups(profile.groups)
@@ -108,9 +111,24 @@ class AppRoute extends Component {
                 if (profile.agent.admin) userRights.push('ADMIN')
                 this.setState({ userRights })
             })
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
         _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
+            .then(checkStatus)
             .then(response => response.json())
             .then(certificate => this.setState({ certificate }))
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
     }
     render() {
         const params = this.state
