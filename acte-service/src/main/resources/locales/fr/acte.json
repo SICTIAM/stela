@@ -45,7 +45,7 @@
       "AR_LETTRE_OBSERVATION_SENT": "AR pour lettre d'observation transmis",
       "AR_PIECE_COMPLEMENTAIRE_SENT": "AR pour pièces complémentaires transmis",
       "REPONSE_COURRIER_SIMPLE_SENT": "Réponse au courrier simple transmise",
-      "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission à la lettre d'observation transmis",
+      "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission de la lettre d'observation transmis",
       "TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Pièces complémentaires transmises",
       "REFUS_EXPLICITE_LETTRE_OBSERVATION_SENT": "Refus transmission des pièces complémentaires transmis",
       "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise"
@@ -207,7 +207,7 @@
       "acte": {
         "title": "Module Acte",
         "local_authority_settings": {
-          "title": "Paramétrage des du module Acte de la collectivité",
+          "title": "Paramétrage du module Acte de la collectivité",
           "general_informations": "Informations générales",
           "MIAT_transmission": "Transmission MIAT",
           "askClassification": "Demander une mise à jour",
