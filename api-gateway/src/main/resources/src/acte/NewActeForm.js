@@ -486,7 +486,7 @@ class NewActeForm extends Component {
                     <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
                         <Grid.Column>
                             <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}
-                                helpText={t('acte.help_text.number')}>
+                                helpText={t('acte.help_text.number')} required={true}>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     placeholder={t('acte.fields.number') + '...'}
                                     value={this.state.fields.number}
@@ -498,7 +498,7 @@ class NewActeForm extends Component {
                         {this.props.mode !== 'ACTE_BATCH' && (
                             <Grid.Column>
                                 <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}
-                                    helpText={t('acte.help_text.decision')}>
+                                    helpText={t('acte.help_text.decision')} required={true}>
                                     <InputValidation id={`${this.state.fields.uuid}_decision`}
                                         type='date'
                                         value={this.state.fields.decision}
@@ -522,7 +522,8 @@ class NewActeForm extends Component {
                             </Grid.Column>
                         )}
                     </Grid>
-                    <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}>
+                    <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}
+                        required={true}>
                         <InputValidation id={`${this.state.fields.uuid}_objet`}
                             placeholder={t('acte.fields.objet') + '...'}
                             value={this.state.fields.objet}
@@ -531,7 +532,8 @@ class NewActeForm extends Component {
                             fieldName={t('acte.fields.objet')} />
                     </FormField>
                     {(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH') && (
-                        <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
+                        <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}
+                            required={true}>
                             <InputValidation id={`${this.state.fields.uuid}_nature`}
                                 type='dropdown'
                                 value={this.state.fields.nature}
@@ -541,7 +543,8 @@ class NewActeForm extends Component {
                                 options={natureOptions} />
                         </FormField>
                     )}
-                    <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
+                    <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}
+                        required={true}>
                         <InputValidation id={`${this.state.fields.uuid}_code`}
                             type='dropdown' search
                             value={this.state.fields.code}
@@ -551,7 +554,7 @@ class NewActeForm extends Component {
                             options={codeOptions} />
                     </FormField>
                     <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
-                        helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
+                        helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
                         <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
                             type='file'
                             accept={acceptFile}
@@ -569,7 +572,8 @@ class NewActeForm extends Component {
                             extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
                     )}
                     <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                        helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
+                        helpText={t('acte.help_text.annexes', { acceptAnnexes })}
+                        required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false}>
                         <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
                             <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
                                 onChange={e => this.saveDraftAnnexe(e.target.files[0])} style={{ display: 'none' }} />

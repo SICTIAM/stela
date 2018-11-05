@@ -5,10 +5,11 @@ import moment from 'moment'
 
 import { bytesToSize } from '../_util/utils'
 
-const FormField = ({ htmlFor, label, children, inline, helpText }) => (
+const FormField = ({ htmlFor, label, children, inline, helpText, required }) => (
     <Form.Field inline={inline ? true : false}>
         <label htmlFor={htmlFor}>
             {label}
+            {required && <span style={{color: '#db2828'}}>*</span>}
             {helpText && <Tooltip icon="question" text={helpText} />}
         </label>
         {children}
