@@ -102,7 +102,8 @@ class NewActeSwitch extends Component {
                         <NewActeBatchedForm
                             uuid={uuid}
                             setStatus={this.setStatus}
-                            status={this.state.status} />
+                            status={this.state.status}
+                            path={this.props.location.pathname} />
                     )}
                 </Segment>
             </Page>
