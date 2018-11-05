@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
@@ -230,11 +231,11 @@ export default class StelaTable extends Component {
                                             collapsing={!!displayedColumn.collapsing}
                                             selectable={this.props.link !== '' ? true : false}
                                             className={this.props.link !== '' ? 'no-hover' : ''}>
-                                            <a href={this.props.link !== '' ? this.props.link + row[this.props.linkProperty] : ''}>{displayedColumn.displayComponent ?
+                                            <Link to={this.props.link !== '' ? this.props.link + row[this.props.linkProperty] : ''}>{displayedColumn.displayComponent ?
                                                 displayedColumn.property === '_self' ?
                                                     displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
                                                 : row[displayedColumn.property]}
-                                            </a>
+                                            </Link>
                                         </Table.Cell>
                                     )}
                                     {select &&
