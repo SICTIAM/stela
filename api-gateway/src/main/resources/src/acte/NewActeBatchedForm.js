@@ -239,13 +239,18 @@ class NewActeBatchedForm extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
+        const regex = /brouillons/g
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.setState({ shouldUnmount: false }, () => {
                     _addNotification(notifications.acte.draftDeleted)
-                    history.push(`/${localAuthoritySlug}/actes/liste`)
+                    if(this.props.path.match(regex)) {
+                        history.push(`/${localAuthoritySlug}/actes/brouillons`)
+                    } else {
+                        history.push(`/${localAuthoritySlug}/actes/liste`)
+                    }
                 })
             })
             .catch(response => {
