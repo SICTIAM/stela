@@ -80,7 +80,8 @@ class NewPes extends Component {
             <Page title={t('pes.new.title')}>
                 <Segment>
                     <Form onSubmit={this.submit}>
-                        <FormField htmlFor='objet' label={t('pes.fields.objet')} helpText={t('pes.help_text.objet')}>
+                        <FormField htmlFor='objet' label={t('pes.fields.objet')} helpText={t('pes.help_text.objet')}
+                            required={true}>
                             <InputValidation id='objet'
                                 placeholder={t('pes.fields.objet') + '...'}
                                 value={this.state.fields.objet}
@@ -88,7 +89,8 @@ class NewPes extends Component {
                                 validationRule={this.validationRules.objet}
                                 fieldName={t('pes.fields.objet')} />
                         </FormField>
-                        <FormField htmlFor='attachment' label={t('pes.fields.attachment')} helpText={t('pes.help_text.attachment', { acceptFile })}>
+                        <FormField htmlFor='attachment' label={t('pes.fields.attachment')} helpText={t('pes.help_text.attachment', { acceptFile })}
+                            required={true}>
                             <InputValidation id='attachment'
                                 type='file'
                                 accept={acceptFile}
