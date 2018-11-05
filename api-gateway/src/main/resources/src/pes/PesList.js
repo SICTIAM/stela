@@ -108,10 +108,10 @@ class PesList extends Component {
             { property: 'uuid', displayed: false, searchable: false },
             { property: 'creation', displayed: true, displayName: t('pes.fields.creation'), searchable: true, displayComponent: creationDisplay,
                 collapsing: true },
-            { property: 'objet', displayed: true, displayName: t('pes.fields.objet'), searchable: true, width: 8 },
-            { property: 'fileType', displayed: true, displayName: t('pes.fields.fileType'), searchable: false,
-                collapsing: true },
-            { property: '_self', displayed: true, displayName: t('pes.fields.status'), searchable: false, displayComponent: statusDisplay, width: 5 }
+            { property: 'objet', displayed: true, displayName: t('pes.fields.objet'), searchable: true },
+            { property: 'fileType', displayed: true, displayName: t('pes.fields.fileType'), searchable: false, collapsing: true },
+            { property: '_self', displayed: true, displayName: t('pes.fields.status'), searchable: false, displayComponent: statusDisplay,
+                collapsing: true }
         ]
         const displayedColumns = metaData.filter(metaData => metaData.displayed)
         const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
