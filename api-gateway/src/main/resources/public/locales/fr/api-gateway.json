@@ -157,7 +157,7 @@
                 "title": "Admin module Acte",
                 "instance_params_updated": "Paramètres de l'instance enregistrés",
                 "local_authority": {
-                    "classificationAsked": "Demande de classfication envoyée",
+                    "classificationAsked": "Demande de classification envoyée",
                     "update": {
                         "success": "La mise à jour de la collectivité a bien été prise en compte"
                     }
@@ -185,7 +185,7 @@
                 "error": {
                     "bad_file_name": "Le nom de fichier est incorrect",
                     "non_extractable_pes": "Erreur lors du traitement du PES",
-                    "existing_file_name": "Le nom de fichier est deja utilisé",
+                    "existing_file_name": "Le nom de fichier est déjà utilisé",
                     "file_too_big": "Le fichier est trop gros (100 Mo max)"
                 },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
@@ -300,7 +300,7 @@
             "general_informations": "Informations générales",
             "modules": "Modules",
             "users": "Agents",
-            "no_user": "Aucune agent dans cette collectivité",
+            "no_user": "Aucun agent dans cette collectivité",
             "groups": "Groupes",
             "no_group": "Aucun groupe dans cette collectivité",
             "confirmModal": {
