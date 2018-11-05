@@ -109,7 +109,8 @@
       "public": "Affichage de cet acte dans le registre des délibérations",
       "publicWebsite": "Affichage de cet acte sur votre site internet si vous avez activé cette option",
       "objet": "L'objet/titre de l'acte (texte libre)",
-      "group": "Groupe de visibilité auquel associer la télétransmission de l'acte"
+      "group": "Groupe de visibilité auquel associer la télétransmission de l'acte",
+      "annexes_size": "Taille totale des fichiers"
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"
