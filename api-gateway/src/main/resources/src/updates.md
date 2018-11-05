@@ -1,4 +1,4 @@
-### 25/10/2018
+### 05/11/2018
 - Ajout du détail des anomalies PES dans les mails
 - Ajout d'un groupe de migration aux actes migrés de Stela 2
 - Correction des mots "status" en "statut" sur différentes pages
