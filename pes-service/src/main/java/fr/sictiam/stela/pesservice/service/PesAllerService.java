@@ -409,8 +409,6 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
     @Override
     public void onApplicationEvent(PesCreationEvent event) {
         Attachment attachment = event.getPesAller().getAttachment();
-        LOGGER.error("GERALD Pes {} : {}", event.getPesAller().getUuid(), event.getPesAller().getObjet());
-        LOGGER.error("GERALD Attachment {} : {}", attachment.getUuid(), attachment.getFilename());
         storageService.storeAttachment(attachment);
         updateStatus(event.getPesAller().getUuid(), StatusType.CREATED);
     }
