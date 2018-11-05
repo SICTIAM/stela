@@ -86,7 +86,8 @@ class NewActeSwitch extends Component {
                             draftUuid={this.props.uuid}
                             mode={this.state.fields.mode}
                             setStatus={this.setStatus}
-                            status={this.state.status} />
+                            status={this.state.status}
+                            path={this.props.location.pathname} />
                     )}
                     {this.state.fields.mode === 'ACTE_BUDGETAIRE' && (
                         <NewActeForm
@@ -94,7 +95,8 @@ class NewActeSwitch extends Component {
                             draftUuid={this.props.uuid}
                             mode={this.state.fields.mode}
                             setStatus={this.setStatus}
-                            status={this.state.status} />
+                            status={this.state.status}
+                            path={this.props.location.pathname} />
                     )}
                     {this.state.fields.mode === 'ACTE_BATCH' && (
                         <NewActeBatchedForm

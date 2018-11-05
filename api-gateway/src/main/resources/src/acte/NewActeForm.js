@@ -389,11 +389,16 @@ class NewActeForm extends Component {
         this.setState({ fields })
         const headers = { 'Content-Type': 'application/json' }
         const url = '/api/acte/drafts'
+        const regex = /brouillons/g
         _fetchWithAuthzHandling({ url, body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.draftDeleted)
-                history.push(`/${localAuthoritySlug}/actes/liste`)
+                if(this.props.path.match(regex)) {
+                    history.push(`/${localAuthoritySlug}/actes/brouillons`)
+                } else {
+                    history.push(`/${localAuthoritySlug}/actes/liste`)
+                }
             })
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
