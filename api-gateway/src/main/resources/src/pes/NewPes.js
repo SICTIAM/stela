@@ -65,7 +65,7 @@ class NewPes extends Component {
                 .then(response => response.text())
                 .then(pesUuid => {
                     _addNotification(notifications.pes.sent)
-                    history.push(`/${localAuthoritySlug}/pes/${pesUuid}`)
+                    history.push(`/${localAuthoritySlug}/pes/liste/${pesUuid}`)
                 })
                 .catch(response => {
                     this.setState({ isSubmitButtonLoading: false })

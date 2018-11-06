@@ -420,7 +420,7 @@ class NewActeForm extends Component {
                 fields['draft'] = false
                 this.setState({ fields }, () => {
                     _addNotification(notifications.acte.sent)
-                    history.push(`/${localAuthoritySlug}/actes/${acteUuid}`)
+                    history.push(`/${localAuthoritySlug}/actes/liste/${acteUuid}`)
                 })
             })
             .catch(response => {
