@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
@@ -224,14 +225,17 @@ export default class StelaTable extends Component {
                             data.map(row =>
                                 <Table.Row key={row[this.props.keyProperty]} negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}>
                                     {displayedColumns.map((displayedColumn, index) =>
-                                        <Table.Cell onClick={() => this.handleLink(row[this.props.linkProperty])}
+                                        <Table.Cell
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}
                                             key={index + '-' + row[displayedColumn.property]}
-                                            collapsing={!!displayedColumn.collapsing}>
-                                            {displayedColumn.displayComponent ?
+                                            collapsing={!!displayedColumn.collapsing}
+                                            selectable={this.props.link !== '' ? true : false}
+                                            className={this.props.link !== '' ? 'no-hover' : ''}>
+                                            <Link to={this.props.link !== '' ? this.props.link + row[this.props.linkProperty] : ''}>{displayedColumn.displayComponent ?
                                                 displayedColumn.property === '_self' ?
                                                     displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
                                                 : row[displayedColumn.property]}
+                                            </Link>
                                         </Table.Cell>
                                     )}
                                     {select &&

@@ -129,6 +129,10 @@ ul.pagination li a.item:focus {
     color: white;
     background-color: #009999;
 }
+.ui.table tbody tr td.selectable.no-hover:hover {
+    background:none !important;
+    color: inherit !important;
+}
 .ui.button.basic.anatra,
 .ui.basic.blue.buttons .button {
     box-shadow: 0 0 0 1px #009999 inset !important;
