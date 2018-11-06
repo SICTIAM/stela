@@ -10,7 +10,7 @@ import { FormField, File, InputFile, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug } from '../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize } from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
 
 class NewActeForm extends Component {
@@ -433,6 +433,14 @@ class NewActeForm extends Component {
                 }
             })
     }
+    sum(items, prop) {
+        if (items == null) {
+            return 0
+        }
+        return items.reduce( (a, b) => {
+            return b[prop] == null ? a : a + b[prop]
+        }, 0)
+    }
     render() {
         const { t } = this.context
         const isPublicFieldDisabled = !this.state.depositFields.publicField
@@ -614,6 +622,11 @@ class NewActeForm extends Component {
                     }
                     {this.props.mode !== 'ACTE_BATCH' && (
                         <div style={{ textAlign: 'right' }}>
+                            {(this.sum(this.state.fields.annexes, 'size') !== 0 || this.state.fields.acteAttachment !== null) && (
+                                <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
+                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this.sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))}
+                                </label>
+                            )}
                             {this.state.fields.uuid && (
                                 <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red'
                                     disabled={isFormSaving} loading={isFormSaving}>
