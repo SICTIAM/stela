@@ -169,7 +169,7 @@ class PesList extends Component {
                             metaData={metaData}
                             header={true}
                             search={false}
-                            link={`/${localAuthoritySlug}/pes/`}
+                            link={`/${localAuthoritySlug}/pes/liste/`}
                             linkProperty="uuid"
                             noDataMessage={t('pes.list.empty')}
                             keyProperty="uuid"
