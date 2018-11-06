@@ -156,9 +156,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         pesAllers.forEach(pes -> {
             if (pes.getPesHistories().stream()
                     .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
-                if (pes.getSesileDocumentId() != null
-                        && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
-                    try {
+                try {
+                    if (pes.getSesileDocumentId() != null
+                            && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
                         Pair<StatusType, String> signatureResult = getSignatureStatus(file);
                         StatusType status = signatureResult.component1();
@@ -168,9 +168,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                                 || !StatusType.SIGNATURE_MISSING.equals(signatureResult.component1())) {
                             updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
                         }
-                    } catch (RestClientException | UnsupportedEncodingException e) {
-                        LOGGER.debug(e.getMessage());
                     }
+                } catch (RestClientException | UnsupportedEncodingException e) {
+                    LOGGER.error("Error on PES {} : {}", pes.getUuid(), e.getMessage());
                 }
             }
         });
