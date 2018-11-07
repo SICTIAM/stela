@@ -32,6 +32,10 @@ html,
 .ui.secondary.menu.topBar .header.item.appTitle img {
     width: 3.5em;
 }
+.ui.secondary.menu.topBar .list-profil .menu.visible {
+    max-height: 300px;
+    overflow-y: scroll;
+}
 .wrapperContainer {
     margin-left: 16em;
 }

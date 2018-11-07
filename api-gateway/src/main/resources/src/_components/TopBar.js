@@ -63,24 +63,19 @@ class TopBar extends Component {
     render() {
         const { isLoggedIn, t, user } = this.context
         const multiPath = getMultiPahtFromSlug()
-        const listProfile = this.state.profiles.map(profile =>
-            profile.uuid !== this.state.currentProfile.uuid && (
-                <Dropdown.Item key={profile.uuid} value={profile.uuid} onClick={() => window.location.href = '/api/api-gateway/switch/' + profile.uuid}>
-                    <Icon name="building" size="large" /> {profile.localAuthority.name}
-                </Dropdown.Item>
-            )
+        const listProfile = this.state.profiles.map(profile => {
+            return {
+                text: profile.localAuthority.name,
+                value: profile.uuid,
+                key: profile.uuid,
+                icon: 'building'
+            }
+        }
         )
         const trigger = (
             <Button basic className={this.props.admin ? 'rosso' : 'anatra'}>
                 <Icon name="user circle outline" size="large" />{' '}
                 {`${user && user.given_name} ${user && user.family_name}`}
-            </Button>
-        )
-        const triggerLA = (
-            <Button basic color="grey">
-                <Icon name="building" size="large" />{' '}
-                {`${this.state.currentProfile.localAuthority.name}`}{' '}
-                <Icon style={{ marginLeft: '0.5em', marginRight: 0 }} name="caret down" />
             </Button>
         )
         // FIXME : isLoggedIn in the context is not reliable (false then true)
@@ -96,10 +91,16 @@ class TopBar extends Component {
                 <Container>
                     <Menu.Menu position="right">
                         {(isLoggedIn && listProfile.length > 1) && (
-                            <Menu.Item>
-                                <Dropdown basic trigger={triggerLA} icon={false}>
-                                    <Dropdown.Menu>{listProfile}</Dropdown.Menu>
-                                </Dropdown>
+                            <Menu.Item className='liste-profil'>
+                                <Dropdown
+                                    style={{minWidth: '18em'}}
+                                    search selection
+                                    options={listProfile}
+                                    value={this.state.currentProfile.uuid}
+                                    selectOnBlur={false}
+                                    text={this.state.currentProfile.localAuthority.name}
+                                    onChange={(event, data) => window.location.href = '/api/api-gateway/switch/' + data.value}
+                                />
                             </Menu.Item>
                         )}
                         {isLoggedIn && (
