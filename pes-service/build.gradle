@@ -41,7 +41,6 @@ dependencies {
     compile('org.codehaus.janino:janino:3.0.6')
     compile('com.vladmihalcea:hibernate-types-52:2.3.0')
     compile('com.amazonaws:aws-java-sdk-s3')
-    compile('org.flywaydb:flyway-core:5.2.1')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')
