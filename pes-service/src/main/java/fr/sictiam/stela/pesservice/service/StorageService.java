@@ -41,27 +41,27 @@ public interface StorageService {
         }
     }
 
-    public default Attachment createAttachment(MultipartFile file) throws IOException {
+    public default Attachment createAttachment(MultipartFile file) throws StorageException, IOException {
 
         return createAttachment(file.getOriginalFilename(), file.getBytes());
     }
 
-    public default Attachment createAttachment(String filename, byte[] content) {
+    public default Attachment createAttachment(String filename, byte[] content) throws StorageException {
         return createAttachment(filename, content, LocalDateTime.now());
     }
 
-    public default Attachment createAttachment(String filename, byte[] content, LocalDateTime date) {
+    public default Attachment createAttachment(String filename, byte[] content, LocalDateTime date) throws StorageException {
         Attachment attachment = new Attachment(filename, content, content.length, date);
         storeObject(attachment.getStorageKey(), content, filename);
 
         return attachment;
     }
 
-    public default void storeAttachment(Attachment attachment) {
+    public default void storeAttachment(Attachment attachment) throws StorageException {
         storeObject(attachment.getStorageKey(), attachment.getContent(), attachment.getFilename());
     }
 
-    public default Attachment updateAttachment(Attachment attachment, byte[] content) {
+    public default Attachment updateAttachment(Attachment attachment, byte[] content) throws StorageException {
         attachment.updateContent(content);
         storeObject(attachment.getStorageKey(), content, attachment.getFilename());
         return attachment;
