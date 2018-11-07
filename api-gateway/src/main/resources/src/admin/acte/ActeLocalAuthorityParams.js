@@ -170,7 +170,7 @@ class ActeLocalAuthorityParams extends Component {
             this.state.localAuthorityFetched && (
                 <Page title={this.state.constantFields.name}>
                     <Segment>
-                        <h2>{t('admin.modules.acte.local_authority_settings.title')}</h2>
+                        <h2 className='rosso'>{t('admin.modules.acte.local_authority_settings.title')}</h2>
 
                         <Form onSubmit={this.submitForm}>
                             <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
@@ -207,7 +207,7 @@ class ActeLocalAuthorityParams extends Component {
                                     className='simpleInput' />
                             </Field>
 
-                            <h2>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
+                            <h2 className='rosso'>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
                             <Field htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
                                 <DraggablePosition
                                     label={t('acte.stamp_pad.pad_label')}
@@ -227,7 +227,7 @@ class ActeLocalAuthorityParams extends Component {
                                     onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
                             </Field>
 
-                            <h2>{t('admin.modules.acte.local_authority_settings.paull_parameters')}</h2>
+                            <h2 className='rosso'>{t('admin.modules.acte.local_authority_settings.paull_parameters')}</h2>
                             <Field htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
                                 <Dropdown compact search selection
                                     id='genericProfileUuid'
@@ -239,7 +239,7 @@ class ActeLocalAuthorityParams extends Component {
                                     placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
                             </Field>
 
-                            <h2>{t('admin.modules.acte.local_authority_settings.archive_parameters')}</h2>
+                            <h2 className='rosso'>{t('admin.modules.acte.local_authority_settings.archive_parameters')}</h2>
                             <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
                                 <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated}
                                     onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />

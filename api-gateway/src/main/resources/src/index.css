@@ -99,6 +99,10 @@ footer {
     width: 31.25%;
     margin-bottom: 0;
 }
+.inline .ui.grid>.column.inline-grid:not(.row) {
+    padding-top: 0;
+    padding-bottom: 0;
+}
 
 .ui.cards {
     margin-bottom: 0.5em;
@@ -124,6 +128,9 @@ ul.pagination li a.item:focus {
 .ui.segment h2:after {
     content: ' ';
     display: block;
+    border: 1px solid #009999;
+}
+.ui.segment h2.rosso:after {
     border: 1px solid #cc0066;
 }
 .ui.table.sortable thead tr th,

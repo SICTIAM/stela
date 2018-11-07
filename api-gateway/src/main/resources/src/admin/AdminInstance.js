@@ -64,7 +64,7 @@ class AdminInstance extends Component {
                 <Segment>
                     <Form onSubmit={this.submitForm}>
 
-                        <h2>{t('admin.instance_params.general_settings')}</h2>
+                        <h2 className='rosso'>{t('admin.instance_params.general_settings')}</h2>
                         <Field htmlFor='contactEmail' label={t('admin.instance_params.contact_email')}>
                             <Input id='contactEmail'
                                 value={this.state.fields.contactEmail || ''}
@@ -77,12 +77,12 @@ class AdminInstance extends Component {
                                 onChange={(e, data) => this.handleFieldChange('reportUrl', data.value)} />
                         </Field>
 
-                        <h2>{t('admin.instance_params.welcome_message')}</h2>
+                        <h2 className='rosso'>{t('admin.instance_params.welcome_message')}</h2>
                         <TextEditor
                             onChange={value => this.handleFieldChange('welcomeMessage', value)}
                             text={this.state.fields.welcomeMessage} />
 
-                        <h2>{t('admin.instance_params.legal_notice')}</h2>
+                        <h2 className='rosso'>{t('admin.instance_params.legal_notice')}</h2>
                         <TextEditor
                             onChange={value => this.handleFieldChange('legalNotice', value)}
                             text={this.state.fields.legalNotice} />
