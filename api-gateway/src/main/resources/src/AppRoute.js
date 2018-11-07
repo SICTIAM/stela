@@ -152,19 +152,18 @@ class AppRoute extends Component {
                 <Route exact path="/:localAuthoritySlug/actes" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/actes/liste`} />
                 )} />
+                <AuthRoute path="/:localAuthoritySlug/actes/liste/:uuid" {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/actes/liste" {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={ActeList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/actes/brouillons/:uuid" {...params} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} certRequired />
                 <AuthRoute path="/:localAuthoritySlug/actes/brouillons" {...params} allowedRights={['ACTES_DEPOSIT']} component={DraftList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/actes/nouveau" {...params} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} certRequired />
-                <AuthRoute path="/:localAuthoritySlug/actes/:uuid" {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
-
                 <Route exact path="/:localAuthoritySlug/pes" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/pes/liste`} />
                 )} />
                 <AuthRoute path="/:localAuthoritySlug/pes/retour/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesRetourList} menu={MenuBar} />
+                <AuthRoute path="/:localAuthoritySlug/pes/liste/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
-                <AuthRoute path="/:localAuthoritySlug/pes/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
 
                 <Route exact path="/:localAuthoritySlug/admin" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/admin/ma-collectivite`} />

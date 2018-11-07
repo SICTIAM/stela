@@ -241,7 +241,7 @@ class ActeList extends Component {
                                 downloadACKsSelectOption,
                                 downloadCSVSelectOption
                             ]}
-                            link={`/${localAuthoritySlug}/actes/`}
+                            link={`/${localAuthoritySlug}/actes/liste/`}
                             linkProperty='uuid'
                             noDataMessage='Aucun acte'
                             keyProperty='uuid'
