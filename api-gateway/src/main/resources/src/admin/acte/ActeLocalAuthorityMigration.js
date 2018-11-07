@@ -103,7 +103,7 @@ class ActeLocalAuthorityMigration extends Component {
         return (
             <Page title={t('admin.modules.acte.migration.title')}>
                 <Segment>
-                    <h2>{t('api-gateway:admin.local_authority.general_informations')}</h2>
+                    <h2 className='rosso'>{t('api-gateway:admin.local_authority.general_informations')}</h2>
                     <Field htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
                         <FieldValue id="uuid">{this.state.fields.uuid}</FieldValue>
                     </Field>
@@ -116,7 +116,7 @@ class ActeLocalAuthorityMigration extends Component {
                 </Segment>
 
                 <Segment>
-                    <h2>{t('admin.modules.acte.migration.additional_options.title')}</h2>
+                    <h2 className='rosso'>{t('admin.modules.acte.migration.additional_options.title')}</h2>
                     <Field htmlFor='email' label={t('admin.modules.acte.migration.additional_options.email')}>
                         <Input id='email'
                             placeholder={`${t('api-gateway:agent.email')}...`}

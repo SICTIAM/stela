@@ -175,7 +175,7 @@ class PesLocalAuthorityParams extends Component {
                 <Segment>
                     <Form onSubmit={this.submitForm}>
 
-                        <h2>{t('admin.modules.pes.local_authority_settings.title')}</h2>
+                        <h2 className='rosso'>{t('admin.modules.pes.local_authority_settings.title')}</h2>
                         <Field htmlFor='serverCode' label={t('admin.modules.pes.local_authority_settings.serverCode')}>
                             <Dropdown compact search selection
                                 id='serverCode'
@@ -199,7 +199,7 @@ class PesLocalAuthorityParams extends Component {
                             </Button>
                         </Field>
 
-                        <h2>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
+                        <h2 className='rosso'>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
                         <Field htmlFor='genericProfileUuid' label={t('admin.modules.pes.local_authority_settings.genericProfileUuid')}>
                             <Dropdown compact search selection
                                 id='genericProfileUuid'
@@ -238,7 +238,7 @@ class PesLocalAuthorityParams extends Component {
                             </Fragment>
                         )}
 
-                        <h2>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
+                        <h2 className='rosso'>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
                         <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
                             <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated}
                                 onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
