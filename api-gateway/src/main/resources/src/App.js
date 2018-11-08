@@ -30,7 +30,7 @@ class App extends Component {
     state = {
         csrfToken: '',
         csrfTokenHeaderName: '',
-        isLoggedIn: false,
+        isLoggedIn: null,
         localAuthoritySlug: '',
         user: {}
     }
