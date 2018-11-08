@@ -62,6 +62,13 @@ class Profile extends Component {
         profile[id] = value
         this.setState({ agent }, callback)
     }
+    onPairCertification = () => {
+        const { uuid } = this.props
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
+            .then(response => response.json())
+            .then(json => this.setState({ agent: json }))
+    }
     onLocalAuthorityNotificationsChange = (uuidProfile, module, checked) => {
         const { agent } = this.state
         const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
@@ -159,7 +166,8 @@ class Profile extends Component {
                 {allLocalAuthorityProfiles}
 
                 {!this.props.uuid && (
-                    <CertificateInfos pairedCertificate={agent.certificate} />
+                    <CertificateInfos pairedCertificate={agent.certificate}
+                        onPairCertification={this.onPairCertification}/>
                 )}
             </Page>
         )
