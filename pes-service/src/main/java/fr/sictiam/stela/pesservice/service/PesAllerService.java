@@ -238,7 +238,7 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
             return create(currentProfileUuid, currentLocalAuthUuid, pesAller, file.getOriginalFilename(), file.getBytes());
         } catch (IOException e) {
             LOGGER.error("Failed to read file content : {}", e.getMessage());
-            throw new PesCreationException("Failed to read file content", e);
+            throw new PesCreationException("notifications.pes.sent.error.read_file", e);
         }
     }
 

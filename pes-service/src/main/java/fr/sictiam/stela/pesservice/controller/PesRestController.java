@@ -161,6 +161,8 @@ public class PesRestController {
             PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid, pesAller, file);
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
 
+        } catch (PesCreationException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (IOException e) {
             throw new PesCreationException();
         }
