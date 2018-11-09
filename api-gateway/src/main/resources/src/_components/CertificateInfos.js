@@ -82,7 +82,7 @@ class CertificateInfos extends Component {
                         {t('profile.certificate.paired')}
                     </span>
                 )}
-                <h2 style={headerStyle}>{t('profile.certificate.title')}</h2>
+                <h2 style={headerStyle} id="certificate">{t('profile.certificate.title')}</h2>
 
                 {isPresent && (
                     <CertificateInfosUI certificate={certificate} />

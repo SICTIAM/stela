@@ -16,6 +16,9 @@
     "legal_notice": "Mentions légales",
     "last_update": "Dernière mise à jour",
     "release_notes": "Notes de mise à jour",
+    "certification_expiration": "Votre certificat expire dans {{days}} jours",
+    "view_profil": "Voir profil",
+    "ask_certificate": "Demander un certificat",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
