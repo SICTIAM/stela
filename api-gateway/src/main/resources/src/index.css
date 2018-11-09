@@ -29,6 +29,24 @@ html,
     margin-top: 0.5em;
     margin-left: 3em;
 }
+.ui.secondary.menu.topBar i.buger-menu {
+    display: none;
+}
+@media (max-width: 600px) {
+    .ui.secondary.menu.topBar .header.item.appTitle {
+        margin-left: 0;
+    }
+    .ui.secondary.menu.topBar i.buger-menu {
+        align-self: center;
+        display: block;
+        font-size: 30px;
+        margin: 0.5em 10px 0 20px;
+        color: #009999;
+    }
+}
+.ui.secondary.menu.topBar .header.item.appTitle h1 {
+    margin-top: 0;
+}
 .ui.secondary.menu.topBar .header.item.appTitle img {
     width: 3.5em;
 }
@@ -39,9 +57,50 @@ html,
 .wrapperContainer {
     margin-left: 16em;
 }
+.overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 100;
+    cursor: pointer;
+}
 @media only screen and (max-width: 1450px) and (min-width: 723px) {
     .wrapperContainer {
         padding: 0 4em;
+    }
+}
+@media (max-width: 600px) {
+    .wrapperContainer {
+        margin-left: 0;
+    }
+    @keyframes slide-left-to-right {
+        from {
+            left: -220px;
+        }
+        to {
+            left: 0;
+        }
+    }
+    @keyframes slide-right-to-left {
+        from {
+            left: 0;
+        }
+        to {
+            left: -220px;
+        }
+    }
+    .ui.vertical.menu.mainMenu {
+        left: -220px;
+        animation: slide-right-to-left 0.5s ease;
+    }
+    .ui.vertical.menu.mainMenu.open {
+        left: 0px;
+        animation: slide-left-to-right 0.5s ease;
     }
 }
 .mainContainer {

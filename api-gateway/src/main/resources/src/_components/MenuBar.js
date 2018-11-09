@@ -13,7 +13,9 @@ class MenuBar extends Component {
         isLoggedIn: PropTypes.bool,
         t: PropTypes.func,
         _fetchWithAuthzHandling: PropTypes.func,
-        _addNotification: PropTypes.func
+        _addNotification: PropTypes.func,
+        isMenuOpened: PropTypes.bool,
+        _openMenu: PropTypes.func
     }
     state = {
         profile: {
@@ -51,13 +53,13 @@ class MenuBar extends Component {
             })
     }
     render() {
-        const { isLoggedIn, t } = this.context
+        const { isLoggedIn, t, isMenuOpened, _openMenu } = this.context
         const { reportUrl } = this.state
         const rights = getRightsFromGroups(this.state.profile.groups)
         const localAuthoritySlug = getLocalAuthoritySlug()
         const multiPath = getMultiPahtFromSlug()
         return (
-            <Menu style={{ backgroundColor: 'white' }} className="mainMenu anatra" fixed="left" secondary vertical>
+            <Menu style={{ backgroundColor: 'white' }} className={'mainMenu anatra' + (isMenuOpened ? ' open' : '')} fixed="left" secondary vertical onClick={() => {isMenuOpened && _openMenu()}}>
                 <div className="mainMenus">
                     <Menu.Item style={{ width: '100%' }}>
                         <Icon name="checkmark box" size="large" />
