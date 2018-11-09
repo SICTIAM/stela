@@ -66,7 +66,7 @@ class Home extends Component {
                             <Segment>
                                 <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
                                 <br/>
-                                <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank">{t('ask_certificate')}</a>
+                                <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
                             </Segment>
                         </Grid.Column>
                     </Grid>
