@@ -124,7 +124,7 @@ public class PaullGenericController {
             @RequestParam(name = "desc", required = false) String desc,
             @RequestParam(name = "validation", required = false) String validation,
             @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "type ", required = false) Integer type,
+            @RequestParam(name = "type", required = false) Integer type,
             @RequestParam(name = "service", required = false) String service, @RequestHeader("userid") String userid,
             @RequestHeader("password") String password) {
 
