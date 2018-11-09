@@ -105,10 +105,8 @@ public class PaullGenericController {
     }
 
     public GenericAccount emailAuth(String email, String password) {
-
         GenericAccount genericAccount = null;
         try {
-
             genericAccount = externalRestService.authWithEmailPassword(email, password);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
@@ -143,10 +141,9 @@ public class PaullGenericController {
         Integer serviceOrganisation = Integer.parseInt(service);
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
         if (localAuthority.isPresent()) {
-            ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority.get(),
-                    new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email));
-
             try {
+                ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority.get(),
+                        new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email));
                 ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(localAuthority.get(),
                         multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getBody().getId());
                 if (documentResonse.getStatusCode().is2xxSuccessful()) {
@@ -155,8 +152,8 @@ public class PaullGenericController {
                             new GenericDocument(classeur.getBody().getId(), documentResonse.getBody().getId(),
                                     serviceOrganisation, email, LocalDateTime.now(), localAuthority.get()));
                 }
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage());
+            } catch (Exception e) {
+                LOGGER.error("Error while trying to send document to signature: {}", e.getMessage());
             }
 
         }
