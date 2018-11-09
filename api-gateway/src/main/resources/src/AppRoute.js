@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { Route, Switch, Redirect } from 'react-router-dom'
-import { Container } from 'semantic-ui-react'
+import { Container, Loader } from 'semantic-ui-react'
 
 import { getRightsFromGroups, rightsFeatureResolver, checkStatus } from './_util/utils'
 import { notifications } from './_util/Notifications'
@@ -65,7 +65,7 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowe
             <div className="wrapperContainer">
                 <Menu />
                 <Container className="mainContainer">
-                    {isLoggedIn ? (
+                    {isLoggedIn === true && (
                         rightsFeatureResolver(userRights, allowedRights) ? (
                             certificate || !certRequired ? (
                                 <Fragment>
@@ -78,8 +78,12 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowe
                         ) : (
                             <ErrorPage error={403} />
                         )
-                    ) : (
+                    )}
+                    {isLoggedIn === false && (
                         <ErrorPage error={401} />
+                    )}
+                    {isLoggedIn === null && (
+                        <Loader active inline="centered"></Loader>
                     )}
                 </Container>
             </div>
