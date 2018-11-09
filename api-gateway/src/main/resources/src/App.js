@@ -22,17 +22,20 @@ class App extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         isLoggedIn: PropTypes.bool,
+        isMenuOpened: PropTypes.bool,
         user: PropTypes.object,
         t: PropTypes.func,
         _addNotification: PropTypes.func,
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _openMenu: PropTypes.func
     }
     state = {
         csrfToken: '',
         csrfTokenHeaderName: '',
         isLoggedIn: null,
         localAuthoritySlug: '',
-        user: {}
+        user: {},
+        isMenuOpened: false
     }
     NotificationStyle = {
         Containers: {
@@ -48,9 +51,14 @@ class App extends Component {
             isLoggedIn: this.state.isLoggedIn,
             user: this.state.user,
             t: this.t,
+            isMenuOpened: this.state.isMenuOpened,
+            _openMenu: this._openMenu,
             _addNotification: this._addNotification,
             _fetchWithAuthzHandling: this._fetchWithAuthzHandling
         }
+    }
+    _openMenu = () => {
+        this.setState({isMenuOpened: !this.state.isMenuOpened})
     }
     _addNotification = (notification, title, message) => {
         const { t } = this.context

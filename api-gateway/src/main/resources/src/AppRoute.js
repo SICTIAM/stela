@@ -9,6 +9,7 @@ import { notifications } from './_util/Notifications'
 import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
+import Overlay from './_components/Overlay'
 import Home from './Home'
 import AlertMessage from './_components/AlertMessage'
 import { UserProfile, AdminProfile } from './Profile'
@@ -56,12 +57,14 @@ const PublicRoute = ({ component: Component, ...rest }) => (
     )}
     />
 )
-
 const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowedRights, certificate, certRequired = false, ...rest },
-    { isLoggedIn }) => (
+    { isLoggedIn, isMenuOpened } ) => (
     <Route {...rest} render={props => (
         <div>
-            <TopBar admin={!!admin} />
+            <TopBar admin={!!admin}/>
+            {isMenuOpened && (
+                <Overlay />
+            )}
             <div className="wrapperContainer">
                 <Menu />
                 <Container className="mainContainer">
@@ -92,7 +95,8 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowe
     />
 )
 AuthRoute.contextTypes = {
-    isLoggedIn: PropTypes.bool
+    isLoggedIn: PropTypes.bool,
+    isMenuOpened: PropTypes.bool
 }
 
 class AppRoute extends Component {

@@ -13,7 +13,9 @@ class TopBar extends Component {
         isLoggedIn: PropTypes.bool,
         user: PropTypes.object,
         t: PropTypes.func,
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _openMenu: PropTypes.func,
+        isMenuOpened: PropTypes.bool
     }
     state = {
         isMainDomain: true,
@@ -61,7 +63,7 @@ class TopBar extends Component {
         else history.push('/choix-collectivite')
     }
     render() {
-        const { isLoggedIn, t, user } = this.context
+        const { isLoggedIn, t, user, _openMenu, isMenuOpened } = this.context
         const multiPath = getMultiPahtFromSlug()
         const listProfile = this.state.profiles.map(profile => {
             return {
@@ -81,7 +83,8 @@ class TopBar extends Component {
         // FIXME : isLoggedIn in the context is not reliable (false then true)
         if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
-            <Menu className={`topBar ${this.props.admin ? 'rosso' : 'anatra'}`} fixed="top" secondary>
+            <Menu className={`topBar ${this.props.admin ? 'rosso' : 'anatra'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
+                <Icon name="bars" onClick={_openMenu} className='buger-menu'></Icon>
                 <Menu.Item className="appTitle" as={Link} to={`${multiPath}/`} header>
                     <h1 style={{ textAlign: 'center' }}>
                         <img src={process.env.PUBLIC_URL + '/img/logo_stela.png'} alt="STELA" />
