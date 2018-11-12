@@ -32,6 +32,7 @@ export default class InputValidation extends Component {
             <div style={style}>
                 {(this.props.type === 'text' || this.props.type === '') && (
                     <input id={this.props.id}
+                        aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className}
                         placeholder={this.props.placeholder}
                         value={this.props.value}
@@ -49,6 +50,7 @@ export default class InputValidation extends Component {
                     <InputFile htmlFor={this.props.id} label={this.props.label}>
                         <input id={this.props.id}
                             type='file'
+                            aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                             style={{ display: 'none' }}
                             accept={this.props.accept}
                             multiple={this.props.multiple}
@@ -60,6 +62,7 @@ export default class InputValidation extends Component {
 
                 {this.props.type === 'select' && (
                     <select id={this.props.id}
+                        aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className}
                         value={this.props.value}
                         onChange={e => this.props.onChange(this.props.id, e.target.value)}
@@ -69,14 +72,17 @@ export default class InputValidation extends Component {
                 )}
 
                 {this.props.type === 'dropdown' && (
-                    <Dropdown id={this.props.id}
+                    <Dropdown id={!this.props.search ? this.props.id : ''}
+                        aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className}
-                        value={this.props.value}
                         onChange={(event, data) => this.props.onChange(this.props.id, data.value)}
                         onBlur={this.validateValue}
                         options={this.props.options}
+                        value={this.props.value}
+                        searchInput={this.props.search ? <input id={this.props.id}/> : null}
                         search={this.props.search || false}
-                        fluid selection />
+                        fluid selection>
+                    </Dropdown>
                 )}
 
                 <div>

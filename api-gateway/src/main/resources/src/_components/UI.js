@@ -89,7 +89,7 @@ const ListItem = ({ children, icon, iconColor, title, ...rest }) => (
 const StatusDisplay = ({ status, date }, { t }) => (
     <Fragment>
         <span>{status}</span><br/>
-        <span style={{fontSize: '0.9em', color: 'rgba(0,0,0,.5)'}}>{moment(date).format('DD/MM/YYYY')}</span>
+        <span style={{fontSize: '0.9em', color: 'rgba(0,0,0,.8)'}}>{moment(date).format('DD/MM/YYYY')}</span>
     </Fragment>
 )
 StatusDisplay.contextTypes = {
@@ -142,12 +142,12 @@ LoadingContent.contextTypes = {
     t: PropTypes.func
 }
 
-const LinkFile = ({ url, text }) => (
+const LinkFile = ({ url, text, ariaLabel = '' }) => (
     <Fragment>
-        <a target="_blank" href={url}>
+        <a target="_blank" href={url} aria-label={ariaLabel}>
             {text}
         </a>
-        <a target="_blank" href={url + '?disposition=attachment'}>
+        <a target="_blank" href={url + '?disposition=attachment'} aria-label={ariaLabel}>
             <Icon style={{ marginLeft: '0.5em' }} name="download" />
         </a>
     </Fragment>

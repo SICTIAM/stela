@@ -19,9 +19,11 @@
     "certification_expiration": "Votre certificat expire dans {{days}} jours",
     "view_profil": "Voir profil",
     "ask_certificate": "Demander un certificat",
+    "skip_to_content": "Sauter au contenu",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
+        "open_advanced_search": "Ouvrir la recherche avancée",
         "all": "Tous",
         "all_feminine": "Toutes",
         "from": "de",
@@ -56,7 +58,13 @@
     },
     "list": {
         "last_modified": "Dernière modification",
-        "item_per_page": "résultats par page"
+        "item_per_page": "résultats par page",
+        "item_per_page_label": "choix du nombre de résultats par page",
+        "select_item": "Sélectionner",
+        "check_all": "Tout sélectionner",
+        "next": "Suivant",
+        "previous": "Précédent",
+        "actions": "Choisisser une action à effectuer"
     },
     "menu": {
         "acte": {

@@ -84,13 +84,13 @@ class TopBar extends Component {
         if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
             <Menu className={`topBar ${this.props.admin ? 'rosso' : 'anatra'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
+                <a href="#content" className="skip">{t('api-gateway:skip_to_content')}</a>
                 <Icon name="bars" onClick={_openMenu} className='buger-menu'></Icon>
                 <Menu.Item className="appTitle" as={Link} to={`${multiPath}/`} header>
                     <h1 style={{ textAlign: 'center' }}>
                         <img src={process.env.PUBLIC_URL + '/img/logo_stela.png'} alt="STELA" />
                     </h1>
                 </Menu.Item>
-
                 <Container>
                     <Menu.Menu position="right">
                         {(isLoggedIn && listProfile.length > 1) && (
