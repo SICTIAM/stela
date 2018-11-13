@@ -33,7 +33,8 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     public OpenIdCConfiguration openIdCConfiguration() {
         StaticOpenIdCConfiguration configuration = new OpenIdConnectConfiguration();
         configuration
-                .addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/", "/editeur/api/acte"));
+                .addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/",
+                        "/editeur/api/acte", "/api/pes/actuator"));
         return configuration;
     }
 
@@ -54,6 +55,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .antMatchers("/api/admin/ozwillo/**").permitAll()
                     .antMatchers("/api/api-gateway/isMainDomain").permitAll()
                     .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
+                    .antMatchers("/api/*/actuator/**").permitAll()
                     .antMatchers("/api/*/locales/**").permitAll()
                     .antMatchers("/api/*/ws/**").permitAll()
                     .antMatchers("/api/**").authenticated()
@@ -61,6 +63,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .antMatchers("/public/**").permitAll().and()
                 .csrf()
                     .ignoringAntMatchers("/api/admin/ozwillo/**")
+                    .ignoringAntMatchers("/api/*/actuator/**")
                     .ignoringAntMatchers("/api/*/ws/**")
                     .ignoringAntMatchers("/editeur/api/**")
                     .ignoringAntMatchers("/externalws/**").and()
