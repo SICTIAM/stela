@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProperty scope="context" name="service-name" source="spring.application.name" />
-    <springProperty scope="context" name="environment" source="spring.profiles.active" />
+    <springProperty scope="context" name="service-name" source="spring.application.name"/>
+    <springProperty scope="context" name="environment" source="spring.profiles.active"/>
     <springProperty scope="context" name="logfile" source="logging.file" defaultValue="./build/logs/api-gateway.log"/>
     <springProperty scope="context" name="logstashhost" source="logging.logstash.host" defaultValue="null"/>
     <springProperty scope="context" name="maxFileSize" source="logging.filesize.max" defaultValue="100MB"/>
@@ -12,7 +12,7 @@
     <appender name="logStashAppender" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${logstashhost}</destination>
         <!-- encoder is required -->
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
     <appender name="consoleOut" class="ch.qos.logback.core.ConsoleAppender">
@@ -39,22 +39,20 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="INFO" />
-    <logger name="org.springframework.web.filter" level="DEBUG" />
-    <logger name="org.springframework.web.client" level="DEBUG" />
-    <logger name="org.springframework.security" level="DEBUG" />
-    <logger name="org.springframework.security.web.access" level="DEBUG" />
-    <logger name="org.oasis_eu.spring" level="DEBUG" />
-    <logger name="fr.sictiam.stela" level="DEBUG" />
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web.client" level="DEBUG"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.oasis_eu.spring" level="DEBUG"/>
+    <logger name="fr.sictiam.stela" level="DEBUG"/>
     <root level="INFO">
         <if condition='!p("logstashhost").equals("null")'>
             <then>
-                <appender-ref ref="logStashAppender" />
+                <appender-ref ref="logStashAppender"/>
             </then>
         </if>
 
-        <appender-ref ref="rolling" />
-        <appender-ref ref="consoleOut" />
+        <appender-ref ref="rolling"/>
+        <appender-ref ref="consoleOut"/>
     </root>
 
 

@@ -249,7 +249,7 @@ public class PaullEndpoint {
         detailsPESAllerStruct.setMessage(returnMessage);
         detailsPESAllerResponse.getRetour().add(detailsPESAllerStruct);
         detailsPESAllerResponse.setStatusCode(status);
-        return null;
+        return detailsPESAllerResponse;
 
     }
 
