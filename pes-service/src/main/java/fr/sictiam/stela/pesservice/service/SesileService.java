@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,15 +111,16 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
                     .orElse(sesileConfigurationRepository.findById(pes.getLocalAuthority().getGenericProfileUuid())
                             .get());
+
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
-            LocalDate deadline = pes.getValidationLimit() != null ? pes.getValidationLimit()
-                    : LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            String deadline = getSesileValidationDate(pes.getValidationLimit().format(dateTimeFormatter), sesileConfiguration.getProfileUuid());
 
             ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
                     new ClasseurRequest(pes.getObjet(), StringUtils.defaultString(pes.getComment()),
-                            deadline.format(dateTimeFormatter), sesileConfiguration.getType(),
+                            deadline, sesileConfiguration.getType(),
                             pes.getServiceOrganisationNumber() != null ? pes.getServiceOrganisationNumber()
                                     : sesileConfiguration.getServiceOrganisationNumber(),
                             sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));
@@ -578,6 +580,26 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public GenericDocument saveGenericDocument(GenericDocument genericDocument) {
         return genericDocumentRepository.save(genericDocument);
+    }
+
+    public String getSesileValidationDate(String initialDate, String profileUuid) {
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDateTime date;
+        if (StringUtils.isEmpty(initialDate)) {
+            Optional<SesileConfiguration> sesileConfiguration = sesileConfigurationRepository.findById(profileUuid);
+            date = LocalDateTime.now().plusDays(sesileConfiguration.isPresent() ?
+                    sesileConfiguration.get().getDaysToValidated() :
+                    3);
+        } else {
+            date = LocalDate.parse(initialDate, dateTimeFormatter).atStartOfDay();
+        }
+
+        if (date.isBefore(LocalDate.now().atStartOfDay())) {
+            date = LocalDateTime.now().plusDays(3);
+        }
+
+        return date.format(dateTimeFormatter);
     }
 
     private String getSesileUrl(LocalAuthority localAuthority) {

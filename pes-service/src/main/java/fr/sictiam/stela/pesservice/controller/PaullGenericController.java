@@ -1,6 +1,7 @@
 package fr.sictiam.stela.pesservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
 import fr.sictiam.stela.pesservice.model.GenericDocument;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
@@ -44,15 +45,17 @@ public class PaullGenericController {
     private final SesileService sesileService;
     private final LocalAuthorityService localAuthorityService;
     private final ExternalRestService externalRestService;
+    private final SesileConfigurationRepository sesileConfigurationRepository;
 
     public PaullGenericController(SesileService sesileService, LocalAuthorityService localAuthorityService,
-            ExternalRestService externalRestService) {
+            ExternalRestService externalRestService, SesileConfigurationRepository sesileConfigurationRepository) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
         this.externalRestService = externalRestService;
+        this.sesileConfigurationRepository = sesileConfigurationRepository;
     }
 
-    @JsonPropertyOrder({"status", "status_message", "data"})
+    @JsonPropertyOrder({ "status", "status_message", "data" })
     class PaullResponse {
 
         String status;
@@ -140,20 +143,26 @@ public class PaullGenericController {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
         }
+
+
         Integer serviceOrganisation = Integer.parseInt(service);
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
         if (localAuthority.isPresent()) {
-            ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority.get(),
+
+            LocalAuthority authority = localAuthority.get();
+            validation = sesileService.getSesileValidationDate(validation, authority.getGenericProfileUuid());
+
+            ResponseEntity<Classeur> classeur = sesileService.postClasseur(authority,
                     new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email));
 
             try {
-                ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(localAuthority.get(),
+                ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(authority,
                         multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getBody().getId());
                 if (documentResonse.getStatusCode().is2xxSuccessful()) {
                     data.put("idFlux", classeur.getBody().getId());
                     sesileService.saveGenericDocument(
                             new GenericDocument(classeur.getBody().getId(), documentResonse.getBody().getId(),
-                                    serviceOrganisation, email, LocalDateTime.now(), localAuthority.get()));
+                                    serviceOrganisation, email, LocalDateTime.now(), authority));
                 }
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
