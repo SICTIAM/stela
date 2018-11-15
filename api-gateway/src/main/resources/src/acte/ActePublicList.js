@@ -167,7 +167,7 @@ class ActePublicList extends Component {
 
                             <Form onSubmit={this.submitForm}>
                                 <FormFieldInline htmlFor='localAuthority' label={t('acte.fields.localAuthority')}>
-                                    <select id='localAuthority' value={search.siren} onChange={e => this.handleFieldChange('siren', e.target.value)}>
+                                    <select id='localAuthority' value={search.siren} onBlur={e => this.handleFieldChange('siren', e.target.value)} onChange={e => this.handleFieldChange('siren', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all_feminine')}</option>
                                         {localAuthoritiesOptions}
                                     </select>

@@ -135,7 +135,7 @@ class MenuBar extends Component {
                             {(isLoggedIn && localAuthoritySlug && reportUrl) && (
                                 <a className="item" href={reportUrl} target="_blank">{t('menu.informations.report')}</a>
                             )}
-                            <a className="item" onClick={this.mailToContact}>{t('menu.informations.contact')}</a>
+                            <button style={{width: '100%', textAlign: 'left', cursor: 'pointer'}} className="item link" onClick={this.mailToContact}>{t('menu.informations.contact')}</button>
                             <Menu.Item as={NavLink} to={`${multiPath}/mentions-legales`}>
                                 {t('menu.informations.legal_notice')}
                             </Menu.Item>
@@ -154,7 +154,7 @@ class MenuBar extends Component {
                     </Menu.Item>
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
                         Créé avec ❤ par le{' '}
-                        <a style={{ color: 'unset', fontWeight: 'bold' }} href="https://www.sictiam.fr/" target="_blank" rel="noopener noreferrer">
+                        <a style={{ fontWeight: 'bold' }} href="https://www.sictiam.fr/" target="_blank" rel="noopener noreferrer">
                             SICTIAM
                         </a>
                     </Menu.Item>

@@ -46,10 +46,14 @@ import PesModuleParams from './admin/pes/PesModuleParams'
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={props => (
         <div>
-            <TopBar />
+            <header>
+                <TopBar />
+            </header>
             <div className="wrapperContainer">
-                <MenuBar />
-                <Container className="mainContainer">
+                <aside>
+                    <MenuBar />
+                </aside>
+                <Container className="mainContainer" as="main" id="content">
                     <Component {...props} {...props.match.params} />
                 </Container>
             </div>
@@ -61,34 +65,40 @@ const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowe
     { isLoggedIn, isMenuOpened } ) => (
     <Route {...rest} render={props => (
         <div>
-            <TopBar admin={!!admin}/>
-            {isMenuOpened && (
-                <Overlay />
-            )}
+            <header>
+                <TopBar admin={!!admin}/>
+            </header>
             <div className="wrapperContainer">
-                <Menu />
-                <Container className="mainContainer">
-                    {isLoggedIn === true && (
-                        rightsFeatureResolver(userRights, allowedRights) ? (
-                            certificate || !certRequired ? (
-                                <Fragment>
-                                    <AlertMessage {...props} />
-                                    <Component {...props} {...props.match.params} />
-                                </Fragment>
+                {isMenuOpened && (
+                    <Overlay />
+                )}
+                <aside>
+                    <Menu />
+                </aside>
+                <main>
+                    <Container className="mainContainer" id="content">
+                        {isLoggedIn === true && (
+                            rightsFeatureResolver(userRights, allowedRights) ? (
+                                certificate || !certRequired ? (
+                                    <Fragment>
+                                        <AlertMessage {...props} />
+                                        <Component {...props} {...props.match.params} />
+                                    </Fragment>
+                                ) : (
+                                    <ErrorPage error={'certificate_required'} />
+                                )
                             ) : (
-                                <ErrorPage error={'certificate_required'} />
+                                <ErrorPage error={403} />
                             )
-                        ) : (
-                            <ErrorPage error={403} />
-                        )
-                    )}
-                    {isLoggedIn === false && (
-                        <ErrorPage error={401} />
-                    )}
-                    {isLoggedIn === null && (
-                        <Loader active inline="centered"></Loader>
-                    )}
-                </Container>
+                        )}
+                        {isLoggedIn === false && (
+                            <ErrorPage error={401} />
+                        )}
+                        {isLoggedIn === null && (
+                            <Loader active inline="centered"></Loader>
+                        )}
+                    </Container>
+                </main>
             </div>
         </div>
     )}

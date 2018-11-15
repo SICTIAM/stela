@@ -502,6 +502,7 @@ class NewActeForm extends Component {
                                 helpText={t('acte.help_text.number')} required={true}>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     placeholder={t('acte.fields.number') + '...'}
+                                    ariaRequired={true}
                                     value={this.state.fields.number}
                                     onChange={this.handleFieldChange}
                                     validationRule={this.validationRules.number}
@@ -514,6 +515,7 @@ class NewActeForm extends Component {
                                     helpText={t('acte.help_text.decision')} required={true}>
                                     <InputValidation id={`${this.state.fields.uuid}_decision`}
                                         type='date'
+                                        ariaRequired={true}
                                         value={this.state.fields.decision}
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
@@ -538,6 +540,7 @@ class NewActeForm extends Component {
                     <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}
                         required={true}>
                         <InputValidation id={`${this.state.fields.uuid}_objet`}
+                            ariaRequired={true}
                             placeholder={t('acte.fields.objet') + '...'}
                             value={this.state.fields.objet}
                             onChange={this.handleFieldChange}
@@ -549,6 +552,7 @@ class NewActeForm extends Component {
                             required={true}>
                             <InputValidation id={`${this.state.fields.uuid}_nature`}
                                 type='dropdown'
+                                ariaRequired={true}
                                 value={this.state.fields.nature}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.nature}
@@ -560,16 +564,19 @@ class NewActeForm extends Component {
                         required={true}>
                         <InputValidation id={`${this.state.fields.uuid}_code`}
                             type='dropdown' search
+                            ariaRequired={true}
                             value={this.state.fields.code}
                             onChange={this.handleFieldChange}
                             validationRule={this.validationRules.code}
                             fieldName={t('acte.fields.code')}
-                            options={codeOptions} />
+                            options={codeOptions}
+                            ariaLabel="Acte code" />
                     </FormField>
                     <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
                         helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
                         <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
                             type='file'
+                            ariaRequired={true}
                             accept={acceptFile}
                             onChange={this.saveDraftFile}
                             value={this.state.fields.acteAttachment}
@@ -588,7 +595,7 @@ class NewActeForm extends Component {
                         helpText={t('acte.help_text.annexes', { acceptAnnexes })}
                         required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false}>
                         <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
-                            <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                            <input type="file" ariaRequired={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
                                 onChange={e => this.saveDraftAnnexe(e.target.files[0])} style={{ display: 'none' }} />
                         </InputFile>
                     </FormField>
@@ -601,11 +608,11 @@ class NewActeForm extends Component {
                     && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') && (
                             <Grid columns={3} style={{ marginBottom: 'auto' }}>
                                 <Grid.Column>
-                                    <FormField htmlFor={`${this.state.fields.uuid}_public`} label={t('acte.fields.public')}
+                                    <FormField label={t('acte.fields.public')}
                                         helpText={t('acte.help_text.public')}>
                                         <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled}
                                             checked={this.state.fields.public} toggle
-                                            onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} />
+                                            onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} aria-label={t('acte.help_text.public')}/>
                                     </FormField>
                                 </Grid.Column>
                                 {this.state.depositFields.publicWebsiteField && (

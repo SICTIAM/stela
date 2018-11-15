@@ -191,15 +191,16 @@ class ActeList extends Component {
 
                             <Form onSubmit={this.submitForm}>
                                 <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
-                                    <input id='number' value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
+                                    <input id='number' aria-label={t('acte.fields.number')} value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                                    <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                                    <input id='objet' aria-label={t('acte.fields.objet')} value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                                     <Form.Group style={{ marginBottom: 0 }} widths='equal'>
                                         <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
                                             <InputDatetime id='decisionFrom'
+                                                ariaLabel={t('api-gateway:form.decision_from')}
                                                 timeFormat={false}
                                                 value={search.decisionFrom}
                                                 onChange={date => this.handleFieldChange('decisionFrom', date)} />
@@ -207,29 +208,31 @@ class ActeList extends Component {
                                         <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
                                             <InputDatetime id='decisionTo'
                                                 timeFormat={false}
+                                                ariaLabel={t('api-gateway:form.decision_to')}
                                                 value={search.decisionTo}
                                                 onChange={date => this.handleFieldChange('decisionTo', date)} />
                                         </FormField>
                                     </Form.Group>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
-                                    <select id='nature' value={search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
+                                    <select id='nature' value={search.nature} onBlur={e => this.handleFieldChange('nature', e.target.value)} onChange={e => this.handleFieldChange('nature', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all_feminine')}</option>
                                         {natureOptions}
                                     </select>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                                    <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <select id='status' value={search.status} onBlur={e => this.handleFieldChange('status', e.target.value)} onChange={e => this.handleFieldChange('status', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all')}</option>
                                         {statusOptions}
                                     </select>
                                 </FormFieldInline>
                                 <div style={{ textAlign: 'right' }}>
-                                    <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
+                                    <Button type='submit' className="anatra" basic primary>{t('api-gateway:form.search')}</Button>
                                 </div>
                             </Form>
                         </AdvancedSearch>
                         <StelaTable
+                            title={t('acte.list.summary')}
                             data={this.state.actes}
                             metaData={metaData}
                             header={true}

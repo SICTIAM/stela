@@ -122,7 +122,7 @@ class PesList extends Component {
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
                 updateItemPerPage={this.updateItemPerPage}
-                currentPage={this.currentPage}
+                currentPage={this.state.currentPage}
             />
         )
         return (
@@ -151,7 +151,7 @@ class PesList extends Component {
                                     </Form.Group>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor="status" label={t('pes.fields.status')} >
-                                    <select id="status" value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <select id="status" value={search.status} onBlur={e => this.handleFieldChange('status', e.target.value)} onChange={e => this.handleFieldChange('status', e.target.value)}>
                                         <option value="">{t('api-gateway:form.all')}</option>
                                         {statusOptions}
                                     </select>

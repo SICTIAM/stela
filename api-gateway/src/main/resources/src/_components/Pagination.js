@@ -15,13 +15,25 @@ class Pagination extends Component {
         updateItemPerPage: PropTypes.func.isRequired,
         handlePageClick: PropTypes.func.isRequired
     }
+    state = {
+        localItemPerPage: this.props.itemPerPage
+    }
+    //update props item per page + refresh table
+    //call whe user click on number or on "enter"
     updateItemPerPage = (itemPerPage) => {
-        localStorage.setItem('itemPerPage', itemPerPage)
-        this.props.updateItemPerPage(itemPerPage)
+        if(itemPerPage !== this.props.itemPerPage) {
+            localStorage.setItem('itemPerPage', itemPerPage)
+            this.props.updateItemPerPage(itemPerPage)
+        }
+    }
+    //update only local item per page, don't refresh table
+    //use for accessibiliy, whe user use keyboard to change item per page, don't refresh automatically table
+    updateLocalItemPerPage = (itemPerPage) => {
+        this.setState({localItemPerPage: itemPerPage})
     }
     render() {
         const { t } = this.context
-        const { columns, pageCount, handlePageClick, itemPerPage, currentPage } = this.props
+        const { columns, pageCount, handlePageClick, currentPage } = this.props
         const options = [
             { key: 25, text: 25, value: 25 },
             { key: 50, text: 50, value: 50 },
@@ -30,11 +42,11 @@ class Pagination extends Component {
         return (
             <Table.Footer>
                 <Table.Row>
-                    <Table.HeaderCell style={{ overflow: 'visible' }} colSpan={columns}>
-                        <Dropdown compact selection options={options} value={itemPerPage} onChange={(e, { value }) => this.updateItemPerPage(value)} />
+                    <Table.Cell style={{ overflow: 'visible' }} colSpan={columns}>
+                        <Dropdown aria-label={t('api-gateway:list.item_per_page_label')} compact selection options={options} value={this.state.localItemPerPage} onChange={(e, { value }) => this.updateLocalItemPerPage(value)} onBlur={(e, { value }) => this.updateItemPerPage(value)} />
                         <span style={{ marginLeft: '1em' }}>{t('list.item_per_page')}</span>
-                        <ReactPaginate previousLabel={<Icon name='left chevron' />}
-                            nextLabel={<Icon name='right chevron' />}
+                        <ReactPaginate previousLabel={<Icon name='left chevron' aria-label={t('api-gateway:list.previous')}/>}
+                            nextLabel={<Icon name='right chevron' aria-label={t('api-gateway:list.next')}/>}
                             breakLabel={<span className='item'>...</span>}
                             pageCount={pageCount}
                             marginPagesDisplayed={2}
@@ -45,8 +57,8 @@ class Pagination extends Component {
                             nextLinkClassName={'icon item'}
                             pageLinkClassName={'item'}
                             activeClassName={'active'}
-                            forcePage={currentPage} />
-                    </Table.HeaderCell>
+                            forcePage={currentPage}/>
+                    </Table.Cell>
                 </Table.Row>
             </Table.Footer>
         )

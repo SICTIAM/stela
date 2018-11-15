@@ -8,6 +8,9 @@ html,
     height: auto;
     background-color: #f4f4f4 !important;
 }
+a {
+    color: #007F99 !important;
+}
 .ui.vertical.menu.mainMenu {
     display: flex;
     flex-direction: column;
@@ -20,6 +23,14 @@ html,
     overflow-y: auto;
     padding-right: 0.5em;
 }
+.ui.vertical.menu .menu .item {
+    color: #757575 !important;
+}
+.ui.vertical.menu .menu .item:hover,
+.ui.vertical.menu .menu .item.active {
+    color: #333333 !important;
+}
+
 @media (min-height: 550px) {
     .mainMenus {
         height: 100%;
@@ -41,7 +52,7 @@ html,
         display: block;
         font-size: 30px;
         margin: 0.5em 10px 0 20px;
-        color: #009999;
+        color: #007F99;
     }
 }
 .ui.secondary.menu.topBar .header.item.appTitle h1 {
@@ -53,6 +64,9 @@ html,
 .ui.secondary.menu.topBar .list-profil .menu.visible {
     max-height: 300px;
     overflow-y: scroll;
+}
+.ui.menu.pagination a.item:focus {
+    background: rgba(0,0,0,.03);
 }
 .wrapperContainer {
     margin-left: 16em;
@@ -68,6 +82,24 @@ html,
     background-color: rgba(0,0,0,0.5);
     z-index: 100;
     cursor: pointer;
+}
+.skip {
+    position: absolute;
+    top: -1000px;
+    left: -1000px;
+    height: 1px;
+    width: 1px;
+    text-align: left;
+    overflow: hidden;
+}
+a.skip:active, 
+a.skip:focus, 
+a.skip:hover {
+    left: 180px;
+    top: 30px;
+    width: auto; 
+    height: auto; 
+    overflow: visible; 
 }
 @media only screen and (max-width: 1450px) and (min-width: 723px) {
     .wrapperContainer {
@@ -124,18 +156,21 @@ fieldset {
     box-shadow: 0 1px 2px 0 rgba(34, 36, 38, 0.15);
 }
 .ui.menu.secondary.topBar.anatra {
-    border-bottom: 2px solid #009999;
+    border-bottom: 2px solid #007F99;
 }
 .ui.menu.secondary.topBar.rosso {
     border-bottom: 2px solid #cc0066;
 }
 .ui.menu.mainMenu.anatra .header,
 .ui.menu.mainMenu.anatra .icon {
-    color: #009999;
+    color: #007F99;
 }
 .ui.menu.mainMenu.rosso .header,
 .ui.menu.mainMenu.rosso .icon {
     color: #cc0066;
+}
+.ui.menu.pagination a.item {
+    color: rgba(0,0,0,.87) !important;
 }
 footer {
     position: absolute;
@@ -187,7 +222,7 @@ ul.pagination li a.item:focus {
 .ui.segment h2:after {
     content: ' ';
     display: block;
-    border: 1px solid #009999;
+    border: 1px solid #007F99;
 }
 .ui.segment h2.rosso:after {
     border: 1px solid #cc0066;
@@ -197,16 +232,41 @@ ul.pagination li a.item:focus {
 .ui.table.sortable thead tr th.sorted,
 .ui.table.sortable thead tr th.sorted:hover {
     color: white;
-    background-color: #009999;
+    background-color: #007F99;
+}
+.ui.table tbody tr td.selectable>a:not(.ui) {
+    color:inherit !important;
 }
 .ui.table tbody tr td.selectable.no-hover:hover {
     background:none !important;
     color: inherit !important;
 }
+.ui.table td.negative a, .ui.table tr.negative a, 
+.ui.table td.negative, .ui.table tr.negative {
+    color: #9f3a38!important;
+}
+.ui.table tfoot > tr > td {
+    border-top: 1px solid rgba(34,36,38,.15) !important;
+    background: #f9fafb;
+    text-align: inherit;
+    color: rgba(0,0,0,.87);
+    padding: .78571429em;
+    vertical-align: middle;
+    font-style: normal;
+    font-weight: 400;
+    text-transform: none;
+}
+.ui.basic.primary.button.anatra, 
+.ui.basic.primary.buttons .button.anatra,
 .ui.button.basic.anatra,
 .ui.basic.blue.buttons .button {
-    box-shadow: 0 0 0 1px #009999 inset !important;
-    color: #009999 !important;
+    box-shadow: 0 0 0 1px #007F99 inset !important;
+    color: #007F99 !important;
+}
+button.ui.basic.orange.button, 
+button.ui.basic.orange.buttons .button {
+    color: #c55400!important;
+    box-shadow: 0 0 0 1px #c55400 inset!important;
 }
 .ui.button.basic.rosso,
 .ui.basic.blue.buttons .button {
@@ -215,7 +275,7 @@ ul.pagination li a.item:focus {
 }
 .ui.tabular.menu,
 .ui.tabular.menu .active.item {
-    border-color: #009999;
+    border-color: #007F99;
 }
 .ui.form .editor select {
     height: 30px;
@@ -234,6 +294,10 @@ span.fieldValue {
     line-height: 1;
     font-size: 2.5em;
     margin: 0 1rem 0 0;
+}
+
+.ui.feed>.event>.content .date {
+    color: rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Home made tooltip, to replace with React SemanticUI Popup once fixed: https://github.com/Semantic-Org/Semantic-UI-React/issues/1126 */

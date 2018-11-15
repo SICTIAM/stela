@@ -86,6 +86,8 @@
     "fields": {
       "number": "Numéro d'acte",
       "decision": "Date de décision",
+      "decision_from": "Date de décision début",
+      "decision_to": "Date de décision fin",
       "nature": "Nature",
       "code": "Code matière",
       "acteAttachment": "Fichier acte",
@@ -119,6 +121,7 @@
     },
     "list": {
       "title": "Liste des actes",
+      "summary": "Liste de vos actes enregistrés",
       "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
       "download_selected_ACKs": "Télécharger les justificatifs d'AR de la sélection",
       "download_all_CSV": "Télécharger toute la liste des actes",
@@ -196,6 +199,7 @@
       "choose": "Choisir...",
       "common_fields": "Champs communs",
       "add_an_acte": "Ajouter un acte",
+      "delete_an_acte": "Supprimer l'acte",
       "batch_title_placeholder": "Nouvel acte...",
       "PJ_types": "Types de pièce jointe...",
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",

@@ -1,10 +1,15 @@
 {
-  "extends": ["react-app"],
+  "plugins": [
+    "jsx-a11y"
+  ],
+  "extends": ["react-app", "plugin:jsx-a11y/recommended"],
   "rules": {
     "quotes": ["warn", "single"],
     "semi": ["warn", "never"],
     "indent": ["warn", 4],
     "max-len": ["warn", { "code": 300 }],
-    "no-trailing-spaces": "error"
+    "no-trailing-spaces": "error",
+    "jsx-a11y/href-no-hash": [0],
+    "jsx-a11y/label-has-for": [0]
   }
 }

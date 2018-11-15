@@ -1,11 +1,15 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
 import history from '../_util/history'
 
-export default class StelaTable extends Component {
+class StelaTable extends Component {
+    static contextTypes = {
+        t: PropTypes.func
+    }
     static propTypes = {
         className: PropTypes.string,
         data: PropTypes.array,
@@ -140,6 +144,7 @@ export default class StelaTable extends Component {
         else return null
     }
     render() {
+        const { t } = this.context
         const { data } = this.state
         const column = this.props.column ? this.props.column : this.state.column
         const direction = this.getDirectionClass()
@@ -169,11 +174,11 @@ export default class StelaTable extends Component {
         return (
             <div className={this.props.className} style={{ marginTop: '0.5em' }}>
                 {search &&
-                    <Input className='tableColor' style={this.floatRightStyle} onChange={this.handleSearch} icon='search' placeholder='Rechercher...' />
+                    <Input className='tableColor' style={this.floatRightStyle} onChange={this.handleSearch} icon='search' aria-label={t('api-gateway:form.search')} placeholder='Rechercher...' />
                 }
 
                 {options &&
-                    <Dropdown direction='left' style={this.floatRightStyle} trigger={trigger} icon={false} basic>
+                    <Dropdown aria-label={t('api-gateway:list.actions')} direction='left' style={this.floatRightStyle} trigger={trigger} icon={false} basic>
                         <Dropdown.Menu>
                             {selectOptions}
                         </Dropdown.Menu>
@@ -186,7 +191,7 @@ export default class StelaTable extends Component {
                     )
                 }
 
-                <Table selectable striped={this.props.striped} sortable={this.props.header} basic={this.props.basic} celled={this.props.celled}>
+                <Table role="presentation" summary={this.props.title ? this.props.title : 'Tableau'} selectable striped={this.props.striped} sortable={this.props.header} basic={this.props.basic} celled={this.props.celled}>
                     {title &&
                         <Table.Header>
                             <Table.Row>
@@ -199,15 +204,15 @@ export default class StelaTable extends Component {
                             <Table.Row>
                                 {this.props.metaData.map((metaData, index) =>
                                     !undisplayedColumnsProperties.includes(metaData.property) &&
-                                    <Table.HeaderCell key={index + '-' + metaData.displayName}
+                                    <Table.HeaderCell scope="col" key={index + '-' + metaData.displayName}
                                         sorted={column === metaData.property ? direction : null}
                                         onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
                                         {metaData.displayName}
                                     </Table.HeaderCell>
                                 )}
                                 {select &&
-                                    <Table.HeaderCell style={{ width: '40px' }} onClick={this.handleChekAll}>
-                                        <Checkbox checked={this.state.checkAll} onClick={this.handleChekAll} />
+                                    <Table.HeaderCell scope="col" style={{ width: '40px' }} onClick={this.handleChekAll}>
+                                        <Checkbox aria-label={t('api-gateway:list.check_all')} checked={this.state.checkAll} onClick={this.handleChekAll} label={<div className='box'></div>}/>
                                     </Table.HeaderCell>
                                 }
                             </Table.Row>
@@ -240,7 +245,7 @@ export default class StelaTable extends Component {
                                     )}
                                     {select &&
                                         <Table.Cell style={{ width: '40px' }}>
-                                            <Checkbox checked={this.state.checkboxes[row[this.props.keyProperty]]}
+                                            <Checkbox aria-label={t('api-gateway:item.select_item')} checked={this.state.checkboxes[row[this.props.keyProperty]]} label={<div className='box'></div>}
                                                 onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
                                         </Table.Cell>
                                     }
@@ -254,3 +259,4 @@ export default class StelaTable extends Component {
         )
     }
 }
+export default translate(['api-gateway'])(StelaTable)

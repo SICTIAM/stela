@@ -26,7 +26,7 @@ class ConfirmModal extends Component {
         const { text } = this.props
         return (
             <Fragment>
-                <span onClick={this.openConfirmModal}>
+                <span role="presentation" onClick={this.openConfirmModal}>
                     {this.props.children}
                 </span>
                 <Confirm

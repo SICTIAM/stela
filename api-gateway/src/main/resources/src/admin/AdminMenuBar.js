@@ -51,7 +51,10 @@ class AdminMenuBar extends Component {
                         <img style={{ width: '100%', padding: '2em' }} src={process.env.PUBLIC_URL + '/img/logo_sictiam.jpg'} alt="SICTIAM" />
                     </Menu.Item>
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
-                        Créé avec ❤ par le SICTIAM
+                        Créé avec ❤ par le{' '}
+                        <a style={{ color: '#c06 !important', fontWeight: 'bold' }} href="https://www.sictiam.fr/" target="_blank" rel="noopener noreferrer">
+                            SICTIAM
+                        </a>
                     </Menu.Item>
                 </div>
             </Menu>
