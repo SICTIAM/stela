@@ -37,6 +37,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -504,11 +505,29 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
+        String url = getSesileUrl(localAuthority);
         try {
-            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
+            return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                     classeur);
         } catch (HttpClientErrorException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {}", e.getStatusCode(),
+                    e.getMessage());
+            // Quick fix : check on other Sesile version
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                String fallbackUrl = url.equals(sesileV4Url) ? sesileUrl : sesileV4Url;
+                LOGGER.warn("Check classeur status on fallback url {}", fallbackUrl + "/api/classeur/{id}");
+                try {
+                    return restTemplate.exchange(fallbackUrl + "/api/classeur/{id}",
+                            HttpMethod.GET,
+                            requestEntity,
+                            Classeur.class,
+                            classeur);
+                } catch (HttpClientErrorException e2) {
+                    LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} on fallback url : {}", e.getStatusCode(),
+                            e.getMessage(), fallbackUrl);
+                    return new ResponseEntity<>(e.getStatusCode());
+                }
+            }
             return new ResponseEntity<>(e.getStatusCode());
         }
     }
@@ -526,10 +545,33 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public Document getDocument(LocalAuthority localAuthority, int documentId) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        ResponseEntity<Document> document =
-                restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}", HttpMethod.GET,
-                        requestEntity, Document.class, documentId);
-        return document.getStatusCode().isError() ? null : document.getBody();
+        String url = getSesileUrl(localAuthority);
+        ResponseEntity<Document> document = null;
+        try {
+            document = restTemplate.exchange(url + "/api/document/{id}", HttpMethod.GET,
+                    requestEntity, Document.class, documentId);
+            return document.getStatusCode().isError() ? null : document.getBody();
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {}", e.getStatusCode(),
+                    e.getMessage());
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                String fallbackUrl = url.equals(sesileV4Url) ? sesileUrl : sesileV4Url;
+                LOGGER.warn("Check classeur status on fallback url {}", fallbackUrl + "/api/classeur/{id}");
+                try {
+                    document = restTemplate.exchange(fallbackUrl + "/api/document/{id}",
+                            HttpMethod.GET,
+                            requestEntity,
+                            Document.class,
+                            documentId);
+                    return document.getStatusCode().isError() ? null : document.getBody();
+                } catch (HttpClientErrorException e2) {
+                    LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} on fallback url : {}", e.getStatusCode(),
+                            e.getMessage(), fallbackUrl);
+                }
+            }
+            return null;
+        }
+
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document)
