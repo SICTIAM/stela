@@ -45,6 +45,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Element;
 
 import javax.validation.constraints.NotNull;
@@ -77,6 +78,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     @Value("${application.sesile.apiV4Url}")
     String sesileV4Url;
+
+    @Value("${application.url")
+    private String applicationUrl;
 
     private final ExternalRestService externalRestService;
 
@@ -119,12 +123,14 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     : LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+            String returnUrl = getReturnUrl(pes);
             ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
                     new ClasseurRequest(pes.getObjet(), StringUtils.defaultString(pes.getComment()),
                             deadline.format(dateTimeFormatter), sesileConfiguration.getType(),
                             pes.getServiceOrganisationNumber() != null ? pes.getServiceOrganisationNumber()
                                     : sesileConfiguration.getServiceOrganisationNumber(),
-                            sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));
+                            sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()),
+                    returnUrl);
 
             byte[] fileContent = storageService.getAttachmentContent(pes.getAttachment());
             Document document = addFileToclasseur(pes.getLocalAuthority(), fileContent,
@@ -593,11 +599,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         }
     }
 
-    public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur)
+    public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur,
+            String returnUrl)
             throws HttpClientErrorException {
         LOGGER.debug(classeur.toString());
         HttpEntity<ClasseurRequest> requestEntity = localAuthority.getSesileNewVersion() ?
-                new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren()), getHeaders(localAuthority)) :
+                new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren(), returnUrl),
+                        getHeaders(localAuthority)) :
                 new HttpEntity<>(classeur, getHeaders(localAuthority));
         try {
             return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
@@ -654,6 +662,19 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private String getSesileUrl(boolean sesileNewVersion) {
         return sesileNewVersion ? sesileV4Url : sesileUrl;
+    }
+
+    public String getReturnUrl(PesAller pes) {
+        String token = pesService.getToken(pes);
+        return applicationUrl + "/api/pes/sesile/signature-hook/" + token + "/" + pes.getUuid();
+    }
+
+    public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
+        if (status.equals("SIGNED")) {
+            pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND, file.getBytes(), file.getOriginalFilename());
+        } else {
+            pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
+        }
     }
 
     @Override

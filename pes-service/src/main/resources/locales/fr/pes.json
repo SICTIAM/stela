@@ -19,6 +19,7 @@
       "SIGNATURE_INVALID": "Signature invalide",
       "SIGNATURE_MISSING": "Signature manquante",
       "CLASSEUR_WITHDRAWN": "Le classeur a été retiré dans SESILE",
+      "CLASSEUR_DELETED": "Le classeur a été supprimé dans SESILE",
       "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur"
     },
     "fields": {

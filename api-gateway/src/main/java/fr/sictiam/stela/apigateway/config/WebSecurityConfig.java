@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
@@ -33,7 +34,8 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     public OpenIdCConfiguration openIdCConfiguration() {
         StaticOpenIdCConfiguration configuration = new OpenIdConnectConfiguration();
         configuration
-                .addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/", "/editeur/api/acte"));
+                .addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/",
+                        "/editeur/api/acte", "/api/pes/sesile/signature-hook"));
         return configuration;
     }
 
@@ -48,6 +50,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
+                    .antMatchers("/api/pes/sesile/signature-hook/**").permitAll()
                     .antMatchers("/api/acte/public/**").permitAll()
                     .antMatchers("/api/admin/instance/**").permitAll()
                     .antMatchers("/api/admin/local-authority/all").permitAll()
@@ -63,6 +66,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                     .ignoringAntMatchers("/api/admin/ozwillo/**")
                     .ignoringAntMatchers("/api/*/ws/**")
                     .ignoringAntMatchers("/editeur/api/**")
+                    .ignoringAntMatchers("/api/pes/sesile/signature-hook/**")
                     .ignoringAntMatchers("/externalws/**").and()
                 .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
