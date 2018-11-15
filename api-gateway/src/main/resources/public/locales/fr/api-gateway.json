@@ -189,7 +189,8 @@
                     "bad_file_name": "Le nom de fichier est incorrect",
                     "non_extractable_pes": "Erreur lors du traitement du PES",
                     "existing_file_name": "Le nom de fichier est déjà utilisé",
-                    "file_too_big": "Le fichier est trop gros (100 Mo max)"
+                    "file_too_big": "Le fichier est trop gros (100 Mo max)",
+                    "read_file": "Impossible de lire le fichier"
                 },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             }
@@ -340,7 +341,7 @@
                 "no_localAuthorities": "Aucune collectivité",
                 "add_localAuthority": "Affecter une collectivité..."
             },
-            "fields":{
+            "fields": {
                 "software": "Logiciel",
                 "email": "Email",
                 "password": "Mot de passe",

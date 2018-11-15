@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
@@ -32,12 +31,9 @@ public class PesHistory implements Comparable<PesHistory> {
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
-    @JsonIgnore
-    private byte[] file;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Attachment attachment;
-    private String fileName;
     // Error messages can be quite lengthy
     @Column(length = 1024)
     private String message;
@@ -95,7 +91,7 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date, Attachment attachment,
-                      List<PesHistoryError> errors) {
+            List<PesHistoryError> errors) {
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = date;
@@ -104,7 +100,7 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     public PesHistory(String pesUuid, StatusType status, LocalDateTime date, Attachment attachment,
-                      String message) {
+            String message) {
 
         this.pesUuid = pesUuid;
         this.status = status;
