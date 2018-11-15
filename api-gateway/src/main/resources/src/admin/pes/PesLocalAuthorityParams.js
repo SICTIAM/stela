@@ -157,6 +157,21 @@ class PesLocalAuthorityParams extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
+    verifyTokens = e => {
+        e.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        const data = new FormData()
+        data.append('token', this.state.fields.token)
+        data.append('secret', this.state.fields.secret)
+        data.append('sesileNewVersion', this.state.fields.sesileNewVersion)
+        _fetchWithAuthzHandling({ url: '/api/pes/sesile/verify-tokens', method: 'POST', body: data, context: this.context })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(tokenValid => _addNotification(tokenValid ? notifications.admin.sesileValidTokens : notifications.admin.sesileInvalidTokens))
+            .catch(response => {
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
+            })
+    }
     render() {
         const { t } = this.context
         const listSiren = this.state.fields.sirens.map((siren, index) =>
@@ -234,6 +249,11 @@ class PesLocalAuthorityParams extends Component {
                                         value={this.state.fields.secret}
                                         required={this.state.fields.sesileSubscription}
                                         onChange={this.sesileConfigurationChange} />
+                                </Field>
+                                <Field htmlFor='verifyTokens' label={t('admin.modules.pes.local_authority_settings.sesile.verifyTokens')}>
+                                    <Button id='verifyTokens' basic color='grey' onClick={this.verifyTokens}>
+                                        {t('api-gateway:form.verify')}
+                                    </Button>
                                 </Field>
                             </Fragment>
                         )}

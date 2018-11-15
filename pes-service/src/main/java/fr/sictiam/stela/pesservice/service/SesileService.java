@@ -450,10 +450,27 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public MultiValueMap<String, String> getHeaders(LocalAuthority localAuthority) {
+        return getHeaders(localAuthority.getToken(), localAuthority.getSecret());
+    }
+
+    public MultiValueMap<String, String> getHeaders(String token, String secret) {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-        headers.add("token", localAuthority.getToken());
-        headers.add("secret", localAuthority.getSecret());
+        headers.add("token", token);
+        headers.add("secret", secret);
         return headers;
+    }
+
+
+    public boolean verifyTokens(String token, String secret, boolean sesileNewVersion) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(token, secret));
+        try {
+            ResponseEntity<Object> response = restTemplate.exchange(getSesileUrl(sesileNewVersion) + "/api/user/",
+                    HttpMethod.GET, requestEntity, Object.class);
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return false;
+        }
     }
 
     public List<ServiceOrganisation> getServiceOrganisations(LocalAuthority localAuthority, String profileUuid)
@@ -632,7 +649,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     private String getSesileUrl(LocalAuthority localAuthority) {
-        return localAuthority.getSesileNewVersion() ? sesileV4Url : sesileUrl;
+        return getSesileUrl(localAuthority.getSesileNewVersion());
+    }
+
+    private String getSesileUrl(boolean sesileNewVersion) {
+        return sesileNewVersion ? sesileV4Url : sesileUrl;
     }
 
     @Override

@@ -41,6 +41,7 @@
         "configure": "Configurer",
         "confirm": "Confirmer",
         "cancel": "Annuler",
+        "verify": "Vérifier",
         "max_string_length": "{{length}} caractères autorisés maximum ({{remaining}} restants)",
         "validation": {
             "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques majuscules et des tirets bas (_).",
@@ -201,6 +202,12 @@
                     "read_file": "Impossible de lire le fichier"
                 },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
+            },
+            "admin": {
+                "sesile": {
+                    "validTokens": "Tokens valides",
+                    "invalidTokens": "Tokens invalides"
+                }
             }
         },
         "admin": {

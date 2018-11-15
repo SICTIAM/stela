@@ -97,7 +97,8 @@
             "subscription": "Abonnement à Sesile",
             "newVersion": "Sesile nouvelle version",
             "secret": "Secret",
-            "token": "Token"
+            "token": "Token",
+            "verifyTokens": "Vérifier la connexion"
           }
         },
         "module_settings": {
