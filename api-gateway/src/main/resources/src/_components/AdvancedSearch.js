@@ -18,7 +18,7 @@ class AdvancedSearch extends Component {
         isOpen: this.props.isDefaultOpen
     }
     toggle = () => this.setState({ isOpen: !this.state.isOpen })
-    handleKeyPressInput = (event) => {
+    handleKeyPress = (event) => {
         if (event.key === 'Enter') this.props.onSubmit()
     }
     render() {

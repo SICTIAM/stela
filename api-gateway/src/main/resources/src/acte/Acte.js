@@ -234,13 +234,13 @@ class Acte extends Component {
                                 </List>
                             </Field>
                         )}
-                        <Field label={t('acte.fields.public')}>
-                            <Checkbox aria-label={t('acte.fields.public')} id="public" checked={acte.public} disabled />
+                        <Field htmlFor='public' label={t('acte.fields.public')}>
+                            <Checkbox label={<div className='box'></div>} id="public" checked={acte.public} disabled />
                         </Field>
 
                         <Grid>
-                            <Grid.Column width={4}><label>{t('acte.fields.publicWebsite')}</label></Grid.Column>
-                            <Grid.Column width={12}><Checkbox aria-label={t('acte.fields.publicWebsite')} id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
+                            <Grid.Column width={4}><label htmlFor='publicWebsite'>{t('acte.fields.publicWebsite')}</label></Grid.Column>
+                            <Grid.Column width={12}><Checkbox label={<div className='box'></div>} id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
                         </Grid>
                     </Segment>
                     <History

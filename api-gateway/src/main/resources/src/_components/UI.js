@@ -142,7 +142,7 @@ LoadingContent.contextTypes = {
     t: PropTypes.func
 }
 
-const LinkFile = ({ url, text, ariaLabel = '' }) => (
+const LinkFile = ({ url, text, ariaLabel = 'Lien fichier' }) => (
     <Fragment>
         <a target="_blank" href={url} aria-label={ariaLabel}>
             {text}

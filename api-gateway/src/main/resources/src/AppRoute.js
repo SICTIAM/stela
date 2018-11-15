@@ -46,9 +46,13 @@ import PesModuleParams from './admin/pes/PesModuleParams'
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={props => (
         <div>
-            <TopBar />
+            <header>
+                <TopBar />
+            </header>
             <div className="wrapperContainer">
-                <MenuBar />
+                <aside>
+                    <MenuBar />
+                </aside>
                 <Container className="mainContainer" as="main" id="content">
                     <Component {...props} {...props.match.params} />
                 </Container>
