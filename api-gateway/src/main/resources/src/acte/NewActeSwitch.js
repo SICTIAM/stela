@@ -6,6 +6,7 @@ import { Menu, Segment } from 'semantic-ui-react'
 import NewActeForm from './NewActeForm'
 import NewActeBatchedForm from './NewActeBatchedForm'
 import { Page } from '../_components/UI'
+import Anomaly from '../_components/Anomaly'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
 
@@ -23,7 +24,8 @@ class NewActeSwitch extends Component {
             mode: '',
             actes: []
         },
-        status: ''
+        status: '',
+        hasAttachmentTypes: false,
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -42,6 +44,17 @@ class NewActeSwitch extends Component {
             fields.mode = 'ACTE'
             this.setState({ fields })
         }
+        _fetchWithAuthzHandling({ url: '/api/acte/localAuthority/current/hasAttachmentTypes'})
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                this.setState({hasAttachmentTypes: json})
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
+                })
+            })
     }
     handleModeChange = (e, { id }) => {
         const { fields } = this.state
@@ -57,6 +70,9 @@ class NewActeSwitch extends Component {
             : ''
         return (
             <Page title={t('acte.new.title')}>
+                {this.state.hasAttachmentTypes && (
+                    <Anomaly type='warning' header={t('api-gateway:notifications.acte.anomaly_attachment_types')} lastHistory={{status: 'FILE_ERROR', message:t('api-gateway:notifications.acte.no_attachment_types')}}/>
+                )}
                 <Segment>
                     <Menu tabular>
                         {(this.state.fields.mode === 'ACTE' || !this.props.uuid) && (
