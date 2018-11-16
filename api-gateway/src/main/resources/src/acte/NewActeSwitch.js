@@ -70,7 +70,7 @@ class NewActeSwitch extends Component {
             : ''
         return (
             <Page title={t('acte.new.title')}>
-                {this.state.hasAttachmentTypes && (
+                {!this.state.hasAttachmentTypes && (
                     <Anomaly type='warning' header={t('api-gateway:notifications.acte.anomaly_attachment_types')} lastHistory={{status: 'FILE_ERROR', message:t('api-gateway:notifications.acte.no_attachment_types')}}/>
                 )}
                 <Segment>

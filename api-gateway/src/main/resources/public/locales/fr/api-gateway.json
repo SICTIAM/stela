@@ -179,8 +179,8 @@
                     }
                 }
             },
-            "anomaly_attachment_types": "Anomalie type de pièce jointe",
-            "no_attachment_types": "Aucun type de pièce jointe n'a été trouvée. Veuillez vérifier que la nomenclature de la collectivité a été envoyée",
+            "anomaly_attachment_types": "Aucun type de pièce jointe n'a été trouvé",
+            "no_attachment_types": "Veuillez vérifier que la nomenclature de la collectivité a été envoyée",
             "courrier_simple_asked": "La réponse au courrier simple a bien été déposée",
             "lettre_observation_asked": "La réponse à la lettre d'observation a bien été déposée",
             "pieces_complementaires_asked": "La réponse à la demande de pièce complémentaire a bien été déposée",
