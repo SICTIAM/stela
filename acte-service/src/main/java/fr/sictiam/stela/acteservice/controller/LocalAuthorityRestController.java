@@ -203,4 +203,10 @@ public class LocalAuthorityRestController {
         migrationService.resetMigration(migrationType, localAuthUuid);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @GetMapping("/current/hasAttachmentTypes")
+    public ResponseEntity<Boolean> hasAttachmentTypes(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+        return new ResponseEntity<>(localAuthorityService.hasAttachmentTypes(currentLocalAuthUuid), HttpStatus.OK);
+    }
 }
