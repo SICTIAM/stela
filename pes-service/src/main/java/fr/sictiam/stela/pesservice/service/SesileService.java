@@ -137,6 +137,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             pes.setSesileDocumentId(document.getId());
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {} ({})", e.getMessage(), e.getResponseBodyAsString());
+            pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         } catch (Exception e) {
             LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {}", e.getMessage());
             pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
@@ -200,7 +203,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         try {
             pesAllerAnalyser.computeSimpleInformation();
         } catch (InvalidPesAllerFileException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[computeSimplePesInformation] {}", e.getMessage());
         }
         return pesAllerAnalyser.getSimplePesInformation();
     }
@@ -214,7 +217,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         try {
             pesAllerAnalyser.computeSignaturesVerificationResults();
         } catch (InvalidPesAllerFileException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[isValidSignature] {}", e.getMessage());
         }
         pesAllerAnalyser.computeSignaturesTypeVerification();
 
@@ -517,8 +520,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                     classeur);
         } catch (HttpClientErrorException e) {
-            LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {}", e.getStatusCode(),
-                    e.getMessage());
+            LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
+                    e.getMessage(), e.getResponseBodyAsString());
             // Quick fix : check on other Sesile version
             if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
                 String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
@@ -531,8 +534,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                             Classeur.class,
                             classeur);
                 } catch (HttpClientErrorException e2) {
-                    LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} on fallback url : {}", e.getStatusCode(),
-                            e.getMessage(), fallbackUrl + "/api/classeur/" + classeur);
+                    LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({}) on fallback " +
+                                    "url: {}", e2.getStatusCode(),
+                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/classeur/" + classeur);
                     return new ResponseEntity<>(e.getStatusCode());
                 }
             }
@@ -563,8 +567,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     requestEntity, Document.class, documentId);
             return document.getStatusCode().isError() ? null : document.getBody();
         } catch (HttpClientErrorException e) {
-            LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {}", e.getStatusCode(),
-                    e.getMessage());
+            LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
+                    e.getMessage(), e.getResponseBodyAsString());
             if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
                 String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
                 LOGGER.warn("[getDocument] Check document status on fallback url {}",
@@ -577,8 +581,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                             documentId);
                     return document.getStatusCode().isError() ? null : document.getBody();
                 } catch (HttpClientErrorException e2) {
-                    LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} on fallback url : {}", e.getStatusCode(),
-                            e.getMessage(), fallbackUrl + "/api/document/" + documentId);
+                    LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} ({}) on fallback url : {}",
+                            e2.getStatusCode(),
+                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/document/" + documentId);
                 }
             }
             return null;
