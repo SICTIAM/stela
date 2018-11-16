@@ -27,6 +27,7 @@ class TopBar extends Component {
                 name: ''
             }
         },
+        selectedProfil: null,
         profiles: []
     }
     componentDidMount() {
@@ -42,7 +43,7 @@ class TopBar extends Component {
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
-                if (json.uuid) this.setState({ currentProfile: json, isUpdated: true })
+                if (json.uuid) this.setState({ currentProfile: json, isUpdated: true, selectedProfil: json.uuid })
             })
             .catch(response => {
                 response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message))
@@ -99,11 +100,11 @@ class TopBar extends Component {
                                     style={{minWidth: '18em'}}
                                     search selection
                                     options={listProfile}
-                                    value={this.state.currentProfile.uuid}
+                                    value={this.state.selectedProfil}
                                     selectOnBlur={false}
                                     text={this.state.currentProfile.localAuthority.name}
-                                    onChange={(event, data) => window.location.href = '/api/api-gateway/switch/' + data.value}
-                                />
+                                    onChange={(event, data) => this.setState({selectedProfil: data.value})}
+                                    onClose={(event, data) => window.location.href = '/api/api-gateway/switch/' + data.value}                                />
                             </Menu.Item>
                         )}
                         {isLoggedIn && (
