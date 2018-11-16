@@ -117,7 +117,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            String deadline = getSesileValidationDate(pes.getValidationLimit().format(dateTimeFormatter), sesileConfiguration.getProfileUuid());
+            String deadline =
+                    getSesileValidationDate(pes.getValidationLimit() == null ?
+                                    null :
+                                    pes.getValidationLimit().format(dateTimeFormatter),
+                            sesileConfiguration.getProfileUuid());
 
             ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
                     new ClasseurRequest(pes.getObjet(), StringUtils.defaultString(pes.getComment()),
@@ -134,7 +138,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {}", e.getMessage());
             pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         }
     }
