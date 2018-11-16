@@ -171,6 +171,16 @@ const notifications = {
             message: 'notifications.admin.certificateDeleted',
             level: 'success',
             position: 'br'
+        },
+        sesileValidTokens: {
+            title: 'notifications.pes.admin.sesile.validTokens',
+            level: 'success',
+            position: 'br'
+        },
+        sesileInvalidTokens: {
+            title: 'notifications.pes.admin.sesile.invalidTokens',
+            level: 'error',
+            position: 'br'
         }
     },
     profile: {

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -71,5 +72,11 @@ public class SesileController {
     @GetMapping("/configuration/{uuid}")
     public SesileConfiguration getConfigurationByUuid(@PathVariable String uuid) {
         return sesileService.getConfigurationByUuid(uuid);
+    }
+
+    @PostMapping("/verify-tokens")
+    public boolean verifyTokens(@RequestParam String token, @RequestParam String secret,
+            @RequestParam boolean sesileNewVersion) {
+        return sesileService.verifyTokens(token, secret, sesileNewVersion);
     }
 }
