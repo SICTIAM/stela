@@ -506,6 +506,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         String url = getSesileUrl(localAuthority);
+        String sesile3 = StringUtils.removeEnd(sesileUrl, "/");
+        String sesile4 = StringUtils.removeEnd(sesileV4Url, "/");
         try {
             LOGGER.debug("[checkClasseurStatus] check classeur on {}", url + "/api/classeur/" + classeur);
             return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
@@ -515,7 +517,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     e.getMessage());
             // Quick fix : check on other Sesile version
             if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
-                String fallbackUrl = StringUtils.removeEnd(url.equals(sesileV4Url) ? sesileUrl : sesileV4Url, "/");
+                String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
                 LOGGER.warn("[checkClasseurStatus] Check classeur status on fallback url {}", fallbackUrl + "/api" +
                         "/classeur/" + classeur);
                 try {
@@ -548,6 +550,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public Document getDocument(LocalAuthority localAuthority, int documentId) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         String url = getSesileUrl(localAuthority);
+        String sesile3 = StringUtils.removeEnd(sesileUrl, "/");
+        String sesile4 = StringUtils.removeEnd(sesileV4Url, "/");
         ResponseEntity<Document> document = null;
         try {
             LOGGER.debug("[getDocument] check document on {}", url + "/api/document/" + documentId);
@@ -558,7 +562,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {}", e.getStatusCode(),
                     e.getMessage());
             if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
-                String fallbackUrl = StringUtils.removeEnd(url.equals(sesileV4Url) ? sesileUrl : sesileV4Url, "/");
+                String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
                 LOGGER.warn("[getDocument] Check document status on fallback url {}",
                         fallbackUrl + "/api/document/" + documentId);
                 try {
