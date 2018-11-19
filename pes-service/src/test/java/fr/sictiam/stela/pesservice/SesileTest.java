@@ -38,7 +38,7 @@ public class SesileTest {
     @Test
     public void testPostClasseur() throws IOException {
         ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority,
-                new ClasseurRequest("test", "test", "20/02/2018", 2, 1, 3, "f.laussinot@sictiam.fr"));
+                new ClasseurRequest("test", "test", "20/02/2018", 2, 1, 3, "f.laussinot@sictiam.fr"), null);
         assertThat(classeur, notNullValue());
         assertThat(classeur.getStatusCodeValue(), is(HttpStatus.OK.value()));
 
