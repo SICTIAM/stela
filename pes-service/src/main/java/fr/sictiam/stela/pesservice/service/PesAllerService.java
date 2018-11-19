@@ -55,6 +55,7 @@ import javax.xml.xpath.XPathFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -404,6 +405,28 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         int nbDays = Integer.parseInt(environment.getProperty("application.dailymail.retensiondays", "1"));
         return pesAllerRepository.findAllByLocalAuthority_UuidAndLastHistoryStatusAndLastHistoryDateGreaterThan(
                 localAuthorityUuid, StatusType.NACK_RECEIVED, LocalDateTime.now().minusDays(nbDays));
+    }
+
+    public String getToken(PesAller pes) {
+        try {
+            StringBuilder sb = new StringBuilder(pes.getUuid());
+            sb.append(pes.getLocalAuthority().getUuid());
+            sb.append(pes.getObjet());
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(sb.toString().getBytes("UTF-8"));
+
+            StringBuilder token = new StringBuilder(2 * hash.length);
+            for (byte b : hash) {
+                token.append(String.format("%02x",
+                        b & 0xff));
+            }
+            return token.toString();
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.warn("No SHA-256 algorithm found");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.warn("Unsupported UTF-8 encoding");
+        }
+        return "default";
     }
 
     @Override

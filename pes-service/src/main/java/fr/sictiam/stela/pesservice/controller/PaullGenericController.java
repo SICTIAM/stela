@@ -52,7 +52,7 @@ public class PaullGenericController {
         this.externalRestService = externalRestService;
     }
 
-    @JsonPropertyOrder({"status", "status_message", "data"})
+    @JsonPropertyOrder({ "status", "status_message", "data" })
     class PaullResponse {
 
         String status;
@@ -143,7 +143,7 @@ public class PaullGenericController {
         if (localAuthority.isPresent()) {
             try {
                 ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority.get(),
-                        new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email));
+                        new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email), null);
                 ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(localAuthority.get(),
                         multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getBody().getId());
                 if (documentResonse.getStatusCode().is2xxSuccessful()) {
