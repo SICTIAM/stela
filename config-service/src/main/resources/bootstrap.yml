@@ -24,7 +24,7 @@ spring:
 ---
 
 spring:
-  profiles: prod
+  profiles: prod, atd24
   cloud:
     config:
       server: 
