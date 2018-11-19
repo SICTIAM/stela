@@ -79,7 +79,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     @Value("${application.sesile.apiV4Url}")
     String sesileV4Url;
 
-    @Value("${application.url")
+    @Value("${application.url}")
     private String applicationUrl;
 
     private final ExternalRestService externalRestService;
