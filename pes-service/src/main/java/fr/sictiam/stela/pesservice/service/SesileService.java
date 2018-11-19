@@ -602,7 +602,6 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur,
             String returnUrl)
             throws HttpClientErrorException {
-        LOGGER.debug(classeur.toString());
         HttpEntity<ClasseurRequest> requestEntity = localAuthority.getSesileNewVersion() ?
                 new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren(), returnUrl),
                         getHeaders(localAuthority)) :

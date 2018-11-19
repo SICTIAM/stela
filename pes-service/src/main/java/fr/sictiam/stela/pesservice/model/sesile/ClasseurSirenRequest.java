@@ -7,14 +7,14 @@ package fr.sictiam.stela.pesservice.model.sesile;
 public class ClasseurSirenRequest extends ClasseurRequest {
 
     private String siren;
-    private String returnUrl;
+    private String callback;
 
-    public ClasseurSirenRequest(ClasseurRequest classeurRequest, String siren, String returnUrl) {
+    public ClasseurSirenRequest(ClasseurRequest classeurRequest, String siren, String callback) {
         super(classeurRequest.getName(), classeurRequest.getDesc(), classeurRequest.getValidation(),
                 classeurRequest.getType(), classeurRequest.getGroupe(), classeurRequest.getVisibilite(),
                 classeurRequest.getEmail());
         this.siren = siren;
-        this.returnUrl = returnUrl;
+        this.callback = callback;
     }
 
     public String getSiren() {
@@ -29,6 +29,6 @@ public class ClasseurSirenRequest extends ClasseurRequest {
     public String toString() {
         return "ClasseurRequest [name=" + getName() + ", desc=" + getDesc() + ", validation=" + getValidation()
                 + ", type=" + getType() + ", groupe=" + getGroupe() + ", visibilite=" + getVisibilite()
-                + ", email=" + getEmail() + ", siren=" + siren + ", returnUrl=" + returnUrl + "]";
+                + ", email=" + getEmail() + ", siren=" + siren + ", callback=" + callback + "]";
     }
 }
