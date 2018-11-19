@@ -93,7 +93,7 @@ public class SesileController {
     /**
      * @return ResponseEntity with status codes :
      * 200: Ok, PES updated
-     * 400: Invalid status value
+     * 400: Invalid status value or signed file is missing
      * 401: Unauthorized : token missing or invalid token
      * 404: PES not found from uuid
      * 500: Stela internal error
@@ -113,6 +113,7 @@ public class SesileController {
 
             if (!token.equals(pesAllerService.getToken(pes))) {
                 LOGGER.error("Invalid token for PES {}", pes.getUuid());
+                LOGGER.error("Token shoud be {}", pesAllerService.getToken(pes));
                 return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
             }
 
