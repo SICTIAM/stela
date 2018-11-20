@@ -37,6 +37,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,16 +119,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
                     .orElse(sesileConfigurationRepository.findById(pes.getLocalAuthority().getGenericProfileUuid())
                             .get());
+
             JsonNode profile = externalRestService.getProfile(pes.getProfileUuid());
 
-            LocalDate deadline = pes.getValidationLimit() != null ? pes.getValidationLimit()
-                    : LocalDate.now().plusDays(sesileConfiguration.getDaysToValidated());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             String returnUrl = getReturnUrl(pes);
+            String deadline =
+                    getSesileValidationDate(pes.getValidationLimit() == null ?
+                                    null :
+                                    pes.getValidationLimit().format(dateTimeFormatter),
+                            sesileConfiguration.getProfileUuid());
+
             ResponseEntity<Classeur> classeur = postClasseur(pes.getLocalAuthority(),
                     new ClasseurRequest(pes.getObjet(), StringUtils.defaultString(pes.getComment()),
-                            deadline.format(dateTimeFormatter), sesileConfiguration.getType(),
+                            deadline, sesileConfiguration.getType(),
                             pes.getServiceOrganisationNumber() != null ? pes.getServiceOrganisationNumber()
                                     : sesileConfiguration.getServiceOrganisationNumber(),
                             sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()),
@@ -140,8 +147,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             pes.setSesileDocumentId(document.getId());
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {} ({})", e.getMessage(), e.getResponseBodyAsString());
+            pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         } catch (Exception e) {
-            LOGGER.error("Error while trying to submit to signature: {}", e.getMessage());
+            LOGGER.error("[submitToSignature] Error while trying to submit to signature: {}", e.getMessage());
             pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         }
     }
@@ -205,7 +215,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         try {
             pesAllerAnalyser.computeSimpleInformation();
         } catch (InvalidPesAllerFileException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[computeSimplePesInformation] {}", e.getMessage());
         }
         return pesAllerAnalyser.getSimplePesInformation();
     }
@@ -219,7 +229,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         try {
             pesAllerAnalyser.computeSignaturesVerificationResults();
         } catch (InvalidPesAllerFileException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[isValidSignature] {}", e.getMessage());
         }
         pesAllerAnalyser.computeSignaturesTypeVerification();
 
@@ -551,11 +561,34 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
+        String url = getSesileUrl(localAuthority);
+        String sesile3 = StringUtils.removeEnd(sesileUrl, "/");
+        String sesile4 = StringUtils.removeEnd(sesileV4Url, "/");
         try {
-            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
+            LOGGER.debug("[checkClasseurStatus] check classeur on {}", url + "/api/classeur/" + classeur);
+            return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                     classeur);
         } catch (HttpClientErrorException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
+                    e.getMessage(), e.getResponseBodyAsString());
+            // Quick fix : check on other Sesile version
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
+                LOGGER.warn("[checkClasseurStatus] Check classeur status on fallback url {}", fallbackUrl + "/api" +
+                        "/classeur/" + classeur);
+                try {
+                    return restTemplate.exchange(fallbackUrl + "/api/classeur/{id}",
+                            HttpMethod.GET,
+                            requestEntity,
+                            Classeur.class,
+                            classeur);
+                } catch (HttpClientErrorException e2) {
+                    LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({}) on fallback " +
+                                    "url: {}", e2.getStatusCode(),
+                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/classeur/" + classeur);
+                    return new ResponseEntity<>(e.getStatusCode());
+                }
+            }
             return new ResponseEntity<>(e.getStatusCode());
         }
     }
@@ -573,13 +606,35 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public Document getDocument(LocalAuthority localAuthority, int documentId) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
+        String url = getSesileUrl(localAuthority);
+        String sesile3 = StringUtils.removeEnd(sesileUrl, "/");
+        String sesile4 = StringUtils.removeEnd(sesileV4Url, "/");
+        ResponseEntity<Document> document = null;
         try {
-            ResponseEntity<Document> document =
-                    restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}", HttpMethod.GET,
-                            requestEntity, Document.class, documentId);
+            LOGGER.debug("[getDocument] check document on {}", url + "/api/document/" + documentId);
+            document = restTemplate.exchange(url + "/api/document/{id}", HttpMethod.GET,
+                    requestEntity, Document.class, documentId);
             return document.getStatusCode().isError() ? null : document.getBody();
         } catch (HttpClientErrorException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
+                    e.getMessage(), e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
+                LOGGER.warn("[getDocument] Check document status on fallback url {}",
+                        fallbackUrl + "/api/document/" + documentId);
+                try {
+                    document = restTemplate.exchange(fallbackUrl + "/api/document/{id}",
+                            HttpMethod.GET,
+                            requestEntity,
+                            Document.class,
+                            documentId);
+                    return document.getStatusCode().isError() ? null : document.getBody();
+                } catch (HttpClientErrorException e2) {
+                    LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} ({}) on fallback url : {}",
+                            e2.getStatusCode(),
+                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/document/" + documentId);
+                }
+            }
             return null;
         }
     }
@@ -655,12 +710,32 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return genericDocumentRepository.save(genericDocument);
     }
 
+    public String getSesileValidationDate(String initialDate, String profileUuid) {
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDateTime date;
+        if (StringUtils.isEmpty(initialDate)) {
+            Optional<SesileConfiguration> sesileConfiguration = sesileConfigurationRepository.findById(profileUuid);
+            date = LocalDateTime.now().plusDays(sesileConfiguration.isPresent() ?
+                    sesileConfiguration.get().getDaysToValidated() :
+                    3);
+        } else {
+            date = LocalDate.parse(initialDate, dateTimeFormatter).atStartOfDay();
+        }
+
+        if (date.isBefore(LocalDate.now().atStartOfDay())) {
+            date = LocalDateTime.now().plusDays(3);
+        }
+
+        return date.format(dateTimeFormatter);
+    }
+
     private String getSesileUrl(LocalAuthority localAuthority) {
         return getSesileUrl(localAuthority.getSesileNewVersion());
     }
 
     private String getSesileUrl(boolean sesileNewVersion) {
-        return sesileNewVersion ? sesileV4Url : sesileUrl;
+        return StringUtils.removeEnd(sesileNewVersion ? sesileV4Url : sesileUrl, "/");
     }
 
     public String getReturnUrl(PesAller pes) {

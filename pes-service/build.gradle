@@ -22,6 +22,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web-services')
     compile('org.springframework.boot:spring-boot-starter-json')
     compile('org.springframework.boot:spring-boot-starter-amqp')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.apache.commons:commons-compress:1.14')
     compile('commons-io:commons-io:2.4')
     compile('org.apache.commons:commons-lang3:3.7')
