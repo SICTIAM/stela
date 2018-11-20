@@ -25,6 +25,14 @@ public class ClasseurSirenRequest extends ClasseurRequest {
         this.siren = siren;
     }
 
+    public String getCallback() {
+        return callback;
+    }
+
+    public void setCallback(String callback) {
+        this.callback = callback;
+    }
+
     @Override
     public String toString() {
         return "ClasseurRequest [name=" + getName() + ", desc=" + getDesc() + ", validation=" + getValidation()
