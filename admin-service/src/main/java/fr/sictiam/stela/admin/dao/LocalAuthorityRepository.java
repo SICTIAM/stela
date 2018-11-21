@@ -1,6 +1,8 @@
 package fr.sictiam.stela.admin.dao;
 
 import fr.sictiam.stela.admin.model.LocalAuthority;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -20,4 +22,10 @@ public interface LocalAuthorityRepository extends JpaRepository<LocalAuthority, 
 
     @Query("SELECT COUNT (la.uuid) FROM LocalAuthority la")
     Long countAll();
+
+    Page<LocalAuthority> findAllByProfiles_AgentUuidAndProfiles_AdminTrue(String agentUuid, Pageable pageable);
+
+    @Query("SELECT COUNT (la.uuid) FROM LocalAuthority la JOIN Profile p ON p.localAuthority.uuid = la.uuid WHERE p" +
+            ".agent.uuid=?1 AND p.admin=true")
+    Long countMine(String agentUuid);
 }

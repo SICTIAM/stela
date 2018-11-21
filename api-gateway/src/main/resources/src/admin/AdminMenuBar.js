@@ -22,8 +22,6 @@ class AdminMenuBar extends Component {
                         <Menu.Header>Général</Menu.Header>
                         <Menu.Menu>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/ma-collectivite`}>{t('admin.my_local_authority')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/agents`}>{t('admin.users')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/collectivite`}>{t('admin.local_authorities')}</Menu.Item>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/parametrage-instance`}>Paramètre d'instance</Menu.Item>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/compte-generique/liste`}>{t('admin.generic_account.title')}</Menu.Item>
                         </Menu.Menu>

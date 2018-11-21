@@ -45,7 +45,6 @@ public class AuthFilter extends OncePerRequestFilter {
         JsonNode token = getToken(request);
 
         Profile profile = null;
-
         if (token != null && StringUtils.isNotBlank(token.get("uuid").asText())) {
             profile = profileService.getByUuid(token.get("uuid").asText());
         }
@@ -59,6 +58,7 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Profile-Is-Local-Authority-Admin", token.get("admin").asBoolean());
             request.setAttribute("STELA-Current-Profile-UUID", profile.getUuid());
             request.setAttribute("STELA-Sub", profile.getAgent().getSub());
+            request.setAttribute("STELA-Current-Agent-UUID", token.get("agent").get("uuid").asText());
             request.setAttribute("STELA-Current-Local-Authority-UUID", profile.getLocalAuthority().getUuid());
             request.setAttribute("STELA-Current-Profile-Paired-Certificate", pairedCertificate);
             request.setAttribute("STELA-Certificate", certificate);
