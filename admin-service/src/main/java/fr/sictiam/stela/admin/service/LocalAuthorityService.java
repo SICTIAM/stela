@@ -6,6 +6,7 @@ import eu.europa.esig.dss.validation.reports.CertificateReports;
 import fr.sictiam.signature.utils.CertUtils;
 import fr.sictiam.stela.admin.dao.CertificateRepository;
 import fr.sictiam.stela.admin.dao.LocalAuthorityRepository;
+import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
@@ -54,6 +55,7 @@ public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
     private final CertificateRepository certificateRepository;
+    private final ProfileRepository profileRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
@@ -70,9 +72,10 @@ public class LocalAuthorityService {
     private String exchange;
 
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
-            CertificateRepository certificateRepository) {
+            CertificateRepository certificateRepository, ProfileRepository profileRepository) {
         this.localAuthorityRepository = localAuthorityRepository;
         this.certificateRepository = certificateRepository;
+        this.profileRepository = profileRepository;
     }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
@@ -122,8 +125,19 @@ public class LocalAuthorityService {
         return page.getContent();
     }
 
+    public List<LocalAuthority> getMineWithPagination(String agentUuid, Integer limit, Integer offset, String column,
+            Sort.Direction direction) {
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit, new Sort(direction, column));
+        Page page = localAuthorityRepository.findAllByProfiles_AgentUuidAndProfiles_AdminTrue(agentUuid, pageable);
+        return page.getContent();
+    }
+
     public Long countAll() {
         return localAuthorityRepository.countAll();
+    }
+
+    public Long countMine(String agentUuid) {
+        return localAuthorityRepository.countMine(agentUuid);
     }
 
     public LocalAuthority getByUuid(String uuid) {
@@ -231,5 +245,10 @@ public class LocalAuthorityService {
 
         List<LocalAuthority> results = entityManager.createQuery(query).setMaxResults(1).getResultList();
         return (results == null || results.isEmpty()) ? Optional.empty() : Optional.of(results.get(0));
+    }
+
+    public boolean isAgentAdmin(String agentUuid, String localAuthorityUuid) {
+
+        return profileRepository.isAdmin(agentUuid, localAuthorityUuid);
     }
 }

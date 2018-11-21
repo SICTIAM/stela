@@ -6,7 +6,6 @@ import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
 import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.UI.LocalAuthorityResultsUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
 import fr.sictiam.stela.admin.model.WorkGroup;
@@ -17,7 +16,6 @@ import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,13 +54,17 @@ public class LocalAuthorityController {
     @JsonView(Views.LocalAuthorityView.class)
     public ResponseEntity<LocalAuthority> getCurrentLocalAuthority(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        if (!isLocalAuthorityAdmin) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String agentUuid) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(agentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(localAuthorityService.getByUuid(currentLocalAuthUuid), HttpStatus.OK);
     }
 
+    /*
+     * Available for Super Admin role (actually not existing)
+     *
     @GetMapping
     @JsonView(Views.LocalAuthorityView.class)
     public ResponseEntity<LocalAuthorityResultsUI> getAllLocalAuthorities(
@@ -70,13 +72,20 @@ public class LocalAuthorityController {
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "name") String column,
             @RequestParam(value = "direction", required = false, defaultValue = "ASC") Sort.Direction direction,
-            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin) {
+            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
         if (!isLocalAuthorityAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        List<LocalAuthority> localAuthorities = localAuthorityService.getAllWithPagination(limit, offset, column,
-                direction);
-        Long count = localAuthorityService.countAll();
+
+        Profile profile = profileService.getByUuid(profileUuid);
+
+        List<LocalAuthority> localAuthorities =
+                localAuthorityService.getMineWithPagination(profile.getAgent().getUuid(), limit,
+                        offset,
+                        column,
+                        direction);
+        Long count = localAuthorityService.countMine(profile.getAgent().getUuid());
         return new ResponseEntity<>(new LocalAuthorityResultsUI(count, localAuthorities), HttpStatus.OK);
     }
 
@@ -85,13 +94,16 @@ public class LocalAuthorityController {
     public List<LocalAuthority> getAllBasicLocalAuthorities() {
         return localAuthorityService.getAll();
     }
-
+    */
+    
     @GetMapping("/{uuid}")
     @JsonView(Views.LocalAuthorityView.class)
     public ResponseEntity<LocalAuthority> getLocalAuthorityByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String agentUuid,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(agentUuid, uuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(localAuthorityService.getByUuid(uuid), HttpStatus.OK);
@@ -121,8 +133,9 @@ public class LocalAuthorityController {
     public ResponseEntity addModule(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String agentUuid,
             @PathVariable Module module) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(agentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         localAuthorityService.addModule(currentLocalAuthUuid, module);
@@ -133,8 +146,9 @@ public class LocalAuthorityController {
     public ResponseEntity removeModule(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String agentUuid,
             @PathVariable Module module) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(agentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         localAuthorityService.removeModule(currentLocalAuthUuid, module);
@@ -145,8 +159,9 @@ public class LocalAuthorityController {
     @JsonView(Views.ProfileView.class)
     public ResponseEntity<Profile> getProfile(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid, @PathVariable String agentUuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, uuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(profileService.getByAgentAndLocalAuthority(uuid, agentUuid), HttpStatus.OK);
@@ -157,8 +172,9 @@ public class LocalAuthorityController {
     public ResponseEntity<Profile> getProfileFromCurrent(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String agentUuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(profileService.getByAgentAndLocalAuthority(currentLocalAuthUuid, agentUuid),
@@ -169,8 +185,9 @@ public class LocalAuthorityController {
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<List<WorkGroup>> getAllGroupByLocalAuthority(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, uuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(workGroupService.getAllByLocalAuthority(uuid), HttpStatus.OK);
@@ -187,8 +204,9 @@ public class LocalAuthorityController {
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<List<WorkGroup>> getAllGroupForCurrent(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-        if (!isLocalAuthorityAdmin) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(workGroupService.getAllByLocalAuthority(currentLocalAuthUuid), HttpStatus.OK);
@@ -198,8 +216,9 @@ public class LocalAuthorityController {
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<WorkGroup> newGroupFromFront(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid, @RequestBody WorkGroupUI workGroupUI) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, uuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(workGroupService.createFromUI(workGroupUI, uuid), HttpStatus.OK);
@@ -217,8 +236,9 @@ public class LocalAuthorityController {
     public ResponseEntity<WorkGroup> newGroupForCurrent(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @RequestBody WorkGroupUI workGroupUI) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(workGroupService.createFromUI(workGroupUI, currentLocalAuthUuid), HttpStatus.OK);
@@ -228,8 +248,10 @@ public class LocalAuthorityController {
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<WorkGroup> getGroup(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         WorkGroup workGroup = workGroupService.getByUuid(uuid);
@@ -240,8 +262,10 @@ public class LocalAuthorityController {
     @JsonView(Views.WorkGroupView.class)
     public ResponseEntity<WorkGroup> updateGroup(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid, @RequestBody WorkGroupUI workGroupUI) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         WorkGroup workGroup = workGroupService.getByUuid(uuid);
@@ -257,8 +281,10 @@ public class LocalAuthorityController {
     @DeleteMapping("/group/{uuid}")
     public ResponseEntity deleteGroup(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         workGroupService.deleteGroup(uuid);
@@ -268,8 +294,10 @@ public class LocalAuthorityController {
     @GetMapping("/certificates/{uuid}")
     public ResponseEntity<Certificate> getLocalAuthorityCertificate(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(localAuthorityService.getCertificate(uuid), HttpStatus.OK);
@@ -279,8 +307,9 @@ public class LocalAuthorityController {
     public ResponseEntity addCurrentLocalAuthorityCertificate(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @RequestParam("file") MultipartFile file) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return addCertificate(currentLocalAuthUuid, file);
@@ -289,8 +318,10 @@ public class LocalAuthorityController {
     @PostMapping("/{uuid}/certificates")
     public ResponseEntity addLocalAuthorityCertificate(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid, @RequestParam("file") MultipartFile file) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return addCertificate(uuid, file);
@@ -311,8 +342,9 @@ public class LocalAuthorityController {
     public ResponseEntity deleteCurrentLocalAuthorityCertificate(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, currentLocalAuthUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         localAuthorityService.deleteCertificate(currentLocalAuthUuid, uuid);
@@ -322,8 +354,9 @@ public class LocalAuthorityController {
     @DeleteMapping("/{localAuthorityUuid}/certificates/{uuid}")
     public ResponseEntity deleteLocalAuthorityCertificate(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String localAuthorityUuid, @PathVariable String uuid) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, localAuthorityUuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         localAuthorityService.deleteCertificate(localAuthorityUuid, uuid);
@@ -333,8 +366,9 @@ public class LocalAuthorityController {
     @PostMapping("/{uuid}/{module}")
     public ResponseEntity addModuleByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid, @PathVariable Module module) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, uuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         localAuthorityService.addModule(uuid, module);
@@ -344,8 +378,9 @@ public class LocalAuthorityController {
     @DeleteMapping("/{uuid}/{module}")
     public ResponseEntity removeModuleByUuid(
             @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
+            @RequestAttribute("STELA-Current-Agent-UUID") String currentAgentUuid,
             @PathVariable String uuid, @PathVariable Module module) {
-        if (!isLocalAuthorityAdmin) {
+        if (!isLocalAuthorityAdmin || !localAuthorityService.isAgentAdmin(currentAgentUuid, uuid)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         localAuthorityService.removeModule(uuid, module);
