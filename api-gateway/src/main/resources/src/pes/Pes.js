@@ -87,10 +87,12 @@ class Pes extends Component {
                 )
             )
         )
+        const regex = '/(1984|1968)/'
+        const anomalyType = lastHistory && lastHistory.errors[0] &&lastHistory.errors[0].message.match(regex) ? 'warning' : 'negative'
         return (
             <Page title={pes.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
-                    <Anomaly header={lastHistory && t('pes.status.'+lastHistory.status)} lastHistory={lastHistory} />
+                    <Anomaly type={anomalyType} header={lastHistory && t('pes.status.'+lastHistory.status)} lastHistory={lastHistory} />
                     <Segment>
                         <Label className="labelStatus" color={pes.lastHistoryStatus ? this.getStatusColor(pes.lastHistoryStatus) : 'blue'} ribbon>
                             {pes.lastHistoryStatus && t(`pes.status.${pes.lastHistoryStatus}`)}
