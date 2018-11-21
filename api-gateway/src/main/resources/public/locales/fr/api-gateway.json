@@ -206,6 +206,12 @@
                 "missing_data": "Merci de remplir tous les champs obligatoires"
             },
             "admin": {
+                "title": "Admin module Pes",
+                "local_authority": {
+                    "update": {
+                        "success": "La mise à jour de la collectivité a bien été prise en compte"
+                    }
+                },
                 "sesile": {
                     "validTokens": "Tokens valides",
                     "invalidTokens": "Tokens invalides"
