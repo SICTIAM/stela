@@ -88,14 +88,15 @@ public class LocalAuthorityController {
         Long count = localAuthorityService.countMine(profile.getAgent().getUuid());
         return new ResponseEntity<>(new LocalAuthorityResultsUI(count, localAuthorities), HttpStatus.OK);
     }
+    */
 
     @GetMapping("/all")
     @JsonView(Views.LocalAuthorityViewBasic.class)
     public List<LocalAuthority> getAllBasicLocalAuthorities() {
         return localAuthorityService.getAll();
     }
-    */
-    
+
+
     @GetMapping("/{uuid}")
     @JsonView(Views.LocalAuthorityView.class)
     public ResponseEntity<LocalAuthority> getLocalAuthorityByUuid(
