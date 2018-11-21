@@ -152,7 +152,7 @@ class PesLocalAuthorityParams extends Component {
         const url = `/api/pes/localAuthority/${this.state.fields.uuid}`
         _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
-            .then(() => _addNotification(notifications.admin.localAuthorityUpdate))
+            .then(() => _addNotification(notifications.admin.localAuthorityPesUpdate))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })

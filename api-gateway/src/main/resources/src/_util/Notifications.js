@@ -124,6 +124,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        localAuthorityPesUpdate: {
+            title: 'notifications.pes.admin.title',
+            message: 'notifications.pes.admin.local_authority.update.success',
+            level: 'success',
+            position: 'br'
+        },
         classificationAsked: {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.local_authority.classificationAsked',
