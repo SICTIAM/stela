@@ -76,7 +76,7 @@ class TopBar extends Component {
         }
         )
         const trigger = (
-            <Button basic className={this.props.admin ? 'rosso' : 'anatra'}>
+            <Button basic className={this.props.admin ? 'secondary' : 'primary'}>
                 <Icon name="user circle outline" size="large" />{' '}
                 {`${user && user.given_name} ${user && user.family_name}`}
             </Button>
@@ -84,9 +84,9 @@ class TopBar extends Component {
         // FIXME : isLoggedIn in the context is not reliable (false then true)
         if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
-            <Menu className={`topBar ${this.props.admin ? 'rosso' : 'anatra'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
+            <Menu className={`topBar ${this.props.admin ? 'secondary' : 'primary'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
                 <a href="#content" className="skip">{t('api-gateway:skip_to_content')}</a>
-                <Icon name="bars" onClick={_openMenu} className='buger-menu'></Icon>
+                <Icon name="bars" onClick={_openMenu} className='buger-menu primary'></Icon>
                 <Menu.Item className="appTitle" as={Link} to={`${multiPath}/`} header>
                     <h1 style={{ textAlign: 'center' }}>
                         <img src={process.env.PUBLIC_URL + '/img/logo_stela.png'} alt="STELA" />
@@ -111,18 +111,18 @@ class TopBar extends Component {
                             <Menu.Item>
                                 <Popup style={{ padding: 0 }} trigger={trigger} on="click" position="bottom center">
                                     <Menu vertical>
-                                        <Menu.Item as={Link} to={`${multiPath}/profil`}>
+                                        <Menu.Item className="primary" as={Link} to={`${multiPath}/profil`}>
                                             <span><Icon name="user" /> {t('top_bar.profile')}</span>
                                         </Menu.Item>
                                         {this.state.currentProfile.admin && (
-                                            <Menu.Item as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
+                                            <Menu.Item className="primary" as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
                                                 <span>
                                                     <Icon name={this.props.admin ? 'reply' : 'settings'} />{' '}
                                                     {t(`top_bar.${this.props.admin ? 'back_to_app' : 'admin'}`)}
                                                 </span>
                                             </Menu.Item>
                                         )}
-                                        <Menu.Item onClick={() => (window.location.href = '/logout')}>
+                                        <Menu.Item className="primary" onClick={() => (window.location.href = '/logout')}>
                                             <span><Icon name="sign out" /> {t('top_bar.log_out')}</span>
                                         </Menu.Item>
                                     </Menu>
@@ -131,7 +131,7 @@ class TopBar extends Component {
                         )}
                         {!isLoggedIn && (
                             <Menu.Item>
-                                <Button basic className="anatra" onClick={this.login}>
+                                <Button basic className="primary" onClick={this.login}>
                                     {t('top_bar.log_in')}
                                 </Button>
                             </Menu.Item>

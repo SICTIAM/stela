@@ -227,7 +227,7 @@ class ActeList extends Component {
                                     </select>
                                 </FormFieldInline>
                                 <div style={{ textAlign: 'right' }}>
-                                    <Button type='submit' className="anatra" basic primary>{t('api-gateway:form.search')}</Button>
+                                    <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
                                 </div>
                             </Form>
                         </AdvancedSearch>

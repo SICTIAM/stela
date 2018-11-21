@@ -1,0 +1,25 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+/*******************************
+             Page
+*******************************/
+
+body,
+html,
+#root {
+    height: auto;
+    background-color: #f4f4f4 !important;
+}
+
+/*---   Header  ---*/
+.ui.segment h2:after {
+    content: ' ';
+    display: block;
+    border: 1px solid @primaryColor;
+}
+
+.ui.segment h2.secondary:after {
+    border: 1px solid @secondaryColor;
+}

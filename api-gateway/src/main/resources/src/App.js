@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import NotificationSystem from 'react-notification-system'
 import { translate } from 'react-i18next'
 
-import 'semantic-ui-css/semantic.min.css'
+import './semantic/dist/semantic.min.css'
 
 import { getLocalAuthoritySlug } from './_util/utils'
 

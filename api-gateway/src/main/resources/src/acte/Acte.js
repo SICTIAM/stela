@@ -129,7 +129,7 @@ class Acte extends Component {
                     position={this.state.acteUI.stampPosition}
                     handleChange={this.handleChangeDeltaPosition} />
                 <div style={{ textAlign: 'center' }}>
-                    <a className='ui primary anatra icon button' target='_blank' aria-label={t('api-gateway:form.download')}
+                    <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
                         href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
                         {t('api-gateway:form.download')}
                     </a>
@@ -145,7 +145,7 @@ class Acte extends Component {
         )
         const canRepublish = lastHistory && !this.state.republished && (anomalies.includes(lastHistory.status) ||
             (lastHistory.status === 'SENT' && moment(lastHistory.date).isSameOrBefore(moment().subtract(hoursBeforeResendActe, 'hour'))))
-        const dropdownButton = <Button basic color='primary anatra'>{t('api-gateway:form.download')}</Button>
+        const dropdownButton = <Button basic color='primary'>{t('api-gateway:form.download')}</Button>
 
         return (
             <Page title={acte.objet}>

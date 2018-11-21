@@ -14,12 +14,14 @@ class AdminMenuBar extends Component {
         const { t } = this.context
         const localAuthoritySlug = getLocalAuthoritySlug()
         return (
-            <Menu style={{ backgroundColor: 'white' }} fixed='left' className='mainMenu rosso' secondary vertical>
+            <Menu style={{ backgroundColor: 'white' }} fixed='left' className='mainMenu secondary' secondary vertical>
                 <div className='mainMenus'>
 
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name='tasks' size='large' />
-                        <Menu.Header>Général</Menu.Header>
+                        <Menu.Header className="secondary">
+                            Général
+                            <Icon name='tasks' size='large' className="float-right"/>
+                        </Menu.Header>
                         <Menu.Menu>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/ma-collectivite`}>{t('admin.my_local_authority')}</Menu.Item>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/agents`}>{t('admin.users')}</Menu.Item>
@@ -30,16 +32,20 @@ class AdminMenuBar extends Component {
                     </Menu.Item>
 
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name='checkmark box' size='large' />
-                        <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
+                        <Menu.Header className="secondary">
+                            {t('menu.acte.legality_control')}
+                            <Icon name='checkmark box' className="float-right" size='large' />
+                        </Menu.Header>
                         <Menu.Menu>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/actes/parametrage-module`}>Paramètres</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
 
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name='calculator' size='large' />
-                        <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
+                        <Menu.Header className="secondary">
+                            {t('menu.pes.accounting_flow')}
+                            <Icon name='calculator' size='large' className="float-right" />
+                        </Menu.Header>
                         <Menu.Menu>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/pes/parametrage-module`}>Paramètres</Menu.Item>
                         </Menu.Menu>

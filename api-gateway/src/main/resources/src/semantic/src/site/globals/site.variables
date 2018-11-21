@@ -1,0 +1,42 @@
+/*******************************
+     User Global Variables
+*******************************/
+
+/*-------------------
+    Brand Colors
+--------------------*/
+@primaryColor        : @blue;
+@secondaryColor      : @pink;
+
+@lightPrimaryColor   : @lightBlue;
+@lightSecondaryColor : @lightPink;
+
+/*-------------------
+       Links
+--------------------*/
+
+@linkColor           : @primaryColor;
+
+/*-------------------
+      Site Colors
+--------------------*/
+
+/*---  Colors  ---*/
+@orange           : #c55400;
+@blue             : #007F99;
+@pink             : #cc0066;
+
+/*---  Light Colors  ---*/
+@lightBlue        : #0C89E8;
+@lightPink        : #FF007F;
+@lightRed         : #db2828;
+
+/*---   Neutrals  ---*/
+@fullBlack        : #000000;
+@white            : #FFFFFF;
+
+/*-------------------
+     Neutral Text
+--------------------*/
+
+@darkTextColor    : #333333;

@@ -1,5 +1,6 @@
 plugins {
     id "com.moowork.node" version "1.2.0"
+    id "com.moowork.gulp" version "1.2.0"
 }
 
 archivesBaseName = 'stela-api-gateway'
@@ -8,6 +9,10 @@ node {
     version = '8.9.4'
     //yarnVersion = '0.16.1'
     download = false
+}
+
+gulp {
+
 }
 
 dependencies {
@@ -42,7 +47,12 @@ task copyFrontBuild(type: Copy) {
     from "${sourceSets.main.resources.srcDirs[0]}/build/"
     into "${sourceSets.main.output.resourcesDir}/public/"
 }
+task semanticBuild(type: GulpTask) {
+    args = ['--cwd', './src/main/resources/src/semantic', 'build']
+}
 
 bootJar.dependsOn(copyFrontBuild)
 copyFrontBuild.dependsOn(frontBundle)
-frontBundle.dependsOn(yarnInstall)
+frontBundle.dependsOn(semanticBuild)
+semanticBuild.dependsOn(installGulp)
+installGulp.dependsOn(yarnInstall)

@@ -1,0 +1,11 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+.ui.form .editor select {
+    height: 30px;
+    padding: 0;
+    background: none;
+    padding-left: 1em;
+    width: 10em;
+}

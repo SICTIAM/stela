@@ -1,0 +1,29 @@
+/*******************************
+    User Variable Overrides
+*******************************/
+
+/* Table Header */
+@headerBackground     : @primaryColor;
+@headerColor          : @white;
+@sortableColor        : @white;
+
+
+/*--------------
+     Types
+---------------*/
+
+/* Sortable */
+
+@sortableHoverBackground        : @primaryColor;
+@sortableHoverColor             : @white;
+
+@sortableActiveHoverBackground  : @primaryColor;
+@sortableActiveHoverColor       : @white;
+
+
+/*--------------
+     States
+---------------*/
+
+/* Negative */
+@negativeColor                  : #9f3a38
