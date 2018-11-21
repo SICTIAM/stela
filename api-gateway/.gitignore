@@ -29,6 +29,8 @@ yarn-error.log*
 ### NetBeans ###
 nbproject/private/
 build/
+## Semantic ##
+!src/main/resources/src/semantic/tasks/build/
 nbbuild/
 dist/
 nbdist/
