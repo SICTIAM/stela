@@ -1,0 +1,13 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+/*-------------------
+       Colors
+--------------------*/
+
+/* Primary */
+
+i.primary.icon {
+  color: @primaryColor !important;
+}

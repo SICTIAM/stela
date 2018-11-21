@@ -59,11 +59,13 @@ class MenuBar extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const multiPath = getMultiPahtFromSlug()
         return (
-            <Menu style={{ backgroundColor: 'white' }} className={'mainMenu anatra' + (isMenuOpened ? ' open' : '')} fixed="left" secondary vertical onClick={() => {isMenuOpened && _openMenu()}}>
+            <Menu style={{ backgroundColor: 'white' }} className={'mainMenu primary' + (isMenuOpened ? ' open' : '')} fixed="left" secondary vertical onClick={() => {isMenuOpened && _openMenu()}}>
                 <div className="mainMenus">
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name="checkmark box" size="large" />
-                        <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
+                        <Menu.Header className="primary">
+                            {t('menu.acte.legality_control')}
+                            <Icon name="checkmark box" className="float-right" size="large" />
+                        </Menu.Header>
                         <Menu.Menu>
                             {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) && localAuthoritySlug) && (
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/actes/nouveau`}>
@@ -88,8 +90,10 @@ class MenuBar extends Component {
 
                     {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'PES')) && (
                         <Menu.Item style={{ width: '100%' }}>
-                            <Icon name="calculator" size="large" />
-                            <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
+                            <Menu.Header className="primary">
+                                {t('menu.pes.accounting_flow')}
+                                <Icon name="calculator" className="float-right" size="large" />
+                            </Menu.Header>
                             <Menu.Menu>
                                 {rightsFeatureResolver(rights, ['PES_DEPOSIT']) && (
                                     <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/pes/nouveau`}>
@@ -112,8 +116,10 @@ class MenuBar extends Component {
 
                     {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'CONVOCATION')) && (
                         <Menu.Item style={{ width: '100%' }}>
-                            <Icon name="calendar outline" size="large" />
-                            <Menu.Header>{t('menu.convocation.convocation')}</Menu.Header>
+                            <Menu.Header className="primary">
+                                {t('menu.convocation.convocation')}
+                                <Icon name="calendar outline" className="float-right" size="large" />
+                            </Menu.Header>
                             <Menu.Menu>
                                 <Menu.Item>
                                     {t('menu.convocation.send_a_convocation')}
@@ -129,8 +135,10 @@ class MenuBar extends Component {
                     )}
 
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name="help" size="large" />
-                        <Menu.Header>{t('menu.informations.title')}</Menu.Header>
+                        <Menu.Header className="primary">
+                            {t('menu.informations.title')}
+                            <Icon name="help" size="large" className="float-right"/>
+                        </Menu.Header>
                         <Menu.Menu>
                             {(isLoggedIn && localAuthoritySlug && reportUrl) && (
                                 <a className="item" href={reportUrl} target="_blank">{t('menu.informations.report')}</a>

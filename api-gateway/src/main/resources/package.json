@@ -44,6 +44,8 @@
     "validatorjs": "^3.14.2"
   },
   "scripts": {
+    "build-semantic": "cd src/semantic && gulp build-css build-assets",
+    "watch-semantic": "cd src/semantic && yarn run build-semantic && gulp watch",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test --env=jsdom",
@@ -52,6 +54,7 @@
   "devDependencies": {
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.2",
-    "prettier": "^1.14.2"
+    "prettier": "^1.14.2",
+    "semantic-ui": "^2.4.2"
   }
 }
