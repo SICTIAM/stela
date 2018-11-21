@@ -149,11 +149,13 @@ public class PesRestController {
         ObjectMapper mapper = new ObjectMapper();
         try {
             if (pesAllerService.checkVirus(file.getBytes())) {
+                LOGGER.error("PES {} attachment contains virus", pesAllerJson);
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
             PesAller pesAller = mapper.readValue(pesAllerJson, PesAller.class);
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {
+                LOGGER.error("PES {} is not valid", pesAller.getObjet());
                 CustomValidationUI customValidationUI = new CustomValidationUI(errors, "has failed");
                 return new ResponseEntity<>(customValidationUI, HttpStatus.BAD_REQUEST);
             }
@@ -162,8 +164,10 @@ public class PesRestController {
             return new ResponseEntity<>(result.getUuid(), HttpStatus.CREATED);
 
         } catch (PesCreationException e) {
+            LOGGER.error("PES {}: error during creation : {}", pesAllerJson, e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (IOException e) {
+            LOGGER.error("PES {}: IO error during creation : {}", pesAllerJson, e.getMessage());
             throw new PesCreationException();
         }
     }
