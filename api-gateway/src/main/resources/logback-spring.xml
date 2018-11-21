@@ -41,8 +41,10 @@
 
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.web.client" level="DEBUG"/>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG"/>
     <logger name="org.springframework.security" level="INFO"/>
-    <logger name="org.oasis_eu.spring" level="DEBUG"/>
+    <logger name="org.oasis_eu.spring" level="INFO"/>
+    <logger name="fr.sictiam.stela.apigateway.config.filter" level="INFO"/>
     <logger name="fr.sictiam.stela" level="DEBUG"/>
     <root level="INFO">
         <if condition='!p("logstashhost").equals("null")'>
