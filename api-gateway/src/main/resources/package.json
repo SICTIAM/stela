@@ -46,8 +46,8 @@
   "scripts": {
     "build-semantic": "cd src/semantic && gulp build-css build-assets",
     "watch-semantic": "cd src/semantic && yarn run build-semantic && gulp watch",
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
+    "start": "yarn run build-semantic && react-app-rewired start",
+    "build": "yarn run build-semantic && react-app-rewired build",
     "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject"
   },

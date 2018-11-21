@@ -43,12 +43,8 @@ task copyFrontBuild(type: Copy) {
     from "${sourceSets.main.resources.srcDirs[0]}/build/"
     into "${sourceSets.main.output.resourcesDir}/public/"
 }
-task semanticBuild(type: GulpTask) {
-    args = ['--cwd', './src/main/resources/src/semantic', 'build']
-}
 
 bootJar.dependsOn(copyFrontBuild)
 copyFrontBuild.dependsOn(frontBundle)
-frontBundle.dependsOn(semanticBuild)
-semanticBuild.dependsOn(installGulp)
+frontBundle.dependsOn(installGulp)
 installGulp.dependsOn(yarnInstall)
