@@ -11,10 +11,6 @@ node {
     download = false
 }
 
-gulp {
-
-}
-
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile('org.springframework.cloud:spring-cloud-starter-config')
