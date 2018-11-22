@@ -47,8 +47,8 @@ class Profile extends Component {
         const { uuid } = this.props
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-                .then(response => response.json())
-                .then(json => this.setState({ activeProfile: json }))
+            .then(response => response.json())
+            .then(json => this.setState({ activeProfile: json }))
         _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
             .then(response => response.json())
             .then(json => this.setState({ agent: json }))
@@ -100,7 +100,7 @@ class Profile extends Component {
         const allLocalAuthorityProfiles = []
         agent.profiles
             .map(profile => {
-                if (profile.localAuthority.uuid == activeProfile.localAuthority.uuid) {
+                if (profile.localAuthority.uuid === activeProfile.localAuthority.uuid) {
                     allLocalAuthorityProfiles.unshift(
                         <LocalAuthorityProfile
                             key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}

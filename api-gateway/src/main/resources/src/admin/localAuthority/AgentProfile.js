@@ -92,7 +92,7 @@ class AgentProfile extends Component {
     }
     render() {
         const { t } = this.context
-        const { agent, localAuthority } = this.state.fields
+        const { agent } = this.state.fields
         const groups = this.state.fields.groups.map(group =>
             <Label basic key={group.uuid}>{group.name} <Icon name='delete' onClick={() => this.removeGroup(group.uuid)} /></Label>
         )
@@ -102,30 +102,23 @@ class AgentProfile extends Component {
                 return { key: group.uuid, value: group.uuid, text: group.name }
             })
         return (
-            <Page title={`${agent.given_name} ${agent.family_name}`} subtitle={`de ${localAuthority.name}`}>
-                <Segment>
-                    <Form>
-                        <Field htmlFor='email' label={t('agent.email')}>
-                            <span id='email'>{agent.email}</span>
-                        </Field>
-                        <Field htmlFor='admin' label={t('agent.local_authority_admin')}>
-                            <Checkbox id='admin'
-                                toggle checked={this.state.fields.admin}
-                                onChange={this.handleCheckboxChange} />
-                        </Field>
-                        <Field htmlFor='groups' label={t('agent.groups')}>
-                            <div style={{ marginBottom: '0.5em' }}>{groups.length > 0 ? groups : t('admin.agent.no_group')}</div>
-                            <div style={{ marginBottom: '1em' }}>
-                                <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions}
-                                    onChange={this.handleChange} />
-                            </div>
-                        </Field>
-                        <div style={{ textAlign: 'right' }}>
-                            <Button basic primary onClick={this.submitForm} type='submit'>{t('api-gateway:form.update')}</Button>
-                        </div>
-                    </Form>
-                </Segment>
-            </Page>
+            <Form>
+                <Field htmlFor='admin' label={t('agent.local_authority_admin')}>
+                    <Checkbox id='admin'
+                        toggle checked={this.state.fields.admin}
+                        onChange={this.handleCheckboxChange} />
+                </Field>
+                <Field htmlFor='groups' label={t('agent.groups')}>
+                    <div style={{ marginBottom: '0.5em' }}>{groups.length > 0 ? groups : t('admin.agent.no_group')}</div>
+                    <div style={{ marginBottom: '1em' }}>
+                        <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions}
+                            onChange={this.handleChange} />
+                    </div>
+                </Field>
+                <div style={{ textAlign: 'right' }}>
+                    <Button basic primary onClick={this.submitForm} type='submit'>{t('api-gateway:form.update')}</Button>
+                </div>
+            </Form>
         )
     }
 }
