@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -102,6 +104,7 @@ public class AgentController {
         Long count = agentService.countAll();
         return new ResponseEntity<>(new AgentResultsUI(count, localAuthorities), HttpStatus.OK);
     }
+    */
 
     @GetMapping("/{uuid}")
     @JsonView(Views.AgentView.class)
@@ -119,7 +122,7 @@ public class AgentController {
     public Set<Profile> getProfiles(@PathVariable String uuid) {
         return agentService.getProfilesByUuid(uuid);
     }
-    */
+
 
     @GetMapping("/profiles")
     @JsonView(Views.AgentView.class)
