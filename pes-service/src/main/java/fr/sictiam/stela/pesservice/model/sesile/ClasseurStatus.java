@@ -1,12 +1,16 @@
 package fr.sictiam.stela.pesservice.model.sesile;
 
 public enum ClasseurStatus {
-    REFUSED(0), IN_PROGRESS(1), FINALIZED(2), WITHDRAWN(3),;
+    REFUSED(0),
+    IN_PROGRESS(1),
+    FINALIZED(2),
+    WITHDRAWN(3),
+    RETRACTED(4);
 
     private final int value;
 
     ClasseurStatus(int value) {
-        this.value = value;
+        this.value = value == 4 ? 1 : value;
     }
 
     /**
@@ -14,6 +18,6 @@ public enum ClasseurStatus {
      */
     @Override
     public String toString() {
-        return Integer.toString(this.value);
+        return Integer.toString(value);
     }
 }
