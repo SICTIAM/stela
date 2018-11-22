@@ -201,6 +201,7 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
             pesAller.setBudCode(path.evaluate("/PES_Aller/EnTetePES/CodBud/@V", document));
 
         } catch (IOException | XPathExpressionException | ParserConfigurationException | SAXException e) {
+            LOGGER.error("Error while parsing PES {} : {} : {}", pesAller.getUuid(), e.getClass(), e.getMessage());
             throw new PesCreationException();
         }
         return pesAller;
