@@ -9,6 +9,7 @@ import AccordionSegment from './_components/AccordionSegment'
 import CertificateInfos from './_components/CertificateInfos'
 import { checkStatus } from './_util/utils'
 import { modules, sesileVisibility } from './_util/constants'
+import AgentProfile from './admin/localAuthority/AgentProfile'
 
 class Profile extends Component {
     static contextTypes = {
@@ -45,8 +46,7 @@ class Profile extends Component {
     componentDidMount() {
         const { uuid } = this.props
         const { _fetchWithAuthzHandling } = this.context
-        if (!uuid)
-            _fetchWithAuthzHandling({ url: '/api/admin/profile' })
+        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
                 .then(response => response.json())
                 .then(json => this.setState({ activeProfile: json }))
         _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
@@ -97,34 +97,38 @@ class Profile extends Component {
         const { t } = this.context
         const { activeProfile, agent, allNotifications } = this.state
         const currentLocalAuthorityProfile = agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
-        const allLocalAuthorityProfiles = this.props.uuid ? []
-            : [
-                <LocalAuthorityProfile
-                    key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
-                    profile={currentLocalAuthorityProfile}
-                    onChange={this.onChange}
-                    updateProfile={this.updateProfile}
-                    allNotifications={allNotifications}
-                    onCheckboxChange={this.onCheckboxChange}
-                    onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
-                />
-            ]
+        const allLocalAuthorityProfiles = []
         agent.profiles
-            .filter(profile => this.props.uuid || profile.localAuthority.uuid !== activeProfile.localAuthority.uuid)
-            .map(profile =>
-                allLocalAuthorityProfiles.push(
-                    <LocalAuthorityProfile
-                        key={profile.uuid}
-                        profile={profile}
-                        isDefaultOpen={false}
-                        onChange={this.onChange}
-                        updateProfile={this.updateProfile}
-                        allNotifications={allNotifications}
-                        onCheckboxChange={this.onCheckboxChange}
-                        onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
-                    />
-                )
-            )
+            .map(profile => {
+                if (profile.localAuthority.uuid == activeProfile.localAuthority.uuid) {
+                    allLocalAuthorityProfiles.unshift(
+                        <LocalAuthorityProfile
+                            key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
+                            profile={currentLocalAuthorityProfile}
+                            isDefaultOpen={true}
+                            onChange={this.onChange}
+                            updateProfile={this.updateProfile}
+                            allNotifications={allNotifications}
+                            onCheckboxChange={this.onCheckboxChange}
+                            onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
+                        />
+                    )
+                }
+                else {
+                    allLocalAuthorityProfiles.push(
+                        <LocalAuthorityProfile
+                            key={profile.uuid}
+                            profile={profile}
+                            isDefaultOpen={false}
+                            onChange={this.onChange}
+                            updateProfile={this.updateProfile}
+                            allNotifications={allNotifications}
+                            onCheckboxChange={this.onCheckboxChange}
+                            onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
+                        />
+                    )
+                }
+            })
         return (
             <Page title={t('profile.title')}>
                 <Segment style={{ borderTop: '2px solid #663399' }}>
@@ -155,6 +159,12 @@ class Profile extends Component {
                         </div>
                     )}
                 </Segment>
+
+                {this.props.uuid &&
+                    <Segment style={{ borderTop: '2px solid #663399' }}>
+                        <AgentProfile uuid={this.props.uuid}/>
+                    </Segment>
+                }
 
                 {allLocalAuthorityProfiles}
 
