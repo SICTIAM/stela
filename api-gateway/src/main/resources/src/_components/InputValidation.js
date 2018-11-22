@@ -47,7 +47,7 @@ export default class InputValidation extends Component {
                 )}
 
                 {this.props.type === 'file' && (
-                    <InputFile htmlFor={this.props.id} label={this.props.label}>
+                    <InputFile icon={this.props.icon} htmlFor={this.props.id} label={this.props.label} labelClassName={this.props.labelClassName}>
                         <input id={this.props.id}
                             type='file'
                             aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }

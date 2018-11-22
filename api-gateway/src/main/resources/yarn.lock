@@ -8514,10 +8514,10 @@ react-draggable@^3.0.5:
     classnames "^2.2.5"
     prop-types "^15.6.0"
 
-react-dropzone@^6.0.4:
-  version "6.0.4"
-  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-6.0.4.tgz#205cf0cf9905cb0ede8209d82f29d956ce6a9065"
-  integrity sha512-O0xLYYR3fEWdvnrPzJcxUGVfRhXzqxjLk0W7jqXiypdIC7lkHwk20izru2KC64STmlMAkbIpDHiafoHHwBJ80A==
+react-dropzone@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-7.0.1.tgz#bc76bc1686fb47ed0c8301f968fffa6aecdff47b"
+  integrity sha512-J4rbzhFZPVW7k7K9CVb0OcwSOJGLWa0y+0rvtB4rBLVkvq0agH/o3kPJ0DCkd6ZVzL2K1NFqIOvtQkwQKpmJBA==
   dependencies:
     attr-accept "^1.1.3"
     prop-types "^15.6.2"
