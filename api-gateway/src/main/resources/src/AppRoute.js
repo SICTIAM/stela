@@ -194,7 +194,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/agents/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/agents" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentList} menu={AdminMenuBar} admin={true} />
 
-                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/agent/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/agent/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AdminProfile} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/certificats/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityCertificate} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/certificats/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthorityCertificate} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/groupes/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={Group} menu={AdminMenuBar} admin={true} />
