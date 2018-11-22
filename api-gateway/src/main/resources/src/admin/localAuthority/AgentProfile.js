@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic-ui-react'
+import { Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic-ui-react'
 
 import { notifications } from '../../_util/Notifications'
-import { Field, Page } from '../../_components/UI'
+import { Field } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
 
 class AgentProfile extends Component {
@@ -21,11 +21,6 @@ class AgentProfile extends Component {
     state = {
         fields: {
             uuid: '',
-            agent: {
-                family_name: '',
-                given_name: '',
-                email: '',
-            },
             localAuthority: {
                 name: ''
             },
@@ -92,7 +87,6 @@ class AgentProfile extends Component {
     }
     render() {
         const { t } = this.context
-        const { agent } = this.state.fields
         const groups = this.state.fields.groups.map(group =>
             <Label basic key={group.uuid}>{group.name} <Icon name='delete' onClick={() => this.removeGroup(group.uuid)} /></Label>
         )
