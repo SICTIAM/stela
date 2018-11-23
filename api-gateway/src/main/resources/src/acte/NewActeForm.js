@@ -5,8 +5,9 @@ import { Button, Form, Checkbox, Card, Dropdown, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
+import accepts from 'attr-accept'
 
-import { FormField, File, InputFile, ValidationPopup } from '../_components/UI'
+import { FormField, File, ValidationPopup, DragAndDropFile, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
@@ -228,6 +229,31 @@ class NewActeForm extends Component {
         })
         return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
     }
+    fileAccept = (file, accept) => {
+        const { _addNotification, t } = this.context
+        if(file.type === 'application/x-moz-file' || accepts(file, accept)) {
+            return true
+        } else {
+            _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
+            return false
+        }
+    }
+    onDropActeAttachment = (acceptedFiles, rejectedFiles) => {
+        const { _addNotification, t } = this.context
+        if(rejectedFiles.length === 0) {
+            this.saveDraftFile(acceptedFiles[0])
+        } else {
+            _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
+        }
+    }
+    onDropAnnexe = (acceptedFiles, rejectedFiles) => {
+        const { _addNotification, t } = this.context
+        if(rejectedFiles.length === 0) {
+            this.saveDraftAnnexe(acceptedFiles[0])
+        } else {
+            _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
+        }
+    }
     validateForm = debounce(() => {
         const { t } = this.context
         const data = {
@@ -279,8 +305,20 @@ class NewActeForm extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }, 3000)
-    saveDraftFile = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
-    saveDraftAnnexe = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
+    saveDraftFile = (file, accept) => {
+        if(accept) {
+            this.fileAccept(file, accept) && this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
+        } else {
+            this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
+        }
+    }
+    saveDraftAnnexe = (file, accept) => {
+        if(accept) {
+            this.fileAccept(file, accept) && this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
+        } else {
+            this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
+        }
+    }
     saveDraftAttachment = (file, url) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (file) {
@@ -574,15 +612,24 @@ class NewActeForm extends Component {
                     </FormField>
                     <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
                         helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
-                        <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
-                            type='file'
-                            ariaRequired={true}
-                            accept={acceptFile}
-                            onChange={this.saveDraftFile}
-                            value={this.state.fields.acteAttachment}
-                            validationRule={this.validationRules.acteAttachment}
-                            label={t('api-gateway:form.add_a_file')}
-                            fieldName={t('acte.fields.acteAttachment')} />
+                        <DragAndDropFile
+                            key={`${this.state.fields.uuid}_acteAttachment`}
+                            multiple={false}
+                            acceptFile={acceptFile}
+                            onDrop={this.onDropActeAttachment}
+                            disableClick={true}>
+                            <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
+                                labelClassName="primary"
+                                type='file'
+                                icon={false}
+                                ariaRequired={true}
+                                accept={acceptFile}
+                                onChange={this.saveDraftFile}
+                                value={this.state.fields.acteAttachment}
+                                validationRule={this.validationRules.acteAttachment}
+                                label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}
+                                fieldName={t('acte.fields.acteAttachment')} />
+                        </DragAndDropFile>
                     </FormField>
                     {this.state.fields.acteAttachment && (
                         <File
@@ -594,10 +641,17 @@ class NewActeForm extends Component {
                     <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
                         helpText={t('acte.help_text.annexes', { acceptAnnexes })}
                         required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false}>
-                        <InputFile htmlFor={`${this.state.fields.uuid}_annexes`} label={t('api-gateway:form.add_a_file')}>
-                            <input type="file" ariaRequired={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
-                                onChange={e => this.saveDraftAnnexe(e.target.files[0])} style={{ display: 'none' }} />
-                        </InputFile>
+                        <DragAndDropFile
+                            key={`${this.state.fields.uuid}_annexes`}
+                            acceptFile={acceptAnnexes}
+                            onDrop={this.onDropAnnexe}
+                            disableClick={true}
+                            multiple={false}>
+                            <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
+                                <input type="file" ariaRequired={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                    onChange={e => this.saveDraftAnnexe(e.target.files[0], acceptAnnexes)} style={{ display: 'none' }} />
+                            </InputFile>
+                        </DragAndDropFile>
                     </FormField>
                     {this.state.fields.annexes.length > 0 && (
                         <Card.Group>

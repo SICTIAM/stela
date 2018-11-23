@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import { Form, Grid, Card, Icon, List, Header, Step, Loader, Segment, Popup } from 'semantic-ui-react'
 import moment from 'moment'
 
+import Dropzone from 'react-dropzone'
+
 import { bytesToSize } from '../_util/utils'
 
 const FormField = ({ htmlFor, label, children, inline, helpText, required }) => (
@@ -67,10 +69,11 @@ const File = ({ attachment, onDelete, extraContent, src }) => (
     </Card>
 )
 
-const InputFile = ({ htmlFor, label, children }) => (
+const InputFile = ({ htmlFor, label, children, labelClassName, icon = true }) => (
     <div>
-        <label htmlFor={htmlFor} className="ui icon button basic">
-            <Icon name="file" /> {label}
+        <label htmlFor={htmlFor} className={`ui icon button basic ${labelClassName}`}>
+            {icon && <Icon name="file" /> }
+            {label}
         </label>
         {children}
     </div>
@@ -93,6 +96,26 @@ const StatusDisplay = ({ status, date }, { t }) => (
     </Fragment>
 )
 StatusDisplay.contextTypes = {
+    t: PropTypes.func
+}
+
+const DragAndDropFile = ({ disableClick = false, children, iconName = 'upload', multiple = true, acceptFile, key, onDrop }, { t }) => (
+    <Dropzone
+        key={key}
+        multiple = { multiple }
+        className={'dropzone' + (disableClick ? ' disabled' : '')}
+        accept={acceptFile}
+        onDrop={onDrop}
+        disableClick={disableClick}
+    >
+        <div className="text-center flex-container-column">
+            <Icon name={iconName} className="xl-icon primary"/>
+            <p style={{ color: 'rgba(34, 36, 38, 1)' }}>{t('api-gateway:form.drag_and_drop')}</p>
+            {children}
+        </div>
+    </Dropzone>
+)
+DragAndDropFile.contextTypes = {
     t: PropTypes.func
 }
 
@@ -239,5 +262,6 @@ export {
     Tooltip,
     StatusDisplay,
     PesErrorList,
-    ValidationPopup
+    ValidationPopup,
+    DragAndDropFile
 }

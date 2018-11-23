@@ -46,6 +46,25 @@
 .float-right {
     float: right;
 }
+.ml-20-inline-block {
+    margin-left: 20px;
+    display: inline-block;
+}
+i.icon.xl-icon {
+    font-size: 2em;
+}
+.text-center {
+    text-align: center
+}
+
+.flex-container-column {
+    display:flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
+    align-items: center;
+}
 
 /********** Components **********/
 
@@ -171,6 +190,23 @@ i.collapsed-text-icon.circular.icon {
     padding: unset !important;
     height: unset !important;
     cursor: pointer;
+}
+
+/* Dropzone */
+.dropzone {
+    position: relative;
+    display: inline-block;
+    width: 290px;
+    border-width: 1px;
+    border-color: rgba(34, 36, 38, 0.60);
+    border-style: dashed;
+    border-radius: 5px;
+    padding: 1em;
+    background-color: rgba(34,36,38,0.05);
+    cursor: pointer;
+}
+.dropzone.disabled {
+    cursor: default;
 }
 
 /********** Responsive **********/
