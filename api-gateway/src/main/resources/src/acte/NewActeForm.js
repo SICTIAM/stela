@@ -5,6 +5,7 @@ import { Button, Form, Checkbox, Card, Dropdown, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
+import accepts from 'attr-accept'
 
 import { FormField, File, ValidationPopup, DragAndDropFile, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
@@ -228,6 +229,15 @@ class NewActeForm extends Component {
         })
         return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
     }
+    fileAccept = (file, accept) => {
+        const { _addNotification, t } = this.context
+        if(file.type === 'application/x-moz-file' || accepts(file, accept)) {
+            return true
+        } else {
+            _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
+            return false
+        }
+    }
     onDropActeAttachment = (acceptedFiles, rejectedFiles) => {
         const { _addNotification, t } = this.context
         if(rejectedFiles.length === 0) {
@@ -295,8 +305,20 @@ class NewActeForm extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }, 3000)
-    saveDraftFile = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
-    saveDraftAnnexe = (file) => this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
+    saveDraftFile = (file, accept) => {
+        if(accept) {
+            this.fileAccept(file, accept) && this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
+        } else {
+            this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/file`)
+        }
+    }
+    saveDraftAnnexe = (file, accept) => {
+        if(accept) {
+            this.fileAccept(file, accept) && this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
+        } else {
+            this.saveDraftAttachment(file, `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/annexe`)
+        }
+    }
     saveDraftAttachment = (file, url) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (file) {
@@ -627,7 +649,7 @@ class NewActeForm extends Component {
                             multiple={false}>
                             <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
                                 <input type="file" ariaRequired={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
-                                    onChange={e => this.saveDraftAnnexe(e.target.files[0])} style={{ display: 'none' }} />
+                                    onChange={e => this.saveDraftAnnexe(e.target.files[0], acceptAnnexes)} style={{ display: 'none' }} />
                             </InputFile>
                         </DragAndDropFile>
                     </FormField>

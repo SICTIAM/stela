@@ -55,7 +55,7 @@ export default class InputValidation extends Component {
                             accept={this.props.accept}
                             multiple={this.props.multiple}
                             placeholder={this.props.placeholder}
-                            onChange={e => this.props.onChange(e.target.files[0])}
+                            onChange={e => this.props.onChange(e.target.files[0], this.props.accept)}
                             onBlur={this.validateValue} />
                     </InputFile>
                 )}
