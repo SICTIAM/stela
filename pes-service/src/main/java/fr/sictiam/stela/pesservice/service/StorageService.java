@@ -17,7 +17,7 @@ public interface StorageService {
 
     byte[] getObject(String key) throws StorageException;
 
-    void storeObject(String key, byte[] content, String filename) throws StorageException;
+    void storeObject(String key, byte[] content) throws StorageException;
 
     boolean deleteObject(String key) throws StorageException;
 
@@ -42,7 +42,6 @@ public interface StorageService {
     }
 
     public default Attachment createAttachment(MultipartFile file) throws StorageException, IOException {
-
         return createAttachment(file.getOriginalFilename(), file.getBytes());
     }
 
@@ -52,23 +51,22 @@ public interface StorageService {
 
     public default Attachment createAttachment(String filename, byte[] content, LocalDateTime date) throws StorageException {
         Attachment attachment = new Attachment(filename, content, content.length, date);
-        storeObject(attachment.getStorageKey(), content, filename);
-
+        storeAttachment(attachment);
         return attachment;
     }
 
     public default void storeAttachment(Attachment attachment) throws StorageException {
-        storeObject(attachment.getStorageKey(), attachment.getContent(), attachment.getFilename());
+        LOGGER.debug("Storing file {} in {}", attachment.getFilename(), attachment.getStorageKey());
+        storeObject(attachment.getStorageKey(), attachment.getContent());
     }
 
     public default Attachment updateAttachment(Attachment attachment, byte[] content) throws StorageException {
         attachment.updateContent(content);
-        storeObject(attachment.getStorageKey(), content, attachment.getFilename());
+        storeObject(attachment.getStorageKey(), content);
         return attachment;
     }
 
     public default boolean deleteAttachmentContent(Attachment attachment) {
-
         try {
             return deleteObject(attachment.getStorageKey());
         } catch (StorageException e) {
