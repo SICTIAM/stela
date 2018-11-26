@@ -745,7 +745,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
         if (status.equals("SIGNED")) {
-            pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND, file.getBytes(), file.getOriginalFilename());
+            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.PENDING_SEND, file.getBytes(),
+                    file.getOriginalFilename());
         } else {
             pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
         }

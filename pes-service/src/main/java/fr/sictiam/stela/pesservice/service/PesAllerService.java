@@ -277,6 +277,14 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
+    public void updateStatusAndAttachment(String pesUuid, StatusType updatedStatus, byte[] file, String fileName) {
+
+        PesAller pes = getByUuid(pesUuid);
+        pes.getAttachment().updateContent(file);
+        pes.getAttachment().setFilename(fileName);
+        updateStatus(pesUuid, updatedStatus);
+    }
+
     public void updateHistory(PesHistory newPesHistory) {
         PesAller pes = getByUuid(newPesHistory.getPesUuid());
 

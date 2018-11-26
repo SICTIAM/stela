@@ -3,6 +3,7 @@ package fr.sictiam.stela.pesservice.controller;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.SesileConfiguration;
+import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
@@ -117,6 +118,10 @@ public class SesileController {
                 return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
             }
 
+            if (!pes.getLastHistoryStatus().equals(StatusType.PENDING_SIGNATURE)) {
+                LOGGER.error("PES {} is nor waiting for Sesile", uuid);
+                return new ResponseEntity<>("Not waiting for signature", HttpStatus.BAD_REQUEST);
+            }
             if (!status.equals("SIGNED") && !status.equals("WITHDRAWN") && !status.equals("DELETED")) {
                 LOGGER.error("Invalid status ({}) incoming from Sesile for pes {}", status, uuid);
                 return new ResponseEntity<>("Invalid status " + status, HttpStatus.BAD_REQUEST);

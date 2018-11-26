@@ -80,6 +80,10 @@ public class Attachment {
         size = content.length;
     }
 
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     public interface Light {
         String getUuid();
 
