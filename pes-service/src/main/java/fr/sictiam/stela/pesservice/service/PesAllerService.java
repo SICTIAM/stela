@@ -278,9 +278,10 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
     }
 
     public void updateStatusAndAttachment(String pesUuid, StatusType updatedStatus, byte[] file, String fileName) {
-
         PesAller pes = getByUuid(pesUuid);
-        pes.getAttachment().updateContent(file);
+        Attachment attachment = pes.getAttachment();
+        attachment = storageService.updateAttachment(attachment, file);
+        pes.setAttachment(attachment);
         pes.getAttachment().setFilename(fileName);
         updateStatus(pesUuid, updatedStatus);
     }
