@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -40,7 +42,10 @@ public class Attachment {
     }
 
     public Attachment(String filename, byte[] content, long size, LocalDateTime date) {
-        this.filename = filename;
+        if (filename != null) {
+            Path path = Paths.get(filename);
+            this.filename = path.getFileName().toString();
+        }
         this.content = content;
         this.size = size;
         this.date = date;

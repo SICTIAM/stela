@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.service.storage;
 
-import com.google.common.collect.ImmutableMap;
 import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.StorageException;
 import org.slf4j.Logger;
@@ -16,10 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 @Service
-@Profile({ "dev", "dev-docker" })
+@Profile({ "dev-docker", "dev" })
 public class Filesystem implements StorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Filesystem.class);
@@ -60,13 +58,7 @@ public class Filesystem implements StorageService {
         }
     }
 
-    @Override
-    public void storeObject(String key, byte[] content, String filename) throws StorageException {
-
-        storeObject(key, content, ImmutableMap.of("filename", filename));
-    }
-
-    public void storeObject(String key, byte[] content, Map<String, String> metaData) throws StorageException {
+    @Override public void storeObject(String key, byte[] content) throws StorageException {
 
         try {
             Path path = Paths.get(rootPath, key);
