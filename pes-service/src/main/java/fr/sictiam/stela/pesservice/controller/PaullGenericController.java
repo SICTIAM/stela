@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -142,6 +143,16 @@ public class PaullGenericController {
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
         }
 
+        if (service == null) {
+            status = HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
+        }
+        if (type == null) {
+            status = HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
+        }
+
+        if (email != null) email = email.trim();
 
         Integer serviceOrganisation = Integer.parseInt(service);
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
@@ -150,10 +161,11 @@ public class PaullGenericController {
 
             LocalAuthority authority = localAuthority.get();
             validation = sesileService.getSesileValidationDate(validation, authority.getGenericProfileUuid());
+
             try {
-                ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority.get(),
+                ResponseEntity<Classeur> classeur = sesileService.postClasseur(authority,
                         new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email), null);
-                ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(localAuthority.get(),
+                ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(authority,
                         multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getBody().getId());
                 if (documentResonse.getStatusCode().is2xxSuccessful()) {
                     data.put("idFlux", classeur.getBody().getId());
@@ -161,12 +173,14 @@ public class PaullGenericController {
                             new GenericDocument(classeur.getBody().getId(), documentResonse.getBody().getId(),
                                     serviceOrganisation, email, LocalDateTime.now(), authority));
                 }
-            } catch (Exception e) {
-                LOGGER.error("Error while trying to send document to signature: {}", e.getMessage());
+            } catch (RestClientResponseException e) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                LOGGER.error("Error from Sesile : {} | Body : {}", e.getMessage(), e.getResponseBodyAsString());
+            } catch (IOException e) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                LOGGER.error("Failed to read bytes from given file : {}", e.getMessage());
             }
-
         }
-
         return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
     }
 
