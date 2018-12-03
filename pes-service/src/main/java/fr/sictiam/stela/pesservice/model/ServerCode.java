@@ -1,7 +1,17 @@
 package fr.sictiam.stela.pesservice.model;
 
 public enum ServerCode {
-    VHPCE11("VHPCE11"),VHPCE21("VHPCE21"), VHPCE31("VHPCE31"), VHPCE51("VHPCE51"), MHPCE11("MHPCE11"), MHPCE21("MHPCE21"), MHPCE31("MHPCE31"), MHPCE41("MHPCE41"), MHPCE51("MHPCE51"), VHICE21("VHICE21");
+    VHPCE11("VHPCE11"),
+    VHPCE21("VHPCE21"),
+    VHPCE31("VHPCE31"),
+    VHPCE51("VHPCE51"),
+    MHPCE11("MHPCE11"),
+    MHPCE21("MHPCE21"),
+    MHPCE31("MHPCE31"),
+    MHPCE41("MHPCE41"),
+    MHPCE51("MHPCE51"),
+    VHICE21("VHICE21"),
+    VHPCE71("VHPCE71");
 
     final String name;
 
@@ -11,6 +21,6 @@ public enum ServerCode {
 
     @Override
     public String toString() {
-        return this.name;
+        return name;
     }
 }
