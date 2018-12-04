@@ -234,6 +234,9 @@ class Acte extends Component {
                                 </List>
                             </Field>
                         )}
+                        <Field htmlFor='multipleChannels' label={t('acte.fields.multipleChannels')}>
+                            <Checkbox label={<div className='box'></div>} id="multipleChannels" checked={acte.multipleChannels} />
+                        </Field>
                         <Field htmlFor='public' label={t('acte.fields.public')}>
                             <Checkbox label={<div className='box'></div>} id="public" checked={acte.public} disabled />
                         </Field>

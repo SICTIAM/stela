@@ -98,7 +98,8 @@
       "objet": "Objet",
       "status": "Statut",
       "group": "Visible par",
-      "agent": "Déposé par"
+      "agent": "Déposé par",
+      "multipleChannels": "Envoi des pièces jointes par des canaux multiples"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
@@ -111,7 +112,8 @@
       "publicWebsite": "Affichage de cet acte sur votre site internet si vous avez activé cette option",
       "objet": "L'objet/titre de l'acte (texte libre)",
       "group": "Groupe de visibilité auquel associer la télétransmission de l'acte",
-      "annexes_size": "Taille totale des fichiers"
+      "annexes_size": "Taille totale des fichiers",
+      "multipleChannels": "Envoi des pièces jointes par des canaux multiples"
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"

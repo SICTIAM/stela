@@ -35,9 +35,9 @@ public class Acte {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @JsonView(Views.ActePublicView.class)
     private String uuid;
-    @NotNull(groups = {RestValidation.class})
-    @Size(max = 15, groups = {RestValidation.class})
-    @Pattern(regexp = "^[A-Z0-9_]+$", groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
+    @Size(max = 15, groups = { RestValidation.class })
+    @Pattern(regexp = "^[A-Z0-9_]+$", groups = { RestValidation.class })
     @JsonView(Views.ActePublicView.class)
     private String number;
     @JsonView(Views.ActePublicView.class)
@@ -45,19 +45,19 @@ public class Acte {
     private LocalDateTime creation;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     @JsonView(Views.ActePublicView.class)
     private LocalDate decision;
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     @JsonView(Views.ActePublicView.class)
     private ActeNature nature;
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     @JsonView(Views.ActePublicView.class)
     private String code;
     @JsonView(Views.ActePublicView.class)
     private String codeLabel;
     @Column(length = 512)
-    @NotNull(groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
     @Size(max = 500)
     @JsonView(Views.ActePublicView.class)
     private String objet;
@@ -84,6 +84,9 @@ public class Acte {
     private String profileUuid;
 
     private String groupUuid;
+
+    @JsonView(Views.ActePublicView.class)
+    private boolean multipleChannels = false;
 
     public String getMiatId() {
         return miatId;
@@ -168,17 +171,17 @@ public class Acte {
         this.groupUuid = groupUuid;
         this.acteAttachment = acteAttachment;
         this.annexes = annexes;
-        this.acteHistories = Collections.emptySortedSet();
+        acteHistories = Collections.emptySortedSet();
         this.profileUuid = profileUuid;
         this.localAuthority = localAuthority;
     }
 
     public String getUuid() {
-        return this.uuid;
+        return uuid;
     }
 
     public String getNumber() {
-        return this.number;
+        return number;
     }
 
     public void setNumber(String number) {
@@ -250,7 +253,7 @@ public class Acte {
     }
 
     public Attachment getActeAttachment() {
-        return this.acteAttachment;
+        return acteAttachment;
     }
 
     public void setActeAttachment(Attachment acteAttachment) {
@@ -343,6 +346,14 @@ public class Acte {
 
     public void setLastHistoryFlux(Flux lastHistoryFlux) {
         this.lastHistoryFlux = lastHistoryFlux;
+    }
+
+    public boolean isMultipleChannels() {
+        return multipleChannels;
+    }
+
+    public void setMultipleChannels(boolean multipleChannels) {
+        this.multipleChannels = multipleChannels;
     }
 
     public boolean empty() {
