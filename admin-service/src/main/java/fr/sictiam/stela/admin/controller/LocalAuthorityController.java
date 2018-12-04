@@ -396,4 +396,12 @@ public class LocalAuthorityController {
         return opt.isPresent() ? new ResponseEntity<>(opt.get(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @GetMapping("/{uuid}/siret")
+    public String getSiret(@PathVariable String uuid) {
+
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
+        String dcId = localAuthority.getOzwilloInstanceInfo().getDcId();
+        return dcId.substring(dcId.lastIndexOf('/') + 1);
+    }
 }

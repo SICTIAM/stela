@@ -22,7 +22,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
@@ -89,12 +88,13 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
                 }
                 byte[] content = storageService.getAttachmentContent(pes.getAttachment());
                 pesService.updateStatus(pendingMessage.getPesUuid(), sendStatus, content,
-                        pes.getAttachment().getFilename());
+                        pesService.renameFileToSend(pes));
 
             } else {
                 LOGGER.info("Hourly limit exceeded, waiting next hour");
             }
         }
     }
+
 
 }
