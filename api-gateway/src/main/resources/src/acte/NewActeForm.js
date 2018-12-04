@@ -610,8 +610,7 @@ class NewActeForm extends Component {
                             options={codeOptions}
                             ariaLabel="Acte code" />
                     </FormField>
-                    <FormField label={t('acte.fields.multipleChannels')}
-                                helpText={t('acte.help_text.multipleChannels')}>
+                    <FormField label={t('acte.fields.multipleChannels')} helpText={t('acte.help_text.multipleChannels')}>
                         <Checkbox id={`${this.state.fields.uuid}_multipleChannels`}
                             checked={this.state.fields.multipleChannels} toggle
                             onChange={e => handleFieldCheckboxChange(this, 'multipleChannels', this.saveDraft)} aria-label={t('acte.help_text.multipleChannels')}/>
