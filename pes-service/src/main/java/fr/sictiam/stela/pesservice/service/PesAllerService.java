@@ -61,6 +61,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
@@ -375,7 +376,7 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
     }
 
     private void persistPesExport(PesAller pes) {
-        PesExport pesExport = new PesExport(pes.getUuid(), ZonedDateTime.now(), pes.getAttachment().getFilename(),
+        PesExport pesExport = new PesExport(pes.getUuid(), ZonedDateTime.now(), renameFileToSend(pes),
                 pes.getAttachment().getSize(), getSha1FromBytes(pes.getAttachment().getContent()), pes.getLocalAuthority().getSiren());
         try {
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
@@ -437,6 +438,27 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
             LOGGER.warn("Unsupported UTF-8 encoding");
         }
         return "default";
+    }
+
+    public String renameFileToSend(PesAller pes) {
+        LocalAuthority localAuthority = pes.getLocalAuthority();
+        String idColl = externalRestService.getLocalAuthoritySiret(localAuthority.getUuid());
+
+        // Fallback on siren if an error occurred
+        if (idColl == null) return localAuthority.getSiren();
+
+        int count = pesHistoryRepository.countSentToday(LocalDate.now().atStartOfDay(),
+                LocalDateTime.now());
+
+        StringBuilder sb = new StringBuilder("PESALR2_");
+        sb.append(idColl);
+        sb.append("_");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
+        sb.append(dateFormatter.format(LocalDate.now()));
+        sb.append("_");
+        sb.append(String.format("%03d", ++count));
+        sb.append(".xml");
+        return sb.toString();
     }
 
     @Override

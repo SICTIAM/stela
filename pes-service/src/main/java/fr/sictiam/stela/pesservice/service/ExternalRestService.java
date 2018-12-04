@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -25,6 +27,9 @@ public class ExternalRestService {
 
     @Autowired
     DiscoveryUtils discoveryUtils;
+
+    @Autowired
+    RestTemplate restTemplate;
 
     public JsonNode getProfile(String profileUuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
@@ -144,4 +149,13 @@ public class ExternalRestService {
         return opt.get();
     }
 
+    public String getLocalAuthoritySiret(String uuid) {
+        try {
+            return restTemplate.getForObject(discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{uuid}" +
+                    "/siret", String.class, uuid);
+        } catch (RestClientResponseException e) {
+            LOGGER.error("Failed to retrieve local authority siret for {} : {} ({})", uuid, e.getMessage(), e.getResponseBodyAsString());
+            return null;
+        }
+    }
 }
