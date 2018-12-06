@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -334,7 +335,7 @@ public class LocalAuthorityController {
             return new ResponseEntity(HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("admin.invalid_certificate", HttpStatus.NOT_ACCEPTABLE);
-        } catch (IOException e) {
+        } catch (IOException | CertificateException e) {
             return new ResponseEntity<>("admin.error_certificate", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

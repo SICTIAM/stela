@@ -166,7 +166,8 @@ public class LocalAuthorityService {
                 .orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_certificate_not_found"));
     }
 
-    public void addCertificate(String uuid, MultipartFile file) throws IOException, IllegalArgumentException {
+    public void addCertificate(String uuid, MultipartFile file)
+            throws IOException, IllegalArgumentException, CertificateException {
         CertificateReports report = CertUtils.validateCertificate(file.getBytes());
         Indication indication = CertUtils.getCertificateValidationResult(report);
         LOGGER.info("DSS validation response : {}", indication);
