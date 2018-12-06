@@ -41,7 +41,7 @@ public class CertUtils {
 
     private final static DataLoader dataloader = new CommonsDataLoader();
 
-    public static CertificateReports validateCertificate(byte[] file) throws IOException {
+    public static CertificateReports validateCertificate(byte[] file) throws IOException, CertificateException {
         CertificateToken certificate = getCertificate(file);
 
         CertificateValidator certificateValidator = CertificateValidator.fromCertificate(certificate);
@@ -92,9 +92,10 @@ public class CertUtils {
         return certificateSource;
     }
 
-    public static CertificateVerifier getCertificateVerifier() throws IOException {
+    public static CertificateVerifier getCertificateVerifier() throws IOException, CertificateException {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-        certificateVerifier.setTrustedCertSource(getTrustedListsCertificateSource());
+        //certificateVerifier.setTrustedCertSource(getTrustedListsCertificateSource());
+        certificateVerifier.setTrustedCertSource(loadLocaleCertificateSource("/signature/CA_RGS3.zip"));
 
         OnlineCRLSource onlineCRLSource = new OnlineCRLSource();
         onlineCRLSource.setDataLoader(dataloader);
