@@ -50,7 +50,7 @@ public class PadesUtils {
         return reports.getDetailedReport();
     }
 
-    public static DetailedReport validatePAdESSignature(byte[] fileBytes) throws IOException {
+    public static DetailedReport validatePAdESSignature(byte[] fileBytes) throws IOException, CertificateException {
         PDFDocumentValidator documentValidator = new PDFDocumentValidator(new InMemoryDocument(fileBytes));
         documentValidator.setCertificateVerifier(CertUtils.getCertificateVerifier());
 
