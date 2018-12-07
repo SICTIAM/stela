@@ -164,6 +164,7 @@ public class PaullController {
             String decodedComment = new String(comment.getBytes("Windows-1252"));
             pesAller.setObjet(decodedTitle);
             pesAller.setComment(decodedComment);
+            pesAller.setPj(PESPJ == 0 ? false : true);
             if (StringUtils.isNotBlank(service)) {
                 pesAller.setServiceOrganisationNumber(Integer.parseInt(service));
             }
