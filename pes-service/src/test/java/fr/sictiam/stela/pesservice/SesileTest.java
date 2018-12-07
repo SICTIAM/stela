@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 @Ignore
 public class SesileTest {
 
-    SesileService sesileService = new SesileService(null, null, null, null, null, null);
+    SesileService sesileService = new SesileService(null, null, null, null, null, null, null);
 
     LocalAuthority localAuthority = new LocalAuthority();
 
