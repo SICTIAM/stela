@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1"?><n:PES_Aller xmlns:n="http://www.minefi.gouv.fr/cp/helios/pes_v2/Rev0/aller" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="ID_PES" xsi:schemaLocation="http://www.minefi.gouv.fr/cp/helios/pes_v2/Rev0/aller D:\Bureau\cbrunerie\MESDOC~1\Schemas_PES_421\PES_V2\Rev0\PES_Aller.xsd">
+	<Enveloppe>
+		<Parametres>
+			<Version V="2"/>
+			<TypFic V="PESALR2"/>
+			<NomFic V="PESALR2COSOLUCEHELIOS20130624102234x"/>
+		</Parametres>
+		<Emetteur>
+			<Sigle V="TEST"/>
+			<Adresse V="CORAIL "/>
+		</Emetteur>
+		<Recepteur>
+			<Sigle V="HELIOS"/>
+		</Recepteur>
+	</Enveloppe>
+	<EnTetePES>
+		<DteStr V="2013-06-24"/>
+		<IdPost V="062075"/>
+		<IdColl V="21620413100017"/>
+		<CodCol V="566"/>
+		<CodBud V="00"/>
+		<LibelleColBud V="Commune "/>
+	</EnTetePES>
+	<PES_DepenseAller>
+		<EnTeteDepense>
+			<IdVer V="2"/>
+			<InfoDematerialisee V="1"/>
+		</EnTeteDepense>
+		<Bordereau Id="D00001">
+			<BlocBordereau>
+				<Exer V="2012"/>
+				<IdBord V="101234"/>
+				<DteBordEm V="2013-06-24"/>
+				<TypBord V="01"/>
+				<NbrPce V="1"/>
+				<MtCumulAnnuel V="169258.98"/>
+				<MtBordHT V="72.00"/>
+			</BlocBordereau>
+			<Piece>
+				<BlocPiece>
+					<InfoPce>
+						<IdPce V="65"/>
+						<TypPce V="01"/>
+						<NatPce V="01"/>
+						<Obj V="Fournitures d entretien"/>
+						<PJ V="Fournitures d entretien"/>
+					</InfoPce>
+					<DGP>
+						<Dgp V="0"/>
+						<DteDebDgp V="2013-06-23"/>
+						<DteFinDgp V="2013-07-23"/>
+						<DureeDgp V="30"/>
+						<CodIntMor V="02"/>
+					</DGP>
+				</BlocPiece>
+				<LigneDePiece>
+					<BlocLignePiece>
+						<InfoLignePce>
+							<IdLigne V="1"/>
+							<Nature V="60631"/>
+							<LibVir1 V="Fournitures d entretien"/>
+							<ModRegl V="03"/>
+							<TVAIntraCom V="0"/>
+							<MtHT V="72.00"/>
+						</InfoLignePce>
+					</BlocLignePiece>
+					<Tiers>
+						<InfoTiers>
+							<RefTiers V="15"/>
+							<CatTiers V="01"/>
+							<NatJur V="01"/>
+							<Civilite V="M"/>
+							<Nom V="XXXXXXXXXXXX"/>
+							<Prenom V="BIDON"/>
+						</InfoTiers>
+						<Adresse>
+							<TypAdr V="1"/>
+							<Adr2 V="8 Rue"/>
+							<CP V="75010"/>
+							<Ville V="PARIS"/>
+							<CodRes V="0"/>
+						</Adresse>
+						<CpteBancaire>
+							<BIC V="BNPAFRPP"/>
+							<IBAN V="FR7630004004010001020839111"/>
+							<LibBanc V="BNPPARB BELFORT"/>
+							<TitCpte V="Bidon"/>
+						</CpteBancaire>
+					</Tiers>
+				</LigneDePiece>
+			</Piece>
+		<ds:Signature Id="IDC1150204092346p0100"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><ds:Reference URI="#D00001"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>Vg0EcvCTMsFXLFJPcBjR/0YlpaQ=</ds:DigestValue></ds:Reference><ds:Reference URI="#IDC1150204092346p0100_SP"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>4kD1vFBNdoxwMlJF7SPUotpPXDM=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="IDC1150204092346p0100_SV">Ju/o8Bl7QCsW7KoDjPtEjy7XfRQWavLTFxXRoXCTUG35d1qVsoFXci0GOs6LDZG19DpXvMkH1+jY
+Iq7xPrfeWTvq4nplC4BdSMOANSUF+ijS7ZFaVaAfKFtzsAlKLVw3U+wC6rAHM5mUb1o0ZZqSqICc
+7/VykQwjGE/TqeY3As7j67O2jKhvSvxKE1HEjGqbzSIghdUUDWQioeeHnhJz9bjrcY9iYdguihr2
+3IWwLDcSMe6dS6kIEW0CF4tj/Q4Mixk8du+NjC5YtJ5TVu21xkToN2qDHhSDge4U9o+MvrY0gcs0
+t5Gh5cmnZuSlPLzwmIHyxNAybZE/IJ3iyNSApw==</ds:SignatureValue><ds:KeyInfo Id="IDC1150204092346p0100_KI"><ds:X509Data><ds:X509Certificate>MIIEFzCCAv+gAwIBAgICJlYwDQYJKoZIhvcNAQEFBQAwgY0xCzAJBgNVBAYTAkZSMTIwMAYDVQQK
+DClESVJFQ1RJT04gR0VORVJBTEUgREVTIEZJTkFOQ0VTIFBVQkxJUVVFUzEcMBoGA1UECwwTMDAw
+MiAxMzAwMDQ5NTUwMDAxNDEsMCoGA1UEAwwjU2lnbmF0dXJlIEhlbGlvcyBGaW5hbmNlcyBQdWJs
+aXF1ZXMwHhcNMTQxMTA3MTAwOTMwWhcNMTcxMTA3MTAwOTMwWjBvMQswCQYDVQQGEwJGUjEOMAwG
+A1UEChMFREdGSVAxGjAYBgNVBAsTEVBhcnRlbmFpcmVzIERHRklQMRUwEwYDVQQDEwxUVVJMQU4g
+c2VyZ2UxHTAbBgoJkiaJk/IsZAEBEw1zaWd0ZXN0c2cxLXh0MIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEArFdAaTCaisNnK1DDbeUDlfAjrfXmChleegoNbXrgge/ovdj/gOm48Fbn6joQ
+AJi8tLCrJE6YzVudjnS2mjxk6WZvOgTpWYGuHCPo2on0R2/j3CTJgNTSnJJXJ/UH15PXHJpgfCpU
+3f+/m/aIFLb2/sFgdSViM7S6suiXPglgLeCe+Th9kJAfEwuMg7sQceH0Tsd6/Hv8y87jmmB+w7rm
+KgAPU/6kiMZvlcJFXH20UNoJ712kNp4dYylbK+b5UqZPd8TqM61jMgtFH060XOQ7R2TdAQrQ2XK4
+4L8rpIX2PZpATSQG8xuNXvSBByG/vDaPld/k2cuCcIKxDckeHHtXewIDAQABo4GdMIGaMB0GA1Ud
+DgQWBBS0YO0vBK47tb3jo3GLhfpDXhz7yDAfBgNVHSMEGDAWgBQUuPaqvmc409uvVw1oeUMzVVdu
+mTAaBgNVHSAEEzARMA8GDSqBegGBAwEFEhQBBQIwDgYDVR0PAQH/BAQDAgZAMCwGA1UdEQQlMCOB
+IWRpcHNucy5wa2lAZGdmaXAuZmluYW5jZXMuZ291di5mcjANBgkqhkiG9w0BAQUFAAOCAQEAlwAL
+eFSZ3HYCPOdLsW/0fDq2B8sCJBpy4IHVQGnF5Ky8Gypik6CbiotJxjOas963RdB3Gn5zWZJi5rOD
+xbPN0nFNIH1UdBCDoGI37XDlimrZTB2KgSYA97+8a3LRqGDKw/Nd+Htp0kn6EF1eJJ3x5r/YKoai
+gxnBFDbdO/E5C8Lk0bK9zKg+EsILh6k9Il1Xgo4jxEqhcKFQOp7DxZnUyPaCgofj8jr9kOINvpGp
+YGstySntZF/j87/gyXNEcDpDmO2axQatgaAv2IkZmgSEOj1yvdbCznqhDSFfmdEMeywDMNHdEDam
+36VkywCwuM74pvKKASYb+QT1wKOxCtBsuQ==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object Id="IDC1150204092346p0100_QI"><xad:QualifyingProperties xmlns:xad="http://uri.etsi.org/01903/v1.1.1#" Target="IDC1150204092346p0100"><xad:SignedProperties Id="IDC1150204092346p0100_SP"><xad:SignedSignatureProperties><xad:SigningTime>2015-02-04T08:23:46.090Z</xad:SigningTime><xad:SigningCertificate><xad:Cert><xad:CertDigest><xad:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><xad:DigestValue>9xx3nsAPAxhvGGIq1ENyTNJzKAU=</xad:DigestValue></xad:CertDigest><xad:IssuerSerial><ds:X509IssuerName>CN=Signature Helios Finances Publiques,OU=0002 13000495500014,O=DIRECTION GENERALE DES FINANCES PUBLIQUES,C=FR</ds:X509IssuerName><ds:X509SerialNumber>9814</ds:X509SerialNumber></xad:IssuerSerial></xad:Cert></xad:SigningCertificate><xad:SignaturePolicyIdentifier><xad:SignaturePolicyId><xad:SigPolicyId><xad:Identifier>urn:oid:1.2.250.1.131.1.5.18.21.1.4</xad:Identifier><xad:Description>Politique de signature Helios de la DGFiP</xad:Description></xad:SigPolicyId><xad:SigPolicyHash><xad:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><xad:DigestValue>Jkdb+aba0Hz6+ZPKmKNhPByzQ+Q=</xad:DigestValue></xad:SigPolicyHash><xad:SigPolicyQualifiers><xad:SigPolicyQualifier><xad:SPURI>https://portail.dgfip.finances.gouv.fr/documents/PS_Helios_DGFiP.pdf</xad:SPURI></xad:SigPolicyQualifier></xad:SigPolicyQualifiers></xad:SignaturePolicyId></xad:SignaturePolicyIdentifier><xad:SignatureProductionPlace><xad:City>noisy le grand</xad:City><xad:PostalCode>93192</xad:PostalCode><xad:CountryName>france</xad:CountryName></xad:SignatureProductionPlace><xad:SignerRole><xad:ClaimedRoles><xad:ClaimedRole>maire test</xad:ClaimedRole></xad:ClaimedRoles></xad:SignerRole></xad:SignedSignatureProperties></xad:SignedProperties></xad:QualifyingProperties></ds:Object></ds:Signature></Bordereau>
+	</PES_DepenseAller>
+</n:PES_Aller>

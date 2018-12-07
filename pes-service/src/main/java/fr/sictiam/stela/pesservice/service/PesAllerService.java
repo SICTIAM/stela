@@ -283,7 +283,6 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         Attachment attachment = pes.getAttachment();
         attachment = storageService.updateAttachment(attachment, file);
         pes.setAttachment(attachment);
-        pes.getAttachment().setFilename(fileName);
         updateStatus(pesUuid, updatedStatus);
     }
 

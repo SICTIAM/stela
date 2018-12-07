@@ -240,7 +240,7 @@ public class PesAllerAnalyser {
     public SignatureVerifier getSignatureVerifier() throws IOException, CertificateException, KeyStoreException,
             CRLException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         if (signatureVerifier == null) {
-            ClassPathResource stream = new ClassPathResource("/signature/certs.zip");
+            ClassPathResource stream = new ClassPathResource("/signature/CA_RGS.zip");
 
             signatureVerifier = new SignatureVerifier(CertificateContainer.fromZipURL(stream.getInputStream()),
                     CertificateContainer.fromZipURL(stream.getInputStream()));

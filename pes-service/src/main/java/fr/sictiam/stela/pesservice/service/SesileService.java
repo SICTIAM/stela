@@ -2,6 +2,8 @@ package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.andrewoma.dexx.collection.Pair;
+import eu.europa.esig.dss.validation.policy.rules.Indication;
+import eu.europa.esig.dss.validation.reports.DetailedReport;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
 import fr.sictiam.signature.pes.verifier.CertificateProcessor.CertificatInformation1;
 import fr.sictiam.signature.pes.verifier.InvalidPesAllerFileException;
@@ -13,6 +15,7 @@ import fr.sictiam.signature.pes.verifier.SimplePesInformation;
 import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1;
 import fr.sictiam.signature.pes.verifier.XadesInfoProcessor.XadesInfoProcessResult1;
 import fr.sictiam.signature.utils.DateUtils;
+import fr.sictiam.signature.utils.XadesUtils;
 import fr.sictiam.stela.pesservice.dao.GenericDocumentRepository;
 import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
 import fr.sictiam.stela.pesservice.model.GenericDocument;
@@ -28,6 +31,8 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
+import fr.sictiam.stela.pesservice.service.exceptions.MissingSignatureException;
+import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +60,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -94,15 +100,18 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private final StorageService storageService;
 
+    private final SignatureService signatureService;
+
     public SesileService(PesAllerService pesService, ExternalRestService externalRestService,
             SesileConfigurationRepository sesileConfigurationRepository, LocalesService localesService,
-            GenericDocumentRepository genericDocumentRepository, StorageService storageService) {
+            GenericDocumentRepository genericDocumentRepository, StorageService storageService, SignatureService signatureService) {
         this.pesService = pesService;
         this.externalRestService = externalRestService;
         this.sesileConfigurationRepository = sesileConfigurationRepository;
         this.localesService = localesService;
         this.genericDocumentRepository = genericDocumentRepository;
         this.storageService = storageService;
+        this.signatureService = signatureService;
     }
 
     public SesileConfiguration createOrUpdate(SesileConfiguration sesileConfiguration) {
@@ -689,7 +698,17 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         if (isSigned(simplePesInformation)) {
             SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
-            if (!signatureValidation.isValid()) {
+            Indication indication;
+            try {
+                DetailedReport report = XadesUtils.validateXadesSignature(file);
+                indication = XadesUtils.getCertificateValidationResult(report);
+            } catch (IOException | CertificateException e) {
+                LOGGER.error("Error while verifying the signature: {}", e.getMessage());
+                indication = Indication.TOTAL_FAILED;
+            }
+            LOGGER.debug("Indication: {}", indication.toString());
+            if (!signatureValidation.isValid()
+                    || (!Indication.TOTAL_PASSED.equals(indication) && !Indication.PASSED.equals(indication))) {
                 status = StatusType.SIGNATURE_INVALID;
                 errorMessage = signatureValidation.getSignatureValidationErrors().stream()
                         .map(error -> localesService.getMessage("fr", "pes", "pes.signature_errors." + error.name()))
@@ -698,8 +717,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         } else {
             status = StatusType.SIGNATURE_MISSING;
         }
-        return new Pair<StatusType, String>(status, errorMessage);
+        return new Pair<>(status, errorMessage);
+    }
 
+    public boolean hasSignature(byte[] file) {
+        SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
+        return simplePesInformation.isSigned();
     }
 
     public Optional<GenericDocument> getGenericDocument(Integer fluxId) {
@@ -745,7 +768,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
         if (status.equals("SIGNED")) {
-            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.PENDING_SEND, file.getBytes(),
+            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file.getBytes(),
                     file.getOriginalFilename());
         } else {
             pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
@@ -759,15 +782,24 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;
-            Pair<StatusType, String> signatureResult = getSignatureStatus(storageService.getAttachmentContent(pes.getAttachment()));
-            pes.setSigned(signatureResult.component1().equals(StatusType.PENDING_SEND));
-            pesService.save(pes);
             if (pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
-            } else if (!sesileSubscription || pes.isSigned()) {
-                pesService.updateStatus(pes.getUuid(), signatureResult.component1(), signatureResult.component2());
+            } else if (!sesileSubscription || hasSignature(storageService.getAttachmentContent(pes.getAttachment()))) {
+                pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_VALIDATION);
             } else {
                 submitToSignature(pes);
+            }
+        } else if (StatusType.SIGNATURE_VALIDATION.equals(event.getPesHistory().getStatus())) {
+            PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
+            try {
+                signatureService.validatePes(storageService.getAttachmentContent(pes.getAttachment()));
+                pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
+            } catch (SignatureException e) {
+                LOGGER.error("Error while validating signature: {}", e.getMessage());
+                pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_INVALID, localesService.getMessage("fr",
+                        "pes", "pes.signature_errors." + e.getMessage()));
+            } catch (MissingSignatureException e) {
+                pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_MISSING);
             }
         }
     }

@@ -34,8 +34,7 @@ public class PadesUtils {
         DSSDocument dssDocument = new InMemoryDocument(fileBytes);
         PDFDocumentValidator pdfDocumentValidator = new PDFDocumentValidator(dssDocument);
 
-        CommonTrustedCertificateSource certificateSource =
-                CertUtils.loadLocaleCertificateSource("/signature/certs.zip");
+        CommonTrustedCertificateSource certificateSource = CertUtils.loadLocaleCertificateSource();
 
         PdfDssDict pdfDssDict = PdfDssDict.extract(null);
         OCSPSource ocspSource = new PAdESOCSPSource(pdfDssDict);
