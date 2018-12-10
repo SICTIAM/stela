@@ -5,7 +5,7 @@ import moment from 'moment'
 import { Grid, Segment, List, Label, Dropdown, Button, Popup } from 'semantic-ui-react'
 
 import DraggablePosition from '../_components/DraggablePosition'
-import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
+import { FieldInline, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
 
@@ -104,24 +104,24 @@ class ActePublic extends Component {
                             </Dropdown>
                         </div>
 
-                        <Field htmlFor="localAuthority" label={t('acte.fields.localAuthority')}>
+                        <FieldInline htmlFor="localAuthority" label={t('acte.fields.localAuthority')}>
                             <FieldValue id="localAuthority">{acte.localAuthority.name}</FieldValue>
-                        </Field>
-                        <Field htmlFor="ack" label={t('acte:acte.status.ACK_RECEIVED')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="ack" label={t('acte:acte.status.ACK_RECEIVED')}>
                             <FieldValue id="ack">{historyAR && moment(historyAR.date).format('DD/MM/YYYY')}</FieldValue>
-                        </Field>
-                        <Field htmlFor="number" label={t('acte.fields.number')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="number" label={t('acte.fields.number')}>
                             <FieldValue id="number">{acte.number}</FieldValue>
-                        </Field>
-                        <Field htmlFor="decision" label={t('acte.fields.decision')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="decision" label={t('acte.fields.decision')}>
                             <FieldValue id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</FieldValue>
-                        </Field>
-                        <Field htmlFor="nature" label={t('acte.fields.nature')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="nature" label={t('acte.fields.nature')}>
                             <FieldValue id="nature">{t(`acte.nature.${acte.nature}`)}</FieldValue>
-                        </Field>
-                        <Field htmlFor="code" label={t('acte.fields.code')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="code" label={t('acte.fields.code')}>
                             <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
-                        </Field>
+                        </FieldInline>
                         {acte.acteAttachment && (
                             <Grid>
                                 <Grid.Column width={4}>
@@ -135,11 +135,11 @@ class ActePublic extends Component {
                             </Grid>
                         )}
                         {annexes.length > 0 && (
-                            <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
+                            <FieldInline htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
-                            </Field>
+                            </FieldInline>
                         )}
                     </Segment>
                 </LoadingContent>

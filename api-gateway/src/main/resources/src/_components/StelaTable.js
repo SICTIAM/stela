@@ -27,11 +27,13 @@ class StelaTable extends Component {
         column: PropTypes.string,
         fetchedSearch: PropTypes.func,
         additionalElements: PropTypes.array,
-        striped: PropTypes.bool
+        striped: PropTypes.bool,
+        selectable: PropTypes.bool
     }
     static defaultProps = {
         className: '',
         header: false,
+        sortable: false,
         search: true,
         select: false,
         selectOptions: [],
@@ -43,7 +45,8 @@ class StelaTable extends Component {
         direction: '',
         column: '',
         additionalElements: [],
-        striped: true
+        striped: true,
+        selectable: true
     }
     state = {
         column: null,
@@ -191,7 +194,12 @@ class StelaTable extends Component {
                     )
                 }
 
-                <Table role="presentation" summary={this.props.title ? this.props.title : 'Tableau'} selectable striped={this.props.striped} sortable={this.props.header} basic={this.props.basic} celled={this.props.celled}>
+                <Table role="presentation" summary={this.props.title ? this.props.title : 'Tableau'}
+                    selectable={this.props.selectable}
+                    striped={this.props.striped}
+                    sortable={this.props.sortable}
+                    basic={this.props.basic}
+                    celled={this.props.celled}>
                     {title &&
                         <Table.Header>
                             <Table.Row>
@@ -228,7 +236,9 @@ class StelaTable extends Component {
                         }
                         {isFilled &&
                             data.map(row =>
-                                <Table.Row key={row[this.props.keyProperty]} negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}>
+                                <Table.Row key={row[this.props.keyProperty]}
+                                    negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}
+                                    className={this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : ''}>
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell
                                             style={this.props.link !== '' ? { cursor: 'pointer' } : null}
@@ -236,11 +246,21 @@ class StelaTable extends Component {
                                             collapsing={!!displayedColumn.collapsing}
                                             selectable={this.props.link !== '' ? true : false}
                                             className={this.props.link !== '' ? 'no-hover' : ''}>
-                                            <Link to={this.props.link !== '' ? this.props.link + row[this.props.linkProperty] : ''}>{displayedColumn.displayComponent ?
-                                                displayedColumn.property === '_self' ?
-                                                    displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
-                                                : row[displayedColumn.property]}
-                                            </Link>
+                                            {this.props.link && (
+                                                <Link to={this.props.link + row[this.props.linkProperty]}>{displayedColumn.displayComponent ?
+                                                    displayedColumn.property === '_self' ?
+                                                        displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
+                                                    : row[displayedColumn.property]}
+                                                </Link>
+                                            )}
+                                            {!this.props.link && (
+                                                <span>
+                                                    {displayedColumn.displayComponent ?
+                                                        displayedColumn.property === '_self' ?
+                                                            displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
+                                                        : row[displayedColumn.property]}
+                                                </span>
+                                            )}
                                         </Table.Cell>
                                     )}
                                     {select &&

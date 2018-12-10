@@ -5,7 +5,7 @@ import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox } from 's
 import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
-import { Field, Page } from '../../_components/UI'
+import { FieldInline, Page } from '../../_components/UI'
 import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 
 class PesLocalAuthorityParams extends Component {
@@ -191,7 +191,7 @@ class PesLocalAuthorityParams extends Component {
                     <Form onSubmit={this.submitForm}>
 
                         <h2 className='secondary'>{t('admin.modules.pes.local_authority_settings.title')}</h2>
-                        <Field htmlFor='serverCode' label={t('admin.modules.pes.local_authority_settings.serverCode')}>
+                        <FieldInline htmlFor='serverCode' label={t('admin.modules.pes.local_authority_settings.serverCode')}>
                             <Dropdown compact search selection
                                 id='serverCode'
                                 className='simpleInput'
@@ -199,8 +199,8 @@ class PesLocalAuthorityParams extends Component {
                                 value={this.state.fields.serverCode}
                                 onChange={this.handleServerCodeChange}
                                 placeholder={`${t('admin.modules.pes.local_authority_settings.serverCode')}...`} />
-                        </Field>
-                        <Field htmlFor='sirens' label={t('admin.modules.pes.local_authority_settings.sirens')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='sirens' label={t('admin.modules.pes.local_authority_settings.sirens')}>
                             <div style={{ marginBottom: '0.5em' }}>
                                 {listSiren.length > 0 ? listSiren : t('admin.modules.pes.local_authority_settings.no_siren')}
                             </div>
@@ -212,10 +212,10 @@ class PesLocalAuthorityParams extends Component {
                             <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>
                                 {t('api-gateway:form.add')}
                             </Button>
-                        </Field>
+                        </FieldInline>
 
                         <h2 className='secondary'>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
-                        <Field htmlFor='genericProfileUuid' label={t('admin.modules.pes.local_authority_settings.genericProfileUuid')}>
+                        <FieldInline htmlFor='genericProfileUuid' label={t('admin.modules.pes.local_authority_settings.genericProfileUuid')}>
                             <Dropdown compact search selection
                                 id='genericProfileUuid'
                                 className='simpleInput'
@@ -223,76 +223,76 @@ class PesLocalAuthorityParams extends Component {
                                 value={this.state.fields.genericProfileUuid}
                                 onChange={this.sesileConfigurationChange}
                                 placeholder={`${t('admin.modules.pes.local_authority_settings.genericProfileUuid')}...`} />
-                        </Field>
-                        <Field htmlFor='sesileSubscription' label={t('admin.modules.pes.local_authority_settings.sesile.subscription')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='sesileSubscription' label={t('admin.modules.pes.local_authority_settings.sesile.subscription')}>
                             <Checkbox toggle id='sesileSubscription'
                                 checked={this.state.fields.sesileSubscription}
                                 onChange={((e, { checked }) => this.sesileSubscriptionChange(checked))} />
-                        </Field>
+                        </FieldInline>
                         {(this.state.fields.sesileSubscription) && (
                             <Fragment>
-                                <Field htmlFor='sesileNewVersion' label={t('admin.modules.pes.local_authority_settings.sesile.newVersion')}>
+                                <FieldInline htmlFor='sesileNewVersion' label={t('admin.modules.pes.local_authority_settings.sesile.newVersion')}>
                                     <Checkbox toggle id='sesileNewVersion'
                                         checked={this.state.fields.sesileNewVersion}
                                         onChange={e => handleFieldCheckboxChange(this, 'sesileNewVersion')} />
-                                </Field>
-                                <Field htmlFor='token' label={t('admin.modules.pes.local_authority_settings.sesile.token')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='token' label={t('admin.modules.pes.local_authority_settings.sesile.token')}>
                                     <Input id='token' style={{ width: '25em' }}
                                         placeholder={t('admin.modules.pes.local_authority_settings.sesile.token')}
                                         value={this.state.fields.token}
                                         required={this.state.fields.sesileSubscription}
                                         onChange={this.sesileConfigurationChange} />
-                                </Field>
-                                <Field htmlFor='secret' label={t('admin.modules.pes.local_authority_settings.sesile.secret')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='secret' label={t('admin.modules.pes.local_authority_settings.sesile.secret')}>
                                     <Input id='secret' style={{ width: '25em' }}
                                         placeholder={t('admin.modules.pes.local_authority_settings.sesile.secret')}
                                         value={this.state.fields.secret}
                                         required={this.state.fields.sesileSubscription}
                                         onChange={this.sesileConfigurationChange} />
-                                </Field>
-                                <Field htmlFor='verifyTokens' label={t('admin.modules.pes.local_authority_settings.sesile.verifyTokens')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='verifyTokens' label={t('admin.modules.pes.local_authority_settings.sesile.verifyTokens')}>
                                     <Button id='verifyTokens' basic color='grey' onClick={this.verifyTokens}>
                                         {t('api-gateway:form.verify')}
                                     </Button>
-                                </Field>
+                                </FieldInline>
                             </Fragment>
                         )}
 
                         <h2 className='secondary'>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
-                        <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
+                        <FieldInline htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
                             <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated}
                                 onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
-                        </Field>
+                        </FieldInline>
                         {this.state.fields.archiveSettings.archiveActivated && (
                             <Fragment>
-                                <Field htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
+                                <FieldInline htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
                                     <Input id='daysBeforeArchiving'
                                         type='number'
                                         value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
                                         onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
-                                </Field>
-                                <Field htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
                                     <Input id='pastellUrl' fluid
                                         placeholder='https://...'
                                         value={this.state.fields.archiveSettings.pastellUrl || ''}
                                         onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
-                                </Field>
-                                <Field htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
                                     <Input id='pastellEntity'
                                         value={this.state.fields.archiveSettings.pastellEntity || ''}
                                         onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
-                                </Field>
-                                <Field htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
                                     <Input id='pastellLogin'
                                         value={this.state.fields.archiveSettings.pastellLogin || ''}
                                         onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
-                                </Field>
-                                <Field htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
+                                </FieldInline>
+                                <FieldInline htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
                                     <Input id='pastellPassword'
                                         type='password'
                                         value={this.state.fields.archiveSettings.pastellPassword || ''}
                                         onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
-                                </Field>
+                                </FieldInline>
                             </Fragment>
                         )}
                         <div style={{ textAlign: 'right' }}>

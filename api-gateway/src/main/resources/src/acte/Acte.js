@@ -9,7 +9,7 @@ import Defere from './Defere'
 import LettreObservation from './LettreObservation'
 import DemandePiecesComplementaires from './DemandePiecesComplementaires'
 import DraggablePosition from '../_components/DraggablePosition'
-import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
+import { FieldInline, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import ConfirmModal from '../_components/ConfirmModal'
 import History from '../_components/History'
@@ -198,22 +198,22 @@ class Acte extends Component {
                             <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
                         </div>
 
-                        <Field htmlFor="number" label={t('acte.fields.number')}>
+                        <FieldInline htmlFor="number" label={t('acte.fields.number')}>
                             <FieldValue id="number">{acte.number}</FieldValue>
-                        </Field>
-                        <Field htmlFor="decision" label={t('acte.fields.decision')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="decision" label={t('acte.fields.decision')}>
                             <FieldValue id="decision">{moment(acte.decision).format('DD/MM/YYYY')}</FieldValue>
-                        </Field>
-                        <Field htmlFor="nature" label={t('acte.fields.nature')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="nature" label={t('acte.fields.nature')}>
                             <FieldValue id="nature">{t(`acte.nature.${acte.nature}`)}</FieldValue>
-                        </Field>
-                        <Field htmlFor="code" label={t('acte.fields.code')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="code" label={t('acte.fields.code')}>
                             <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
-                        </Field>
+                        </FieldInline>
                         {this.state.agent && (
-                            <Field htmlFor='agent' label={t('acte.fields.agent')}>
+                            <FieldInline htmlFor='agent' label={t('acte.fields.agent')}>
                                 <FieldValue id='agent'>{this.state.agent}</FieldValue>
-                            </Field>
+                            </FieldInline>
                         )}
                         {acte.acteAttachment && (
                             <Grid>
@@ -228,18 +228,18 @@ class Acte extends Component {
                             </Grid>
                         )}
                         {annexes.length > 0 && (
-                            <Field htmlFor="annexes" label={t('acte.fields.annexes')}>
+                            <FieldInline htmlFor="annexes" label={t('acte.fields.annexes')}>
                                 <List id="annexes">
                                     {annexes}
                                 </List>
-                            </Field>
+                            </FieldInline>
                         )}
-                        <Field htmlFor='multipleChannels' label={t('acte.fields.multipleChannels')}>
+                        <FieldInline htmlFor='multipleChannels' label={t('acte.fields.multipleChannels')}>
                             <Checkbox label={<div className='box'></div>} id="multipleChannels" checked={acte.multipleChannels} disabled />
-                        </Field>
-                        <Field htmlFor='public' label={t('acte.fields.public')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='public' label={t('acte.fields.public')}>
                             <Checkbox label={<div className='box'></div>} id="public" checked={acte.public} disabled />
-                        </Field>
+                        </FieldInline>
 
                         <Grid>
                             <Grid.Column width={4}><label htmlFor='publicWebsite'>{t('acte.fields.publicWebsite')}</label></Grid.Column>

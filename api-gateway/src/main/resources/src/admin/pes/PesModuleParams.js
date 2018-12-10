@@ -7,7 +7,7 @@ import moment from 'moment'
 
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
-import { Field, Page, InputTextControlled } from '../../_components/UI'
+import { FieldInline, Page, InputTextControlled } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
 
 class PesModuleParams extends Component {
@@ -97,12 +97,12 @@ class PesModuleParams extends Component {
             <Page title={t('admin.modules.pes.module_settings.title')}>
                 <Segment>
                     <Form onSubmit={this.submitForm}>
-                        <Field htmlFor='heliosAvailable' label={t('admin.modules.pes.module_settings.heliosAvailable')}>
+                        <FieldInline htmlFor='heliosAvailable' label={t('admin.modules.pes.module_settings.heliosAvailable')}>
                             <Checkbox id="heliosAvailable"
                                 toggle checked={this.state.fields.heliosAvailable}
                                 onChange={this.handleCheckboxChange} />
-                        </Field>
-                        <Field htmlFor='unavailabilityHelios' label={t('admin.modules.pes.module_settings.unavailabilityHelios')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='unavailabilityHelios' label={t('admin.modules.pes.module_settings.unavailabilityHelios')}>
                             <Form.Group style={{ marginBottom: 0, flexDirection: 'column' }} className='test'>
                                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                                     <label htmlFor='unavailabilityHeliosStartDate' style={{ marginRight: '0.5em' }}>
@@ -126,20 +126,20 @@ class PesModuleParams extends Component {
                                     </div>
                                 )}
                             </Form.Group>
-                        </Field>
-                        <Field htmlFor='alertMessageDisplayed' label={t('admin.modules.pes.module_settings.alertMessageDisplayed')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='alertMessageDisplayed' label={t('admin.modules.pes.module_settings.alertMessageDisplayed')}>
                             <Checkbox id='alertMessageDisplayed'
                                 toggle checked={this.state.fields.alertMessageDisplayed}
                                 onChange={this.handleCheckboxChange} />
-                        </Field>
-                        <Field htmlFor='alertMessage' label={t('admin.modules.pes.module_settings.alertMessage')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='alertMessage' label={t('admin.modules.pes.module_settings.alertMessage')}>
                             <InputTextControlled component={TextArea}
                                 id='alertMessage'
                                 maxLength={250}
                                 placeholder={`${t('admin.modules.pes.module_settings.alertMessage')}...`}
                                 value={this.state.fields.alertMessage || ''}
                                 onChange={this.handleFieldChange} />
-                        </Field>
+                        </FieldInline>
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>
                                 {t('api-gateway:form.update')}

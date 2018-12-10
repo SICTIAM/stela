@@ -43,6 +43,9 @@ import AgentProfile from './admin/localAuthority/AgentProfile'
 import ActeModuleParams from './admin/acte/ActeModuleParams'
 import PesModuleParams from './admin/pes/PesModuleParams'
 
+import ConvocationForm from './convocation/ConvocationForm'
+import Convocation from './convocation/Convocation'
+
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={props => (
         <div>
@@ -152,6 +155,8 @@ class AppRoute extends Component {
         const params = this.state
 
         // TODO: Fix redirects, cf https://github.com/ReactTraining/react-router/pull/5209
+
+        // TODO: Add Allow right for convocation and Auth Route
         return (
             <Switch>
                 <PublicRoute exact path="/" {...params} component={Home} />
@@ -182,6 +187,8 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/liste/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
+                <PublicRoute path="/:localAuthoritySlug/convocation/nouveau" {...params} component={ConvocationForm} menu={MenuBar}/>
+                <PublicRoute path="/:localAuthoritySlug/convocation/:uuid" {...params} component={Convocation} menu={MenuBar}/>
 
                 <Route exact path="/:localAuthoritySlug/admin" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/admin/ma-collectivite`} />

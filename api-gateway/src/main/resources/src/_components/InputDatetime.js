@@ -7,11 +7,23 @@ class InputDatetime extends Component {
         return (
             <div>
                 {this.props.ariaLabel && (
-                    <Datetime utc={true} inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'aria-label': this.props.ariaLabel }} locale="fr-fr" dateFormat="DD/MM/YYYY" closeOnSelect={true} {...this.props} />
+                    <Datetime
+                        utc={true}
+                        inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'aria-label': this.props.ariaLabel, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '' }}
+                        locale="fr-fr" dateFormat="DD/MM/YYYY"
+                        closeOnSelect={true}
+                        onBlur={this.props.onBlur}
+                        {...this.props} />
                 )}
                 {!this.props.ariaLabel && (
-                    <Datetime utc={true} inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false }} locale="fr-fr" dateFormat="DD/MM/YYYY" closeOnSelect={true} {...this.props} />
-
+                    <Datetime
+                        utc={true}
+                        inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '' }}
+                        locale="fr-fr"
+                        dateFormat="DD/MM/YYYY"
+                        closeOnSelect={true}
+                        onBlur={this.props.onBlur}
+                        {...this.props} />
                 )}
             </div>
         )

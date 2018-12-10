@@ -3,52 +3,52 @@ import PropTypes from 'prop-types'
 import { Header } from 'semantic-ui-react'
 import moment from 'moment'
 
-import { Field, FieldValue } from './UI'
+import { FieldInline, FieldValue } from './UI'
 
 const CertificateInfosUI = ({ certificate }, { t }) =>
     <Fragment>
-        <Field htmlFor="serial" label={t('certificate.serial')}>
+        <FieldInline htmlFor="serial" label={t('certificate.serial')}>
             <FieldValue id="serial">{certificate.serial}</FieldValue>
-        </Field>
-        <Field htmlFor="issuer" label={t('certificate.issuer')}>
+        </FieldInline>
+        <FieldInline htmlFor="issuer" label={t('certificate.issuer')}>
             <FieldValue id="issuer">{certificate.issuer}</FieldValue>
-        </Field>
-        <Field htmlFor="issuedDate" label={t('certificate.issuedDate')}>
+        </FieldInline>
+        <FieldInline htmlFor="issuedDate" label={t('certificate.issuedDate')}>
             <FieldValue id="issuedDate">{moment(certificate.issuedDate).format('DD/MM/YYYY')}</FieldValue>
-        </Field>
-        <Field htmlFor="expiredDate" label={t('certificate.expiredDate')}>
+        </FieldInline>
+        <FieldInline htmlFor="expiredDate" label={t('certificate.expiredDate')}>
             <FieldValue id="expiredDate">{moment(certificate.expiredDate).format('DD/MM/YYYY')}</FieldValue>
-        </Field>
+        </FieldInline>
         {certificate.status && (
-            <Field htmlFor="status" label={t('profile.certificate.status')}>
+            <FieldInline htmlFor="status" label={t('profile.certificate.status')}>
                 <FieldValue id="status">{certificate.status}</FieldValue>
-            </Field>
+            </FieldInline>
         )}
 
         <Header as='h3' dividing>{t('certificate.subject')}</Header>
-        <Field htmlFor="subjectCommonName" label={t('certificate.subjectCommonName')}>
+        <FieldInline htmlFor="subjectCommonName" label={t('certificate.subjectCommonName')}>
             <FieldValue id="subjectCommonName">{certificate.subjectCommonName}</FieldValue>
-        </Field>
-        <Field htmlFor="subjectOrganization" label={t('certificate.subjectOrganization')}>
+        </FieldInline>
+        <FieldInline htmlFor="subjectOrganization" label={t('certificate.subjectOrganization')}>
             <FieldValue id="subjectOrganization">{certificate.subjectOrganization}</FieldValue>
-        </Field>
-        <Field htmlFor="subjectOrganizationUnit" label={t('certificate.subjectOrganizationUnit')}>
+        </FieldInline>
+        <FieldInline htmlFor="subjectOrganizationUnit" label={t('certificate.subjectOrganizationUnit')}>
             <FieldValue id="subjectOrganizationUnit">{certificate.subjectOrganizationUnit}</FieldValue>
-        </Field>
-        <Field htmlFor="subjectEmail" label={t('certificate.subjectEmail')}>
+        </FieldInline>
+        <FieldInline htmlFor="subjectEmail" label={t('certificate.subjectEmail')}>
             <FieldValue id="subjectEmail">{certificate.subjectEmail}</FieldValue>
-        </Field>
+        </FieldInline>
 
         <Header as='h3' dividing>{t('certificate.issuer')}</Header>
-        <Field htmlFor="issuerCommonName" label={t('certificate.issuerCommonName')}>
+        <FieldInline htmlFor="issuerCommonName" label={t('certificate.issuerCommonName')}>
             <FieldValue id="issuerCommonName">{certificate.issuerCommonName}</FieldValue>
-        </Field>
-        <Field htmlFor="issuerOrganization" label={t('certificate.issuerOrganization')}>
+        </FieldInline>
+        <FieldInline htmlFor="issuerOrganization" label={t('certificate.issuerOrganization')}>
             <FieldValue id="issuerOrganization">{certificate.issuerOrganization}</FieldValue>
-        </Field>
-        <Field htmlFor="issuerEmail" label={t('certificate.issuerEmail')}>
+        </FieldInline>
+        <FieldInline htmlFor="issuerEmail" label={t('certificate.issuerEmail')}>
             <FieldValue id="issuerEmail">{certificate.issuerEmail}</FieldValue>
-        </Field>
+        </FieldInline>
     </Fragment>
 
 CertificateInfosUI.contextTypes = {

@@ -8,7 +8,7 @@ import StelaTable from '../../_components/StelaTable'
 import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
 import ConfirmModal from '../../_components/ConfirmModal'
-import { Field, FieldValue, ListItem, Page } from '../../_components/UI'
+import { FieldInline, FieldValue, ListItem, Page } from '../../_components/UI'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 
 class LocalAuthority extends Component {
@@ -146,12 +146,12 @@ class LocalAuthority extends Component {
                     <Grid.Column>
                         <Segment style={{ height: '100%' }}>
                             <h2 className='secondary'>{t('admin.local_authority.general_informations')}</h2>
-                            <Field htmlFor="uuid" label={t('local_authority.uuid')}>
+                            <FieldInline htmlFor="uuid" label={t('local_authority.uuid')}>
                                 <FieldValue id="uuid">{this.state.fields.uuid}</FieldValue>
-                            </Field>
-                            <Field htmlFor="siren" label={t('local_authority.siren')}>
+                            </FieldInline>
+                            <FieldInline htmlFor="siren" label={t('local_authority.siren')}>
                                 <FieldValue id="siren">{this.state.fields.siren}</FieldValue>
-                            </Field>
+                            </FieldInline>
                         </Segment>
                     </Grid.Column>
 

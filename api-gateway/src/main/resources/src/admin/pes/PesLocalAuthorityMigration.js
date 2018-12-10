@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Icon, Input } from 'semantic-ui-react'
 
-import { Page, Field, FieldValue, MigrationSteps } from '../../_components/UI'
+import { Page, FieldInline, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus } from '../../_util/utils'
 
@@ -102,31 +102,31 @@ class PesLocalAuthorityMigration extends Component {
             <Page title={t('admin.modules.pes.migration.title')}>
                 <Segment>
                     <h2 className='secondary'>{t('api-gateway:admin.local_authority.general_informations')}</h2>
-                    <Field htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
+                    <FieldInline htmlFor="uuid" label={t('api-gateway:local_authority.uuid')}>
                         <FieldValue id="uuid">{this.state.fields.uuid}</FieldValue>
-                    </Field>
-                    <Field htmlFor="name" label={t('api-gateway:local_authority.name')}>
+                    </FieldInline>
+                    <FieldInline htmlFor="name" label={t('api-gateway:local_authority.name')}>
                         <FieldValue id="name">{this.state.fields.name}</FieldValue>
-                    </Field>
-                    <Field htmlFor="siren" label={t('api-gateway:local_authority.siren')}>
+                    </FieldInline>
+                    <FieldInline htmlFor="siren" label={t('api-gateway:local_authority.siren')}>
                         <FieldValue id="siren">{this.state.fields.siren}</FieldValue>
-                    </Field>
+                    </FieldInline>
                 </Segment>
 
                 <Segment>
                     <h2 className='secondary'>{t('admin.modules.pes.migration.additional_options.title')}</h2>
-                    <Field htmlFor='email' label={t('admin.modules.pes.migration.additional_options.email')}>
+                    <FieldInline htmlFor='email' label={t('admin.modules.pes.migration.additional_options.email')}>
                         <Input id='email'
                             placeholder={`${t('api-gateway:agent.email')}...`}
                             value={this.state.form.email}
                             onChange={this.onFormChange} />
-                    </Field>
-                    <Field htmlFor='siren' label={t('admin.modules.pes.migration.additional_options.siren')}>
+                    </FieldInline>
+                    <FieldInline htmlFor='siren' label={t('admin.modules.pes.migration.additional_options.siren')}>
                         <Input id='siren'
                             placeholder={`${t('api-gateway:local_authority.siren')}...`}
                             value={this.state.form.siren}
                             onChange={this.onFormChange} />
-                    </Field>
+                    </FieldInline>
                 </Segment>
                 <Segment>
                     <MigrationSteps

@@ -5,7 +5,7 @@ import { Segment, Label, Icon, Dropdown, Form, Button } from 'semantic-ui-react'
 
 import history from '../../_util/history'
 import { notifications } from '../../_util/Notifications'
-import { Field, Page } from '../../_components/UI'
+import { FieldInline, Page } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
 import { checkStatus } from '../../_util/utils'
 
@@ -112,21 +112,21 @@ class Group extends Component {
             <Page title='Groupe'>
                 <Segment>
                     <Form>
-                        <Field htmlFor='name' label={t('group.name')}>
+                        <FieldInline htmlFor='name' label={t('group.name')}>
                             <InputValidation id='name'
                                 placeholder={t('group.name') + '...'}
                                 value={group.name}
                                 onChange={this.handleFieldChange}
                                 validationRule={this.validationRules.name}
                                 fieldName={t('group.name')} />
-                        </Field>
-                        <Field htmlFor='rights' label={t('group.rights')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='rights' label={t('group.rights')}>
                             <div style={{ marginBottom: '0.5em' }}>{rights.length > 0 ? rights : t('admin.group.no_rights')}</div>
                             <div style={{ marginBottom: '1em' }}>
                                 <Dropdown id='groups' value='' placeholder={t('admin.group.add_right') + '...'}
                                     fluid selection options={rightsOptions} onChange={this.handleRightChange} />
                             </div>
-                        </Field>
+                        </FieldInline>
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary onClick={this.submitForm} type='submit'>
                                 {t(this.props.uuid ? 'form.update' : 'form.create')}

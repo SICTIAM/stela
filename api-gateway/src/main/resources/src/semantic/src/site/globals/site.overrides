@@ -23,3 +23,10 @@ html,
 .ui.segment h2.secondary:after {
     border: 1px solid @secondaryColor;
 }
+
+p.red {
+    color: @red
+}
+p.green {
+    color: @green
+}

@@ -34,6 +34,15 @@ const FormFieldInline = ({ htmlFor, label, children }) => (
 )
 
 const Field = ({ htmlFor, label, children }) => (
+    <Fragment>
+        <label htmlFor={htmlFor} className='fieldLabel'>
+            {label}
+        </label>
+        {children}
+    </Fragment>
+)
+
+const FieldInline = ({ htmlFor, label, children }) => (
     <Grid>
         <Grid.Column width={4}>
             <label style={{ verticalAlign: 'middle' }} htmlFor={htmlFor}>
@@ -249,6 +258,7 @@ const PesErrorList = ( errors, prefix = '' ) =>
 export {
     FormField,
     FormFieldInline,
+    FieldInline,
     Field,
     FieldValue,
     File,

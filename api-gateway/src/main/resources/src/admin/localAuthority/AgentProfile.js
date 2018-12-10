@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import { Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic-ui-react'
 
 import { notifications } from '../../_util/Notifications'
-import { Field } from '../../_components/UI'
+import { FieldInline } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
 
 class AgentProfile extends Component {
@@ -97,18 +97,18 @@ class AgentProfile extends Component {
             })
         return (
             <Form>
-                <Field htmlFor='admin' label={t('agent.local_authority_admin')}>
+                <FieldInline htmlFor='admin' label={t('agent.local_authority_admin')}>
                     <Checkbox id='admin'
                         toggle checked={this.state.fields.admin}
                         onChange={this.handleCheckboxChange} />
-                </Field>
-                <Field htmlFor='groups' label={t('agent.groups')}>
+                </FieldInline>
+                <FieldInline htmlFor='groups' label={t('agent.groups')}>
                     <div style={{ marginBottom: '0.5em' }}>{groups.length > 0 ? groups : t('admin.agent.no_group')}</div>
                     <div style={{ marginBottom: '1em' }}>
                         <Dropdown id='groups' value='' placeholder={t('admin.agent.add_group')} fluid selection options={groupOptions}
                             onChange={this.handleChange} />
                     </div>
-                </Field>
+                </FieldInline>
                 <div style={{ textAlign: 'right' }}>
                     <Button basic primary onClick={this.submitForm} type='submit'>{t('api-gateway:form.update')}</Button>
                 </div>

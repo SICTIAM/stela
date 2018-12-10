@@ -9,3 +9,9 @@
     padding-left: 1em;
     width: 10em;
 }
+
+.ui.form .error-message-form {
+    color: @negativeTextColor;
+    font-size: 12px;
+    position: absolute;
+}
