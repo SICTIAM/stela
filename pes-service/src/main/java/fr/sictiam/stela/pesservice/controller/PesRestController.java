@@ -10,7 +10,6 @@ import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.pesservice.model.util.Certificate;
 import fr.sictiam.stela.pesservice.model.util.RightUtils;
-import fr.sictiam.stela.pesservice.scheduler.ReceiverTask;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.StorageService;
@@ -64,9 +63,6 @@ public class PesRestController {
 
     @Value("${application.archive.maxSize}")
     private Long maxSize;
-
-    @Autowired
-    private ReceiverTask receiverTask;
 
     @Autowired
     public PesRestController(PesAllerService pesAllerService, PesRetourService pesRetourService, CertUtilService certUtilService,
