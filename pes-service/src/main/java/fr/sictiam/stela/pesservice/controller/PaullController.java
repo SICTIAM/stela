@@ -165,6 +165,7 @@ public class PaullController {
             pesAller.setObjet(decodedTitle);
             pesAller.setComment(decodedComment);
             pesAller.setPj(PESPJ == 0 ? false : true);
+
             if (StringUtils.isNotBlank(service)) {
                 pesAller.setServiceOrganisationNumber(Integer.parseInt(service));
             }
@@ -176,11 +177,6 @@ public class PaullController {
             }
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {
-                status = HttpStatus.BAD_REQUEST;
-                return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-            }
-
-            if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                 status = HttpStatus.BAD_REQUEST;
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
             }
