@@ -4,6 +4,8 @@ import fr.sictiam.stela.apigateway.model.AlertMessage;
 import fr.sictiam.stela.apigateway.model.Notification;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/api-gateway")
 public class ProfileController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProfileController.class);
 
     @Value("${application.url}")
     String applicationUrl;
@@ -59,16 +63,31 @@ public class ProfileController {
     public List<Notification> getAllNotifications() {
         RestTemplate restTemplate = new RestTemplate();
 
-        Notification[] acteNotifications = restTemplate
-                .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/notifications/all", Notification[].class);
-
-        Notification[] pesNotifications = restTemplate
-                .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/notifications/all", Notification[].class);
-
         List<Notification> notificationFiltered = new ArrayList<>();
 
-        notificationFiltered.addAll(mapNotififaction("ACTES_", acteNotifications));
-        notificationFiltered.addAll(mapNotififaction("PES_", pesNotifications));
+        try {
+            notificationFiltered.addAll(mapNotififaction("ACTES_",
+                    restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/notifications/all",
+                            Notification[].class)));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module acte is probably not running : {}", e.getMessage());
+        }
+
+        try {
+            notificationFiltered.addAll(mapNotififaction("PES_",
+                    restTemplate.getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/notifications/all",
+                            Notification[].class)));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module pes is probably not running : {}", e.getMessage());
+        }
+
+        try {
+            notificationFiltered.addAll(mapNotififaction("CONVOCATION_",
+                    restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/convocation/notifications/all",
+                            Notification[].class)));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module convocation is probably not running : {}", e.getMessage());
+        }
 
         return notificationFiltered;
     }
@@ -85,12 +104,30 @@ public class ProfileController {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, AlertMessage> alertMessageModules = new HashMap<>();
-        AlertMessage alertMessageActe = restTemplate
-                .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
-        alertMessageModules.put("actes", alertMessageActe);
-        AlertMessage alertMessagePes = restTemplate
-                .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
-        alertMessageModules.put("pes", alertMessagePes);
+        try {
+            AlertMessage alertMessageActe = restTemplate
+                    .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
+            alertMessageModules.put("actes", alertMessageActe);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module acte is probably not running : {}", e.getMessage());
+        }
+
+        try {
+            AlertMessage alertMessagePes = restTemplate
+                    .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
+            alertMessageModules.put("pes", alertMessagePes);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module pes is probably not running : {}", e.getMessage());
+        }
+
+        try {
+            AlertMessage alertMessagePes = restTemplate
+                    .getForObject(discoveryUtils.convocationServiceUrl() + "/api/convocation/admin/alert-message",
+                            AlertMessage.class);
+            alertMessageModules.put("convocation", alertMessagePes);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module convocation is probably not running : {}", e.getMessage());
+        }
 
         return alertMessageModules;
     }

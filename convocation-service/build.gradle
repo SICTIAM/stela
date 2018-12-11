@@ -1,5 +1,11 @@
 archivesBaseName = 'stela-convocation-service'
 
+dependencyManagement {
+    imports {
+        mavenBom 'software.amazon.awssdk:bom:2.1.0'
+    }
+}
+
 dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
@@ -20,6 +26,7 @@ dependencies {
     compile('net.logstash.logback:logstash-logback-encoder:5.2')
     compile('ch.qos.logback:logback-classic:1.2.3')
     compile('org.codehaus.janino:janino:3.0.6')
+    compile('software.amazon.awssdk:s3')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')
