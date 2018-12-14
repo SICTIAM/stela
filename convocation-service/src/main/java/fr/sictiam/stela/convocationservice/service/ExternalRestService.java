@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -18,10 +20,14 @@ import java.util.Optional;
 public class ExternalRestService {
 
     @Autowired
-    DiscoveryUtils discoveryUtils;
+    private DiscoveryUtils discoveryUtils;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalRestService.class);
 
+    /*
     public JsonNode getProfile(String profileUuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> profile = webClient.get().uri("/api/admin/profile/{uuid}", profileUuid).retrieve()
@@ -35,7 +41,7 @@ public class ExternalRestService {
 
         return node;
     }
-
+ */
     public JsonNode getProfiles(String uuid) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> profiles = webClient.get().uri("/api/admin/local-authority/{uuid}/profiles", uuid).retrieve()
@@ -48,6 +54,17 @@ public class ExternalRestService {
         JsonNode node = objectMapper.readTree(opt.get());
 
         return node;
+    }
+
+
+    public JsonNode getProfile(String uuid) {
+        try {
+            return restTemplate.getForObject(discoveryUtils.adminServiceUrl() + "/api/admin/profile/{uuid}",
+                    JsonNode.class, uuid);
+        } catch (RestClientResponseException e) {
+            LOGGER.error("Failed to retrieve local authority siret for {} : {} ({})", uuid, e.getMessage(), e.getResponseBodyAsString());
+            return null;
+        }
     }
 
 }

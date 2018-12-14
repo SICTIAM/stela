@@ -1,5 +1,6 @@
 package fr.sictiam.stela.convocationservice.model.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchResultsUI {
@@ -7,6 +8,8 @@ public class SearchResultsUI {
     private List<?> results;
 
     public SearchResultsUI() {
+        totalCount = 0L;
+        results = new ArrayList<>();
     }
 
     public SearchResultsUI(Long totalCount, List<?> results) {

@@ -28,14 +28,14 @@ public class ConvocationResponse {
 
     @ManyToOne
     @JsonView(Views.ConvocationResponseViewPrivate.class)
-    private ExternalUser externalUser;
+    private Recipient recipient;
 
     @JsonView(Views.ConvocationResponseViewPublic.class)
     private String substituteProfileUuid;
 
     @ManyToOne
     @JsonView(Views.ConvocationResponseViewPrivate.class)
-    private ExternalUser substituteExternalUser;
+    private Recipient substituteRecipient;
 
     @ManyToOne
     @JsonView(Views.ConvocationResponseViewPrivate.class)
@@ -52,13 +52,13 @@ public class ConvocationResponse {
     public ConvocationResponse() {
     }
 
-    public ConvocationResponse(String profileUuid, ExternalUser externalUser, String substituteProfileUuid,
-            ExternalUser substituteExternalUser, Convocation convocation, ResponseType responseType,
+    public ConvocationResponse(String profileUuid, Recipient recipient, String substituteProfileUuid,
+            Recipient substituteRecipient, Convocation convocation, ResponseType responseType,
             Set<QuestionResponse> questionResponses) {
         this.profileUuid = profileUuid;
-        this.externalUser = externalUser;
+        this.recipient = recipient;
         this.substituteProfileUuid = substituteProfileUuid;
-        this.substituteExternalUser = substituteExternalUser;
+        this.substituteRecipient = substituteRecipient;
         this.convocation = convocation;
         this.responseType = responseType;
         this.questionResponses = questionResponses;
@@ -72,12 +72,12 @@ public class ConvocationResponse {
         this.profileUuid = profileUuid;
     }
 
-    public ExternalUser getExternalUser() {
-        return externalUser;
+    public Recipient getRecipient() {
+        return recipient;
     }
 
-    public void setExternalUser(ExternalUser externalUser) {
-        this.externalUser = externalUser;
+    public void setRecipient(Recipient recipient) {
+        this.recipient = recipient;
     }
 
     public String getSubstituteProfileUuid() {
@@ -88,12 +88,12 @@ public class ConvocationResponse {
         this.substituteProfileUuid = substituteProfileUuid;
     }
 
-    public ExternalUser getSubstituteExternalUser() {
-        return substituteExternalUser;
+    public Recipient getSubstituteRecipient() {
+        return substituteRecipient;
     }
 
-    public void setSubstituteExternalUser(ExternalUser substituteExternalUser) {
-        this.substituteExternalUser = substituteExternalUser;
+    public void setSubstituteRecipient(Recipient substituteRecipient) {
+        this.substituteRecipient = substituteRecipient;
     }
 
     public Convocation getConvocation() {

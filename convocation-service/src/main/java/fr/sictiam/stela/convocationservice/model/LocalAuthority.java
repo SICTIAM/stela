@@ -12,29 +12,35 @@ public class LocalAuthority {
     @Id
     @JsonView(Views.LocalAuthorityView.class)
     private String uuid;
+
     @JsonView(Views.LocalAuthorityView.class)
     private String name;
+
+    @JsonView(Views.LocalAuthorityView.class)
+    private String slugName;
+
     @JsonView(Views.LocalAuthorityView.class)
     private String siren;
+
     @JsonView(Views.LocalAuthorityView.class)
     private Boolean active;
+
     @JsonView(Views.LocalAuthorityView.class)
     private Long residentNumber;
 
     public LocalAuthority() {
     }
 
-    public LocalAuthority(String uuid, String name, String siren, Boolean active) {
+    public LocalAuthority(String uuid, String name, String slugName, String siren, Boolean active) {
         this.uuid = uuid;
         this.name = name;
+        this.slugName = slugName;
         this.siren = siren;
         this.active = active;
     }
 
-    public LocalAuthority(String uuid, String name, String siren) {
-        this.uuid = uuid;
-        this.name = name;
-        this.siren = siren;
+    public LocalAuthority(String uuid, String name, String slugName, String siren) {
+        this(uuid, name, slugName, siren, true);
     }
 
     public String getUuid() {
@@ -67,5 +73,17 @@ public class LocalAuthority {
 
     public void setResidentNumber(Long residentNumber) {
         this.residentNumber = residentNumber;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSlugName() {
+        return slugName;
+    }
+
+    public void setSlugName(String slugName) {
+        this.slugName = slugName;
     }
 }

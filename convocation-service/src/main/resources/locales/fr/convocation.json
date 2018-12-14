@@ -3,7 +3,7 @@
     "status": {
       "CREATED": "Créé",
       "SENT": "envoyée"
-   },
+    },
     "admin": {
       "modules": {
         "convocation": {
@@ -18,6 +18,11 @@
             "alertMessage": "Message d'alerte"
           }
         }
+      }
+    },
+    "errors": {
+      "recipient": {
+        "alreadyExists": "Un destinataire existe avec ce courriel"
       }
     }
   }

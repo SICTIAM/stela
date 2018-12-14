@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 public class Convocation {
 
-    public Convocation(Set<String> observerProfileUuids, Set<ExternalUser> externalObserver, AssemblyType assemblyType,
+    public Convocation(Set<String> observerProfileUuids, Set<Recipient> externalObserver, AssemblyType assemblyType,
             Attachment attachment, Set<Attachment> annexes, Set<Question> questions, LocalDateTime creationDate,
             LocalDateTime meetingDate, String place, String subject, String comment, String profileUuid,
             String groupUuid) {
@@ -51,7 +51,7 @@ public class Convocation {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JsonView(Views.ConvocationViewPrivate.class)
-    private Set<ExternalUser> externalObserver;
+    private Set<Recipient> externalObserver;
 
     @ManyToOne
     @JsonView(Views.ConvocationViewPrivate.class)
@@ -107,11 +107,11 @@ public class Convocation {
         this.observerProfileUuids = observerProfileUuids;
     }
 
-    public Set<ExternalUser> getExternalObserver() {
+    public Set<Recipient> getExternalObserver() {
         return externalObserver;
     }
 
-    public void setExternalObserver(Set<ExternalUser> externalObserver) {
+    public void setExternalObserver(Set<Recipient> externalObserver) {
         this.externalObserver = externalObserver;
     }
 

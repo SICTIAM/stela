@@ -16,17 +16,12 @@ CREATE TABLE admin (
 CREATE TABLE assembly_type (
     uuid character varying(255) NOT NULL,
     name character varying(255),
-    local_authority_uuid character varying(255)
-);
-
-
---
--- Name: assembly_type_external_users; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE assembly_type_external_users (
-    assembly_type_uuid character varying(255) NOT NULL,
-    external_users_uuid character varying(255) NOT NULL
+    local_authority_uuid character varying(255),
+    delay int NOT NULL DEFAULT 0,
+    reminder_delay int NOT NULL DEFAULT 0,
+    location character varying(512),
+    active boolean,
+    use_procuration boolean
 );
 
 
@@ -37,7 +32,7 @@ CREATE TABLE assembly_type_external_users (
 CREATE TABLE attachment (
     uuid character varying(255) NOT NULL,
     date timestamp without time zone,
-    file bytea,
+    storage_key character varying(255),
     filename character varying(255),
     size bigint NOT NULL
 );
@@ -116,8 +111,8 @@ CREATE TABLE convocation_response (
     response_type character varying(255),
     substitute_profile_uuid character varying(255),
     convocation_uuid character varying(255),
-    external_user_uuid character varying(255),
-    substitute_external_user_uuid character varying(255)
+    recipient_uuid character varying(255),
+    substitute_recipient_uuid character varying(255)
 );
 
 
@@ -132,15 +127,17 @@ CREATE TABLE convocation_response_question_responses (
 
 
 --
--- Name: external_user; Type: TABLE; Schema: public; Owner: -
+-- Name: recipient; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE external_user (
+CREATE TABLE recipient (
     uuid character varying(255) NOT NULL,
     email character varying(255),
-    first_name character varying(255),
-    name character varying(255),
-    local_authority_uuid character varying(255)
+    firstname character varying(255),
+    lastname character varying(255),
+    local_authority_uuid character varying(255),
+    token character varying(255),
+    active boolean default true
 );
 
 
@@ -199,20 +196,17 @@ CREATE TABLE question_response (
 );
 
 
+CREATE TABLE assembly_type_recipient (
+    assembly_type_uuid character varying(255) NOT NULL,
+    recipient_uuid character varying(255) NOT NULL
+);
+
 --
 -- Name: admin admin_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY admin
     ADD CONSTRAINT admin_pkey PRIMARY KEY (uuid);
-
-
---
--- Name: assembly_type_external_users assembly_type_external_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY assembly_type_external_users
-    ADD CONSTRAINT assembly_type_external_users_pkey PRIMARY KEY (assembly_type_uuid, external_users_uuid);
 
 
 --
@@ -288,11 +282,11 @@ ALTER TABLE ONLY convocation_response_question_responses
 
 
 --
--- Name: external_user external_user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: recipient recipient_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY external_user
-    ADD CONSTRAINT external_user_pkey PRIMARY KEY (uuid);
+ALTER TABLE ONLY recipient
+    ADD CONSTRAINT recipient_pkey PRIMARY KEY (uuid);
 
 
 --
@@ -343,14 +337,6 @@ ALTER TABLE ONLY convocation_annexes
 
 
 --
--- Name: assembly_type_external_users uk_l2kw8i67r7541kmu9q1ma0730; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY assembly_type_external_users
-    ADD CONSTRAINT uk_l2kw8i67r7541kmu9q1ma0730 UNIQUE (external_users_uuid);
-
-
---
 -- Name: convocation_questions uk_nb79i0asd223kbjo0n28lpyg2; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -370,7 +356,7 @@ ALTER TABLE ONLY convocation_response_question_responses
 --
 
 ALTER TABLE ONLY convocation_response
-    ADD CONSTRAINT fk45vi0u9tfjl9jm9e8din5xqux FOREIGN KEY (external_user_uuid) REFERENCES external_user(uuid);
+    ADD CONSTRAINT fk45vi0u9tfjl9jm9e8din5xqux FOREIGN KEY (recipient_uuid) REFERENCES recipient(uuid);
 
 
 --
@@ -386,7 +372,7 @@ ALTER TABLE ONLY convocation_response
 --
 
 ALTER TABLE ONLY convocation_response
-    ADD CONSTRAINT fk7wvsoau3nj5ornsmse87pi8j3 FOREIGN KEY (substitute_external_user_uuid) REFERENCES external_user(uuid);
+    ADD CONSTRAINT fk7wvsoau3nj5ornsmse87pi8j3 FOREIGN KEY (substitute_recipient_uuid) REFERENCES recipient(uuid);
 
 
 --
@@ -458,7 +444,7 @@ ALTER TABLE ONLY convocation_annexes
 --
 
 ALTER TABLE ONLY convocation_external_observer
-    ADD CONSTRAINT fkbwp916gjyybax4pqb6hncsrjx FOREIGN KEY (external_observer_uuid) REFERENCES external_user(uuid);
+    ADD CONSTRAINT fkbwp916gjyybax4pqb6hncsrjx FOREIGN KEY (external_observer_uuid) REFERENCES recipient(uuid);
 
 
 --
@@ -478,10 +464,10 @@ ALTER TABLE ONLY profile_uuids
 
 
 --
--- Name: external_user fkkmtgr5dfkasyobr33lddr7shk; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: recipient fkkmtgr5dfkasyobr33lddr7shk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY external_user
+ALTER TABLE ONLY recipient
     ADD CONSTRAINT fkkmtgr5dfkasyobr33lddr7shk FOREIGN KEY (local_authority_uuid) REFERENCES local_authority(uuid);
 
 
@@ -502,27 +488,36 @@ ALTER TABLE ONLY question_response
 
 
 --
--- Name: assembly_type_external_users fko891mqq0am2kwm1xnsf9yfdjy; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY assembly_type_external_users
-    ADD CONSTRAINT fko891mqq0am2kwm1xnsf9yfdjy FOREIGN KEY (assembly_type_uuid) REFERENCES assembly_type(uuid);
-
-
---
--- Name: assembly_type_external_users fksq0bvj8n5rdacbm3gln0oq3hj; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY assembly_type_external_users
-    ADD CONSTRAINT fksq0bvj8n5rdacbm3gln0oq3hj FOREIGN KEY (external_users_uuid) REFERENCES external_user(uuid);
-
-
---
 -- Name: convocation_annexes fktoj1siayae5sbu3knh6kqvve0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY convocation_annexes
     ADD CONSTRAINT fktoj1siayae5sbu3knh6kqvve0 FOREIGN KEY (convocation_uuid) REFERENCES convocation(uuid);
+
+
+--
+-- Name: assembly_type_external_users assembly_type_external_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY assembly_type_recipient
+    ADD CONSTRAINT assembly_type_recipient_pkey PRIMARY KEY (assembly_type_uuid, recipient_uuid);
+
+
+--
+-- Name: assembly_type_recipient fko891mqq0am2kwm1xnsf9yfdjy; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY assembly_type_recipient
+    ADD CONSTRAINT fko891mqq0am2kwm1xnsf9yfdjy FOREIGN KEY (assembly_type_uuid) REFERENCES assembly_type(uuid);
+
+
+--
+-- Name: assembly_type_recipient fksq0bvj8n5rdacbm3gln0oq3hj; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY assembly_type_recipient
+    ADD CONSTRAINT fksq0bvj8n5rdacbm3gln0oq3hj FOREIGN KEY (recipient_uuid) REFERENCES recipient(uuid);
+
 
 
 --

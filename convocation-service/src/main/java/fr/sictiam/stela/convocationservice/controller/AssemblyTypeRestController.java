@@ -1,56 +1,69 @@
 package fr.sictiam.stela.convocationservice.controller;
 
+import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
+import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.Right;
-import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
+import fr.sictiam.stela.convocationservice.service.AssemblyTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.core.Response.StatusType;
-
 import java.net.URLConnection;
-import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/convocation")
-public class ConvocationRestController {
+@RequestMapping("/api/convocation/assembly-type")
+public class AssemblyTypeRestController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConvocationRestController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AssemblyTypeRestController.class);
 
     @Autowired
-    public ConvocationRestController() {
+    AssemblyTypeRepository assemblyTypeRepository;
 
+    @Autowired
+    AssemblyTypeService assemblyTypeService;
+
+
+    @Autowired
+    public AssemblyTypeRestController() {
     }
 
     @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
-            @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationFrom,
-            @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate creationTo,
-            @RequestParam(value = "status", required = false) StatusType status,
-            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
-            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
-            @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
+    public ResponseEntity<List<AssemblyType.Light>> getAll(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(new SearchResultsUI(), HttpStatus.OK);
+
+        List<AssemblyType.Light> assemblyTypes = assemblyTypeService.findAllSimple(currentLocalAuthUuid);
+        return new ResponseEntity<>(assemblyTypes, HttpStatus.OK);
     }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<AssemblyType> getAssemblyType(
+            @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(assemblyTypeService.getAssembly(uuid), HttpStatus.OK);
+    }
+
 
     @PostMapping
     public ResponseEntity<?> create(

@@ -16,7 +16,7 @@ public class Views {
     }
 
     public interface ConvocationResponseView extends ConvocationViewPublic, ConvocationResponseViewPublic,
-            ConvocationResponseViewPrivate, ExternalUserView, QuestionResponseViewPublic, QuestionView {
+            ConvocationResponseViewPrivate, UserView, QuestionResponseViewPublic, QuestionView {
 
     }
 
@@ -29,7 +29,7 @@ public class Views {
     }
 
     public interface AssemblyTypeView
-            extends ExternalUserViewPublic, AssemblyTypeViewPublic, AssemblyTypeViewPrivate, ConvocationViewPublic {
+            extends UserViewPublic, AssemblyTypeViewPublic, AssemblyTypeViewPrivate, ConvocationViewPublic {
 
     }
 
@@ -45,15 +45,15 @@ public class Views {
 
     }
 
-    public interface ExternalUserView extends ExternalUserViewPrivate, ExternalUserViewPublic {
+    public interface UserView extends UserViewPrivate, UserViewPublic {
 
     }
 
-    public interface ExternalUserViewPublic {
+    public interface UserViewPublic {
 
     }
 
-    public interface ExternalUserViewPrivate {
+    public interface UserViewPrivate {
 
     }
 

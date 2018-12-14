@@ -68,6 +68,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                 .ignoringAntMatchers("/api/*/ws/**")
                 .ignoringAntMatchers("/editeur/api/**")
                 .ignoringAntMatchers("/api/pes/sesile/signature-hook/**")
+                .ignoringAntMatchers("/api/convocation/**")
                 .ignoringAntMatchers("/externalws/**").and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()

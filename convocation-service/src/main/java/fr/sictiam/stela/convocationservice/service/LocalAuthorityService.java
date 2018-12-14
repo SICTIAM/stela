@@ -48,11 +48,8 @@ public class LocalAuthorityService {
     @Transactional
     public void handleEvent(LocalAuthorityEvent event) throws IOException {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
-                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
+                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSlugName(), event.getSiren()));
 
-        if (event.getActivatedModules().contains("PES")) {
-            localAuthority.setActive(true);
-        }
         createOrUpdate(localAuthority);
     }
 
