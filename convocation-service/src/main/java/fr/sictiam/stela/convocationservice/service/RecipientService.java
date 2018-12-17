@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 
@@ -32,7 +33,8 @@ public class RecipientService {
     LocalAuthorityService localAuthorityService;
 
 
-    public Recipient createFrom(String firstname, String lastname, String email, String localAuthorityUuid) {
+    public Recipient createFrom(String firstname, String lastname, String email,
+            String phoneNumber, String localAuthorityUuid) {
 
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
 
@@ -42,8 +44,9 @@ public class RecipientService {
             throw new RecipientExistsException();
         }
 
-        Recipient recipient = new Recipient(firstname, lastname, email, localAuthority);
+        Recipient recipient = new Recipient(firstname, lastname, email, phoneNumber, localAuthority);
         recipient.setToken(generateToken(recipient));
+        recipient.setAssemblyTypes(new HashSet<>());
         return recipient;
     }
 
@@ -55,6 +58,12 @@ public class RecipientService {
     public Recipient save(Recipient recipient) {
 
         return recipientRepository.saveAndFlush(recipient);
+    }
+
+    public void setActive(String uuid, boolean active) {
+        Recipient recipient = getRecipient(uuid);
+        recipient.setActive(active);
+        save(recipient);
     }
 
     public String generateToken(Recipient recipient) {

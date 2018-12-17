@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,10 +68,6 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        LOGGER.info("profile uuid {}", currentProfileUuid);
-        LOGGER.info("localAuthority uuid {}", currentLocalAuthUuid);
-        rights.forEach(right -> LOGGER.info("right {}", right.toString()));
-
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -86,19 +83,51 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestParam("firstname") String firstname,
             @RequestParam("lastname") String lastname,
-            @RequestParam("email") String email) {
-
-        LOGGER.info("profile uuid {}", currentProfileUuid);
-        LOGGER.info("localAuthority uuid {}", currentLocalAuthUuid);
-        rights.forEach(right -> LOGGER.info("right {}", right.toString()));
+            @RequestParam("email") String email,
+            @RequestParam("phoneNumber") String phoneNumber) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
+        firstname = firstname.trim();
+        lastname = lastname.trim();
+        email = email.trim();
+        phoneNumber = phoneNumber.trim();
 
-        Recipient recipient = recipientService.createFrom(firstname, lastname, email, currentLocalAuthUuid);
+        Recipient recipient = recipientService.createFrom(firstname, lastname, email, phoneNumber,
+                currentLocalAuthUuid);
         recipient = recipientService.save(recipient);
+        return new ResponseEntity<>(recipient, HttpStatus.OK);
+    }
+
+    @PutMapping("/{uuid}/active")
+    public ResponseEntity<?> setActive(
+            @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        recipientService.setActive(uuid, true);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/{uuid}/inactive")
+    public ResponseEntity<?> setInactive(
+            @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        recipientService.setActive(uuid, false);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

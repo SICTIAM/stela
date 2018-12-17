@@ -9,7 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 
 import java.util.Set;
 
@@ -32,12 +32,15 @@ public class Recipient {
     private String email;
 
     @JsonView(Views.UserViewPublic.class)
+    private String phoneNumber;
+
+    @JsonView(Views.UserViewPublic.class)
     private boolean active = true;
 
     @JsonView(Views.UserViewPrivate.class)
     private String token;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonView(Views.UserViewPublic.class)
     private LocalAuthority localAuthority;
 
@@ -48,10 +51,12 @@ public class Recipient {
     public Recipient() {
     }
 
-    public Recipient(String firstname, String lastname, String email, LocalAuthority localAuthority) {
+    public Recipient(String firstname, String lastname, String email, String phoneNumber,
+            LocalAuthority localAuthority) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
+        this.phoneNumber = phoneNumber;
         this.localAuthority = localAuthority;
     }
 
@@ -77,6 +82,14 @@ public class Recipient {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getUuid() {

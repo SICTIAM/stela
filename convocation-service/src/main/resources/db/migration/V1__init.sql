@@ -135,6 +135,7 @@ CREATE TABLE recipient (
     email character varying(255),
     firstname character varying(255),
     lastname character varying(255),
+    phone_number character varying(64),
     local_authority_uuid character varying(255),
     token character varying(255),
     active boolean default true
