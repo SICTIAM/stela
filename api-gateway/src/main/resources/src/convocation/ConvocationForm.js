@@ -17,6 +17,7 @@ class ConvocationForm extends Component {
 	}
 	state = {
 	    errorTypePointing: false,
+	    modalOpened: false,
 	    fields: {
 	        uuid: 'test',
 	        date: '',
@@ -63,11 +64,11 @@ class ConvocationForm extends Component {
 	    }
 
 	    const attributeNames = {
-	        date: 'this.state.fields.date',
-	        hour: 'this.state.fields.hour',
+	        date: t('convocation.fields.date'),
+	        hour: t('convocation.fields.hour'),
 	        /*assemblyType: 'this.state.fields.assemblyType',*/
-	        assemblyPlace: 'this.state.fields.assemblyPlace',
-	        objet: 'this.state.fields.objet',
+	        assemblyPlace: t('convocation.fields.assembly_place'),
+	        objet: t('convocation.fields.object'),
 	        /*annexes: 'this.state.fields.annexes',
 	        convocationAttachment: 'this.state.fields.convocationAttachment'*/
 	    }
@@ -92,6 +93,9 @@ class ConvocationForm extends Component {
 	        if (callback) callback()
 	    })
 	}
+	closeModal = () => {
+	    this.setState({modalOpened: false})
+	}
 	updateQuestions = (questions) => {
 	    const fields = this.state.fields
 	    fields['questions'] = questions
@@ -106,7 +110,7 @@ class ConvocationForm extends Component {
 	    const acceptAnnexeFile = '.xml, .pdf, .jpg, .png'
 	    const submissionButton =
             <Button type='submit' primary basic disabled={!this.state.isFormValid }>
-                {t('api-gateway:form.submit')}
+                {t('api-gateway:form.send')}
             </Button>
 
 	    return (
@@ -115,7 +119,8 @@ class ConvocationForm extends Component {
 	                <Form onSubmit={this.submit}>
 	                    <Grid>
 	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_date`} label='Date de la séance' required={true}>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_date`}
+	                                label={t('convocation.fields.date')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    id={`${this.state.fields.uuid}_date`}
@@ -123,36 +128,38 @@ class ConvocationForm extends Component {
 	                                    type='date'
 	                                    onChange={this.handleFieldChange}
 	                                    validationRule={this.validationRules.date}
-	                                    fieldName='this.state.fields.date'
-	                                    placeholder='jj/mm/aaaa'
+	                                    fieldName={t('convocation.fields.date')}
+	                                    placeholder={t('convocation.fields.date_placeholder')}
 	                                    isValidDate={(current) => current.isAfter(new moment())}
 	                                    ariaRequired={true}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_hour`} label='Heure de la séance' required={true}>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_hour`}
+	                                label={t('convocation.fields.hour')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    id={`${this.state.fields.uuid}_hour`}
 	                                    type='time'
 	                                    dropdown={true}
-	                                    placeholder='hh:mm'
+	                                    placeholder={t('convocation.fields.hour_placeholder')}
 	                                    ariaRequired={true}
 	                                    validationRule={this.validationRules.hour}
 	                                    value={this.state.fields.hour}
-	                                    fieldName='this.state.fields.hour'
+	                                    fieldName={t('convocation.fields.hour')}
 	                                    onChange={this.handleFieldChange}
 	                                />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_assemblyType`} label='Type d assemblée' required={true}>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_assemblyType`}
+	                                label={t('convocation.fields.assembly_type')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    id={`${this.state.fields.uuid}_assemblyType`}
 	                                    type='dropdown'
 	                                    validationRule={this.validationRules.assemblyType}
-	                                    fieldName='this.state.fields.assemblyType'
+	                                    fieldName={t('convocation.fields.assembly_type')}
 	                                    ariaRequired={true}
 	                                    options={null}
 	                                    value={this.state.fields.assemblyType}
@@ -161,12 +168,13 @@ class ConvocationForm extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlForm={`${this.state.fields.uuid}_assemblyPlace`} label='Lieu de l assemblée' required={true}>
+	                            <FormField htmlForm={`${this.state.fields.uuid}_assemblyPlace`}
+	                                label={t('convocation.fields.assembly_place')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    validationRule={this.validationRules.assemblyPlace}
 	                                    id={`${this.state.fields.uuid}_assemblyPlace`}
-	                                    fieldName='this.state.fields.assemblyPlace'
+	                                    fieldName={t('convocation.fields.assembly_place')}
 	                                    onChange={this.handleFieldChange}
 	                                    value={this.state.fields.assemblyPlace}
 	                                />
@@ -174,48 +182,49 @@ class ConvocationForm extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_objet`}
-	                                label='Objet'
+	                                label={t('convocation.fields.object')}
                         			required={true}>
 	                                <InputValidation id={`${this.state.fields.uuid}_objet`}
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    ariaRequired={true}
 	                                    validationRule={this.validationRules.objet}
-	                                    fieldName='this.state.fields.assemblyPlace'
-	                                    placeholder='L objet de la objet'
+	                                    fieldName={t('convocation.fields.object')}
+	                                    placeholder={t('convocation.fields.object_placeholder')}
 	                                    value={this.state.fields.objet}
 	                                    onChange={this.handleFieldChange}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_comment`}
-	                                label='Commentaires'>
+	                                label={t('convocation.fields.comment')}>
 	                                <InputTextControlled component={TextArea}
 	                                    id={`${this.state.fields.uuid}_comment`}
 	                                    maxLength={250}
 	                                    style={{ minHeight: '3em' }}
-	                                    placeholder='Commentaires ...'
+	                                    placeholder={`${t('convocation.fields.comment')}...`}
 	                                    value={this.state.fields.comment}
 	                                    onChange={this.handleFieldChange} />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='16'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_receives`}
-	                                label='Destinataire' required={true}>
+	                                label={t('convocation.fields.receives')} required={true}>
 	                                <Grid>
 	                                    <Grid.Column computer='8'>
-	                                        <Modal trigger={<Button
+	                                        <Modal open={this.state.modalOpened} trigger={<Button
+	                                            onClick={() => this.setState({modalOpened: true})}
 	                                            type='button'
 	                                            id={`${this.state.fields.uuid}_receives`}
-	                                            compact basic primary>Ajouter un/des destinataires
+	                                            compact basic primary>{t('convocation.new.add_receives')}
 	                                        </Button>}>
-	                                            <ReceivesForm></ReceivesForm>
+	                                            <ReceivesForm onCloseModal={this.closeModal}></ReceivesForm>
 	                                        </Modal>
 	                                    </Grid.Column>
 	                                    <Grid.Column computer='8'>
 	                                        <Button
 	                                            type='button'
 	                                            id={`${this.state.fields.uuid}_deleteReceives`}
-	                                            compact basic color='red'>Supprimer tous les destinataires
+	                                            compact basic color='red'>{t('convocation.new.delete_all_receives')}
 	                                        </Button>
 	                                    </Grid.Column>
 	                                </Grid>
@@ -223,13 +232,13 @@ class ConvocationForm extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
-	                                label='Modèle de procuration par défaut'>
-	                                <Button className="link" primary compact basic>Visualiser</Button>
+	                                label={t('convocation.fields.default_procuration')}>
+	                                <Button className="link" primary compact basic>{t('convocation.new.display')}</Button>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_customProcuration`}
-	                                label='Modèle de procuration personnalisé'>
+	                                label={t('convocation.fields.custom_procuration')}>
 	                                <InputFile labelClassName="primary"
 	                                    htmlFor={`${this.state.fields.uuid}_customProcuration`}
 	                                    label={`${t('api-gateway:form.add_a_file')}`}>
@@ -240,7 +249,7 @@ class ConvocationForm extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_document`}
-	                                label='Documents de la convocation' required={true}>
+	                                label={t('convocation.fields.convocation_document')} required={true}>
 	                                <InputValidation id={`${this.state.fields.uuid}_document`}
 	                                    labelClassName="primary"
 	                                    type='file'
@@ -248,19 +257,19 @@ class ConvocationForm extends Component {
 	                                    accept={acceptFileDocument}
 	                                    value={this.state.fields.convocationAttachment}
 	                                    label={`${t('api-gateway:form.add_a_file')}`}
-	                                    fieldName='document' />
+	                                    fieldName={t('convocation.fields.convocation_document')} />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_annexes`}
-	                                label='Annexe(s)'>
+	                                label={t('convocation.fields.annexes')}>
 	                                <InputValidation id={`${this.state.fields.uuid}_annexes`}
 	                                    labelClassName="primary"
 	                                    type='file'
 	                                    accept={acceptAnnexeFile}
 	                                    value={this.state.fields.convocationAttachment}
 	                                    label={`${t('api-gateway:form.add_a_file')}`}
-	                                    fieldName='annexes' />
+	                                    fieldName={t('convocation.fields.annexes')} />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='16'>
@@ -273,7 +282,7 @@ class ConvocationForm extends Component {
 	                    </Grid>
 	                    <div className='footerForm'>
 	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} basic color='red'>
-								Annuler
+	                            {t('api-gateway:form.cancel')}
 	                        </Button>
 
 	                        {this.state.allFormErrors.length > 0 &&
@@ -289,5 +298,4 @@ class ConvocationForm extends Component {
 	    )
 	}
 }
-export default translate(['api-gateway'])(ConvocationForm)
-//export default translate(['convocation', 'api-gateway'])(ConvocationForm)
+export default translate(['convocation', 'api-gateway'])(ConvocationForm)

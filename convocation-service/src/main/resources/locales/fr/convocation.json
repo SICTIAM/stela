@@ -4,6 +4,39 @@
       "CREATED": "Créé",
       "SENT": "envoyée"
     },
+    "fields": {
+      "date": "Date de la séance",
+      "date_placeholder": "jj/mm/aaaa",
+      "hour": "Heure de la séance",
+      "hour_placeholder": "hh:mm",
+      "assembly_type": "Type d'assemblée",
+      "assembly_place": "Lieu de l'assemblée",
+      "object": "Objet",
+      "object_placeholder": "L'objet de la convocation",
+      "comment": "Commentaires",
+      "receives": "Destinataire",
+      "default_procuration": "Modèle de procuration par défaut",
+      "custom_procuration": "Modèle de procuration personnalisé",
+      "convocation_document": "Document de la convocation",
+      "annexes": "Annexe(s)",
+      "questions": "Question(s) supplémentaire(s)",
+      "questions_placeholder": "Entrez votre question"
+    },
+    "list": {
+
+    },
+    "page": {
+
+    },
+    "new": {
+      "display": "Visualiser",
+      "add_receives": "Ajouter un/des destinataires",
+      "delete_all_receives": "Supprimer tous les destinataires",
+      "view_more_receives": "Voir les {{number}} destinataires",
+      "view_less_receives": "Voir moins de destinataires",
+      "no_receive": "Aucun destinataire",
+      "choose_from_the_list": "Choisir dans la liste"
+    },
     "admin": {
       "modules": {
         "convocation": {
@@ -16,6 +49,18 @@
             "title": "Paramètres du module Convocation",
             "alertMessageDisplayed": "Affichage du message d'alerte",
             "alertMessage": "Message d'alerte"
+          },
+          "assembly_type_config": {
+            "type": "Type d'assemblée",
+            "convocation_delay": "Délai de convocation",
+            "reminder_time": "Délai de relance" ,
+            "place": "Lieu de la séance",
+            "receives": "Destinataires",
+            "procuration": "Utilisateur de procuration",
+            "status": "Statut"
+          },
+          "assembly_type_liste": {
+            "no_assembly_type": "Aucun type d'assemblée"
           }
         }
       }

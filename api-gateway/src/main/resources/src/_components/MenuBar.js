@@ -121,7 +121,7 @@ class MenuBar extends Component {
                                 <Icon name="calendar outline" className="float-right" size="large" />
                             </Menu.Header>
                             <Menu.Menu>
-                                <Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/nouveau`}>
                                     {t('menu.convocation.send_a_convocation')}
                                 </Menu.Item>
                                 <Menu.Item>

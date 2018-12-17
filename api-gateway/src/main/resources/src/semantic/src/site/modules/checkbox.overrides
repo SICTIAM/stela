@@ -1,3 +1,7 @@
 /*******************************
          Site Overrides
 *******************************/
+.ui.toggle.checkbox.secondary input:checked~.box:before, 
+.ui.toggle.checkbox.secondary input:checked~label:before {
+    background-color: @secondaryColor !important;
+}

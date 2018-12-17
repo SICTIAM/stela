@@ -16,23 +16,17 @@ class InputTimePicker extends Component {
 	    }
 	}
 	componentDidMount = () => {
-	    let hour = Array.from(new Array(23), (val, index) => {
-	        return index<10 ? `0${index}` : index
+	    const hour = Array.from(new Array(24), (val, index) => {
+	        return index<10 ? `0${index}` : `${index}`
 	    })
-	    hour = this.move(hour, 5)
-	    const minute = Array.from(new Array(59), (val, index) => {
-	        return index<10 ? `0${index}` : index
+	    const minute = Array.from(new Array(60), (val, index) => {
+	        return index<10 ? `0${index}` : `${index}`
 	    })
 	    const optionGroups = {
 	        hour: hour,
 	        minute: minute
 	    }
 	    this.setState({optionGroups: optionGroups})
-
-	}
-	move = (arr, offset=0) => {
-	    const pivot = (offset < 0? 0: arr.length) - offset % arr.length
-  		return arr.slice(pivot).concat(arr.slice(0, pivot))
 	}
 	handleKeyDown = (e) => {
 	    if(e.target.selectionStart !== 2 && e.target.selectionStart !== 5) {
@@ -93,24 +87,24 @@ class InputTimePicker extends Component {
 	        } else if(hourMinuteArray[1].match(/^[6-9][0-9]$/)) {
 	            newHour = newHour.replace(hourMinuteArray[1], `0${hourMinuteArray[1].charAt(1)}`)
 	        }
+
+	        const hourFormeMobilePicker = newHour.replace(/[_]/g, '0')
+	        this.setState(({valueGroups}) => ({
+	            valueGroups: {
+	                hour: hourFormeMobilePicker.split(':')[0],
+	                minute: hourFormeMobilePicker.split(':')[1]
+	            }
+	        }))
 	    }
 	    return newHour
 	}
 	handlePickerChange = (name, value) => {
-	    const hour = this.move(this.state.optionGroups.hour, 5)
-	    /*this.setState(({optionGroups}) => ({
-	        optionGroups: {
-	            ...optionGroups,
-	            hour: hour
-	        }
-	    }))*/
-	    this.setState(({valueGroups}) => ({
-		  valueGroups: {
-	            ...valueGroups,
-	            [name]: value
-		  }
-	    }))
-	    this.props.onChange(this.formateDate24h(`${this.state.valueGroups['hour']}:${this.state.valueGroups['minute']}`))
+	    let valueGroups = this.state.valueGroups
+	    valueGroups[name] = value
+	    this.setState({valueGroups: valueGroups})
+
+	    this.props.onChange(`${this.state.valueGroups['hour']}:${this.state.valueGroups['minute']}`)
+
 	}
 	onChange = (value) => {
 	    this.props.onChange(this.formateDate24h(value))

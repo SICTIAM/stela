@@ -66,6 +66,9 @@
     margin-left: 20px;
     display: inline-block;
 }
+.mt-15 {
+    margin-top: 15px;
+}
 .mb-0 {
     margin-bottom: 0px;
 }
@@ -75,6 +78,9 @@
 }
 .pt-0 {
     padding-top: 0;
+}
+.pl-5 {
+    padding-left: 5px
 }
 
 /* icon */
@@ -298,6 +304,23 @@ i.collapsed-text-icon.circular.icon {
 }
 .deletableListItem:last-child {
     border: none;
+}
+
+/* Chips */
+.chip {
+    border-radius: 15px;
+    border: 1px solid rgba(34,36,38,.3);
+    display: inline-block;
+    padding: 5px 10px;
+    margin-right: 20px;
+}
+
+.chip .remove {
+    display: inline-block;
+    cursor: pointer;
+}
+.chip .remove i {
+    padding: 0px 5px;
 }
 
 /* Mobile Picker */

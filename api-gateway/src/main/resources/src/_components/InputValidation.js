@@ -17,7 +17,8 @@ export default class InputValidation extends Component {
         type: '',
         accept: '',
         className: '',
-        style: {}
+        style: {},
+        min: 0
     }
     validateValue = () => {
         const value = this.props.type === 'date' && this.props.value ? moment(this.props.value).format('YYYY-MM-DD') : this.props.value
@@ -39,6 +40,17 @@ export default class InputValidation extends Component {
                         value={this.props.value}
                         onChange={e => this.props.onChange(this.props.id, e.target.value)}
                         onBlur={this.validateValue} />
+                )}
+                {this.props.type === 'number' && (
+                    <input id={this.props.id}
+                        aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
+                        className={this.props.className + (this.state.errorMessage ? ' error' : '')}
+                        placeholder={this.props.placeholder}
+                        value={this.props.value}
+                        type='number'
+                        min={this.props.min}
+                        onChange={e => this.props.onChange(this.props.id, e.target.value)}
+                        onBlur={this.validateValue}/>
                 )}
 
                 {this.props.type === 'date' && (

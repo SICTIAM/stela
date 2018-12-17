@@ -71,7 +71,7 @@ class StelaTable extends Component {
         }
     }
     componentWillReceiveProps = (nextProps) => {
-        if (nextProps.data) {
+        if (nextProps.data && nextProps.data !== this.props.data) {
             const checkboxes = {}
             if (nextProps.select) {
                 nextProps.data.map(data => checkboxes[data[nextProps.keyProperty]] = false)
@@ -127,6 +127,7 @@ class StelaTable extends Component {
         const checkboxes = this.state.checkboxes
         checkboxes[keyProperty] = !checkboxes[keyProperty]
         this.setState({ checkboxes })
+        this.props.onSelectedRow && this.props.onSelectedRow(keyProperty, this.state.checkboxes[keyProperty])
     }
     handleChekAll = () => {
         const checkAll = !this.state.checkAll
@@ -236,7 +237,7 @@ class StelaTable extends Component {
                         }
                         {isFilled &&
                             data.map(row =>
-                                <Table.Row key={row[this.props.keyProperty]}
+                                <Table.Row active={this.state.checkboxes[row[this.props.keyProperty]]} key={row[this.props.keyProperty]}
                                     negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}
                                     className={this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : ''}>
                                     {displayedColumns.map((displayedColumn, index) =>

@@ -3,7 +3,8 @@
 *******************************/
 
 .ui.form input:not([type]).error,
-.ui.form input[type=text].error {
+.ui.form input[type=text].error,
+.ui.form input[type=number].error {
     background-color: @negativeBackgroundColor;
     border-color: @negativeBorderColor;
     color: @negativeTextColor;

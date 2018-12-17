@@ -1,11 +1,14 @@
 import React, { Component, Fragment } from 'react'
 import { Input, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
+import PropTypes from 'prop-types'
 
 import { FormField } from '../_components/UI'
 
 class QuestionsForm extends Component {
-
+	static contextTypes = {
+	    t: PropTypes.func,
+	}
 	state = {
 	    currentQuestion: ''
 	}
@@ -32,6 +35,7 @@ class QuestionsForm extends Component {
 	}
 
 	render() {
+	    const { t } = this.context
 	    const questions = this.props.questions.map((question, index) => {
 	        return (
 	            <Fragment>
@@ -49,14 +53,14 @@ class QuestionsForm extends Component {
 	        <Fragment>
 	            {this.props.editable && (
 	                <FormField htmlFor={`${this.props.uuid}_questions`}
-	                    label='Question(s)'>
+	                    label={t('convocation.fields.questions')}>
 	                    <Input
 	                        id={`${this.props.uuid}_questions`}
 	                        value={this.state.currentQuestion}
 	                        onKeyPress={(e) => { this.handleKeyPress(e) }}
 	                        onChange={(e) => { this.setState({currentQuestion: e.target.value}) } }
-	                        action={{ icon: 'add', color: 'primary', onClick: this.addQuestion, type: 'button' }}
-	                        placeholder='Entrez votre question'/>
+	                        action={{ icon: 'add', color: 'blue', onClick: this.addQuestion, type: 'button' }}
+	                        placeholder={t('convocation.fields.questions_placeholder')}/>
 	                </FormField>
 	            )}
 	            {questions}
@@ -64,4 +68,4 @@ class QuestionsForm extends Component {
 	    )
 	}
 }
-export default translate(['api-gateway'])(QuestionsForm)
+export default translate(['convocation','api-gateway'])(QuestionsForm)

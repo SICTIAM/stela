@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
+import PropTypes from 'prop-types'
 
 import { Page, Field, FieldValue } from '../_components/UI'
 
@@ -11,6 +12,9 @@ import Participants from './Participants'
 
 
 class Convocation extends Component {
+	static contextTypes = {
+	    t: PropTypes.func,
+	}
 	state = {
 	    displayListParticipants: false,
 	    totalCount: 0,
@@ -70,6 +74,8 @@ class Convocation extends Component {
 	}
 
 	render() {
+	    const { t } = this.context
+
 	    const presents = this.sumParticipantsByStatus('OK')
 	    const absents = this.sumParticipantsByStatus('KO')
 	    const procurations = this.sumParticipantsByStatus('procurations')
@@ -99,22 +105,22 @@ class Convocation extends Component {
 	                    <Grid.Column mobile='16' tablet='16' computer='12'>
 	                        <Grid>
 	                            <Grid.Column computer='16'>
-	                                <Field htmlFor="comments" label='Commentaires'>
+	                                <Field htmlFor="comments" label={t('convocation.fields.comment')}>
 	                                    <FieldValue id="comments">{this.state.convocation.comments}</FieldValue>
 	                                </Field>
 	                            </Grid.Column>
 	                            <Grid.Column mobile='16' computer='8'>
-	                                <Field htmlFor="document" label='Document de la convocation'>
+	                                <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
 	                                    <FieldValue id="document"><Button className="link" primary compact basic>DEC_01_Courrier_logik.pdf</Button></FieldValue>
 	                                </Field>
 	                            </Grid.Column>
 	                            <Grid.Column mobile='16' computer='8'>
-	                                <Field htmlFor="procuration" label='Modèle de procuration'>
+	                                <Field htmlFor="procuration" label={t('convocation.fields.default_procuration')}>
 	                                    <FieldValue id="procuration"><Button className="link" primary compact basic>{this.state.convocation.procuration}</Button></FieldValue>
 	                                </Field>
 	                            </Grid.Column>
 	                            <Grid.Column computer='16' tablet='16'>
-	                                <Field htmlFor="questions" label='Question(s) supplémentaire(s)'>
+	                                <Field htmlFor="questions" label={t('convocation.fields.questions')}>
 	                                    <QuestionsForm
 	                                        editable={false}
 	                                        questions={this.state.convocation.questions}
@@ -127,17 +133,17 @@ class Convocation extends Component {
 						 	<div className='block-information'>
 	                            <Grid columns='1'>
 	                                <Grid.Column>
-	                                    <Field htmlFor="Date" label='Date'>
+	                                    <Field htmlFor="Date" label={t('convocation.fields.date')}>
 	                                        <FieldValue id="Date">{this.state.convocation.date}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                                <Grid.Column>
-	                                    <Field htmlFor="assemblyType" label='Type d assemblée'>
+	                                    <Field htmlFor="assemblyType" label={t('convocation.fields.assembly_type')}>
 	                                        <FieldValue id="assemblyType">{this.state.convocation.assemblyType}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                                <Grid.Column>
-	                                    <Field htmlFor="assemblyPlace" label='Lieu'>
+	                                    <Field htmlFor="assemblyPlace" label={t('convocation.fields.assembly_place')}>
 	                                        <FieldValue id="assemblyPlace">{this.state.convocation.assemblyPlace}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
@@ -238,4 +244,4 @@ class Convocation extends Component {
 
 }
 
-export default translate(['api-gateway'])(Convocation)
+export default translate(['convocation', 'api-gateway'])(Convocation)

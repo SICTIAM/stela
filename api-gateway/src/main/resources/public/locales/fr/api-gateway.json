@@ -30,6 +30,7 @@
     "from": "de",
     "to": "à",
     "submit": "Déposer",
+    "send": "Envoyer",
     "create": "Créer",
     "update": "Mettre à jour",
     "delete": "Supprimer",
@@ -320,7 +321,9 @@
     "all_local_authorities": "Toutes les collectivités",
     "local_authorities": "Collectivités",
     "my_local_authority": "Ma collectivité",
+    "parameters": "Paramètres",
     "instance_params": {
+      "instance_params": "Paramètre d'instance",
       "title": "Paramètres de l'instance",
       "general_settings": "Paramètres généraux",
       "contact_email": "Email de contact",
@@ -346,6 +349,11 @@
       "no_certificate": "Aucun certificat pour cette collectivité",
       "no_certificate_email": "Aucun email",
       "drop_new_certificate": "Déposer le nouveau certificat"
+    },
+    "convocation": {
+      "assembly_type": "Type d'assemblée",
+      "assembly_type_list": "Liste des types d'assemblée",
+      "receives": "Destinataire"
     },
     "modules": {
       "title": "Module",
