@@ -41,6 +41,7 @@
       "modules": {
         "convocation": {
           "title": "Module Convocation",
+          "assembly_types": "Types d'assemblée",
           "local_authority_settings": {
             "title": "Paramétrage des collectivités",
             "general_informations": "Informations générales"
@@ -63,7 +64,9 @@
             "firstname": "Prénom",
             "lastname": "Nom",
             "phonenumber": "Numéro de téléphone",
-            "email": "Email"
+            "email": "Email",
+            "status": "Statut",
+            "edit": "Editer"
           },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"

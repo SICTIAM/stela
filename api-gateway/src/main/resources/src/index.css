@@ -66,6 +66,9 @@
     margin-left: 20px;
     display: inline-block;
 }
+.mr-20 {
+    margin-right: 20px;
+}
 .mt-15 {
     margin-top: 15px;
 }
@@ -289,6 +292,42 @@ i.collapsed-text-icon.circular.icon {
 }
 .dropzone.disabled {
     cursor: default;
+}
+
+/* Quick View */
+.quick-view {
+    position: fixed;
+    display: flex;
+    background-color: #ffffff;
+    padding: 10px 15px;
+    right: -600px;
+    left: auto;
+    animation: close-slide-left-to-right 0.5s ease;
+    box-shadow: 0px 0px 8px -0.5px rgba(0,0,0,0.40);
+    width: 600px;
+    z-index: 100;
+}
+.quick-view.open {
+    right: 10px;
+    animation: open-slide-right-to-left 0.5s ease;
+}
+
+/* Animations */
+@keyframes close-slide-left-to-right {
+    from {
+        right: 10px;
+    }
+    to {
+        right: -600px;
+    }
+}
+@keyframes open-slide-right-to-left {
+    from {
+        right: -600px;
+    }
+    to {
+        right: 10px;
+    }
 }
 
 /* Deletable List */

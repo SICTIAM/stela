@@ -192,6 +192,11 @@ const notifications = {
             title: 'notifications.convocation.admin.recipients.recipient_created',
             level: 'success',
             position: 'br'
+        },
+        statusUpdated: {
+            title: 'notifications.convocation.admin.recipients.status_updated',
+            level: 'success',
+            position: 'br'
         }
     },
     profile: {

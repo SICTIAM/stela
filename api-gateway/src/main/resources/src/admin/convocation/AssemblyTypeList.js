@@ -43,7 +43,7 @@ class AssemblyTypeList extends Component {
 	                    metaData={metaData}
 	                    data={this.state.assemblyTypes}
 	                    keyProperty="name"
-	                    noDataMessage={t('convocation.admin.assembly_type_liste.no_assembly_type')}
+	                    noDataMessage={t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')}
 	                />
 	            </Segment>
 	        </Page>

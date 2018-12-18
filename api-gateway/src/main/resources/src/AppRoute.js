@@ -48,7 +48,7 @@ import ConvocationLocalAuthorityParams from './admin/convocation/ConvocationLoca
 import AssemblyTypeConfig from './admin/convocation/AssemblyTypeConfig'
 import AssemblyTypeList from './admin/convocation/AssemblyTypeList'
 import RecipentConfig from './admin/convocation/RecipentConfig'
-import UsersList from './admin/convocation/UsersList'
+import RecipientsList from './admin/convocation/RecipientsList'
 
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={props => (
@@ -217,7 +217,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/liste-type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeList} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/destinataire" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipentConfig} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path="/:localAuthoritySlug/admin/convocation/liste-destinataires" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={UsersList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/liste-destinataires" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipientsList} menu={AdminMenuBar} admin={true} />
 
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
 

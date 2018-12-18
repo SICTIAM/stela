@@ -20,3 +20,8 @@
     background-color: @lightGrey;
     font-weight: @bold
 }
+
+.ui.table tbody tr td.selectable>span:not(.ui) {
+    display: block;
+    padding: .78571429em .78571429em;
+}

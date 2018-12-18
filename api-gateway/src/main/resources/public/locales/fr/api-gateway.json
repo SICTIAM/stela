@@ -225,7 +225,8 @@
       "admin": {
           "title": "Admin module Convocation",
           "recipients": {
-            "recipient_created": "Le destinataire a été créé avec succès."  
+            "recipient_created": "Le destinataire a été créé avec succès.",
+            "status_updated": "Le statut a bien été mis à jour"
           }
       }
     },

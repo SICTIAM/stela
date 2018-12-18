@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
-import history from '../_util/history'
+// import history from '../_util/history'
 
 class StelaTable extends Component {
     static contextTypes = {
@@ -86,11 +86,11 @@ class StelaTable extends Component {
             return result * sortOrder
         }
     }
-    handleLink = linkProperty => {
-        if (this.props.link !== '') {
-            history.push(this.props.link + linkProperty)
-        }
-    }
+    // handleLink = linkProperty => {
+    //     if (this.props.link !== '') {
+    //         history.push(this.props.link + linkProperty)
+    //     }
+    // }
     handleSearch = (e, { value }) => {
         if (this.props.fetchedSearch) this.props.fetchedSearch(value)
         else {
@@ -242,11 +242,12 @@ class StelaTable extends Component {
                                     className={this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : ''}>
                                     {displayedColumns.map((displayedColumn, index) =>
                                         <Table.Cell
-                                            style={this.props.link !== '' ? { cursor: 'pointer' } : null}
+                                            style={(this.props.link !== '' || this.props.click) ? { cursor: 'pointer' } : null}
                                             key={index + '-' + row[displayedColumn.property]}
                                             collapsing={!!displayedColumn.collapsing}
-                                            selectable={this.props.link !== '' ? true : false}
-                                            className={this.props.link !== '' ? 'no-hover' : ''}>
+                                            selectable={(this.props.link !== '' || this.props.click) ? true : false}
+                                            className={(this.props.link !== '' || this.props.click) ? 'no-hover' : ''}
+                                            onClick={(e) => this.props.onClick && this.props.onClick(e, displayedColumn.property, row)}>
                                             {this.props.link && (
                                                 <Link to={this.props.link + row[this.props.linkProperty]}>{displayedColumn.displayComponent ?
                                                     displayedColumn.property === '_self' ?
