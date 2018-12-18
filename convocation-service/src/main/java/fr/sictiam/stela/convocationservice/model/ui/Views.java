@@ -57,6 +57,10 @@ public class Views {
 
     }
 
+    public interface UserLocalAuthorityView extends UserViewPublic, LocalAuthorityView {
+
+    }
+
     public interface QuestionView {
 
     }

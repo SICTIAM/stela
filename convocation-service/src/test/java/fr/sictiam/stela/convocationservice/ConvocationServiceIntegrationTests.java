@@ -85,7 +85,7 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
     public void createLocalAuthority() {
         if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
             LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test",
-                    "999888777", true);
+                    "sictiam", "999888777", true);
             localAuthorityService.createOrUpdate(localAuthority);
 
             String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","
@@ -121,7 +121,7 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
             }
-            this.restTemplate.getRestTemplate()
+            restTemplate.getRestTemplate()
                     .setInterceptors(Collections.singletonList((request1, body, execution) -> {
 
                         String jwtToken = Jwts.builder().setSubject(profile1)

@@ -151,7 +151,8 @@ CREATE TABLE local_authority (
     active boolean,
     name character varying(255),
     resident_number bigint,
-    siren character varying(255)
+    siren character varying(255),
+    slug_name character varying(255)
 );
 
 

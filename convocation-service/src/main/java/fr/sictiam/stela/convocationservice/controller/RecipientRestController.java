@@ -7,6 +7,7 @@ import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.LocalAuthorityService;
+import fr.sictiam.stela.convocationservice.service.NotificationService;
 import fr.sictiam.stela.convocationservice.service.RecipientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -41,25 +43,29 @@ public class RecipientRestController {
     @Autowired
     LocalAuthorityService localAuthorityService;
 
+    @Autowired
+    NotificationService notificationService;
+
 
     @Autowired
     public RecipientRestController() {
     }
 
-    /*
-        @GetMapping
-        public ResponseEntity<List<AssemblyType.Light>> getAll(
-                @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-                @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+    @JsonView(Views.UserLocalAuthorityView.class)
+    @GetMapping
+    public ResponseEntity<List<Recipient>> getAll(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-            if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-
-            List<AssemblyType.Light> assemblyTypes = assemblyTypeService.findAllSimple(currentLocalAuthUuid);
-            return new ResponseEntity<>(assemblyTypes, HttpStatus.OK);
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-    */
+
+        List<Recipient> recipients = recipientService.findAll(currentLocalAuthUuid);
+        return new ResponseEntity<>(recipients, HttpStatus.OK);
+    }
+
+
     @JsonView(Views.UserViewPublic.class)
     @GetMapping("/{uuid}")
     public ResponseEntity<Recipient> getAssemblyType(
@@ -131,6 +137,17 @@ public class RecipientRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
+    @GetMapping("/mail")
+    public ResponseEntity<?> sendMail() {
+
+        try {
+            notificationService.sendMail("gerald.gole@gmail.om", "Test", "Body");
+        } catch (Exception e) {
+            LOGGER.error("Error while sending mail : ({}) : {]", e.getClass(), e.getMessage());
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     private String getContentType(String filename) {
         String mimeType = URLConnection.guessContentTypeFromName(filename);

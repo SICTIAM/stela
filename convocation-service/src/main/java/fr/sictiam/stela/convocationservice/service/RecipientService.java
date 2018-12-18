@@ -15,6 +15,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -66,6 +67,11 @@ public class RecipientService {
         save(recipient);
     }
 
+    public List<Recipient> findAll(String localAuthorityUuid) {
+
+        return recipientRepository.findAllByLocalAuthorityUuid(localAuthorityUuid);
+    }
+
     public String generateToken(Recipient recipient) {
         try {
             StringBuilder sb = new StringBuilder(recipient.getEmail());
@@ -76,8 +82,7 @@ public class RecipientService {
 
             StringBuilder token = new StringBuilder(2 * hash.length);
             for (byte b : hash) {
-                token.append(String.format("%02x",
-                        b & 0xff));
+                token.append(String.format("%02x", b & 0xff));
             }
             return token.toString();
         } catch (NoSuchAlgorithmException e) {
