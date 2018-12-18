@@ -138,7 +138,8 @@ CREATE TABLE recipient (
     phone_number character varying(64),
     local_authority_uuid character varying(255),
     token character varying(255),
-    active boolean default true
+    active boolean default true,
+    inactivity_date timestamp without time zone
 );
 
 

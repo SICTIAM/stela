@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -14,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "uuid")
@@ -52,6 +57,11 @@ public class Recipient {
     @JsonView(Views.UserViewPublic.class)
     @ManyToMany(mappedBy = "recipients", fetch = FetchType.EAGER)
     private Set<AssemblyType> assemblyTypes;
+
+    @JsonView(Views.UserViewPublic.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    LocalDateTime inactivityDate;
 
     public Recipient() {
     }
@@ -131,5 +141,13 @@ public class Recipient {
 
     public void setAssemblyTypes(Set<AssemblyType> assemblyTypes) {
         this.assemblyTypes = assemblyTypes;
+    }
+
+    public LocalDateTime getInactivityDate() {
+        return inactivityDate;
+    }
+
+    public void setInactivityDate(LocalDateTime inactivityDate) {
+        this.inactivityDate = inactivityDate;
     }
 }

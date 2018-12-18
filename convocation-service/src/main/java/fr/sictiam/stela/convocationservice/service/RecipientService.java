@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -77,6 +78,7 @@ public class RecipientService {
     public void setActive(String uuid, boolean active) {
         Recipient recipient = getRecipient(uuid);
         recipient.setActive(active);
+        recipient.setInactivityDate(active ? null : LocalDateTime.now());
         save(recipient);
     }
 
