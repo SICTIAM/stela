@@ -14,7 +14,7 @@
       "object": "Objet",
       "object_placeholder": "L'objet de la convocation",
       "comment": "Commentaires",
-      "receives": "Destinataire",
+      "recipient": "Destinataire",
       "default_procuration": "Modèle de procuration par défaut",
       "custom_procuration": "Modèle de procuration personnalisé",
       "convocation_document": "Document de la convocation",
@@ -30,11 +30,11 @@
     },
     "new": {
       "display": "Visualiser",
-      "add_receives": "Ajouter un/des destinataires",
-      "delete_all_receives": "Supprimer tous les destinataires",
-      "view_more_receives": "Voir les {{number}} destinataires",
-      "view_less_receives": "Voir moins de destinataires",
-      "no_receive": "Aucun destinataire",
+      "add_recipients": "Ajouter un/des destinataires",
+      "delete_all_recipients": "Supprimer tous les destinataires",
+      "view_more_recipients": "Voir les {{number}} destinataires",
+      "view_less_recipients": "Voir moins de destinataires",
+      "no_recipient": "Aucun destinataire",
       "choose_from_the_list": "Choisir dans la liste"
     },
     "admin": {
@@ -55,9 +55,15 @@
             "convocation_delay": "Délai de convocation",
             "reminder_time": "Délai de relance" ,
             "place": "Lieu de la séance",
-            "receives": "Destinataires",
+            "recipients": "Destinataires",
             "procuration": "Utilisateur de procuration",
             "status": "Statut"
+          },
+          "recipient_config": {
+            "firstname": "Prénom",
+            "lastname": "Nom",
+            "phonenumber": "Numéro de téléphone",
+            "email": "Email"
           },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"

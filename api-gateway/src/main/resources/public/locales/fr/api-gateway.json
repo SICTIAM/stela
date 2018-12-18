@@ -221,6 +221,14 @@
         }
       }
     },
+    "convocation": {
+      "admin": {
+          "title": "Admin module Convocation",
+          "recipients": {
+            "recipient_created": "Le destinataire a été créé avec succès."  
+          }
+      }
+    },
     "admin": {
       "title": "Administration",
       "local_authority_not_found": "Collectivité non trouvée",
@@ -351,9 +359,10 @@
       "drop_new_certificate": "Déposer le nouveau certificat"
     },
     "convocation": {
-      "assembly_type": "Type d'assemblée",
+      "assembly_type": "Ajouter un type d'assemblée",
       "assembly_type_list": "Liste des types d'assemblée",
-      "receives": "Destinataire"
+      "recipent": "Ajouter un destinataire",
+      "recipient_list": "Liste des destinataires"
     },
     "modules": {
       "title": "Module",

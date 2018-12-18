@@ -187,6 +187,11 @@ const notifications = {
             title: 'notifications.pes.admin.sesile.invalidTokens',
             level: 'error',
             position: 'br'
+        },
+        recipientCreated: {
+            title: 'notification.convocation.admin.recipients.recipient_created',
+            level: 'succes',
+            position: 'br'
         }
     },
     profile: {

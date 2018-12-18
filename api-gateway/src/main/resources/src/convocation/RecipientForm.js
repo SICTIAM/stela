@@ -6,7 +6,7 @@ import { Button, Modal, Tab } from 'semantic-ui-react'
 
 import StelaTable from '../_components/StelaTable'
 
-class ReceivesForm extends Component {
+class RecipientForm extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
 	}
@@ -62,7 +62,7 @@ class ReceivesForm extends Component {
 	    ]
 	    return (
 	        <Fragment>
-	            <Modal.Header>{t('convocation.new.add_receives')}</Modal.Header>
+	            <Modal.Header>{t('convocation.new.add_recipients')}</Modal.Header>
 	            <Modal.Content>
 	                <Tab panes={panes} />
 	            </Modal.Content>
@@ -81,4 +81,4 @@ class ReceivesForm extends Component {
 	}
 
 }
-export default translate(['convocation', 'api-gateway'])(ReceivesForm)
+export default translate(['convocation', 'api-gateway'])(RecipientForm)

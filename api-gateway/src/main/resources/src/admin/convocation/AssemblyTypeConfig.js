@@ -6,7 +6,7 @@ import Validator from 'validatorjs'
 import debounce from 'debounce'
 
 import InputValidation from '../../_components/InputValidation'
-import ReceivesForm from '../../convocation/ReceivesForm'
+import RecipientForm from '../../convocation/RecipientForm'
 
 import { Page, FormField, ValidationPopup} from '../../_components/UI'
 import ChipsList from '../../_components/ChipsList'
@@ -33,7 +33,7 @@ class AssemblyTypeConfig extends Component {
 	        reminderTime: '0',
 	        procuration: false,
 	        status: false,
-	        receives: []
+	        recipients: []
 	    },
 	    modalOpened: false
 	}
@@ -77,15 +77,15 @@ class AssemblyTypeConfig extends Component {
 	closeModal = () => {
 	    this.setState({modalOpened: false})
 	}
-	addReceives = (selectedUser) => {
+	addRecipient = (selectedUser) => {
 	    const fields = this.state.fields
-	    fields['receives'] = fields['receives'].concat(selectedUser)
+	    fields['recipients'] = fields['recipients'].concat(selectedUser)
 	    this.setState({fields})
 	    this.closeModal()
 	}
-	removeReceives = (index) => {
+	removeRecipientes = (index) => {
 	    const fields = this.state.fields
-	    fields['receives'].splice(index, 1)
+	    fields['recipients'].splice(index, 1)
 	    this.setState({fields})
 	}
 	render () {
@@ -172,27 +172,27 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_receives`}
-	                                label={t('convocation.admin.modules.convocation.assembly_type_config.receives')} required={true}>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
+	                                label={t('convocation.admin.modules.convocation.assembly_type_config.recipients')} required={true}>
 	                                <Modal open={this.state.modalOpened} trigger={<Button
 	                                    	onClick={() => this.setState({modalOpened: true})}
 	                                    	type='button'
-	                                    	id={`${this.state.fields.uuid}_receives`}
-	                                    	compact basic primary>{t('convocation.new.add_receives')}
+	                                    	id={`${this.state.fields.uuid}_recipient`}
+	                                    	compact basic primary>{t('convocation.new.add_recipients')}
 	                                    </Button>}>
-	                                    <ReceivesForm
+	                                    <RecipientForm
 	                                        onCloseModal={this.closeModal}
-	                                        onAdded={(selectedUser) => this.addReceives(selectedUser)}>
-	                                    </ReceivesForm>
+	                                        onAdded={(selectedUser) => this.addRecipient(selectedUser)}>
+	                                    </RecipientForm>
 	                                </Modal>
 	                            </FormField>
 	                            <ChipsList
-	                                list={this.state.fields.receives}
+	                                list={this.state.fields.recipients}
 	                                labelText='email'
 	                                removable={true}
-	                                onRemoveChip={this.removeReceives}
-	                                viewMoreText={t('convocation.new.view_more_receives', {number: this.state.fields.receives.length})}
-	                                viewLessText={t('convocation.new.view_less_receives')}/>
+	                                onRemoveChip={this.removeRecipient}
+	                                viewMoreText={t('convocation.new.view_more_recipients', {number: this.state.fields.recipients.length})}
+	                                viewLessText={t('convocation.new.view_less_recipients')}/>
 	                        </Grid.Column>
 	                    </Grid>
 	                    <div className='footerForm'>

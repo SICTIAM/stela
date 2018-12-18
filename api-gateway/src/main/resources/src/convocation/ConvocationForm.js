@@ -9,7 +9,7 @@ import Validator from 'validatorjs'
 import { Page, FormField, InputTextControlled, InputFile, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import QuestionsForm from './QuestionsForm'
-import ReceivesForm from './ReceivesForm'
+import RecipientForm from './RecipientForm'
 
 class ConvocationForm extends Component {
 	static contextTypes = {
@@ -207,24 +207,24 @@ class ConvocationForm extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='16'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_receives`}
-	                                label={t('convocation.fields.receives')} required={true}>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
+	                                label={t('convocation.fields.recipient')} required={true}>
 	                                <Grid>
 	                                    <Grid.Column computer='8'>
 	                                        <Modal open={this.state.modalOpened} trigger={<Button
 	                                            onClick={() => this.setState({modalOpened: true})}
 	                                            type='button'
-	                                            id={`${this.state.fields.uuid}_receives`}
-	                                            compact basic primary>{t('convocation.new.add_receives')}
+	                                            id={`${this.state.fields.uuid}_recipient`}
+	                                            compact basic primary>{t('convocation.new.add_recipients')}
 	                                        </Button>}>
-	                                            <ReceivesForm onCloseModal={this.closeModal}></ReceivesForm>
+	                                            <RecipientForm onCloseModal={this.closeModal}></RecipientForm>
 	                                        </Modal>
 	                                    </Grid.Column>
 	                                    <Grid.Column computer='8'>
 	                                        <Button
 	                                            type='button'
-	                                            id={`${this.state.fields.uuid}_deleteReceives`}
-	                                            compact basic color='red'>{t('convocation.new.delete_all_receives')}
+	                                            id={`${this.state.fields.uuid}_deleteRecipient`}
+	                                            compact basic color='red'>{t('convocation.new.delete_all_recipients')}
 	                                        </Button>
 	                                    </Grid.Column>
 	                                </Grid>
