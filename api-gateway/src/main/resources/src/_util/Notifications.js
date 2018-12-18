@@ -189,8 +189,8 @@ const notifications = {
             position: 'br'
         },
         recipientCreated: {
-            title: 'notification.convocation.admin.recipients.recipient_created',
-            level: 'succes',
+            title: 'notifications.convocation.admin.recipients.recipient_created',
+            level: 'success',
             position: 'br'
         }
     },

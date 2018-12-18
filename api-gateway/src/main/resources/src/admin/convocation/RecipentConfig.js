@@ -68,8 +68,8 @@ class RecipentConfig extends Component {
 	        _fetchWithAuthzHandling({url: '/api/convocation/recipient/new', method: 'POST', headers: headers, query: parameters, context: this.context})
 	            .then(checkStatus)
 	            .then(() => {
-	                _addNotification(notifications.admin.recipientCreated)
 	                history.push(`/${localAuthoritySlug}/admin/convocation/liste-destinataires`)
+	                _addNotification(notifications.admin.recipientCreated)
 	            })
 	            .catch(response => {
 	                response.json().then((json) => {
@@ -104,7 +104,7 @@ class RecipentConfig extends Component {
 	render () {
 	    const { t } = this.context
 	    const submissionButton =
-			<Button type='submit' primary basic disabled={!this.state.isFormValid } onClick={this.submitForm}>
+			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
 			    {t('api-gateway:form.send')}
 			</Button>
 	    return (
