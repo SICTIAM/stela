@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
+import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.LocalAuthorityService;
@@ -51,9 +52,18 @@ public class RecipientRestController {
     public RecipientRestController() {
     }
 
-    @JsonView(Views.UserLocalAuthorityView.class)
+    @JsonView(Views.Public.class)
     @GetMapping
-    public ResponseEntity<List<Recipient>> getAll(
+    public ResponseEntity<SearchResultsUI> getAll(
+            @RequestParam(value = "multifield", required = false) String multifield,
+            @RequestParam(value = "firstname", required = false) String firstname,
+            @RequestParam(value = "lastname", required = false) String lastname,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "lastname") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
@@ -61,12 +71,17 @@ public class RecipientRestController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<Recipient> recipients = recipientService.findAll(currentLocalAuthUuid);
-        return new ResponseEntity<>(recipients, HttpStatus.OK);
+        List<Recipient> recipients = recipientService.findAllWithQuery(multifield, firstname, lastname, email, active,
+                limit, offset, column, direction, currentLocalAuthUuid);
+
+        Long count = recipientService.countAllWithQuery(multifield, firstname, lastname, email, active,
+                limit, offset, column, direction, currentLocalAuthUuid);
+
+        return new ResponseEntity<>(new SearchResultsUI(count, recipients), HttpStatus.OK);
     }
 
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.UserLocalAuthorityAssemblyTypeView.class)
     @GetMapping("/{uuid}")
     public ResponseEntity<Recipient> getAssemblyType(
             @PathVariable String uuid,

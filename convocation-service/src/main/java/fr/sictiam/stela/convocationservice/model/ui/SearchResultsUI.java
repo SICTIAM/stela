@@ -1,10 +1,16 @@
 package fr.sictiam.stela.convocationservice.model.ui;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class SearchResultsUI {
+
+    @JsonView(Views.Public.class)
     private Long totalCount;
+
+    @JsonView(Views.Public.class)
     private List<?> results;
 
     public SearchResultsUI() {

@@ -1,6 +1,9 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -13,6 +16,7 @@ import javax.persistence.ManyToOne;
 
 import java.util.Set;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "uuid")
 @Entity
 public class Recipient {
 
@@ -37,6 +41,7 @@ public class Recipient {
     @JsonView(Views.UserViewPublic.class)
     private boolean active = true;
 
+    @JsonIgnore
     @JsonView(Views.UserViewPrivate.class)
     private String token;
 
@@ -45,7 +50,7 @@ public class Recipient {
     private LocalAuthority localAuthority;
 
     @JsonView(Views.UserViewPublic.class)
-    @ManyToMany(mappedBy = "recipients")
+    @ManyToMany(mappedBy = "recipients", fetch = FetchType.EAGER)
     private Set<AssemblyType> assemblyTypes;
 
     public Recipient() {

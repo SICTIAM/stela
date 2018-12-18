@@ -57,7 +57,7 @@ public class Views {
 
     }
 
-    public interface UserLocalAuthorityView extends UserViewPublic, LocalAuthorityView {
+    public interface UserLocalAuthorityAssemblyTypeView extends UserViewPublic, LocalAuthorityView, AssemblyTypeViewPublic {
 
     }
 
@@ -78,4 +78,7 @@ public class Views {
 
     }
 
+    public interface Public extends UserViewPublic, LocalAuthorityView, AssemblyTypeViewPublic {
+
+    }
 }
