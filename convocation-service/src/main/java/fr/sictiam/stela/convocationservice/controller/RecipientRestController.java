@@ -71,7 +71,6 @@ public class RecipientRestController {
     public ResponseEntity<Recipient> getAssemblyType(
             @PathVariable String uuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
@@ -93,7 +92,7 @@ public class RecipientRestController {
             @RequestParam("phoneNumber") String phoneNumber) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         firstname = firstname.trim();
@@ -134,18 +133,6 @@ public class RecipientRestController {
         }
 
         recipientService.setActive(uuid, false);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-
-    @GetMapping("/mail")
-    public ResponseEntity<?> sendMail() {
-
-        try {
-            notificationService.sendMail("gerald.gole@gmail.om", "Test", "Body");
-        } catch (Exception e) {
-            LOGGER.error("Error while sending mail : ({}) : {]", e.getClass(), e.getMessage());
-        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

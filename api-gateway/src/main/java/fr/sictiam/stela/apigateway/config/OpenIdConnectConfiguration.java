@@ -12,8 +12,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.util.regex.Pattern;
-
 public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
 
     @Value("${application.urlWithSlug}")
@@ -38,7 +36,7 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
                 && !path.contains("/api/api-gateway/isMainDomain") && !path.contains("/api/admin/ozwillo")
                 && !path.contains("/api/admin/instance") && !path.contains("/api/acte/public")
                 && !path.contains("/editeur/api/") && !path.contains("/api/pes/sesile/signature-hook") && !path.contains("/actuator/")
-                && !Pattern.matches(".*/api/convocation/.*\\?token=\\w+", path) /*!path.contains("/api/convocation")*/)
+                && !path.contains("/api/convocation"))
                 && !path.contains("/ws/") && !path.contains("/externalws/") || path.contains("/index.html");
     }
 

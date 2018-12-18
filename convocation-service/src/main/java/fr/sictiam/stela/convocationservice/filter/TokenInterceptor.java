@@ -1,7 +1,9 @@
 package fr.sictiam.stela.convocationservice.filter;
 
+import com.google.common.collect.Sets;
 import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
 import fr.sictiam.stela.convocationservice.model.Recipient;
+import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.exception.TokenAuthenticationException;
 import fr.sictiam.stela.convocationservice.service.ExternalRestService;
 import org.slf4j.Logger;
@@ -28,8 +30,6 @@ public class TokenInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
 
-        LOGGER.info("TokenInterceptor::preHandle ");
-        request.getParameterMap().forEach((s, strings) -> LOGGER.info("param {} : {}", s, strings));
         String token;
         if ((token = request.getParameter("token")) != null) {
             Optional<Recipient> opt = recipientRepository.findByToken(token);
@@ -37,8 +37,14 @@ public class TokenInterceptor extends HandlerInterceptorAdapter {
                 LOGGER.error("No user found with token {}", token);
                 throw new TokenAuthenticationException();
             }
+
+            // Set attributes
+            Recipient recipient = opt.get();
+            request.setAttribute("STELA-Current-Local-Authority-UUID", recipient.getLocalAuthority().getUuid());
+            request.setAttribute("STELA-Current-Profile-Rights", Sets.newHashSet(Right.CONVOCATION_DISPLAY));
+            request.setAttribute("STELA-Current-Recipient", recipient);
         }
-        //request.setAttribute("STELA-Local-Authority", localAuthority);
+
         return true;
     }
 }
