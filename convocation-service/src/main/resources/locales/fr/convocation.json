@@ -68,6 +68,11 @@
             "status": "Statut",
             "edit": "Editer"
           },
+          "recipient_list": {
+            "active": "Actif",
+            "inactive": "Inactif",
+            "active_inactive": "Actif/Inactif"
+          },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"
           }

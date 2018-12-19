@@ -23,7 +23,10 @@ class RecipientsList extends Component {
 	    recipients:[],
 	    search: {
 	        multifield: '',
-	        fisrname: ''
+	        fistname: '',
+	        lastname: '',
+	        email: '',
+	        active: ''
 	    },
 	    column: '',
 	    direction: '',
@@ -109,6 +112,8 @@ class RecipientsList extends Component {
 	    console.log('BLABLA')
 	}
 	handleFieldChange = (field, value) => {
+	    console.log('jkljk')
+	    console.log(value)
 	    const search = this.state.search
 	    search[field] = value
 	    this.setState({ search: search })
@@ -133,7 +138,7 @@ class RecipientsList extends Component {
 	render() {
 	    const { t } = this.context
 	    const { search } = this.state
-	    const statusDisplay = (active) => active ? 'Actif' : 'Inactif'
+	    const statusDisplay = (active) => active ? t('convocation.admin.modules.convocation.recipient_list.active') : t('convocation.admin.modules.convocation.recipient_list.inactive')
 	    const assemblyTypes = (assemblyTypes) => assemblyTypes.length > 2 ? <span>{assemblyTypes.slice(2, assemblyTypes.length -1).join(', ')} Voir Tout <Icon name='arrow right'/></span> : assemblyTypes.join(', ')
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
@@ -183,6 +188,13 @@ class RecipientsList extends Component {
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='email' label={t('convocation.admin.modules.convocation.recipient_config.email')} >
 	                            <input id='email' aria-label={t('convocation.admin.modules.convocation.recipient_config.email')} value={search.email} onChange={e => this.handleFieldChange('email', e.target.value)} />
+	                        </FormFieldInline>
+	                        <FormFieldInline htmlFor='active' label={t('convocation.admin.modules.convocation.recipient_config.status')}>
+	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => this.handleFieldChange('active', e.target.value)}>
+	                                <option value=''>{t('convocation.admin.modules.convocation.recipient_list.active_inactive')}</option>
+	                                <option value={true}>{t('convocation.admin.modules.convocation.recipient_list.active')}</option>
+	                                <option value={false}>{t('convocation.admin.modules.convocation.recipient_list.inactive')}</option>
+	                            </select>
 	                        </FormFieldInline>
 	                        <div style={{ textAlign: 'right' }}>
 	                            <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>
