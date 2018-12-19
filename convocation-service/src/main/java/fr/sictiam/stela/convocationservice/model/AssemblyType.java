@@ -1,16 +1,28 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.Set;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "uuid")
 @Entity
 public class AssemblyType {
 
@@ -22,12 +34,6 @@ public class AssemblyType {
 
     @JsonView(Views.AssemblyTypeViewPublic.class)
     private String name;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "profile_uuids", joinColumns = @JoinColumn(name = "assembly_type_uuid"))
-    @Column(name = "profile_uuid")
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    private Set<String> profileUuids;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "assembly_type_recipient",
@@ -51,21 +57,25 @@ public class AssemblyType {
     @JsonView(Views.AssemblyTypeViewPublic.class)
     private boolean active;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    @Transient
-    private Map<String, JsonNode> profiles;
+    @JsonView(Views.UserViewPublic.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    LocalDateTime inactivityDate;
 
-    public AssemblyType(String name, Set<String> profileUuids, Set<Recipient> recipients,
-            LocalAuthority localAuthority) {
-        this.name = name;
-        this.profileUuids = profileUuids;
-        this.recipients = recipients;
-        this.localAuthority = localAuthority;
-    }
+    @JsonView(Views.AssemblyTypeViewPublic.class)
+    private String profileUuid;
 
     @ManyToOne
     @JsonView(Views.AssemblyTypeViewPrivate.class)
     private LocalAuthority localAuthority;
+
+    public AssemblyType(String name, Set<Recipient> recipients,
+            LocalAuthority localAuthority) {
+        this.name = name;
+        this.recipients = recipients;
+        this.localAuthority = localAuthority;
+    }
+
 
     public AssemblyType() {
     }
@@ -80,14 +90,6 @@ public class AssemblyType {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<String> getProfileUuids() {
-        return profileUuids;
-    }
-
-    public void setProfileUuids(Set<String> profileUuids) {
-        this.profileUuids = profileUuids;
     }
 
     public Set<Recipient> getRecipients() {
@@ -146,26 +148,19 @@ public class AssemblyType {
         this.active = active;
     }
 
-    public Map<String, JsonNode> getProfiles() {
-        return profiles;
+    public LocalDateTime getInactivityDate() {
+        return inactivityDate;
     }
 
-    public void setProfiles(Map<String, JsonNode> profiles) {
-        this.profiles = profiles;
+    public void setInactivityDate(LocalDateTime inactivityDate) {
+        this.inactivityDate = inactivityDate;
     }
 
-    public void addProfile(String uuid, JsonNode profile) {
-        if (profiles == null)
-            profiles = new HashMap<>();
-
-        profiles.put(uuid, profile);
+    public String getProfileUuid() {
+        return profileUuid;
     }
 
-    public interface Light {
-
-        public String getUuid();
-
-        public String getName();
-
+    public void setProfileUuid(String profileUuid) {
+        this.profileUuid = profileUuid;
     }
 }

@@ -102,22 +102,13 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestParam("firstname") String firstname,
-            @RequestParam("lastname") String lastname,
-            @RequestParam("email") String email,
-            @RequestParam("phoneNumber") String phoneNumber) {
+            @RequestBody Recipient recipient) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        firstname = firstname.trim();
-        lastname = lastname.trim();
-        email = email.trim();
-        phoneNumber = phoneNumber.trim();
-
-        Recipient recipient = recipientService.createFrom(firstname, lastname, email, phoneNumber,
-                currentLocalAuthUuid);
+        recipient = recipientService.create(recipient, currentLocalAuthUuid);
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }
 
@@ -137,36 +128,6 @@ public class RecipientRestController {
         Recipient recipient = recipientService.update(uuid, recipientParams);
 
         return new ResponseEntity<>(recipient, HttpStatus.OK);
-    }
-
-    @PutMapping("/{uuid}/active")
-    public ResponseEntity<?> setActive(
-            @PathVariable String uuid,
-            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
-        recipientService.setActive(uuid, true);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PutMapping("/{uuid}/inactive")
-    public ResponseEntity<?> setInactive(
-            @PathVariable String uuid,
-            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
-        recipientService.setActive(uuid, false);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private String getContentType(String filename) {

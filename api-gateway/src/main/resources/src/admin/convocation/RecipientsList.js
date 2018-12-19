@@ -130,9 +130,13 @@ class RecipientsList extends Component {
 	}
 	handleFieldCheckboxChange = (row) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
-	    const url = !row.active ? `/api/convocation/recipient/${row.uuid}/active` : `/api/convocation/recipient/${row.uuid}/inactive`
+		const url = !row.active ? `/api/convocation/recipient/${row.uuid}` : `/api/convocation/recipient/${row.uuid}`
+		const body = {
+			active: !row.active ? true : false
+		}
+		const headers = { 'Content-Type': 'application/json' }
 
-	    _fetchWithAuthzHandling({url: url, method: 'PUT', context: this.context})
+	    _fetchWithAuthzHandling({url: url, method: 'PUT', headers: headers, body: JSON.stringify(body), context: this.context})
 	        .then(checkStatus)
 	        .then(response => {
 	            _addNotification(notifications.admin.statusUpdated)

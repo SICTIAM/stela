@@ -16,6 +16,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -39,27 +40,25 @@ public class RecipientService {
     private EntityManager entityManager;
 
     @Autowired
-    RecipientRepository recipientRepository;
+    private RecipientRepository recipientRepository;
 
     @Autowired
-    ExternalRestService externalRestService;
-
-    @Autowired
-    LocalAuthorityService localAuthorityService;
+    private LocalAuthorityService localAuthorityService;
 
 
-    public Recipient createFrom(String firstname, String lastname, String email,
-            String phoneNumber, String localAuthorityUuid) {
+    public Recipient create(Recipient recipient, String localAuthorityUuid) {
 
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
 
-        Optional<Recipient> exist = recipientRepository.findByEmailAndLocalAuthorityUuid(email, localAuthorityUuid);
+        Optional<Recipient> exist = recipientRepository.findByEmailAndLocalAuthorityUuid(recipient.getEmail(),
+                localAuthorityUuid);
         if (exist.isPresent()) {
-            LOGGER.error("A recipient with email {} already exists in local authority {}", email, localAuthority.getName());
+            LOGGER.error("A recipient with email {} already exists in local authority {}", recipient.getEmail(), localAuthority.getName());
             throw new RecipientExistsException();
         }
 
-        Recipient recipient = new Recipient(firstname, lastname, email, phoneNumber, localAuthority);
+        recipient.setLocalAuthority(localAuthority);
+        recipient.setActive(true);
         recipient.setToken(generateToken(recipient));
         recipient.setAssemblyTypes(new HashSet<>());
         return save(recipient);
@@ -86,6 +85,11 @@ public class RecipientService {
         if (StringUtils.isNotEmpty(recipientParams.getPhoneNumber()))
             recipient.setPhoneNumber(recipientParams.getPhoneNumber().trim());
 
+        if (recipientParams.isActive() != null) {
+            recipient.setInactivityDate(recipientParams.isActive() ? null : LocalDateTime.now());
+            recipient.setActive(recipientParams.isActive());
+        }
+
         return save(recipient);
     }
 
@@ -97,13 +101,6 @@ public class RecipientService {
     public Recipient save(Recipient recipient) {
 
         return recipientRepository.saveAndFlush(recipient);
-    }
-
-    public void setActive(String uuid, boolean active) {
-        Recipient recipient = getRecipient(uuid);
-        recipient.setActive(active);
-        recipient.setInactivityDate(active ? null : LocalDateTime.now());
-        save(recipient);
     }
 
     public Long countAllWithQuery(String multifield, String firstname, String lastname, String email,
@@ -135,10 +132,18 @@ public class RecipientService {
         List<Predicate> predicates = getQueryPredicates(builder, recipientRoot, multifield, firstname, lastname,
                 email, active, currentLocalAuthUuid);
 
+        List<Order> orders = new ArrayList<>();
+
+        if (!columnAttribute.equals("active")) {
+            orders.add(builder.desc(recipientRoot.get("active")));
+        }
+        orders.add(!StringUtils.isEmpty(direction) && direction.equals("ASC")
+                ? (columnAttribute.equals("active") ? builder.desc(recipientRoot.get(columnAttribute)) :
+                builder.asc(recipientRoot.get(columnAttribute)))
+                : (columnAttribute.equals("active") ? builder.asc(recipientRoot.get(columnAttribute)) :
+                builder.desc(recipientRoot.get(columnAttribute))));
         query.where(predicates.toArray(new Predicate[predicates.size()]))
-                .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
-                        ? builder.asc(recipientRoot.get(columnAttribute))
-                        : builder.desc(recipientRoot.get(columnAttribute)));
+                .orderBy(orders);
 
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }

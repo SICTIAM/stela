@@ -21,7 +21,9 @@ CREATE TABLE assembly_type (
     reminder_delay int NOT NULL DEFAULT 0,
     location character varying(512),
     active boolean,
-    use_procuration boolean
+    use_procuration boolean,
+    inactivity_date timestamp without time zone,
+    profileUuid character varying(255)
 );
 
 
@@ -163,16 +165,6 @@ CREATE TABLE local_authority (
 
 CREATE TABLE observer_profile_uuids (
     convocation_uuid character varying(255) NOT NULL,
-    profile_uuid character varying(255)
-);
-
-
---
--- Name: profile_uuids; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE profile_uuids (
-    assembly_type_uuid character varying(255) NOT NULL,
     profile_uuid character varying(255)
 );
 
@@ -456,14 +448,6 @@ ALTER TABLE ONLY convocation_external_observer
 
 ALTER TABLE ONLY convocation
     ADD CONSTRAINT fkk45anwhkdihwuqvm4nrsawy11 FOREIGN KEY (attachment_uuid) REFERENCES attachment(uuid);
-
-
---
--- Name: profile_uuids fkkewx12yb3uxed95p5fqilg11c; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY profile_uuids
-    ADD CONSTRAINT fkkewx12yb3uxed95p5fqilg11c FOREIGN KEY (assembly_type_uuid) REFERENCES assembly_type(uuid);
 
 
 --

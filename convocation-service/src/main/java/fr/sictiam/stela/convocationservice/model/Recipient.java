@@ -44,14 +44,14 @@ public class Recipient {
     private String phoneNumber;
 
     @JsonView(Views.UserViewPublic.class)
-    private boolean active = true;
+    private Boolean active;
 
     @JsonIgnore
     @JsonView(Views.UserViewPrivate.class)
     private String token;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.UserViewPrivate.class)
     private LocalAuthority localAuthority;
 
     @JsonView(Views.UserViewPublic.class)
@@ -127,11 +127,11 @@ public class Recipient {
         this.localAuthority = localAuthority;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 

@@ -1,8 +1,11 @@
 package fr.sictiam.stela.convocationservice.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.Right;
+import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.AssemblyTypeService;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URLConnection;
@@ -39,17 +43,29 @@ public class AssemblyTypeRestController {
     public AssemblyTypeRestController() {
     }
 
+    @JsonView(Views.Public.class)
     @GetMapping
-    public ResponseEntity<List<AssemblyType.Light>> getAll(
+    public ResponseEntity<SearchResultsUI> getAll(
+            @RequestParam(value = "multifield", required = false) String multifield,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "name") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "ASC") String direction,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<AssemblyType.Light> assemblyTypes = assemblyTypeService.findAllSimple(currentLocalAuthUuid);
-        return new ResponseEntity<>(assemblyTypes, HttpStatus.OK);
+        List<AssemblyType> recipients = assemblyTypeService.findAllWithQuery(multifield, name, active,
+                limit, offset, column, direction, currentLocalAuthUuid);
+
+        Long count = assemblyTypeService.countAllWithQuery(multifield, name, active, currentLocalAuthUuid);
+
+        return new ResponseEntity<>(new SearchResultsUI(count, recipients), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
@@ -59,9 +75,9 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(assemblyTypeService.getAssembly(uuid), HttpStatus.OK);
+        return new ResponseEntity<>(assemblyTypeService.getAssemblyType(uuid), HttpStatus.OK);
     }
 
 

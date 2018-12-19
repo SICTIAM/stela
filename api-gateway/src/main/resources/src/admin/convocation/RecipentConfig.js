@@ -82,33 +82,19 @@ class RecipentConfig extends Component {
 	    delete parameters.assemblyTypes
 	    delete parameters.inactivityDate
 
-	    if(this.state.fields.uuid) {
-	        const headers = { 'Content-Type': 'application/json' }
-	        _fetchWithAuthzHandling({url: `/api/convocation/recipient/${this.state.fields.uuid}`, method: 'PUT', headers: headers, body: JSON.stringify(parameters), context: this.context})
-	            .then(checkStatus)
-	            .then(() => {
-	                history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
-	                _addNotification(notifications.admin.recipientUpdated)
-	            })
-	            .catch(response => {
-	                response.json().then((json) => {
-	                    _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
-	                })
-	            })
-	    } else {
-	        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
-	        _fetchWithAuthzHandling({url: '/api/convocation/recipient', method: 'POST', headers: headers, query: parameters, context: this.context})
-	            .then(checkStatus)
-	            .then(() => {
-	                history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
-	                _addNotification(notifications.admin.recipientCreated)
-	            })
-	            .catch(response => {
-	                response.json().then((json) => {
-	                    _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
-	                })
-	            })
-	    }
+
+		const headers = { 'Content-Type': 'application/json' }
+		_fetchWithAuthzHandling({url: `/api/convocation/recipient` + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.context})
+			.then(checkStatus)
+			.then(() => {
+				history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
+				_addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+			})
+			.catch(response => {
+				response.json().then((json) => {
+					_addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
+				})
+			})
 	}
 	cancel = () => {
 	    history.goBack()
