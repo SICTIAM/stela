@@ -62,7 +62,31 @@ public class RecipientService {
         Recipient recipient = new Recipient(firstname, lastname, email, phoneNumber, localAuthority);
         recipient.setToken(generateToken(recipient));
         recipient.setAssemblyTypes(new HashSet<>());
-        return recipient;
+        return save(recipient);
+    }
+
+    public Recipient update(String uuid, Recipient recipientParams) {
+
+        Recipient recipient = getRecipient(uuid);
+
+        if (StringUtils.isNotEmpty(recipientParams.getFirstname()))
+            recipient.setFirstname(recipientParams.getFirstname().trim());
+
+        if (StringUtils.isNotEmpty(recipientParams.getLastname()))
+            recipient.setLastname(recipientParams.getLastname().trim());
+
+        if (StringUtils.isNotEmpty(recipientParams.getEmail())) {
+            if (recipientRepository.recipientExists(uuid, recipient.getLocalAuthority().getUuid(),
+                    recipientParams.getEmail()) > 0) {
+                LOGGER.error("A recipient with email {} already exists in local authority {}", recipientParams.getEmail(), recipient.getLocalAuthority().getName());
+                throw new RecipientExistsException();
+            }
+            recipient.setEmail(recipientParams.getEmail().trim());
+        }
+        if (StringUtils.isNotEmpty(recipientParams.getPhoneNumber()))
+            recipient.setPhoneNumber(recipientParams.getPhoneNumber().trim());
+
+        return save(recipient);
     }
 
     public Recipient getRecipient(String uuid) {

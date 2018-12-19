@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -96,7 +97,7 @@ public class RecipientRestController {
 
 
     @JsonView(Views.UserViewPublic.class)
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<Recipient> create(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
@@ -117,7 +118,24 @@ public class RecipientRestController {
 
         Recipient recipient = recipientService.createFrom(firstname, lastname, email, phoneNumber,
                 currentLocalAuthUuid);
-        recipient = recipientService.save(recipient);
+        return new ResponseEntity<>(recipient, HttpStatus.OK);
+    }
+
+    @JsonView(Views.UserViewPublic.class)
+    @PutMapping("/{uuid}")
+    public ResponseEntity<Recipient> update(
+            @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestBody Recipient recipientParams) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Recipient recipient = recipientService.update(uuid, recipientParams);
+
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }
 
