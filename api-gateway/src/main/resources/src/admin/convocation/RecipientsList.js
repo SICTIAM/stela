@@ -8,7 +8,8 @@ import AdvancedSearch from '../../_components/AdvancedSearch'
 import { Page, FormFieldInline } from '../../_components/UI'
 import Pagination from '../../_components/Pagination'
 import QuickView from '../../_components/QuickView'
-import { checkStatus } from '../../_util/utils'
+import history from '../../_util/history'
+import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import { notifications } from '../../_util/Notifications'
 
 class RecipientsList extends Component {
@@ -96,7 +97,15 @@ class RecipientsList extends Component {
 	        headerContent: row.firstname + ' ' + row.lastname,
 	        action:
 			<div>
-			    <Checkbox toggle className='mr-20' checked={this.state.quickViewActive} onChange={e => this.handleFieldCheckboxChange(row)}/>
+			    <label htmlFor='status'>
+			        {row.active && (
+			            <span style={{verticalAlign: 'super', marginRight: '5px', fontStyle: 'italic'}}>{t('convocation.admin.modules.convocation.recipient_list.deactivate')}</span>
+			        )}
+			        {!row.active && (
+			            <span style={{verticalAlign: 'super', marginRight: '5px', fontStyle: 'italic'}}>{t('convocation.admin.modules.convocation.recipient_list.activate')}</span>
+			        )}
+			    	<Checkbox id='status' toggle className='mr-20' checked={row.active} onChange={e => this.handleFieldCheckboxChange(row)}/>
+			    </label>
 			    <Button type="button" basic primary onClick={() => this.onEditRecipient(row)}>
 			        {t('convocation.admin.modules.convocation.recipient_config.edit')}
 			    </Button>
@@ -109,7 +118,8 @@ class RecipientsList extends Component {
 	    }
 	}
 	onEditRecipient = (recipient) => {
-	    console.log('BLABLA')
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires/${recipient.uuid}`)
 	}
 	handleFieldChange = (field, value) => {
 	    console.log('jkljk')

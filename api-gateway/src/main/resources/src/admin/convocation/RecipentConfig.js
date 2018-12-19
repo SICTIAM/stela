@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
-import { Segment, Button, Form, Grid } from 'semantic-ui-react'
+import moment from 'moment'
+import { Segment, Button, Form, Grid, Message } from 'semantic-ui-react'
 
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
@@ -35,11 +36,30 @@ class RecipentConfig extends Component {
 	        lastname: '',
 	        email: '',
 	        phoneNumber: '',
-	        active: true
+	        active: true,
+	        assemblyTypes: [],
+	        inactivityDate: null
 	    }
 	}
 	componentDidMount() {
+	    const { _fetchWithAuthzHandling } = this.context
 	    this.validateForm()
+	    const uuid = this.props.uuid
+	    if(uuid !== '') {
+	        _fetchWithAuthzHandling({ url: '/api/convocation/recipient/' + uuid })
+	            .then(checkStatus)
+	            .then(response => response.json())
+	            .then(json => {
+	                const fields = this.state.fields
+	                Object.keys(fields).forEach(function (key) {
+	                    fields[key] = json[key]
+	                })
+	                this.setState({fields})
+	            })
+	            .catch(response => {
+	                //TO DO ERROR
+	            })
+	    }
 	}
 	extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
 	handleFieldChange = (field, value, callback) => {
@@ -55,20 +75,32 @@ class RecipentConfig extends Component {
 	submitForm = () => {
 	    const { t, _fetchWithAuthzHandling, _addNotification } = this.context
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const parameters = Object.assign({}, this.state.fields)
+	    delete parameters.uuid
+	    delete parameters.active
+	    delete parameters.uuid
+	    delete parameters.assemblyTypes
+	    delete parameters.inactivityDate
 
 	    if(this.state.fields.uuid) {
-
-	    } else {
-	        const parameters = Object.assign({}, this.state.fields)
-	        delete parameters.uuid
-	        delete parameters.active
-	        delete parameters.uuid
-	        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
-
-	        _fetchWithAuthzHandling({url: '/api/convocation/recipient/new', method: 'POST', headers: headers, query: parameters, context: this.context})
+	        const headers = { 'Content-Type': 'application/json' }
+	        _fetchWithAuthzHandling({url: `/api/convocation/recipient/${this.state.fields.uuid}`, method: 'PUT', headers: headers, body: JSON.stringify(parameters), context: this.context})
 	            .then(checkStatus)
 	            .then(() => {
-	                history.push(`/${localAuthoritySlug}/admin/convocation/liste-destinataires`)
+	                history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
+	                _addNotification(notifications.admin.recipientUpdated)
+	            })
+	            .catch(response => {
+	                response.json().then((json) => {
+	                    _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
+	                })
+	            })
+	    } else {
+	        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+	        _fetchWithAuthzHandling({url: '/api/convocation/recipient', method: 'POST', headers: headers, query: parameters, context: this.context})
+	            .then(checkStatus)
+	            .then(() => {
+	                history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
 	                _addNotification(notifications.admin.recipientCreated)
 	            })
 	            .catch(response => {
@@ -77,6 +109,9 @@ class RecipentConfig extends Component {
 	                })
 	            })
 	    }
+	}
+	cancel = () => {
+	    history.goBack()
 	}
 	validateForm = debounce(() => {
 	    const { t } = this.context
@@ -109,6 +144,12 @@ class RecipentConfig extends Component {
 			</Button>
 	    return (
 	        <Page>
+	            {!this.state.fields.active && (
+	                <Message warning>
+	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.admin.modules.convocation.recipient_config.inactive_recipient_title')}</Message.Header>
+	                    <p>{t('convocation.admin.modules.convocation.recipient_config.inactive_recipient_content', {date: moment(this.state.fields.inactivityDate).format('DD/MM/YYYY')})}</p>
+	                </Message>
+	            )}
 	            <Segment>
 	                <Form onSubmit={this.submitForm}>
 	                    <Grid>
@@ -170,10 +211,11 @@ class RecipentConfig extends Component {
 	                        </Grid.Column>
 	                    </Grid>
 	                    <div className='footerForm'>
-	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} basic color='red'>
-	                            {t('api-gateway:form.cancel')}
-	                        </Button>
-
+	                        {this.state.fields.uuid && (
+	                            <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.cancel(e)} basic color='red'>
+	                                {t('api-gateway:form.cancel')}
+	                            </Button>
+	                        )}
 	                        {this.state.formErrors.length > 0 &&
 								<ValidationPopup errorList={this.state.formErrors}>
 								    {submissionButton}

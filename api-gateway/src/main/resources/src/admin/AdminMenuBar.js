@@ -55,10 +55,10 @@ class AdminMenuBar extends Component {
                         </Menu.Header>
                         <Menu.Menu>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/parametrage-module`}>{t('admin.parameters')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee`}>{t('admin.convocation.assembly_type')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/liste-type-assemblee`}>{t('admin.convocation.assembly_type_list')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/destinataire`}>{t('admin.convocation.recipent')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/liste-destinataires`}>{t('admin.convocation.recipient_list')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee/nouveau`}>{t('admin.convocation.assembly_type')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`}>{t('admin.convocation.assembly_type_list')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/destinataire/nouveau`}>{t('admin.convocation.recipent')}</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`}>{t('admin.convocation.recipient_list')}</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
                 </div>

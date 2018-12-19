@@ -66,12 +66,16 @@
             "phonenumber": "Numéro de téléphone",
             "email": "Email",
             "status": "Statut",
-            "edit": "Editer"
+            "edit": "Editer",
+            "inactive_recipient_title": "Destinataire inactif",
+            "inactive_recipient_content": "Le destinataire est inactif depuis le: {{date}}."
           },
           "recipient_list": {
             "active": "Actif",
             "inactive": "Inactif",
-            "active_inactive": "Actif/Inactif"
+            "active_inactive": "Actif/Inactif",
+            "activate": "Activer",
+            "deactivate": "Désactiver"
           },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"

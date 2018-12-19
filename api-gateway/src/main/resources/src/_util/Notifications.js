@@ -193,6 +193,11 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        recipientUpdated: {
+            title: 'notifications.convocation.admin.recipients.recipient_updated',
+            level: 'success',
+            position: 'br'
+        },
         statusUpdated: {
             title: 'notifications.convocation.admin.recipients.status_updated',
             level: 'success',
