@@ -1,4 +1,4 @@
-package fr.sictiam.stela.adminservice;
+package fr.sictiam.stela.admin;
 
 import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.configuration.ProjectName;

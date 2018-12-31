@@ -44,6 +44,10 @@ subprojects {
         maven {
             url 'https://ec.europa.eu/cefdigital/artifact/content/groups/public'
         }
+        maven {
+            // jitpack is used for publications of the ozwillo-java-spring-integration lib
+            url 'https://jitpack.io' 
+        }
     }
 
     dependencies {

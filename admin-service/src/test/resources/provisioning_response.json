@@ -1,0 +1,21 @@
+{
+  "instance_id" : "instance-id",
+  "destruction_uri" : "http://localhost/api/admin/ozwillo/delete",
+  "status_changed_uri" : "http://localhost/api/admin/ozwillo/status",
+  "services" : [ {
+    "local_id" : "back-office",
+    "name" : "null - Valbonne sur mer",
+    "description" : null,
+    "tos_uri" : null,
+    "policy_uri" : null,
+    "icon" : null,
+    "contacts" : null,
+    "payment_option" : "PAID",
+    "target_audience" : [ "PUBLIC_BODIES" ],
+    "visibility" : "NEVER_VISIBLE",
+    "access_control" : "ALWAYS_RESTRICTED",
+    "service_uri" : "http://localhost/login?instance_id=instance-id",
+    "redirect_uris" : [ "http://localhost/callback?instance_id=instance-id" ],
+    "post_logout_redirect_uris" : [ "http://services.sictiam.fr" ]
+  } ]
+}

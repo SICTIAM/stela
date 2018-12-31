@@ -34,7 +34,9 @@ dependencies {
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.34.0')
+    testCompile('com.github.tomakehurst:wiremock-standalone:2.20.0')
 }
+
 sourceSets {
     main {
         java {
@@ -44,8 +46,9 @@ sourceSets {
 }
 
 test {
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
     useJUnit {
-        excludeCategories 'fr.sictiam.stela.adminservice.IntegrationTest'
+        excludeCategories 'fr.sictiam.stela.admin.IntegrationTest'
     }
 }
 
@@ -53,6 +56,6 @@ task integrationTest(type: Test) {
     environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
 
     useJUnit {
-        includeCategories 'fr.sictiam.stela.adminservice.IntegrationTest'
+        includeCategories 'fr.sictiam.stela.admin.IntegrationTest'
     }
 }

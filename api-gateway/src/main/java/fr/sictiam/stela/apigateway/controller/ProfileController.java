@@ -33,8 +33,8 @@ public class ProfileController {
     @Value("${application.url}")
     String applicationUrl;
 
-    @Value("${application.ozwilloPortalUrl}")
-    String ozwilloPortalUrl;
+    @Value("${application.portalUrl}")
+    String portalUrl;
 
     @Autowired
     DiscoveryUtils discoveryUtils;
@@ -56,7 +56,7 @@ public class ProfileController {
 
     @GetMapping("/ozwillo-portal/my/profile")
     public void redirectOzwilloProfile(HttpServletResponse response) throws IOException {
-        response.sendRedirect(ozwilloPortalUrl + "my/profile");
+        response.sendRedirect(portalUrl + "my/profile");
     }
 
     @GetMapping("/profile/all-notifications")

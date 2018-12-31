@@ -1,6 +1,5 @@
-package fr.sictiam.stela.adminservice;
+package fr.sictiam.stela.admin;
 
-import fr.sictiam.stela.admin.AdminServiceApplication;
 import fr.sictiam.stela.admin.dao.AgentRepository;
 import fr.sictiam.stela.admin.dao.CertificateRepository;
 import fr.sictiam.stela.admin.model.Agent;
