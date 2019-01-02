@@ -86,7 +86,7 @@ subprojects {
 
             def gitDetails = versionDetails()
             registry = 'forge-registry.sictiam.fr/internet'
-            push = false
+            push = project.hasProperty('push')
 
             tagVersion = project.hasProperty("env") ? project.getProperty("env") + "-" + gitDetails.gitHashFull : gitDetails.gitHashFull
 
