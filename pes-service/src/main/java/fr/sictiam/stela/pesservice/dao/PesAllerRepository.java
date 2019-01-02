@@ -20,4 +20,6 @@ public interface PesAllerRepository extends JpaRepository<PesAller, String> {
 
     List<PesAller> findAllByLocalAuthority_UuidAndLastHistoryStatusAndLastHistoryDateGreaterThan(
             String localAuthorityUuid, StatusType status, LocalDateTime date);
+
+    Long countByLastHistoryStatus(StatusType statusType);
 }

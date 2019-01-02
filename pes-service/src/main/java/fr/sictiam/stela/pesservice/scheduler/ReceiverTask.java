@@ -1,9 +1,10 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
-import com.netflix.discovery.converters.Auto;
+import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.*;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.NotificationService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
@@ -13,6 +14,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
 import org.springframework.integration.ftp.session.FtpSession;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +24,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.mail.MessagingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -48,6 +51,9 @@ public class ReceiverTask {
     private PesRetourRepository pesRetourRepository;
 
     @Autowired
+    private PesAllerRepository pesAllerRepository;
+
+    @Autowired
     private LocalAuthorityService localAuthorityService;
 
     @Autowired
@@ -55,6 +61,21 @@ public class ReceiverTask {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Value("${application.receiverTask.hoursWithoutNewFiles}")
+    private int hoursWithoutNewFiles;
+
+    @Value("${application.receiverTask.maxWaitingPes}")
+    private int maxWaitingPes;
+
+    @Value("${application.receiverTask.alertEmail}")
+    private String alertEmail;
+
+    private Long runsWithoutNewFiles = 0L;
+    private boolean alertSent = false;
 
     @Scheduled(fixedRate = 60000)
     public void receive() throws IOException {
@@ -64,6 +85,24 @@ public class ReceiverTask {
 
         FTPFile[] files = ftpClient.listFiles();
         LOGGER.info("{} files found on FTP server", files.length);
+
+        if (files.length == 2)
+            runsWithoutNewFiles++;
+
+        if (runsWithoutNewFiles > 60 * hoursWithoutNewFiles
+                && pesAllerRepository.countByLastHistoryStatus(StatusType.SENT) > maxWaitingPes
+                && !alertSent) {
+            LOGGER.warn("No new AR since 4 hours and more than 20 PES files waiting");
+            try {
+                notificationService.sendMail(Collections.singletonList(alertEmail).toArray(new String[0]),
+                        "Alerte - Problème potentiel de récupération des ARs PES",
+                        "Pas de nouvel AR récupéré depuis plus de 4 heures et plus de 20 PES en attente");
+                alertSent = true;
+            } catch (MessagingException e) {
+                LOGGER.error("Unable to send email alert for ARs retrieval", e);
+            }
+        }
+
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
                 String fileName = ftpFile.getName();
@@ -91,6 +130,8 @@ public class ReceiverTask {
                 }
             }
         }
+
+        ftpSession.close();
     }
 
     public void readACK(byte[] targetArray, String ackName)
