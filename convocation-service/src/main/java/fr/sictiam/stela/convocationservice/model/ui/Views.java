@@ -33,7 +33,7 @@ public class Views {
 
     }
 
-    public interface AssemblyTypeViewPublic {
+    public interface AssemblyTypeViewPublic extends LocalAuthorityViewPublic, UserViewPublic {
 
     }
 
@@ -41,7 +41,11 @@ public class Views {
 
     }
 
-    public interface LocalAuthorityView {
+    public interface LocalAuthorityViewPublic {
+
+    }
+
+    public interface LocalAuthorityView extends LocalAuthorityViewPublic {
 
     }
 
@@ -78,7 +82,34 @@ public class Views {
 
     }
 
-    public interface Public extends UserViewPublic, LocalAuthorityView, AssemblyTypeViewPublic {
-
+    public interface Public {
     }
+
+    public interface Search extends Public {
+    }
+
+    public interface SearchRecipient extends Search, RecipientInternal {
+    }
+
+    public interface SearchAssemblyType extends Search, AssemblyTypeInternal {
+    }
+
+    public interface Recipient extends Public {
+    }
+
+    public interface RecipientInternal extends Recipient {
+    }
+
+    public interface RecipientPrivate extends RecipientInternal {
+    }
+
+    public interface AssemblyType extends Public {
+    }
+
+    public interface AssemblyTypeInternal extends AssemblyType {
+    }
+
+    public interface LocalAuthority extends Public {
+    }
+
 }

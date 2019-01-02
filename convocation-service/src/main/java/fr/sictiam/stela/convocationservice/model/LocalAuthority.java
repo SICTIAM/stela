@@ -10,22 +10,22 @@ import javax.persistence.Id;
 public class LocalAuthority {
 
     @Id
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.Public.class)
     private String uuid;
 
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.Public.class)
     private String name;
 
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.Public.class)
     private String slugName;
 
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.LocalAuthority.class)
     private String siren;
 
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.LocalAuthority.class)
     private Boolean active;
 
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.LocalAuthority.class)
     private Long residentNumber;
 
     public LocalAuthority() {

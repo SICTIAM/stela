@@ -53,7 +53,7 @@ public class RecipientRestController {
     public RecipientRestController() {
     }
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.SearchRecipient.class)
     @GetMapping
     public ResponseEntity<SearchResultsUI> getAll(
             @RequestParam(value = "multifield", required = false) String multifield,
@@ -82,9 +82,9 @@ public class RecipientRestController {
     }
 
 
-    @JsonView(Views.UserLocalAuthorityAssemblyTypeView.class)
+    @JsonView(Views.RecipientInternal.class)
     @GetMapping("/{uuid}")
-    public ResponseEntity<Recipient> getAssemblyType(
+    public ResponseEntity<Recipient> get(
             @PathVariable String uuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
@@ -92,11 +92,11 @@ public class RecipientRestController {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(recipientService.getRecipient(uuid), HttpStatus.OK);
+        return new ResponseEntity<>(recipientService.getRecipient(uuid, currentLocalAuthUuid), HttpStatus.OK);
     }
 
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.RecipientInternal.class)
     @PostMapping
     public ResponseEntity<Recipient> create(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
@@ -112,7 +112,7 @@ public class RecipientRestController {
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.RecipientInternal.class)
     @PutMapping("/{uuid}")
     public ResponseEntity<Recipient> update(
             @PathVariable String uuid,
@@ -125,7 +125,7 @@ public class RecipientRestController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        Recipient recipient = recipientService.update(uuid, recipientParams);
+        Recipient recipient = recipientService.update(uuid, currentLocalAuthUuid, recipientParams);
 
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }

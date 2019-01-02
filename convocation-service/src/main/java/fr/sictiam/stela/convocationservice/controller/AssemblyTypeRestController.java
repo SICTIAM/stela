@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +45,7 @@ public class AssemblyTypeRestController {
     public AssemblyTypeRestController() {
     }
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.SearchAssemblyType.class)
     @GetMapping
     public ResponseEntity<SearchResultsUI> getAll(
             @RequestParam(value = "multifield", required = false) String multifield,
@@ -68,26 +70,51 @@ public class AssemblyTypeRestController {
         return new ResponseEntity<>(new SearchResultsUI(count, recipients), HttpStatus.OK);
     }
 
+    @JsonView(Views.AssemblyTypeInternal.class)
     @GetMapping("/{uuid}")
     public ResponseEntity<AssemblyType> getAssemblyType(
             @PathVariable String uuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
+        LOGGER.info("Current local authority {}", currentLocalAuthUuid);
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(assemblyTypeService.getAssemblyType(uuid), HttpStatus.OK);
+        return new ResponseEntity<>(assemblyTypeService.getAssemblyType(uuid, currentLocalAuthUuid), HttpStatus.OK);
     }
 
 
+    @JsonView(Views.AssemblyTypeInternal.class)
     @PostMapping
     public ResponseEntity<?> create(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestBody AssemblyType assemblyType) {
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        assemblyType = assemblyTypeService.create(assemblyType, currentLocalAuthUuid, currentProfileUuid);
+        return new ResponseEntity<>(assemblyType, HttpStatus.OK);
+    }
+
+    @JsonView(Views.AssemblyTypeInternal.class)
+    @PutMapping("/{uuid}")
+    public ResponseEntity<?> update(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid,
+            @RequestBody AssemblyType assemblyType) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        LOGGER.info("active {}", assemblyType.getActive());
+        assemblyType = assemblyTypeService.update(uuid, currentLocalAuthUuid, assemblyType);
+        return new ResponseEntity<>(assemblyType, HttpStatus.OK);
     }
 
 

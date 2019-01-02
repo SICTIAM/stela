@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface RecipientRepository extends JpaRepository<Recipient, String> {
 
-    public Optional<Recipient> findByUuid(String uuid);
+    public Optional<Recipient> findByUuidAndLocalAuthorityUuid(String uuid, String localAuthorityUuid);
 
     public Optional<Recipient> findByEmailAndLocalAuthorityUuid(String email, String localAuthorityUuid);
 

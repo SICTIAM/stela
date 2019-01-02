@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface AssemblyTypeRepository extends JpaRepository<AssemblyType, String> {
 
-    public Optional<AssemblyType> findByUuid(String uuid);
+    public Optional<AssemblyType> findByUuidAndLocalAuthorityUuid(String uuid, String localAuthorityUuid);
 
 }

@@ -1,8 +1,6 @@
 package fr.sictiam.stela.convocationservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
@@ -22,51 +20,50 @@ import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "uuid")
 @Entity
 public class AssemblyType {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.Public.class)
     private String uuid;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.Public.class)
     private String name;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "assembly_type_recipient",
             joinColumns = @JoinColumn(name = "assembly_type_uuid"),
             inverseJoinColumns = @JoinColumn(name = "recipient_uuid"))
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.AssemblyTypeInternal.class)
     private Set<Recipient> recipients;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    private int delay;
+    @JsonView(Views.AssemblyType.class)
+    private Integer delay;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    private int reminderDelay;
+    @JsonView(Views.AssemblyType.class)
+    private Integer reminderDelay;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.AssemblyType.class)
     private String location;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    private boolean useProcuration;
+    @JsonView(Views.AssemblyType.class)
+    private Boolean useProcuration;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    private boolean active;
+    @JsonView(Views.AssemblyType.class)
+    private Boolean active;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.AssemblyType.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    LocalDateTime inactivityDate;
+    private LocalDateTime inactivityDate;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.AssemblyType.class)
     private String profileUuid;
 
     @ManyToOne
-    @JsonView(Views.AssemblyTypeViewPrivate.class)
+    @JsonView(Views.AssemblyType.class)
     private LocalAuthority localAuthority;
 
     public AssemblyType(String name, Set<Recipient> recipients,
@@ -108,19 +105,19 @@ public class AssemblyType {
         this.localAuthority = localAuthority;
     }
 
-    public int getDelay() {
+    public Integer getDelay() {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(Integer delay) {
         this.delay = delay;
     }
 
-    public int getReminderDelay() {
+    public Integer getReminderDelay() {
         return reminderDelay;
     }
 
-    public void setReminderDelay(int reminderDelay) {
+    public void setReminderDelay(Integer reminderDelay) {
         this.reminderDelay = reminderDelay;
     }
 
@@ -132,19 +129,19 @@ public class AssemblyType {
         this.location = location;
     }
 
-    public boolean isUseProcuration() {
+    public Boolean getUseProcuration() {
         return useProcuration;
     }
 
-    public void setUseProcuration(boolean useProcuration) {
+    public void setUseProcuration(Boolean useProcuration) {
         this.useProcuration = useProcuration;
     }
 
-    public boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 

@@ -1,9 +1,7 @@
 package fr.sictiam.stela.convocationservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
@@ -21,47 +19,46 @@ import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "uuid")
 @Entity
 public class Recipient {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Public.class)
     private String uuid;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Public.class)
     private String firstname;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Public.class)
     private String lastname;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Public.class)
     private String email;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Recipient.class)
     private String phoneNumber;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Public.class)
     private Boolean active;
 
     @JsonIgnore
-    @JsonView(Views.UserViewPrivate.class)
+    @JsonView(Views.RecipientPrivate.class)
     private String token;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JsonView(Views.UserViewPrivate.class)
+    @JsonView(Views.RecipientInternal.class)
     private LocalAuthority localAuthority;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.RecipientInternal.class)
     @ManyToMany(mappedBy = "recipients", fetch = FetchType.EAGER)
     private Set<AssemblyType> assemblyTypes;
 
-    @JsonView(Views.UserViewPublic.class)
+    @JsonView(Views.Recipient.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    LocalDateTime inactivityDate;
+    private LocalDateTime inactivityDate;
 
     public Recipient() {
     }
@@ -127,7 +124,7 @@ public class Recipient {
         this.localAuthority = localAuthority;
     }
 
-    public Boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 

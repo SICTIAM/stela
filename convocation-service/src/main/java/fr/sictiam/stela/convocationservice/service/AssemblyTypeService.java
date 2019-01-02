@@ -3,7 +3,9 @@ package fr.sictiam.stela.convocationservice.service;
 import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
+import fr.sictiam.stela.convocationservice.model.exception.MissingParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
+import fr.sictiam.stela.convocationservice.model.util.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +36,34 @@ public class AssemblyTypeService {
     private AssemblyTypeRepository assemblyTypeRepository;
 
     @Autowired
-    private ExternalRestService externalRestService;
+    private LocalAuthorityService localAuthorityService;
 
 
-    public AssemblyType getAssemblyType(String uuid) {
+    public AssemblyType getAssemblyType(String uuid, String localAuthorityUuid) {
 
-        return assemblyTypeRepository.findByUuid(uuid).orElseThrow(NotFoundException::new);
+        return assemblyTypeRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(NotFoundException::new);
+    }
+
+    public AssemblyType create(AssemblyType assemblyType, String localAuthorityUuid, String profileUuid) {
+
+        validate(assemblyType);
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
+
+        assemblyType.setLocalAuthority(localAuthority);
+        assemblyType.setProfileUuid(profileUuid);
+        assemblyType.setActive(true);
+        return save(assemblyType);
+    }
+
+    public AssemblyType update(String uuid, String currentLocalAuthorityUuid, AssemblyType params) {
+
+        AssemblyType assemblyType = getAssemblyType(uuid, currentLocalAuthorityUuid);
+        BeanUtils.copyProperties(params, assemblyType, "uuid", "localAuthority", "profileUuid", "inactivityDate");
+
+        if (params.getActive() != null) {
+            assemblyType.setInactivityDate(params.getActive() ? null : LocalDateTime.now());
+        }
+        return save(assemblyType);
     }
 
     public Long countAllWithQuery(String multifield, String name, Boolean active, String currentLocalAuthUuid) {
@@ -97,5 +122,21 @@ public class AssemblyTypeService {
             predicates.add(builder.and(builder.equal(assemblyRoot.get("active"), active)));
 
         return predicates;
+    }
+
+    private AssemblyType save(AssemblyType assemblyType) {
+        return assemblyTypeRepository.saveAndFlush(assemblyType);
+    }
+
+    private void validate(AssemblyType params) throws MissingParameterException {
+
+        if (StringUtils.isEmpty(params.getName())) throw new MissingParameterException("name");
+        params.setName(params.getName().trim());
+
+        if (StringUtils.isEmpty(params.getLocation())) throw new MissingParameterException("location");
+        params.setLocation(params.getLocation().trim());
+
+        if (params.getDelay() == null) throw new MissingParameterException("delay");
+        if (params.getReminderDelay() == null) throw new MissingParameterException("reminderDelay");
     }
 }

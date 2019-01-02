@@ -5,6 +5,7 @@ import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.exception.RecipientExistsException;
+import fr.sictiam.stela.convocationservice.model.util.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,38 +65,29 @@ public class RecipientService {
         return save(recipient);
     }
 
-    public Recipient update(String uuid, Recipient recipientParams) {
+    public Recipient update(String uuid, String localAuthorityUuid, Recipient recipientParams) {
 
-        Recipient recipient = getRecipient(uuid);
+        Recipient recipient = getRecipient(uuid, localAuthorityUuid);
 
-        if (StringUtils.isNotEmpty(recipientParams.getFirstname()))
-            recipient.setFirstname(recipientParams.getFirstname().trim());
-
-        if (StringUtils.isNotEmpty(recipientParams.getLastname()))
-            recipient.setLastname(recipientParams.getLastname().trim());
-
+        BeanUtils.copyProperties("uuid", "token", "localAuthority", "inactivityDate");
         if (StringUtils.isNotEmpty(recipientParams.getEmail())) {
             if (recipientRepository.recipientExists(uuid, recipient.getLocalAuthority().getUuid(),
                     recipientParams.getEmail()) > 0) {
                 LOGGER.error("A recipient with email {} already exists in local authority {}", recipientParams.getEmail(), recipient.getLocalAuthority().getName());
                 throw new RecipientExistsException();
             }
-            recipient.setEmail(recipientParams.getEmail().trim());
         }
-        if (StringUtils.isNotEmpty(recipientParams.getPhoneNumber()))
-            recipient.setPhoneNumber(recipientParams.getPhoneNumber().trim());
 
-        if (recipientParams.isActive() != null) {
-            recipient.setInactivityDate(recipientParams.isActive() ? null : LocalDateTime.now());
-            recipient.setActive(recipientParams.isActive());
+        if (recipientParams.getActive() != null) {
+            recipient.setInactivityDate(recipientParams.getActive() ? null : LocalDateTime.now());
         }
 
         return save(recipient);
     }
 
-    public Recipient getRecipient(String uuid) {
+    public Recipient getRecipient(String uuid, String localAuthorityUuid) {
 
-        return recipientRepository.findByUuid(uuid).orElseThrow(NotFoundException::new);
+        return recipientRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(NotFoundException::new);
     }
 
     public Recipient save(Recipient recipient) {

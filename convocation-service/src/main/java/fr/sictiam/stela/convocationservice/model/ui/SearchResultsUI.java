@@ -7,10 +7,10 @@ import java.util.List;
 
 public class SearchResultsUI {
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.Search.class)
     private Long totalCount;
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.Search.class)
     private List<?> results;
 
     public SearchResultsUI() {
