@@ -1,4 +1,4 @@
-### 04/12/2018
+### 03/01/2019
 - Renommage des fichiers PES lorsqu'ils sont envoyés au serveur Helios
 - Stockage des fichiers PES sur Amazon S3
 - Possibilité de vérifer le token de connextion à Sesile
