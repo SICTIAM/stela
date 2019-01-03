@@ -1,13 +1,15 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { Route, Switch, Redirect } from 'react-router-dom'
-import { Container } from 'semantic-ui-react'
+import { Container, Loader } from 'semantic-ui-react'
 
-import { getRightsFromGroups, rightsFeatureResolver } from './_util/utils'
+import { getRightsFromGroups, rightsFeatureResolver, checkStatus } from './_util/utils'
+import { notifications } from './_util/Notifications'
 
 import ErrorPage from './_components/ErrorPage'
 import MenuBar from './_components/MenuBar'
 import TopBar from './_components/TopBar'
+import Overlay from './_components/Overlay'
 import Home from './Home'
 import AlertMessage from './_components/AlertMessage'
 import { UserProfile, AdminProfile } from './Profile'
@@ -44,10 +46,14 @@ import PesModuleParams from './admin/pes/PesModuleParams'
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={props => (
         <div>
-            <TopBar />
+            <header>
+                <TopBar />
+            </header>
             <div className="wrapperContainer">
-                <MenuBar />
-                <Container className="mainContainer">
+                <aside>
+                    <MenuBar />
+                </aside>
+                <Container className="mainContainer" as="main" id="content">
                     <Component {...props} {...props.match.params} />
                 </Container>
             </div>
@@ -55,52 +61,67 @@ const PublicRoute = ({ component: Component, ...rest }) => (
     )}
     />
 )
-
 const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowedRights, certificate, certRequired = false, ...rest },
-    { isLoggedIn }) => (
+    { isLoggedIn, isMenuOpened } ) => (
     <Route {...rest} render={props => (
         <div>
-            <TopBar admin={!!admin} />
+            <header>
+                <TopBar admin={!!admin}/>
+            </header>
             <div className="wrapperContainer">
-                <Menu />
-                <Container className="mainContainer">
-                    {isLoggedIn ? (
-                        rightsFeatureResolver(userRights, allowedRights) ? (
-                            certificate || !certRequired ? (
-                                <Fragment>
-                                    <AlertMessage {...props} />
-                                    <Component {...props} {...props.match.params} />
-                                </Fragment>
+                {isMenuOpened && (
+                    <Overlay />
+                )}
+                <aside>
+                    <Menu />
+                </aside>
+                <main>
+                    <Container className="mainContainer" id="content">
+                        {isLoggedIn === true && (
+                            rightsFeatureResolver(userRights, allowedRights) ? (
+                                certificate || !certRequired ? (
+                                    <Fragment>
+                                        <AlertMessage {...props} />
+                                        <Component {...props} {...props.match.params} />
+                                    </Fragment>
+                                ) : (
+                                    <ErrorPage error={'certificate_required'} />
+                                )
                             ) : (
-                                <ErrorPage error={'certificate_required'} />
+                                <ErrorPage error={403} />
                             )
-                        ) : (
-                            <ErrorPage error={403} />
-                        )
-                    ) : (
-                        <ErrorPage error={401} />
-                    )}
-                </Container>
+                        )}
+                        {isLoggedIn === false && (
+                            <ErrorPage error={401} />
+                        )}
+                        {isLoggedIn === null && (
+                            <Loader active inline="centered"></Loader>
+                        )}
+                    </Container>
+                </main>
             </div>
         </div>
     )}
     />
 )
 AuthRoute.contextTypes = {
-    isLoggedIn: PropTypes.bool
+    isLoggedIn: PropTypes.bool,
+    isMenuOpened: PropTypes.bool
 }
 
 class AppRoute extends Component {
     static contextTypes = {
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _addNotification: PropTypes.func
     }
     state = {
         userRights: [],
         certificate: false
     }
     componentDidMount() {
-        const { _fetchWithAuthzHandling } = this.context
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile' })
+            .then(checkStatus)
             .then(response => response.json())
             .then(profile => {
                 const userRights = getRightsFromGroups(profile.groups)
@@ -108,9 +129,24 @@ class AppRoute extends Component {
                 if (profile.agent.admin) userRights.push('ADMIN')
                 this.setState({ userRights })
             })
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
         _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
+            .then(checkStatus)
             .then(response => response.json())
             .then(certificate => this.setState({ certificate }))
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
     }
     render() {
         const params = this.state
@@ -134,19 +170,18 @@ class AppRoute extends Component {
                 <Route exact path="/:localAuthoritySlug/actes" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/actes/liste`} />
                 )} />
+                <AuthRoute path="/:localAuthoritySlug/actes/liste/:uuid" {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/actes/liste" {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={ActeList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/actes/brouillons/:uuid" {...params} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} certRequired />
                 <AuthRoute path="/:localAuthoritySlug/actes/brouillons" {...params} allowedRights={['ACTES_DEPOSIT']} component={DraftList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/actes/nouveau" {...params} allowedRights={['ACTES_DEPOSIT']} component={NewActeSwitch} menu={MenuBar} certRequired />
-                <AuthRoute path="/:localAuthoritySlug/actes/:uuid" {...params} allowedRights={['ACTES_DEPOSIT', 'ACTES_DISPLAY']} component={Acte} menu={MenuBar} />
-
                 <Route exact path="/:localAuthoritySlug/pes" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/pes/liste`} />
                 )} />
                 <AuthRoute path="/:localAuthoritySlug/pes/retour/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesRetourList} menu={MenuBar} />
+                <AuthRoute path="/:localAuthoritySlug/pes/liste/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
-                <AuthRoute path="/:localAuthoritySlug/pes/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
 
                 <Route exact path="/:localAuthoritySlug/admin" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/admin/ma-collectivite`} />

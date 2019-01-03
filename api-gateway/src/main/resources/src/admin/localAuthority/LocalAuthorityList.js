@@ -22,6 +22,7 @@ class LocalAuthorityList extends Component {
         localAuthorities: [],
         totalCount: 0,
         limit: 25,
+        currentPage: 0,
         offset: 0,
         column: '',
         direction: ''
@@ -33,7 +34,7 @@ class LocalAuthorityList extends Component {
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, this.fetchLocalAuthorities)
+        this.setState({ offset, currentPage: data.selected }, this.fetchLocalAuthorities)
     }
     fetchLocalAuthorities = () => {
         const { _fetchWithAuthzHandling } = this.context
@@ -64,7 +65,7 @@ class LocalAuthorityList extends Component {
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchLocalAuthorities)
     }
     updateItemPerPage = (limit) => {
-        this.setState({ limit }, this.fetchLocalAuthorities)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.fetchLocalAuthorities)
     }
     renderActivatedModule = (activatedModules, moduleName) =>
         activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
@@ -95,7 +96,8 @@ class LocalAuthorityList extends Component {
                 pageCount={pageCount}
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage} />
+                updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage} />
         return (
             <Page title={t('admin.modules.local_authority_settings')}>
                 <Segment>

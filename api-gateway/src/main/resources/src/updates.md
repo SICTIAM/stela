@@ -1,3 +1,12 @@
+### 04/12/2018
+- Renommage des fichiers PES lorsqu'ils sont envoyés au serveur Helios
+- Stockage des fichiers PES sur Amazon S3
+- Possibilité de vérifer le token de connextion à Sesile
+- Option multi-canal lors du dépôt de fichiers Actes
+- Dépôt des fichiers par glisser-déposer dans le module Actes
+- Correctifs sur la communication avec Stela
+- Correctifs sur l'interface
+
 ### 05/11/2018
 - Ajout du détail des anomalies PES dans les mails
 - Ajout d'un groupe de migration aux actes migrés de Stela 2

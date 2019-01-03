@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Header, Accordion, Input } from 'semantic-ui-react'
+import { Header, Accordion, Input, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
+
 
 class AdvancedSearch extends Component {
     static contextTypes = {
@@ -29,11 +30,15 @@ class AdvancedSearch extends Component {
                 <Accordion style={{ marginBottom: '1em' }} styled>
                     <Accordion.Title active={isOpen} style={{ cursor: 'default' }}>
                         <Input fluid
+                            aria-label={t('api-gateway:form.search')}
                             id={fieldId}
                             value={fieldValue}
+                            style={{borderRight: 'none'}}
                             onKeyPress={this.handleKeyPress}
                             onChange={(e, { id, value }) => fieldOnChange(id, value)}
-                            icon={{ name: 'caret ' + (isOpen ? 'down' : 'left'), link: true, onClick: this.toggle }}
+                            icon={<button aria-label={t('api-gateway:form.open_advanced_search')} onClick={this.toggle} style={{backgroundColor: '#fff', border: '1px solid rgba(34,36,38,.15)', borderLeft: 'none'}}>
+                                <Icon name={'caret ' + (isOpen ? 'down' : 'left')}/>
+                            </button>}
                             placeholder={`${t('api-gateway:form.search')}...`}
                         />
                     </Accordion.Title>

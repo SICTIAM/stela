@@ -1,0 +1,20 @@
+/*******************************
+    User Variable Overrides
+*******************************/
+
+/*-------------------
+      Collection
+--------------------*/
+
+/* Sub Menu */
+@subMenuTextColor       : #757575;
+
+/*--------------
+     States
+---------------*/
+
+/* Pressed Item */
+@pressedItemTextColor   : @darkTextColor;
+
+/* Active Item */
+@activeItemTextColor: @darkTextColor;

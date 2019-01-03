@@ -13,7 +13,9 @@ class TopBar extends Component {
         isLoggedIn: PropTypes.bool,
         user: PropTypes.object,
         t: PropTypes.func,
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _openMenu: PropTypes.func,
+        isMenuOpened: PropTypes.bool
     }
     state = {
         isMainDomain: true,
@@ -25,6 +27,7 @@ class TopBar extends Component {
                 name: ''
             }
         },
+        selectedProfil: null,
         profiles: []
     }
     componentDidMount() {
@@ -40,7 +43,7 @@ class TopBar extends Component {
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
-                if (json.uuid) this.setState({ currentProfile: json, isUpdated: true })
+                if (json.uuid) this.setState({ currentProfile: json, isUpdated: true, selectedProfil: json.uuid })
             })
             .catch(response => {
                 response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message))
@@ -61,63 +64,65 @@ class TopBar extends Component {
         else history.push('/choix-collectivite')
     }
     render() {
-        const { isLoggedIn, t, user } = this.context
+        const { isLoggedIn, t, user, _openMenu, isMenuOpened } = this.context
         const multiPath = getMultiPahtFromSlug()
-        const listProfile = this.state.profiles.map(profile =>
-            profile.uuid !== this.state.currentProfile.uuid && (
-                <Dropdown.Item key={profile.uuid} value={profile.uuid} onClick={() => window.location.href = '/api/api-gateway/switch/' + profile.uuid}>
-                    <Icon name="building" size="large" /> {profile.localAuthority.name}
-                </Dropdown.Item>
-            )
+        const listProfile = this.state.profiles.map(profile => {
+            return {
+                text: profile.localAuthority.name,
+                value: profile.uuid,
+                key: profile.uuid,
+                icon: 'building'
+            }
+        }
         )
         const trigger = (
-            <Button basic className={this.props.admin ? 'rosso' : 'anatra'}>
+            <Button basic className={this.props.admin ? 'secondary' : 'primary'}>
                 <Icon name="user circle outline" size="large" />{' '}
                 {`${user && user.given_name} ${user && user.family_name}`}
-            </Button>
-        )
-        const triggerLA = (
-            <Button basic color="grey">
-                <Icon name="building" size="large" />{' '}
-                {`${this.state.currentProfile.localAuthority.name}`}{' '}
-                <Icon style={{ marginLeft: '0.5em', marginRight: 0 }} name="caret down" />
             </Button>
         )
         // FIXME : isLoggedIn in the context is not reliable (false then true)
         if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
-            <Menu className={`topBar ${this.props.admin ? 'rosso' : 'anatra'}`} fixed="top" secondary>
+            <Menu className={`topBar ${this.props.admin ? 'secondary' : 'primary'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
+                <a href="#content" className="skip">{t('api-gateway:skip_to_content')}</a>
+                <Icon name="bars" onClick={_openMenu} className='buger-menu primary'></Icon>
                 <Menu.Item className="appTitle" as={Link} to={`${multiPath}/`} header>
                     <h1 style={{ textAlign: 'center' }}>
                         <img src={process.env.PUBLIC_URL + '/img/logo_stela.png'} alt="STELA" />
                     </h1>
                 </Menu.Item>
-
                 <Container>
                     <Menu.Menu position="right">
                         {(isLoggedIn && listProfile.length > 1) && (
-                            <Menu.Item>
-                                <Dropdown basic trigger={triggerLA} icon={false}>
-                                    <Dropdown.Menu>{listProfile}</Dropdown.Menu>
-                                </Dropdown>
+                            <Menu.Item className='liste-profil'>
+                                <Dropdown
+                                    style={{minWidth: '18em'}}
+                                    search selection
+                                    options={listProfile}
+                                    value={this.state.selectedProfil}
+                                    selectOnBlur={false}
+                                    text={this.state.currentProfile.localAuthority.name}
+                                    onChange={(event, data) => this.setState({selectedProfil: data.value})}
+                                    onClose={(event, data) => window.location.href = '/api/api-gateway/switch/' + data.value}                                />
                             </Menu.Item>
                         )}
                         {isLoggedIn && (
                             <Menu.Item>
                                 <Popup style={{ padding: 0 }} trigger={trigger} on="click" position="bottom center">
                                     <Menu vertical>
-                                        <Menu.Item as={Link} to={`${multiPath}/profil`}>
+                                        <Menu.Item className="primary" as={Link} to={`${multiPath}/profil`}>
                                             <span><Icon name="user" /> {t('top_bar.profile')}</span>
                                         </Menu.Item>
                                         {this.state.currentProfile.admin && (
-                                            <Menu.Item as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
+                                            <Menu.Item className="primary" as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
                                                 <span>
                                                     <Icon name={this.props.admin ? 'reply' : 'settings'} />{' '}
                                                     {t(`top_bar.${this.props.admin ? 'back_to_app' : 'admin'}`)}
                                                 </span>
                                             </Menu.Item>
                                         )}
-                                        <Menu.Item onClick={() => (window.location.href = '/logout')}>
+                                        <Menu.Item className="primary" onClick={() => (window.location.href = '/logout')}>
                                             <span><Icon name="sign out" /> {t('top_bar.log_out')}</span>
                                         </Menu.Item>
                                     </Menu>
@@ -126,7 +131,7 @@ class TopBar extends Component {
                         )}
                         {!isLoggedIn && (
                             <Menu.Item>
-                                <Button basic className="anatra" onClick={this.login}>
+                                <Button basic className="primary" onClick={this.login}>
                                     {t('top_bar.log_in')}
                                 </Button>
                             </Menu.Item>

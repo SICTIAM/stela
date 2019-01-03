@@ -16,11 +16,17 @@
     "legal_notice": "Mentions légales",
     "last_update": "Dernière mise à jour",
     "release_notes": "Notes de mise à jour",
+    "certification_expiration": "Votre certificat expire dans {{days}} jours",
+    "view_profil": "Voir profil",
+    "ask_certificate": "Demander un certificat",
+    "skip_to_content": "Sauter au contenu",
     "form": {
         "search": "Rechercher",
         "advanced_search": "Recherche avancée",
+        "open_advanced_search": "Ouvrir la recherche avancée",
         "all": "Tous",
         "all_feminine": "Toutes",
+        "or": "ou",
         "from": "de",
         "to": "à",
         "submit": "Déposer",
@@ -29,6 +35,7 @@
         "delete": "Supprimer",
         "delete_draft": "Supprimer le brouillon",
         "add_a_file": "Ajouter un fichier",
+        "drag_and_drop": "Glisser et déposer votre fichier",
         "add": "Ajouter",
         "activate": "Activer",
         "deactivate": "Désactiver",
@@ -36,6 +43,7 @@
         "configure": "Configurer",
         "confirm": "Confirmer",
         "cancel": "Annuler",
+        "verify": "Vérifier",
         "max_string_length": "{{length}} caractères autorisés maximum ({{remaining}} restants)",
         "validation": {
             "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques majuscules et des tirets bas (_).",
@@ -53,7 +61,13 @@
     },
     "list": {
         "last_modified": "Dernière modification",
-        "item_per_page": "résultats par page"
+        "item_per_page": "résultats par page",
+        "item_per_page_label": "choix du nombre de résultats par page",
+        "select_item": "Sélectionner",
+        "check_all": "Tout sélectionner",
+        "next": "Suivant",
+        "previous": "Précédent",
+        "actions": "Choisisser une action à effectuer"
     },
     "menu": {
         "acte": {
@@ -90,11 +104,11 @@
         "modify_my_profile": "Modifier mon profil",
         "no_email": "Aucun email",
         "notifications_title": "Notifications",
-        "localAuthorityNotifications": "Être notifié de l'évolution du flux de ma collectivité",
+        "localAuthorityNotifications": "Être notifié pour des actes déposés par un membre du groupe",
         "notifications": {
             "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
-            "ACTES_SENT": "Envoi réussi d'un acte",
-            "ACTES_CANCELLED": "Annulation d'un acte",
+            "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
+            "ACTES_CANCELLED": "Réception de l'AR d'annulation d'un acte",
             "ACTES_NACK_RECEIVED": "Réception d'une anomalie de la Préfecture pour un acte",
             "ACTES_ANOMALIES": "Toutes anomalies concernant un acte",
             "PES_ACK_RECEIVED": "Réception de l'AR d'un PES",
@@ -157,7 +171,7 @@
                 "title": "Admin module Acte",
                 "instance_params_updated": "Paramètres de l'instance enregistrés",
                 "local_authority": {
-                    "classificationAsked": "Demande de classfication envoyée",
+                    "classificationAsked": "Demande de classification envoyée",
                     "update": {
                         "success": "La mise à jour de la collectivité a bien été prise en compte"
                     }
@@ -168,6 +182,8 @@
                     }
                 }
             },
+            "anomaly_attachment_types": "Aucun type de pièce jointe n'a été trouvé",
+            "no_attachment_types": "Veuillez vérifier que la nomenclature de la collectivité a été envoyée",
             "courrier_simple_asked": "La réponse au courrier simple a bien été déposée",
             "lettre_observation_asked": "La réponse à la lettre d'observation a bien été déposée",
             "pieces_complementaires_asked": "La réponse à la demande de pièce complémentaire a bien été déposée",
@@ -185,10 +201,23 @@
                 "error": {
                     "bad_file_name": "Le nom de fichier est incorrect",
                     "non_extractable_pes": "Erreur lors du traitement du PES",
-                    "existing_file_name": "Le nom de fichier est deja utilisé",
-                    "file_too_big": "Le fichier est trop gros (100 Mo max)"
+                    "existing_file_name": "Le nom de fichier est déjà utilisé",
+                    "file_too_big": "Le fichier est trop gros (100 Mo max)",
+                    "read_file": "Impossible de lire le fichier"
                 },
                 "missing_data": "Merci de remplir tous les champs obligatoires"
+            },
+            "admin": {
+                "title": "Admin module Pes",
+                "local_authority": {
+                    "update": {
+                        "success": "La mise à jour de la collectivité a bien été prise en compte"
+                    }
+                },
+                "sesile": {
+                    "validTokens": "Tokens valides",
+                    "invalidTokens": "Tokens invalides"
+                }
             }
         },
         "admin": {
@@ -300,7 +329,7 @@
             "general_informations": "Informations générales",
             "modules": "Modules",
             "users": "Agents",
-            "no_user": "Aucune agent dans cette collectivité",
+            "no_user": "Aucun agent dans cette collectivité",
             "groups": "Groupes",
             "no_group": "Aucun groupe dans cette collectivité",
             "confirmModal": {
@@ -337,7 +366,7 @@
                 "no_localAuthorities": "Aucune collectivité",
                 "add_localAuthority": "Affecter une collectivité..."
             },
-            "fields":{
+            "fields": {
                 "software": "Logiciel",
                 "email": "Email",
                 "password": "Mot de passe",

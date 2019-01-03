@@ -36,7 +36,14 @@ class History extends Component {
                         <Feed.Extra>{status.message}</Feed.Extra>
                     }
                     {status.errors && <CollapsedList items={PesErrorList(status.errors, `history-${status.uuid}`)}/>}
-                    {status.fileName &&
+                    {(status.attachment && status.attachment.filename /* PES histories */) &&
+                    <Feed.Extra>
+                        {t(`${moduleName}:${moduleName}.page.linked_file`)}:
+                        <LinkFile text={status.attachment.filename}
+                            url={`/api/${moduleName}/${status[`${moduleName}Uuid`]}/history/${status.uuid}/file`} />
+                    </Feed.Extra>
+                    }
+                    {(status.fileName /* Acte histories */) &&
                     <Feed.Extra>
                         {t(`${moduleName}:${moduleName}.page.linked_file`)}:
                         <LinkFile text={status.fileName}

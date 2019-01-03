@@ -15,7 +15,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PesAller {
 
     public interface RestValidation {
@@ -31,8 +31,8 @@ public class PesAller {
     private LocalDateTime creation;
 
     @Column(length = 512)
-    @NotNull(groups = {RestValidation.class})
-    @Size(max = 500, groups = {RestValidation.class})
+    @NotNull(groups = { RestValidation.class })
+    @Size(max = 500, groups = { RestValidation.class })
     private String objet;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -47,7 +47,7 @@ public class PesAller {
 
     private String profileUuid;
 
-    @Size(max = 250, groups = {RestValidation.class})
+    @Size(max = 250, groups = { RestValidation.class })
     private String comment;
 
     private String fileType;
@@ -113,7 +113,7 @@ public class PesAller {
     }
 
     public String getUuid() {
-        return this.uuid;
+        return uuid;
     }
 
     public String getObjet() {

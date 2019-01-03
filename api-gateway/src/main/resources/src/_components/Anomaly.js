@@ -11,13 +11,14 @@ class Anomaly extends Component {
             status: '',
             message: '',
             errors: []
-        }
+        },
+        type: 'negative'
     }
     render() {
-        const { header, lastHistory } = this.props
+        const { header, lastHistory, type = 'negative' } = this.props
         return (
             anomalies.includes(lastHistory.status) && (
-                <Message negative>
+                <Message negative={type === 'negative'} warning={type === 'warning'}>
                     <Message.Header style={{ marginBottom: '0.5em'}}>{header}</Message.Header>
                     {lastHistory.message &&
                         <p>{lastHistory.message}</p>

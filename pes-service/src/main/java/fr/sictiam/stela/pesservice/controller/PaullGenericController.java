@@ -109,10 +109,8 @@ public class PaullGenericController {
     }
 
     public GenericAccount emailAuth(String email, String password) {
-
         GenericAccount genericAccount = null;
         try {
-
             genericAccount = externalRestService.authWithEmailPassword(email, password);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
@@ -158,6 +156,7 @@ public class PaullGenericController {
 
         Integer serviceOrganisation = Integer.parseInt(service);
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
+
         if (localAuthority.isPresent()) {
 
             LocalAuthority authority = localAuthority.get();
@@ -165,8 +164,7 @@ public class PaullGenericController {
 
             try {
                 ResponseEntity<Classeur> classeur = sesileService.postClasseur(authority,
-                        new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email));
-
+                        new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email), null);
                 ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(authority,
                         multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getBody().getId());
                 if (documentResonse.getStatusCode().is2xxSuccessful()) {

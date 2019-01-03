@@ -2,6 +2,8 @@ package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.andrewoma.dexx.collection.Pair;
+import eu.europa.esig.dss.validation.policy.rules.Indication;
+import eu.europa.esig.dss.validation.reports.DetailedReport;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
 import fr.sictiam.signature.pes.verifier.CertificateProcessor.CertificatInformation1;
 import fr.sictiam.signature.pes.verifier.InvalidPesAllerFileException;
@@ -13,6 +15,7 @@ import fr.sictiam.signature.pes.verifier.SimplePesInformation;
 import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1;
 import fr.sictiam.signature.pes.verifier.XadesInfoProcessor.XadesInfoProcessResult1;
 import fr.sictiam.signature.utils.DateUtils;
+import fr.sictiam.signature.utils.XadesUtils;
 import fr.sictiam.stela.pesservice.dao.GenericDocumentRepository;
 import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
 import fr.sictiam.stela.pesservice.model.GenericDocument;
@@ -28,6 +31,8 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
+import fr.sictiam.stela.pesservice.service.exceptions.MissingSignatureException;
+import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +51,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Element;
 
 import javax.validation.constraints.NotNull;
@@ -54,6 +60,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -80,6 +87,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     @Value("${application.sesile.apiV4Url}")
     String sesileV4Url;
 
+    @Value("${application.url}")
+    private String applicationUrl;
+
     private final ExternalRestService externalRestService;
 
     private final SesileConfigurationRepository sesileConfigurationRepository;
@@ -88,14 +98,20 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     private final LocalesService localesService;
 
+    private final StorageService storageService;
+
+    private final SignatureService signatureService;
+
     public SesileService(PesAllerService pesService, ExternalRestService externalRestService,
             SesileConfigurationRepository sesileConfigurationRepository, LocalesService localesService,
-            GenericDocumentRepository genericDocumentRepository) {
+            GenericDocumentRepository genericDocumentRepository, StorageService storageService, SignatureService signatureService) {
         this.pesService = pesService;
         this.externalRestService = externalRestService;
         this.sesileConfigurationRepository = sesileConfigurationRepository;
         this.localesService = localesService;
         this.genericDocumentRepository = genericDocumentRepository;
+        this.storageService = storageService;
+        this.signatureService = signatureService;
     }
 
     public SesileConfiguration createOrUpdate(SesileConfiguration sesileConfiguration) {
@@ -107,7 +123,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public void submitToSignature(PesAller pes) {
-
+        LOGGER.info("Submitting PES {} to signature...", pes.getObjet());
         try {
             SesileConfiguration sesileConfiguration = sesileConfigurationRepository.findById(pes.getProfileUuid())
                     .orElse(sesileConfigurationRepository.findById(pes.getLocalAuthority().getGenericProfileUuid())
@@ -117,6 +133,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+            String returnUrl = getReturnUrl(pes);
             String deadline =
                     getSesileValidationDate(pes.getValidationLimit() == null ?
                                     null :
@@ -128,9 +145,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                             deadline, sesileConfiguration.getType(),
                             pes.getServiceOrganisationNumber() != null ? pes.getServiceOrganisationNumber()
                                     : sesileConfiguration.getServiceOrganisationNumber(),
-                            sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()));
+                            sesileConfiguration.getVisibility(), profile.get("agent").get("email").asText()),
+                    returnUrl);
 
-            Document document = addFileToclasseur(pes.getLocalAuthority(), pes.getAttachment().getFile(),
+            byte[] fileContent = storageService.getAttachmentContent(pes.getAttachment());
+            Document document = addFileToclasseur(pes.getLocalAuthority(), fileContent,
                     pes.getAttachment().getFilename(), classeur.getBody().getId()).getBody();
 
             pes.setSesileClasseurId(classeur.getBody().getId());
@@ -141,7 +160,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {} ({})", e.getMessage(), e.getResponseBodyAsString());
             pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         } catch (Exception e) {
-            LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {}", e.getMessage());
+            LOGGER.error("[submitToSignature] Error while trying to submit to signature: {}", e.getMessage());
             pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         }
     }
@@ -151,7 +170,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
             if (pes.getPesHistories().stream()
-                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
+                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus()))) {
                 if (pes.getSesileClasseurId() != null
                         && checkClasseurWithdrawn(pes.getLocalAuthority(), pes.getSesileClasseurId())) {
                     pesService.updateStatus(pes.getUuid(), StatusType.CLASSEUR_WITHDRAWN);
@@ -165,18 +184,20 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
             if (pes.getPesHistories().stream()
-                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()))) {
+                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus()))) {
                 try {
                     if (pes.getSesileDocumentId() != null
                             && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
-                        Pair<StatusType, String> signatureResult = getSignatureStatus(file);
-                        StatusType status = signatureResult.component1();
-                        String errorMessage = signatureResult.component2();
-                        // HACK: Prevent from incrementing SIGNATURE_MISSING when the PES is stuck on SESILE
-                        if (!StatusType.SIGNATURE_MISSING.equals(pes.getLastHistoryStatus())
-                                || !StatusType.SIGNATURE_MISSING.equals(signatureResult.component1())) {
-                            updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
+                        if (file != null) {
+                            Pair<StatusType, String> signatureResult = getSignatureStatus(file);
+                            StatusType status = signatureResult.component1();
+                            String errorMessage = signatureResult.component2();
+                            // HACK: Prevent from incrementing SIGNATURE_MISSING when the PES is stuck on SESILE
+                            if (!StatusType.SIGNATURE_MISSING.equals(pes.getLastHistoryStatus())
+                                    || !StatusType.SIGNATURE_MISSING.equals(signatureResult.component1())) {
+                                updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
+                            }
                         }
                     }
                 } catch (RestClientException | UnsupportedEncodingException e) {
@@ -189,7 +210,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     private void updatePesWithSignature(String pesUuid, byte[] file, StatusType status, String errorMessage) {
         PesAller pesAller = pesService.getByUuid(pesUuid);
         pesAller.setSigned(status.equals(StatusType.PENDING_SEND));
-        pesAller.getAttachment().setFile(file);
+        storageService.updateAttachment(pesAller.getAttachment(), file);
         pesService.save(pesAller);
         pesService.updateStatus(pesUuid, status, errorMessage);
     }
@@ -424,9 +445,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public ResponseEntity<Document> addFileToclasseur(LocalAuthority localAuthority, byte[] file, String fileName,
-            int classeur) {
+            int classeur) throws HttpClientErrorException {
 
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
         map.add("name", fileName);
         map.add("filename", fileName);
@@ -444,15 +465,37 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{classeur}/newDocuments", HttpMethod.POST,
-                requestEntity, Document.class, classeur);
+        try {
+            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{classeur}/newDocuments", HttpMethod.POST,
+                    requestEntity, Document.class, classeur);
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            throw e;
+        }
     }
 
     public MultiValueMap<String, String> getHeaders(LocalAuthority localAuthority) {
+        return getHeaders(localAuthority.getToken(), localAuthority.getSecret());
+    }
+
+    public MultiValueMap<String, String> getHeaders(String token, String secret) {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-        headers.add("token", localAuthority.getToken());
-        headers.add("secret", localAuthority.getSecret());
+        headers.add("token", token);
+        headers.add("secret", secret);
         return headers;
+    }
+
+
+    public boolean verifyTokens(String token, String secret, boolean sesileNewVersion) {
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(token, secret));
+        try {
+            ResponseEntity<Object> response = restTemplate.exchange(getSesileUrl(sesileNewVersion) + "/api/user/",
+                    HttpMethod.GET, requestEntity, Object.class);
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return false;
+        }
     }
 
     public List<ServiceOrganisation> getServiceOrganisations(LocalAuthority localAuthority, String profileUuid)
@@ -460,14 +503,21 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         JsonNode profile = externalRestService.getProfile(profileUuid);
         String email = profile.get("agent").get("email").asText();
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        List<ServiceOrganisation> organisations = Arrays.asList(
-                localAuthority.getSesileNewVersion() ?
-                        restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
-                                requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
-                        restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET,
-                                requestEntity, ServiceOrganisation[].class, email).getBody()
-        );
-        List<ClasseurType> types = Arrays.asList(getTypes(localAuthority).getBody());
+        List<ServiceOrganisation> organisations;
+        try {
+            organisations = Arrays.asList(
+                    localAuthority.getSesileNewVersion() ?
+                            restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
+                                    requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
+                            restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET,
+                                    requestEntity, ServiceOrganisation[].class, email).getBody()
+            );
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return new ArrayList<>();
+        }
+
+        List<ClasseurType> types = getTypes(localAuthority);
         organisations.forEach(organisation -> {
             organisation.setTypes(types.stream().filter(type -> organisation.getType_classeur().contains(type.getId()))
                     .collect(Collectors.toList()));
@@ -478,29 +528,37 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public List<ServiceOrganisation> getServiceGenericOrganisations(LocalAuthority localAuthority, String email) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        // TODO: Add a new call with SIREN for SESILE v4
-        List<ServiceOrganisation> organisations = Arrays.asList(
-                localAuthority.getSesileNewVersion() ?
-                        restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
-                                requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
-                        restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
-                                ServiceOrganisation[].class, email).getBody()
-        );
-
-        return organisations;
-
+        try {
+            return Arrays.asList(
+                    localAuthority.getSesileNewVersion() ?
+                            restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
+                                    requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
+                            restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                                    ServiceOrganisation[].class, email).getBody()
+            );
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public List<ServiceOrganisation> getHeliosServiceOrganisations(LocalAuthority localAuthority, String email) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        List<ServiceOrganisation> organisations = Arrays.asList(
-                localAuthority.getSesileNewVersion() ?
-                        restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
-                                requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
-                        restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
-                                ServiceOrganisation[].class, email).getBody()
-        );
-        List<Integer> types = Arrays.asList(getTypes(localAuthority).getBody()).stream()
+        List<ServiceOrganisation> organisations;
+        try {
+            organisations = Arrays.asList(
+                    localAuthority.getSesileNewVersion() ?
+                            restTemplate.exchange(sesileV4Url + "/api/user/{userEmail}/org/{SIREN}/circuits", HttpMethod.GET,
+                                    requestEntity, ServiceOrganisation[].class, email, localAuthority.getSiren()).getBody() :
+                            restTemplate.exchange(sesileUrl + "/api/user/services/{email}", HttpMethod.GET, requestEntity,
+                                    ServiceOrganisation[].class, email).getBody()
+            );
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return new ArrayList<>();
+        }
+
+        List<Integer> types = getTypes(localAuthority).stream()
                 .filter(type -> type.getNom().equals("Helios")).map(type -> type.getId()).collect(Collectors.toList());
 
         organisations = organisations.stream()
@@ -588,29 +646,49 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             }
             return null;
         }
-
     }
 
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document)
             throws RestClientException, UnsupportedEncodingException {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-
-        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
-                String.class, document).getBody().getBytes("ISO-8859-1");
+        try {
+            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
+                    String.class, document).getBody().getBytes("ISO-8859-1");
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            return null;
+        } catch (NullPointerException e) {
+            LOGGER.error("Receiving no byte from SESILE: {}", e.getMessage());
+            return null;
+        }
     }
 
-    public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur) {
-        LOGGER.debug(classeur.toString());
+    public ResponseEntity<Classeur> postClasseur(LocalAuthority localAuthority, ClasseurRequest classeur,
+            String returnUrl)
+            throws HttpClientErrorException {
         HttpEntity<ClasseurRequest> requestEntity = localAuthority.getSesileNewVersion() ?
-                new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren()), getHeaders(localAuthority)) :
+                new HttpEntity<>(new ClasseurSirenRequest(classeur, localAuthority.getSiren(), returnUrl),
+                        getHeaders(localAuthority)) :
                 new HttpEntity<>(classeur, getHeaders(localAuthority));
-        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
+        try {
+            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            throw e;
+        }
     }
 
-    public ResponseEntity<ClasseurType[]> getTypes(LocalAuthority localAuthority) {
+    public List<ClasseurType> getTypes(LocalAuthority localAuthority) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
-        return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/types/", HttpMethod.GET, requestEntity,
-                ClasseurType[].class);
+        List<ClasseurType> types;
+        try {
+            types = Arrays.asList(restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/types/", HttpMethod.GET, requestEntity,
+                    ClasseurType[].class).getBody());
+        } catch (HttpClientErrorException e) {
+            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            types = new ArrayList<>();
+        }
+        return types;
     }
 
     public Pair<StatusType, String> getSignatureStatus(byte[] file) {
@@ -620,7 +698,17 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
         if (isSigned(simplePesInformation)) {
             SignatureValidation signatureValidation = isValidSignature(simplePesInformation);
-            if (!signatureValidation.isValid()) {
+            Indication indication;
+            try {
+                DetailedReport report = XadesUtils.validateXadesSignature(file);
+                indication = XadesUtils.getCertificateValidationResult(report);
+            } catch (IOException | CertificateException e) {
+                LOGGER.error("Error while verifying the signature: {}", e.getMessage());
+                indication = Indication.TOTAL_FAILED;
+            }
+            LOGGER.debug("Indication: {}", indication.toString());
+            if (!signatureValidation.isValid()
+                    || (!Indication.TOTAL_PASSED.equals(indication) && !Indication.PASSED.equals(indication))) {
                 status = StatusType.SIGNATURE_INVALID;
                 errorMessage = signatureValidation.getSignatureValidationErrors().stream()
                         .map(error -> localesService.getMessage("fr", "pes", "pes.signature_errors." + error.name()))
@@ -629,8 +717,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         } else {
             status = StatusType.SIGNATURE_MISSING;
         }
-        return new Pair<StatusType, String>(status, errorMessage);
+        return new Pair<>(status, errorMessage);
+    }
 
+    public boolean hasSignature(byte[] file) {
+        SimplePesInformation simplePesInformation = computeSimplePesInformation(file);
+        return simplePesInformation.isSigned();
     }
 
     public Optional<GenericDocument> getGenericDocument(Integer fluxId) {
@@ -662,7 +754,25 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     private String getSesileUrl(LocalAuthority localAuthority) {
-        return StringUtils.removeEnd(localAuthority.getSesileNewVersion() ? sesileV4Url : sesileUrl, "/");
+        return getSesileUrl(localAuthority.getSesileNewVersion());
+    }
+
+    private String getSesileUrl(boolean sesileNewVersion) {
+        return StringUtils.removeEnd(sesileNewVersion ? sesileV4Url : sesileUrl, "/");
+    }
+
+    public String getReturnUrl(PesAller pes) {
+        String token = pesService.getToken(pes);
+        return applicationUrl + "/api/pes/sesile/signature-hook/" + token + "/" + pes.getUuid();
+    }
+
+    public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
+        if (status.equals("SIGNED")) {
+            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file.getBytes(),
+                    file.getOriginalFilename());
+        } else {
+            pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
+        }
     }
 
     @Override
@@ -672,15 +782,24 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;
-            Pair<StatusType, String> signatureResult = getSignatureStatus(pes.getAttachment().getFile());
-            pes.setSigned(signatureResult.component1().equals(StatusType.PENDING_SEND));
-            pesService.save(pes);
             if (pes.isPj()) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
-            } else if (!sesileSubscription || pes.isSigned()) {
-                pesService.updateStatus(pes.getUuid(), signatureResult.component1(), signatureResult.component2());
+            } else if (!sesileSubscription || hasSignature(storageService.getAttachmentContent(pes.getAttachment()))) {
+                pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_VALIDATION);
             } else {
                 submitToSignature(pes);
+            }
+        } else if (StatusType.SIGNATURE_VALIDATION.equals(event.getPesHistory().getStatus())) {
+            PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
+            try {
+                signatureService.validatePes(storageService.getAttachmentContent(pes.getAttachment()));
+                pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
+            } catch (SignatureException e) {
+                LOGGER.error("Error while validating signature: {}", e.getMessage());
+                pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_INVALID, localesService.getMessage("fr",
+                        "pes", "pes.signature_errors." + e.getMessage()));
+            } catch (MissingSignatureException e) {
+                pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_MISSING);
             }
         }
     }

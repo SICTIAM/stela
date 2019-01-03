@@ -42,7 +42,10 @@ class CertificateInfos extends Component {
         if (this.state.certificate.status === 'VALID') {
             _fetchWithAuthzHandling({ url: '/api/admin/certificate', method: 'POST', context: this.context })
                 .then(checkStatus)
-                .then(() => _addNotification(notifications.profile.certificatePairedSuccess))
+                .then(() => {
+                    _addNotification(notifications.profile.certificatePairedSuccess)
+                    this.props.onPairCertification()
+                })
                 .catch(response => {
                     if (response.status === 412) {
                         _addNotification(notifications.profile.certificateNotValid)
@@ -75,11 +78,11 @@ class CertificateInfos extends Component {
                     </Button>
                 )}
                 {isCertificatePaired && (
-                    <span style={{ float: 'right', fontStyle: 'italic' }} onClick={this.pairCertificate}>
+                    <span style={{ float: 'right', fontStyle: 'italic' }}>
                         {t('profile.certificate.paired')}
                     </span>
                 )}
-                <h2 style={headerStyle}>{t('profile.certificate.title')}</h2>
+                <h2 style={headerStyle} id="certificate">{t('profile.certificate.title')}</h2>
 
                 {isPresent && (
                     <CertificateInfosUI certificate={certificate} />

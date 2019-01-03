@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import { NavLink } from 'react-router-dom'
 import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
+import { checkStatus } from '../_util/utils'
+import { notifications } from '../_util/Notifications'
 
 import { getRightsFromGroups, rightsFeatureResolver, rightsModuleResolver, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils'
 
@@ -10,7 +12,10 @@ class MenuBar extends Component {
     static contextTypes = {
         isLoggedIn: PropTypes.bool,
         t: PropTypes.func,
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _addNotification: PropTypes.func,
+        isMenuOpened: PropTypes.bool,
+        _openMenu: PropTypes.func
     }
     state = {
         profile: {
@@ -23,10 +28,18 @@ class MenuBar extends Component {
         reportUrl: ''
     }
     componentDidMount() {
-        const { _fetchWithAuthzHandling } = this.context
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile' })
+            .then(checkStatus)
             .then(response => response.json())
             .then(profile => this.setState({ profile }, this.fetchAllRights))
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
         _fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
             .then(response => response.text())
             .then(reportUrl => this.setState({ reportUrl }))
@@ -40,17 +53,19 @@ class MenuBar extends Component {
             })
     }
     render() {
-        const { isLoggedIn, t } = this.context
+        const { isLoggedIn, t, isMenuOpened, _openMenu } = this.context
         const { reportUrl } = this.state
         const rights = getRightsFromGroups(this.state.profile.groups)
         const localAuthoritySlug = getLocalAuthoritySlug()
         const multiPath = getMultiPahtFromSlug()
         return (
-            <Menu style={{ backgroundColor: 'white' }} className="mainMenu anatra" fixed="left" secondary vertical>
+            <Menu style={{ backgroundColor: 'white' }} className={'mainMenu primary' + (isMenuOpened ? ' open' : '')} fixed="left" secondary vertical onClick={() => {isMenuOpened && _openMenu()}}>
                 <div className="mainMenus">
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name="checkmark box" size="large" />
-                        <Menu.Header>{t('menu.acte.legality_control')}</Menu.Header>
+                        <Menu.Header className="primary">
+                            {t('menu.acte.legality_control')}
+                            <Icon name="checkmark box" className="float-right" size="large" />
+                        </Menu.Header>
                         <Menu.Menu>
                             {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) && localAuthoritySlug) && (
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/actes/nouveau`}>
@@ -75,8 +90,10 @@ class MenuBar extends Component {
 
                     {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'PES')) && (
                         <Menu.Item style={{ width: '100%' }}>
-                            <Icon name="calculator" size="large" />
-                            <Menu.Header>{t('menu.pes.accounting_flow')}</Menu.Header>
+                            <Menu.Header className="primary">
+                                {t('menu.pes.accounting_flow')}
+                                <Icon name="calculator" className="float-right" size="large" />
+                            </Menu.Header>
                             <Menu.Menu>
                                 {rightsFeatureResolver(rights, ['PES_DEPOSIT']) && (
                                     <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/pes/nouveau`}>
@@ -99,8 +116,10 @@ class MenuBar extends Component {
 
                     {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'CONVOCATION')) && (
                         <Menu.Item style={{ width: '100%' }}>
-                            <Icon name="calendar outline" size="large" />
-                            <Menu.Header>{t('menu.convocation.convocation')}</Menu.Header>
+                            <Menu.Header className="primary">
+                                {t('menu.convocation.convocation')}
+                                <Icon name="calendar outline" className="float-right" size="large" />
+                            </Menu.Header>
                             <Menu.Menu>
                                 <Menu.Item>
                                     {t('menu.convocation.send_a_convocation')}
@@ -116,13 +135,15 @@ class MenuBar extends Component {
                     )}
 
                     <Menu.Item style={{ width: '100%' }}>
-                        <Icon name="help" size="large" />
-                        <Menu.Header>{t('menu.informations.title')}</Menu.Header>
+                        <Menu.Header className="primary">
+                            {t('menu.informations.title')}
+                            <Icon name="help" size="large" className="float-right"/>
+                        </Menu.Header>
                         <Menu.Menu>
                             {(isLoggedIn && localAuthoritySlug && reportUrl) && (
                                 <a className="item" href={reportUrl} target="_blank">{t('menu.informations.report')}</a>
                             )}
-                            <a className="item" onClick={this.mailToContact}>{t('menu.informations.contact')}</a>
+                            <button style={{width: '100%', textAlign: 'left', cursor: 'pointer'}} className="item link" onClick={this.mailToContact}>{t('menu.informations.contact')}</button>
                             <Menu.Item as={NavLink} to={`${multiPath}/mentions-legales`}>
                                 {t('menu.informations.legal_notice')}
                             </Menu.Item>
@@ -141,7 +162,7 @@ class MenuBar extends Component {
                     </Menu.Item>
                     <Menu.Item style={{ textAlign: 'center', width: '100%' }}>
                         Créé avec ❤ par le{' '}
-                        <a style={{ color: 'unset', fontWeight: 'bold' }} href="https://www.sictiam.fr/" target="_blank" rel="noopener noreferrer">
+                        <a style={{ fontWeight: 'bold' }} href="https://www.sictiam.fr/" target="_blank" rel="noopener noreferrer">
                             SICTIAM
                         </a>
                     </Menu.Item>

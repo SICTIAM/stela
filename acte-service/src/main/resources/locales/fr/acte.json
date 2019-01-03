@@ -20,7 +20,7 @@
       "NOTIFICATION_SENT": "Notification envoyée au déposant",
       "FILE_ERROR": "Erreur sur les fichiers de l'acte",
       "COURRIER_SIMPLE_RECEIVED": "Courrier simple reçu",
-      "DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED": "Réponse au courrier simple",
+      "DEMANDE_PIECE_COMPLEMENTAIRE_RECEIVED": "Demande de pièce complétementaire reçue",
       "LETTRE_OBSERVATION_RECEIVED": "Lettre d'observation reçue",
       "DEFERE_RECEIVED": "Déféré reçu",
       "REJET_LETTRE_OBSERVATION_ARCHIVE_CREATED": "Archive créée pour le rejet de la lettre d'observation",
@@ -45,9 +45,9 @@
       "AR_LETTRE_OBSERVATION_SENT": "AR pour lettre d'observation transmis",
       "AR_PIECE_COMPLEMENTAIRE_SENT": "AR pour pièces complémentaires transmis",
       "REPONSE_COURRIER_SIMPLE_SENT": "Réponse au courrier simple transmise",
-      "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission à la lettre d'observation transmis",
+      "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission des pièces complémentaires transmis",
       "TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Pièces complémentaires transmises",
-      "REFUS_EXPLICITE_LETTRE_OBSERVATION_SENT": "Refus transmission des pièces complémentaires transmis",
+      "REFUS_EXPLICITE_LETTRE_OBSERVATION_SENT": "Refus transmission de la lettre d'observation transmis",
       "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise"
     },
     "signature": {
@@ -62,7 +62,6 @@
       "SIGNATURE_POLICY_NOT_AVAILABLE": "Politique de signature non disponible",
       "TRY_LATER": "Essayez plus tard",
       "REVOKED_CA_NO_POE": "Autorité de certification revoquée (NO_POE)",
-      "CHAIN_CONSTRAINTS_FAILURE": "La signature est invalide",
       "CRYPTO_CONSTRAINTS_FAILURE": "La signature n'est pas cryptographiquement correcte",
       "SIGNED_DATA_NOT_FOUND": "Aucune donnée de signature trouvée",
       "HASH_FAILURE": "Echec de hachage",
@@ -87,6 +86,8 @@
     "fields": {
       "number": "Numéro d'acte",
       "decision": "Date de décision",
+      "decision_from": "Date de décision début",
+      "decision_to": "Date de décision fin",
       "nature": "Nature",
       "code": "Code matière",
       "acteAttachment": "Fichier acte",
@@ -97,7 +98,8 @@
       "objet": "Objet",
       "status": "Statut",
       "group": "Visible par",
-      "agent": "Déposé par"
+      "agent": "Déposé par",
+      "multipleChannels": "Envoi des pièces jointes par des canaux multiples"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
@@ -109,7 +111,9 @@
       "public": "Affichage de cet acte dans le registre des délibérations",
       "publicWebsite": "Affichage de cet acte sur votre site internet si vous avez activé cette option",
       "objet": "L'objet/titre de l'acte (texte libre)",
-      "group": "Groupe de visibilité auquel associer la télétransmission de l'acte"
+      "group": "Groupe de visibilité auquel associer la télétransmission de l'acte",
+      "annexes_size": "Taille totale des fichiers",
+      "multipleChannels": "Envoi des pièces jointes par des canaux multiples"
     },
     "history": {
       "message": "Anomalie envoyée par le MIAT"
@@ -119,6 +123,7 @@
     },
     "list": {
       "title": "Liste des actes",
+      "summary": "Liste de vos actes enregistrés",
       "download_all_ACKs": "Télécharger tous les justificatifs d'AR",
       "download_selected_ACKs": "Télécharger les justificatifs d'AR de la sélection",
       "download_all_CSV": "Télécharger toute la liste des actes",
@@ -196,6 +201,7 @@
       "choose": "Choisir...",
       "common_fields": "Champs communs",
       "add_an_acte": "Ajouter un acte",
+      "delete_an_acte": "Supprimer l'acte",
       "batch_title_placeholder": "Nouvel acte...",
       "PJ_types": "Types de pièce jointe...",
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",
@@ -207,7 +213,7 @@
       "acte": {
         "title": "Module Acte",
         "local_authority_settings": {
-          "title": "Paramétrage des du module Acte de la collectivité",
+          "title": "Paramétrage du module Acte de la collectivité",
           "general_informations": "Informations générales",
           "MIAT_transmission": "Transmission MIAT",
           "askClassification": "Demander une mise à jour",

@@ -1,0 +1,44 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+.ui.menu .header.primary {
+    color: @primaryColor;
+}
+
+.ui.menu .header.secondary {
+    color: @secondaryColor;
+}
+
+.ui.vertical.menu .menu .item:active {
+    color: @darkTextColor;
+}
+
+.ui.menu .item.primary {
+    color: @primaryColor;
+}
+
+/*--------------
+   Pagination
+---------------*/
+.ui.pagination.menu a.item {
+    color: rgba(0,0,0,.87);
+}
+.ui.menu.pagination a.item:focus {
+    background: rgba(0,0,0,.03);
+}
+
+/*--------------
+     Customs
+---------------*/
+.ui.menu.secondary.topBar {
+    background-color: @white;
+    height: 4.5em;
+    box-shadow: 0 1px 2px 0 rgba(34, 36, 38, 0.15);
+}
+.ui.menu.secondary.topBar.primary {
+    border-bottom: 2px solid @primaryColor;
+}
+.ui.menu.topBar.secondary {
+    border-bottom: 2px solid @secondaryColor;
+}

@@ -38,12 +38,13 @@ class ActeList extends Component {
         },
         limit: 25,
         offset: 0,
+        currentPage: 0,
         fetchStatus: ''
     }
     componentDidMount() {
         const itemPerPage = localStorage.getItem('itemPerPage')
-        if (!itemPerPage) localStorage.setItem('itemPerPage', 25)
-        else this.setState({ limit: 25 }, this.submitForm)
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
     }
     handleFieldChange = (field, value) => {
         const search = this.state.search
@@ -62,7 +63,7 @@ class ActeList extends Component {
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, () => this.submitForm())
+        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
     }
     sort = (clickedColumn) => {
         const { column, direction } = this.state
@@ -73,7 +74,7 @@ class ActeList extends Component {
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
     }
     updateItemPerPage = (limit) => {
-        this.setState({ limit }, this.submitForm)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     submitForm = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -175,7 +176,8 @@ class ActeList extends Component {
                 pageCount={pageCount}
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage} />
+                updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage} />
         return (
             <Page title={t('acte.list.title')}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
@@ -189,15 +191,16 @@ class ActeList extends Component {
 
                             <Form onSubmit={this.submitForm}>
                                 <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
-                                    <input id='number' value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
+                                    <input id='number' aria-label={t('acte.fields.number')} value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                                    <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                                    <input id='objet' aria-label={t('acte.fields.objet')} value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                                     <Form.Group style={{ marginBottom: 0 }} widths='equal'>
                                         <FormField htmlFor='decisionFrom' label={t('api-gateway:form.from')}>
                                             <InputDatetime id='decisionFrom'
+                                                ariaLabel={t('api-gateway:form.decision_from')}
                                                 timeFormat={false}
                                                 value={search.decisionFrom}
                                                 onChange={date => this.handleFieldChange('decisionFrom', date)} />
@@ -205,19 +208,20 @@ class ActeList extends Component {
                                         <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
                                             <InputDatetime id='decisionTo'
                                                 timeFormat={false}
+                                                ariaLabel={t('api-gateway:form.decision_to')}
                                                 value={search.decisionTo}
                                                 onChange={date => this.handleFieldChange('decisionTo', date)} />
                                         </FormField>
                                     </Form.Group>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='nature' label={t('acte.fields.nature')}>
-                                    <select id='nature' value={search.nature} onChange={e => this.handleFieldChange('nature', e.target.value)}>
+                                    <select id='nature' value={search.nature} onBlur={e => this.handleFieldChange('nature', e.target.value)} onChange={e => this.handleFieldChange('nature', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all_feminine')}</option>
                                         {natureOptions}
                                     </select>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='status' label={t('acte.fields.status')}>
-                                    <select id='status' value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <select id='status' value={search.status} onBlur={e => this.handleFieldChange('status', e.target.value)} onChange={e => this.handleFieldChange('status', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all')}</option>
                                         {statusOptions}
                                     </select>
@@ -228,6 +232,7 @@ class ActeList extends Component {
                             </Form>
                         </AdvancedSearch>
                         <StelaTable
+                            title={t('acte.list.summary')}
                             data={this.state.actes}
                             metaData={metaData}
                             header={true}
@@ -239,7 +244,7 @@ class ActeList extends Component {
                                 downloadACKsSelectOption,
                                 downloadCSVSelectOption
                             ]}
-                            link={`/${localAuthoritySlug}/actes/`}
+                            link={`/${localAuthoritySlug}/actes/liste/`}
                             linkProperty='uuid'
                             noDataMessage='Aucun acte'
                             keyProperty='uuid'

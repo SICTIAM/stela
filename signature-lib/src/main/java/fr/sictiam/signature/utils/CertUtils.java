@@ -43,7 +43,6 @@ public class CertUtils {
 
     public static CertificateReports validateCertificate(byte[] file) throws IOException, CertificateException {
         CertificateToken certificate = getCertificate(file);
-
         CertificateValidator certificateValidator = CertificateValidator.fromCertificate(certificate);
         certificateValidator.setCertificateVerifier(getCertificateVerifier());
         certificateValidator.setValidationTime(new Date());
@@ -65,7 +64,7 @@ public class CertUtils {
         return indicationResult;
     }
 
-    private static TrustedListsCertificateSource getTrustedListsCertificateSource() throws IOException {
+    public static TrustedListsCertificateSource getTrustedListsCertificateSource() throws IOException {
         TrustedListsCertificateSource certificateSource = new TrustedListsCertificateSource();
 
         // FIXME: signature/keystore.p12 must be in the ressources directory of the module using this lib
@@ -94,8 +93,7 @@ public class CertUtils {
 
     public static CertificateVerifier getCertificateVerifier() throws IOException, CertificateException {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-        //certificateVerifier.setTrustedCertSource(getTrustedListsCertificateSource());
-        certificateVerifier.setTrustedCertSource(loadLocaleCertificateSource("/signature/CA_RGS3.zip"));
+        certificateVerifier.setTrustedCertSource(loadLocaleCertificateSource());
 
         OnlineCRLSource onlineCRLSource = new OnlineCRLSource();
         onlineCRLSource.setDataLoader(dataloader);
@@ -110,11 +108,29 @@ public class CertUtils {
         return certificateVerifier;
     }
 
-    public static CommonTrustedCertificateSource loadLocaleCertificateSource(String fileSrc)
-            throws IOException, CertificateException {
-        CommonTrustedCertificateSource certificateSource = new CommonTrustedCertificateSource();
+    /*
+        public static CertificateVerifier getCertificateVerifier(CertificateSource certificateSource,
+                List<String> crls) throws IOException {
+            CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
+            certificateVerifier.setTrustedCertSource(certificateSource);
 
-        ClassPathResource stream = new ClassPathResource(fileSrc);
+            OfflineCRLSource offlineCRLSource = signature.getCRLSource();
+            certificateVerifier.setCrlSource(offlineCRLSource);
+
+            OnlineOCSPSource onlineOCSPSource = new OnlineOCSPSource();
+            onlineOCSPSource.setDataLoader(new OCSPDataLoader());
+            certificateVerifier.setOcspSource(onlineOCSPSource);
+
+            certificateVerifier.setDataLoader(dataloader);
+            return certificateVerifier;
+        }
+    */
+    public static CommonTrustedCertificateSource loadLocaleCertificateSource()
+            throws IOException, CertificateException {
+        String zipSource = "/signature/CA_RGS3.zip";
+        LOGGER.info("Loading zip source: {}", zipSource);
+        CommonTrustedCertificateSource certificateSource = new CommonTrustedCertificateSource();
+        ClassPathResource stream = new ClassPathResource(zipSource);
         CertificateContainer.fromZipURL(stream.getInputStream()).getAllCertificates()
                 .forEach(certif -> certificateSource.addCertificate(new CertificateToken(certif)));
         return certificateSource;

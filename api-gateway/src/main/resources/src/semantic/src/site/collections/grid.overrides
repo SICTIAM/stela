@@ -1,0 +1,18 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+.ui.grid .column.inline-grid {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.ui.grid .wide.column .simpleInput {
+    width: 31.25%;
+    margin-bottom: 0;
+}
+
+.inline .ui.grid>.column.inline-grid:not(.row) {
+    padding-top: 0;
+    padding-bottom: 0;
+}

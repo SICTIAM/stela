@@ -25,6 +25,7 @@ import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.LocalesService;
 import fr.sictiam.stela.pesservice.service.NotificationService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.mail.util.MimeMessageParser;
@@ -127,6 +128,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
     @Autowired
     private ExternalRestService externalRestService;
 
+    @Autowired
+    StorageService storageService;
+
     @Rule
     public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
@@ -189,7 +193,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
             }
-            this.restTemplate.getRestTemplate()
+            restTemplate.getRestTemplate()
                     .setInterceptors(Collections.singletonList((request1, body, execution) -> {
 
                         String jwtToken = Jwts.builder().setSubject(profile1)
@@ -358,12 +362,12 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
 
             assertThat(pesService.getByUuid(pesAller.getUuid()).getAttachment(), notNullValue());
             assertThat(attachmentRepository.findByUuid(pesAttachmentUuid).isPresent(), is(true));
-            assertThat(pesHistoryRepository.findByUuid(arUuid).get().getFile(), notNullValue());
+            assertThat(storageService.getAttachmentContent(pesHistoryRepository.findByUuid(arUuid).get().getAttachment()), notNullValue());
 
             archiverService.deletePesFiles(pesAller);
             assertThat(pesService.getByUuid(pesAller.getUuid()).getAttachment(), nullValue());
             assertThat(attachmentRepository.findByUuid(pesAttachmentUuid).isPresent(), is(false));
-            assertThat(pesHistoryRepository.findByUuid(arUuid).get().getFile(), nullValue());
+            assertThat(storageService.getAttachmentContent(pesHistoryRepository.findByUuid(arUuid).get().getAttachment()), nullValue());
         } catch (IOException e) {
             LOGGER.error("Error while trying to create a new PesAller");
         }
@@ -382,7 +386,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        Attachment pesSent = new Attachment(targetArray, filename + ".xml", in.available());
+        Attachment pesSent = storageService.createAttachment(filename + ".xml", targetArray);
         pes.setAttachment(pesSent);
         pes = pesService.save(pes);
         return pes;
@@ -397,7 +401,7 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        Attachment pesSent = new Attachment(targetArray, "30002-2015-P-DN-16-1429552171140-sign.xml", in.available());
+        Attachment pesSent = storageService.createAttachment("30002-2015-P-DN-16-1429552171140-sign.xml", targetArray);
         pes.setAttachment(pesSent);
         pes = pesService.save(pes);
         return pes;
@@ -479,8 +483,9 @@ public class PesServiceIntegrationTests extends BaseIntegrationTests {
         InputStream in = new ClassPathResource("data/006102_180625141825-ACK-F2521211_A00FLRNS_OK.xml").getInputStream();
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
+        Attachment attachment = storageService.createAttachment("006102_180625141825-ACK-F2521211_A00FLRNS_OK.xml", targetArray);
         acteHistories.add(new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
-                LocalDateTime.now(), targetArray, "006102_180625141825-ACK-F2521211_A00FLRNS_OK.xml"));
+                LocalDateTime.now(), attachment));
         pesAller.setPesHistories(acteHistories);
         return pesRepository.save(pesAller);
     }

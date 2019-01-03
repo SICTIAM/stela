@@ -13,6 +13,7 @@ import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
+import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.soap.model.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -58,17 +59,19 @@ public class PesEndpoint {
     private final LocalAuthorityService localAuthorityService;
     private final SoapReturnGenerator soapReturnGenerator;
     private final ExternalRestService externalRestService;
+    private final StorageService storageService;
     private ObjectFactory objectFactory;
 
     public PesEndpoint(PesAllerService pesAllerService, LocalAuthorityService localAuthorityService,
             SoapReturnGenerator soapReturnGenerator, ExternalRestService externalRestService,
-            PesRetourService pesRetourService) {
+            PesRetourService pesRetourService, StorageService storageService) {
         this.pesAllerService = pesAllerService;
         this.localAuthorityService = localAuthorityService;
         this.soapReturnGenerator = soapReturnGenerator;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
-        this.objectFactory = new ObjectFactory();
+        this.storageService = storageService;
+        objectFactory = new ObjectFactory();
     }
 
     public AuthHeader extractHeader(SoapHeaderElement soapHeaderElement) {
@@ -229,11 +232,12 @@ public class PesEndpoint {
         TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
 
         try {
-            TarGzUtils.addEntry(pesAller.getAttachment().getFilename(), pesAller.getAttachment().getFile(), taos);
+
+            TarGzUtils.addEntry(pesAller.getAttachment().getFilename(), storageService.getAttachmentContent(pesAller.getAttachment()), taos);
 
             fileHistories.forEach(pesHistory -> {
                 try {
-                    TarGzUtils.addEntry(pesHistory.getFileName(), pesHistory.getFile(), taos);
+                    TarGzUtils.addEntry(pesHistory.getAttachment().getFilename(), storageService.getAttachmentContent(pesHistory.getAttachment()), taos);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage());
                 }
@@ -278,8 +282,8 @@ public class PesEndpoint {
 
         if (peshistory.isPresent()) {
             Map<String, String> returnMap = new HashMap<>();
-            returnMap.put("chaine_archive", Base64.encode(peshistory.get().getFile()));
-            returnMap.put("filename", peshistory.get().getFileName());
+            returnMap.put("chaine_archive", Base64.encode(storageService.getAttachmentContent(peshistory.get().getAttachment())));
+            returnMap.put("filename", peshistory.get().getAttachment().getFilename());
 
             returnObject.setJsonGetACKAller(soapReturnGenerator.generateReturn("OK", returnMap));
         }
@@ -441,11 +445,11 @@ public class PesEndpoint {
                     } catch (UnsupportedEncodingException | Base64DecodingException e) {
                         LOGGER.error(e.getMessage());
                     }
-                    return new Attachment(byteArray, name, byteArray.length);
+                    return new Attachment(name, byteArray);
                 }).collect(Collectors.toList());
 
                 Attachment mainAttachement = attachments.remove(0);
-                if (pesAllerService.checkVirus(mainAttachement.getFile())) {
+                if (pesAllerService.checkVirus(mainAttachement.getContent())) {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "VIRUS_FOUND"));
                     return returnObject;
                 }
@@ -457,16 +461,16 @@ public class PesEndpoint {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "INVALID_DATAS"));
                     return returnObject;
                 }
-                pesAller.setAttachment(mainAttachement);
+
                 pesAller.setCreation(LocalDateTime.now());
-                pesAller = pesAllerService.populateFromByte(pesAller, mainAttachement.getFile());
+
                 if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                     returnObject.setRetour(soapReturnGenerator.generateReturn("NOK", "DUPLICATE_FILE"));
                     return returnObject;
                 }
 
                 pesAllerService.create(localAuthorityService.getByUuid(sendGroup).getGenericProfileUuid(), sendGroup,
-                        pesAller);
+                        pesAller, mainAttachement.getFilename(), mainAttachement.getContent());
 
                 returnObject.setRetour(soapReturnGenerator.generateReturn("OK", "_HELIOS_OK_INSERT"));
             }

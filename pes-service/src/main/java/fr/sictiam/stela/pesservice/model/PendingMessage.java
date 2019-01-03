@@ -21,43 +21,15 @@ public class PendingMessage {
 
     private String pesUuid;
 
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime date;
-
-    @Column(length = 1024)
-    private String message;
-    private byte[] file;
-
-    private String fileName;
-
     public PendingMessage() {
     }
 
     public PendingMessage(PesHistory pesHistory) {
         this.pesUuid = pesHistory.getPesUuid();
-        this.date = pesHistory.getDate();
-        this.file = pesHistory.getFile();
-        this.fileName = pesHistory.getFileName();
     }
 
     public String getPesUuid() {
         return pesUuid;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public String getFileName() {
-        return fileName;
     }
 
 }

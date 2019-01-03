@@ -99,7 +99,7 @@ class Acte extends Component {
         const { t } = this.context
         const { acteACK } =this.state.acteUI
         return (acteACK && isPDF(filename)) ? <Fragment><LinkFile url={`${url}/stamped`} text={filename} /> (<LinkFile url={url} text={t('acte.page.original')} />)</Fragment>
-            : <LinkFile url={url} text={filename} />
+            : <LinkFile url={url} text={filename} ariaLabel={'Download '+filename}/>
     }
     render() {
         const { t } = this.context
@@ -129,7 +129,7 @@ class Acte extends Component {
                     position={this.state.acteUI.stampPosition}
                     handleChange={this.handleChangeDeltaPosition} />
                 <div style={{ textAlign: 'center' }}>
-                    <a className='ui blue icon button' target='_blank'
+                    <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
                         href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
                         {t('api-gateway:form.download')}
                     </a>
@@ -145,12 +145,12 @@ class Acte extends Component {
         )
         const canRepublish = lastHistory && !this.state.republished && (anomalies.includes(lastHistory.status) ||
             (lastHistory.status === 'SENT' && moment(lastHistory.date).isSameOrBefore(moment().subtract(hoursBeforeResendActe, 'hour'))))
-        const dropdownButton = <Button basic color='blue'>{t('api-gateway:form.download')}</Button>
+        const dropdownButton = <Button basic color='primary'>{t('api-gateway:form.download')}</Button>
 
         return (
             <Page title={acte.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
-                    <Anomaly header={t('acte.history.message')} lastHistory={lastHistory} />
+                    <Anomaly header={lastHistory && t('acte.status.'+lastHistory.status)}  lastHistory={lastHistory} />
 
                     {isDefere && (
                         <Defere acteUuid={this.props.uuid} acteHistories={this.state.acteUI.acte.acteHistories} />
@@ -166,7 +166,7 @@ class Acte extends Component {
                     )}
 
                     <Segment>
-                        <Label className='labelStatus' color={acte.lastHistoryStatus ? this.getStatusColor(acte.lastHistoryStatus) : 'blue'} ribbon>
+                        <Label className='labelStatus' color={acte.lastHistoryStatus ? this.getStatusColor(acte.lastHistoryStatus) : 'primary anatra'} ribbon>
                             {acte.lastHistoryStatus && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
                         </Label>
                         <div style={{ textAlign: 'right' }}>
@@ -180,11 +180,11 @@ class Acte extends Component {
                                         </Dropdown.Item>
                                     )}
                                     {acteACK && (
-                                        <a className='item' href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
+                                        <a className='item' aria-label={t('acte.page.download_justificative')} href={`/api/acte/${acte.uuid}/AR_${acte.uuid}.pdf`} target='_blank'>
                                             {t('acte.page.download_justificative')}
                                         </a>
                                     )}
-                                    <a className='item' href={`/api/acte/${acte.uuid}/file`} target='_blank'>
+                                    <a className='item' aria-label={t('acte.page.download_original')} href={`/api/acte/${acte.uuid}/file`} target='_blank'>
                                         {t('acte.page.download_original')}
                                     </a>
                                 </Dropdown.Menu>
@@ -234,13 +234,16 @@ class Acte extends Component {
                                 </List>
                             </Field>
                         )}
-                        <Field htmlFor="public" label={t('acte.fields.public')}>
-                            <Checkbox id="public" checked={acte.public} disabled />
+                        <Field htmlFor='multipleChannels' label={t('acte.fields.multipleChannels')}>
+                            <Checkbox label={<div className='box'></div>} id="multipleChannels" checked={acte.multipleChannels} disabled />
+                        </Field>
+                        <Field htmlFor='public' label={t('acte.fields.public')}>
+                            <Checkbox label={<div className='box'></div>} id="public" checked={acte.public} disabled />
                         </Field>
 
                         <Grid>
-                            <Grid.Column width={4}><label htmlFor="publicWebsite">{t('acte.fields.publicWebsite')}</label></Grid.Column>
-                            <Grid.Column width={12}><Checkbox id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
+                            <Grid.Column width={4}><label htmlFor='publicWebsite'>{t('acte.fields.publicWebsite')}</label></Grid.Column>
+                            <Grid.Column width={12}><Checkbox label={<div className='box'></div>} id="publicWebsite" checked={acte.publicWebsite} disabled /></Grid.Column>
                         </Grid>
                     </Segment>
                     <History

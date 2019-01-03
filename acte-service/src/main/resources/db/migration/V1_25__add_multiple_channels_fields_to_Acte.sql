@@ -1,0 +1,1 @@
+ALTER TABLE acte ADD COLUMN multiple_channels boolean not null default false;

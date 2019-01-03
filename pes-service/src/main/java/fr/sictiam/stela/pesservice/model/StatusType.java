@@ -2,10 +2,13 @@ package fr.sictiam.stela.pesservice.model;
 
 public enum StatusType {
     CREATED("CREATED", false),
+    CREATION_IN_PROGRESS("CREATION_IN_PROGRESS", false),
     RECREATED("RECREATED", false),
     PENDING_SIGNATURE("PENDING_SIGNATURE", false),
+    SIGNATURE_VALIDATION("SIGNATURE_VALIDATION", false),
     SIGNATURE_INVALID("SIGNATURE_INVALID", true),
     SIGNATURE_MISSING("SIGNATURE_MISSING", true),
+    CLASSEUR_DELETED("CLASSEUR_DELETED", false),
     CLASSEUR_WITHDRAWN("CLASSEUR_WITHDRAWN", false),
     PENDING_SEND("PENDING_SEND", false),
     SENT("SENT", false),
@@ -32,11 +35,11 @@ public enum StatusType {
     }
 
     public boolean isAnomaly() {
-        return this.anomaly;
+        return anomaly;
     }
 
     @Override
     public String toString() {
-        return this.name;
+        return name;
     }
 }

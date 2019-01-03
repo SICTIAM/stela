@@ -211,9 +211,14 @@ public class LocalAuthorityService {
 
             return (attachmentType.getCode().startsWith("99"))
                     || ((materialCode1.equals(firstChar) || firstChar.equals("0"))
-                            && (materialCode2.equals(secondChar) || secondChar.equals("0")));
+                    && (materialCode2.equals(secondChar) || secondChar.equals("0")));
         }).collect(Collectors.toSet());
         return attachmentTypes;
+    }
+
+    public Boolean hasAttachmentTypes(String localAuthorityUuid) {
+        LocalAuthority localAuthority = getByUuid(localAuthorityUuid);
+        return !localAuthority.getAttachmentTypeReferencials().isEmpty();
     }
 
     public String getCodeMatiereLabel(String localAuthorityUuid, String codeMatiereKey) {

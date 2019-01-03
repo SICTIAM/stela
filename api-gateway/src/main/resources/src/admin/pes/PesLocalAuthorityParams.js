@@ -152,7 +152,22 @@ class PesLocalAuthorityParams extends Component {
         const url = `/api/pes/localAuthority/${this.state.fields.uuid}`
         _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.context })
             .then(checkStatus)
-            .then(() => _addNotification(notifications.admin.localAuthorityUpdate))
+            .then(() => _addNotification(notifications.admin.localAuthorityPesUpdate))
+            .catch(response => {
+                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
+            })
+    }
+    verifyTokens = e => {
+        e.preventDefault()
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        const data = new FormData()
+        data.append('token', this.state.fields.token)
+        data.append('secret', this.state.fields.secret)
+        data.append('sesileNewVersion', this.state.fields.sesileNewVersion)
+        _fetchWithAuthzHandling({ url: '/api/pes/sesile/verify-tokens', method: 'POST', body: data, context: this.context })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(tokenValid => _addNotification(tokenValid ? notifications.admin.sesileValidTokens : notifications.admin.sesileInvalidTokens))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
@@ -175,7 +190,7 @@ class PesLocalAuthorityParams extends Component {
                 <Segment>
                     <Form onSubmit={this.submitForm}>
 
-                        <h2>{t('admin.modules.pes.local_authority_settings.title')}</h2>
+                        <h2 className='secondary'>{t('admin.modules.pes.local_authority_settings.title')}</h2>
                         <Field htmlFor='serverCode' label={t('admin.modules.pes.local_authority_settings.serverCode')}>
                             <Dropdown compact search selection
                                 id='serverCode'
@@ -199,7 +214,7 @@ class PesLocalAuthorityParams extends Component {
                             </Button>
                         </Field>
 
-                        <h2>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
+                        <h2 className='secondary'>{t('admin.modules.pes.local_authority_settings.paull_parameters')}</h2>
                         <Field htmlFor='genericProfileUuid' label={t('admin.modules.pes.local_authority_settings.genericProfileUuid')}>
                             <Dropdown compact search selection
                                 id='genericProfileUuid'
@@ -235,10 +250,15 @@ class PesLocalAuthorityParams extends Component {
                                         required={this.state.fields.sesileSubscription}
                                         onChange={this.sesileConfigurationChange} />
                                 </Field>
+                                <Field htmlFor='verifyTokens' label={t('admin.modules.pes.local_authority_settings.sesile.verifyTokens')}>
+                                    <Button id='verifyTokens' basic color='grey' onClick={this.verifyTokens}>
+                                        {t('api-gateway:form.verify')}
+                                    </Button>
+                                </Field>
                             </Fragment>
                         )}
 
-                        <h2>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
+                        <h2 className='secondary'>{t('admin.modules.pes.local_authority_settings.archive_parameters')}</h2>
                         <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
                             <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated}
                                 onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />

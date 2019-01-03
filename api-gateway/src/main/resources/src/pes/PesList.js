@@ -34,13 +34,14 @@ class PesList extends Component {
         direction: '',
         limit: 25,
         offset: 0,
+        currentPage: 0,
         fetchStatus: ''
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling } = this.context
         const itemPerPage = localStorage.getItem('itemPerPage')
-        if (!itemPerPage) localStorage.setItem('itemPerPage', 25)
-        else this.setState({ limit: 25 }, this.submitForm)
+        if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
+        else this.setState({ limit: parseInt(itemPerPage, 10) }, this.submitForm)
         _fetchWithAuthzHandling({ url: '/api/pes/statuses' })
             .then(response => response.json())
             .then(json => this.setState({ pesStatuses: json }))
@@ -78,7 +79,7 @@ class PesList extends Component {
     }
     handlePageClick = data => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, () => this.submitForm())
+        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
     }
     sort = clickedColumn => {
         const { column, direction } = this.state
@@ -89,7 +90,7 @@ class PesList extends Component {
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
     }
     updateItemPerPage = limit => {
-        this.setState({ limit }, this.submitForm)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     negativeResolver = pes => anomalies.includes(pes.lastHistoryStatus)
     render() {
@@ -121,6 +122,7 @@ class PesList extends Component {
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
                 updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage}
             />
         )
         return (
@@ -149,7 +151,7 @@ class PesList extends Component {
                                     </Form.Group>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor="status" label={t('pes.fields.status')} >
-                                    <select id="status" value={search.status} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <select id="status" value={search.status} onBlur={e => this.handleFieldChange('status', e.target.value)} onChange={e => this.handleFieldChange('status', e.target.value)}>
                                         <option value="">{t('api-gateway:form.all')}</option>
                                         {statusOptions}
                                     </select>
@@ -167,7 +169,7 @@ class PesList extends Component {
                             metaData={metaData}
                             header={true}
                             search={false}
-                            link={`/${localAuthoritySlug}/pes/`}
+                            link={`/${localAuthoritySlug}/pes/liste/`}
                             linkProperty="uuid"
                             noDataMessage={t('pes.list.empty')}
                             keyProperty="uuid"

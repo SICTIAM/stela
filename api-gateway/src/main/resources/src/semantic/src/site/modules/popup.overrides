@@ -1,0 +1,15 @@
+/*******************************
+        User Overrides
+*******************************/
+
+.ui.popup.validation-popup {
+    border: 1px solid #db2828;
+}
+.ui.popup.validation-popup:before {
+    box-shadow: 1px 1px 0 0 #db2828;
+}
+.ui.popup.validation-popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0
+}

@@ -34,7 +34,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
         StaticOpenIdCConfiguration configuration = new OpenIdConnectConfiguration();
         configuration
                 .addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/",
-                        "/editeur/api/acte", "/api/pes/actuator"));
+                        "/editeur/api/acte", "/api/pes/sesile/signature-hook", "/api/pes/actuator"));
         return configuration;
     }
 
@@ -49,28 +49,30 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
-                    .antMatchers("/api/acte/public/**").permitAll()
-                    .antMatchers("/api/admin/instance/**").permitAll()
-                    .antMatchers("/api/admin/local-authority/all").permitAll()
-                    .antMatchers("/api/admin/ozwillo/**").permitAll()
-                    .antMatchers("/api/api-gateway/isMainDomain").permitAll()
-                    .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
-                    .antMatchers("/api/*/actuator/**").permitAll()
-                    .antMatchers("/api/*/locales/**").permitAll()
-                    .antMatchers("/api/*/ws/**").permitAll()
-                    .antMatchers("/api/**").authenticated()
-                    .antMatchers("/externalws/**").permitAll()
-                    .antMatchers("/public/**").permitAll().and()
+                .antMatchers("/api/pes/sesile/signature-hook/**").permitAll()
+                .antMatchers("/api/acte/public/**").permitAll()
+                .antMatchers("/api/admin/instance/**").permitAll()
+                .antMatchers("/api/admin/local-authority/all").permitAll()
+                .antMatchers("/api/admin/ozwillo/**").permitAll()
+                .antMatchers("/api/api-gateway/isMainDomain").permitAll()
+                .antMatchers("/api/api-gateway/loginWithSlug/**").permitAll()
+                .antMatchers("/api/*/actuator/**").permitAll()
+                .antMatchers("/api/*/locales/**").permitAll()
+                .antMatchers("/api/*/ws/**").permitAll()
+                .antMatchers("/api/**").authenticated()
+                .antMatchers("/externalws/**").permitAll()
+                .antMatchers("/public/**").permitAll().and()
                 .csrf()
-                    .ignoringAntMatchers("/api/admin/ozwillo/**")
-                    .ignoringAntMatchers("/api/*/actuator/**")
-                    .ignoringAntMatchers("/api/*/ws/**")
-                    .ignoringAntMatchers("/editeur/api/**")
-                    .ignoringAntMatchers("/externalws/**").and()
+                .ignoringAntMatchers("/api/admin/ozwillo/**")
+                .ignoringAntMatchers("/api/*/actuator/**")
+                .ignoringAntMatchers("/api/*/ws/**")
+                .ignoringAntMatchers("/editeur/api/**")
+                .ignoringAntMatchers("/api/pes/sesile/signature-hook/**")
+                .ignoringAntMatchers("/externalws/**").and()
                 .logout()
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
                 .exceptionHandling()
-                    .authenticationEntryPoint(authenticationEntryPoint()).and()
+                .authenticationEntryPoint(authenticationEntryPoint()).and()
                 .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class)
                 .addFilterAfter(new CsrfTokenGeneratorFilter(), CsrfFilter.class);
     }

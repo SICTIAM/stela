@@ -1,7 +1,9 @@
 package fr.sictiam.stela.pesservice.service;
 
+import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
@@ -45,6 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -67,9 +70,14 @@ public class MigrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MigrationService.class);
 
     private final PesAllerRepository pesAllerRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final PesHistoryRepository pesHistoryRepository;
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
+    private final StorageService storageService;
     private final DiscoveryUtils discoveryUtils;
+    private final PesAllerService pesAllerService;
+
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -105,11 +113,16 @@ public class MigrationService {
     private final String sql_liaison_server = getStringResourceFromStream("migration/liaison_siren.sql");
 
     public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository,
-            NotificationService notificationService, DiscoveryUtils discoveryUtils) {
+            NotificationService notificationService, DiscoveryUtils discoveryUtils, AttachmentRepository attachmentRepository,
+            StorageService storageService, PesAllerService pesAllerService, PesHistoryRepository pesHistoryRepository) {
         this.pesAllerRepository = pesAllerRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
         this.discoveryUtils = discoveryUtils;
+        this.attachmentRepository = attachmentRepository;
+        this.storageService = storageService;
+        this.pesAllerService = pesAllerService;
+        this.pesHistoryRepository = pesHistoryRepository;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -202,6 +215,7 @@ public class MigrationService {
                 }
                 Attachment pesAllerAttachment = getAttachmentFromArchive(pesMigration.getPesAttachment(), archiveBytes,
                         pesMigration.getPesAttachmentSize(), pesMigration.getCreation());
+
                 SortedSet<PesHistory> pesHistories = new TreeSet<>();
 
                 PesAller pesAller = new PesAller(
@@ -223,6 +237,9 @@ public class MigrationService {
                         true);
                 pesAller = pesAllerRepository.save(pesAller);
 
+                // Manually update attachment content to be processed by cron task
+                attachmentRepository.updateContent(pesAllerAttachment.getUuid(), pesAllerAttachment.getContent());
+
                 if (pesMigration.getCreation() != null) {
                     pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.CREATED,
                             pesMigration.getCreation()));
@@ -233,18 +250,31 @@ public class MigrationService {
                 }
                 if (pesMigration.getDateAR() != null) {
                     byte[] bytesAR = getFileFromTarGz(archiveBytes, pesMigration.getFilenameAR());
-                    pesAller.getPesHistories().add(new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
-                            pesMigration.getDateAR(), bytesAR, pesMigration.getFilenameAR()));
+
+                    Attachment attachment = new Attachment(Paths.get(pesMigration.getFilenameAR()).getFileName().toString(),
+                            bytesAR);
+                    attachment = attachmentRepository.saveAndFlush(attachment);
+                    PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.ACK_RECEIVED,
+                            pesMigration.getDateAR(), attachment);
+                    pesAller.getPesHistories().add(pesHistory);
+                    pesAller = pesAllerRepository.save(pesAller);
+                    attachmentRepository.updateContent(attachment.getUuid(), bytesAR);
                 }
                 if (pesMigration.getDateANO() != null) {
                     byte[] fileANOBytes = null;
                     if (StringUtils.isNotBlank(pesMigration.getPathFilenameANO())) {
                         fileANOBytes = downloadFile(sshClient, pesMigration.getPathFilenameANO());
                     }
+
+                    Attachment attachment = new Attachment(Paths.get(pesMigration.getPathFilenameANO()).getFileName().toString(),
+                            fileANOBytes);
+                    attachment = attachmentRepository.saveAndFlush(attachment);
                     PesHistory pesHistory = new PesHistory(pesAller.getUuid(), StatusType.NACK_RECEIVED,
-                            pesMigration.getDateANO(), fileANOBytes, pesMigration.getPathFilenameANO());
+                            pesMigration.getDateANO(), attachment);
                     pesHistory.addError(new PesHistoryError(null, pesMigration.getMessageANO(), null));
                     pesAller.getPesHistories().add(pesHistory);
+                    pesAllerRepository.save(pesAller);
+                    attachmentRepository.updateContent(attachment.getUuid(), fileANOBytes);
                 }
 
                 // Update lastHistory fields
@@ -256,8 +286,7 @@ public class MigrationService {
                 LOGGER.info("PES with message_id '{}' successfully migrated", pesMigration.getMessage_id());
                 log(migrationLog, "PES with message_id '" + pesMigration.getMessage_id() + "' successfully migrated", false);
                 i++;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log(migrationLog, "Error during " + pesMigration.getMessage_id() + " migration : " + e.getMessage(), true);
             }
         }
@@ -355,7 +384,7 @@ public class MigrationService {
 
     private Attachment getAttachmentFromArchive(String filename, byte[] archiveBytes, long size, LocalDateTime fileDate) {
         byte[] fileBytes = getFileFromTarGz(archiveBytes, filename);
-        return new Attachment(fileBytes, filename, size, fileDate);
+        return new Attachment(filename, fileBytes, size, fileDate);
     }
 
     private LocalDateTime getLocalDateTimeFromTimestamp(String timestamp) {

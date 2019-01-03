@@ -1,0 +1,17 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+/* Footer */
+
+.ui.table tfoot tr td {
+    border-top: 1px solid rgba(34,36,38,.15) !important;
+    background: #f9fafb;
+    text-align: inherit;
+    color: rgba(0,0,0,.87);
+    padding: .78571429em;
+    vertical-align: middle;
+    font-style: normal;
+    font-weight: 400;
+    text-transform: none;
+}

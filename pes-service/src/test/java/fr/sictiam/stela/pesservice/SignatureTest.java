@@ -1,39 +1,64 @@
 package fr.sictiam.stela.pesservice;
 
-import fr.sictiam.signature.pes.verifier.SignatureValidation;
-import fr.sictiam.signature.pes.verifier.SimplePesInformation;
 import fr.sictiam.stela.pesservice.service.SesileService;
-import org.apache.commons.io.IOUtils;
-import org.apache.xml.security.Init;
+import fr.sictiam.stela.pesservice.service.SignatureService;
+import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
+import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
 import java.io.InputStream;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 public class SignatureTest {
 
-    SesileService sesileService = new SesileService(null, null, null, null, null);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SignatureTest.class);
+
+    private SesileService sesileService = new SesileService(null, null, null, null, null, null, null);
+    private SignatureService signatureService = new SignatureService();
 
     @Test
-    public void testsigned() throws IOException {
-        Init.init();
-        InputStream file = new ClassPathResource("data/30002-2015-P-DN-16-1429552171140-sign.xml").getInputStream();
+    public void testValidSignature() throws Exception {
+        boolean valid = true;
+        InputStream pesFile = new ClassPathResource("data/30000-depenses-2018-BO-227.xml").getInputStream();
 
-        SimplePesInformation simplePesInformation = sesileService
-                .computeSimplePesInformation(IOUtils.toByteArray(file));
-        assertThat(sesileService.isSigned(simplePesInformation), is(true));
-        SignatureValidation validation = sesileService.isValidSignature(simplePesInformation);
-        assertThat(validation.isValid(), is(true));
-        InputStream fileNotSigned = new ClassPathResource("data/28000-2017-P-RN-22-1516807373820.xml").getInputStream();
-        SimplePesInformation simplePesInformationNotSigned = sesileService
-                .computeSimplePesInformation(IOUtils.toByteArray(fileNotSigned));
+        try {
+            signatureService.validatePes(pesFile);
+        } catch (SignatureException e) {
+            valid = false;
+        }
 
-        assertThat(sesileService.isSigned(simplePesInformationNotSigned), is(false));
+        Assert.assertTrue(valid);
+    }
 
+    @Test
+    public void testExpiredSignature() throws Exception {
+        boolean valid = true;
+        InputStream pesFile = new ClassPathResource("data/test-perime-04-04-2016.xml").getInputStream();
+
+        try {
+            signatureService.validatePes(pesFile);
+        } catch (SignatureException e) {
+            valid = false;
+
+        }
+
+        Assert.assertFalse(valid);
+    }
+
+    @Test
+    public void testAlteredSignature() throws Exception {
+        boolean valid = true;
+        InputStream pesFile = new ClassPathResource("data/test-alteree.xml").getInputStream();
+
+        try {
+            signatureService.validatePes(pesFile);
+        } catch (SignatureException e) {
+            valid = false;
+        }
+
+        Assert.assertFalse(valid);
     }
 
 }

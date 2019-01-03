@@ -124,6 +124,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        localAuthorityPesUpdate: {
+            title: 'notifications.pes.admin.title',
+            message: 'notifications.pes.admin.local_authority.update.success',
+            level: 'success',
+            position: 'br'
+        },
         classificationAsked: {
             title: 'notifications.acte.admin.title',
             message: 'notifications.acte.admin.local_authority.classificationAsked',
@@ -170,6 +176,16 @@ const notifications = {
             title: 'notifications.admin.title',
             message: 'notifications.admin.certificateDeleted',
             level: 'success',
+            position: 'br'
+        },
+        sesileValidTokens: {
+            title: 'notifications.pes.admin.sesile.validTokens',
+            level: 'success',
+            position: 'br'
+        },
+        sesileInvalidTokens: {
+            title: 'notifications.pes.admin.sesile.invalidTokens',
+            level: 'error',
             position: 'br'
         }
     },

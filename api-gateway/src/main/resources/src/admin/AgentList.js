@@ -18,6 +18,7 @@ class AgentList extends Component {
         agents: [],
         totalCount: 0,
         limit: 25,
+        currentPage: 0,
         offset: 0,
         column: '',
         direction: '',
@@ -37,7 +38,7 @@ class AgentList extends Component {
     }
     handlePageClick = (data) => {
         const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset }, this.fetchAgents)
+        this.setState({ offset, currentPage: data.selected }, this.fetchAgents)
     }
     search = debounce((search) => {
         this.setState({ search }, this.fetchAgents)
@@ -68,7 +69,7 @@ class AgentList extends Component {
         this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchAgents)
     }
     updateItemPerPage = (limit) => {
-        this.setState({ limit }, this.fetchAgents)
+        this.setState({ limit, offset: 0, currentPage: 0 }, this.fetchAgents)
     }
     render() {
         const { t } = this.context
@@ -95,7 +96,8 @@ class AgentList extends Component {
                 pageCount={pageCount}
                 handlePageClick={this.handlePageClick}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage} />
+                updateItemPerPage={this.updateItemPerPage}
+                currentPage={this.state.currentPage} />
         return (
             <Page title={t('admin.users')}>
                 <Segment>

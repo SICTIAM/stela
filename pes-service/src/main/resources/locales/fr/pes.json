@@ -2,6 +2,7 @@
   "pes": {
     "status": {
       "CREATED": "Déposé",
+      "CREATION_IN_PROGRESS": "En cours de transfert",
       "RECREATED": "Redéposé",
       "SENT": "Envoyé",
       "NOT_SENT": "Non envoyé",
@@ -18,7 +19,9 @@
       "SIGNATURE_INVALID": "Signature invalide",
       "SIGNATURE_MISSING": "Signature manquante",
       "CLASSEUR_WITHDRAWN": "Le classeur a été retiré dans SESILE",
-      "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur, veuillez vérifier la configuration du profil déposant ou de la collectivité"
+      "CLASSEUR_DELETED": "Le classeur a été supprimé dans SESILE",
+      "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur",
+      "SIGNATURE_VALIDATION": "Validation de la signature"
     },
     "fields": {
       "objet": "Objet",
@@ -48,6 +51,10 @@
       "re_send_confirm": "Voulez-vous vraiment renvoyer le flux manuellement ?"
     },
     "signature_errors": {
+      "INVALID_SIGNATURE": "La signature du fichier n'a pas pu être vérifiée",
+      "EXPIRED_CERTIFICATE": "Le certificat de signature est expiré",
+      "NOT_YET_VALID_CERTIFICATE": "Le certificat de signature n'est pas encore valide",
+      "PDF_ATTACHMENT": "Un des attachements PDF n'est pas valide",
       "INVALID_SCHEMA": "Schema XML Helios invalide",
       "UNVERIFIABLE_SIGNATURE": "NOK : Signature non vérifiable. Cette signature n'a pu être analysée (problème grave de corruption du fichier)",
       "NOT_SIGNED_CONTENT": "NOK : Des bordereaux n'ont pas été signés.",
@@ -96,7 +103,8 @@
             "subscription": "Abonnement à Sesile",
             "newVersion": "Sesile nouvelle version",
             "secret": "Secret",
-            "token": "Token"
+            "token": "Token",
+            "verifyTokens": "Vérifier la connexion"
           }
         },
         "module_settings": {

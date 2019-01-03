@@ -41,15 +41,17 @@ public class ArchiverService {
     private final AttachmentRepository attachmentRepository;
     private final LocalAuthorityService localAuthorityService;
     private final RestTemplate restTemplate;
+    private final StorageService storageService;
 
     public ArchiverService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
-            AttachmentRepository attachmentRepository, LocalAuthorityService localAuthorityService,
-            RestTemplate restTemplate) {
+                           AttachmentRepository attachmentRepository, LocalAuthorityService localAuthorityService,
+                           RestTemplate restTemplate, StorageService storageService) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.attachmentRepository = attachmentRepository;
         this.localAuthorityService = localAuthorityService;
         this.restTemplate = restTemplate;
+        this.storageService = storageService;
     }
 
     public void archivePesTask() {
@@ -91,7 +93,8 @@ public class ArchiverService {
                 .filter(pesHistory -> pesHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 .findFirst();
 
-        if (historyAR.isPresent() && historyAR.get().getFile() != null) {
+        byte[] content;
+        if (historyAR.isPresent() && (content = storageService.getAttachmentContent(historyAR.get().getAttachment())) != null) {
             LOGGER.info("Archiving pes {}...", pesAller.getUuid());
             LOGGER.info("Creating new Pastell document");
             AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
@@ -104,12 +107,12 @@ public class ArchiverService {
 
             LOGGER.info("Sending pes file to Pastell");
             updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "fichier_pes",
-                    pesAller.getAttachment().getFilename(), pesAller.getAttachment().getFile(), archiveSettings);
+                    pesAller.getAttachment().getFilename(), storageService.getAttachmentContent(pesAller.getAttachment()), archiveSettings);
             logAsalaeResultForm(updatedAsalaeResultForm);
 
             LOGGER.info("Sending ACK file to Pastell");
             updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "fichier_reponse",
-                    historyAR.get().getFileName(), historyAR.get().getFile(), archiveSettings);
+                    historyAR.get().getAttachment().getFilename(), content, archiveSettings);
             logAsalaeResultForm(updatedAsalaeResultForm);
 
             LOGGER.info("Archiving Pastell document to Asalae");
@@ -192,7 +195,7 @@ public class ArchiverService {
     }
 
     private AsalaeResultForm updateAsalaeDocument(AsalaeDocument asalaeDocument, PesAller pesAller,
-            ArchiveSettings archiveSettings) {
+                                                  ArchiveSettings archiveSettings) {
         StringBuilder url = new StringBuilder();
         url.append(archiveSettings.getPastellUrl())
                 .append("/api/v2/entite/")
@@ -209,7 +212,7 @@ public class ArchiverService {
     }
 
     private AsalaeResultForm updateFileAsalaeDocument(AsalaeDocument asalaeDocument, String fileType, String filename,
-            byte[] file, ArchiveSettings archiveSettings) {
+                                                      byte[] file, ArchiveSettings archiveSettings) {
         StringBuilder url = new StringBuilder();
         url.append(archiveSettings.getPastellUrl())
                 .append("/api/v2/entite/")
@@ -231,7 +234,7 @@ public class ArchiverService {
     }
 
     public ResponseEntity<AsalaeResultForm> sendAction(AsalaeDocument asalaeDocument, String action,
-            ArchiveSettings archiveSettings) {
+                                                       ArchiveSettings archiveSettings) {
         LOGGER.info("Sending action \"{}\" Asalae document {} to SAE...", action, asalaeDocument.getInfo().getId_d());
         if (asalaeDocument.getAction_possible().contains(action)) {
             StringBuilder url = new StringBuilder();
@@ -266,8 +269,8 @@ public class ArchiverService {
         pesAller.setAttachment(null);
 
         pesAller.getPesHistories().forEach(pesHistory -> {
-            pesHistory.setFile(null);
-            pesHistory.setFileName(null);
+            storageService.deleteAttachmentContent(pesHistory.getAttachment());
+            pesHistory.setAttachment(null);
             pesHistoryRepository.save(pesHistory);
         });
         pesAller = pesAllerRepository.save(pesAller);

@@ -239,13 +239,18 @@ class NewActeBatchedForm extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
+        const regex = /brouillons/g
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.context })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.setState({ shouldUnmount: false }, () => {
                     _addNotification(notifications.acte.draftDeleted)
-                    history.push(`/${localAuthoritySlug}/actes/liste`)
+                    if(this.props.path.match(regex)) {
+                        history.push(`/${localAuthoritySlug}/actes/brouillons`)
+                    } else {
+                        history.push(`/${localAuthoritySlug}/actes/liste`)
+                    }
                 })
             })
             .catch(response => {
@@ -274,6 +279,7 @@ class NewActeBatchedForm extends Component {
                 formValid={this.state.formValid[acte.uuid]}
                 isActive={this.state.active === acte.uuid}
                 handleClick={this.handleClick}
+                labelDelete={t('acte.new.batch_title_placeholder')}
                 titlePlaceholder={t('acte.new.batch_title_placeholder')}
                 deleteBatchedActe={this.deleteBatchedActe}>
                 <NewActeForm
@@ -369,7 +375,7 @@ const styles = {
     }
 }
 
-const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, formValid }) =>
+const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, formValid, labelDelete }) =>
     <Segment style={{ paddingTop: '0', paddingBottom: '0' }}>
         <Accordion.Title active={isActive}>
             <Grid>
@@ -392,7 +398,7 @@ const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedA
                         : <Icon color='red' name='warning circle' size='large' />}
                 </Grid.Column>
                 <Grid.Column width={1}>
-                    <Button color='red' basic size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
+                    <Button color='red' aria-label={labelDelete} basic size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
                         <Icon name='remove' />
                     </Button>
                 </Grid.Column>

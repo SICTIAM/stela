@@ -1,17 +1,19 @@
 package fr.sictiam.stela.pesservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateTimeDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,9 +31,9 @@ public class PesHistory implements Comparable<PesHistory> {
     private StatusType status;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
-    @JsonIgnore
-    private byte[] file;
-    private String fileName;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Attachment attachment;
     // Error messages can be quite lengthy
     @Column(length = 1024)
     private String message;
@@ -44,20 +46,20 @@ public class PesHistory implements Comparable<PesHistory> {
     public PesHistory(String pesUuid, StatusType status) {
         this.pesUuid = pesUuid;
         this.status = status;
-        this.date = LocalDateTime.now();
+        date = LocalDateTime.now();
     }
 
     public PesHistory(String pesUuid, StatusType status, List<PesHistoryError> errors) {
         this.pesUuid = pesUuid;
         this.status = status;
-        this.date = LocalDateTime.now();
+        date = LocalDateTime.now();
         this.errors = errors;
     }
 
     public PesHistory(String pesUuid, StatusType status, String message) {
         this.pesUuid = pesUuid;
         this.status = status;
-        this.date = LocalDateTime.now();
+        date = LocalDateTime.now();
         this.message = message;
     }
 
@@ -81,32 +83,29 @@ public class PesHistory implements Comparable<PesHistory> {
         this.message = message;
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
+    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, Attachment attachment) {
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = date;
-        this.file = file;
-        this.fileName = fileName;
+        this.attachment = attachment;
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, Attachment attachment,
             List<PesHistoryError> errors) {
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = date;
-        this.file = file;
-        this.fileName = fileName;
+        this.attachment = attachment;
         this.errors = errors;
     }
 
-    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+    public PesHistory(String pesUuid, StatusType status, LocalDateTime date, Attachment attachment,
             String message) {
 
         this.pesUuid = pesUuid;
         this.status = status;
         this.date = date;
-        this.file = file;
-        this.fileName = fileName;
+        this.attachment = attachment;
         this.message = message;
     }
 
@@ -124,22 +123,6 @@ public class PesHistory implements Comparable<PesHistory> {
 
     public StatusType getStatus() {
         return status;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public String getMessage() {
@@ -164,14 +147,22 @@ public class PesHistory implements Comparable<PesHistory> {
         errors.add(error);
     }
 
+    public Attachment getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
     @Override
     public int compareTo(PesHistory acteHistory) {
-        return this.date.compareTo(acteHistory.getDate());
+        return date.compareTo(acteHistory.getDate());
     }
 
     @Override
     public String toString() {
         return "ActeHistory{" + "uuid='" + uuid + '\'' + ", pesUuid='" + pesUuid + '\'' + ", status=" + status
-                + ", date=" + date + ", fileName='" + fileName + '\'' + ", message='" + message + "\'}";
+                + ", date=" + date + ", fileName='" + attachment.getFilename() + '\'' + ", message='" + message + "\'}";
     }
 }

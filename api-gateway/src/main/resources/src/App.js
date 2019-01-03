@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import NotificationSystem from 'react-notification-system'
 import { translate } from 'react-i18next'
 
-import 'semantic-ui-css/semantic.min.css'
+import './semantic/dist/semantic.min.css'
 
 import { getLocalAuthoritySlug } from './_util/utils'
 
@@ -22,17 +22,20 @@ class App extends Component {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
         isLoggedIn: PropTypes.bool,
+        isMenuOpened: PropTypes.bool,
         user: PropTypes.object,
         t: PropTypes.func,
         _addNotification: PropTypes.func,
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _openMenu: PropTypes.func
     }
     state = {
         csrfToken: '',
         csrfTokenHeaderName: '',
-        isLoggedIn: false,
+        isLoggedIn: null,
         localAuthoritySlug: '',
-        user: {}
+        user: {},
+        isMenuOpened: false
     }
     NotificationStyle = {
         Containers: {
@@ -48,9 +51,14 @@ class App extends Component {
             isLoggedIn: this.state.isLoggedIn,
             user: this.state.user,
             t: this.t,
+            isMenuOpened: this.state.isMenuOpened,
+            _openMenu: this._openMenu,
             _addNotification: this._addNotification,
             _fetchWithAuthzHandling: this._fetchWithAuthzHandling
         }
+    }
+    _openMenu = () => {
+        this.setState({isMenuOpened: !this.state.isMenuOpened})
     }
     _addNotification = (notification, title, message) => {
         const { t } = this.context
