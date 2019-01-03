@@ -1,11 +1,29 @@
-### 03/01/2019
-- Renommage des fichiers PES lorsqu'ils sont envoyés au serveur Helios
-- Stockage des fichiers PES sur Amazon S3
-- Possibilité de vérifer le token de connextion à Sesile
-- Option multi-canal lors du dépôt de fichiers Actes
-- Dépôt des fichiers par glisser-déposer dans le module Actes
-- Correctifs sur la communication avec Stela
-- Correctifs sur l'interface
+### 07/01/2019
+
+#### Contrôle de légalité
+
+- Ajout de l'option multi-canal lors du dépôt
+- Dépôt des fichiers par glisser-déposer
+- Affichage d'un message d'avertissement si la nomenclature n'a pas été demandée
+- Affichage de la taille cumulée des fichiers joints lors du dépôt
+
+#### Flux comptable
+
+- Ajout d'une distinction spéciale pour les anomalies 1984 et 1968 sur la page d'un flux
+- Correction sur le nommage des fichiers PES lorsqu'ils sont envoyés au serveur Helios
+- Externalisation du stockage des fichiers pour améliorer les performances et l'exploitation
+
+#### Connecteurs
+
+- Amélioration de la robustesse des échanges avec les éditeurs métiers
+- Possibilité de vérifier le token de connexion à SESILE
+- Amélioration de la réactivité des échanges entre STELA et SESILE
+
+#### Général
+
+- Ajout de marqueurs pour les champs obligatoires dans les formulaires
+- Possibilité de faire un clic droit sur une ligne du tableau de résultats de recherche
+- Mise en avant du nombre de jours restants avant expiration du certificat
 
 ### 05/11/2018
 - Ajout du détail des anomalies PES dans les mails
