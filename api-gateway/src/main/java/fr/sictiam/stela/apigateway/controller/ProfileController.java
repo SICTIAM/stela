@@ -3,7 +3,6 @@ package fr.sictiam.stela.apigateway.controller;
 import fr.sictiam.stela.apigateway.model.AlertMessage;
 import fr.sictiam.stela.apigateway.model.Notification;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;

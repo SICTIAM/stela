@@ -1,6 +1,7 @@
 package fr.sictiam.stela.acteservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.DocumentException;
 import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
@@ -29,7 +30,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.client.ResourceAccessException;
@@ -654,13 +653,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
         List<ActeCSVUI> acteCSVUIs = new ArrayList<>();
         try {
-            JSONObject jsonObject = new JSONObject(
-                    new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(classPathResource.getInputStream());
             for (Acte acte : actes) {
                 acteCSVUIs.add(new ActeCSVUI(acte.getNumber(), acte.getObjet(), acte.getDecision().toString(),
-                        jsonObject.getJSONObject("acte").getJSONObject("nature").getString(acte.getNature().toString()),
-                        jsonObject.getJSONObject("acte").getJSONObject("status")
-                                .getString(acte.getActeHistories().last().getStatus().toString())));
+                        jsonNode.get("acte").get("nature").get(acte.getNature().toString()).asText(),
+                        jsonNode.get("acte").get("status")
+                                .get(acte.getActeHistories().last().getStatus().toString()).asText()));
             }
         } catch (Exception e) {
             LOGGER.error("Error while trying to translate Acte values, will take untranslated values: {}", e);
@@ -679,11 +678,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             language = "fr";
         ClassPathResource classPathResource = new ClassPathResource("/locales/" + language + "/acte.json");
         try {
-            JSONObject jsonObject = new JSONObject(
-                    new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(classPathResource.getInputStream());
             List<String> translatedList = new ArrayList<>();
             for (String field : fields)
-                translatedList.add(jsonObject.getJSONObject("acte").getJSONObject("fields").getString(field));
+                translatedList.add(jsonNode.get("acte").get("fields").get(field).asText());
             return translatedList;
         } catch (Exception e) {
             LOGGER.error("Error while trying to translate CSV fields, will take untranslated fields: {}", e);
@@ -769,16 +768,16 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         };
         try {
             // If we can translate we add ("entry_fieldName", translate(entry_fieldName))
-            JSONObject jsonObject = new JSONObject(
-                    new String(FileCopyUtils.copyToByteArray(classPathResource.getInputStream())));
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(classPathResource.getInputStream());
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 // TODO: Hack, fix me !
                 if (entry.getKey().equals("status"))
                     data.put(entry.getKey() + "_value",
-                            jsonObject.getJSONObject("acte").getJSONObject("status").getString(entry.getValue()));
+                            jsonNode.get("acte").get("status").get(entry.getValue()).asText());
                 else
                     data.put(entry.getKey() + "_fieldName",
-                            jsonObject.getJSONObject("acte").getJSONObject("fields").getString(entry.getKey()));
+                            jsonNode.get("acte").get("fields").get(entry.getKey()).asText());
             }
         } catch (Exception e) {
             // else no translation

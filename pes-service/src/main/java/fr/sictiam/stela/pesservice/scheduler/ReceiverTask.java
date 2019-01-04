@@ -2,7 +2,12 @@ package fr.sictiam.stela.pesservice.scheduler;
 
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
-import fr.sictiam.stela.pesservice.model.*;
+import fr.sictiam.stela.pesservice.model.Attachment;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistoryError;
+import fr.sictiam.stela.pesservice.model.PesRetour;
+import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.NotificationService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
@@ -37,7 +42,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ReceiverTask {
@@ -151,14 +159,14 @@ public class ReceiverTask {
 
         boolean etatAck = true;
         List<PesHistoryError> errors = new ArrayList<>();
-        NodeList nodes = (NodeList)path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
-        for (int i = 0 ; i < nodes.getLength() ; i++) {
+        NodeList nodes = (NodeList) path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             etatAck = etatAck && path.evaluate("EtatAck/@V", node).equals("1");
 
-            NodeList innerNodes= (NodeList)path.evaluate("DetailPiece", node, XPathConstants.NODESET);
+            NodeList innerNodes = (NodeList) path.evaluate("DetailPiece", node, XPathConstants.NODESET);
             if (innerNodes.getLength() != 0) {
-                for (int j = 0 ; j < innerNodes.getLength() ; j++) {
+                for (int j = 0; j < innerNodes.getLength(); j++) {
                     Node in = innerNodes.item(j);
                     PesHistoryError e = new PesHistoryError(
                             path.evaluate("Erreur/NumAnoAck/@V", in),
@@ -167,8 +175,7 @@ public class ReceiverTask {
                     );
                     errors.add(e);
                 }
-            }
-            else {
+            } else {
                 PesHistoryError e = new PesHistoryError(
                         path.evaluate("Erreur/NumAnoAck/@V", node),
                         path.evaluate("Erreur/LibelleAnoAck/@V", node),
@@ -180,8 +187,7 @@ public class ReceiverTask {
 
         if (etatAck) {
             pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
-        }
-        else {
+        } else {
             pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errors);
         }
 

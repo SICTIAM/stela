@@ -21,17 +21,19 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-web-services')
-    compile('wsdl4j:wsdl4j:1.6.2')
     compile('org.springframework.boot:spring-boot-starter-amqp')
-    compile('org.apache.commons:commons-lang3:3.6')
+    // the following two libs are required for Spring Cloud Config retry
+    compile("org.springframework.retry:spring-retry")
+    compile("org.springframework.boot:spring-boot-starter-aop")
+    compile('wsdl4j:wsdl4j:1.6.2')
+    compile('org.apache.commons:commons-lang3:3.8.1')
     compile('commons-beanutils:commons-beanutils:1.8.3')
     compile('com.github.slugify:slugify:2.2')
     compile('net.logstash.logback:logstash-logback-encoder:5.2')
     compile('ch.qos.logback:logback-classic:1.2.3')
-    compile('org.codehaus.janino:janino:3.0.6')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.31.1')
+    testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.34.0')
 }
 sourceSets {
     main {

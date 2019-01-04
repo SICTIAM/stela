@@ -2,7 +2,6 @@ package fr.sictiam.stela.pesservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
@@ -21,7 +20,7 @@ public class ThymeleafConfiguration {
     }
 
     @Bean
-    public TemplateEngine templateEngine(){
+    public SpringTemplateEngine templateEngine(){
         SpringTemplateEngine springTemplateEngine = new SpringTemplateEngine();
         springTemplateEngine.setEnableSpringELCompiler(true);
         springTemplateEngine.setTemplateResolver(templateResolver());

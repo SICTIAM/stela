@@ -1,12 +1,11 @@
 package fr.sictiam.stela.apigateway.model.sitemap;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @XmlAccessorType(value = XmlAccessType.NONE)
 @XmlRootElement(name = "url")
@@ -29,7 +28,7 @@ public class XmlUrl {
     private String loc;
 
     @XmlElement
-    private String lastmod = new DateTime().toString(DateTimeFormat.forPattern("yyyy-MM-dd"));
+    private String lastmod = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
     @XmlElement
     private String changefreq = "daily";
