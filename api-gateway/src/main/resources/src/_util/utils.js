@@ -134,7 +134,7 @@ const getUpdates = () =>
 const getLastUpdate = () =>
     fetch(updatesFile)
         .then(response => response.text())
-        .then(updates => /(^#{3}(?:.|\n)*?)(?=#{3})/.exec(updates)[0])
+        .then(updates => /(^#{3} (?:.|\n)*?)(?=\n#{3} )/.exec(updates)[0])
 
 
 export {
