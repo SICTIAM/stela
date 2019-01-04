@@ -99,7 +99,7 @@
       "status": "Statut",
       "group": "Visible par",
       "agent": "Déposé par",
-      "multipleChannels": "Envoi des pièces jointes par des canaux multiples"
+      "multipleChannels": "Envoi des pièces jointes par des canaux multiples (la télétransmission sera complétée par un envoi papier ou un dépôt physique)"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
