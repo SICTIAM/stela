@@ -88,7 +88,8 @@ subprojects {
             registry = 'forge-registry.sictiam.fr/internet'
             push = project.hasProperty('push')
 
-            tagVersion = project.hasProperty("env") ? project.getProperty("env") + "-" + gitDetails.gitHashFull : gitDetails.gitHashFull
+            // Specific case for integration : avoid tagging images with hash => generates too many image tags.. Keep "latest" tag
+            tagVersion = project.hasProperty("env") ? project.getProperty("env") + "-" + gitDetails.gitHashFull : "latest"
 
             applicationName = 'stela-poc/' + jar.baseName
             dockerfile = file('src/main/docker/Dockerfile')
