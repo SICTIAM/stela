@@ -5,7 +5,6 @@ import fr.sictiam.stela.apigateway.model.LocalAuthorityInstance;
 import fr.sictiam.stela.apigateway.service.CertUtilService;
 import fr.sictiam.stela.apigateway.service.LocalAuthorityInstanceService;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;

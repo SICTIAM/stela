@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.andrewoma.dexx.collection.Pair;
 import eu.europa.esig.dss.validation.policy.rules.Indication;
 import eu.europa.esig.dss.validation.reports.DetailedReport;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
@@ -34,6 +33,8 @@ import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.exceptions.MissingSignatureException;
 import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -191,11 +192,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
                         if (file != null) {
                             Pair<StatusType, String> signatureResult = getSignatureStatus(file);
-                            StatusType status = signatureResult.component1();
-                            String errorMessage = signatureResult.component2();
+                            StatusType status = signatureResult.getLeft();
+                            String errorMessage = signatureResult.getRight();
                             // HACK: Prevent from incrementing SIGNATURE_MISSING when the PES is stuck on SESILE
                             if (!StatusType.SIGNATURE_MISSING.equals(pes.getLastHistoryStatus())
-                                    || !StatusType.SIGNATURE_MISSING.equals(signatureResult.component1())) {
+                                    || !StatusType.SIGNATURE_MISSING.equals(status)) {
                                 updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
                             }
                         }
@@ -717,7 +718,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         } else {
             status = StatusType.SIGNATURE_MISSING;
         }
-        return new Pair<>(status, errorMessage);
+        return new ImmutablePair<>(status, errorMessage);
     }
 
     public boolean hasSignature(byte[] file) {

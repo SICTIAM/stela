@@ -6,12 +6,9 @@ import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.ActeParams;
 import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.ui.CustomValidationUI;
-import fr.sictiam.stela.acteservice.model.util.Certificate;
 import fr.sictiam.stela.acteservice.service.ActeService;
-import fr.sictiam.stela.acteservice.service.ExternalRestService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.service.ValidationService;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -42,18 +40,16 @@ public class EditeurRestController {
     private final ActeService acteService;
     private final LocalAuthorityService localAuthorityService;
     private final ValidationService validationService;
-    private final ExternalRestService externalRestService;
 
-    public EditeurRestController(ActeService acteService, LocalAuthorityService localAuthorityService, ValidationService validationService, ExternalRestService externalRestService) {
+    public EditeurRestController(ActeService acteService, LocalAuthorityService localAuthorityService, ValidationService validationService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
         this.validationService = validationService;
-        this.externalRestService = externalRestService;
     }
 
     @PostMapping()
     ResponseEntity<?> create(HttpServletRequest request,
-            @RequestAttribute(value = "STELA-Local-Authority", required = true) LocalAuthority localAuthority,
+            @RequestAttribute(value = "STELA-Local-Authority") LocalAuthority localAuthority,
             @RequestParam("number") String number,
             @RequestParam("objet") String objet,
             @RequestParam("nature") ActeNature nature,

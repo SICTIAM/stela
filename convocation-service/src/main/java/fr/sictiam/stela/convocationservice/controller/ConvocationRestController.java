@@ -1,5 +1,6 @@
 package fr.sictiam.stela.convocationservice.controller;
 
+import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.ws.rs.core.Response.StatusType;
 
 import java.net.URLConnection;
 import java.time.LocalDate;

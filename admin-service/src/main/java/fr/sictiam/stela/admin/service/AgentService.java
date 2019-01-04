@@ -10,9 +10,7 @@ import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.UserGatewayRequest;
 import fr.sictiam.stela.admin.model.UserMigration;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +28,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,17 +61,14 @@ public class AgentService {
     private final ProfileRepository profileRepository;
     private final CertificateRepository certificateRepository;
     private final LocalAuthorityService localAuthorityService;
-    private final WorkGroupService workGroupService;
     private RestTemplate restTemplate = new RestTemplate();
 
     public AgentService(AgentRepository agentRepository, ProfileRepository profileRepository,
-            CertificateRepository certificateRepository, LocalAuthorityService localAuthorityService,
-            WorkGroupService workGroupService) {
+            CertificateRepository certificateRepository, LocalAuthorityService localAuthorityService) {
         this.agentRepository = agentRepository;
         this.profileRepository = profileRepository;
         this.certificateRepository = certificateRepository;
         this.localAuthorityService = localAuthorityService;
-        this.workGroupService = workGroupService;
     }
 
     private Agent createIfNotExists(Agent agent) {

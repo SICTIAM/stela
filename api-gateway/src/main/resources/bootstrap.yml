@@ -11,6 +11,9 @@ spring:
       retry:
         initialInterval: 2000
         maxAttempts: 30
+  main:
+    # to allow overriding openIdCConfiguration already defined in KernelConfiguration class in ozwillo lib
+    allow-bean-definition-overriding: true
 
 ---
 
