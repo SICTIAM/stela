@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:8-jre-alpine
 VOLUME /tmp
 EXPOSE 9008 9009
 ADD stela-acte-service.jar app.jar
