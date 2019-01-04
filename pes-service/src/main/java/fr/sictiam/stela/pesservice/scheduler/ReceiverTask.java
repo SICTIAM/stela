@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -93,6 +94,7 @@ public class ReceiverTask {
 
         FTPFile[] files = ftpClient.listFiles();
         LOGGER.info("{} files found on FTP server", files.length);
+        Arrays.asList(files).forEach(file -> LOGGER.info(file.getName()));
 
         if (files.length == 2)
             runsWithoutNewFiles++;
