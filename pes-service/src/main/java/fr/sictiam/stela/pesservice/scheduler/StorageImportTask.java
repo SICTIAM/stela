@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,6 +17,7 @@ import javax.persistence.Query;
 
 import java.util.List;
 
+@Transactional
 @Component
 public class StorageImportTask {
 
@@ -34,7 +36,7 @@ public class StorageImportTask {
     public void importAttachments() throws Exception {
 
         Query query = entityManager.createNativeQuery("select uuid from " +
-                "attachment where file is not null");
+                "attachment where file is not null limit 500");
 
         List<String> result = query.getResultList();
         LOGGER.info("Importing {} attachments", result.size());
@@ -68,7 +70,7 @@ public class StorageImportTask {
         }
 
         // Process data in pes_history table
-        query = entityManager.createNativeQuery("SELECT uuid FROM pes_history WHERE file IS NOT NULL");
+        query = entityManager.createNativeQuery("SELECT uuid FROM pes_history WHERE file IS NOT NULL  limit 500");
         result = query.getResultList();
         LOGGER.info("Importing {} pes history attachments", result.size());
 
