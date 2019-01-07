@@ -15,6 +15,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -84,5 +86,15 @@ public class AwsS3 implements StorageService {
             LOGGER.error("Failed to delete object {} in bucket {}: {}", key, bucket, e.getMessage());
         }
         return false;
+    }
+
+    public ListObjectsV2Response listObjects(String token) throws StorageException {
+
+        try {
+            return s3.listObjectsV2(ListObjectsV2Request.builder().bucket(bucket).prefix("pes").continuationToken(token).build());
+        } catch (SdkException e) {
+            LOGGER.error("Failed list objects in bucket {} with continuation token : ", bucket, token, e.getMessage());
+            throw new StorageException("Failed list objects in bucket " + bucket + " with continuation token " + token, e);
+        }
     }
 }
