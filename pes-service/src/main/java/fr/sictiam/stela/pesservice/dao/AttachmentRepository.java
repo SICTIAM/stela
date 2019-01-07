@@ -18,4 +18,6 @@ public interface AttachmentRepository extends JpaRepository<Attachment, String> 
     @Transactional
     @Query(value = "UPDATE attachment SET file=:content WHERE uuid=:uuid", nativeQuery = true)
     int updateContent(@Param("uuid") String uuid, @Param("content") byte[] content);
+
+    Optional<Attachment> findByStorageKey(String key);
 }
