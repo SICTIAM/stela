@@ -11,6 +11,7 @@ import QuickView from '../../_components/QuickView'
 import history from '../../_util/history'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import { notifications } from '../../_util/Notifications'
+import Breadcrumb from '../../_components/Breadcrumb'
 
 class RecipientsList extends Component {
 	static contextTypes = {
@@ -93,6 +94,19 @@ class RecipientsList extends Component {
 	}
 	createData = (row) => {
 	    const { t } = this.context
+	    let assemblyTypes = t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')
+	    if(row.assemblyTypes && row.assemblyTypes.length > 0) {
+	        if (row.assemblyTypes.length === 1){
+	            assemblyTypes = row.assemblyTypes[0].name
+	        }
+	        if(row.assemblyTypes.length > 1) {
+	            let temp = row.assemblyTypes.reduce((acc, curr, index) => {
+	                return acc.name ? acc.name + ', ' + curr.name : acc + ', ' + curr.name
+	            })
+	            assemblyTypes = temp
+	        }
+	    }
+
 	    return {
 	        headerContent: row.firstname + ' ' + row.lastname,
 	        action:
@@ -113,7 +127,7 @@ class RecipientsList extends Component {
 	        data: [
 	            {label: t('convocation.admin.modules.convocation.recipient_config.email'), value: row.email, id: 'email', computer: '8'},
 	            {label: t('convocation.admin.modules.convocation.recipient_config.phonenumber'), value: row.phoneNumber, id: 'phoneNumber', computer: '8'},
-	            {label: t('convocation.admin.modules.convocation.assembly_types'), value: row.assemblyTypes.length > 0 ? row.assemblyTypes.join(', ') : t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type'), id: 'assemblyType', computer: '16'}
+	            {label: t('convocation.admin.modules.convocation.assembly_types'), value: assemblyTypes, id: 'assemblyType', computer: '16'}
 	        ]
 	    }
 	}
@@ -122,19 +136,17 @@ class RecipientsList extends Component {
 	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires/${recipient.uuid}`)
 	}
 	handleFieldChange = (field, value) => {
-	    console.log('jkljk')
-	    console.log(value)
 	    const search = this.state.search
 	    search[field] = value
 	    this.setState({ search: search })
 	}
 	handleFieldCheckboxChange = (row) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
-		const url = !row.active ? `/api/convocation/recipient/${row.uuid}` : `/api/convocation/recipient/${row.uuid}`
-		const body = {
-			active: !row.active ? true : false
-		}
-		const headers = { 'Content-Type': 'application/json' }
+	    const url = !row.active ? `/api/convocation/recipient/${row.uuid}` : `/api/convocation/recipient/${row.uuid}`
+	    const body = {
+	        active: !row.active ? true : false
+	    }
+	    const headers = { 'Content-Type': 'application/json' }
 
 	    _fetchWithAuthzHandling({url: url, method: 'PUT', headers: headers, body: JSON.stringify(body), context: this.context})
 	        .then(checkStatus)
@@ -153,7 +165,28 @@ class RecipientsList extends Component {
 	    const { t } = this.context
 	    const { search } = this.state
 	    const statusDisplay = (active) => active ? t('convocation.admin.modules.convocation.recipient_list.active') : t('convocation.admin.modules.convocation.recipient_list.inactive')
-	    const assemblyTypes = (assemblyTypes) => assemblyTypes.length > 2 ? <span>{assemblyTypes.slice(2, assemblyTypes.length -1).join(', ')} Voir Tout <Icon name='arrow right'/></span> : assemblyTypes.join(', ')
+	    const assemblyTypes = (assemblyTypes) => {
+	        if(assemblyTypes && assemblyTypes.length > 0) {
+	            let temp = assemblyTypes
+	            if (assemblyTypes.length === 1){
+	                return <span>{assemblyTypes[0].name}</span>
+	            }
+	            if(assemblyTypes.length > 2) {
+	                temp = assemblyTypes.slice(0, 2)
+	            }
+	            temp = temp.reduce((acc, curr, index) => {
+	                if(index > 0) {
+	                    acc = acc.name + ', '
+	                }
+	                return acc + curr.name
+	            })
+	            if(assemblyTypes.length > 2) {
+	                return <span>{temp},... <span style={{fontStyle: 'italic', marginLeft: '5px'}}>Voir Tout <Icon name='arrow right'/></span></span>
+	            }
+	            return <span>{temp}</span>
+	        }
+	        return ''
+	    }
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
 	        { property: 'firstname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.firstname') },
@@ -179,8 +212,16 @@ class RecipientsList extends Component {
                 updateItemPerPage={this.updateItemPerPage}
                 currentPage={this.state.currentPage}
                 options={options} />
+	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={[
+	                    {title: 'Accueil Admin', url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	                    {title: 'Convocation'},
+	                    {title: 'Liste des destinataires'}
+	                ]}
+	            />
 	            <QuickView
 	                open={this.state.quickViewOpened}
 	                header={true}
