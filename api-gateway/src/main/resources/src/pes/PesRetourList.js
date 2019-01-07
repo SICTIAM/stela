@@ -61,6 +61,9 @@ class PesRetourList extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
     }
+    onSearch = () => {
+        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
+    }
     handlePageClick = data => {
         const offset = Math.ceil(data.selected * this.state.limit)
         this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
@@ -95,8 +98,8 @@ class PesRetourList extends Component {
             <Page title={t('pes.retour.list.title')}>
                 <Segment>
                     <AdvancedSearch isDefaultOpen={false} fieldId="multifield" fieldValue={search.multifield} fieldOnChange={this.handleFieldChange}
-                        onSubmit={this.submitForm}>
-                        <Form onSubmit={this.submitForm}>
+                        onSubmit={this.onSearch}>
+                        <Form onSubmit={this.onSearch}>
                             <FormFieldInline htmlFor="filename" label={t('pes.fields.attachment')}>
                                 <input id="filename" value={search.objet} onChange={e => this.handleFieldChange('filename', e.target.value)} />
                             </FormFieldInline>

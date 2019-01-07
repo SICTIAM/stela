@@ -64,6 +64,9 @@ class GenericAccountList extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.admin.title', text))
             })
     }
+    onSearch = () => {
+        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
+    }
     handlePageClick = data => {
         const offset = Math.ceil(data.selected * this.state.limit)
         this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
@@ -110,8 +113,8 @@ class GenericAccountList extends Component {
                             </Link>
                         </div>
                         <AdvancedSearch isDefaultOpen={false} fieldId="multifield" fieldValue={search.multifield}
-                            fieldOnChange={this.handleFieldChange} onSubmit={this.submitForm}>
-                            <Form onSubmit={this.submitForm}>
+                            fieldOnChange={this.handleFieldChange} onSubmit={this.onSearch}>
+                            <Form onSubmit={this.onSearch}>
                                 <FormFieldInline htmlFor="software" label={t('admin.generic_account.fields.software')}>
                                     <input id="software" value={search.software} onChange={e => this.handleFieldChange('software', e.target.value)} />
                                 </FormFieldInline>
