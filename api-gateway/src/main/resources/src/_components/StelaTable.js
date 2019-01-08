@@ -236,11 +236,21 @@ class StelaTable extends Component {
                                             collapsing={!!displayedColumn.collapsing}
                                             selectable={this.props.link !== '' ? true : false}
                                             className={this.props.link !== '' ? 'no-hover' : ''}>
-                                            <Link to={this.props.link !== '' ? this.props.link + row[this.props.linkProperty] : ''}>{displayedColumn.displayComponent ?
-                                                displayedColumn.property === '_self' ?
-                                                    displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
-                                                : row[displayedColumn.property]}
-                                            </Link>
+                                            {this.props.link !== '' && (
+                                                <Link to={this.props.link + row[this.props.linkProperty]}>{displayedColumn.displayComponent ?
+                                                    displayedColumn.property === '_self' ?
+                                                        displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
+                                                    : row[displayedColumn.property]}
+                                                </Link>
+                                            )}
+                                            {this.props.link === '' && (
+                                                <div>
+                                                    { displayedColumn.displayComponent ?
+                                                        displayedColumn.property === '_self' ?
+                                                            displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
+                                                        : row[displayedColumn.property]}
+                                                </div>
+                                            )}
                                         </Table.Cell>
                                     )}
                                     {select &&
