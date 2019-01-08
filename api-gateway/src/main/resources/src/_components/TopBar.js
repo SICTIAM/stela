@@ -63,6 +63,14 @@ class TopBar extends Component {
         }
         else history.push('/choix-collectivite')
     }
+    updateSelectedProfil = (event, value) => {
+        if(event.keyCode && event.keyCode !== 13) {
+            this.setState({selectedProfil: value})
+        }
+        else {
+            window.location.href = '/api/api-gateway/switch/' + value
+        }
+    }
     render() {
         const { isLoggedIn, t, user, _openMenu, isMenuOpened } = this.context
         const multiPath = getMultiPahtFromSlug()
@@ -101,10 +109,10 @@ class TopBar extends Component {
                                     search selection
                                     options={listProfile}
                                     value={this.state.selectedProfil}
-                                    selectOnBlur={false}
+                                    selectOnBlur={true}
                                     text={this.state.currentProfile.localAuthority.name}
-                                    onChange={(event, data) => this.setState({selectedProfil: data.value})}
-                                    onClose={(event, data) => window.location.href = '/api/api-gateway/switch/' + data.value}                                />
+                                    onChange={(event, { value }) => this.updateSelectedProfil(event, value)}
+                                />
                             </Menu.Item>
                         )}
                         {isLoggedIn && (
