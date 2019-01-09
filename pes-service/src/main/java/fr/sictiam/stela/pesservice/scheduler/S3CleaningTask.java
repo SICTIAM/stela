@@ -16,18 +16,18 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.util.Optional;
 
 @Component
-@Profile("!( dev-docker | dev )")
+@Profile("S3")
 public class S3CleaningTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(S3CleaningTask.class);
 
     @Autowired
-    AttachmentRepository attachmentRepository;
+    private AttachmentRepository attachmentRepository;
 
     @Autowired
-    AwsS3 s3Service;
+    private AwsS3 s3Service;
 
-    @Scheduled(cron = "0 0 0 * * MON-FRI")
+    @Scheduled(cron = "${application.storage.awss3.cleaningCron}")
     public void purgeObjects() {
 
         LOGGER.info("Start S3 cleaning");
@@ -37,23 +37,25 @@ public class S3CleaningTask {
         long deleted = 0L;
         String token = null;
         while (!done) {
-            response = s3Service.listObjects(token);
+            try {
+                response = s3Service.listObjects(token);
+                count += response.keyCount();
 
-            count += response.keyCount();
-
-            for (S3Object content : response.contents()) {
-                Optional<Attachment> a = attachmentRepository.findByStorageKey(content.key());
-                if (!a.isPresent()) {
-                    try {
-                        s3Service.deleteObject(content.key());
-                        deleted++;
-                    } catch (StorageException e) {
-                        LOGGER.error(e.getMessage());
+                for (S3Object content : response.contents()) {
+                    Optional<Attachment> a = attachmentRepository.findByStorageKey(content.key());
+                    if (!a.isPresent()) {
+                        if (s3Service.deleteObject(content.key())) {
+                            deleted++;
+                        }
                     }
                 }
-            }
 
-            if ((token = response.nextContinuationToken()) == null) done = true;
+                if ((token = response.nextContinuationToken()) == null) done = true;
+
+            } catch (StorageException e) {
+                // thrown by listObjects()
+                LOGGER.error("Failed to retrieve S3 objects: {}. Stop processing", e.getMessage());
+            }
         }
 
         LOGGER.info("Found {} objects | deleted {}", count, deleted);

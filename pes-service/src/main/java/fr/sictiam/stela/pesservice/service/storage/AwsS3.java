@@ -23,7 +23,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import javax.annotation.PostConstruct;
 
 @Component
-@Profile("!(dev | dev-docker)")
+@Profile("S3")
 public class AwsS3 implements StorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsS3.class);

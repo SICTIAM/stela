@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-@Profile("dev-docker | dev")
+@Profile("!S3")
 public class Filesystem implements StorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Filesystem.class);
