@@ -254,6 +254,10 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrueAndArchiveNull();
     }
 
+    List<PesAller> getPendingSignature() {
+        return pesAllerRepository.findByLastHistoryStatus(StatusType.PENDING_SIGNATURE);
+    }
+
     public void updateStatus(String pesUuid, StatusType updatedStatus) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus);
         updateHistory(pesHistory);
@@ -278,7 +282,7 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
     }
 
-    public void updateStatusAndAttachment(String pesUuid, StatusType updatedStatus, byte[] file, String fileName) {
+    public void updateStatusAndAttachment(String pesUuid, StatusType updatedStatus, byte[] file) {
         PesAller pes = getByUuid(pesUuid);
         Attachment attachment = pes.getAttachment();
         attachment = storageService.updateAttachment(attachment, file);
