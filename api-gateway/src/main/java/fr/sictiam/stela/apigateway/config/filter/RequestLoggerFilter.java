@@ -1,8 +1,9 @@
 package fr.sictiam.stela.apigateway.config.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,8 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Component
@@ -59,37 +60,45 @@ public class RequestLoggerFilter extends OncePerRequestFilter {
 
     protected void beforeRequest(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response) {
         if (LOGGER.isInfoEnabled()) {
-            logRequestHeader(request, request.getRemoteAddr() + "|>");
+
         }
     }
 
     protected void afterRequest(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response) {
         if (LOGGER.isInfoEnabled()) {
-            logRequestBody(request, request.getRemoteAddr() + "|>");
-            logResponse(response, request.getRemoteAddr() + "|<");
+            logRequestHeader(request);
+            logRequestBody(request);
+            //logResponse(response, request.getRemoteAddr() + "|<");
         }
     }
 
-    private static void logRequestHeader(ContentCachingRequestWrapper request, String prefix) {
+    private static void logRequestHeader(ContentCachingRequestWrapper request) {
+        ObjectMapper mapper = new ObjectMapper();
+        String url =
+                request.getMethod() + " " + request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() +
+                        request.getRequestURI() + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         String queryString = request.getQueryString();
-        if (queryString == null) {
-            LOGGER.info("{} {} {}", prefix, request.getMethod(), request.getRequestURI());
-        } else {
-            LOGGER.info("{} {} {}?{}", prefix, request.getMethod(), request.getRequestURI(), queryString);
+
+        LOGGER.info("Incoming request: {}", url);
+
+        Map<String, String[]> parameters = request.getParameterMap();
+        if (parameters.size() > 0) {
+            try {
+                LOGGER.info("Parameters: {}", mapper.writeValueAsString(parameters));
+            } catch (JsonProcessingException e) {
+                LOGGER.error("Json mapping error: {}", e.getMessage());
+            }
         }
-        Collections.list(request.getHeaderNames()).forEach(headerName ->
-                Collections.list(request.getHeaders(headerName)).forEach(headerValue ->
-                        LOGGER.info("{} {}: {}", prefix, headerName, headerValue)));
-        LOGGER.info("{}", prefix);
     }
 
-    private static void logRequestBody(ContentCachingRequestWrapper request, String prefix) {
+    private static void logRequestBody(ContentCachingRequestWrapper request) {
         byte[] content = request.getContentAsByteArray();
         if (content.length > 0) {
-            logContent(content, request.getContentType(), request.getCharacterEncoding(), prefix);
+            logContent(content, request.getContentType(), request.getCharacterEncoding(), "body:");
         }
     }
 
+    /* Not use for the moment
     private static void logResponse(ContentCachingResponseWrapper response, String prefix) {
         int status = response.getStatus();
         LOGGER.info("{} {} {}", prefix, status, HttpStatus.valueOf(status).getReasonPhrase());
@@ -99,9 +108,10 @@ public class RequestLoggerFilter extends OncePerRequestFilter {
         LOGGER.info("{}", prefix);
         byte[] content = response.getContentAsByteArray();
         if (content.length > 0) {
-            logContent(content, response.getContentType(), response.getCharacterEncoding(), prefix);
+            logContent(content, response.getContentType(), response.getCharacterEncoding());
         }
     }
+    */
 
     private static void logContent(byte[] content, String contentType, String contentEncoding, String prefix) {
         MediaType mediaType = MediaType.valueOf(contentType);
@@ -111,10 +121,10 @@ public class RequestLoggerFilter extends OncePerRequestFilter {
                 String contentString = new String(content, contentEncoding);
                 Stream.of(contentString.split("\r\n|\r|\n")).forEach(line -> LOGGER.info("{} {}", prefix, line));
             } catch (UnsupportedEncodingException e) {
-                LOGGER.info("{} [{} bytes content]", prefix, content.length);
+                LOGGER.info("[{} bytes content]", content.length);
             }
         } else {
-            LOGGER.info("{} [{} bytes content]", prefix, content.length);
+            LOGGER.info("[{} bytes content]", content.length);
         }
     }
 

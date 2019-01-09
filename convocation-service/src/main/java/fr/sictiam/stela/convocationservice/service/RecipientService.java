@@ -5,7 +5,7 @@ import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.exception.RecipientExistsException;
-import fr.sictiam.stela.convocationservice.model.util.BeanUtils;
+import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class RecipientService {
 
         Recipient recipient = getRecipient(uuid, localAuthorityUuid);
 
-        BeanUtils.copyProperties("uuid", "token", "localAuthority", "inactivityDate");
+        ConvocationBeanUtils.mergeProperties(recipientParams, recipient, "uuid", "token", "localAuthority", "inactivityDate");
         if (StringUtils.isNotEmpty(recipientParams.getEmail())) {
             if (recipientRepository.recipientExists(uuid, recipient.getLocalAuthority().getUuid(),
                     recipientParams.getEmail()) > 0) {

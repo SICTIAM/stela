@@ -2,6 +2,7 @@ package fr.sictiam.stela.convocationservice.model.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
@@ -15,9 +16,9 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
-public class BeanUtils {
+public class ConvocationBeanUtils {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(BeanUtils.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ConvocationBeanUtils.class);
 
     /**
      * Copy the property values of the given source bean into the given target bean.
@@ -31,7 +32,7 @@ public class BeanUtils {
      * @throws BeansException if the copying failed
      * @see BeanWrapper
      */
-    public static void copyProperties(Object source, Object target, @Nullable String... ignoreProperties)
+    public static void mergeProperties(Object source, Object target, @Nullable String... ignoreProperties)
             throws BeansException {
 
         Assert.notNull(source, "Source must not be null");
@@ -39,7 +40,7 @@ public class BeanUtils {
 
         Class<?> actualEditable = target.getClass();
 
-        PropertyDescriptor[] targetPds = org.springframework.beans.BeanUtils.getPropertyDescriptors(actualEditable);
+        PropertyDescriptor[] targetPds = BeanUtils.getPropertyDescriptors(actualEditable);
         List<String> ignoreList = (ignoreProperties != null ? Arrays.asList(ignoreProperties) : null);
 
         for (PropertyDescriptor targetPd : targetPds) {

@@ -5,7 +5,7 @@ import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.exception.MissingParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
-import fr.sictiam.stela.convocationservice.model.util.BeanUtils;
+import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class AssemblyTypeService {
     public AssemblyType update(String uuid, String currentLocalAuthorityUuid, AssemblyType params) {
 
         AssemblyType assemblyType = getAssemblyType(uuid, currentLocalAuthorityUuid);
-        BeanUtils.copyProperties(params, assemblyType, "uuid", "localAuthority", "profileUuid", "inactivityDate");
+        ConvocationBeanUtils.mergeProperties(params, assemblyType, "uuid", "localAuthority", "profileUuid", "inactivityDate");
 
         if (params.getActive() != null) {
             assemblyType.setInactivityDate(params.getActive() ? null : LocalDateTime.now());

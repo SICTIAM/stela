@@ -50,6 +50,9 @@ public class LocalAuthorityService {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSlugName(), event.getSiren()));
 
+        // Update existing local authorities with new slug name
+        localAuthority.setSlugName(event.getSlugName());
+        
         createOrUpdate(localAuthority);
     }
 
