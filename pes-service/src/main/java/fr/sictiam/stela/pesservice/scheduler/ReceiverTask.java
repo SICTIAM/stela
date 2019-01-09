@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class ReceiverTask {
@@ -86,17 +87,36 @@ public class ReceiverTask {
     private Long runsWithoutNewFiles = 0L;
     private boolean alertSent = false;
 
+    @Value("${application.ftp.timeout}")
+    private Integer timeout;
+
     @Scheduled(fixedRate = 60000)
     public void receive() throws IOException {
         LOGGER.info("Starting receiver task...");
-        FtpSession ftpSession = defaultFtpSessionFactory.getSession();
-        FTPClient ftpClient = ftpSession.getClientInstance();
+        defaultFtpSessionFactory.setConnectTimeout(timeout);
+        defaultFtpSessionFactory.setDataTimeout(timeout);
+        defaultFtpSessionFactory.setDefaultTimeout(timeout);
 
-        FTPFile[] files = ftpClient.listFiles();
-        LOGGER.info("{} files found on FTP server", files.length);
-        Arrays.asList(files).forEach(file -> LOGGER.info(file.getName()));
+        FtpSession ftpSession = null;
+        FTPClient ftpClient = null;
+        List<FTPFile> files = new ArrayList<>();
 
-        if (files.length == 2)
+        try {
+            ftpSession = defaultFtpSessionFactory.getSession();
+            ftpClient = ftpSession.getClientInstance();
+
+            files.addAll(Arrays.asList(ftpClient.listFiles()).stream()
+                    .filter(file -> !file.getName().equals(".") && !file.getName().equals(".."))
+                    .collect(Collectors.toList()));
+        } catch (IllegalStateException | IOException e) {
+            LOGGER.error("Error with FTP connection: {} caused by {}", e.getMessage(), e.getCause() != null ?
+                    e.getCause().getMessage() : "unknown");
+        }
+
+        LOGGER.info("{} files found on FTP server: ", files.size());
+        files.forEach(file -> LOGGER.info(" |- {}", file.getName()));
+
+        if (files.size() == 0)
             runsWithoutNewFiles++;
 
         if (runsWithoutNewFiles > 60 * hoursWithoutNewFiles
@@ -117,7 +137,7 @@ public class ReceiverTask {
             if (ftpFile.isFile()) {
                 String fileName = ftpFile.getName();
                 LOGGER.debug("file found: " + fileName);
-                if (ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) {
+                if ((ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) && ftpClient != null) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                     if (ftpClient.completePendingCommand()) {
                         byte[] targetArray = new byte[inputStream.available()];
@@ -136,12 +156,12 @@ public class ReceiverTask {
                             inputStream.close();
                         }
                     }
-
                 }
             }
         }
 
-        ftpSession.close();
+        if (ftpSession != null)
+            ftpSession.close();
     }
 
     public void readACK(byte[] targetArray, String ackName)
