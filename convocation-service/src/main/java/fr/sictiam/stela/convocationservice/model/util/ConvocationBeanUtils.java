@@ -59,8 +59,9 @@ public class BeanUtils {
                             if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
                                 writeMethod.setAccessible(true);
                             }
-                            if (value != null) // Only copy properties that are not null
+                            if (value != null) { // Only copy properties that are not null
                                 writeMethod.invoke(target, value);
+                            }
                         } catch (Throwable ex) {
                             throw new FatalBeanException(
                                     "Could not copy property '" + targetPd.getName() + "' from source to target", ex);
