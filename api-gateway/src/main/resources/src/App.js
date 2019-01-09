@@ -4,6 +4,7 @@ import NotificationSystem from 'react-notification-system'
 import { translate } from 'react-i18next'
 
 import './semantic/dist/semantic.min.css'
+import AuthProvider from './Auth'
 
 import { getLocalAuthoritySlug } from './_util/utils'
 
@@ -21,9 +22,7 @@ class App extends Component {
     static childContextTypes = {
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
-        isLoggedIn: PropTypes.bool,
         isMenuOpened: PropTypes.bool,
-        user: PropTypes.object,
         t: PropTypes.func,
         _addNotification: PropTypes.func,
         _fetchWithAuthzHandling: PropTypes.func,
@@ -32,9 +31,7 @@ class App extends Component {
     state = {
         csrfToken: '',
         csrfTokenHeaderName: '',
-        isLoggedIn: null,
         localAuthoritySlug: '',
-        user: {},
         isMenuOpened: false
     }
     NotificationStyle = {
@@ -48,8 +45,6 @@ class App extends Component {
         return {
             csrfToken: this.state.csrfToken,
             csrfTokenHeaderName: this.state.csrfTokenHeaderName,
-            isLoggedIn: this.state.isLoggedIn,
-            user: this.state.user,
             t: this.t,
             isMenuOpened: this.state.isMenuOpened,
             _openMenu: this._openMenu,
@@ -94,32 +89,14 @@ class App extends Component {
             body: data
         })
     }
-    componentDidMount() {
-        this._fetchWithAuthzHandling({ url: '/api/csrf-token' })
-            .then(response => {
-                // TODO: Improve (coockies..)
-                this.setState({ isLoggedIn: response.status !== 401 }, this.fetchUser)
-                return response
-            })
-            .then(response => response.headers)
-            .then(headers =>
-                this.setState({
-                    csrfToken: headers.get('X-CSRF-TOKEN'),
-                    csrfTokenHeaderName: headers.get('X-CSRF-HEADER')
-                })
-            )
-    }
-    fetchUser = () => {
-        if (this.state.isLoggedIn)
-            this._fetchWithAuthzHandling({ url: '/api/admin/agent' })
-                .then(response => response.json())
-                .then(json => this.setState({ user: json }))
-    }
+
     render() {
         return (
             <div>
                 <NotificationSystem ref={n => (this._notificationSystem = n)} style={this.NotificationStyle} />
-                {this.props.children}
+                <AuthProvider>
+                    {this.props.children}
+                </AuthProvider>
             </div>
         )
     }

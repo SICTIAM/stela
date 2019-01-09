@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container, Loader } from 'semantic-ui-react'
 
-import { getRightsFromGroups, rightsFeatureResolver, checkStatus } from './_util/utils'
+import { rightsFeatureResolver, checkStatus } from './_util/utils'
 import { notifications } from './_util/Notifications'
 
 import ErrorPage from './_components/ErrorPage'
@@ -43,6 +43,8 @@ import AgentProfile from './admin/localAuthority/AgentProfile'
 import ActeModuleParams from './admin/acte/ActeModuleParams'
 import PesModuleParams from './admin/pes/PesModuleParams'
 
+import { withAuthContext, AuthConsumer } from './Auth'
+
 const PublicRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={props => (
         <div>
@@ -61,51 +63,57 @@ const PublicRoute = ({ component: Component, ...rest }) => (
     )}
     />
 )
-const AuthRoute = ({ component: Component, menu: Menu, admin, userRights, allowedRights, certificate, certRequired = false, ...rest },
-    { isLoggedIn, isMenuOpened } ) => (
-    <Route {...rest} render={props => (
-        <div>
-            <header>
-                <TopBar admin={!!admin}/>
-            </header>
-            <div className="wrapperContainer">
-                {isMenuOpened && (
-                    <Overlay />
-                )}
-                <aside>
-                    <Menu />
-                </aside>
-                <main>
-                    <Container className="mainContainer" id="content">
-                        {isLoggedIn === true && (
-                            rightsFeatureResolver(userRights, allowedRights) ? (
-                                certificate || !certRequired ? (
-                                    <Fragment>
-                                        <AlertMessage {...props} />
-                                        <Component {...props} {...props.match.params} />
-                                    </Fragment>
-                                ) : (
-                                    <ErrorPage error={'certificate_required'} />
-                                )
-                            ) : (
-                                <ErrorPage error={403} />
-                            )
+const AuthRoute = ({ component: Component, menu: Menu, admin, allowedRights, certificate, certRequired = false, ...rest },
+    { isMenuOpened } ) => (
+    <AuthConsumer>
+        {(context) => {
+            const userRights = context.userRights
+            if (context.profile && context.profile.admin) userRights.push('LOCAL_AUTHORITY_ADMIN')
+            if (context.profile && context.profile.agent.admin) userRights.push('ADMIN')
+            return (<Route {...rest} render={props => (
+                <div>
+                    <header>
+                        <TopBar admin={!!admin}/>
+                    </header>
+                    <div className="wrapperContainer">
+                        {isMenuOpened && (
+                            <Overlay />
                         )}
-                        {isLoggedIn === false && (
-                            <ErrorPage error={401} />
-                        )}
-                        {isLoggedIn === null && (
-                            <Loader active inline="centered"></Loader>
-                        )}
-                    </Container>
-                </main>
-            </div>
-        </div>
-    )}
-    />
+                        <aside>
+                            <Menu />
+                        </aside>
+                        <main>
+                            <Container className="mainContainer" id="content">
+                                {context.isLoggedIn === true && (
+                                    rightsFeatureResolver(userRights, allowedRights) ? (
+                                        certificate || !certRequired ? (
+                                            <Fragment>
+                                                <AlertMessage {...props} />
+                                                <Component {...props} {...props.match.params} />
+                                            </Fragment>
+                                        ) : (
+                                            <ErrorPage error={'certificate_required'} />
+                                        )
+                                    ) : (
+                                        <ErrorPage error={403} />
+                                    )
+                                )}
+                                {context.isLoggedIn === false && (
+                                    <ErrorPage error={401} />
+                                )}
+                                {context.isLoggedIn === null && (
+                                    <Loader active inline="centered"></Loader>
+                                )}
+                            </Container>
+                        </main>
+                    </div>
+                </div>
+            )}
+            />)
+        }}
+    </AuthConsumer>
 )
 AuthRoute.contextTypes = {
-    isLoggedIn: PropTypes.bool,
     isMenuOpened: PropTypes.bool
 }
 
@@ -120,22 +128,6 @@ class AppRoute extends Component {
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(profile => {
-                const userRights = getRightsFromGroups(profile.groups)
-                if (profile.admin) userRights.push('LOCAL_AUTHORITY_ADMIN')
-                if (profile.agent.admin) userRights.push('ADMIN')
-                this.setState({ userRights })
-            })
-            .catch(response => {
-                if(response.status !== 401) {
-                    response.text().then(text => {
-                        _addNotification(notifications.defaultError, 'notifications.title', text)
-                    })
-                }
-            })
         _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
             .then(checkStatus)
             .then(response => response.json())
@@ -160,7 +152,7 @@ class AppRoute extends Component {
                 <PublicRoute path="/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />
                 <PublicRoute path="/registre-des-deliberations" {...params} component={ActePublicList} menu={MenuBar} />
 
-                <AuthRoute path="/:localAuthoritySlug/mentions-legales" {...params} component={LegalNotice} menu={MenuBar} />
+                <AuthRoute path="/:localAuthoritySlug/mentions-legales" {...params} component={LegalNotice} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/registre-des-deliberations" {...params} component={ActePublicList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/notes-de-mise-a-jour" {...params} component={Updates} menu={MenuBar} />
@@ -229,4 +221,6 @@ class AppRoute extends Component {
     }
 }
 
-export default AppRoute
+
+
+export default withAuthContext(AppRoute)

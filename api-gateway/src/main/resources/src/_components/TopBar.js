@@ -4,14 +4,14 @@ import { translate } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Button, Menu, Dropdown, Container, Icon, Popup } from 'semantic-ui-react'
 
+import { withAuthContext } from '../Auth'
+
 import { notifications } from '../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils'
 import history from '../_util/history'
 
 class TopBar extends Component {
     static contextTypes = {
-        isLoggedIn: PropTypes.bool,
-        user: PropTypes.object,
         t: PropTypes.func,
         _fetchWithAuthzHandling: PropTypes.func,
         _openMenu: PropTypes.func,
@@ -19,7 +19,6 @@ class TopBar extends Component {
     }
     state = {
         isMainDomain: true,
-        isUpdated: false,
         currentProfile: {
             uuid: '',
             admin: false,
@@ -37,17 +36,17 @@ class TopBar extends Component {
             .then(response => response.json())
             .then(isMainDomain => this.setState({ isMainDomain }))
     }
+    componentDidUpdate() {
+        /** We need update state only if profile exist and is different from current Profile */
+        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile, this.state.currentProfile)) {
+            if (this.props.authContext.profile.uuid) {
+                this.setState({ currentProfile: this.props.authContext.profile, selectedProfil: this.props.authContext.profile.uuid })
+                this.fetchUserInfo()
+            }
+        }
+    }
     fetchUserInfo = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => {
-                if (json.uuid) this.setState({ currentProfile: json, isUpdated: true, selectedProfil: json.uuid })
-            })
-            .catch(response => {
-                response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message))
-            })
         _fetchWithAuthzHandling({ url: '/api/admin/agent/profiles' })
             .then(checkStatus)
             .then(response => response.json())
@@ -72,7 +71,8 @@ class TopBar extends Component {
         }
     }
     render() {
-        const { isLoggedIn, t, user, _openMenu, isMenuOpened } = this.context
+        const { t, _openMenu, isMenuOpened } = this.context
+        const { isLoggedIn, user } = this.props.authContext
         const multiPath = getMultiPahtFromSlug()
         const listProfile = this.state.profiles.map(profile => {
             return {
@@ -89,8 +89,6 @@ class TopBar extends Component {
                 {`${user && user.given_name} ${user && user.family_name}`}
             </Button>
         )
-        // FIXME : isLoggedIn in the context is not reliable (false then true)
-        if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
             <Menu className={`topBar ${this.props.admin ? 'secondary' : 'primary'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
                 <a href="#content" className="skip">{t('api-gateway:skip_to_content')}</a>
@@ -151,4 +149,4 @@ class TopBar extends Component {
     }
 }
 
-export default translate('api-gateway')(TopBar)
+export default translate(['api-gateway'])(withAuthContext(TopBar))

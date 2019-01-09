@@ -8,6 +8,7 @@ import { notifications } from '../../_util/Notifications'
 import { Field, Page } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
 import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class Group extends Component {
     static contextTypes = {
@@ -47,11 +48,11 @@ class Group extends Component {
                     })
                 })
         }
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(response => response.json())
-            .then(profile =>
-                this.setState({ activatedModules: profile.localAuthority.activatedModules }, this.fetchAllRights)
-            )
+    }
+    componentDidUpdate() {
+        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile.localAuthority.activatedModules, this.state.activatedModules)) {
+            this.setState({activatedModules: this.props.authContext.profile.localAuthority.activatedModules}, this.fetchAllRights)
+        }
     }
     fetchAllRights = () => {
         const { _fetchWithAuthzHandling } = this.context
@@ -139,4 +140,4 @@ class Group extends Component {
     }
 }
 
-export default translate(['api-gateway'])(Group)
+export default translate(['api-gateway'])(withAuthContext(Group))

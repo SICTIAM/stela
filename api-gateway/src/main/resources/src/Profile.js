@@ -11,6 +11,8 @@ import { checkStatus } from './_util/utils'
 import { modules, sesileVisibility } from './_util/constants'
 import AgentProfile from './admin/localAuthority/AgentProfile'
 
+import { withAuthContext } from './Auth'
+
 class Profile extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
@@ -46,15 +48,23 @@ class Profile extends Component {
     componentDidMount() {
         const { uuid } = this.props
         const { _fetchWithAuthzHandling } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(response => response.json())
-            .then(json => this.setState({ activeProfile: json }))
-        _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
-            .then(response => response.json())
-            .then(json => this.setState({ agent: json }))
+        if(uuid) {
+            _fetchWithAuthzHandling({ url: `/api/admin/agent/${uuid}` })
+                .then(response => response.json())
+                .then(json => this.setState({ agent: json }))
+        }
         _fetchWithAuthzHandling({ url: '/api/api-gateway/profile/all-notifications' })
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
+    }
+    componentDidUpdate() {
+        const { uuid } = this.props
+        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile, this.state.activeProfile)) {
+            this.setState({activeProfile: this.props.authContext.profile})
+        }
+        if(this.props.authContext.user && !Object.is(this.props.authContext.user, this.state.agent) & !uuid) {
+            this.setState({agent: this.props.authContext.user})
+        }
     }
     onChange = (uuidProfile, id, value, callback) => {
         const { agent } = this.state
@@ -437,7 +447,8 @@ class LocalAuthorityProfile extends Component {
     }
 }
 
-const UserProfile = translate('api-gateway')(props => <Profile {...props} />)
-const AdminProfile = translate('api-gateway')(props => <Profile {...props} />)
+const UserProfile = translate(['api-gateway'])(withAuthContext(Profile))
+
+const AdminProfile = translate(['api-gateway'])(withAuthContext(Profile))
 
 export { UserProfile, AdminProfile }
