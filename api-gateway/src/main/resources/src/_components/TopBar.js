@@ -19,31 +19,19 @@ class TopBar extends Component {
     }
     state = {
         isMainDomain: true,
-        currentProfile: {
-            uuid: '',
-            admin: false,
-            localAuthority: {
-                name: ''
-            }
-        },
         selectedProfil: null,
         profiles: []
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling } = this.context
+        if (this.props.authContext.profile && this.props.authContext.profile.uuid) {
+            this.setState({ selectedProfil: this.props.authContext.profile.uuid })
+            this.fetchUserInfo()
+        }
         _fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
             .then(checkStatus)
             .then(response => response.json())
             .then(isMainDomain => this.setState({ isMainDomain }))
-    }
-    componentDidUpdate() {
-        /** We need update state only if profile exist and is different from current Profile */
-        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile, this.state.currentProfile)) {
-            if (this.props.authContext.profile.uuid) {
-                this.setState({ currentProfile: this.props.authContext.profile, selectedProfil: this.props.authContext.profile.uuid })
-                this.fetchUserInfo()
-            }
-        }
     }
     fetchUserInfo = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -72,7 +60,7 @@ class TopBar extends Component {
     }
     render() {
         const { t, _openMenu, isMenuOpened } = this.context
-        const { isLoggedIn, user } = this.props.authContext
+        const { isLoggedIn, user, profile } = this.props.authContext
         const multiPath = getMultiPahtFromSlug()
         const listProfile = this.state.profiles.map(profile => {
             return {
@@ -108,7 +96,7 @@ class TopBar extends Component {
                                     options={listProfile}
                                     value={this.state.selectedProfil}
                                     selectOnBlur={true}
-                                    text={this.state.currentProfile.localAuthority.name}
+                                    text={profile.localAuthority.name}
                                     onChange={(event, { value }) => this.updateSelectedProfil(event, value)}
                                 />
                             </Menu.Item>
@@ -120,7 +108,7 @@ class TopBar extends Component {
                                         <Menu.Item className="primary" as={Link} to={`${multiPath}/profil`}>
                                             <span><Icon name="user" /> {t('top_bar.profile')}</span>
                                         </Menu.Item>
-                                        {this.state.currentProfile.admin && (
+                                        {profile && profile.admin && (
                                             <Menu.Item className="primary" as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
                                                 <span>
                                                     <Icon name={this.props.admin ? 'reply' : 'settings'} />{' '}

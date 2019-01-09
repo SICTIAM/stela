@@ -48,11 +48,7 @@ class Group extends Component {
                     })
                 })
         }
-    }
-    componentDidUpdate() {
-        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile.localAuthority.activatedModules, this.state.activatedModules)) {
-            this.setState({activatedModules: this.props.authContext.profile.localAuthority.activatedModules}, this.fetchAllRights)
-        }
+        this.setState({activatedModules: this.props.authContext.profile.localAuthority.activatedModules}, this.fetchAllRights)
     }
     fetchAllRights = () => {
         const { _fetchWithAuthzHandling } = this.context

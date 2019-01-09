@@ -48,23 +48,17 @@ class Profile extends Component {
     componentDidMount() {
         const { uuid } = this.props
         const { _fetchWithAuthzHandling } = this.context
+        this.setState({activeProfile: this.props.authContext.profile})
         if(uuid) {
             _fetchWithAuthzHandling({ url: `/api/admin/agent/${uuid}` })
                 .then(response => response.json())
                 .then(json => this.setState({ agent: json }))
+        } else {
+            this.setState({agent: this.props.authContext.user})
         }
         _fetchWithAuthzHandling({ url: '/api/api-gateway/profile/all-notifications' })
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
-    }
-    componentDidUpdate() {
-        const { uuid } = this.props
-        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile, this.state.activeProfile)) {
-            this.setState({activeProfile: this.props.authContext.profile})
-        }
-        if(this.props.authContext.user && !Object.is(this.props.authContext.user, this.state.agent) & !uuid) {
-            this.setState({agent: this.props.authContext.user})
-        }
     }
     onChange = (uuidProfile, id, value, callback) => {
         const { agent } = this.state

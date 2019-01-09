@@ -17,13 +17,6 @@ class MenuBar extends Component {
         _openMenu: PropTypes.func
     }
     state = {
-        profile: {
-            uuid: '',
-            localAuthority: {
-                activatedModules: []
-            },
-            groups: []
-        },
         reportUrl: ''
     }
     componentDidMount() {
@@ -31,11 +24,6 @@ class MenuBar extends Component {
         _fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
             .then(response => response.text())
             .then(reportUrl => this.setState({ reportUrl }))
-    }
-    componentDidUpdate() {
-        if(this.props.authContext.profile && !Object.is(this.props.authContext.profile, this.state.profile)) {
-            this.setState({profile: this.props.authContext.profile}, this.fetchAllRights)
-        }
     }
     mailToContact = () => {
         const { _fetchWithAuthzHandling } = this.context
@@ -48,8 +36,8 @@ class MenuBar extends Component {
     render() {
         const { t, isMenuOpened, _openMenu } = this.context
         const { reportUrl } = this.state
-        const { isLoggedIn } = this.props.authContext
-        const rights = this.props.authContext.userRights
+        const { isLoggedIn, userRights } = this.props.authContext
+        const rights = userRights
         const localAuthoritySlug = getLocalAuthoritySlug()
         const multiPath = getMultiPahtFromSlug()
         return (

@@ -52,34 +52,30 @@ class AuthProvider extends Component {
 	componentDidMount() {
 	    this.checkAuthentication()
 	}
-	componentDidUpdate() {
-	    //this.checkAuthentication()
-	}
 	/** Call /api/csrf-token
 	 * check if user is logged in
 	 * true -> get profile and agent
 	 */
 	async checkAuthentication() {
-	    const {_fetchWithAuthzHandling } = this.context
-	    _fetchWithAuthzHandling({ url: '/api/csrf-token' })
-	        .then(response => {
-				if((response.status !== 401) !== this.state.isLoggedIn) {
-					this.setState({isLoggedIn: response.status !== 401}, () => {
-						if(this.state.isLoggedIn) {
-							this.getProfile()
-							this.getUser()
-						}
-					})
+		const isAuthenticateResponse = await this.isAuthenticate()
+		const statusAuthentication = isAuthenticateResponse.status
+		const isLoggedIn = statusAuthentication !== 401
+		if(isLoggedIn !== this.state.isLoggedIn) {
+			this.setState({isLoggedIn}, () => {
+				if(this.state.isLoggedIn) {
+					this.getProfile()
+					this.getUser()
 				}
-				return response
-	        })
-	        .then(response => response.headers)
-	        .then(headers =>
-	            this.setState({
-	                csrfToken: headers.get('X-CSRF-TOKEN'),
-	                csrfTokenHeaderName: headers.get('X-CSRF-HEADER')
-	            })
-	        )
+			})
+		}
+		this.setState({
+			csrfToken: isAuthenticateResponse.headers.get('X-CSRF-TOKEN'),
+			csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
+		})
+	}
+	async isAuthenticate() {
+		const {_fetchWithAuthzHandling } = this.context
+		return _fetchWithAuthzHandling({ url: '/api/csrf-token' })
 	}
 	getProfile = () => {
 	    const {_fetchWithAuthzHandling, _addNotification } = this.context
