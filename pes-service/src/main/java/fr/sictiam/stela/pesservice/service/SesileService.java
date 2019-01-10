@@ -183,7 +183,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         LOGGER.info("Cheking for new PES signatures...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
-            if (pes.getPesHistories().stream()
+            if (pes.getLastHistoryStatus().equals(StatusType.PENDING_SIGNATURE) && pes.getPesHistories().stream()
                     .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus()))) {
                 try {
                     LOGGER.debug("Checking document {} status", pes.getSesileDocumentId());
