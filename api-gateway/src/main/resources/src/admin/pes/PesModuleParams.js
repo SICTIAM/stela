@@ -9,6 +9,7 @@ import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page, InputTextControlled } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class PesModuleParams extends Component {
     static contextTypes = {
@@ -83,7 +84,7 @@ class PesModuleParams extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: '/api/pes/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/pes/admin', method: 'PATCH', body: data, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.moduleUpdated))
             .catch(response => {
@@ -152,4 +153,4 @@ class PesModuleParams extends Component {
     }
 }
 
-export default translate(['pes', 'api-gateway'])(PesModuleParams)
+export default translate(['pes', 'api-gateway'])(withAuthContext(PesModuleParams))

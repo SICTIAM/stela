@@ -17,6 +17,7 @@ import { notifications } from '../_util/Notifications'
 import { checkStatus, getHistoryStatusTranslationKey, isPDF } from '../_util/utils'
 import { anomalies, hoursBeforeResendActe } from '../_util/constants'
 import ActeCancelButton from './ActeCancelButton'
+import { withAuthContext } from '../Auth'
 
 class Acte extends Component {
     static contextTypes = {
@@ -84,7 +85,7 @@ class Acte extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const uuid = this.props.uuid
         if (uuid !== '') {
-            _fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/republish', method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/republish', method: 'POST', context: this.props.authContext })
                 .then(checkStatus)
                 .then(() => {
                     _addNotification(notifications.acte.republished)
@@ -257,4 +258,4 @@ class Acte extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(Acte)
+export default translate(['acte', 'api-gateway'])(withAuthContext(Acte))

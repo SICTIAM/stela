@@ -11,6 +11,7 @@ import ConfirmModal from '../_components/ConfirmModal'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
 import { anomalies, hoursBeforeResendPes } from '../_util/constants'
+import { withAuthContext } from '../Auth'
 
 class Pes extends Component {
     static contextTypes = {
@@ -67,7 +68,7 @@ class Pes extends Component {
     }
     reSendFlux = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/pes/resend/' + this.props.uuid, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/pes/resend/' + this.props.uuid, context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.pes.sent))
             .catch(response =>
@@ -138,4 +139,4 @@ class Pes extends Component {
     }
 }
 
-export default translate(['pes', 'api-gateway'])(Pes)
+export default translate(['pes', 'api-gateway'])(withAuthContext(Pes))

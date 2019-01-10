@@ -10,6 +10,7 @@ import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { Field, Page, InputTextControlled } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class ActeModuleParams extends Component {
     static contextTypes = {
@@ -109,7 +110,7 @@ class ActeModuleParams extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = JSON.stringify(this.state.fields)
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: '/api/acte/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/acte/admin', method: 'PATCH', body: data, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.moduleUpdated))
             .catch(response => {
@@ -199,4 +200,4 @@ class ActeModuleParams extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ActeModuleParams)
+export default translate(['acte', 'api-gateway'])(withAuthContext(ActeModuleParams))

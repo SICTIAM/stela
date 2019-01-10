@@ -6,6 +6,7 @@ import { Button } from 'semantic-ui-react'
 import ConfirmModal from '../_components/ConfirmModal'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
+import { withAuthContext } from '../Auth'
 
 class ActeCancelButton extends Component {
     static contextTypes = {
@@ -22,7 +23,7 @@ class ActeCancelButton extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const uuid = this.props.uuid
         if (this.props.isCancellable && uuid !== '') {
-            _fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/status/cancel', method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/acte/' + uuid + '/status/cancel', method: 'POST', context: this.props.authContext })
                 .then(checkStatus)
                 .then(() => {
                     _addNotification(notifications.acte.cancelled)
@@ -44,4 +45,4 @@ class ActeCancelButton extends Component {
     }
 }
 
-export default translate(['acte'])(ActeCancelButton)
+export default translate(['acte'])(withAuthContext(ActeCancelButton))
