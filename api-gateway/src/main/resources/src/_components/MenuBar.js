@@ -3,14 +3,13 @@ import PropTypes from 'prop-types'
 import { NavLink } from 'react-router-dom'
 import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
-import { checkStatus } from '../_util/utils'
-import { notifications } from '../_util/Notifications'
 
-import { getRightsFromGroups, rightsFeatureResolver, rightsModuleResolver, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils'
+import { withAuthContext } from '../Auth'
+
+import { rightsFeatureResolver, rightsModuleResolver, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils'
 
 class MenuBar extends Component {
     static contextTypes = {
-        isLoggedIn: PropTypes.bool,
         t: PropTypes.func,
         _fetchWithAuthzHandling: PropTypes.func,
         _addNotification: PropTypes.func,
@@ -18,28 +17,10 @@ class MenuBar extends Component {
         _openMenu: PropTypes.func
     }
     state = {
-        profile: {
-            uuid: '',
-            localAuthority: {
-                activatedModules: []
-            },
-            groups: []
-        },
         reportUrl: ''
     }
     componentDidMount() {
-        const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(profile => this.setState({ profile }, this.fetchAllRights))
-            .catch(response => {
-                if(response.status !== 401) {
-                    response.text().then(text => {
-                        _addNotification(notifications.defaultError, 'notifications.title', text)
-                    })
-                }
-            })
+        const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/instance/report-url' })
             .then(response => response.text())
             .then(reportUrl => this.setState({ reportUrl }))
@@ -53,9 +34,10 @@ class MenuBar extends Component {
             })
     }
     render() {
-        const { isLoggedIn, t, isMenuOpened, _openMenu } = this.context
+        const { t, isMenuOpened, _openMenu } = this.context
         const { reportUrl } = this.state
-        const rights = getRightsFromGroups(this.state.profile.groups)
+        const { isLoggedIn, userRights } = this.props.authContext
+        const rights = userRights
         const localAuthoritySlug = getLocalAuthoritySlug()
         const multiPath = getMultiPahtFromSlug()
         return (
@@ -172,4 +154,4 @@ class MenuBar extends Component {
     }
 }
 
-export default translate(['api-gateway'])(MenuBar)
+export default translate(['api-gateway'])(withAuthContext(MenuBar))

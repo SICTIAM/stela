@@ -4,14 +4,14 @@ import { translate } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Button, Menu, Dropdown, Container, Icon, Popup } from 'semantic-ui-react'
 
+import { withAuthContext } from '../Auth'
+
 import { notifications } from '../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils'
 import history from '../_util/history'
 
 class TopBar extends Component {
     static contextTypes = {
-        isLoggedIn: PropTypes.bool,
-        user: PropTypes.object,
         t: PropTypes.func,
         _fetchWithAuthzHandling: PropTypes.func,
         _openMenu: PropTypes.func,
@@ -19,19 +19,15 @@ class TopBar extends Component {
     }
     state = {
         isMainDomain: true,
-        isUpdated: false,
-        currentProfile: {
-            uuid: '',
-            admin: false,
-            localAuthority: {
-                name: ''
-            }
-        },
         selectedProfil: null,
         profiles: []
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling } = this.context
+        if (this.props.authContext.profile && this.props.authContext.profile.uuid) {
+            this.setState({ selectedProfil: this.props.authContext.profile.uuid })
+            this.fetchUserInfo()
+        }
         _fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
             .then(checkStatus)
             .then(response => response.json())
@@ -39,15 +35,6 @@ class TopBar extends Component {
     }
     fetchUserInfo = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => {
-                if (json.uuid) this.setState({ currentProfile: json, isUpdated: true, selectedProfil: json.uuid })
-            })
-            .catch(response => {
-                response.json().then(json => _addNotification(notifications.defaultError, 'notifications.admin.title', json.message))
-            })
         _fetchWithAuthzHandling({ url: '/api/admin/agent/profiles' })
             .then(checkStatus)
             .then(response => response.json())
@@ -72,7 +59,8 @@ class TopBar extends Component {
         }
     }
     render() {
-        const { isLoggedIn, t, user, _openMenu, isMenuOpened } = this.context
+        const { t, _openMenu, isMenuOpened } = this.context
+        const { isLoggedIn, user, profile } = this.props.authContext
         const multiPath = getMultiPahtFromSlug()
         const listProfile = this.state.profiles.map(profile => {
             return {
@@ -89,8 +77,6 @@ class TopBar extends Component {
                 {`${user && user.given_name} ${user && user.family_name}`}
             </Button>
         )
-        // FIXME : isLoggedIn in the context is not reliable (false then true)
-        if (isLoggedIn && !this.state.isUpdated) this.fetchUserInfo()
         return (
             <Menu className={`topBar ${this.props.admin ? 'secondary' : 'primary'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
                 <a href="#content" className="skip">{t('api-gateway:skip_to_content')}</a>
@@ -110,7 +96,7 @@ class TopBar extends Component {
                                     options={listProfile}
                                     value={this.state.selectedProfil}
                                     selectOnBlur={true}
-                                    text={this.state.currentProfile.localAuthority.name}
+                                    text={profile.localAuthority.name}
                                     onChange={(event, { value }) => this.updateSelectedProfil(event, value)}
                                 />
                             </Menu.Item>
@@ -122,7 +108,7 @@ class TopBar extends Component {
                                         <Menu.Item className="primary" as={Link} to={`${multiPath}/profil`}>
                                             <span><Icon name="user" /> {t('top_bar.profile')}</span>
                                         </Menu.Item>
-                                        {this.state.currentProfile.admin && (
+                                        {profile && profile.admin && (
                                             <Menu.Item className="primary" as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
                                                 <span>
                                                     <Icon name={this.props.admin ? 'reply' : 'settings'} />{' '}
@@ -151,4 +137,4 @@ class TopBar extends Component {
     }
 }
 
-export default translate('api-gateway')(TopBar)
+export default translate(['api-gateway'])(withAuthContext(TopBar))
