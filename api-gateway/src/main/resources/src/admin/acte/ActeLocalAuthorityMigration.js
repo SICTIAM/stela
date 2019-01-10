@@ -7,6 +7,7 @@ import { Page, Field, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus } from '../../_util/utils'
 import { monthBeforeArchiving } from '../../_util/constants'
+import { withAuthContext } from '../../Auth'
 
 class ActeLocalAuthorityMigration extends Component {
     static contextTypes = {
@@ -66,7 +67,7 @@ class ActeLocalAuthorityMigration extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}`
         const data = this.getFormData()
-        _fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -83,7 +84,7 @@ class ActeLocalAuthorityMigration extends Component {
     reset = (migrationType) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}/reset`
-        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.props.authContextt })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -158,4 +159,4 @@ class ActeLocalAuthorityMigration extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ActeLocalAuthorityMigration)
+export default translate(['acte', 'api-gateway'])(withAuthContext(ActeLocalAuthorityMigration))

@@ -9,6 +9,7 @@ import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import { Page, LoadingContent } from '../../_components/UI'
 import CertificateInfosUI from '../../_components/CertificateInfosUI'
+import { withAuthContext } from '../../Auth'
 
 class LocalAuthorityCertificate extends Component {
     static contextTypes = {
@@ -42,7 +43,7 @@ class LocalAuthorityCertificate extends Component {
         data.append('file', acceptedFiles[0])
         const localAuthoritySlug = getLocalAuthoritySlug()
         const url = `/api/admin/local-authority/${this.props.localAuthorityUuid || 'current'}/certificates`
-        _fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 history.push(`/${localAuthoritySlug}/admin/${this.props.localAuthorityUuid ? `collectivite/${this.props.localAuthorityUuid}` : 'ma-collectivite'}/`)
@@ -59,7 +60,7 @@ class LocalAuthorityCertificate extends Component {
             const { _fetchWithAuthzHandling, _addNotification } = this.context
             const url = `/api/admin/local-authority/${this.props.localAuthorityUuid || 'current'}/certificates/` + uuid
             const localAuthoritySlug = getLocalAuthoritySlug()
-            _fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.context })
+            _fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.props.authContext })
                 .then(checkStatus)
                 .then(() => {
                     history.push(`/${localAuthoritySlug}/admin/${this.props.localAuthorityUuid ? `collectivite/${this.props.localAuthorityUuid}` : 'ma-collectivite'}/`)
@@ -101,4 +102,4 @@ class LocalAuthorityCertificate extends Component {
     }
 }
 
-export default translate(['api-gateway'])(LocalAuthorityCertificate)
+export default translate(['api-gateway'])(withAuthContext(LocalAuthorityCertificate))

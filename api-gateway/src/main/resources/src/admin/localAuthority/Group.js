@@ -81,7 +81,7 @@ class Group extends Component {
             ? `/api/admin/local-authority/group/${uuid}`
             : `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group`
         const method = uuid ? 'PATCH' : 'POST'
-        _fetchWithAuthzHandling({ url, method, body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method, body, headers, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {

@@ -13,6 +13,7 @@ import { checkStatus, getHistoryStatusTranslationKey, getLocalAuthoritySlug } fr
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent, StatusDisplay } from '../_components/UI'
 import { natures, status, anomalies } from '../_util/constants'
+import { withAuthContext } from '../Auth'
 
 class ActeList extends Component {
     static contextTypes = {
@@ -101,7 +102,7 @@ class ActeList extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const ActeUuidsAndSearchUI = Object.assign({ uuids: selectedUuids }, this.getSearchData())
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => {
                 if (response.status === 204) throw response
@@ -263,4 +264,4 @@ class ActeList extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ActeList)
+export default translate(['acte', 'api-gateway'])(withAuthContext(ActeList))

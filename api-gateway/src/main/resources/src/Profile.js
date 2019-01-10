@@ -97,7 +97,7 @@ class Profile extends Component {
             localAuthorityNotifications: profile.localAuthorityNotifications
         }
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers, method: 'PATCH', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers, method: 'PATCH', context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.profile.updated))
             .catch(response => {
@@ -107,7 +107,7 @@ class Profile extends Component {
     render() {
         const { t } = this.context
         const { activeProfile, agent, allNotifications } = this.state
-        const currentLocalAuthorityProfile = agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
+        const currentLocalAuthorityProfile = agent.profiles && agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
         const allLocalAuthorityProfiles = []
         agent.profiles.forEach((profile) => {
             if (profile.localAuthority.uuid === activeProfile.localAuthority.uuid) {
@@ -245,7 +245,7 @@ class LocalAuthorityProfile extends Component {
             const sesileConf = this.state.sesileConfiguration
             sesileConf.profileUuid = profile.uuid
             const url = '/api/pes/sesile/configuration'
-            _fetchWithAuthzHandling({ url, body: JSON.stringify(sesileConf), headers, method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url, body: JSON.stringify(sesileConf), headers, method: 'POST', context: this.props.authContext })
                 .then(checkStatus)
                 .catch(response => {
                     response.text().then(text =>

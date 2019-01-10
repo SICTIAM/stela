@@ -7,6 +7,7 @@ import TextEditor from '../_components/TextEditor'
 import { Page, Field } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
+import { withAuthContext } from '../Auth'
 
 class AdminInstance extends Component {
     static contextTypes = {
@@ -50,7 +51,7 @@ class AdminInstance extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const headers = { 'Content-Type': 'application/json' }
         const body = JSON.stringify(this.state.fields)
-        _fetchWithAuthzHandling({ url: '/api/admin/instance', method: 'PUT', body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/admin/instance', method: 'PUT', body, headers, context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.instanceParamsUpdated))
             .catch(response => {
@@ -97,4 +98,4 @@ class AdminInstance extends Component {
     }
 }
 
-export default translate(['api-gateway'])(AdminInstance)
+export default translate(['api-gateway'])(withAuthContext(AdminInstance))

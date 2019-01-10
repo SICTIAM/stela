@@ -13,6 +13,7 @@ import InputValidation from '../_components/InputValidation'
 import { checkStatus, getLocalAuthoritySlug, toUniqueArray } from '../_util/utils'
 import NewActeForm from './NewActeForm'
 import { natures } from '../_util/constants'
+import { withAuthContext } from '../Auth'
 
 class NewActeBatchedForm extends Component {
     static contextTypes = {
@@ -99,7 +100,7 @@ class NewActeBatchedForm extends Component {
     }
     addBatchedActe = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/newActe`, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/newActe`, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -116,7 +117,7 @@ class NewActeBatchedForm extends Component {
     }
     deleteBatchedActe = (uuid) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const { fields, statuses, formValid, formErrors } = this.state
@@ -134,7 +135,7 @@ class NewActeBatchedForm extends Component {
     }
     removeAttachmentTypes = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/types`, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/types`, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus()))
             .catch(response => {
@@ -172,7 +173,7 @@ class NewActeBatchedForm extends Component {
         const draftData = this.getDraftData()
         const headers = { 'Content-Type': 'application/json' }
         const url= `/api/acte/drafts/${draftData.uuid}`
-        _fetchWithAuthzHandling({ url, body: JSON.stringify(draftData), headers: headers, method: 'PATCH', context: this.context })
+        _fetchWithAuthzHandling({ url, body: JSON.stringify(draftData), headers: headers, method: 'PATCH', context: this.props.authContext })
             .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus))
             .catch(response => {
@@ -222,7 +223,7 @@ class NewActeBatchedForm extends Component {
     submitDraft = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
@@ -240,7 +241,7 @@ class NewActeBatchedForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
         const regex = /brouillons/g
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
@@ -409,4 +410,4 @@ const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedA
         </Accordion.Content>
     </Segment>
 
-export default translate(['acte', 'api-gateway'])(NewActeBatchedForm)
+export default translate(['acte', 'api-gateway'])(withAuthContext(NewActeBatchedForm))

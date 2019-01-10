@@ -8,6 +8,7 @@ import StelaTable from '../_components/StelaTable'
 import { Page } from '../_components/UI'
 import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
+import { withAuthContext } from '../Auth'
 
 class DraftList extends Component {
     static contextTypes = {
@@ -30,7 +31,7 @@ class DraftList extends Component {
     deleteDrafts = (selectedUuids) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify(selectedUuids), headers, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/acte/drafts', body: JSON.stringify(selectedUuids), headers, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.draftsDeleted)
@@ -84,4 +85,4 @@ class DraftList extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(DraftList)
+export default translate(['acte', 'api-gateway'])(withAuthContext(DraftList))

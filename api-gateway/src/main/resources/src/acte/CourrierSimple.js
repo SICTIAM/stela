@@ -6,6 +6,7 @@ import { Button, Grid, Segment, Header } from 'semantic-ui-react'
 import { File, InputFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
+import { withAuthContext } from '../Auth'
 
 class CourrierSimple extends Component {
     static contextTypes = {
@@ -33,7 +34,7 @@ class CourrierSimple extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const data = new FormData()
         data.append('file', this.state.file)
-        _fetchWithAuthzHandling({ url: `/api/acte/${this.props.acteUuid}/courrier-simple`, method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/${this.props.acteUuid}/courrier-simple`, method: 'POST', body: data, context: this.props.authContext})
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.courrierSimpleAsked)
@@ -101,4 +102,4 @@ class CourrierSimple extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(CourrierSimple)
+export default translate(['acte', 'api-gateway'])(withAuthContext(CourrierSimple))

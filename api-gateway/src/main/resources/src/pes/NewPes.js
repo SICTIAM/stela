@@ -10,6 +10,7 @@ import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import { withAuthContext } from '../Auth'
 
 class NewPes extends Component {
     static contextTypes = {
@@ -60,7 +61,7 @@ class NewPes extends Component {
             const data = new FormData()
             data.append('pesAller', JSON.stringify(this.state.fields))
             data.append('file', this.state.attachment)
-            _fetchWithAuthzHandling({ url: '/api/pes', method: 'POST', body: data, context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/pes', method: 'POST', body: data, context: this.props.authContext })
                 .then(checkStatus)
                 .then(response => response.text())
                 .then(pesUuid => {
@@ -126,4 +127,4 @@ class NewPes extends Component {
     }
 }
 
-export default translate(['pes', 'api-gateway'])(NewPes)
+export default translate(['pes', 'api-gateway'])(withAuthContext(NewPes))

@@ -10,6 +10,7 @@ import { modules } from '../../_util/constants'
 import ConfirmModal from '../../_components/ConfirmModal'
 import { Field, FieldValue, ListItem, Page } from '../../_components/UI'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class LocalAuthority extends Component {
     static contextTypes = {
@@ -65,7 +66,7 @@ class LocalAuthority extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const uuid = this.props.uuid
         const url = uuid ? `/api/admin/local-authority/${uuid}/${moduleName}` : `/api/admin/local-authority/current/${moduleName}`
-        _fetchWithAuthzHandling({ url, method: method, context: this.context })
+        _fetchWithAuthzHandling({ url, method: method, context: this.props.authContext })
             .then(checkStatus)
             .then(callback)
             .catch(response => {
@@ -75,7 +76,7 @@ class LocalAuthority extends Component {
     removeGroup = (event, uuid) => {
         event.preventDefault()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}`, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/admin/local-authority/group/${uuid}`, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -223,4 +224,4 @@ class LocalAuthority extends Component {
     }
 }
 
-export default translate(['api-gateway'])(LocalAuthority)
+export default translate(['api-gateway'])(withAuthContext(LocalAuthority))
