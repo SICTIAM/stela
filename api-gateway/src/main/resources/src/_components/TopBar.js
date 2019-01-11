@@ -20,18 +20,23 @@ class TopBar extends Component {
     state = {
         isMainDomain: true,
         selectedProfil: null,
+        defaultProfil: null,
         profiles: []
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling } = this.context
-        if (this.props.authContext.profile && this.props.authContext.profile.uuid) {
-            this.setState({ selectedProfil: this.props.authContext.profile.uuid })
-            this.fetchUserInfo()
-        }
+        this.fetchUserInfo()
         _fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
             .then(checkStatus)
             .then(response => response.json())
             .then(isMainDomain => this.setState({ isMainDomain }))
+    }
+    componentDidUpdate() {
+        // QuickFix
+        // context sometimes doen't load in ComponentDidMount
+        if (this.props.authContext.profile && this.props.authContext.profile.uuid && this.props.authContext.profile.uuid !== this.state.defaultProfil) {
+            this.setState({ defaultProfil: this.props.authContext.profile.uuid, selectedProfil: this.props.authContext.profile.uuid })
+        }
     }
     fetchUserInfo = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -54,7 +59,8 @@ class TopBar extends Component {
         if(event.keyCode && event.keyCode !== 13) {
             this.setState({selectedProfil: value})
         }
-        else {
+        else if(value !== this.state.defaultProfil) {
+            //redirect only if new profile is selected
             window.location.href = '/api/api-gateway/switch/' + value
         }
     }
