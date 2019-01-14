@@ -48,6 +48,7 @@ class Home extends Component {
         const { t } = this.context
         const { authContext } = this.props
         const localAuthoritySlug = getLocalAuthoritySlug()
+        const { certificate } = this.state
         const pairedCertificate = authContext.user && authContext.user.certificate
         const isCertificatePaired = pairedCertificate
             && this.state.certificate.serial === pairedCertificate.serial
@@ -64,7 +65,7 @@ class Home extends Component {
                 <Segment>
                     <ReactMarkdown source={this.state.welcomeMessage} />
                 </Segment>
-                {(authContext.isLoggedIn && localAuthoritySlug && isCertificatePaired) && (
+                {/* {(authContext.isLoggedIn && localAuthoritySlug && isCertificatePaired) && (
                     <Grid columns={2}>
                         <Grid.Column largeScreen={10} computer={10} mobile={16}>
                             <Segment>
@@ -74,6 +75,7 @@ class Home extends Component {
                         </Grid.Column>
                         <Grid.Column largeScreen={6} computer={6} mobile={16}>
                             <Segment>
+                                <h2>{t('profile.certificate.title')}</h2>
                                 <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
                                 <br/>
                                 <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
@@ -86,6 +88,37 @@ class Home extends Component {
                         <h2>{t('last_update')}</h2>
                         <ReactMarkdown source={this.state.lastUpdate} />
                     </Segment>
+                )} */}
+                {(authContext.isLoggedIn && localAuthoritySlug) && (
+                    <Grid columns={2}>
+                        <Grid.Column largeScreen={10} computer={10} mobile={16}>
+                            <Segment>
+                                <h2>{t('last_update')}</h2>
+                                <ReactMarkdown source={this.state.lastUpdate} />
+                            </Segment>
+                        </Grid.Column>
+                        <Grid.Column largeScreen={6} computer={6} mobile={16}>
+                            <Segment>
+                                <h2>{t('profile.certificate.title')}</h2>
+                                {certificate.status === 'NONE' && pairedCertificate && (
+                                    <span>{t('certificate_not_inserted')}</span>
+                                )}
+                                {certificate.status === 'NONE' && !pairedCertificate && (
+                                    <span>{t('certificate_not_paired')}</span>
+                                )}
+                                {certificate.status !== 'NONE' && !pairedCertificate && (
+                                    <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}</Link>
+                                )}
+                                {isCertificatePaired && (
+                                    <div>
+                                        <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
+                                        <br/>
+                                        <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
+                                    </div>
+                                )}
+                            </Segment>
+                        </Grid.Column>
+                    </Grid>
                 )}
             </Fragment>
         )
