@@ -1,10 +1,9 @@
 package fr.sictiam.stela.admin.service;
 
 import fr.sictiam.stela.admin.dao.ProfileRepository;
-import fr.sictiam.stela.admin.model.NotificationValue;
 import fr.sictiam.stela.admin.model.Profile;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.model.UI.ProfileRights;
+import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +32,7 @@ public class ProfileService {
 
     @Transactional
     public Profile createOrUpdate(Profile profile) {
-        List<NotificationValue> notificationValues = profile.getNotificationValues().stream().map(notificationValue -> {
-            notificationValue.setProfileUuid(profile.getUuid());
-            return notificationValue;
-        }).collect(Collectors.toList());
-        profile.getNotificationValues().clear();
-        profile.getNotificationValues().addAll(notificationValues);
+
         return profileRepository.save(profile);
     }
 

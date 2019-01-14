@@ -6,9 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,7 +39,7 @@ public class Profile {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_uuid")
     @JsonView(Views.ProfileViewPublic.class)
-    private List<NotificationValue> notificationValues;
+    private Set<NotificationValue> notificationValues;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -102,13 +100,12 @@ public class Profile {
         this.email = email;
     }
 
-    public List<NotificationValue> getNotificationValues() {
-        return notificationValues != null ? notificationValues : new ArrayList<>();
+    public Set<NotificationValue> getNotificationValues() {
+        return notificationValues != null ? notificationValues : new HashSet<>();
     }
 
-    public void setNotificationValues(List<NotificationValue> notificationValues) {
-        getNotificationValues().clear();
-        getNotificationValues().addAll(notificationValues);
+    public void setNotificationValues(Set<NotificationValue> notificationValues) {
+        this.notificationValues = notificationValues;
     }
 
     public Set<Module> getLocalAuthorityNotifications() {
