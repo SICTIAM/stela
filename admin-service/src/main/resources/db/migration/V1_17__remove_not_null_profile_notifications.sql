@@ -1,0 +1,1 @@
+alter table notification_value alter column profile_uuid drop not null;
