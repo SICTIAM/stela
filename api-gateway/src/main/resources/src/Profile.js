@@ -60,6 +60,14 @@ class Profile extends Component {
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
     }
+    componentDidUpdate() {
+        // QuickFix
+        // context sometimes doen't load in ComponentDidMount
+        const { uuid } = this.props
+        if(!uuid && this.props.authContext.user && this.props.authContext.user !== this.state.agent) {
+            this.setState({agent: this.props.authContext.user})
+        }
+    }
     onChange = (uuidProfile, id, value, callback) => {
         const { agent } = this.state
         const profile = agent.profiles.find(profile => profile.uuid === uuidProfile)
