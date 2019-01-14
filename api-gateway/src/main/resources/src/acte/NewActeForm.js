@@ -472,6 +472,9 @@ class NewActeForm extends Component {
                 }
             })
     }
+    toUpperCase = (field, value, callback) => {
+        this.handleFieldChange(field, value.toUpperCase(), callback)
+    }
     sum(items, prop) {
         if (items == null) {
             return 0
@@ -543,7 +546,7 @@ class NewActeForm extends Component {
                                     placeholder={t('acte.fields.number') + '...'}
                                     ariaRequired={true}
                                     value={this.state.fields.number}
-                                    onChange={this.handleFieldChange}
+                                    onChange={this.toUpperCase}
                                     validationRule={this.validationRules.number}
                                     fieldName={t('acte.fields.number')} />
                             </FormField>
