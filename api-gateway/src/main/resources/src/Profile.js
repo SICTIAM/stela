@@ -75,11 +75,15 @@ class Profile extends Component {
         this.setState({ agent }, callback)
     }
     onPairCertification = () => {
-        const { uuid } = this.props
+        const { uuid, authContext } = this.props
         const { _fetchWithAuthzHandling } = this.context
-        _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
-            .then(response => response.json())
-            .then(json => this.setState({ agent: json }))
+        if(!uuid) {
+            authContext.getUser()
+        } else {
+            _fetchWithAuthzHandling({ url: `/api/admin/agent/${uuid}` })
+                .then(response => response.json())
+                .then(json => this.setState({ agent: json }))
+        }
     }
     onLocalAuthorityNotificationsChange = (uuidProfile, module, checked) => {
         const { agent } = this.state
@@ -124,6 +128,7 @@ class Profile extends Component {
                         key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
                         profile={currentLocalAuthorityProfile}
                         isDefaultOpen={true}
+                        authContext={this.props.authContext}
                         onChange={this.onChange}
                         updateProfile={this.updateProfile}
                         allNotifications={allNotifications}
@@ -139,6 +144,7 @@ class Profile extends Component {
                         profile={profile}
                         isDefaultOpen={false}
                         onChange={this.onChange}
+                        authContext={this.props.authContext}
                         updateProfile={this.updateProfile}
                         allNotifications={allNotifications}
                         onCheckboxChange={this.onCheckboxChange}

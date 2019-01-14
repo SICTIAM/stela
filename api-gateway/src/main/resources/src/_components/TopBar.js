@@ -25,7 +25,6 @@ class TopBar extends Component {
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling } = this.context
-        this.fetchUserInfo()
         _fetchWithAuthzHandling({ url: '/api/api-gateway/isMainDomain' })
             .then(checkStatus)
             .then(response => response.json())
@@ -36,6 +35,7 @@ class TopBar extends Component {
         // context sometimes doen't load in ComponentDidMount
         if (this.props.authContext.profile && this.props.authContext.profile.uuid && this.props.authContext.profile.uuid !== this.state.defaultProfil) {
             this.setState({ defaultProfil: this.props.authContext.profile.uuid, selectedProfil: this.props.authContext.profile.uuid })
+            this.fetchUserInfo()
         }
     }
     fetchUserInfo = () => {

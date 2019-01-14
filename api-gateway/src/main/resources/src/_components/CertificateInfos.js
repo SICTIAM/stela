@@ -33,6 +33,9 @@ class CertificateInfos extends Component {
         }
     }
     componentDidMount() {
+        this.certificateInfo()
+    }
+    certificateInfo = () => {
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
             .then(response => response.json())
@@ -46,6 +49,7 @@ class CertificateInfos extends Component {
                 .then(() => {
                     _addNotification(notifications.profile.certificatePairedSuccess)
                     this.props.onPairCertification()
+                    this.certificateInfo()
                 })
                 .catch(response => {
                     if (response.status === 412) {
