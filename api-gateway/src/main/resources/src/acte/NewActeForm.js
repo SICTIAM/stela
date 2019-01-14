@@ -292,19 +292,21 @@ class NewActeForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const acteData = this.getActeData()
         const headers = { 'Content-Type': 'application/json' }
-        const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
-        _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.props.authContext })
-            .then(checkStatus)
-            .then(response => response.text())
-            .then(acteUuid => {
-                const fields = this.state.fields
-                fields['uuid'] = acteUuid
-                this.setState({ fields }, callback)
-                this.props.setStatus('saved', this.state.fields.uuid)
-            })
-            .catch(response => {
-                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
-            })
+        if(this.state.fields.number || this.state.fields.object || this.state.fields.decision) {
+            const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
+            _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.props.authContext })
+                .then(checkStatus)
+                .then(response => response.text())
+                .then(acteUuid => {
+                    const fields = this.state.fields
+                    fields['uuid'] = acteUuid
+                    this.setState({ fields }, callback)
+                    this.props.setStatus('saved', this.state.fields.uuid)
+                })
+                .catch(response => {
+                    response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                })
+        }
     }, 3000)
     saveDraftFile = (file, accept) => {
         if(accept) {
@@ -657,7 +659,7 @@ class NewActeForm extends Component {
                             disableClick={true}
                             multiple={false}>
                             <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
-                                <input type="file" ariaRequired={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                <input type="file" aria-required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
                                     onChange={e => this.saveDraftAnnexe(e.target.files[0], acceptAnnexes)} style={{ display: 'none' }} />
                             </InputFile>
                         </DragAndDropFile>
