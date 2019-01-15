@@ -157,6 +157,10 @@ public class SignatureService {
                 } catch (IOException | CertificateException e) {
                     LOGGER.error("Generic error while validating pdf attachment in pes : {}", e.getMessage());
                     throw new SignatureException("PDF_ATTACHMENT", e);
+                } catch (Exception e) {
+                    LOGGER.error("Unknown error while validating pdf attachment in pes : {} : {})",
+                            e.getClass().getSimpleName(), e.getMessage());
+                    throw new SignatureException("PDF_ATTACHMENT", e);
                 } finally {
                     bais.close();
                     gis.close();

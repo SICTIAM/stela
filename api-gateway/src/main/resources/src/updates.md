@@ -1,3 +1,12 @@
+### 11/01/2019
+
+#### Général
+
+- Correctifs sur l'interface
+  - changement de collectivité via le bouton
+  - affichage du contenu d'un PES retour
+  - meilleure gestion de la pagination lors d'une recherche dans une liste
+
 ### 07/01/2019
 
 #### Contrôle de légalité
