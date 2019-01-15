@@ -65,30 +65,6 @@ class Home extends Component {
                 <Segment>
                     <ReactMarkdown source={this.state.welcomeMessage} />
                 </Segment>
-                {/* {(authContext.isLoggedIn && localAuthoritySlug && isCertificatePaired) && (
-                    <Grid columns={2}>
-                        <Grid.Column largeScreen={10} computer={10} mobile={16}>
-                            <Segment>
-                                <h2>{t('last_update')}</h2>
-                                <ReactMarkdown source={this.state.lastUpdate} />
-                            </Segment>
-                        </Grid.Column>
-                        <Grid.Column largeScreen={6} computer={6} mobile={16}>
-                            <Segment>
-                                <h2>{t('profile.certificate.title')}</h2>
-                                <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
-                                <br/>
-                                <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
-                            </Segment>
-                        </Grid.Column>
-                    </Grid>
-                )}
-                {(authContext.isLoggedIn && localAuthoritySlug && !isCertificatePaired) && (
-                    <Segment>
-                        <h2>{t('last_update')}</h2>
-                        <ReactMarkdown source={this.state.lastUpdate} />
-                    </Segment>
-                )} */}
                 {(authContext.isLoggedIn && localAuthoritySlug) && (
                     <Grid columns={2}>
                         <Grid.Column largeScreen={10} computer={10} mobile={16}>

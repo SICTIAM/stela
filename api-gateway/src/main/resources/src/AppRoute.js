@@ -127,6 +127,14 @@ class AppRoute extends Component {
         certificate: false
     }
     componentDidMount() {
+        this.checkCertificateIsValide()
+    }
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.authContext.user && this.props.authContext.user.certificate !== prevProps.authContext.user.certificate) {
+            this.checkCertificateIsValide()
+        }
+    }
+    checkCertificateIsValide = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
             .then(checkStatus)

@@ -17,7 +17,10 @@ export const AuthContext = createContext({
     profile: null,
     userRights: null,
     isLoggedIn: null,
-    user: null
+	user: null,
+	getUser: () => {},
+	csrfToken: null,
+	csrfTokenHeaderName: null
 })
 
 /** export Consumer, to use easily when we need */
@@ -43,11 +46,27 @@ class AuthProvider extends Component {
 	    _fetchWithAuthzHandling: PropTypes.func,
 	    _addNotification: PropTypes.func,
 	}
+	getUser = () => {
+	    const {_fetchWithAuthzHandling, _addNotification } = this.context
+	     _fetchWithAuthzHandling({ url: '/api/admin/agent' })
+	        .then(response => response.json())
+			.then(json => this.setState({ user: json }))
+			.catch(response => {
+				if(response.status !== 401) {
+				    response.text().then(text => {
+				        _addNotification(notifications.defaultError, 'notifications.title', text)
+				    })
+				}
+			})
+	}
 	state = {
 	    profile: null,
 	    userRights: null,
 	    isLoggedIn: null,
-	    user: null
+		user: null,
+		getUser: this.getUser,
+		csrfToken: null,
+		csrfTokenHeaderName: null
 	}
 	componentDidMount() {
 	    this.checkAuthentication()
@@ -73,10 +92,6 @@ class AuthProvider extends Component {
 			csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
 		})
 	}
-	async isAuthenticate() {
-		const {_fetchWithAuthzHandling } = this.context
-		return _fetchWithAuthzHandling({ url: '/api/csrf-token' })
-	}
 	getProfile = () => {
 	    const {_fetchWithAuthzHandling, _addNotification } = this.context
 	    _fetchWithAuthzHandling({ url: '/api/admin/profile' })
@@ -95,21 +110,10 @@ class AuthProvider extends Component {
 	            }
 	        })
 	}
-
-	getUser = () => {
-	    const {_fetchWithAuthzHandling, _addNotification } = this.context
-	     _fetchWithAuthzHandling({ url: '/api/admin/agent' })
-	        .then(response => response.json())
-			.then(json => this.setState({ user: json }))
-			.catch(response => {
-				if(response.status !== 401) {
-				    response.text().then(text => {
-				        _addNotification(notifications.defaultError, 'notifications.title', text)
-				    })
-				}
-			})
+	async isAuthenticate() {
+		const {_fetchWithAuthzHandling } = this.context
+		return _fetchWithAuthzHandling({ url: '/api/csrf-token' })
 	}
-
 	render() {
 	    return (
 	        <AuthContext.Provider value={this.state}>
