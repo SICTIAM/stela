@@ -81,6 +81,9 @@ class PesList extends Component {
         const offset = Math.ceil(data.selected * this.state.limit)
         this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
     }
+    onSearch = () => {
+        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
+    }
     sort = clickedColumn => {
         const { column, direction } = this.state
         if (column !== clickedColumn) {
@@ -130,8 +133,8 @@ class PesList extends Component {
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
                     <Segment>
                         <AdvancedSearch isDefaultOpen={false} fieldId="multifield" fieldValue={search.multifield}
-                            fieldOnChange={this.handleFieldChange} onSubmit={this.submitForm}>
-                            <Form onSubmit={this.submitForm}>
+                            fieldOnChange={this.handleFieldChange} onSubmit={this.onSearch}>
+                            <Form onSubmit={this.onSearch}>
                                 <FormFieldInline htmlFor="objet" label={t('pes.fields.objet')}>
                                     <input id="objet" value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
                                 </FormFieldInline>

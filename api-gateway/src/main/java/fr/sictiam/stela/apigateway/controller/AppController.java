@@ -2,10 +2,10 @@ package fr.sictiam.stela.apigateway.controller;
 
 import fr.sictiam.stela.apigateway.model.sitemap.XmlUrl;
 import fr.sictiam.stela.apigateway.model.sitemap.XmlUrlSet;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -36,7 +36,7 @@ public class AppController {
         response.setHeader("Content-Disposition", "inline; filename=robots.txt");
         response.addHeader("Content-Type", "text/plain; charset=UTF-8");
         try {
-            IOUtils.copy(new ByteArrayInputStream(buildRobots(robotsProperties).getBytes()), response.getOutputStream());
+            FileCopyUtils.copy(new ByteArrayInputStream(buildRobots(robotsProperties).getBytes()), response.getOutputStream());
             response.flushBuffer();
             return new ResponseEntity(HttpStatus.OK);
         } catch (IOException e) {

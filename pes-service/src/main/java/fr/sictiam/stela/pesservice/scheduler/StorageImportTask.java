@@ -36,7 +36,7 @@ public class StorageImportTask {
     public void importAttachments() throws Exception {
 
         Query query = entityManager.createNativeQuery("select uuid from " +
-                "attachment where file is not null");
+                "attachment where file is not null limit 500");
 
         List<String> result = query.getResultList();
         LOGGER.info("Importing {} attachments", result.size());
@@ -70,7 +70,7 @@ public class StorageImportTask {
         }
 
         // Process data in pes_history table
-        query = entityManager.createNativeQuery("SELECT uuid FROM pes_history WHERE file IS NOT NULL");
+        query = entityManager.createNativeQuery("SELECT uuid FROM pes_history WHERE file IS NOT NULL  limit 500");
         result = query.getResultList();
         LOGGER.info("Importing {} pes history attachments", result.size());
 

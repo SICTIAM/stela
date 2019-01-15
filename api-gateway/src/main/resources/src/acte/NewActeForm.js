@@ -13,6 +13,7 @@ import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize } from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
+import { withAuthContext } from '../Auth'
 
 class NewActeForm extends Component {
     static contextTypes = {
@@ -125,7 +126,7 @@ class NewActeForm extends Component {
             const acteData = this.getActeData()
             const headers = { 'Content-Type': 'application/json' }
             const url = `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/leave`
-            _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
+            _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.props.authContext })
                 .then(checkStatus)
                 .catch(response => {
                     response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -157,7 +158,7 @@ class NewActeForm extends Component {
         const nature = this.state.fields.nature
         const materialCode = this.state.fields.code
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ attachmentTypes: json }))
@@ -291,19 +292,21 @@ class NewActeForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const acteData = this.getActeData()
         const headers = { 'Content-Type': 'application/json' }
-        const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
-        _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.context })
-            .then(checkStatus)
-            .then(response => response.text())
-            .then(acteUuid => {
-                const fields = this.state.fields
-                fields['uuid'] = acteUuid
-                this.setState({ fields }, callback)
-                this.props.setStatus('saved', this.state.fields.uuid)
-            })
-            .catch(response => {
-                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
-            })
+        if(this.state.fields.number || this.state.fields.object || this.state.fields.decision) {
+            const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
+            _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.props.authContext })
+                .then(checkStatus)
+                .then(response => response.text())
+                .then(acteUuid => {
+                    const fields = this.state.fields
+                    fields['uuid'] = acteUuid
+                    this.setState({ fields }, callback)
+                    this.props.setStatus('saved', this.state.fields.uuid)
+                })
+                .catch(response => {
+                    response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
+                })
+        }
     }, 3000)
     saveDraftFile = (file, accept) => {
         if(accept) {
@@ -326,7 +329,7 @@ class NewActeForm extends Component {
             const data = new FormData()
             data.append('file', file)
             data.append('nature', this.state.fields.nature)
-            _fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: url, body: data, method: 'POST', context: this.props.authContext })
                 .then(checkStatus)
                 .then(response => response.json())
                 .then(json => {
@@ -354,7 +357,7 @@ class NewActeForm extends Component {
     deleteDraftAttachment = (url, annexeUuid) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.props.setStatus('saving', this.state.fields.uuid)
-        _fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url: url, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const fields = this.state.fields
@@ -379,7 +382,7 @@ class NewActeForm extends Component {
             code, annexeUuid)
     onAttachmentTypeChange = (url, code, annexeUuid) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url, method: 'PUT', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'PUT', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const fields = this.state.fields
@@ -408,7 +411,7 @@ class NewActeForm extends Component {
     fetchRemoveActeAttachmentTypes = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/types`
-        _fetchWithAuthzHandling({ url, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(this.removeAttachmentTypes)
             .catch(response => {
@@ -428,7 +431,7 @@ class NewActeForm extends Component {
         const headers = { 'Content-Type': 'application/json' }
         const url = '/api/acte/drafts'
         const regex = /brouillons/g
-        _fetchWithAuthzHandling({ url, body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.context })
+        _fetchWithAuthzHandling({ url, body: JSON.stringify([draftUuid]), headers: headers, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.draftDeleted)
@@ -451,7 +454,7 @@ class NewActeForm extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const fields = this.state.fields
-        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
@@ -470,6 +473,9 @@ class NewActeForm extends Component {
                     response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
                 }
             })
+    }
+    toUpperCase = (field, value, callback) => {
+        this.handleFieldChange(field, value.toUpperCase(), callback)
     }
     sum(items, prop) {
         if (items == null) {
@@ -542,7 +548,7 @@ class NewActeForm extends Component {
                                     placeholder={t('acte.fields.number') + '...'}
                                     ariaRequired={true}
                                     value={this.state.fields.number}
-                                    onChange={this.handleFieldChange}
+                                    onChange={this.toUpperCase}
                                     validationRule={this.validationRules.number}
                                     fieldName={t('acte.fields.number')} />
                             </FormField>
@@ -653,7 +659,7 @@ class NewActeForm extends Component {
                             disableClick={true}
                             multiple={false}>
                             <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
-                                <input type="file" ariaRequired={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                <input type="file" aria-required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
                                     onChange={e => this.saveDraftAnnexe(e.target.files[0], acceptAnnexes)} style={{ display: 'none' }} />
                             </InputFile>
                         </DragAndDropFile>
@@ -713,4 +719,4 @@ class NewActeForm extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(NewActeForm)
+export default translate(['acte', 'api-gateway'])(withAuthContext(NewActeForm))

@@ -9,6 +9,7 @@ import { modules } from '../../_util/constants'
 import { Page } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class LocalAuthorityList extends Component {
     static contextTypes = {
@@ -47,7 +48,7 @@ class LocalAuthorityList extends Component {
     askAllClassificationUpdate = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = '/api/acte/ask-classification/all'
-        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.classificationAsked))
             .catch((response) => {
@@ -125,4 +126,4 @@ class LocalAuthorityList extends Component {
     }
 }
 
-export default translate(['api-gateway', 'acte'])(LocalAuthorityList)
+export default translate(['api-gateway', 'acte'])(withAuthContext(LocalAuthorityList))

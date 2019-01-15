@@ -1,9 +1,15 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
-import com.netflix.discovery.converters.Auto;
+import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
-import fr.sictiam.stela.pesservice.model.*;
+import fr.sictiam.stela.pesservice.model.Attachment;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.PesAller;
+import fr.sictiam.stela.pesservice.model.PesHistoryError;
+import fr.sictiam.stela.pesservice.model.PesRetour;
+import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.NotificationService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
@@ -13,6 +19,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
 import org.springframework.integration.ftp.session.FtpSession;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.mail.MessagingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,7 +42,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class ReceiverTask {
@@ -48,6 +61,9 @@ public class ReceiverTask {
     private PesRetourRepository pesRetourRepository;
 
     @Autowired
+    private PesAllerRepository pesAllerRepository;
+
+    @Autowired
     private LocalAuthorityService localAuthorityService;
 
     @Autowired
@@ -56,19 +72,72 @@ public class ReceiverTask {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private NotificationService notificationService;
+
+    @Value("${application.receiverTask.hoursWithoutNewFiles}")
+    private int hoursWithoutNewFiles;
+
+    @Value("${application.receiverTask.maxWaitingPes}")
+    private int maxWaitingPes;
+
+    @Value("${application.receiverTask.alertEmail}")
+    private String alertEmail;
+
+    private Long runsWithoutNewFiles = 0L;
+    private boolean alertSent = false;
+
+    @Value("${application.ftp.timeout}")
+    private Integer timeout;
+
     @Scheduled(fixedRate = 60000)
     public void receive() throws IOException {
         LOGGER.info("Starting receiver task...");
-        FtpSession ftpSession = defaultFtpSessionFactory.getSession();
-        FTPClient ftpClient = ftpSession.getClientInstance();
+        defaultFtpSessionFactory.setConnectTimeout(timeout);
+        defaultFtpSessionFactory.setDataTimeout(timeout);
+        defaultFtpSessionFactory.setDefaultTimeout(timeout);
 
-        FTPFile[] files = ftpClient.listFiles();
-        LOGGER.info("{} files found on FTP server", files.length);
+        FtpSession ftpSession = null;
+        FTPClient ftpClient = null;
+        List<FTPFile> files = new ArrayList<>();
+
+        try {
+            ftpSession = defaultFtpSessionFactory.getSession();
+            ftpClient = ftpSession.getClientInstance();
+
+            files.addAll(Arrays.asList(ftpClient.listFiles()).stream()
+                    .filter(file -> !file.getName().equals(".") && !file.getName().equals(".."))
+                    .collect(Collectors.toList()));
+        } catch (IllegalStateException | IOException e) {
+            LOGGER.error("Error with FTP connection: {} caused by {}", e.getMessage(), e.getCause() != null ?
+                    e.getCause().getMessage() : "unknown");
+        }
+
+        LOGGER.info("{} files found on FTP server: ", files.size());
+        files.forEach(file -> LOGGER.info(" |- {}", file.getName()));
+
+        if (files.size() == 0)
+            runsWithoutNewFiles++;
+
+        if (runsWithoutNewFiles > 60 * hoursWithoutNewFiles
+                && pesAllerRepository.countByLastHistoryStatus(StatusType.SENT) > maxWaitingPes
+                && !alertSent) {
+            LOGGER.warn("No new AR since 4 hours and more than 20 PES files waiting");
+            try {
+                notificationService.sendMail(Collections.singletonList(alertEmail).toArray(new String[0]),
+                        "Alerte - Problème potentiel de récupération des ARs PES",
+                        "Pas de nouvel AR récupéré depuis plus de 4 heures et plus de 20 PES en attente");
+                alertSent = true;
+            } catch (MessagingException e) {
+                LOGGER.error("Unable to send email alert for ARs retrieval", e);
+            }
+        }
+
         for (FTPFile ftpFile : files) {
             if (ftpFile.isFile()) {
                 String fileName = ftpFile.getName();
                 LOGGER.debug("file found: " + fileName);
-                if (ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) {
+                if ((ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) && ftpClient != null) {
                     InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                     if (ftpClient.completePendingCommand()) {
                         byte[] targetArray = new byte[inputStream.available()];
@@ -87,10 +156,12 @@ public class ReceiverTask {
                             inputStream.close();
                         }
                     }
-
                 }
             }
         }
+
+        if (ftpSession != null)
+            ftpSession.close();
     }
 
     public void readACK(byte[] targetArray, String ackName)
@@ -110,14 +181,14 @@ public class ReceiverTask {
 
         boolean etatAck = true;
         List<PesHistoryError> errors = new ArrayList<>();
-        NodeList nodes = (NodeList)path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
-        for (int i = 0 ; i < nodes.getLength() ; i++) {
+        NodeList nodes = (NodeList) path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             etatAck = etatAck && path.evaluate("EtatAck/@V", node).equals("1");
 
-            NodeList innerNodes= (NodeList)path.evaluate("DetailPiece", node, XPathConstants.NODESET);
+            NodeList innerNodes = (NodeList) path.evaluate("DetailPiece", node, XPathConstants.NODESET);
             if (innerNodes.getLength() != 0) {
-                for (int j = 0 ; j < innerNodes.getLength() ; j++) {
+                for (int j = 0; j < innerNodes.getLength(); j++) {
                     Node in = innerNodes.item(j);
                     PesHistoryError e = new PesHistoryError(
                             path.evaluate("Erreur/NumAnoAck/@V", in),
@@ -126,8 +197,7 @@ public class ReceiverTask {
                     );
                     errors.add(e);
                 }
-            }
-            else {
+            } else {
                 PesHistoryError e = new PesHistoryError(
                         path.evaluate("Erreur/NumAnoAck/@V", node),
                         path.evaluate("Erreur/LibelleAnoAck/@V", node),
@@ -139,8 +209,7 @@ public class ReceiverTask {
 
         if (etatAck) {
             pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
-        }
-        else {
+        } else {
             pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errors);
         }
 

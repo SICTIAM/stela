@@ -248,20 +248,20 @@ class StelaTable extends Component {
                                             selectable={(this.props.link !== '' || this.props.click) ? true : false}
                                             className={(this.props.link !== '' || this.props.click) ? 'no-hover' : ''}
                                             onClick={(e) => this.props.onClick && this.props.onClick(e, displayedColumn.property, row)}>
-                                            {this.props.link && (
+                                            {this.props.link !== '' && (
                                                 <Link to={this.props.link + row[this.props.linkProperty]}>{displayedColumn.displayComponent ?
                                                     displayedColumn.property === '_self' ?
                                                         displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
                                                     : row[displayedColumn.property]}
                                                 </Link>
                                             )}
-                                            {!this.props.link && (
-                                                <span>
-                                                    {displayedColumn.displayComponent ?
+                                            {this.props.link === '' && (
+                                                <div>
+                                                    { displayedColumn.displayComponent ?
                                                         displayedColumn.property === '_self' ?
                                                             displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
                                                         : row[displayedColumn.property]}
-                                                </span>
+                                                </div>
                                             )}
                                         </Table.Cell>
                                     )}

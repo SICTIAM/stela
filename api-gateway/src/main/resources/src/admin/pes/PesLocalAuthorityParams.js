@@ -7,6 +7,7 @@ import Validator from 'validatorjs'
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
 import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class PesLocalAuthorityParams extends Component {
     static contextTypes = {
@@ -150,7 +151,7 @@ class PesLocalAuthorityParams extends Component {
             'Content-Type': 'application/json'
         }
         const url = `/api/pes/localAuthority/${this.state.fields.uuid}`
-        _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.localAuthorityPesUpdate))
             .catch(response => {
@@ -164,7 +165,7 @@ class PesLocalAuthorityParams extends Component {
         data.append('token', this.state.fields.token)
         data.append('secret', this.state.fields.secret)
         data.append('sesileNewVersion', this.state.fields.sesileNewVersion)
-        _fetchWithAuthzHandling({ url: '/api/pes/sesile/verify-tokens', method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url: '/api/pes/sesile/verify-tokens', method: 'POST', body: data, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
             .then(tokenValid => _addNotification(tokenValid ? notifications.admin.sesileValidTokens : notifications.admin.sesileInvalidTokens))
@@ -305,4 +306,4 @@ class PesLocalAuthorityParams extends Component {
     }
 }
 
-export default translate(['pes', 'api-gateway'])(PesLocalAuthorityParams)
+export default translate(['pes', 'api-gateway'])(withAuthContext(PesLocalAuthorityParams))

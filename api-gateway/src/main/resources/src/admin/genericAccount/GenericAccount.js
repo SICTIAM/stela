@@ -9,6 +9,7 @@ import ConfirmModal from '../../_components/ConfirmModal'
 import InputPassword from '../../_components/InputPassword'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class GenericAccountCreation extends Component {
     static contextTypes = {
@@ -63,7 +64,7 @@ class GenericAccountCreation extends Component {
         const headers = { 'Content-Type': 'application/json' }
         const method = this.props.uuid ? 'PUT' : 'POST'
         const url = `/api/admin/generic_account${this.props.uuid && `/${this.props.uuid}`}`
-        _fetchWithAuthzHandling({ url, method, body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method, body, headers, context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 _addNotification(this.props.uuid ? notifications.admin.generic_account_updated : notifications.admin.generic_account_created)
@@ -100,7 +101,7 @@ class GenericAccountCreation extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const localAuthoritySlug = getLocalAuthoritySlug()
         if(this.props.uuid) {
-            _fetchWithAuthzHandling({ url:`/api/admin/generic_account/${this.props.uuid}`, method: 'DELETE', context: this.context })
+            _fetchWithAuthzHandling({ url:`/api/admin/generic_account/${this.props.uuid}`, method: 'DELETE', context: this.props.authContext })
                 .then(checkStatus)
                 .then(() => {
                     _addNotification(notifications.admin.generic_account_deleted)
@@ -166,4 +167,4 @@ class GenericAccountCreation extends Component {
     }
 }
 
-export default translate(['api-gateway'])(GenericAccountCreation)
+export default translate(['api-gateway'])(withAuthContext(GenericAccountCreation))

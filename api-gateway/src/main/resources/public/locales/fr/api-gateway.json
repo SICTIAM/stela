@@ -17,6 +17,9 @@
   "last_update": "Dernière mise à jour",
   "release_notes": "Notes de mise à jour",
   "certification_expiration": "Votre certificat expire dans {{days}} jours",
+  "certificate_not_inserted": "Certificat non inséré",
+  "certificate_not_paired": "Certificat non appairé",
+  "clic_to_paire": "Cliquez ici pour appairer votre certificat",
   "view_profil": "Voir profil",
   "ask_certificate": "Demander un certificat",
   "skip_to_content": "Sauter au contenu",
@@ -223,12 +226,12 @@
     },
     "convocation": {
       "admin": {
-          "title": "Admin module Convocation",
-          "recipients": {
-            "recipient_created": "Le destinataire a été créé avec succès.",
-            "recipient_updated": "Le destinataire a bien été mis à jour.",
-            "status_updated": "Le statut a bien été mis à jour."
-          }
+        "title": "Admin module Convocation",
+        "recipients": {
+          "recipient_created": "Le destinataire a été créé avec succès.",
+          "recipient_updated": "Le destinataire a bien été mis à jour.",
+          "status_updated": "Le statut a bien été mis à jour."
+        }
       }
     },
     "admin": {

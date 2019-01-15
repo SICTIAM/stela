@@ -8,6 +8,7 @@ import moment from 'moment'
 import { checkStatus } from './_util/utils'
 import { notifications } from './_util/Notifications'
 
+import { withAuthContext } from './Auth'
 import { getLastUpdate, getLocalAuthoritySlug } from './_util/utils'
 
 class Home extends Component {
@@ -22,8 +23,7 @@ class Home extends Component {
     state = {
         welcomeMessage: '',
         lastUpdate: '',
-        certificate: {},
-        pairedCertificate: {}
+        certificate: {}
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling,_addNotification } = this.context
@@ -32,17 +32,6 @@ class Home extends Component {
             .then(json => this.setState({ welcomeMessage: json }))
         getLastUpdate()
             .then(lastUpdate => this.setState({ lastUpdate }))
-        _fetchWithAuthzHandling({ url: '/api/admin/agent' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(json => this.setState({ pairedCertificate: json.certificate }))
-            .catch(response => {
-                if(response.status !== 401) {
-                    response.text().then(text => {
-                        _addNotification(notifications.defaultError, 'notifications.title', text)
-                    })
-                }
-            })
         _fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
             .then(checkStatus)
             .then(response => response.json())
@@ -56,14 +45,17 @@ class Home extends Component {
             })
     }
     render() {
-        const { t, isLoggedIn } = this.context
+        const { t } = this.context
+        const { authContext } = this.props
         const localAuthoritySlug = getLocalAuthoritySlug()
-        const isCertificatePaired = this.state.pairedCertificate
-            && this.state.certificate.serial === this.state.pairedCertificate.serial
-            && this.state.certificate.issuer === this.state.pairedCertificate.issuer
+        const { certificate } = this.state
+        const pairedCertificate = authContext.user && authContext.user.certificate
+        const isCertificatePaired = pairedCertificate
+            && this.state.certificate.serial === pairedCertificate.serial
+            && this.state.certificate.issuer === pairedCertificate.issuer
         let days = null
-        if(isCertificatePaired && this.state.pairedCertificate.expiredDate) {
-            let expirationDate = moment(this.state.pairedCertificate.expiredDate)
+        if(isCertificatePaired && pairedCertificate.expiredDate) {
+            let expirationDate = moment(pairedCertificate.expiredDate)
             let today = moment()
             let duration = moment.duration(expirationDate.diff(today))
             days = Math.trunc(duration.asDays())
@@ -73,7 +65,7 @@ class Home extends Component {
                 <Segment>
                     <ReactMarkdown source={this.state.welcomeMessage} />
                 </Segment>
-                {(isLoggedIn && localAuthoritySlug && isCertificatePaired) && (
+                {(authContext.isLoggedIn && localAuthoritySlug) && (
                     <Grid columns={2}>
                         <Grid.Column largeScreen={10} computer={10} mobile={16}>
                             <Segment>
@@ -83,22 +75,30 @@ class Home extends Component {
                         </Grid.Column>
                         <Grid.Column largeScreen={6} computer={6} mobile={16}>
                             <Segment>
-                                <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
-                                <br/>
-                                <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
+                                <h2>{t('profile.certificate.title')}</h2>
+                                {certificate.status === 'NONE' && pairedCertificate && (
+                                    <span>{t('certificate_not_inserted')}</span>
+                                )}
+                                {certificate.status === 'NONE' && !pairedCertificate && (
+                                    <span>{t('certificate_not_paired')}</span>
+                                )}
+                                {certificate.status !== 'NONE' && !pairedCertificate && (
+                                    <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}</Link>
+                                )}
+                                {isCertificatePaired && (
+                                    <div>
+                                        <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
+                                        <br/>
+                                        <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
+                                    </div>
+                                )}
                             </Segment>
                         </Grid.Column>
                     </Grid>
-                )}
-                {(isLoggedIn && localAuthoritySlug && !isCertificatePaired) && (
-                    <Segment>
-                        <h2>{t('last_update')}</h2>
-                        <ReactMarkdown source={this.state.lastUpdate} />
-                    </Segment>
                 )}
             </Fragment>
         )
     }
 }
 
-export default translate(['api-gateway'])(Home)
+export default translate(['api-gateway'])(withAuthContext(Home))

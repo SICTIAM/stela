@@ -164,7 +164,8 @@ public class PaullController {
             String decodedComment = new String(comment.getBytes("Windows-1252"));
             pesAller.setObjet(decodedTitle);
             pesAller.setComment(decodedComment);
-            pesAller.setPj(PESPJ == 0 ? false : true);
+            // Probably source of bug : PES from Ciril are not send to Sesile
+            //pesAller.setPj(PESPJ == 0 ? false : true);
             if (StringUtils.isNotBlank(service)) {
                 pesAller.setServiceOrganisationNumber(Integer.parseInt(service));
             }
@@ -176,11 +177,6 @@ public class PaullController {
             }
             List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
             if (!errors.isEmpty()) {
-                status = HttpStatus.BAD_REQUEST;
-                return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-            }
-
-            if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
                 status = HttpStatus.BAD_REQUEST;
                 return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
             }

@@ -12,6 +12,7 @@ import InputDatetime from '../_components/InputDatetime'
 import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
+import { withAuthContext } from '../Auth'
 
 class ActePublicList extends Component {
     static contextTypes = {
@@ -100,6 +101,9 @@ class ActePublicList extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
+    onSearch = () => {
+        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
+    }
     downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
     downloadZipedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.zip', 'actes.zip')
     downloadACKs = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
@@ -108,7 +112,7 @@ class ActePublicList extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const ActeUuidsAndSearchUI = Object.assign({ uuids: selectedUuids }, this.getSearchData())
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => {
                 if (response.status === 204) throw response
@@ -163,9 +167,9 @@ class ActePublicList extends Component {
                             fieldId='multifield'
                             fieldValue={search.multifield}
                             fieldOnChange={this.handleFieldChange}
-                            onSubmit={this.submitForm}>
+                            onSubmit={this.onSearch}>
 
-                            <Form onSubmit={this.submitForm}>
+                            <Form onSubmit={this.onSearch}>
                                 <FormFieldInline htmlFor='localAuthority' label={t('acte.fields.localAuthority')}>
                                     <select id='localAuthority' value={search.siren} onBlur={e => this.handleFieldChange('siren', e.target.value)} onChange={e => this.handleFieldChange('siren', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all_feminine')}</option>
@@ -217,4 +221,4 @@ class ActePublicList extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ActePublicList)
+export default translate(['acte', 'api-gateway'])(withAuthContext(ActePublicList))

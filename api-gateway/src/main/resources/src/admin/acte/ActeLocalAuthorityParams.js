@@ -10,6 +10,7 @@ import DraggablePosition from '../../_components/DraggablePosition'
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
 import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class ActeLocalAuthorityParams extends Component {
     static contextTypes = {
@@ -133,7 +134,7 @@ class ActeLocalAuthorityParams extends Component {
             'Content-Type': 'application/json'
         }
         const url = `/api/acte/localAuthority/${this.state.constantFields.uuid}`
-        _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'PATCH', body: data, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -148,7 +149,7 @@ class ActeLocalAuthorityParams extends Component {
         event.preventDefault()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/ask-classification${force ? '-force' : ''}/${this.props.uuid || 'current'}`
-        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.classificationAsked))
             .catch(response => {
@@ -290,4 +291,4 @@ class ActeLocalAuthorityParams extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ActeLocalAuthorityParams)
+export default translate(['acte', 'api-gateway'])(withAuthContext(ActeLocalAuthorityParams))

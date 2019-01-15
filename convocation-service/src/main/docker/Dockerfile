@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:8-jre-alpine
 VOLUME /tmp
 EXPOSE 9012 9013
 ADD stela-convocation-service.jar app.jar

@@ -13,6 +13,7 @@ import { checkStatus, getHistoryStatusTranslationKey, getLocalAuthoritySlug } fr
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent, StatusDisplay } from '../_components/UI'
 import { natures, status, anomalies } from '../_util/constants'
+import { withAuthContext } from '../Auth'
 
 class ActeList extends Component {
     static contextTypes = {
@@ -90,6 +91,9 @@ class ActeList extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
+    onSearch = () => {
+        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
+    }
     downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
     downloadZipedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.zip', 'actes.zip')
     downloadACKs = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/ARs.pdf', 'ARs.pdf')
@@ -98,7 +102,7 @@ class ActeList extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const ActeUuidsAndSearchUI = Object.assign({ uuids: selectedUuids }, this.getSearchData())
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url: url, body: JSON.stringify(ActeUuidsAndSearchUI), headers: headers, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => {
                 if (response.status === 204) throw response
@@ -187,9 +191,9 @@ class ActeList extends Component {
                             fieldId='multifield'
                             fieldValue={search.multifield}
                             fieldOnChange={this.handleFieldChange}
-                            onSubmit={this.submitForm}>
+                            onSubmit={this.onSearch}>
 
-                            <Form onSubmit={this.submitForm}>
+                            <Form onSubmit={this.onSearch}>
                                 <FormFieldInline htmlFor='number' label={t('acte.fields.number')} >
                                     <input id='number' aria-label={t('acte.fields.number')} value={search.number} onChange={e => this.handleFieldChange('number', e.target.value)} />
                                 </FormFieldInline>
@@ -260,4 +264,4 @@ class ActeList extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(ActeList)
+export default translate(['acte', 'api-gateway'])(withAuthContext(ActeList))

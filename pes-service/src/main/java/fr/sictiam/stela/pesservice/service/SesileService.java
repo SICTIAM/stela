@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.andrewoma.dexx.collection.Pair;
 import eu.europa.esig.dss.validation.policy.rules.Indication;
 import eu.europa.esig.dss.validation.reports.DetailedReport;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
@@ -34,6 +33,8 @@ import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.service.exceptions.MissingSignatureException;
 import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -183,21 +184,19 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         LOGGER.info("Cheking for new PES signatures...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
-            if (pes.getPesHistories().stream()
+            if (pes.getLastHistoryStatus().equals(StatusType.PENDING_SIGNATURE) && pes.getPesHistories().stream()
                     .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus()))) {
                 try {
+                    LOGGER.debug("Checking document {} status", pes.getSesileDocumentId());
                     if (pes.getSesileDocumentId() != null
                             && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
+                        LOGGER.debug("Document {} signed from Sesile", pes.getSesileDocumentId());
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
+                        LOGGER.debug("Sending document {} to Stela validation process", pes.getSesileDocumentId());
                         if (file != null) {
-                            Pair<StatusType, String> signatureResult = getSignatureStatus(file);
-                            StatusType status = signatureResult.component1();
-                            String errorMessage = signatureResult.component2();
-                            // HACK: Prevent from incrementing SIGNATURE_MISSING when the PES is stuck on SESILE
-                            if (!StatusType.SIGNATURE_MISSING.equals(pes.getLastHistoryStatus())
-                                    || !StatusType.SIGNATURE_MISSING.equals(signatureResult.component1())) {
-                                updatePesWithSignature(pes.getUuid(), file, status, errorMessage);
-                            }
+                            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file);
+                        } else {
+                            LOGGER.warn("Document content for {} is null");
                         }
                     }
                 } catch (RestClientException | UnsupportedEncodingException e) {
@@ -604,6 +603,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public boolean checkDocumentSigned(LocalAuthority localAuthority, int documentId) {
         Document document = getDocument(localAuthority, documentId);
+        LOGGER.debug("Document {} signed: {}", documentId, document != null && document.isSigned());
         return document != null && document.isSigned();
     }
 
@@ -717,7 +717,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         } else {
             status = StatusType.SIGNATURE_MISSING;
         }
-        return new Pair<>(status, errorMessage);
+        return new ImmutablePair<>(status, errorMessage);
     }
 
     public boolean hasSignature(byte[] file) {
@@ -768,8 +768,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
         if (status.equals("SIGNED")) {
-            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file.getBytes(),
-                    file.getOriginalFilename());
+            pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file.getBytes());
         } else {
             pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
         }

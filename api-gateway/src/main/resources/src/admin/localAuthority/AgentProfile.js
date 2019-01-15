@@ -6,6 +6,7 @@ import { Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic-ui-react
 import { notifications } from '../../_util/Notifications'
 import { FieldInline } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class AgentProfile extends Component {
     static contextTypes = {
@@ -60,7 +61,7 @@ class AgentProfile extends Component {
         const body = JSON.stringify({ admin: this.state.fields.admin, groupUuids })
         const headers = { 'Content-Type': 'application/json' }
         const url = `/api/admin/profile/${this.state.fields.uuid}/rights`
-        _fetchWithAuthzHandling({ url, method: 'PUT', body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'PUT', body, headers, context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.admin.agentProfileUpdated))
             .catch(response => {
@@ -117,4 +118,4 @@ class AgentProfile extends Component {
     }
 }
 
-export default translate(['api-gateway'])(AgentProfile)
+export default translate(['api-gateway'])(withAuthContext(AgentProfile))

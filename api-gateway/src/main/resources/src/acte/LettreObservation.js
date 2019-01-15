@@ -6,6 +6,7 @@ import { Button, Grid, Segment, Header } from 'semantic-ui-react'
 import { File, InputFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
+import { withAuthContext } from '../Auth'
 
 class LetteObservation extends Component {
     static contextTypes = {
@@ -34,7 +35,7 @@ class LetteObservation extends Component {
         const data = new FormData()
         const url = `/api/acte/${this.props.acteUuid}/lettre-observation/${reponseOrRejet}`
         data.append('file', this.state.file)
-        _fetchWithAuthzHandling({ url, method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', body: data, context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.lettreObservationAsked)
@@ -109,4 +110,4 @@ class LetteObservation extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(LetteObservation)
+export default translate(['acte', 'api-gateway'])(withAuthContext(LetteObservation))

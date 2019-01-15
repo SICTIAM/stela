@@ -6,6 +6,7 @@ import { Button, Grid, Segment, Header, Card } from 'semantic-ui-react'
 import { File, InputFile } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
+import { withAuthContext } from '../Auth'
 
 class DemandePiecesComplementaires extends Component {
     static contextTypes = {
@@ -42,7 +43,7 @@ class DemandePiecesComplementaires extends Component {
         const data = new FormData()
         const url = `/api/acte/${this.props.acteUuid}/pieces-complementaires/${reponseOrRejet}`
         this.state.files.forEach(file => data.append('files', file))
-        _fetchWithAuthzHandling({ url, method: 'POST', body: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', body: data, context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 _addNotification(notifications.acte.piecesComplementairesAsked)
@@ -123,4 +124,4 @@ class DemandePiecesComplementaires extends Component {
     }
 }
 
-export default translate(['acte', 'api-gateway'])(DemandePiecesComplementaires)
+export default translate(['acte', 'api-gateway'])(withAuthContext(DemandePiecesComplementaires))

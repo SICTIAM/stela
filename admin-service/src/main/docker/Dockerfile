@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:8-jre-alpine
 VOLUME /tmp
 EXPOSE 9006 9007
 ADD stela-admin-service.jar app.jar

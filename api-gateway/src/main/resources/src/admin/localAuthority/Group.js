@@ -8,6 +8,7 @@ import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
 import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class Group extends Component {
     static contextTypes = {
@@ -47,11 +48,13 @@ class Group extends Component {
                     })
                 })
         }
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(response => response.json())
-            .then(profile =>
-                this.setState({ activatedModules: profile.localAuthority.activatedModules }, this.fetchAllRights)
-            )
+    }
+    componentDidUpdate() {
+        // QuickFix
+        // context sometimes doen't load in ComponentDidMount
+        if (this.props.authContext.profile && this.props.authContext.profile.localAuthority && this.props.authContext.profile.localAuthority.activatedModules !== this.state.activatedModules) {
+            this.setState({activatedModules: this.props.authContext.profile.localAuthority.activatedModules}, this.fetchAllRights)
+        }
     }
     fetchAllRights = () => {
         const { _fetchWithAuthzHandling } = this.context
@@ -84,7 +87,7 @@ class Group extends Component {
             ? `/api/admin/local-authority/group/${uuid}`
             : `/api/admin/local-authority/${localAuthorityUuid || 'current'}/group`
         const method = uuid ? 'PATCH' : 'POST'
-        _fetchWithAuthzHandling({ url, method, body, headers, context: this.context })
+        _fetchWithAuthzHandling({ url, method, body, headers, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
             .then(json => {
@@ -139,4 +142,4 @@ class Group extends Component {
     }
 }
 
-export default translate(['api-gateway'])(Group)
+export default translate(['api-gateway'])(withAuthContext(Group))

@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:8-jre-alpine
 VOLUME /tmp
 EXPOSE 9004 9005
 ADD stela-api-gateway.jar app.jar

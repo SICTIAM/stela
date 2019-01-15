@@ -11,6 +11,8 @@ import { checkStatus } from './_util/utils'
 import { modules, sesileVisibility } from './_util/constants'
 import AgentProfile from './admin/localAuthority/AgentProfile'
 
+import { withAuthContext } from './Auth'
+
 class Profile extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
@@ -46,15 +48,25 @@ class Profile extends Component {
     componentDidMount() {
         const { uuid } = this.props
         const { _fetchWithAuthzHandling } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/profile' })
-            .then(response => response.json())
-            .then(json => this.setState({ activeProfile: json }))
-        _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
-            .then(response => response.json())
-            .then(json => this.setState({ agent: json }))
+        this.setState({activeProfile: this.props.authContext.profile})
+        if(uuid) {
+            _fetchWithAuthzHandling({ url: `/api/admin/agent/${uuid}` })
+                .then(response => response.json())
+                .then(json => this.setState({ agent: json }))
+        } else {
+            this.setState({agent: this.props.authContext.user})
+        }
         _fetchWithAuthzHandling({ url: '/api/api-gateway/profile/all-notifications' })
             .then(response => response.json())
             .then(json => this.setState({ allNotifications: json }))
+    }
+    componentDidUpdate() {
+        // QuickFix
+        // context sometimes doen't load in ComponentDidMount
+        const { uuid } = this.props
+        if(!uuid && this.props.authContext.user && this.props.authContext.user !== this.state.agent) {
+            this.setState({agent: this.props.authContext.user})
+        }
     }
     onChange = (uuidProfile, id, value, callback) => {
         const { agent } = this.state
@@ -63,11 +75,15 @@ class Profile extends Component {
         this.setState({ agent }, callback)
     }
     onPairCertification = () => {
-        const { uuid } = this.props
+        const { uuid, authContext } = this.props
         const { _fetchWithAuthzHandling } = this.context
-        _fetchWithAuthzHandling({ url: uuid ? `/api/admin/agent/${uuid}` : '/api/admin/agent' })
-            .then(response => response.json())
-            .then(json => this.setState({ agent: json }))
+        if(!uuid) {
+            authContext.getUser()
+        } else {
+            _fetchWithAuthzHandling({ url: `/api/admin/agent/${uuid}` })
+                .then(response => response.json())
+                .then(json => this.setState({ agent: json }))
+        }
     }
     onLocalAuthorityNotificationsChange = (uuidProfile, module, checked) => {
         const { agent } = this.state
@@ -93,7 +109,7 @@ class Profile extends Component {
             localAuthorityNotifications: profile.localAuthorityNotifications
         }
         const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers, method: 'PATCH', context: this.context })
+        _fetchWithAuthzHandling({ url: `/api/admin/profile/${uuid}`, body: JSON.stringify(profileUI), headers, method: 'PATCH', context: this.props.authContext })
             .then(checkStatus)
             .then(() => _addNotification(notifications.profile.updated))
             .catch(response => {
@@ -103,7 +119,7 @@ class Profile extends Component {
     render() {
         const { t } = this.context
         const { activeProfile, agent, allNotifications } = this.state
-        const currentLocalAuthorityProfile = agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
+        const currentLocalAuthorityProfile = agent.profiles && agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
         const allLocalAuthorityProfiles = []
         agent.profiles.forEach((profile) => {
             if (profile.localAuthority.uuid === activeProfile.localAuthority.uuid) {
@@ -112,6 +128,7 @@ class Profile extends Component {
                         key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
                         profile={currentLocalAuthorityProfile}
                         isDefaultOpen={true}
+                        authContext={this.props.authContext}
                         onChange={this.onChange}
                         updateProfile={this.updateProfile}
                         allNotifications={allNotifications}
@@ -127,6 +144,7 @@ class Profile extends Component {
                         profile={profile}
                         isDefaultOpen={false}
                         onChange={this.onChange}
+                        authContext={this.props.authContext}
                         updateProfile={this.updateProfile}
                         allNotifications={allNotifications}
                         onCheckboxChange={this.onCheckboxChange}
@@ -241,7 +259,7 @@ class LocalAuthorityProfile extends Component {
             const sesileConf = this.state.sesileConfiguration
             sesileConf.profileUuid = profile.uuid
             const url = '/api/pes/sesile/configuration'
-            _fetchWithAuthzHandling({ url, body: JSON.stringify(sesileConf), headers, method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url, body: JSON.stringify(sesileConf), headers, method: 'POST', context: this.props.authContext })
                 .then(checkStatus)
                 .catch(response => {
                     response.text().then(text =>
@@ -437,7 +455,8 @@ class LocalAuthorityProfile extends Component {
     }
 }
 
-const UserProfile = translate('api-gateway')(props => <Profile {...props} />)
-const AdminProfile = translate('api-gateway')(props => <Profile {...props} />)
+const UserProfile = translate(['api-gateway'])(withAuthContext(Profile))
+
+const AdminProfile = translate(['api-gateway'])(withAuthContext(Profile))
 
 export { UserProfile, AdminProfile }

@@ -6,6 +6,7 @@ import { translate } from 'react-i18next'
 import { checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import CertificateInfosUI from './CertificateInfosUI'
+import { withAuthContext } from '../Auth'
 
 class CertificateInfos extends Component {
     static contextTypes = {
@@ -32,6 +33,9 @@ class CertificateInfos extends Component {
         }
     }
     componentDidMount() {
+        this.certificateInfo()
+    }
+    certificateInfo = () => {
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
             .then(response => response.json())
@@ -40,11 +44,12 @@ class CertificateInfos extends Component {
     pairCertificate = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         if (this.state.certificate.status === 'VALID') {
-            _fetchWithAuthzHandling({ url: '/api/admin/certificate', method: 'POST', context: this.context })
+            _fetchWithAuthzHandling({ url: '/api/admin/certificate', method: 'POST', context: this.props.authContext })
                 .then(checkStatus)
                 .then(() => {
                     _addNotification(notifications.profile.certificatePairedSuccess)
                     this.props.onPairCertification()
+                    this.certificateInfo()
                 })
                 .catch(response => {
                     if (response.status === 412) {
@@ -95,4 +100,4 @@ class CertificateInfos extends Component {
     }
 }
 
-export default translate(['api-gateway'])(CertificateInfos)
+export default translate(['api-gateway'])(withAuthContext(CertificateInfos))

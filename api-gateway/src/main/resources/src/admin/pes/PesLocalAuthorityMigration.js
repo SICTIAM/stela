@@ -6,6 +6,7 @@ import { Segment, Icon, Input } from 'semantic-ui-react'
 import { Page, FieldInline, FieldValue, MigrationSteps } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
 
 class PesLocalAuthorityMigration extends Component {
     static contextTypes = {
@@ -64,7 +65,7 @@ class PesLocalAuthorityMigration extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}`
         const data = this.getFormData()
-        _fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', query: data, context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -81,7 +82,7 @@ class PesLocalAuthorityMigration extends Component {
     reset = (migrationType) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/pes/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}/reset`
-        _fetchWithAuthzHandling({ url, method: 'POST', context: this.context })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state
@@ -149,4 +150,4 @@ class PesLocalAuthorityMigration extends Component {
     }
 }
 
-export default translate(['pes', 'api-gateway'])(PesLocalAuthorityMigration)
+export default translate(['pes', 'api-gateway'])(withAuthContext(PesLocalAuthorityMigration))
