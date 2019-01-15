@@ -127,14 +127,23 @@ class AppRoute extends Component {
         certificate: false
     }
     componentDidMount() {
-        this.checkCertificateIsValide()
+        this.checkCertificateIsValid()
     }
-    componentDidUpdate(prevProps, prevState) {
-        if(prevProps.authContext.user && this.props.authContext.user.certificate !== prevProps.authContext.user.certificate) {
-            this.checkCertificateIsValide()
+    async refreshJWT() {
+        const { _fetchWithAuthzHandling } = this.context
+        return _fetchWithAuthzHandling({ url: `/api/api-gateway/profile/${this.props.authContext.profile.uuid}/update-jwt` })
+    }
+    async componentDidUpdate(prevProps, prevState) {
+        if(prevProps.authContext.user && !Object.is(this.props.authContext.user, prevProps.authContext.user)) {
+            const refreshToken = await this.refreshJWT()
+            if(refreshToken.status === 200)
+            {
+                this.checkCertificateIsValid()
+            }
         }
     }
-    checkCertificateIsValide = () => {
+
+    checkCertificateIsValid = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
             .then(checkStatus)

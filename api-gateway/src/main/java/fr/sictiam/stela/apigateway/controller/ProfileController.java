@@ -1,12 +1,19 @@
 package fr.sictiam.stela.apigateway.controller;
 
+import fr.sictiam.stela.apigateway.model.Agent;
 import fr.sictiam.stela.apigateway.model.AlertMessage;
 import fr.sictiam.stela.apigateway.model.Notification;
+import fr.sictiam.stela.apigateway.model.StelaUserInfo;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
+import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -113,5 +120,31 @@ public class ProfileController {
         alertMessageModules.put("pes", alertMessagePes);
 
         return alertMessageModules;
+    }
+
+    @GetMapping("/profile/{profileUuid}/update-jwt")
+    public ResponseEntity updateJwt(@PathVariable String profileUuid) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
+
+        if (authenticationOpen.isAppAdmin() || authenticationOpen.isAppUser()) {
+            RestTemplate restTemplate = new RestTemplate();
+            String instanceId = restTemplate.getForObject(
+                    discoveryUtils.adminServiceUrl() + "/api/admin/profile/{uuid}/instance-id", String.class, profileUuid);
+            Agent agent = new Agent(authenticationOpen.getUserInfo(), authenticationOpen.isAppAdmin(), instanceId);
+            ResponseEntity<String> agentProfile = restTemplate
+                    .postForEntity(discoveryUtils.adminServiceUrl() + "/api/admin/agent", agent, String.class);
+
+
+            String token = agentProfile.getBody();
+            StelaUserInfo stelaUserInfo = StelaUserInfo.from(((OpenIdCAuthentication) authentication).getUserInfo());
+            stelaUserInfo.setStelaToken(token);
+            authenticationOpen.setUserInfo(stelaUserInfo);
+            return new ResponseEntity(HttpStatus.OK);
+        } else {
+            LOGGER.error("Authentication succeded but user not authorized for this instance !");
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
     }
 }
