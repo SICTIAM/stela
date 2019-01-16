@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Form, Grid, Radio, Button, Modal } from 'semantic-ui-react'
+import { Segment, Form, Grid, Checkbox, Button, Modal } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 
+import { notifications } from '../../_util/Notifications'
+import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import history from '../../_util/history'
 import InputValidation from '../../_components/InputValidation'
 import RecipientForm from '../../convocation/RecipientForm'
 
@@ -13,32 +16,74 @@ import ChipsList from '../../_components/ChipsList'
 
 class AssemblyTypeConfig extends Component {
 	static contextTypes = {
+	    csrfToken: PropTypes.string,
+	    csrfTokenHeaderName: PropTypes.string,
 	    t: PropTypes.func,
+	    _addNotification: PropTypes.func,
+	    _fetchWithAuthzHandling: PropTypes.func
 	}
 	validationRules = {
-	    type: 'required',
-	    place: 'required',
-	    convocationDelay: ['required', 'regex:/^[0-9]+$/'],
-	    reminderTime: ['required', 'regex:/^[0-9]+$/']
+	    name: 'required',
+	    location: 'required',
+	    delay: ['required'],
+	    reminderDelay: ['required']
 	}
 	state = {
 	    formErrors: [],
 	    isFormValid: false,
 	    errorTypePointing: false,
 	    fields: {
-	        uuid: '',
-	        type: '',
-	        place: '',
-	        convocationDelay: '',
-	        reminderTime: '0',
-	        procuration: false,
-	        status: false,
+	        uuid: null,
+	        name: '',
+	        location: '',
+	        delay: '',
+	        reminderDelay: 0,
+	        useProcuration: false,
 	        recipients: []
 	    },
 	    modalOpened: false
 	}
-	submit = () => {
-	    console.log('SUBMIT')
+	componentDidMount() {
+	    const { _fetchWithAuthzHandling } = this.context
+	    const uuid = this.props.uuid
+	    if(uuid) {
+	        _fetchWithAuthzHandling({ url: '/api/convocation/assembly-type/' + uuid })
+	            .then(checkStatus)
+	            .then(response => response.json())
+	            .then(json => {
+	                const fields = this.state.fields
+	                Object.keys(fields).forEach(function (key) {
+	                    fields[key] = json[key]
+	                })
+	                this.setState({fields}, this.validateForm)
+	            })
+	            .catch(response => {
+	                //TO DO ERROR
+	            })
+	    }
+	}
+	submitForm = () => {
+	    const { t, _fetchWithAuthzHandling, _addNotification } = this.context
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const parameters = Object.assign({}, this.state.fields)
+	    delete parameters.uuid
+	    delete parameters.recipients
+
+	    const headers = { 'Content-Type': 'application/json' }
+	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.context})
+	        .then(checkStatus)
+	        .then(() => {
+	            history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`)
+	            _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+	        })
+	        .catch(response => {
+	            response.json().then((json) => {
+	                _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
+	            })
+	        })
+	}
+	cancel = () => {
+	    history.goBack()
 	}
 	extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
 	handleFieldChange = (field, value, callback) => {
@@ -46,7 +91,7 @@ class AssemblyTypeConfig extends Component {
 	    //Set set for thid field
 	    field = this.extractFieldNameFromId(field)
 	    const fields = this.state.fields
-	    fields[field] = value
+	    fields[field] = ((field === 'delay' || field === 'reminderDelay') && value)? parseInt(value): value
 	    this.setState({ fields: fields }, () => {
 	        this.validateForm()
 	        if (callback) callback()
@@ -55,16 +100,16 @@ class AssemblyTypeConfig extends Component {
 	validateForm = debounce(() => {
 	    const { t } = this.context
 	    const data = {
-	        type: this.state.fields.type,
-	        place: this.state.fields.place,
-	        convocationDelay: this.state.fields.convocationDelay,
-	        reminderTime: this.state.fields.reminderTime
+	        name: this.state.fields.name,
+	        location: this.state.fields.location,
+	        delay: this.state.fields.delay,
+	        reminderDelay: this.state.fields.reminderDelay
 	    }
 	    const attributeNames = {
-	        type: t('convocation.admin.modules.convocation.assembly_type_config.type'),
-	        place: t('convocation.admin.modules.convocation.assembly_type_config.place'),
-	        convocationDelay: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay'),
-	        reminderTime: t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')
+	        name: t('convocation.admin.modules.convocation.assembly_type_config.type'),
+	        location: t('convocation.admin.modules.convocation.assembly_type_config.place'),
+	        delay: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay'),
+	        reminderDelay: t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')
 	    }
 	    const validationRules = this.validationRules
 
@@ -97,44 +142,44 @@ class AssemblyTypeConfig extends Component {
 	    return (
 	        <Page>
 	            <Segment>
-	                <Form onSubmit={this.submit}>
+	                <Form onSubmit={this.submitForm}>
 	                    <Grid>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_type`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_name`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.type')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_type`}
-	                                    value={this.state.fields.type}
+	                                    id={`${this.state.fields.uuid}_name`}
+	                                    value={this.state.fields.name}
 	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.type}
+	                                    validationRule={this.validationRules.name}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.type')}
 	                                    ariaRequired={true}
 	                                />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_place`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_location`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.place')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_place`}
-	                                    value={this.state.fields.place}
+	                                    id={`${this.state.fields.uuid}_location`}
+	                                    value={this.state.fields.location}
 	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.place}
+	                                    validationRule={this.validationRules.location}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.place')}
 	                                    ariaRequired={true}
 	                                />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_convocationDelay`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_delay`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_convocationDelay`}
-	                                    validationRule={this.validationRules.convocationDelay}
-	                                    value={this.state.fields.convocationDelay}
+	                                    id={`${this.state.fields.uuid}_delay`}
+	                                    validationRule={this.validationRules.delay}
+	                                    value={this.state.fields.delay}
 	                                    type='number'
 	                                    onChange={this.handleFieldChange}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay')}
@@ -143,13 +188,13 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_reminderTime`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_reminderDelay`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_reminderTime`}
-	                                    validationRule={this.validationRules.reminderTime}
-	                                    value={this.state.fields.reminderTime}
+	                                    id={`${this.state.fields.uuid}_reminderDelay`}
+	                                    validationRule={this.validationRules.reminderDelay}
+	                                    value={this.state.fields.reminderDelay}
 	                                    type='number'
 	                                    onChange={this.handleFieldChange}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')}
@@ -158,17 +203,10 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_status`}
-	                                label={t('convocation.admin.modules.convocation.assembly_type_config.status')}>
-	                                <Radio toggle className='secondary'
-	                                    value={this.state.fields.status}/>
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_useProcuration`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.procuration')}>
-	                                <Radio toggle className='secondary'
-	                                    value={this.state.fields.procuration}/>
+	                                <Checkbox toggle className='secondary'
+	                                    checked={this.state.fields.useProcuration}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>

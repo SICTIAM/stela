@@ -49,6 +49,7 @@ import AssemblyTypeConfig from './admin/convocation/AssemblyTypeConfig'
 import AssemblyTypeList from './admin/convocation/AssemblyTypeList'
 import RecipentConfig from './admin/convocation/RecipentConfig'
 import RecipientsList from './admin/convocation/RecipientsList'
+import ConvocationModuleParams from './admin/convocation/ConvocationModuleParams'
 
 import { withAuthContext, AuthConsumer } from './Auth'
 
@@ -224,6 +225,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeList} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/destinataire/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipentConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/destinataire/liste-destinataires/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipentConfig} menu={AdminMenuBar} admin={true} />
@@ -244,6 +246,7 @@ class AppRoute extends Component {
 
                 <AuthRoute path="/:localAuthoritySlug/admin/actes/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/pes/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationModuleParams} menu={AdminMenuBar} admin={true} />
 
                 <PublicRoute path="/:localAuthoritySlug/admin/*" component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
 
