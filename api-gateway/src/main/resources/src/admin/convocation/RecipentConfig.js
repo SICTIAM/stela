@@ -11,6 +11,8 @@ import { withAuthContext } from '../../Auth'
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
+
+import Breadcrumb from '../../_components/Breadcrumb'
 import { Page, ValidationPopup, FormField } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
 
@@ -129,8 +131,22 @@ class RecipentConfig extends Component {
 			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
 			    {t('api-gateway:form.send')}
 			</Button>
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const dataBreadcrumb = this.props.uuid ? [
+	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.recipients_list'), url: `/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires` },
+	        {title: t('api-gateway:breadcrumb.convocation.edit_recipients') }
+	    ] : [
+	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.add_recipients') }
+	    ]
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={dataBreadcrumb}
+	            />
 	            {!this.state.fields.active && (
 	                <Message warning>
 	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.admin.modules.convocation.recipient_config.inactive_recipient_title')}</Message.Header>

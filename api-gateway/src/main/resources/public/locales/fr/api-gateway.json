@@ -371,7 +371,10 @@
       "assembly_type": "Ajouter un type d'assemblée",
       "assembly_type_list": "Liste des types d'assemblée",
       "recipent": "Ajouter un destinataire",
-      "recipient_list": "Liste des destinataires"
+      "recipient_list": "Liste des destinataires",
+      "fields": {
+        "residents_number": "3500 habitants ou plus"
+      }
     },
     "modules": {
       "title": "Module",
@@ -439,6 +442,18 @@
       "NONE": "Aucun certificat détecté",
       "VALID": "Votre certificat est valide"
     }
+  },
+  "breadcrumb": {
+    "admin_home": "Accueil Admin",
+    "convocation": {
+      "convocation": "Convocation",
+      "assembly_type_list": "Liste des types d'assemblée",
+      "add_assembly_type": "Ajouter un type d'assemblée",
+      "edit_assembly_type": "Editer un type d'assemblée",
+      "recipients_list": "Liste des destinataires",
+      "add_recipients": "Ajouter un destinataire",
+      "edit_recipients": "Editer un destinataire"
+    }  
   },
   "made_with_love": "Créé avec ❤ par le SICTIAM"
 }

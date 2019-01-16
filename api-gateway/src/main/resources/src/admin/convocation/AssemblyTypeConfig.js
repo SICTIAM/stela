@@ -12,6 +12,7 @@ import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
 import InputValidation from '../../_components/InputValidation'
 import RecipientForm from '../../convocation/RecipientForm'
+import Breadcrumb from '../../_components/Breadcrumb'
 
 import { Page, FormField, ValidationPopup} from '../../_components/UI'
 import ChipsList from '../../_components/ChipsList'
@@ -143,8 +144,22 @@ class AssemblyTypeConfig extends Component {
 			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
 			    {t('api-gateway:form.send')}
 			</Button>
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const dataBreadcrumb = this.props.uuid ? [
+	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.assembly_type_list'), url: `/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee` },
+	        {title: t('api-gateway:breadcrumb.convocation.edit_assembly_type') }
+	    ] : [
+	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.add_assembly_type') }
+	    ]
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={dataBreadcrumb}
+	            />
 	            <Segment>
 	                <Form onSubmit={this.submitForm}>
 	                    <Grid>
