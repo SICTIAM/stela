@@ -1,11 +1,11 @@
 package fr.sictiam.stela.convocationservice.filter;
 
-import com.google.common.collect.Sets;
 import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.exception.TokenAuthenticationException;
 import fr.sictiam.stela.convocationservice.service.ExternalRestService;
+import org.apache.commons.compress.utils.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
