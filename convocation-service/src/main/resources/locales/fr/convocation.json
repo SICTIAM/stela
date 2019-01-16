@@ -58,7 +58,8 @@
             "place": "Lieu de la séance",
             "recipients": "Destinataires",
             "procuration": "Utilisateur de procuration",
-            "status": "Statut"
+            "status": "Statut",
+            "edit_recipients": "Editer la liste de destinataires"
           },
           "recipient_config": {
             "firstname": "Prénom",

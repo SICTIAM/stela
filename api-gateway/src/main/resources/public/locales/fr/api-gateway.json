@@ -8,6 +8,8 @@
     "admin": "Administration",
     "back_to_app": "Application"
   },
+  "yes": "Oui",
+  "no": "Non",
   "select_localAuthority": "Sélectionner la collectivité",
   "last_localAuthorities": "Dernières collectivités utilisées",
   "alert": "Alerte",
@@ -230,7 +232,9 @@
         "recipients": {
           "recipient_created": "Le destinataire a été créé avec succès.",
           "recipient_updated": "Le destinataire a bien été mis à jour.",
-          "status_updated": "Le statut a bien été mis à jour."
+          "status_updated": "Le statut a bien été mis à jour.",
+          "assembly_type_created": "Le type d'assemblée a été créé avec succès.",
+          "assembly_type_updated": "Le type d'assemblée a été mis à jour avec succès"
         }
       }
     },

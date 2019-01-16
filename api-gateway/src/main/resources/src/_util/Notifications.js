@@ -198,6 +198,16 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        assemblyTypeCreated: {
+            title: 'notifications.convocation.admin.recipients.assembly_type_created',
+            level: 'success',
+            position: 'br'
+        },
+        assemblyTypeUpdated: {
+            title: 'notifications.convocation.admin.recipients.assembly_type_updated',
+            level: 'success',
+            position: 'br'
+        },
         statusUpdated: {
             title: 'notifications.convocation.admin.recipients.status_updated',
             level: 'success',

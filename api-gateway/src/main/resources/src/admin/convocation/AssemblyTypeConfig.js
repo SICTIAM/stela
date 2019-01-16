@@ -18,8 +18,6 @@ import ChipsList from '../../_components/ChipsList'
 
 class AssemblyTypeConfig extends Component {
 	static contextTypes = {
-	    csrfToken: PropTypes.string,
-	    csrfTokenHeaderName: PropTypes.string,
 	    t: PropTypes.func,
 	    _addNotification: PropTypes.func,
 	    _fetchWithAuthzHandling: PropTypes.func
@@ -69,14 +67,18 @@ class AssemblyTypeConfig extends Component {
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const parameters = Object.assign({}, this.state.fields)
 	    delete parameters.uuid
-	    delete parameters.recipients
 
 	    const headers = { 'Content-Type': 'application/json' }
 	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
 	        .then(checkStatus)
 	        .then(() => {
 	            history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`)
-	            _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+	            /** UPDATE NOTIFICATION */
+	            if(this.state.fields.uuid) {
+	                _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeUpdated : notifications.admin.assembly_type_updated)
+	            } else {
+	                _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeCreated : notifications.admin.assembly_type_created)
+	            }
 	        })
 	        .catch(response => {
 	            response.json().then((json) => {
@@ -126,14 +128,14 @@ class AssemblyTypeConfig extends Component {
 	}
 	addRecipient = (selectedUser) => {
 	    const fields = this.state.fields
-	    fields['recipients'] = fields['recipients'].concat(selectedUser)
+	    fields['recipients'] = selectedUser
 	    this.setState({fields})
 	    this.closeModal()
 	}
-	removeRecipientes = (index) => {
+	useProcuration = (checked) => {
 	    const fields = this.state.fields
-	    fields['recipients'].splice(index, 1)
-	    this.setState({fields})
+	    fields.useProcuration = checked
+	    this.setState({ fields: fields })
 	}
 	render () {
 	    const { t } = this.context
@@ -208,7 +210,8 @@ class AssemblyTypeConfig extends Component {
 	                            <FormField htmlFor={`${this.state.fields.uuid}_useProcuration`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.procuration')}>
 	                                <Checkbox toggle className='secondary'
-	                                    checked={this.state.fields.useProcuration}/>
+	                                    checked={this.state.fields.useProcuration}
+	                                    onChange={((e, { checked }) => this.useProcuration(checked))}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
@@ -218,25 +221,25 @@ class AssemblyTypeConfig extends Component {
 	                                    	onClick={() => this.setState({modalOpened: true})}
 	                                    	type='button'
 	                                    	id={`${this.state.fields.uuid}_recipient`}
-	                                    	compact basic primary>{t('convocation.new.add_recipients')}
+	                                    	compact basic primary>{t('convocation.admin.modules.convocation.assembly_type_config.edit_recipients')}
 	                                    </Button>}>
 	                                    <RecipientForm
 	                                        onCloseModal={this.closeModal}
-	                                        onAdded={(selectedUser) => this.addRecipient(selectedUser)}>
+	                                        onAdded={(selectedUser) => this.addRecipient(selectedUser)}
+	                                        selectedUser={this.state.fields.recipients}>
 	                                    </RecipientForm>
 	                                </Modal>
 	                            </FormField>
 	                            <ChipsList
 	                                list={this.state.fields.recipients}
 	                                labelText='email'
-	                                removable={true}
-	                                onRemoveChip={this.removeRecipient}
+	                                removable={false}
 	                                viewMoreText={t('convocation.new.view_more_recipients', {number: this.state.fields.recipients.length})}
 	                                viewLessText={t('convocation.new.view_less_recipients')}/>
 	                        </Grid.Column>
 	                    </Grid>
 	                    <div className='footerForm'>
-	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} basic color='red'>
+	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.cancel()} basic color='red'>
 	                            {t('api-gateway:form.cancel')}
 	                        </Button>
 

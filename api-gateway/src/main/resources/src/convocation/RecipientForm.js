@@ -1,22 +1,31 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-
 import { Button, Modal, Tab } from 'semantic-ui-react'
+
+import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
 
 import StelaTable from '../_components/StelaTable'
 
 class RecipientForm extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
+	    _fetchWithAuthzHandling: PropTypes.func
 	}
 	state = {
 	    selectedUser: [],
-	    users: [
-	        { name: 'Julie ALBALADEJO', email: 'julie.albaladejo@avisto.com' },
-	        { name: 'Gérald GOLE', email: 'gérald.gole@avisto.com' },
-	        { name: 'Anne-Sophie LEVEQUES', email: 'anne-sophie.leveques@sictiam.com' }
-	    ]
+	    users: []
+	}
+	componentDidMount() {
+	    const { _fetchWithAuthzHandling } = this.context
+	    _fetchWithAuthzHandling({ url: '/api/convocation/local-authority/recipients'})
+	        .then(checkStatus)
+	        .then(response => response.json())
+	        .then(json => {
+	            this.setState({users: json})
+	        })
+
+	    this.setState({selectedUser: this.props.selectedUser})
 	}
 	cancelAdd = () => {
 	    this.setState({selectedUser: []})
@@ -24,35 +33,44 @@ class RecipientForm extends Component {
 	}
 	onSelectedRow = (key, state) => {
 	    let selectedUser = this.state.selectedUser.slice()
-	    if(state) {
-	        const users = this.state.users.slice()
-	        let user = users.find((user) => {
-	            return user.email === key
-	        })
-	        selectedUser.push(user)
-	        this.setState({ selectedUser })
+	    if(key !== 'all') {
+	        if(state) {
+	            const users = this.state.users.slice()
+	            let user = users.find((user) => {
+	                return user.uuid === key
+	            })
+	            selectedUser.push(user)
+	            this.setState({ selectedUser })
+	        } else {
+	            const indexUser = selectedUser.findIndex((user) => {
+	                return user.uuid === key
+	            })
+	            selectedUser.splice(indexUser, 1)
+	            this.setState({ selectedUser })
+	        }
 	    } else {
-	        const indexUser = selectedUser.findIndex((user) => {
-	            return user.email === key
-	        })
-	        selectedUser.splice(indexUser, 1)
-	        this.setState({ selectedUser })
+	        state ? this.setState({ selectedUser: this.state.users}) : this.setState({ selectedUser: []})
 	    }
+
 	}
 	render() {
 	    const { t } = this.context
 	    const metaData = [
-	        { property: 'name', displayed: true, searchable: true },
+	        { property: 'uuid', displayed: false },
+	        { property: 'firstname', displayed: true, searchable: true },
+	        { property: 'lastname', displayed: true, searchable: true },
 	        { property: 'email', displayed: true, searchable: true },
 	    ]
 	    const listContent =
 			<StelaTable
-			    header={false}
+			    containerTable='maxh-300 w-100'
+			    header={true}
 			    searchable={true}
 			    sortable={false}
 			    metaData={metaData}
 			    data={this.state.users}
-			    keyProperty="email"
+			    selectedRow={this.props.selectedUser}
+			    keyProperty="uuid"
 			    select={true}
 			    onSelectedRow={this.onSelectedRow}
 			    noDataMessage={t('convocation.new.no_receive')}

@@ -23,7 +23,6 @@ export default class ChipList extends Component {
 	    const chipToDisplay = this.state.showMore && this.props.numberChipDisplay > 0 && this.props.list.length > this.props.numberChipDisplay ? this.props.list.slice(0, this.props.numberChipDisplay) : this.props.list.slice()
 
 	    const chipsList = chipToDisplay.map((chip, index) => {
-	        console.log(index)
 	        return <Chip
 	            key={`chip-${index}`}
 	            removable={this.props.removable}
