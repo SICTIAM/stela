@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -66,20 +67,22 @@ public class AssemblyTypeService {
         return save(assemblyType);
     }
 
-    public Long countAllWithQuery(String multifield, String name, Boolean active, String currentLocalAuthUuid) {
+    public Long countAllWithQuery(String multifield, String name, String location, Boolean active,
+            String currentLocalAuthUuid) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<AssemblyType> assemblyRoot = query.from(AssemblyType.class);
 
-        List<Predicate> predicates = getQueryPredicates(builder, assemblyRoot, multifield, name, active, currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, assemblyRoot, multifield, name, location, active,
+                currentLocalAuthUuid);
         query.select(builder.count(assemblyRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    public List<AssemblyType> findAllWithQuery(String multifield, String name,
+    public List<AssemblyType> findAllWithQuery(String multifield, String name, String location,
             Boolean active, Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
 
@@ -89,29 +92,44 @@ public class AssemblyTypeService {
 
         query.select(assemblyRoot);
         String columnAttribute = StringUtils.isEmpty(column) ? "name" : column;
-        List<Predicate> predicates = getQueryPredicates(builder, assemblyRoot, multifield, name, active, currentLocalAuthUuid);
+        List<Predicate> predicates = getQueryPredicates(builder, assemblyRoot, multifield, name, location, active,
+                currentLocalAuthUuid);
 
+        List<Order> orders = new ArrayList<>();
+
+        if (!columnAttribute.equals("active")) {
+            orders.add(builder.desc(assemblyRoot.get("active")));
+        }
+        orders.add(!StringUtils.isEmpty(direction) && direction.equals("ASC")
+                ? (columnAttribute.equals("active") ? builder.desc(assemblyRoot.get(columnAttribute)) :
+                builder.asc(assemblyRoot.get(columnAttribute)))
+                : (columnAttribute.equals("active") ? builder.asc(assemblyRoot.get(columnAttribute)) :
+                builder.desc(assemblyRoot.get(columnAttribute))));
         query.where(predicates.toArray(new Predicate[predicates.size()]))
-                .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
-                        ? builder.asc(assemblyRoot.get(columnAttribute))
-                        : builder.desc(assemblyRoot.get(columnAttribute)));
+                .orderBy(orders);
 
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
     private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<AssemblyType> assemblyRoot, String multifield,
-            String name, Boolean active, String currentLocalAuthUuid) {
+            String name, String location, Boolean active, String currentLocalAuthUuid) {
 
         List<Predicate> predicates = new ArrayList<>();
         if (StringUtils.isNotBlank(multifield)) {
             predicates.add(
                     builder.or(
-                            builder.like(builder.lower(assemblyRoot.get("name")), "%" + multifield.toLowerCase() + "%")));
+                            builder.like(builder.lower(assemblyRoot.get("name")), "%" + multifield.toLowerCase() + "%"),
+                            builder.like(builder.lower(assemblyRoot.get("location")),
+                                    "%" + multifield.toLowerCase() + "%")));
         }
         if (StringUtils.isNotBlank(name))
             predicates.add(
                     builder.and(builder.like(builder.lower(assemblyRoot.get("name")), "%" + name.toLowerCase() + "%")));
 
+        if (StringUtils.isNotBlank(location))
+            predicates.add(
+                    builder.and(builder.like(builder.lower(assemblyRoot.get("location")),
+                            "%" + location.toLowerCase() + "%")));
 
         if (StringUtils.isNotBlank(currentLocalAuthUuid)) {
             Join<LocalAuthority, LocalAuthority> LocalAuthorityJoin = assemblyRoot.join("localAuthority");

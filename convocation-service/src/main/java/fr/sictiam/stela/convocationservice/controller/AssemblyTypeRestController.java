@@ -50,6 +50,7 @@ public class AssemblyTypeRestController {
     public ResponseEntity<SearchResultsUI> getAll(
             @RequestParam(value = "multifield", required = false) String multifield,
             @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "active", required = false) Boolean active,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
@@ -62,10 +63,10 @@ public class AssemblyTypeRestController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<AssemblyType> recipients = assemblyTypeService.findAllWithQuery(multifield, name, active,
+        List<AssemblyType> recipients = assemblyTypeService.findAllWithQuery(multifield, name, location, active,
                 limit, offset, column, direction, currentLocalAuthUuid);
 
-        Long count = assemblyTypeService.countAllWithQuery(multifield, name, active, currentLocalAuthUuid);
+        Long count = assemblyTypeService.countAllWithQuery(multifield, name, location, active, currentLocalAuthUuid);
 
         return new ResponseEntity<>(new SearchResultsUI(count, recipients), HttpStatus.OK);
     }
