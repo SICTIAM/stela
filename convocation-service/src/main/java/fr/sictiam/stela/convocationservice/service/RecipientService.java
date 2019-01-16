@@ -95,6 +95,11 @@ public class RecipientService {
         return recipientRepository.saveAndFlush(recipient);
     }
 
+    public List<Recipient> getAllByLocalAuthority(String localAuthorityUuid) {
+
+        return recipientRepository.findAllByLocalAuthorityUuid(localAuthorityUuid);
+    }
+
     public Long countAllWithQuery(String multifield, String firstname, String lastname, String email,
             Boolean active, Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
