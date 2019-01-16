@@ -3,7 +3,7 @@
 .ui.vertical.menu.mainMenu {
     display: flex;
     flex-direction: column;
-    margin-top: 6em;
+    margin-top: 5em;
     margin-left: 0.5em;
     margin-bottom: 0.5em;
     padding-top: 1em;
