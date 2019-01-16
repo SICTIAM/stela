@@ -3,14 +3,17 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Icon, Button, Checkbox, Form } from 'semantic-ui-react'
 
+import history from '../../_util/history'
+import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { notifications } from '../../_util/Notifications'
+
+import { withAuthContext } from '../../Auth'
+
 import StelaTable from '../../_components/StelaTable'
 import AdvancedSearch from '../../_components/AdvancedSearch'
 import { Page, FormFieldInline } from '../../_components/UI'
 import Pagination from '../../_components/Pagination'
 import QuickView from '../../_components/QuickView'
-import history from '../../_util/history'
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
-import { notifications } from '../../_util/Notifications'
 import Breadcrumb from '../../_components/Breadcrumb'
 
 class RecipientsList extends Component {
@@ -148,7 +151,7 @@ class RecipientsList extends Component {
 	    }
 	    const headers = { 'Content-Type': 'application/json' }
 
-	    _fetchWithAuthzHandling({url: url, method: 'PUT', headers: headers, body: JSON.stringify(body), context: this.context})
+	    _fetchWithAuthzHandling({url: url, method: 'PUT', headers: headers, body: JSON.stringify(body), context: this.props.authContext})
 	        .then(checkStatus)
 	        .then(response => {
 	            _addNotification(notifications.admin.statusUpdated)
@@ -218,7 +221,7 @@ class RecipientsList extends Component {
 	            <Breadcrumb
 	                data={[
 	                    {title: 'Accueil Admin', url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	                    {title: 'Convocation'},
+	                    {title: 'Convocation', url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
 	                    {title: 'Liste des destinataires'}
 	                ]}
 	            />
@@ -264,7 +267,7 @@ class RecipientsList extends Component {
 	                    sortable={true}
 	                    metaData={metaData}
 	                    data={this.state.recipients}
-	                    keyProperty="name"
+	                    keyProperty="uuid"
 	                    striped={false}
 	                    negativeResolver={this.negativeResolver}
 	                    pagination={pagination}
@@ -279,4 +282,4 @@ class RecipientsList extends Component {
 	}
 }
 
-export default translate(['convocation', 'api-gateway'])(RecipientsList)
+export default translate(['convocation', 'api-gateway'])(withAuthContext(RecipientsList))
