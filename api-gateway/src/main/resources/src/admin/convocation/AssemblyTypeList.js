@@ -29,7 +29,8 @@ class AssemblyTypeList extends Component {
 	    search: {
 	        multifield: '',
 	        name: '',
-	        active: ''
+	        active: '',
+	        location: ''
 	    },
 	    column: '',
 	    direction: '',
@@ -204,7 +205,7 @@ class AssemblyTypeList extends Component {
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
 	        { property: 'name', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.assembly_type') },
-	        { property: 'location', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.place') },
+	        { property: 'location', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.place') },
 	        { property: 'delay', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay') },
 	        { property: 'reminderDelay', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.reminder_time') },
 	        { property: 'recipients', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), displayComponent: recipientsDisplay },
@@ -252,6 +253,9 @@ class AssemblyTypeList extends Component {
 	                    <Form onSubmit={this.loadData}>
 	                        <FormFieldInline htmlFor='name' label={t('convocation.fields.assembly_type')} >
 	                            <input id='name' aria-label={t('convocation.fields.assembly_type')} value={search.name} onChange={e => this.handleFieldChange('name', e.target.value)} />
+	                        </FormFieldInline>
+	                        <FormFieldInline htmlFor='location' label={t('convocation.admin.modules.convocation.assembly_type_config.place')} >
+	                            <input id='location' aria-label={t('convocation.admin.modules.convocation.assembly_type_config.place')} value={search.location} onChange={e => this.handleFieldChange('location', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='active' label={t('convocation.admin.modules.convocation.recipient_config.status')}>
 	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => this.handleFieldChange('active', e.target.value)}>
