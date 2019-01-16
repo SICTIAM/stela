@@ -1,14 +1,11 @@
 package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
-import fr.sictiam.stela.convocationservice.service.LocalAuthorityService;
-import fr.sictiam.stela.convocationservice.service.NotificationService;
 import fr.sictiam.stela.convocationservice.service.RecipientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -37,21 +33,8 @@ public class RecipientRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipientRestController.class);
 
     @Autowired
-    AssemblyTypeRepository assemblyTypeRepository;
+    private RecipientService recipientService;
 
-    @Autowired
-    RecipientService recipientService;
-
-    @Autowired
-    LocalAuthorityService localAuthorityService;
-
-    @Autowired
-    NotificationService notificationService;
-
-
-    @Autowired
-    public RecipientRestController() {
-    }
 
     @JsonView(Views.SearchRecipient.class)
     @GetMapping
@@ -128,14 +111,5 @@ public class RecipientRestController {
         Recipient recipient = recipientService.update(uuid, currentLocalAuthUuid, recipientParams);
 
         return new ResponseEntity<>(recipient, HttpStatus.OK);
-    }
-
-    private String getContentType(String filename) {
-        String mimeType = URLConnection.guessContentTypeFromName(filename);
-        if (mimeType == null) {
-            LOGGER.info("Mimetype is not detectable, will take default");
-            mimeType = "application/octet-stream";
-        }
-        return mimeType;
     }
 }

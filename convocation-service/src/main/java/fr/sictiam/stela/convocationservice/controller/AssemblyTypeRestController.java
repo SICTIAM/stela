@@ -1,7 +1,6 @@
 package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -35,15 +33,7 @@ public class AssemblyTypeRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssemblyTypeRestController.class);
 
     @Autowired
-    AssemblyTypeRepository assemblyTypeRepository;
-
-    @Autowired
-    AssemblyTypeService assemblyTypeService;
-
-
-    @Autowired
-    public AssemblyTypeRestController() {
-    }
+    private AssemblyTypeService assemblyTypeService;
 
     @JsonView(Views.SearchAssemblyType.class)
     @GetMapping
@@ -116,15 +106,5 @@ public class AssemblyTypeRestController {
         LOGGER.info("active {}", assemblyType.getActive());
         assemblyType = assemblyTypeService.update(uuid, currentLocalAuthUuid, assemblyType);
         return new ResponseEntity<>(assemblyType, HttpStatus.OK);
-    }
-
-
-    private String getContentType(String filename) {
-        String mimeType = URLConnection.guessContentTypeFromName(filename);
-        if (mimeType == null) {
-            LOGGER.info("Mimetype is not detectable, will take default");
-            mimeType = "application/octet-stream";
-        }
-        return mimeType;
     }
 }

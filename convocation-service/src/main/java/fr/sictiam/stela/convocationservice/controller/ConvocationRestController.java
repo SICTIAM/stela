@@ -6,7 +6,6 @@ import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +26,6 @@ import java.util.Set;
 public class ConvocationRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConvocationRestController.class);
-
-    @Autowired
-    public ConvocationRestController() {
-
-    }
 
     @GetMapping
     public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
