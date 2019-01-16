@@ -6,6 +6,8 @@ import debounce from 'debounce'
 import moment from 'moment'
 import { Segment, Button, Form, Grid, Message } from 'semantic-ui-react'
 
+import { withAuthContext } from '../../Auth'
+
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
@@ -23,6 +25,7 @@ class RecipentConfig extends Component {
 	validationRules = {
 	    firstname: 'required',
 	    lastname: 'required',
+	    // eslint-disable-next-line no-useless-escape
 	    email: ['required', 'regex:/^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/'],
 	    phoneNumber: ['required', 'regex:/^(0|\\+33)[1-9]([-. ]?[0-9]{2}){4}$/']
 	}
@@ -31,7 +34,7 @@ class RecipentConfig extends Component {
 	    errorTypePointing: false,
 	    isFormValid: false,
 	    fields: {
-	        uuid: '',
+	        uuid: null,
 	        firstname: '',
 	        lastname: '',
 	        email: '',
@@ -43,9 +46,8 @@ class RecipentConfig extends Component {
 	}
 	componentDidMount() {
 	    const { _fetchWithAuthzHandling } = this.context
-	    this.validateForm()
 	    const uuid = this.props.uuid
-	    if(uuid !== '') {
+	    if(uuid) {
 	        _fetchWithAuthzHandling({ url: '/api/convocation/recipient/' + uuid })
 	            .then(checkStatus)
 	            .then(response => response.json())
@@ -54,7 +56,7 @@ class RecipentConfig extends Component {
 	                Object.keys(fields).forEach(function (key) {
 	                    fields[key] = json[key]
 	                })
-	                this.setState({fields})
+	                this.setState({fields}, this.validateForm)
 	            })
 	            .catch(response => {
 	                //TO DO ERROR
@@ -78,23 +80,22 @@ class RecipentConfig extends Component {
 	    const parameters = Object.assign({}, this.state.fields)
 	    delete parameters.uuid
 	    delete parameters.active
-	    delete parameters.uuid
 	    delete parameters.assemblyTypes
 	    delete parameters.inactivityDate
 
 
-		const headers = { 'Content-Type': 'application/json' }
-		_fetchWithAuthzHandling({url: `/api/convocation/recipient` + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.context})
-			.then(checkStatus)
-			.then(() => {
-				history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
-				_addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
-			})
-			.catch(response => {
-				response.json().then((json) => {
-					_addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
-				})
-			})
+	    const headers = { 'Content-Type': 'application/json' }
+	    _fetchWithAuthzHandling({url: '/api/convocation/recipient' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
+	        .then(checkStatus)
+	        .then(() => {
+	            history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
+	            _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+	        })
+	        .catch(response => {
+	            response.json().then((json) => {
+	                _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
+	            })
+	        })
 	}
 	cancel = () => {
 	    history.goBack()
@@ -216,4 +217,4 @@ class RecipentConfig extends Component {
 	}
 }
 
-export default translate(['convocation', 'api-gateway'])(RecipentConfig)
+export default translate(['convocation', 'api-gateway'])(withAuthContext(RecipentConfig))

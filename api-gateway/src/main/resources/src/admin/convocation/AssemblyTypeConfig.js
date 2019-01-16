@@ -5,6 +5,8 @@ import { Segment, Form, Grid, Checkbox, Button, Modal } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 
+import { withAuthContext } from '../../Auth'
+
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
@@ -70,7 +72,7 @@ class AssemblyTypeConfig extends Component {
 	    delete parameters.recipients
 
 	    const headers = { 'Content-Type': 'application/json' }
-	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.context})
+	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
 	        .then(checkStatus)
 	        .then(() => {
 	            history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`)
@@ -252,4 +254,4 @@ class AssemblyTypeConfig extends Component {
 	}
 }
 
-export default translate(['convocation', 'api-gateway'])(AssemblyTypeConfig)
+export default translate(['convocation', 'api-gateway'])(withAuthContext(AssemblyTypeConfig))
