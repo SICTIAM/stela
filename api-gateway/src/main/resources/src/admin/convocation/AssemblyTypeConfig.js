@@ -26,8 +26,7 @@ class AssemblyTypeConfig extends Component {
 	validationRules = {
 	    name: 'required',
 	    location: 'required',
-	    delay: ['required'],
-	    reminderDelay: ['required']
+	    delay: ['required']
 	}
 	state = {
 	    formErrors: [],
@@ -38,14 +37,14 @@ class AssemblyTypeConfig extends Component {
 	        name: '',
 	        location: '',
 	        delay: '',
-	        reminderDelay: 0,
+	        reminder: true,
 	        useProcuration: false,
 	        recipients: []
 	    },
 	    modalOpened: false
 	}
 	componentDidMount() {
-	    const { _fetchWithAuthzHandling } = this.context
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const uuid = this.props.uuid
 	    if(uuid) {
 	        _fetchWithAuthzHandling({ url: '/api/convocation/assembly-type/' + uuid })
@@ -59,7 +58,23 @@ class AssemblyTypeConfig extends Component {
 	                this.setState({fields}, this.validateForm)
 	            })
 	            .catch(response => {
-	                //TO DO ERROR
+	                response.json().then(json => {
+	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	                })
+	            })
+	    } else {
+	        _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/delay'})
+	            .then(checkStatus)
+	            .then(response => response.json())
+	            .then(json => {
+	                const fields = this.state.fields
+	                fields['delay'] = json.delay
+	                this.setState({fields})
+	            })
+	            .catch(response => {
+	                response.json().then(json => {
+	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	                })
 	            })
 	    }
 	}
@@ -73,13 +88,12 @@ class AssemblyTypeConfig extends Component {
 	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
 	        .then(checkStatus)
 	        .then(() => {
-	            history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`)
-	            /** UPDATE NOTIFICATION */
 	            if(this.state.fields.uuid) {
 	                _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeUpdated : notifications.admin.assembly_type_updated)
 	            } else {
 	                _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeCreated : notifications.admin.assembly_type_created)
 	            }
+	            history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`)
 	        })
 	        .catch(response => {
 	            response.json().then((json) => {
@@ -96,7 +110,7 @@ class AssemblyTypeConfig extends Component {
 	    //Set set for thid field
 	    field = this.extractFieldNameFromId(field)
 	    const fields = this.state.fields
-	    fields[field] = ((field === 'delay' || field === 'reminderDelay') && value)? parseInt(value): value
+	    fields[field] = ((field === 'delay') && value)? parseInt(value): value
 	    this.setState({ fields: fields }, () => {
 	        this.validateForm()
 	        if (callback) callback()
@@ -108,13 +122,13 @@ class AssemblyTypeConfig extends Component {
 	        name: this.state.fields.name,
 	        location: this.state.fields.location,
 	        delay: this.state.fields.delay,
-	        reminderDelay: this.state.fields.reminderDelay
+	        reminder: this.state.fields.reminder
 	    }
 	    const attributeNames = {
 	        name: t('convocation.admin.modules.convocation.assembly_type_config.type'),
 	        location: t('convocation.admin.modules.convocation.assembly_type_config.place'),
 	        delay: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay'),
-	        reminderDelay: t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')
+	        reminder: t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')
 	    }
 	    const validationRules = this.validationRules
 
@@ -133,9 +147,9 @@ class AssemblyTypeConfig extends Component {
 	    this.setState({fields})
 	    this.closeModal()
 	}
-	useProcuration = (checked) => {
+	handleCheckbox = (checked, field) => {
 	    const fields = this.state.fields
-	    fields.useProcuration = checked
+	    fields[field] = checked
 	    this.setState({ fields: fields })
 	}
 	render () {
@@ -207,18 +221,20 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_reminderDelay`}
-	                                label={t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')} required={true}>
-	                                <InputValidation
+	                            <FormField htmlFor={`${this.state.fields.uuid}_reminder`}
+	                                label={t('convocation.admin.modules.convocation.assembly_type_config.reminder')} required={true}>
+	                                <Checkbox className='secondary'
+	                                    checked={this.state.fields.reminder}
+	                                    onChange={((e, { checked }) => this.handleCheckbox(checked, 'reminder'))}/>
+	                                {/* <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_reminderDelay`}
-	                                    validationRule={this.validationRules.reminderDelay}
-	                                    value={this.state.fields.reminderDelay}
-	                                    type='number'
+	                                    id={`${this.state.fields.uuid}_reminder`}
+	                                    validationRule={this.validationRules.reminder}
+	                                    value={this.state.fields.reminder}
 	                                    onChange={this.handleFieldChange}
-	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.reminder_time')}
+	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.reminder')}
 	                                    ariaRequired={true}
-	                                />
+	                                /> */}
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
@@ -226,7 +242,7 @@ class AssemblyTypeConfig extends Component {
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.procuration')}>
 	                                <Checkbox toggle className='secondary'
 	                                    checked={this.state.fields.useProcuration}
-	                                    onChange={((e, { checked }) => this.useProcuration(checked))}/>
+	                                    onChange={((e, { checked }) => this.handleCheckbox(checked, 'useProcuration'))}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>

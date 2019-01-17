@@ -47,7 +47,7 @@ class RecipentConfig extends Component {
 	    }
 	}
 	componentDidMount() {
-	    const { _fetchWithAuthzHandling } = this.context
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const uuid = this.props.uuid
 	    if(uuid) {
 	        _fetchWithAuthzHandling({ url: '/api/convocation/recipient/' + uuid })
@@ -61,7 +61,9 @@ class RecipentConfig extends Component {
 	                this.setState({fields}, this.validateForm)
 	            })
 	            .catch(response => {
-	                //TO DO ERROR
+	                response.json().then(json => {
+	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	                })
 	            })
 	    }
 	}
@@ -90,8 +92,8 @@ class RecipentConfig extends Component {
 	    _fetchWithAuthzHandling({url: '/api/convocation/recipient' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
 	        .then(checkStatus)
 	        .then(() => {
-	            history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
 	            _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+	            history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
 	        })
 	        .catch(response => {
 	            response.json().then((json) => {

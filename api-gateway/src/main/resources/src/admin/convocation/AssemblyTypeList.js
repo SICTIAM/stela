@@ -202,14 +202,15 @@ class AssemblyTypeList extends Component {
 	        }
 	        return ''
 	    }
-	    const procurationDisplay = (useProcuration) => useProcuration ? t('api-gateway:yes') : t('api-gateway:no')
+
+	    const checkboxDisplay = (value) => value ? <Icon name='check' color='green'/>: <Icon name='close' color='red'/>
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
 	        { property: 'name', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.assembly_type') },
 	        { property: 'location', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.place') },
 	        { property: 'delay', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay') },
-	        { property: 'reminderDelay', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.reminder_time') },
-	        { property: 'useProcuration', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.procuration'), displayComponent: procurationDisplay },
+	        { property: 'reminder', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.reminder'), displayComponent: checkboxDisplay },
+	        { property: 'useProcuration', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.procuration'), displayComponent: checkboxDisplay },
 	        { property: 'recipients', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), displayComponent: recipientsDisplay },
 	        { property: 'active', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.status'), displayComponent: statusDisplay },
 	    ]

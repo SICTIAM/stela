@@ -54,7 +54,7 @@
           "assembly_type_config": {
             "type": "Type d'assemblée",
             "convocation_delay": "Délai de convocation",
-            "reminder_time": "Délai de relance" ,
+            "reminder": "Relance" ,
             "place": "Lieu de la séance",
             "recipients": "Destinataires",
             "procuration": "Utilisateur de procuration",
