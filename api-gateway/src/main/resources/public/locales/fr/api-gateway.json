@@ -373,7 +373,7 @@
       "recipent": "Ajouter un destinataire",
       "recipient_list": "Liste des destinataires",
       "fields": {
-        "residents_number": "3500 habitants ou plus"
+        "residents_number": "Nombre d'habitant de la commune"
       }
     },
     "modules": {

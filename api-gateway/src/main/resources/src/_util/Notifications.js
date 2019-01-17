@@ -142,6 +142,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        moduleConvocationUpdated: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.acte.admin.admin_module.update.success',
+            level: 'success',
+            position: 'br'
+        },
         groupCreated: {
             title: 'notifications.admin.title',
             message: 'notifications.admin.group_created',

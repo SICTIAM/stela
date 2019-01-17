@@ -41,7 +41,7 @@
       "modules": {
         "convocation": {
           "title": "Module Convocation",
-          "assembly_types": "Types d'assemblée",
+          "assembly_types": "Type d'assemblée",
           "local_authority_settings": {
             "title": "Paramétrage des collectivités",
             "general_informations": "Informations générales"

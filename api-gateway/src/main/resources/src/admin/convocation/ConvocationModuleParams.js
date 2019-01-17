@@ -1,16 +1,18 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment } from 'semantic-ui-react'
-import {  Page } from '../../_components/UI'
-// import { Form, Button, Segment, Label, Checkbox, TextArea } from 'semantic-ui-react'
-// import Validator from 'validatorjs'
-// import moment from 'moment'
+import { Segment, Form, Button, Grid } from 'semantic-ui-react'
+import debounce from 'debounce'
+import Validator from 'validatorjs'
 
-// import InputDatetime from '../../_components/InputDatetime'
-// import { notifications } from '../../_util/Notifications'
-// import { FieldInline, Page, InputTextControlled } from '../../_components/UI'
-// import { checkStatus } from '../../_util/utils'
+import { withAuthContext } from '../../Auth'
+
+import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { notifications } from '../../_util/Notifications'
+
+import {  Page, FormField, ValidationPopup } from '../../_components/UI'
+import Breadcrumb from '../../_components/Breadcrumb'
+import InputValidation from '../../_components/InputValidation'
 
 class ConvocationModuleParams extends Component {
     static contextTypes = {
@@ -20,138 +22,125 @@ class ConvocationModuleParams extends Component {
         _addNotification: PropTypes.func,
         _fetchWithAuthzHandling: PropTypes.func
     }
-    // state = {
-    //     isFormValid: true,
-    //     dateValidation: '',
-    //     fields: {
-    //         heliosAvailable: true,
-    //         unavailabilityHeliosStartDate: '',
-    //         unavailabilityHeliosEndDate: '',
-    //         alertMessageDisplayed: false,
-    //         alertMessage: ''
-    //     }
-    // }
-    // validationRules = {
-    //     unavailabilityHeliosStartDate: 'required|date|dateOrder',
-    //     unavailabilityHeliosEndDate: 'required|date',
-    // }
-    // componentDidMount() {
-    //     const { _fetchWithAuthzHandling, _addNotification } = this.context
-    //     _fetchWithAuthzHandling({ url: '/api/pes/admin' })
-    //         .then(checkStatus)
-    //         .then(response => response.json())
-    //         .then(json => {
-    //             json.unavailabilityHeliosStartDate = new moment.utc(json.unavailabilityHeliosStartDate)
-    //             json.unavailabilityHeliosEndDate = new moment.utc(json.unavailabilityHeliosEndDate)
-    //             this.setState({ fields: json })
-    //         })
-    //         .catch(response => {
-    //             response.json().then(json => {
-    //                 _addNotification(notifications.defaultError, 'notifications.admin.pes.title', json.message)
-    //             })
-    //         })
-    // }
+    validationRules = {
+	    residentNumber: 'required'
+    }
+    state = {
+        fields: {
+            uuid: '',
+            residentNumber: '',
+        },
+        isFormValid: false,
+        formErrors: []
+    }
+    componentDidMount() {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({url: '/api/convocation/local-authority'})
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(json => {
+                const fields = this.state.fields
+                fields['uuid'] = json.uuid
+                fields['residentNumber'] = json.residentNumber
+                this.setState({fields})
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+                })
+            })
+    }
 
-    // handleFieldChange = (field, value) => {
-    //     const fields = this.state.fields
-    //     fields[field] = value
-    //     this.setState({ fields: fields }, this.validateForm)
-    // }
-    // handleCheckboxChange = (event, { id }) => {
-    //     const { fields } = this.state
-    //     fields[id] = !fields[id]
-    //     this.setState({ fields })
-    // }
-    // validateForm = () => {
-    //     this.setState({ isFormValid: this.validateDates().passes() })
-    // }
+    extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
+    handleFieldChange = (field, value, callback) => {
+	    //Set set for thid field
+	    field = this.extractFieldNameFromId(field)
+	    const fields = this.state.fields
+	    fields[field] = value
+	    this.setState({ fields: fields }, () => {
+	        this.validateForm()
+	        if (callback) callback()
+	    })
+    }
+    validateForm = debounce(() => {
+	    const { t } = this.context
+	    const data = {
+	        residentNumber: this.state.fields.residentNumber
+	    }
+	    const attributeNames = {
+	        residentNumber: t('api-gateway:admin.convocation.fields.residents_number')
+	    }
+	    const validationRules = this.validationRules
 
-    // validateDates = () => {
-    //     const { unavailabilityHeliosStartDate, unavailabilityHeliosEndDate } = this.state.fields
-    //     Validator.register('dateOrder',
-    //         () => moment(this.state.fields.unavailabilityHeliosStartDate).isSameOrBefore(this.state.fields.unavailabilityHeliosEndDate),
-    //         this.context.t('api-gateway:form.validation.date_begin_before_date_end'))
-    //     const validation = new Validator({ unavailabilityHeliosStartDate, unavailabilityHeliosEndDate },
-    //         { unavailabilityHeliosStartDate: 'required|date|dateOrder', unavailabilityHeliosEndDate: 'required|date' })
-    //     return validation
-    // }
-    // updateDateValidation = () => {
-    //     const validation = this.validateDates()
-    //     validation.passes()
-    //     this.setState({ dateValidation: validation.errors.first('unavailabilityHeliosStartDate') || '' })
-    // }
-    // submitForm = (event) => {
-    //     event.preventDefault()
-    //     const { _fetchWithAuthzHandling, _addNotification } = this.context
-    //     const data = JSON.stringify(this.state.fields)
-    //     const headers = { 'Content-Type': 'application/json' }
-    //     _fetchWithAuthzHandling({ url: '/api/pes/admin', method: 'PATCH', body: data, headers: headers, context: this.context })
-    //         .then(checkStatus)
-    //         .then(() => _addNotification(notifications.admin.moduleUpdated))
-    //         .catch(response => {
-    //             response.text().then(text => _addNotification(notifications.defaultError, 'notifications.admin.instance.title', text))
-    //         })
-    // }
+	    const validation = new Validator(data, validationRules)
+	    validation.setAttributeNames(attributeNames)
+	    const isFormValid = validation.passes()
+	    const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
+	    this.setState({ isFormValid, formErrors })
+    }, 500)
+
+    submitForm = (e) => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        e.preventDefault()
+        const headers = { 'Content-Type': 'application/json' }
+        _fetchWithAuthzHandling({url: '/api/convocation/local-authority', method: 'PUT', headers: headers, body: JSON.stringify(this.state.fields), context: this.props.authContext})
+            .then(checkStatus)
+            .then(() => {
+                _addNotification(notifications.admin.moduleConvocationUpdated)
+            })
+            .catch(response => {
+                response.json().then(json => {
+                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+                })
+            })
+    }
     render() {
         const { t } = this.context
-
+        const localAuthoritySlug = getLocalAuthoritySlug()
+        const submissionButton =
+			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
+			    {t('api-gateway:form.update')}
+			</Button>
         return (
             <Page>
+                <Breadcrumb
+	                data={[
+	                    {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation')}
+	                ]}
+	            />
                 <Segment>
-                    {/* <Form onSubmit={this.submitForm}>
-                        <FieldInline htmlFor='heliosAvailable' label={t('admin.modules.pes.module_settings.heliosAvailable')}>
-                            <Checkbox id="heliosAvailable"
-                                toggle checked={this.state.fields.heliosAvailable}
-                                onChange={this.handleCheckboxChange} />
-                        </FieldInline>
-                        <FieldInline htmlFor='unavailabilityHelios' label={t('admin.modules.pes.module_settings.unavailabilityHelios')}>
-                            <Form.Group style={{ marginBottom: 0, flexDirection: 'column' }} className='test'>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <label htmlFor='unavailabilityHeliosStartDate' style={{ marginRight: '0.5em' }}>
-                                        {t('api-gateway:form.from')}
-                                    </label>
-                                    <InputDatetime id='unavailabilityHeliosStartDate'
-                                        onBlur={this.updateDateValidation}
-                                        value={this.state.fields.unavailabilityHeliosStartDate}
-                                        onChange={date => this.handleFieldChange('unavailabilityHeliosStartDate', date)} />
-                                    <label htmlFor='unavailabilityHeliosEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>
-                                        {t('api-gateway:form.to')}
-                                    </label>
-                                    <InputDatetime id='unavailabilityHeliosEndDate'
-                                        onBlur={this.updateDateValidation}
-                                        value={this.state.fields.unavailabilityHeliosEndDate}
-                                        onChange={date => this.handleFieldChange('unavailabilityHeliosEndDate', date)} />
-                                </div>
-                                {this.state.dateValidation && (
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <Label color='red' pointing>{this.state.dateValidation}</Label>
-                                    </div>
-                                )}
-                            </Form.Group>
-                        </FieldInline>
-                        <FieldInline htmlFor='alertMessageDisplayed' label={t('admin.modules.pes.module_settings.alertMessageDisplayed')}>
-                            <Checkbox id='alertMessageDisplayed'
-                                toggle checked={this.state.fields.alertMessageDisplayed}
-                                onChange={this.handleCheckboxChange} />
-                        </FieldInline>
-                        <FieldInline htmlFor='alertMessage' label={t('admin.modules.pes.module_settings.alertMessage')}>
-                            <InputTextControlled component={TextArea}
-                                id='alertMessage'
-                                maxLength={250}
-                                placeholder={`${t('admin.modules.pes.module_settings.alertMessage')}...`}
-                                value={this.state.fields.alertMessage || ''}
-                                onChange={this.handleFieldChange} />
-                        </FieldInline>
-                        <div style={{ textAlign: 'right' }}>
-                            <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>
-                                {t('api-gateway:form.update')}
-                            </Button>
+                    <Form onSubmit={this.submitForm}>
+                        <Grid>
+                            <Grid.Column mobile="16" computer='8'>
+                                <FormField htmlFor='residentNumber'
+                                    label={t('api-gateway:admin.convocation.fields.residents_number')}>
+                                    <InputValidation
+                                        errorTypePointing={this.state.errorTypePointing}
+                                        id={`${this.state.fields.uuid}_residentNumber`}
+                                        value={this.state.fields.residentNumber}
+                                        type='number'
+                                        onChange={this.handleFieldChange}
+                                        validationRule={this.validationRules.residentNumber}
+                                        fieldName={t('api-gateway:admin.convocation.fields.residents_number')}
+                                        ariaRequired={true}
+                                    />
+                                </FormField>
+                            </Grid.Column>
+                        </Grid>
+                        <div className='footerForm'>
+                            {this.state.formErrors.length > 0 &&
+								<ValidationPopup errorList={this.state.formErrors}>
+								    {submissionButton}
+								</ValidationPopup>
+	                        }
+	                        {this.state.formErrors.length === 0 && submissionButton}
                         </div>
-                    </Form> */}
+                    </Form>
                 </Segment>
             </Page>
         )
     }
 }
 
-export default translate(['convocation', 'api-gateway'])(ConvocationModuleParams)
+export default translate(['convocation', 'api-gateway'])(withAuthContext(ConvocationModuleParams))
