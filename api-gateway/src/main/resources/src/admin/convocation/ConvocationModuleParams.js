@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Form, Button, Grid } from 'semantic-ui-react'
+import { Segment, Form, Button, Grid, Radio } from 'semantic-ui-react'
 import debounce from 'debounce'
 import Validator from 'validatorjs'
 
@@ -12,7 +12,6 @@ import { notifications } from '../../_util/Notifications'
 
 import {  Page, FormField, ValidationPopup } from '../../_components/UI'
 import Breadcrumb from '../../_components/Breadcrumb'
-import InputValidation from '../../_components/InputValidation'
 
 class ConvocationModuleParams extends Component {
     static contextTypes = {
@@ -23,12 +22,12 @@ class ConvocationModuleParams extends Component {
         _fetchWithAuthzHandling: PropTypes.func
     }
     validationRules = {
-	    residentNumber: 'required'
+	    residentThreshold: 'required'
     }
     state = {
         fields: {
             uuid: '',
-            residentNumber: '',
+            residentThreshold: null,
         },
         isFormValid: false,
         formErrors: []
@@ -41,7 +40,7 @@ class ConvocationModuleParams extends Component {
             .then(json => {
                 const fields = this.state.fields
                 fields['uuid'] = json.uuid
-                fields['residentNumber'] = json.residentNumber
+                fields['residentThreshold'] = json.residentThreshold
                 this.setState({fields})
             })
             .catch(response => {
@@ -50,25 +49,13 @@ class ConvocationModuleParams extends Component {
                 })
             })
     }
-
-    extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
-    handleFieldChange = (field, value, callback) => {
-	    //Set set for thid field
-	    field = this.extractFieldNameFromId(field)
-	    const fields = this.state.fields
-	    fields[field] = value
-	    this.setState({ fields: fields }, () => {
-	        this.validateForm()
-	        if (callback) callback()
-	    })
-    }
     validateForm = debounce(() => {
 	    const { t } = this.context
 	    const data = {
-	        residentNumber: this.state.fields.residentNumber
+	        residentThreshold: this.state.fields.residentThreshold
 	    }
 	    const attributeNames = {
-	        residentNumber: t('api-gateway:admin.convocation.fields.residents_number')
+	        residentThreshold: t('api-gateway:admin.convocation.fields.residents_threshold')
 	    }
 	    const validationRules = this.validationRules
 
@@ -78,6 +65,12 @@ class ConvocationModuleParams extends Component {
 	    const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
 	    this.setState({ isFormValid, formErrors })
     }, 500)
+
+    handleChangeRadio = (e, value, field) => {
+        const fields = this.state.fields
+        fields[field] = value === 'true'
+        this.setState({fields}, this.validateForm())
+    }
 
     submitForm = (e) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -113,18 +106,22 @@ class ConvocationModuleParams extends Component {
                     <Form onSubmit={this.submitForm}>
                         <Grid>
                             <Grid.Column mobile="16" computer='8'>
-                                <FormField htmlFor='residentNumber'
-                                    label={t('api-gateway:admin.convocation.fields.residents_number')}>
-                                    <InputValidation
-                                        errorTypePointing={this.state.errorTypePointing}
-                                        id={`${this.state.fields.uuid}_residentNumber`}
-                                        value={this.state.fields.residentNumber}
-                                        type='number'
-                                        onChange={this.handleFieldChange}
-                                        validationRule={this.validationRules.residentNumber}
-                                        fieldName={t('api-gateway:admin.convocation.fields.residents_number')}
-                                        ariaRequired={true}
-                                    />
+                                <FormField htmlFor='residentThreshold'
+                                    label={t('api-gateway:admin.convocation.fields.residents_threshold')}>
+                                    <Radio
+                                        label={t('api-gateway:yes')}
+                                        value='true'
+                                        name='residentThreshold'
+                                        checked={this.state.fields.residentThreshold === true}
+                                        onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
+                                    ></Radio>
+                                    <Radio
+                                        label={t('api-gateway:no')}
+                                        name='residentThreshold'
+                                        value='false'
+                                        checked={this.state.fields.residentThreshold === false}
+                                        onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
+                                    ></Radio>
                                 </FormField>
                             </Grid.Column>
                         </Grid>
