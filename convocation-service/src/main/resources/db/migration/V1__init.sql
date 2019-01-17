@@ -18,7 +18,7 @@ CREATE TABLE assembly_type (
     name character varying(255),
     local_authority_uuid character varying(255),
     delay int NOT NULL DEFAULT 0,
-    reminder_delay int NOT NULL DEFAULT 0,
+    reminder boolean NOT NULL DEFAULT true,
     location character varying(512),
     active boolean,
     use_procuration boolean,
@@ -153,7 +153,7 @@ CREATE TABLE local_authority (
     uuid character varying(255) NOT NULL,
     active boolean,
     name character varying(255),
-    resident_number bigint,
+    resident_threshold boolean default true,
     siren character varying(255),
     slug_name character varying(255)
 );

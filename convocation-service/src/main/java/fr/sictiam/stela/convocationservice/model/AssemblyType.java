@@ -43,7 +43,7 @@ public class AssemblyType {
     private Integer delay;
 
     @JsonView(Views.AssemblyType.class)
-    private Integer reminderDelay;
+    private Boolean reminder;
 
     @JsonView(Views.AssemblyType.class)
     private String location;
@@ -113,12 +113,12 @@ public class AssemblyType {
         this.delay = delay;
     }
 
-    public Integer getReminderDelay() {
-        return reminderDelay;
+    public Boolean getReminder() {
+        return reminder;
     }
 
-    public void setReminderDelay(Integer reminderDelay) {
-        this.reminderDelay = reminderDelay;
+    public void setReminder(Boolean reminder) {
+        this.reminder = reminder;
     }
 
     public String getLocation() {

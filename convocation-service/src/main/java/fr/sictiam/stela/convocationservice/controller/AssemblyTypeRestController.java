@@ -2,11 +2,13 @@ package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
+import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.AssemblyTypeService;
+import fr.sictiam.stela.convocationservice.service.LocalAuthorityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class AssemblyTypeRestController {
 
     @Autowired
     private AssemblyTypeService assemblyTypeService;
+
+    @Autowired
+    private LocalAuthorityService localAuthorityService;
 
     @JsonView(Views.SearchAssemblyType.class)
     @GetMapping
@@ -105,6 +110,23 @@ public class AssemblyTypeRestController {
         }
         LOGGER.info("active {}", assemblyType.getActive());
         assemblyType = assemblyTypeService.update(uuid, currentLocalAuthUuid, assemblyType);
+        return new ResponseEntity<>(assemblyType, HttpStatus.OK);
+    }
+
+    @JsonView(Views.AssemblyType.class)
+    @GetMapping("/delay")
+    public ResponseEntity<AssemblyType> getDelay(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        LocalAuthority localAuthority = localAuthorityService.getLocalAuthority(currentLocalAuthUuid);
+        AssemblyType assemblyType = new AssemblyType();
+        assemblyType.setDelay(localAuthority.getResidentThreshold() ? 5 : 3);
+        
         return new ResponseEntity<>(assemblyType, HttpStatus.OK);
     }
 }

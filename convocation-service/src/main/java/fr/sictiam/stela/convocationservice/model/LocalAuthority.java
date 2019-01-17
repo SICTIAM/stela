@@ -25,8 +25,12 @@ public class LocalAuthority {
     @JsonView(Views.LocalAuthority.class)
     private Boolean active;
 
+    /**
+     * true if inhabitant number is > 3500, false otherwise
+     * Used for legal convocation delay
+     */
     @JsonView(Views.LocalAuthority.class)
-    private Long residentNumber;
+    private Boolean residentThreshold = true;
 
     public LocalAuthority() {
     }
@@ -67,12 +71,12 @@ public class LocalAuthority {
         this.active = active;
     }
 
-    public Long getResidentNumber() {
-        return residentNumber;
+    public Boolean getResidentThreshold() {
+        return residentThreshold;
     }
 
-    public void setResidentNumber(Long residentNumber) {
-        this.residentNumber = residentNumber;
+    public void setResidentThreshold(Boolean residentThreshold) {
+        this.residentThreshold = residentThreshold;
     }
 
     public void setName(String name) {

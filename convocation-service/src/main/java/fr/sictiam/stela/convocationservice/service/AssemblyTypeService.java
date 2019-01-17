@@ -155,6 +155,6 @@ public class AssemblyTypeService {
         params.setLocation(params.getLocation().trim());
 
         if (params.getDelay() == null) throw new MissingParameterException("delay");
-        if (params.getReminderDelay() == null) throw new MissingParameterException("reminderDelay");
+        if (params.getReminder() == null) throw new MissingParameterException("reminderDelay");
     }
 }
