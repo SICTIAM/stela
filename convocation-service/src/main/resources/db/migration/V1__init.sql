@@ -23,7 +23,7 @@ CREATE TABLE assembly_type (
     active boolean,
     use_procuration boolean,
     inactivity_date timestamp without time zone,
-    profileUuid character varying(255)
+    profile_uuid character varying(255)
 );
 
 
