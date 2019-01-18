@@ -70,7 +70,12 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                 .ignoringAntMatchers("/api/pes/sesile/signature-hook/**")
                 .ignoringAntMatchers("/externalws/**").and()
                 .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessHandler(logoutHandler()).and()
+                    // session is invalidated by OasisLogoutHandler as per https://doc.ozwillo.com/#s4-sign-out
+                    // what's more token revocation in OasisLogoutHandler fails if session is invalidated before
+                    .invalidateHttpSession(false)
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                    .logoutSuccessHandler(logoutHandler())
+                    .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint()).and()
                 .addFilterAfter(oasisExceptionTranslationFilter(authenticationEntryPoint()), ExceptionTranslationFilter.class)

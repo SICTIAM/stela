@@ -19,18 +19,18 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityExistsException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @EnableConfigurationProperties(OzwilloProvisioningService.OzwilloServiceProperties.class)
@@ -80,6 +80,9 @@ public class OzwilloProvisioningService {
     @Value("${application.url}")
     private String applicationUrl;
 
+    @Value("${application.portalUrl}")
+    private String portalUrl;
+
     private final LocalAuthorityService localAuthorityService;
     private final OzwilloServiceProperties ozwilloServiceProperties;
     private final RestTemplate restTemplate;
@@ -116,7 +119,7 @@ public class OzwilloProvisioningService {
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
         localAuthorityService.createOrUpdate(localAuthority);
 
-        CompletableFuture.runAsync(() -> notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo));
+        notifyRegistrationToKernel(provisioningRequest, ozwilloInstanceInfo);
     }
 
     /**
@@ -129,16 +132,12 @@ public class OzwilloProvisioningService {
      * <p>
      * See http://doc.ozwillo.com/#s3-3-provider-acknowledgement for full details.
      */
-    private void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest,
-            OzwilloInstanceInfo ozwilloInstanceInfo) {
+    @Async
+    void notifyRegistrationToKernel(ProvisioningRequest provisioningRequest, OzwilloInstanceInfo ozwilloInstanceInfo) {
         HttpHeaders httpHeaders = new HttpHeaders();
         String clientInfo = provisioningRequest.getClientId() + ":" + provisioningRequest.getClientSecret();
-        try {
-            httpHeaders.add("Authorization",
-                    "Basic " + Base64.getEncoder().encodeToString(clientInfo.getBytes("UTF-8")));
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Non realistic encoding exception !");
-        }
+        httpHeaders.add("Authorization",
+                "Basic " + Base64.getEncoder().encodeToString(clientInfo.getBytes(StandardCharsets.UTF_8)));
 
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
@@ -255,6 +254,8 @@ public class OzwilloProvisioningService {
             private String serviceUri;
             @JsonProperty("redirect_uris")
             private List<String> redirectUris;
+            @JsonProperty("post_logout_redirect_uris")
+            private List<String> postLogoutRedirectUris;
 
             Service(OzwilloServiceProperties ozwilloServiceProperties, ProvisioningRequest provisioningRequest) {
                 this.localId = ozwilloServiceProperties.localId;
@@ -271,16 +272,27 @@ public class OzwilloProvisioningService {
                 String instanceIdParam = "instance_id=" + provisioningRequest.getInstanceId();
                 this.serviceUri = applicationUrl + "/login?" + instanceIdParam;
                 this.redirectUris = Collections.singletonList(applicationUrl + "/callback?" + instanceIdParam);
+                this.postLogoutRedirectUris = Collections.singletonList(portalUrl);
             }
 
             @Override
             public String toString() {
-                return "Service{" + "localId='" + localId + '\'' + ", name='" + name + '\'' + ", description='"
-                        + description + '\'' + ", tosUri='" + tosUri + '\'' + ", policyUri='" + policyUri + '\''
-                        + ", icon='" + icon + '\'' + ", contacts=" + contacts + ", paymentOption='" + paymentOption
-                        + '\'' + ", targetAudience='" + targetAudience + '\'' + ", visibility='" + visibility + '\''
-                        + ", accessControl='" + accessControl + '\'' + ", serviceUri='" + serviceUri + '\''
-                        + ", redirectUris=" + redirectUris + '}';
+                return "Service{" +
+                        "localId='" + localId + '\'' +
+                        ", name='" + name + '\'' +
+                        ", description='" + description + '\'' +
+                        ", tosUri='" + tosUri + '\'' +
+                        ", policyUri='" + policyUri + '\'' +
+                        ", icon='" + icon + '\'' +
+                        ", contacts=" + contacts +
+                        ", paymentOption='" + paymentOption + '\'' +
+                        ", targetAudience=" + targetAudience +
+                        ", visibility='" + visibility + '\'' +
+                        ", accessControl='" + accessControl + '\'' +
+                        ", serviceUri='" + serviceUri + '\'' +
+                        ", redirectUris=" + redirectUris +
+                        ", postLogoutRedirectUris=" + postLogoutRedirectUris +
+                        '}';
             }
         }
     }

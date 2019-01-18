@@ -1,4 +1,4 @@
-package fr.sictiam.stela.adminservice;
+package fr.sictiam.stela.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.admin.model.Agent;

@@ -20,6 +20,9 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
     @Value("${application.url}")
     private String applicationUrl;
 
+    @Value("${application.portalUrl}")
+    private String portalUrl;
+
     @Autowired
     private LocalAuthorityInstanceService localAuthorityInstanceService;
 
@@ -72,5 +75,10 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
             return callBackUri.toString();
         }
         return null;
+    }
+
+    @Override
+    public String getPostLogoutRedirectUri() {
+        return portalUrl;
     }
 }
