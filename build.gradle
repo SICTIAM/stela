@@ -90,7 +90,7 @@ subprojects {
             push = project.hasProperty('push')
 
             // Specific case for integration : avoid tagging images with hash => generates too many image tags.. Keep "latest" tag
-            def env = project.getProperty("env")
+            def env = project.hasProperty("env") ? project.getProperty("env") : "test"
             tagVersion = env == "prod" ? env + "-" + gitDetails.gitHashFull : env
 
             applicationName = 'stela-poc/' + jar.baseName
