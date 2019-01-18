@@ -7,20 +7,21 @@ image: forge-registry.sictiam.fr/internet/stela-poc/openjdocker
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 services:
-  - docker:18.03-dind
+- docker:18.03-dind
 
 stages:
-  - test
-  - registry
-  - registry-dev
-  - registry-prod
+- test
+- registry
+- registry-dev
+- registry-prod
+- registry-convocation
 # Disabled for now as it does not work and it's a pita to know why
 #  - integrationTest
 
 test:
   stage: test
   script:
-    - ./gradlew --build-cache --stacktrace -g /cache test
+  - ./gradlew --build-cache --stacktrace -g /cache test
 # Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
 #  artifacts:
 #    paths:
@@ -37,23 +38,31 @@ test:
 registry:
   stage: registry
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
+  - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=integration
   only:
-    - develop
+  - develop
 
 registry-dev:
   stage: registry-dev
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=dev
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
+  - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=dev
   only:
-    - /^dev\/.*/
+  - /^dev\/.*/
 
 registry-prod:
   stage: registry-prod
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
-    - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=prod
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
+  - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=prod
   only:
-    - master
+  - master
+
+registry-convocation:
+  stage: registry-convocation
+  script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
+  - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=convocation
+  only:
+  - feature/convocation
