@@ -12,13 +12,6 @@ export default class QuickView extends Component {
 	    open: false
 	}
 	render() {
-	    // return (
-	    //     <div className={'quick-view' + (this.props.open ? ' open' : '')}>
-	    //         {this.props.data && (
-	    //             <div>{this.props.data}</div>
-	    //         )}
-	    //     </div>
-	    // )
 	    const data = this.props.data && this.props.data.data ? this.props.data.data.map((row) => {
 	        return (
 	            <Fragment key={row.id}>

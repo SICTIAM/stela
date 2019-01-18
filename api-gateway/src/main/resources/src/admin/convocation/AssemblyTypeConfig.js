@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Form, Grid, Checkbox, Button, Modal } from 'semantic-ui-react'
+import { Segment, Form, Grid, Checkbox, Button, Modal, Message } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
+import moment from 'moment'
 
 import { withAuthContext } from '../../Auth'
 
@@ -38,6 +39,7 @@ class AssemblyTypeConfig extends Component {
 	        location: '',
 	        delay: '',
 	        reminder: true,
+	        active: true,
 	        useProcuration: false,
 	        recipients: []
 	    },
@@ -83,16 +85,13 @@ class AssemblyTypeConfig extends Component {
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const parameters = Object.assign({}, this.state.fields)
 	    delete parameters.uuid
+	    delete parameters.active
 
 	    const headers = { 'Content-Type': 'application/json' }
 	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
 	        .then(checkStatus)
 	        .then(() => {
-	            if(this.state.fields.uuid) {
-	                _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeUpdated : notifications.admin.assembly_type_updated)
-	            } else {
-	                _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeCreated : notifications.admin.assembly_type_created)
-	            }
+	            _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeUpdated: notifications.admin.assemblyTypeCreated)
 	            history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`)
 	        })
 	        .catch(response => {
@@ -174,6 +173,12 @@ class AssemblyTypeConfig extends Component {
 	            <Breadcrumb
 	                data={dataBreadcrumb}
 	            />
+	            {!this.state.fields.active && (
+	                <Message warning>
+	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.admin.modules.convocation.assembly_type_config.inactive_assembly_type_title')}</Message.Header>
+	                    <p>{t('convocation.admin.modules.convocation.assembly_type_config.inactive_assembly_type_content', {date: moment(this.state.fields.inactivityDate).format('DD/MM/YYYY')})}</p>
+	                </Message>
+	            )}
 	            <Segment>
 	                <Form onSubmit={this.submitForm}>
 	                    <Grid>
@@ -222,19 +227,11 @@ class AssemblyTypeConfig extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_reminder`}
-	                                label={t('convocation.admin.modules.convocation.assembly_type_config.reminder')} required={true}>
+	                                label={t('convocation.admin.modules.convocation.assembly_type_config.reminder')}>
+	                                <p className="text-muted">{t('convocation.admin.modules.convocation.assembly_type_config.explanation_reminder')}</p>
 	                                <Checkbox className='secondary'
 	                                    checked={this.state.fields.reminder}
 	                                    onChange={((e, { checked }) => this.handleCheckbox(checked, 'reminder'))}/>
-	                                {/* <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_reminder`}
-	                                    validationRule={this.validationRules.reminder}
-	                                    value={this.state.fields.reminder}
-	                                    onChange={this.handleFieldChange}
-	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.reminder')}
-	                                    ariaRequired={true}
-	                                /> */}
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
@@ -247,7 +244,7 @@ class AssemblyTypeConfig extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
-	                                label={t('convocation.admin.modules.convocation.assembly_type_config.recipients')} required={true}>
+	                                label={t('convocation.admin.modules.convocation.assembly_type_config.recipients')}>
 	                                <Modal open={this.state.modalOpened} trigger={<Button
 	                                    	onClick={() => this.setState({modalOpened: true})}
 	                                    	type='button'

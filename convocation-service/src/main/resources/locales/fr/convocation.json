@@ -55,11 +55,14 @@
             "type": "Type d'assemblée",
             "convocation_delay": "Délai de convocation",
             "reminder": "Relance" ,
+            "explanation_reminder": "Si vous activez la relance, un email de rappel sera envoyé deux jours avant l'assemblée aux destinataires qui n'ont pas répondu",
             "place": "Lieu de la séance",
             "recipients": "Destinataires",
-            "procuration": "Utilisateur de procuration",
+            "procuration": "Utilisation de procuration",
             "status": "Statut",
-            "edit_recipients": "Editer la liste de destinataires"
+            "edit_recipients": "Editer la liste de destinataires",
+            "inactive_assembly_type_title": "Type d'assemblée inactif",
+            "inactive_assembly_type_content": "Le type d'assemblée est inactif depuis le: {{date}}."
           },
           "recipient_config": {
             "firstname": "Prénom",

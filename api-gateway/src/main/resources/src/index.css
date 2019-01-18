@@ -111,6 +111,10 @@ i.icon.xl-icon {
 .text-bold {
     font-weight: bold;
 }
+.text-muted {
+    font-size: 0.8em;
+    color: #767676;
+}
 
 /* button */
 .ui.basic.primary.button.link {
