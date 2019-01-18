@@ -34,7 +34,8 @@ class Pes extends Component {
             profileUuid: '',
             pj: false,
             lastHistoryDate: '',
-            lastHistoryStatus: ''
+            lastHistoryStatus: '',
+            sesileClasseurUrl: null
         },
         agent: '',
         fetchStatus: ''
@@ -132,7 +133,7 @@ class Pes extends Component {
                         </Field>
                     </Segment>
                     <History title={t('pes.page.historic')} moduleName="pes" emptyMessage={t('pes.page.no_history')}
-                        history={this.state.pes.pesHistories} />
+                        history={this.state.pes.pesHistories} sesileClasseurUrl={pes.sesileClasseurUrl} />
                 </LoadingContent>
             </Page>
         )

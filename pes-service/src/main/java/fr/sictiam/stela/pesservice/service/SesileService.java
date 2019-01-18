@@ -152,6 +152,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     pes.getAttachment().getFilename(), classeur.getBody().getId()).getBody();
 
             pes.setSesileClasseurId(classeur.getBody().getId());
+            pes.setSesileClasseurUrl(classeur.getBody().getUrl());
             pes.setSesileDocumentId(document.getId());
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);

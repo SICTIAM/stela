@@ -24,6 +24,8 @@ public class Classeur {
 
     private List<Document> documents;
 
+    private String url;
+
     public ClasseurStatus getStatus() {
         return status;
     }
@@ -104,5 +106,13 @@ public class Classeur {
 
     public void setDocuments(List<Document> documents) {
         this.documents = documents;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
