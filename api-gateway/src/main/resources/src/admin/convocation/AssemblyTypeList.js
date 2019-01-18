@@ -237,7 +237,7 @@ class AssemblyTypeList extends Component {
 	            <Breadcrumb
 	                data={[
 	                    {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	                    {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	                    {title: t('api-gateway:breadcrumb.convocation.assembly_type_list')}
 	                ]}
 	            />

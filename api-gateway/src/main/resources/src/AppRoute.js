@@ -223,7 +223,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/actes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes/migration" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationModuleParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeList} menu={AdminMenuBar} admin={true} />
@@ -246,7 +246,6 @@ class AppRoute extends Component {
 
                 <AuthRoute path="/:localAuthoritySlug/admin/actes/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeModuleParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/pes/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesModuleParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path="/:localAuthoritySlug/admin/convocation/parametrage-module" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationModuleParams} menu={AdminMenuBar} admin={true} />
 
                 <PublicRoute path="/:localAuthoritySlug/admin/*" component={() => <ErrorPage error={404} />} menu={AdminMenuBar} />
 

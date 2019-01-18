@@ -109,7 +109,7 @@ class AssemblyTypeConfig extends Component {
 	    //Set set for thid field
 	    field = this.extractFieldNameFromId(field)
 	    const fields = this.state.fields
-	    fields[field] = ((field === 'delay') && value)? parseInt(value): value
+	    fields[field] = ((field === 'delay') && value)? parseInt(value, 10): value
 	    this.setState({ fields: fields }, () => {
 	        this.validateForm()
 	        if (callback) callback()
@@ -160,12 +160,12 @@ class AssemblyTypeConfig extends Component {
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const dataBreadcrumb = this.props.uuid ? [
 	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	        {title: t('api-gateway:breadcrumb.convocation.assembly_type_list'), url: `/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee` },
 	        {title: t('api-gateway:breadcrumb.convocation.edit_assembly_type') }
 	    ] : [
 	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	        {title: t('api-gateway:breadcrumb.convocation.add_assembly_type') }
 	    ]
 	    return (

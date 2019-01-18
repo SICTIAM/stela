@@ -136,12 +136,12 @@ class RecipentConfig extends Component {
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const dataBreadcrumb = this.props.uuid ? [
 	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	        {title: t('api-gateway:breadcrumb.convocation.recipients_list'), url: `/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires` },
 	        {title: t('api-gateway:breadcrumb.convocation.edit_recipients') }
 	    ] : [
 	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	        {title: t('api-gateway:breadcrumb.convocation.add_recipients') }
 	    ]
 	    return (

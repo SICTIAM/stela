@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Modal, Tab } from 'semantic-ui-react'
 
-import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import { checkStatus } from '../_util/utils'
 
 import StelaTable from '../_components/StelaTable'
 

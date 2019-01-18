@@ -221,7 +221,7 @@ class RecipientsList extends Component {
 	            <Breadcrumb
 	                data={[
 	                    {title: 'Accueil Admin', url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	                    {title: 'Convocation', url: `/${localAuthoritySlug}/admin/convocation/parametrage-module`},
+	                    {title: 'Convocation', url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	                    {title: 'Liste des destinataires'}
 	                ]}
 	            />
