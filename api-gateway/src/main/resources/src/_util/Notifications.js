@@ -187,6 +187,11 @@ const notifications = {
             title: 'notifications.pes.admin.sesile.invalidTokens',
             level: 'error',
             position: 'br'
+        },
+        sesileUnavailableService: {
+            title: 'notifications.pes.admin.sesile.unavailableService',
+            level: 'error',
+            position: 'br'
         }
     },
     profile: {
