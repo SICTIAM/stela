@@ -48,6 +48,8 @@ subprojects {
             // jitpack is used for publications of the ozwillo-java-spring-integration lib
             url 'https://jitpack.io' 
         }
+        // uncomment this when locally developing on ozwillo-java-spring-integration lib
+        //mavenLocal()
     }
 
     dependencies {
