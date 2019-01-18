@@ -85,12 +85,12 @@ subprojects {
         // Private task, should be called from outside
         task tagGitHash(type: Docker, dependsOn: build) {
 
-            gitDetails = versionDetails()
+            def gitDetails = versionDetails()
             registry = 'forge-registry.sictiam.fr/internet'
             push = project.hasProperty('push')
 
             // Specific case for integration : avoid tagging images with hash => generates too many image tags.. Keep "latest" tag
-            env = project.getProperty("env")
+            def env = project.getProperty("env")
             tagVersion = env == "prod" ? env + "-" + gitDetails.gitHashFull : env
 
             applicationName = 'stela-poc/' + jar.baseName
