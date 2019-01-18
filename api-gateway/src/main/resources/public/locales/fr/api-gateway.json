@@ -219,7 +219,8 @@
                 },
                 "sesile": {
                     "validTokens": "Tokens valides",
-                    "invalidTokens": "Tokens invalides"
+                    "invalidTokens": "Tokens invalides",
+                    "unavailableService": "Le service Sesile est indisponible"
                 }
             }
         },

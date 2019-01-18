@@ -10,6 +10,7 @@ import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -86,9 +87,11 @@ public class SesileController {
     }
 
     @PostMapping("/verify-tokens")
-    public boolean verifyTokens(@RequestParam String token, @RequestParam String secret,
-            @RequestParam boolean sesileNewVersion) {
-        return sesileService.verifyTokens(token, secret, sesileNewVersion);
+    public ResponseEntity verifyTokens(@RequestParam String token, @RequestParam String secret,
+                                       @RequestParam boolean sesileNewVersion) {
+        HttpStatus responseStatus = sesileService.verifyTokens(token, secret, sesileNewVersion);
+
+        return new ResponseEntity<>(responseStatus.is2xxSuccessful(), responseStatus);
     }
 
     /**

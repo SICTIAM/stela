@@ -168,10 +168,11 @@ class PesLocalAuthorityParams extends Component {
         _fetchWithAuthzHandling({ url: '/api/pes/sesile/verify-tokens', method: 'POST', body: data, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
-            .then(tokenValid => _addNotification(tokenValid ? notifications.admin.sesileValidTokens : notifications.admin.sesileInvalidTokens))
-            .catch(response => {
-                response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
-            })
+            .then(() => _addNotification(notifications.admin.sesileValidTokens))
+            .catch(response => _addNotification(
+                response.status === 403 ?
+                    notifications.admin.sesileInvalidTokens :
+                    notifications.admin.sesileUnavailableService))
     }
     render() {
         const { t } = this.context
