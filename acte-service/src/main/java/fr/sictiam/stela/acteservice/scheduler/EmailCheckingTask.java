@@ -126,7 +126,7 @@ public class EmailCheckingTask {
 
             inbox.open(Folder.READ_WRITE);
             Message[] messages = inbox.getMessages();
-            LOGGER.debug("messages.length---" + messages.length);
+            LOGGER.debug("Reading {} messages from INBOX", messages.length);
 
             List<Message> messagesOK = new ArrayList<>();
             List<Message> messagesKO = new ArrayList<>();
@@ -135,8 +135,7 @@ public class EmailCheckingTask {
 
                 if (!message.isSet(Flag.DELETED)) {
                     try {
-                        LOGGER.debug("---------------------------------");
-                        LOGGER.debug("Email Number " + (i + 1));
+                        LOGGER.debug("Dealing with email #" + (i + 1));
                         LOGGER.debug("Subject: " + message.getSubject());
                         LOGGER.debug("From: " + message.getFrom()[0]);
                         LOGGER.debug("Text: " + message.getContent().toString());
@@ -172,10 +171,10 @@ public class EmailCheckingTask {
                                 JAXBElement<String> je = unmarshaller.unmarshal(xmlSource, String.class);
 
                                 String rootName = je.getName().getLocalPart();
+                                LOGGER.debug("XML return type is {}", rootName);
 
                                 StreamSource classSource = new StreamSource(bodyPart.getInputStream());
                                 if ("ARActe".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: ARActe");
                                     ARActe arActe = unmarshall(classSource, ARActe.class);
                                     byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 
@@ -184,7 +183,6 @@ public class EmailCheckingTask {
                                     acteService.receiveAREvent(arActe.getIDActe(), StatusType.ACK_RECEIVED, attachment);
 
                                 } else if ("ARAnnulation".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: ARAnnulation");
                                     ARAnnulation arAnnulation = unmarshall(classSource, ARAnnulation.class);
                                     byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 
@@ -194,7 +192,6 @@ public class EmailCheckingTask {
                                             attachment);
 
                                 } else if ("AnomalieActe".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: AnomalieActe");
                                     if (enveloppe == null) {
                                         throw new NoEnveloppeException();
                                     }
@@ -208,7 +205,6 @@ public class EmailCheckingTask {
                                             attachment);
 
                                 } else if ("AnomalieEnveloppe".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: AnomalieEnveloppe");
                                     AnomalieEnveloppe anomalie = unmarshall(classSource, AnomalieEnveloppe.class);
                                     byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 
@@ -218,7 +214,6 @@ public class EmailCheckingTask {
                                             attachment);
 
                                 } else if ("CourrierSimple".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: CourrierSimple");
                                     CourrierSimple courrierSimple = unmarshall(classSource, CourrierSimple.class);
                                     Attachment attachment = getFileAttachmentByName(
                                             courrierSimple.getDocument().getNomFichier(), originalMultipart);
@@ -226,10 +221,8 @@ public class EmailCheckingTask {
                                             courrierSimple.getIDActe(), attachment, null, Flux.COURRIER_SIMPLE);
 
                                 } else if ("DemandePieceComplementaire".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: DemandePieceComplementaire");
                                     DemandePieceComplementaire demandePieceComplementaire = unmarshall(classSource,
                                             DemandePieceComplementaire.class);
-                                    demandePieceComplementaire.getIDActe();
                                     Attachment attachment = getFileAttachmentByName(
                                             demandePieceComplementaire.getDocument().getNomFichier(),
                                             originalMultipart);
@@ -238,7 +231,6 @@ public class EmailCheckingTask {
                                             demandePieceComplementaire.getDescriptionPieces(),
                                             Flux.DEMANDE_PIECE_COMPLEMENTAIRE);
                                 } else if ("LettreObservations".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: LettreObservations");
                                     LettreObservations letterObs = unmarshall(classSource, LettreObservations.class);
                                     Attachment attachment = getFileAttachmentByName(
                                             letterObs.getDocument().getNomFichier(), originalMultipart);
@@ -247,7 +239,6 @@ public class EmailCheckingTask {
                                             Flux.LETTRE_OBSERVATION);
 
                                 } else if ("DefereTA".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: DefereTA");
                                     DefereTA defereTA = unmarshall(classSource, DefereTA.class);
                                     List<Attachment> attachments = defereTA.getPiecesJointes().getPieceJointe().stream()
                                             .map(file -> getFileAttachmentByName(file.getNomFichier(),
@@ -258,7 +249,6 @@ public class EmailCheckingTask {
                                             attachments, defereTA.getNatureIllegalite());
 
                                 } else if ("ARPieceComplementaire".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: ARPieceComplementaire");
                                     JAXBElement<ARReponseCL> arPieceComplementaire = unmarshallARReponseCL(classSource);
                                     byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 
@@ -269,7 +259,6 @@ public class EmailCheckingTask {
                                             StatusType.ACK_REPONSE_PIECE_COMPLEMENTAIRE, attachment);
 
                                 } else if ("ARReponseRejetLettreObservations".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: ARReponseRejetLettreObservations");
                                     JAXBElement<ARReponseCL> arLettreObs = unmarshallARReponseCL(classSource);
                                     byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 
@@ -280,7 +269,6 @@ public class EmailCheckingTask {
                                             StatusType.ACK_REPONSE_LETTRE_OBSERVATION, attachment);
 
                                 } else if ("RetourClassification".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: RetourClassification");
                                     RetourClassification retClassification = unmarshall(classSource,
                                             RetourClassification.class);
 
@@ -293,7 +281,6 @@ public class EmailCheckingTask {
                                     localAuthorityService.loadClassification(currentLocalAuthority.getUuid(),
                                             retClassification);
                                 } else if ("EnveloppeMISILLCL".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: EnveloppeMISILLCL");
                                     enveloppe = unmarshall(classSource, EnveloppeMISILLCL.class);
                                 }
                             }
