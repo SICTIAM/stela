@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.pesservice.config.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -63,6 +64,9 @@ public class PesAller {
     private Integer sesileClasseurId;
 
     private Integer sesileDocumentId;
+
+    @URL
+    private String sesileClasseurUrl;
 
     private LocalDate validationLimit;
 
@@ -238,6 +242,14 @@ public class PesAller {
 
     public Integer getSesileDocumentId() {
         return sesileDocumentId;
+    }
+
+    public String getSesileClasseurUrl() {
+        return sesileClasseurUrl;
+    }
+
+    public void setSesileClasseurUrl(String sesileClasseurUrl) {
+        this.sesileClasseurUrl = sesileClasseurUrl;
     }
 
     public LocalDate getValidationLimit() {

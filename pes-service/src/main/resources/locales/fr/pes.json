@@ -14,7 +14,7 @@
       "NOTIFICATION_SENT": "Notification envoyée",
       "RESENT": "Renvoyé",
       "MANUAL_RESENT": "Renvoyé manuellement",
-      "PENDING_SIGNATURE": "En attente de signature",
+      "PENDING_SIGNATURE": "Envoyé à la signature",
       "PENDING_SEND": "En attente d'envoi",
       "SIGNATURE_INVALID": "Signature invalide",
       "SIGNATURE_MISSING": "Signature manquante",
@@ -48,7 +48,8 @@
       "linked_file": "Fichier joint",
       "no_history": "Aucun historique pour ce PES",
       "re_send": "Renvoyer le flux manuellement",
-      "re_send_confirm": "Voulez-vous vraiment renvoyer le flux manuellement ?"
+      "re_send_confirm": "Voulez-vous vraiment renvoyer le flux manuellement ?",
+      "see_classeur": "voir le classeur"
     },
     "signature_errors": {
       "INVALID_SIGNATURE": "La signature du fichier n'a pas pu être vérifiée",
