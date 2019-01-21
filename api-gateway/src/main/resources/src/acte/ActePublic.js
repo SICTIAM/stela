@@ -30,7 +30,11 @@ class ActePublic extends Component {
             x: 10,
             y: 10
         },
-        fetchStatus: ''
+        fetchStatus: '',
+        thumbnail: {
+            image:'',
+            orientation: ''
+        }
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -40,7 +44,7 @@ class ActePublic extends Component {
             _fetchWithAuthzHandling({ url: '/api/acte/public/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ fields: json, fetchStatus: 'fetched' }))
+                .then(json => this.setState({ fields: json, fetchStatus: 'fetched' }, this.fetchThumbnail))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
@@ -49,6 +53,48 @@ class ActePublic extends Component {
                 })
         }
     }
+    fetchThumbnail = () => {
+        const { _fetchWithAuthzHandling} = this.context;
+        const uuid = this.props.uuid
+
+        _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+            .then(res => res.json())
+            .then(json => {
+                let stampPosition = this.state.stampPosition;
+                if(json.orientation ==='LANDSCAPE'){
+                    this.setState({thumbnail: json, stampPosition: {x: stampPosition.y, y: stampPosition.x}});
+                }else{
+                    this.setState({thumbnail: json});
+                }
+            });
+    };
+
+    thumbnailSize = () => {
+        let height, width = 0;
+        if(this.state.thumbnail.orientation ==="LANDSCAPE"){
+            height = 190;
+            width = 300;
+        }else {
+            height = 300;
+            width =  190;
+        }
+
+        return {height: height, width: width};
+    }
+
+    draggableBoxSize = () => {
+        let boxHeight, boxWidth = 0;
+        if(this.state.thumbnail.orientation ==="LANDSCAPE"){
+            boxHeight = 70;
+            boxWidth = 25;
+        }else {
+            boxHeight = 25;
+            boxWidth =  70;
+        }
+
+        return {boxHeight: boxHeight, boxWidth: boxWidth};
+    }
+
     handleChangeDeltaPosition = (stampPosition) => this.setState({ stampPosition })
     render() {
         const { t } = this.context
@@ -62,14 +108,18 @@ class ActePublic extends Component {
                 </FieldValue>
             </List.Item>
         )
+        const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
+        const {boxWidth, boxHeight} = this.draggableBoxSize();
         const stampPosition = (
             <div>
                 <DraggablePosition
                     style={{ marginBottom: '0.5em' }}
-                    backgroundImage={`/api/acte/public/${acte.uuid}/file/thumbnail`}
+                    backgroundImage={"data:image/png;base64," + this.state.thumbnail.image.trim()}
                     label={t('acte.stamp_pad.pad_label')}
-                    height={300}
-                    width={190}
+                    height={thumbnailHeight}
+                    width={thumbnailWidth}
+                    boxHeight={boxHeight}
+                    boxWidth={boxWidth}
                     labelColor='#000'
                     position={this.state.stampPosition}
                     handleChange={this.handleChangeDeltaPosition} />
