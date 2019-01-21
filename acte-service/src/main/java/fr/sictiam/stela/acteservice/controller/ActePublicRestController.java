@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.lowagie.text.DocumentException;
 import fr.sictiam.stela.acteservice.model.Acte;
 import fr.sictiam.stela.acteservice.model.Attachment;
+import fr.sictiam.stela.acteservice.model.Thumbnail;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.acteservice.model.ui.Views;
@@ -95,12 +96,12 @@ public class ActePublicRestController {
     }
 
     @GetMapping("/{uuid}/file/thumbnail")
-    public ResponseEntity getActeAttachmentThumbnail(HttpServletResponse response, @PathVariable String uuid) {
+    public ResponseEntity<Thumbnail> getActeAttachmentThumbnail(HttpServletResponse response, @PathVariable String uuid) {
         if (StringUtils.isNotBlank(uuid)) {
             try {
-                byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
-                outputFile(response, thumbnail, "thumbnail-" + uuid + ".png", "inline");
-                return new ResponseEntity(HttpStatus.OK);
+                Thumbnail thumbnail = acteService.getActeAttachmentThumbnail(uuid);
+//                outputFile(response, thumbnail.getImage(), "thumbnail-" + uuid + ".png", "inline");
+                return new ResponseEntity<>(thumbnail,HttpStatus.OK);
             } catch (IOException e) {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
                 return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);

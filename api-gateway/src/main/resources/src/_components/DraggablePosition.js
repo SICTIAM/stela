@@ -13,7 +13,9 @@ class DraggablePosition extends Component {
         style: PropTypes.object,
         showPercents: PropTypes.bool,
         handleChange: PropTypes.func.isRequired,
-        backgroundImage: PropTypes.string
+        backgroundImage: PropTypes.string,
+        boxWidth: PropTypes.number,
+        boxHeight: PropTypes.number
     }
     static defaultProps = {
         position: { x: 10, y: 10 },
@@ -30,6 +32,12 @@ class DraggablePosition extends Component {
             borderRadius: '3px',
             padding: '3px',
             display: 'inline-block'
+        },
+        labelStyle: {
+            display: 'flex',
+            height: '100%', width:'100%',
+            justifyContent:'center',
+            alignItems:'center'
         },
         globalStyle: {
             position: 'relative', overflow: 'auto', padding: '0'
@@ -81,7 +89,7 @@ class DraggablePosition extends Component {
                 <div style={{ ...globalStyle, ...backgroundImageStyle }}>
                     <Draggable position={pixelPosition} bounds={bounds} onDrag={this.handleDrag}>
                         <div style={{ ...box, ...this.styles.draggablePositionBox }}>
-                            {label}
+                            <div style={{...this.styles.labelStyle}}>{label}</div>
                         </div>
                     </Draggable>
                 </div>

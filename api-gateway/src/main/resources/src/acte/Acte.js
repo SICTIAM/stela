@@ -46,7 +46,11 @@ class Acte extends Component {
         },
         agent: '',
         fetchStatus: '',
-        republished: false
+        republished: false,
+        thumbnail: {
+            image:'',
+            orientation: ''
+        }
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -63,6 +67,13 @@ class Acte extends Component {
                         _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
+
+            _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+                .then(res => res.json())
+                .then(json => {
+                    this.setState({thumbnail: json});
+                    console.warn(json)
+                });
         }
     }
     getAgentInfos = () => {
@@ -102,6 +113,33 @@ class Acte extends Component {
         return (acteACK && isPDF(filename)) ? <Fragment><LinkFile url={`${url}/stamped`} text={filename} /> (<LinkFile url={url} text={t('acte.page.original')} />)</Fragment>
             : <LinkFile url={url} text={filename} ariaLabel={'Download '+filename}/>
     }
+
+    thumbnailSize = () => {
+        let height, width = 0;
+        if(this.state.thumbnail.orientation ==="LANDSCAPE"){
+            height = 190;
+            width = 300;
+        }else {
+            height = 300;
+            width =  190;
+        }
+
+        return {height: height, width: width};
+    }
+
+    draggableBoxSize = () => {
+        let boxHeight, boxWidth = 0;
+        if(this.state.thumbnail.orientation ==="LANDSCAPE"){
+            boxHeight = 70;
+            boxWidth = 25;
+        }else {
+            boxHeight = 25;
+            boxWidth =  70;
+        }
+
+        return {boxHeight: boxHeight, boxWidth: boxWidth};
+    }
+
     render() {
         const { t } = this.context
         const { acteACK, acte } = this.state.acteUI
@@ -118,20 +156,27 @@ class Acte extends Component {
                 </FieldValue>
             </List.Item>
         )
+
+        const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
+        const {boxWidth, boxHeight} = this.draggableBoxSize();
+
         const stampPosition = (
             <div>
                 <DraggablePosition
                     style={{ marginBottom: '0.5em' }}
-                    backgroundImage={`/api/acte/${acte.uuid}/file/thumbnail`}
+                    backgroundImage={"data:image/png;base64," + this.state.thumbnail.image.trim()}
+                    imageOrientation={this.state.thumbnail.orientation}
                     label={t('acte.stamp_pad.pad_label')}
-                    height={300}
-                    width={190}
+                    height={thumbnailHeight}
+                    width={thumbnailWidth}
                     labelColor='#000'
                     position={this.state.acteUI.stampPosition}
-                    handleChange={this.handleChangeDeltaPosition} />
+                    handleChange={this.handleChangeDeltaPosition}
+                    boxHeight={boxHeight}
+                    boxWidth={boxWidth}/>
                 <div style={{ textAlign: 'center' }}>
                     <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
-                        href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
+                       href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
                         {t('api-gateway:form.download')}
                     </a>
                 </div>
@@ -173,10 +218,10 @@ class Acte extends Component {
                         <div style={{ textAlign: 'right' }}>
                             <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>
                                 <Dropdown.Menu>
-                                    {acteACK && (
+                                    {acteACK && this.state.thumbnail.image &&  (
                                         <Dropdown.Item>
                                             <Popup content={stampPosition} on='click' position='left center'
-                                                trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
+                                                   trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
                                             />
                                         </Dropdown.Item>
                                     )}
