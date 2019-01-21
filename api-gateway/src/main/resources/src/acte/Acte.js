@@ -60,7 +60,10 @@ class Acte extends Component {
             _fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, () => {
+                    this.getAgentInfos();
+                    this.fetchThumbnail();
+                }))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
@@ -68,14 +71,30 @@ class Acte extends Component {
                     })
                 })
 
-            _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
-                .then(res => res.json())
-                .then(json => {
-                    this.setState({thumbnail: json});
-                    console.warn(json)
-                });
+
         }
     }
+
+    fetchThumbnail = () => {
+        const { _fetchWithAuthzHandling} = this.context;
+        const uuid = this.props.uuid
+
+        _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+            .then(res => res.json())
+            .then(json => {
+                let stampPosition = this.state.acteUI.stampPosition;
+                if(json.orientation ==='LANDSCAPE'){
+                    this.setState(prevState =>
+                        ({thumbnail: json,
+                            acteUI: {...prevState.acteUI,
+                            stampPosition: {x: stampPosition.y, y: stampPosition.x}}}));
+                }else{
+                    this.setState({thumbnail: json});
+                }
+            });
+    };
+
+
     getAgentInfos = () => {
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })

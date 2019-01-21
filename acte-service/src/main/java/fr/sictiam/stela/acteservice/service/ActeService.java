@@ -3,6 +3,7 @@ package fr.sictiam.stela.acteservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfReader;
 import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
@@ -795,9 +796,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public byte[] getStampedActe(Acte acte, Integer x, Integer y, LocalAuthority localAuthority)
             throws IOException, DocumentException {
+        PdfReader pdfReader = new PdfReader(acte.getActeAttachment().getFile());
         if (x == null || y == null) {
-            x = localAuthority.getStampPosition().getX();
-            y = localAuthority.getStampPosition().getY();
+            if(pdfReader.getPageRotation(1) != 0 && pdfReader.getPageRotation(1) % 90 == 0){
+                //landscape case
+                y = localAuthority.getStampPosition().getX();
+                x = localAuthority.getStampPosition().getY();
+            }else{
+                //portrait case
+                x = localAuthority.getStampPosition().getX();
+                y = localAuthority.getStampPosition().getY();
+            }
         }
         ActeHistory ackHistory = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();

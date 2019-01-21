@@ -1,14 +1,14 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Checkbox, Form, Button, Dropdown, Segment, Input } from 'semantic-ui-react'
+import { Checkbox, Form, Button, Dropdown, Segment, Input, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
 import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
 import { notifications } from '../../_util/Notifications'
-import { FieldInline, Page } from '../../_components/UI'
+import { FieldInline, Page} from '../../_components/UI'
 import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
@@ -210,14 +210,30 @@ class ActeLocalAuthorityParams extends Component {
 
                             <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
                             <FieldInline htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
-                                <DraggablePosition
-                                    label={t('acte.stamp_pad.pad_label')}
-                                    height={300}
-                                    width={190}
-                                    showPercents={true}
-                                    labelColor='#000'
-                                    position={this.state.fields.stampPosition}
-                                    handleChange={this.handleChangeDeltaPosition} />
+                                <Grid>
+                                    <Grid.Row style={{display:'flex', justifyContent:'space-around', alignItems:'center'}}>
+                                        <DraggablePosition
+                                            label={t('acte.stamp_pad.pad_label')}
+                                            height={300}
+                                            width={190}
+                                            showPercents={true}
+                                            labelColor='#000'
+                                            position={this.state.fields.stampPosition}
+                                            handleChange={this.handleChangeDeltaPosition} />
+                                        <DraggablePosition
+                                            label={t('acte.stamp_pad.pad_label')}
+                                            height={190}
+                                            width={300}
+                                            boxHeight={70}
+                                            boxWidth={25}
+                                            showPercents={true}
+                                            labelColor='#000'
+                                            position={{x:this.state.fields.stampPosition.y, y: this.state.fields.stampPosition.x}}
+                                            handleChange={() =>  console.error("Not available to proceed changes")}
+                                            disabled={true}
+                                        />
+                                    </Grid.Row>
+                                </Grid>
                             </FieldInline>
                             <FieldInline htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
                                 <Checkbox id="canPublishRegistre" toggle checked={this.state.fields.canPublishRegistre}
