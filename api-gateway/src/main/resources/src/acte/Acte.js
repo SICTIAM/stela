@@ -50,7 +50,8 @@ class Acte extends Component {
         thumbnail: {
             image:'',
             orientation: ''
-        }
+        },
+        thumbnailStatus: 'loading'
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -60,10 +61,7 @@ class Acte extends Component {
             _fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, () => {
-                    this.getAgentInfos();
-                    this.fetchThumbnail();
-                }))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
@@ -77,21 +75,34 @@ class Acte extends Component {
 
     fetchThumbnail = () => {
         const { _fetchWithAuthzHandling} = this.context;
-        const uuid = this.props.uuid
+        const {thumbnailStatus} = this.state;
+        const uuid = this.props.uuid;
 
-        _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
-            .then(res => res.json())
-            .then(json => {
-                let stampPosition = this.state.acteUI.stampPosition;
-                if(json.orientation ==='LANDSCAPE'){
-                    this.setState(prevState =>
-                        ({thumbnail: json,
-                            acteUI: {...prevState.acteUI,
-                            stampPosition: {x: stampPosition.y, y: stampPosition.x}}}));
-                }else{
-                    this.setState({thumbnail: json});
-                }
-            });
+        if(thumbnailStatus !== 'fetched') {
+                _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+                    .then(checkStatus)
+                    .then(res => res.json())
+                    .then(json => {
+                        let stampPosition = this.state.acteUI.stampPosition;
+                        if (json.orientation === 'LANDSCAPE') {
+                            this.setState(prevState =>
+                                ({
+                                    thumbnail: json,
+                                    thumbnailStatus: 'fetched',
+                                    acteUI: {
+                                        ...prevState.acteUI,
+                                        stampPosition: {x: stampPosition.y, y: stampPosition.x}
+                                    }
+                                }));
+                        } else {
+                            this.setState({thumbnail: json,thumbnailStatus: 'fetched'});
+                        }
+                    })
+                    .catch(err => {
+                        this.setState({thumbnailStatus: 'loading'});
+                        console.error(err)
+                    })
+        }
     };
 
 
@@ -162,6 +173,7 @@ class Acte extends Component {
     render() {
         const { t } = this.context
         const { acteACK, acte } = this.state.acteUI
+        const { thumbnailStatus } = this.state
         const lastMetierHistory = {
             date: acte.lastHistoryDate,
             status: acte.lastHistoryStatus,
@@ -191,7 +203,7 @@ class Acte extends Component {
                     labelColor='#000'
                     position={this.state.acteUI.stampPosition}
                     handleChange={this.handleChangeDeltaPosition}
-                    boxHeight={boxHeight}
+                    boxHeight={boxHeight}AR
                     boxWidth={boxWidth}/>
                 <div style={{ textAlign: 'center' }}>
                     <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
@@ -235,13 +247,16 @@ class Acte extends Component {
                             {acte.lastHistoryStatus && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
                         </Label>
                         <div style={{ textAlign: 'right' }}>
-                            <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>
+                            <Dropdown basic direction='left' trigger={dropdownButton} icon={false} onClick={this.fetchThumbnail}>
                                 <Dropdown.Menu>
-                                    {acteACK && this.state.thumbnail.image &&  (
+                                    {acteACK &&  (
                                         <Dropdown.Item>
-                                            <Popup content={stampPosition} on='click' position='left center'
-                                                   trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
-                                            />
+                                            <LoadingContent fetchStatus={thumbnailStatus}>
+                                                <Popup content={stampPosition} on='click' position='left center'
+                                                       trigger={<Dropdown item icon='none'
+                                                                          text={t('acte.stamp_pad.download_stamped_acte')}/>}
+                                                />
+                                            </LoadingContent>
                                         </Dropdown.Item>
                                     )}
                                     {acteACK && (
