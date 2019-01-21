@@ -1,7 +1,5 @@
 package fr.sictiam.stela.acteservice.model;
 
-import fr.sictiam.stela.acteservice.model.util.OrientationEnum;
-
 public class Thumbnail {
 
     OrientationEnum orientation;
@@ -30,4 +28,24 @@ public class Thumbnail {
     public void setImage(String image) {
         this.image = image;
     }
+
+    public enum OrientationEnum {
+
+        LANDSCAPE("landscape"),
+        PORTRAIT("portrait");
+
+        private final String direction;
+
+        OrientationEnum(String direction) {
+            this.direction = direction;
+        }
+
+        public String toString() {
+            return direction;
+        }
+    }
+
+
 }
+
+

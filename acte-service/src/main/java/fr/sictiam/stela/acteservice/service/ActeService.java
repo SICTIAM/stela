@@ -798,7 +798,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             throws IOException, DocumentException {
         PdfReader pdfReader = new PdfReader(acte.getActeAttachment().getFile());
         if (x == null || y == null) {
-            if(pdfReader.getPageRotation(1) != 0 && pdfReader.getPageRotation(1) % 90 == 0){
+            if(pdfGeneratorUtil.pdfIsRotated(pdfReader)){
                 //landscape case
                 y = localAuthority.getStampPosition().getX();
                 x = localAuthority.getStampPosition().getY();

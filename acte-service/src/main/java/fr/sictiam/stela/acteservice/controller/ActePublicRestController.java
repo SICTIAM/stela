@@ -100,7 +100,6 @@ public class ActePublicRestController {
         if (StringUtils.isNotBlank(uuid)) {
             try {
                 Thumbnail thumbnail = acteService.getActeAttachmentThumbnail(uuid);
-//                outputFile(response, thumbnail.getImage(), "thumbnail-" + uuid + ".png", "inline");
                 return new ResponseEntity<>(thumbnail,HttpStatus.OK);
             } catch (IOException e) {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);

@@ -18,7 +18,6 @@ import com.lowagie.text.pdf.PdfSmartCopy;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfWriter;
 import fr.sictiam.stela.acteservice.model.Thumbnail;
-import fr.sictiam.stela.acteservice.model.util.OrientationEnum;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -84,12 +83,11 @@ public class PdfGeneratorUtil {
         PDDocument document = PDDocument.load(pdf);
 
         PdfReader pdfReader = new PdfReader(pdf);
-        int rotation = pdfReader.getPageRotation(1);
-        OrientationEnum orientationEnum;
-        if (rotation != 0 && rotation % 90 == 0) {
-            orientationEnum = OrientationEnum.LANDSCAPE;
+        Thumbnail.OrientationEnum orientationEnum;
+        if (pdfIsRotated(pdfReader)) {
+            orientationEnum = Thumbnail.OrientationEnum.LANDSCAPE;
         } else {
-            orientationEnum = OrientationEnum.PORTRAIT;
+            orientationEnum = Thumbnail.OrientationEnum.PORTRAIT;
         }
 
 
@@ -135,15 +133,11 @@ public class PdfGeneratorUtil {
         PdfStamper stamp = new PdfStamper(reader, baos, '\0', true);
         stamp.setRotateContents(false);
 
-        float heighttest = reader.getPageSize(1).getHeight();
-        float widthtest= reader.getPageSize(1).getWidth();
-
         Color color = new Color(43, 43, 43);
-        int rotation = reader.getPageRotation(1);
         Rectangle mediabox = reader.getBoxSize(1, "media");
         int pixelPositionX = 0;
         int pixelPositionY = 0;
-        if (rotation != 0 && rotation % 90 == 0) {
+        if (pdfIsRotated(reader)) {
             //rotate axes for PDF landscape
             pixelPositionX = Math.round((percentPositionY) * mediabox.getWidth() / 100);
             pixelPositionY = Math.round((percentPositionX) * mediabox.getHeight() / 100);
@@ -216,4 +210,10 @@ public class PdfGeneratorUtil {
         canvas.lineTo(pixelPositionX + 5, pixelPositionY + 30);
         canvas.closePathStroke();
     }
+
+
+    public boolean pdfIsRotated(PdfReader pdfReader){
+        return pdfReader.getPageRotation(1) != 0 && pdfReader.getPageRotation(1) % 90 == 0;
+    }
+
 }
