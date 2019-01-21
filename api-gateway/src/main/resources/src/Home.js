@@ -51,8 +51,8 @@ class Home extends Component {
         const { certificate } = this.state
         const pairedCertificate = authContext.user && authContext.user.certificate
         const isCertificatePaired = pairedCertificate
-            && this.state.certificate.serial === pairedCertificate.serial
-            && this.state.certificate.issuer === pairedCertificate.issuer
+            && certificate.serial === pairedCertificate.serial
+            && certificate.issuer === pairedCertificate.issuer
         let days = null
         if(isCertificatePaired && pairedCertificate.expiredDate) {
             let expirationDate = moment(pairedCertificate.expiredDate)
@@ -79,11 +79,21 @@ class Home extends Component {
                                 {certificate.status === 'NONE' && pairedCertificate && (
                                     <span>{t('certificate_not_inserted')}</span>
                                 )}
-                                {certificate.status === 'NONE' && !pairedCertificate && (
+                                {certificate.status !== 'VALID' && !pairedCertificate && (
                                     <span>{t('certificate_not_paired')}</span>
                                 )}
-                                {certificate.status !== 'NONE' && !pairedCertificate && (
+                                {certificate.status === 'VALID'  && !pairedCertificate && (
                                     <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}</Link>
+                                )}
+                                {certificate.status === 'EXPIRED' && pairedCertificate && (
+                                    <span>{t('error.certificate_required.EXPIRED')}</span>
+                                )}
+                                {(pairedCertificate &&
+                                    (certificate.serial !== pairedCertificate.serial || certificate.issuer !== pairedCertificate.issuer )) && (
+                                        <span>{t('certificate_not_paired_user')}</span>
+                                    )}
+                                {(certificate.status !== 'NONE' && certificate.status !== 'VALID') && (
+                                    <span>{t('notifications.admin.invalid_certificate')}</span>
                                 )}
                                 {isCertificatePaired && (
                                     <div>
