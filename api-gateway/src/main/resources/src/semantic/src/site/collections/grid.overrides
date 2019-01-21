@@ -16,3 +16,11 @@
     padding-top: 0;
     padding-bottom: 0;
 }
+
+.block-information .ui.grid {
+    margin: 0px;
+}
+
+.block-information .ui.grid>.column:not(.row) {
+    padding: 5px;
+}

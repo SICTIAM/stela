@@ -33,6 +33,10 @@ class MenuBar extends Component {
                 if (contactEmail) window.location.href = 'mailto:' + contactEmail
             })
     }
+    checkActivatedModule = (module) => {
+        const { profile } = this.props.authContext
+        return profile.localAuthority.activatedModules.includes(module)
+    }
     render() {
         const { t, isMenuOpened, _openMenu } = this.context
         const { reportUrl } = this.state
@@ -49,12 +53,12 @@ class MenuBar extends Component {
                             <Icon name="checkmark box" className="float-right" size="large" />
                         </Menu.Header>
                         <Menu.Menu>
-                            {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) && localAuthoritySlug) && (
+                            {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) && localAuthoritySlug && this.checkActivatedModule('ACTES')) && (
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/actes/nouveau`}>
                                     {t('menu.acte.submit_an_act')}
                                 </Menu.Item>
                             )}
-                            {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT', 'ACTES_DISPLAY']) && localAuthoritySlug) && (
+                            {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT', 'ACTES_DISPLAY']) && localAuthoritySlug && this.checkActivatedModule('ACTES')) && (
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/actes/liste`}>
                                     {t('menu.acte.list')}
                                 </Menu.Item>
@@ -62,7 +66,7 @@ class MenuBar extends Component {
                             <Menu.Item as={NavLink} to={`${multiPath}/registre-des-deliberations`}>
                                 Registre des délibérations
                             </Menu.Item>
-                            {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) && localAuthoritySlug) && (
+                            {(rightsFeatureResolver(rights, ['ACTES_DEPOSIT']) && localAuthoritySlug && this.checkActivatedModule('ACTES')) && (
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/actes/brouillons`}>
                                     {t('menu.acte.drafts')}
                                 </Menu.Item>
@@ -70,7 +74,7 @@ class MenuBar extends Component {
                         </Menu.Menu>
                     </Menu.Item>
 
-                    {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'PES')) && (
+                    {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'PES')) && this.checkActivatedModule('PES') && (
                         <Menu.Item style={{ width: '100%' }}>
                             <Menu.Header className="primary">
                                 {t('menu.pes.accounting_flow')}
@@ -96,14 +100,14 @@ class MenuBar extends Component {
                         </Menu.Item>
                     )}
 
-                    {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'CONVOCATION')) && (
+                    {(isLoggedIn && localAuthoritySlug && rightsModuleResolver(rights, 'CONVOCATION')) && this.checkActivatedModule('CONVOCATION') && (
                         <Menu.Item style={{ width: '100%' }}>
                             <Menu.Header className="primary">
                                 {t('menu.convocation.convocation')}
                                 <Icon name="calendar outline" className="float-right" size="large" />
                             </Menu.Header>
                             <Menu.Menu>
-                                <Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/nouveau`}>
                                     {t('menu.convocation.send_a_convocation')}
                                 </Menu.Item>
                                 <Menu.Item>

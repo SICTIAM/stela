@@ -1,419 +1,460 @@
 {
-    "app_title": "STELA",
-    "heavy_development": "en cours de fort développement",
-    "top_bar": {
-        "log_in": "Connexion",
-        "log_out": "Déconnexion",
-        "profile": "Profil",
-        "admin": "Administration",
-        "back_to_app": "Application"
+  "app_title": "STELA",
+  "heavy_development": "en cours de fort développement",
+  "top_bar": {
+    "log_in": "Connexion",
+    "log_out": "Déconnexion",
+    "profile": "Profil",
+    "admin": "Administration",
+    "back_to_app": "Application"
+  },
+  "yes": "Oui",
+  "no": "Non",
+  "select_localAuthority": "Sélectionner la collectivité",
+  "last_localAuthorities": "Dernières collectivités utilisées",
+  "alert": "Alerte",
+  "at": "à",
+  "loading": "Chargement",
+  "legal_notice": "Mentions légales",
+  "last_update": "Dernière mise à jour",
+  "release_notes": "Notes de mise à jour",
+  "certification_expiration": "Votre certificat expire dans {{days}} jours",
+  "certificate_not_inserted": "Certificat non inséré",
+  "certificate_not_paired": "Certificat non appairé",
+  "clic_to_paire": "Cliquez ici pour appairer votre certificat",
+  "view_profil": "Voir profil",
+  "ask_certificate": "Demander un certificat",
+  "skip_to_content": "Sauter au contenu",
+  "form": {
+    "search": "Rechercher",
+    "advanced_search": "Recherche avancée",
+    "open_advanced_search": "Ouvrir la recherche avancée",
+    "all": "Tous",
+    "all_feminine": "Toutes",
+    "or": "ou",
+    "from": "de",
+    "to": "à",
+    "submit": "Déposer",
+    "send": "Envoyer",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "delete": "Supprimer",
+    "delete_draft": "Supprimer le brouillon",
+    "add_a_file": "Ajouter un fichier",
+    "drag_and_drop": "Glisser et déposer votre fichier",
+    "add": "Ajouter",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "download": "Télécharger",
+    "configure": "Configurer",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "verify": "Vérifier",
+    "max_string_length": "{{length}} caractères autorisés maximum ({{remaining}} restants)",
+    "validation": {
+      "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques majuscules et des tirets bas (_).",
+      "mandatoryfield": "Le champ est obligatoire",
+      "malformedfield": "Le champ n'est pas formé correctement",
+      "mandatoryfile": "Fichier obligatoire",
+      "badextension": "L'extension du fichier est incorrecte",
+      "badbudgetfile": "Erreur lors de l'analyse du fichier",
+      "badstampbudgetfile": "Erreur lors du calcul de l'empreinte du fichier",
+      "budgetfilenotsealed": "Le fichier budgétaire n'est pas scellé",
+      "badsealbudgetfile": "Le fichier budgétaire n'est pas correctement scellé",
+      "budgetfilemalformed": "Le fichier budgétaire n'est pas correctement formé, impossible de l'analyser",
+      "date_begin_before_date_end": "La date de début doit être antérieure à la date de fin"
+    }
+  },
+  "list": {
+    "last_modified": "Dernière modification",
+    "item_per_page": "résultats par page",
+    "item_per_page_label": "choix du nombre de résultats par page",
+    "select_item": "Sélectionner",
+    "check_all": "Tout sélectionner",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "actions": "Choisisser une action à effectuer"
+  },
+  "menu": {
+    "acte": {
+      "legality_control": "Contrôle de légalité",
+      "submit_an_act": "Déposer un acte",
+      "list": "Liste des actes",
+      "drafts": "Brouillons",
+      "deliberation_register": "Registre des délibérations"
     },
-    "select_localAuthority": "Sélectionner la collectivité",
-    "last_localAuthorities": "Dernières collectivités utilisées",
-    "alert": "Alerte",
-    "at": "à",
-    "loading": "Chargement",
-    "legal_notice": "Mentions légales",
-    "last_update": "Dernière mise à jour",
-    "release_notes": "Notes de mise à jour",
-    "certification_expiration": "Votre certificat expire dans {{days}} jours",
-    "certificate_not_inserted": "Certificat non inséré",
-    "certificate_not_paired": "Certificat non appairé",
-    "clic_to_paire": "Cliquez ici pour appairer votre certificat",
-    "view_profil": "Voir profil",
-    "ask_certificate": "Demander un certificat",
-    "skip_to_content": "Sauter au contenu",
-    "form": {
-        "search": "Rechercher",
-        "advanced_search": "Recherche avancée",
-        "open_advanced_search": "Ouvrir la recherche avancée",
-        "all": "Tous",
-        "all_feminine": "Toutes",
-        "or": "ou",
-        "from": "de",
-        "to": "à",
-        "submit": "Déposer",
-        "create": "Créer",
-        "update": "Mettre à jour",
-        "delete": "Supprimer",
-        "delete_draft": "Supprimer le brouillon",
-        "add_a_file": "Ajouter un fichier",
-        "drag_and_drop": "Glisser et déposer votre fichier",
-        "add": "Ajouter",
-        "activate": "Activer",
-        "deactivate": "Désactiver",
-        "download": "Télécharger",
-        "configure": "Configurer",
-        "confirm": "Confirmer",
-        "cancel": "Annuler",
-        "verify": "Vérifier",
-        "max_string_length": "{{length}} caractères autorisés maximum ({{remaining}} restants)",
-        "validation": {
-            "regex_alpha_num_underscore": "Le champ {{fieldName}} ne peut contenir que des caractères alphanumériques majuscules et des tirets bas (_).",
-            "mandatoryfield": "Le champ est obligatoire",
-            "malformedfield": "Le champ n'est pas formé correctement",
-            "mandatoryfile": "Fichier obligatoire",
-            "badextension": "L'extension du fichier est incorrecte",
-            "badbudgetfile": "Erreur lors de l'analyse du fichier",
-            "badstampbudgetfile": "Erreur lors du calcul de l'empreinte du fichier",
-            "budgetfilenotsealed": "Le fichier budgétaire n'est pas scellé",
-            "badsealbudgetfile": "Le fichier budgétaire n'est pas correctement scellé",
-            "budgetfilemalformed": "Le fichier budgétaire n'est pas correctement formé, impossible de l'analyser",
-            "date_begin_before_date_end": "La date de début doit être antérieure à la date de fin"
-        }
+    "pes": {
+      "accounting_flow": "Flux comptable",
+      "submit_a_PES_Aller": "Déposer un PES Aller",
+      "PES_Aller_list": "Liste des PES Aller",
+      "PES_Retour_list": "Liste des PES Retour"
     },
-    "list": {
-        "last_modified": "Dernière modification",
-        "item_per_page": "résultats par page",
-        "item_per_page_label": "choix du nombre de résultats par page",
-        "select_item": "Sélectionner",
-        "check_all": "Tout sélectionner",
-        "next": "Suivant",
-        "previous": "Précédent",
-        "actions": "Choisisser une action à effectuer"
+    "convocation": {
+      "convocation": "Convocation",
+      "send_a_convocation": "Déposer une convocation",
+      "reveived_convocations": "Convocations reçues",
+      "sent_convocations": "Convocations envoyées"
     },
-    "menu": {
-        "acte": {
-            "legality_control": "Contrôle de légalité",
-            "submit_an_act": "Déposer un acte",
-            "list": "Liste des actes",
-            "drafts": "Brouillons",
-            "deliberation_register": "Registre des délibérations"
-        },
-        "pes": {
-            "accounting_flow": "Flux comptable",
-            "submit_a_PES_Aller": "Déposer un PES Aller",
-            "PES_Aller_list": "Liste des PES Aller",
-            "PES_Retour_list": "Liste des PES Retour"
-        },
-        "convocation": {
-            "convocation": "Convocation",
-            "send_a_convocation": "Déposer une convocation",
-            "reveived_convocations": "Convocations reçues",
-            "sent_convocations": "Convocations envoyées"
-        },
-        "informations": {
-            "title": "Informations",
-            "help": "Aide",
-            "report": "Déclarer un incident",
-            "contact": "Contact",
-            "legal_notice": "Mentions légales",
-            "cgu": "CGU"
-        },
-        "admin": "Admin"
+    "informations": {
+      "title": "Informations",
+      "help": "Aide",
+      "report": "Déclarer un incident",
+      "contact": "Contact",
+      "legal_notice": "Mentions légales",
+      "cgu": "CGU"
     },
-    "profile": {
-        "title": "Profil",
-        "modify_my_profile": "Modifier mon profil",
-        "no_email": "Aucun email",
-        "notifications_title": "Notifications",
-        "localAuthorityNotifications": "Être notifié pour des actes déposés par un membre du groupe",
-        "notifications": {
-            "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
-            "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
-            "ACTES_CANCELLED": "Réception de l'AR d'annulation d'un acte",
-            "ACTES_NACK_RECEIVED": "Réception d'une anomalie de la Préfecture pour un acte",
-            "ACTES_ANOMALIES": "Toutes anomalies concernant un acte",
-            "PES_ACK_RECEIVED": "Réception de l'AR d'un PES",
-            "PES_NACK_RECEIVED": "Réception d'une anomalie de la trésorerie pour un PES",
-            "PES_ANOMALIES": "Toutes anomalies concernant un flux PES",
-            "PES_SENT": "Envoi réussi d'un PES",
-            "PES_DAILY_ERRORS": "Courriel quotidien des PES en erreur"
-        },
-        "certificate": {
-            "title": "Informations du certificat",
-            "pair": "Appairer le certificat",
-            "paired": "Certificat appairé",
-            "status": "Statut"
-        },
-        "no_certificate": "Aucun certificat",
-        "sesile": {
-            "title": "Connexion Sesile",
-            "serviceOrganisationNumber": "Service organisationnel",
-            "type": "Type de classeur",
-            "visibility": "Visibilité",
-            "visibilities": {
-                "0": "Privé",
-                "1": "Public",
-                "3": "Service organisationnel"
-            },
-            "validationLimit": "Délai de validation (jours)",
-            "secret": "Secret",
-            "token": "Token"
-        }
-    },
+    "admin": "Admin"
+  },
+  "profile": {
+    "title": "Profil",
+    "modify_my_profile": "Modifier mon profil",
+    "no_email": "Aucun email",
+    "notifications_title": "Notifications",
+    "localAuthorityNotifications": "Être notifié pour des actes déposés par un membre du groupe",
     "notifications": {
-        "title": "STELA",
-        "acte": {
-            "title": "Module Acte",
-            "sent": {
-                "success": "Le dépot de l'acte a bien été effectué",
-                "error": {
-                    "empty_acte": "L'acte envoyé est vide",
-                    "non_extrayable_act": "Impossible de récupérer les données de l'acte",
-                    "number_unavailable": "Le numéro d'acte est déjà pris"
-                }
-            },
-            "republished": {
-                "success": "L'acte a bien été redéposé",
-                "error": "Impossible de redéposer l'acte"
-            },
-            "cancelled": {
-                "success": "La demande d'annulation du dépot a bien été prise en compte",
-                "forbidden": "Cet acte ne peut pas être annulé"
-            },
-            "draft": {
-                "single_deleted": {
-                    "success": "Le brouillon a bien été supprimé"
-                },
-                "multiple_deleted": {
-                    "success": "Les brouillons ont bien été supprimés"
-                }
-            },
-            "admin": {
-                "title": "Admin module Acte",
-                "instance_params_updated": "Paramètres de l'instance enregistrés",
-                "local_authority": {
-                    "classificationAsked": "Demande de classification envoyée",
-                    "update": {
-                        "success": "La mise à jour de la collectivité a bien été prise en compte"
-                    }
-                },
-                "admin_module": {
-                    "update": {
-                        "success": "Les modifications ont bien été enregistrées"
-                    }
-                }
-            },
-            "anomaly_attachment_types": "Aucun type de pièce jointe n'a été trouvé",
-            "no_attachment_types": "Veuillez vérifier que la nomenclature de la collectivité a été envoyée",
-            "courrier_simple_asked": "La réponse au courrier simple a bien été déposée",
-            "lettre_observation_asked": "La réponse à la lettre d'observation a bien été déposée",
-            "pieces_complementaires_asked": "La réponse à la demande de pièce complémentaire a bien été déposée",
-            "annexe_not_found": "Fichier annexe inexistant",
-            "history_not_found": "Historique d'acte inexistant",
-            "no_history_file": "Aucun fichier pour cet historique",
-            "not_found": "Acte inexistant",
-            "no_content": "Le résultat de cette requête n'a aucun résultat"
-        },
-        "pes": {
-            "title": "Module PES",
-            "sent": {
-                "success": "Le dépot PES a bien été effectué",
-                "virus": "Le dépot PES a échoué car il contenait un virus",
-                "error": {
-                    "bad_file_name": "Le nom de fichier est incorrect",
-                    "non_extractable_pes": "Erreur lors du traitement du PES",
-                    "existing_file_name": "Le nom de fichier est déjà utilisé",
-                    "file_too_big": "Le fichier est trop gros (100 Mo max)",
-                    "read_file": "Impossible de lire le fichier"
-                },
-                "missing_data": "Merci de remplir tous les champs obligatoires"
-            },
-            "admin": {
-                "title": "Admin module Pes",
-                "local_authority": {
-                    "update": {
-                        "success": "La mise à jour de la collectivité a bien été prise en compte"
-                    }
-                },
-                "sesile": {
-                    "validTokens": "Tokens valides",
-                    "invalidTokens": "Tokens invalides",
-                    "unavailableService": "Le service Sesile est indisponible"
-                }
-            }
-        },
-        "admin": {
-            "title": "Administration",
-            "local_authority_not_found": "Collectivité non trouvée",
-            "local_authority_certificate_not_found": "Certificat de collectivité non trouvé",
-            "error_certificate": "Erreur lors de l'ajout du certificat",
-            "invalid_certificate": "Le certificat est invalide",
-            "generic_account": {
-                "created": "Compte générique créé",
-                "updated": "Compte générique mis à jour",
-                "deleted": "Compte générique supprimé",
-                "email_conflict": "Cet email est déjà utilisé pour un compte générique",
-                "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
-            },
-            "agent_not_found": "Agent non trouvé",
-            "group_created": "Le groupe a bien été créé",
-            "group_updated": "Le groupe a bien été mis à jour",
-            "group_deleted": "Le groupe a bien été supprimé",
-            "agent_profile_updated": "Les droits de l'agent ont bien été mis à jour",
-            "certificateCreated": "Le certificat a bien été ajouté",
-            "certificateDeleted": "Le certificat a bien été supprimé"
-        },
-        "profile": {
-            "title": "Profil",
-            "updated": "Votre profil a bien été mis à jour",
-            "certificatePairedSuccess": "Le certificat à bien été appairé",
-            "certificateNotValid": "Le certificat n'est pas valide",
-            "certificateConflict": "Le certificat est déjà enregistré sur un autre utilisateur"
-        }
-    },
-    "local_authority": {
-        "uuid": "UUID",
-        "name": "Nom de la collectivité",
-        "siren": "SIREN",
-        "department": "Département",
-        "district": "Arrondissement",
-        "nature": "Nature",
-        "genericProfileUuid": "Agent garant",
-        "nomenclatureDate": "Date de nomenclature",
-        "canPublishRegistre": "Affichage sur le registre des délibérations",
-        "canPublishWebSite": "Affichage sur site internet",
-        "miatConnectionStatus": "Accessibilité du serveur MIAT",
-        "miatConnectionStartDate": "Début d'inaccessibilité du serveur MIAT",
-        "miatConnectionEndDate": "Fin d'inaccessibilité du serveur MIAT",
-        "archiveActivated": "Activer l'archivage",
-        "daysBeforeArchiving": "Nombre de jours avant d'archiver",
-        "pastellUrl": "URL Pastell",
-        "pastellEntity": "Entité Pastell",
-        "pastellLogin": "Login Pastell",
-        "pastellPassword": "Mot de passe Pastell"
+      "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
+      "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
+      "ACTES_CANCELLED": "Réception de l'AR d'annulation d'un acte",
+      "ACTES_NACK_RECEIVED": "Réception d'une anomalie de la Préfecture pour un acte",
+      "ACTES_ANOMALIES": "Toutes anomalies concernant un acte",
+      "PES_ACK_RECEIVED": "Réception de l'AR d'un PES",
+      "PES_NACK_RECEIVED": "Réception d'une anomalie de la trésorerie pour un PES",
+      "PES_ANOMALIES": "Toutes anomalies concernant un flux PES",
+      "PES_SENT": "Envoi réussi d'un PES",
+      "PES_DAILY_ERRORS": "Courriel quotidien des PES en erreur"
     },
     "certificate": {
-        "serial": "Numéro de série",
-        "issuer": "Émetteur",
-        "subject": "Propriétaire",
-        "subjectCommonName": "Nom",
-        "subjectOrganization": "Organisation",
-        "subjectOrganizationUnit": "Unité d'organisation",
-        "subjectEmail": "Email",
-        "issuerCommonName": "Nom",
-        "issuerOrganization": "Organisation",
-        "issuerEmail": "Email",
-        "issuedDate": "Émis le",
-        "expiredDate": "Expire le"
+      "title": "Informations du certificat",
+      "pair": "Appairer le certificat",
+      "paired": "Certificat appairé",
+      "status": "Statut"
     },
-    "agent": {
-        "family_name": "Nom",
-        "given_name": "Prénom",
-        "email": "Email",
-        "modules": "Modules",
-        "local_authority_admin": "Administrateur de collectivité",
-        "groups": "Groupes",
-        "add_group": "Ajouter un groupe"
+    "no_certificate": "Aucun certificat",
+    "sesile": {
+      "title": "Connexion Sesile",
+      "serviceOrganisationNumber": "Service organisationnel",
+      "type": "Type de classeur",
+      "visibility": "Visibilité",
+      "visibilities": {
+        "0": "Privé",
+        "1": "Public",
+        "3": "Service organisationnel"
+      },
+      "validationLimit": "Délai de validation (jours)",
+      "secret": "Secret",
+      "token": "Token"
+    }
+  },
+  "notifications": {
+    "title": "STELA",
+    "acte": {
+      "title": "Module Acte",
+      "sent": {
+        "success": "Le dépot de l'acte a bien été effectué",
+        "error": {
+          "empty_acte": "L'acte envoyé est vide",
+          "non_extrayable_act": "Impossible de récupérer les données de l'acte",
+          "number_unavailable": "Le numéro d'acte est déjà pris"
+        }
+      },
+      "republished": {
+        "success": "L'acte a bien été redéposé",
+        "error": "Impossible de redéposer l'acte"
+      },
+      "cancelled": {
+        "success": "La demande d'annulation du dépot a bien été prise en compte",
+        "forbidden": "Cet acte ne peut pas être annulé"
+      },
+      "draft": {
+        "single_deleted": {
+          "success": "Le brouillon a bien été supprimé"
+        },
+        "multiple_deleted": {
+          "success": "Les brouillons ont bien été supprimés"
+        }
+      },
+      "admin": {
+        "title": "Admin module Acte",
+        "instance_params_updated": "Paramètres de l'instance enregistrés",
+        "local_authority": {
+          "classificationAsked": "Demande de classification envoyée",
+          "update": {
+            "success": "La mise à jour de la collectivité a bien été prise en compte"
+          }
+        },
+        "admin_module": {
+          "update": {
+            "success": "Les modifications ont bien été enregistrées"
+          }
+        }
+      },
+      "anomaly_attachment_types": "Aucun type de pièce jointe n'a été trouvé",
+      "no_attachment_types": "Veuillez vérifier que la nomenclature de la collectivité a été envoyée",
+      "courrier_simple_asked": "La réponse au courrier simple a bien été déposée",
+      "lettre_observation_asked": "La réponse à la lettre d'observation a bien été déposée",
+      "pieces_complementaires_asked": "La réponse à la demande de pièce complémentaire a bien été déposée",
+      "annexe_not_found": "Fichier annexe inexistant",
+      "history_not_found": "Historique d'acte inexistant",
+      "no_history_file": "Aucun fichier pour cet historique",
+      "not_found": "Acte inexistant",
+      "no_content": "Le résultat de cette requête n'a aucun résultat"
     },
-    "group": {
-        "name": "Nom",
-        "rights": "Droits"
+    "pes": {
+      "title": "Module PES",
+      "sent": {
+        "success": "Le dépot PES a bien été effectué",
+        "virus": "Le dépot PES a échoué car il contenait un virus",
+        "error": {
+          "bad_file_name": "Le nom de fichier est incorrect",
+          "non_extractable_pes": "Erreur lors du traitement du PES",
+          "existing_file_name": "Le nom de fichier est déjà utilisé",
+          "file_too_big": "Le fichier est trop gros (100 Mo max)",
+          "read_file": "Impossible de lire le fichier"
+        },
+        "missing_data": "Merci de remplir tous les champs obligatoires"
+      },
+      "admin": {
+        "title": "Admin module Pes",
+        "local_authority": {
+          "update": {
+            "success": "La mise à jour de la collectivité a bien été prise en compte"
+          }
+        },
+        "sesile": {
+          "validTokens": "Tokens valides",
+          "invalidTokens": "Tokens invalides",
+          "unavailableService": "Le service Sesile est indisponible"
+        }
+      }
     },
-    "right": {
-        "ACTES_DEPOSIT": "Dépot d'actes",
-        "ACTES_DISPLAY": "Visualisation d'actes",
-        "ACTES_ADMIN": "Administration du module Actes",
-        "PES_DEPOSIT": "Dépot de PES",
-        "PES_DISPLAY": "Visualisation de PES",
-        "PES_ADMIN": "Administration du module PES"
-    },
-    "migration": {
-        "title": "Migration",
-        "start": "Lancer la migration",
-        "ongoing": "Migration en cours",
-        "finished": "Migration effectuée"
+    "convocation": {
+      "admin": {
+        "title": "Admin module Convocation",
+        "recipients": {
+          "recipient_created": "Le destinataire a été créé avec succès.",
+          "recipient_updated": "Le destinataire a bien été mis à jour.",
+          "status_updated": "Le statut a bien été mis à jour.",
+          "assembly_type_created": "Le type d'assemblée a été créé avec succès.",
+          "assembly_type_updated": "Le type d'assemblée a été mis à jour avec succès"
+        }
+      }
     },
     "admin": {
-        "dashboard": "Tableau de bord",
-        "users": "Utilisateurs",
-        "all_local_authorities": "Toutes les collectivités",
-        "local_authorities": "Collectivités",
-        "my_local_authority": "Ma collectivité",
-        "instance_params": {
-            "title": "Paramètres de l'instance",
-            "general_settings": "Paramètres généraux",
-            "contact_email": "Email de contact",
-            "report_url": "URL pour déclarer un incident",
-            "welcome_message": "Message de bienvenue",
-            "legal_notice": "Mentions légales"
-        },
-        "local_authority": {
-            "general_informations": "Informations générales",
-            "modules": "Modules",
-            "users": "Agents",
-            "no_user": "Aucun agent dans cette collectivité",
-            "groups": "Groupes",
-            "no_group": "Aucun groupe dans cette collectivité",
-            "confirmModal": {
-                "activation": "Voulez-vous vraiment activer le module {{moduleName}} pour cette collectivité ?",
-                "deactivation": "Voulez-vous vraiment désactiver le module {{moduleName}} pour cette collectivité ?"
-            },
-            "new_group": "Ajouter un groupe",
-            "certificates": "Certificats de la collectivité",
-            "certificate": "Certificat",
-            "new_certificate": "Ajouter un certificat",
-            "no_certificate": "Aucun certificat pour cette collectivité",
-            "no_certificate_email": "Aucun email",
-            "drop_new_certificate": "Déposer le nouveau certificat"
-        },
-        "modules": {
-            "title": "Module",
-            "pes": "Module PES",
-            "convocation": "Module Convocation",
-            "configuration": "Configuration",
-            "local_authority_settings": "Paramétrage des collectivités"
-        },
-        "agent": {
-            "no_group": "Aucun groupe",
-            "add_group": "Affecter un groupe..."
-        },
-        "generic_account": {
-            "title": "Comptes génériques",
-            "empty": "Aucun compte générique",
-            "delete_confirm": "Voulez-vous vraiment supprimer ce compte générique ?",
-            "keep_password": "Concerver le même mot de passe",
-            "add_new": "Ajouter un nouveau compte",
-            "new": {
-                "title": "Compte générique",
-                "no_localAuthorities": "Aucune collectivité",
-                "add_localAuthority": "Affecter une collectivité..."
-            },
-            "fields": {
-                "software": "Logiciel",
-                "email": "Email",
-                "password": "Mot de passe",
-                "serial": "Serial",
-                "vendor": "Vendor",
-                "localAuthorities": "Collectivités"
-            }
-        },
-        "group": {
-            "no_rights": "Aucun droit",
-            "add_right": "Ajouter un droit"
-        },
-        "back_to_stela": "Retourner sur STELA"
+      "title": "Administration",
+      "local_authority_not_found": "Collectivité non trouvée",
+      "local_authority_certificate_not_found": "Certificat de collectivité non trouvé",
+      "error_certificate": "Erreur lors de l'ajout du certificat",
+      "invalid_certificate": "Le certificat est invalide",
+      "generic_account": {
+        "created": "Compte générique créé",
+        "updated": "Compte générique mis à jour",
+        "deleted": "Compte générique supprimé",
+        "email_conflict": "Cet email est déjà utilisé pour un compte générique",
+        "certificate_conflict": "Ce certificat est déjà utilisé pour un compte générique"
+      },
+      "agent_not_found": "Agent non trouvé",
+      "group_created": "Le groupe a bien été créé",
+      "group_updated": "Le groupe a bien été mis à jour",
+      "group_deleted": "Le groupe a bien été supprimé",
+      "agent_profile_updated": "Les droits de l'agent ont bien été mis à jour",
+      "certificateCreated": "Le certificat a bien été ajouté",
+      "certificateDeleted": "Le certificat a bien été supprimé"
+    },
+    "profile": {
+      "title": "Profil",
+      "updated": "Votre profil a bien été mis à jour",
+      "certificatePairedSuccess": "Le certificat à bien été appairé",
+      "certificateNotValid": "Le certificat n'est pas valide",
+      "certificateConflict": "Le certificat est déjà enregistré sur un autre utilisateur"
+    }
+  },
+  "local_authority": {
+    "uuid": "UUID",
+    "name": "Nom de la collectivité",
+    "siren": "SIREN",
+    "department": "Département",
+    "district": "Arrondissement",
+    "nature": "Nature",
+    "genericProfileUuid": "Agent garant",
+    "nomenclatureDate": "Date de nomenclature",
+    "canPublishRegistre": "Affichage sur le registre des délibérations",
+    "canPublishWebSite": "Affichage sur site internet",
+    "miatConnectionStatus": "Accessibilité du serveur MIAT",
+    "miatConnectionStartDate": "Début d'inaccessibilité du serveur MIAT",
+    "miatConnectionEndDate": "Fin d'inaccessibilité du serveur MIAT",
+    "archiveActivated": "Activer l'archivage",
+    "daysBeforeArchiving": "Nombre de jours avant d'archiver",
+    "pastellUrl": "URL Pastell",
+    "pastellEntity": "Entité Pastell",
+    "pastellLogin": "Login Pastell",
+    "pastellPassword": "Mot de passe Pastell"
+  },
+  "certificate": {
+    "serial": "Numéro de série",
+    "issuer": "Émetteur",
+    "subject": "Propriétaire",
+    "subjectCommonName": "Nom",
+    "subjectOrganization": "Organisation",
+    "subjectOrganizationUnit": "Unité d'organisation",
+    "subjectEmail": "Email",
+    "issuerCommonName": "Nom",
+    "issuerOrganization": "Organisation",
+    "issuerEmail": "Email",
+    "issuedDate": "Émis le",
+    "expiredDate": "Expire le"
+  },
+  "agent": {
+    "family_name": "Nom",
+    "given_name": "Prénom",
+    "email": "Email",
+    "modules": "Modules",
+    "local_authority_admin": "Administrateur de collectivité",
+    "groups": "Groupes",
+    "add_group": "Ajouter un groupe"
+  },
+  "group": {
+    "name": "Nom",
+    "rights": "Droits"
+  },
+  "right": {
+    "ACTES_DEPOSIT": "Dépot d'actes",
+    "ACTES_DISPLAY": "Visualisation d'actes",
+    "ACTES_ADMIN": "Administration du module Actes",
+    "PES_DEPOSIT": "Dépot de PES",
+    "PES_DISPLAY": "Visualisation de PES",
+    "PES_ADMIN": "Administration du module PES",
+    "CONVOCATION_DEPOSIT": "Création de convocations",
+    "CONVOCATION_DISPLAY": "Visualisation de convocations",
+    "CONVOCATION_ADMIN": "Administration du module Convocation"
+  },
+  "migration": {
+    "title": "Migration",
+    "start": "Lancer la migration",
+    "ongoing": "Migration en cours",
+    "finished": "Migration effectuée"
+  },
+  "admin": {
+    "dashboard": "Tableau de bord",
+    "users": "Utilisateurs",
+    "all_local_authorities": "Toutes les collectivités",
+    "local_authorities": "Collectivités",
+    "my_local_authority": "Ma collectivité",
+    "parameters": "Paramètres",
+    "instance_params": {
+      "instance_params": "Paramètre d'instance",
+      "title": "Paramètres de l'instance",
+      "general_settings": "Paramètres généraux",
+      "contact_email": "Email de contact",
+      "report_url": "URL pour déclarer un incident",
+      "welcome_message": "Message de bienvenue",
+      "legal_notice": "Mentions légales"
+    },
+    "local_authority": {
+      "general_informations": "Informations générales",
+      "modules": "Modules",
+      "users": "Agents",
+      "no_user": "Aucun agent dans cette collectivité",
+      "groups": "Groupes",
+      "no_group": "Aucun groupe dans cette collectivité",
+      "confirmModal": {
+        "activation": "Voulez-vous vraiment activer le module {{moduleName}} pour cette collectivité ?",
+        "deactivation": "Voulez-vous vraiment désactiver le module {{moduleName}} pour cette collectivité ?"
+      },
+      "new_group": "Ajouter un groupe",
+      "certificates": "Certificats de la collectivité",
+      "certificate": "Certificat",
+      "new_certificate": "Ajouter un certificat",
+      "no_certificate": "Aucun certificat pour cette collectivité",
+      "no_certificate_email": "Aucun email",
+      "drop_new_certificate": "Déposer le nouveau certificat"
+    },
+    "convocation": {
+      "assembly_type": "Ajouter un type d'assemblée",
+      "assembly_type_list": "Liste des types d'assemblée",
+      "recipent": "Ajouter un destinataire",
+      "recipient_list": "Liste des destinataires",
+      "fields": {
+        "residents_threshold": "3500 habitants ou plus"
+      }
     },
     "modules": {
-        "ACTES": "Actes",
-        "PES": "PES",
-        "CONVOCATION": "Convocation"
+      "title": "Module",
+      "pes": "Module PES",
+      "convocation": "Module Convocation",
+      "configuration": "Configuration",
+      "local_authority_settings": "Paramétrage des collectivités"
     },
-    "error": {
-        "default": "Une erreur s'est produite",
-        "401": {
-            "title": "Erreur 401",
-            "content": "Vous devez être authentifié pour accéder à cette page"
-        },
-        "403": {
-            "title": "Erreur 403",
-            "content": "Vous n'avez pas les droits suffisants pour accéder à cette page"
-        },
-        "404": {
-            "title": "Erreur 404",
-            "content": "Cette page n'existe pas"
-        },
-        "certificate_required": {
-            "title": "Certificat électronique requis",
-            "default": "Un certificat est requis pour accéder à cette fonctionnalité",
-            "EXPIRED": "Votre certificat est expiré",
-            "REVOKED": "Votre certificat est révoqué",
-            "OTHER": "Votre certificat est invalide",
-            "NOT_PAIRED": "Votre certificat n'est pas appairé",
-            "NONE": "Aucun certificat détecté",
-            "VALID": "Votre certificat est valide"
-        }
+    "agent": {
+      "no_group": "Aucun groupe",
+      "add_group": "Affecter un groupe..."
     },
-    "made_with_love": "Créé avec ❤ par le SICTIAM"
+    "generic_account": {
+      "title": "Comptes génériques",
+      "empty": "Aucun compte générique",
+      "delete_confirm": "Voulez-vous vraiment supprimer ce compte générique ?",
+      "keep_password": "Concerver le même mot de passe",
+      "add_new": "Ajouter un nouveau compte",
+      "new": {
+        "title": "Compte générique",
+        "no_localAuthorities": "Aucune collectivité",
+        "add_localAuthority": "Affecter une collectivité..."
+      },
+      "fields": {
+        "software": "Logiciel",
+        "email": "Email",
+        "password": "Mot de passe",
+        "serial": "Serial",
+        "vendor": "Vendor",
+        "localAuthorities": "Collectivités"
+      }
+    },
+    "group": {
+      "no_rights": "Aucun droit",
+      "add_right": "Ajouter un droit"
+    },
+    "back_to_stela": "Retourner sur STELA"
+  },
+  "modules": {
+    "ACTES": "Actes",
+    "PES": "PES",
+    "CONVOCATION": "Convocation"
+  },
+  "error": {
+    "default": "Une erreur s'est produite",
+    "401": {
+      "title": "Erreur 401",
+      "content": "Vous devez être authentifié pour accéder à cette page"
+    },
+    "403": {
+      "title": "Erreur 403",
+      "content": "Vous n'avez pas les droits suffisants pour accéder à cette page"
+    },
+    "404": {
+      "title": "Erreur 404",
+      "content": "Cette page n'existe pas"
+    },
+    "certificate_required": {
+      "title": "Certificat électronique requis",
+      "default": "Un certificat est requis pour accéder à cette fonctionnalité",
+      "EXPIRED": "Votre certificat est expiré",
+      "REVOKED": "Votre certificat est révoqué",
+      "OTHER": "Votre certificat est invalide",
+      "NOT_PAIRED": "Votre certificat n'est pas appairé",
+      "NONE": "Aucun certificat détecté",
+      "VALID": "Votre certificat est valide"
+    }
+  },
+  "breadcrumb": {
+    "admin_home": "Accueil Admin",
+    "convocation": {
+      "convocation": "Convocation",
+      "assembly_type_list": "Liste des types d'assemblée",
+      "add_assembly_type": "Ajouter un type d'assemblée",
+      "edit_assembly_type": "Editer un type d'assemblée",
+      "recipients_list": "Liste des destinataires",
+      "add_recipients": "Ajouter un destinataire",
+      "edit_recipients": "Editer un destinataire"
+    }
+  },
+  "made_with_love": "Créé avec ❤ par le SICTIAM"
 }

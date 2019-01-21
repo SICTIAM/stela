@@ -10,31 +10,41 @@ import javax.persistence.Id;
 public class LocalAuthority {
 
     @Id
-    @JsonView(Views.LocalAuthorityView.class)
+    @JsonView(Views.Public.class)
     private String uuid;
-    @JsonView(Views.LocalAuthorityView.class)
+
+    @JsonView(Views.Public.class)
     private String name;
-    @JsonView(Views.LocalAuthorityView.class)
+
+    @JsonView(Views.Public.class)
+    private String slugName;
+
+    @JsonView(Views.LocalAuthority.class)
     private String siren;
-    @JsonView(Views.LocalAuthorityView.class)
+
+    @JsonView(Views.LocalAuthority.class)
     private Boolean active;
-    @JsonView(Views.LocalAuthorityView.class)
-    private Long residentNumber;
+
+    /**
+     * true if inhabitant number is > 3500, false otherwise
+     * Used for legal convocation delay
+     */
+    @JsonView(Views.LocalAuthority.class)
+    private Boolean residentThreshold = true;
 
     public LocalAuthority() {
     }
 
-    public LocalAuthority(String uuid, String name, String siren, Boolean active) {
+    public LocalAuthority(String uuid, String name, String slugName, String siren, Boolean active) {
         this.uuid = uuid;
         this.name = name;
+        this.slugName = slugName;
         this.siren = siren;
         this.active = active;
     }
 
-    public LocalAuthority(String uuid, String name, String siren) {
-        this.uuid = uuid;
-        this.name = name;
-        this.siren = siren;
+    public LocalAuthority(String uuid, String name, String slugName, String siren) {
+        this(uuid, name, slugName, siren, true);
     }
 
     public String getUuid() {
@@ -61,11 +71,23 @@ public class LocalAuthority {
         this.active = active;
     }
 
-    public Long getResidentNumber() {
-        return residentNumber;
+    public Boolean getResidentThreshold() {
+        return residentThreshold;
     }
 
-    public void setResidentNumber(Long residentNumber) {
-        this.residentNumber = residentNumber;
+    public void setResidentThreshold(Boolean residentThreshold) {
+        this.residentThreshold = residentThreshold;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSlugName() {
+        return slugName;
+    }
+
+    public void setSlugName(String slugName) {
+        this.slugName = slugName;
     }
 }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Segment, Label, Input, Header, Checkbox, Dropdown } from 'semantic-ui-react'
 
-import { Field, Page, FieldValue } from './_components/UI'
+import { FieldInline, Page, FieldValue } from './_components/UI'
 import { notifications } from './_util/Notifications'
 import AccordionSegment from './_components/AccordionSegment'
 import CertificateInfos from './_components/CertificateInfos'
@@ -156,15 +156,15 @@ class Profile extends Component {
         return (
             <Page title={t('profile.title')}>
                 <Segment style={{ borderTop: '2px solid #663399' }}>
-                    <Field htmlFor="family_name" label={t('agent.family_name')}>
+                    <FieldInline htmlFor="family_name" label={t('agent.family_name')}>
                         <FieldValue id="family_name">{agent.family_name}</FieldValue>
-                    </Field>
-                    <Field htmlFor="given_name" label={t('agent.given_name')}>
+                    </FieldInline>
+                    <FieldInline htmlFor="given_name" label={t('agent.given_name')}>
                         <FieldValue id="given_name">{agent.given_name}</FieldValue>
-                    </Field>
-                    <Field htmlFor="email" label={t('agent.email')}>
+                    </FieldInline>
+                    <FieldInline htmlFor="email" label={t('agent.email')}>
                         <FieldValue id="email">{agent.email}</FieldValue>
-                    </Field>
+                    </FieldInline>
                     {!this.props.uuid && (
                         <div style={{ textAlign: 'right' }}>
                             <a href="/api/api-gateway/ozwillo-portal/my/profile" target="_blank" className="ui button"
@@ -347,7 +347,7 @@ class LocalAuthorityProfile extends Component {
                         <Header as="h3" dividing>
                             {t('profile.sesile.title')}
                         </Header>
-                        <Field htmlFor="serviceOrganisationNumber" label={t('profile.sesile.serviceOrganisationNumber')}>
+                        <FieldInline htmlFor="serviceOrganisationNumber" label={t('profile.sesile.serviceOrganisationNumber')}>
                             <Dropdown
                                 compact
                                 search
@@ -358,8 +358,8 @@ class LocalAuthorityProfile extends Component {
                                 options={serviceOrganisations}
                                 value={this.state.sesileConfiguration.serviceOrganisationNumber}
                                 onChange={this.sesileConfigurationChange} />
-                        </Field>
-                        <Field htmlFor="type" label={t('profile.sesile.type')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="type" label={t('profile.sesile.type')}>
                             <Dropdown
                                 compact
                                 search
@@ -370,8 +370,8 @@ class LocalAuthorityProfile extends Component {
                                 options={typesAvailable}
                                 value={this.state.sesileConfiguration.type}
                                 onChange={this.sesileConfigurationChange} />
-                        </Field>
-                        <Field htmlFor="visibility" label={t('profile.sesile.visibility')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="visibility" label={t('profile.sesile.visibility')}>
                             <Dropdown
                                 compact
                                 search
@@ -382,15 +382,15 @@ class LocalAuthorityProfile extends Component {
                                 options={visibilities}
                                 value={this.state.sesileConfiguration.visibility}
                                 onChange={this.sesileConfigurationChange} />
-                        </Field>
-                        <Field htmlFor="daysToValidated" label={t('profile.sesile.validationLimit')}>
+                        </FieldInline>
+                        <FieldInline htmlFor="daysToValidated" label={t('profile.sesile.validationLimit')}>
                             <Input
                                 id="daysToValidated"
                                 type="number"
                                 placeholder={t('profile.sesile.validationLimit')}
                                 value={this.state.sesileConfiguration.daysToValidated}
                                 onChange={this.sesileConfigurationChange} />
-                        </Field>
+                        </FieldInline>
                     </div>
                 )
         )
@@ -400,16 +400,16 @@ class LocalAuthorityProfile extends Component {
                     <Header as="h3" dividing>
                         {t('profile.notifications_title')} {activatedModule}
                     </Header>
-                    <Field htmlFor={activatedModule} label={t('profile.localAuthorityNotifications')}>
+                    <FieldInline htmlFor={activatedModule} label={t('profile.localAuthorityNotifications')}>
                         <Checkbox toggle id={activatedModule} checked={profile.localAuthorityNotifications.includes(activatedModule)}
                             onChange={(e, { id, checked }) => onLocalAuthorityNotificationsChange(profile.uuid, id, checked)} />
-                    </Field>
+                    </FieldInline>
                     {allNotifications
                         .filter(notification => notification.type.startsWith(`${activatedModule}_`))
                         .map(notification => {
                             const notificationValue = profile.notificationValues.find(notif => notif.name === notification.type)
                             return (
-                                <Field key={`${profile.uuid}-${notification.type}`} htmlFor={`${profile.uuid}-${notification.type}`}
+                                <FieldInline key={`${profile.uuid}-${notification.type}`} htmlFor={`${profile.uuid}-${notification.type}`}
                                     label={t(`profile.notifications.${notification.type}`)}>
                                     <Checkbox toggle id={`${profile.uuid}-${notification.type}`}
                                         checked={!notification.deactivatable || (
@@ -417,7 +417,7 @@ class LocalAuthorityProfile extends Component {
                                         )}
                                         disabled={!notification.deactivatable}
                                         onChange={(e, { checked }) => onCheckboxChange(profile.uuid, notification.type, checked)} />
-                                </Field>
+                                </FieldInline>
                             )
                         })
                     }
@@ -426,13 +426,13 @@ class LocalAuthorityProfile extends Component {
         )
         const content = (
             <div>
-                <Field htmlFor="modules" label={t('agent.modules')}>
+                <FieldInline htmlFor="modules" label={t('agent.modules')}>
                     <span id="modules">{modulesRows}</span>
-                </Field>
-                <Field htmlFor="email" label={t('agent.email')}>
+                </FieldInline>
+                <FieldInline htmlFor="email" label={t('agent.email')}>
                     <Input id="email" fluid style={{ maxWidth: '25em' }} value={profile.email || ''} placeholder={t('profile.no_email')}
                         onChange={(e, { id, value }) => onChange(profile.uuid, id, value)} />
-                </Field>
+                </FieldInline>
                 {sesileConnection}
                 {profile.localAuthority.activatedModules.length > 0 && profileNotifications}
                 <div style={{ textAlign: 'right' }}>

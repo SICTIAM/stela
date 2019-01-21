@@ -1,11 +1,23 @@
 package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -14,33 +26,53 @@ public class AssemblyType {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.Public.class)
     private String uuid;
 
-    @JsonView(Views.AssemblyTypeViewPublic.class)
+    @JsonView(Views.Public.class)
     private String name;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "profile_uuids", joinColumns = @JoinColumn(name = "assembly_type_uuid"))
-    @Column(name = "profile_uuid")
-    @JsonView(Views.AssemblyTypeViewPublic.class)
-    private Set<String> profileUuids;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "assembly_type_recipient",
+            joinColumns = @JoinColumn(name = "assembly_type_uuid"),
+            inverseJoinColumns = @JoinColumn(name = "recipient_uuid"))
+    @JsonView(Views.AssemblyTypeInternal.class)
+    private Set<Recipient> recipients;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JsonView(Views.AssemblyTypeViewPrivate.class)
-    private Set<ExternalUser> externalUsers;
+    @JsonView(Views.AssemblyType.class)
+    private Integer delay;
 
-    public AssemblyType(String name, Set<String> profileUuids, Set<ExternalUser> externalUsers,
+    @JsonView(Views.AssemblyType.class)
+    private Boolean reminder;
+
+    @JsonView(Views.AssemblyType.class)
+    private String location;
+
+    @JsonView(Views.AssemblyType.class)
+    private Boolean useProcuration;
+
+    @JsonView(Views.AssemblyType.class)
+    private Boolean active;
+
+    @JsonView(Views.AssemblyType.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime inactivityDate;
+
+    @JsonView(Views.AssemblyType.class)
+    private String profileUuid;
+
+    @ManyToOne
+    @JsonView(Views.AssemblyType.class)
+    private LocalAuthority localAuthority;
+
+    public AssemblyType(String name, Set<Recipient> recipients,
             LocalAuthority localAuthority) {
         this.name = name;
-        this.profileUuids = profileUuids;
-        this.externalUsers = externalUsers;
+        this.recipients = recipients;
         this.localAuthority = localAuthority;
     }
 
-    @ManyToOne
-    @JsonView(Views.AssemblyTypeViewPrivate.class)
-    private LocalAuthority localAuthority;
 
     public AssemblyType() {
     }
@@ -57,20 +89,12 @@ public class AssemblyType {
         this.name = name;
     }
 
-    public Set<String> getProfileUuids() {
-        return profileUuids;
+    public Set<Recipient> getRecipients() {
+        return recipients;
     }
 
-    public void setProfileUuids(Set<String> profileUuids) {
-        this.profileUuids = profileUuids;
-    }
-
-    public Set<ExternalUser> getExternalUsers() {
-        return externalUsers;
-    }
-
-    public void setExternalUsers(Set<ExternalUser> externalUsers) {
-        this.externalUsers = externalUsers;
+    public void setRecipients(Set<Recipient> recipients) {
+        this.recipients = recipients;
     }
 
     public LocalAuthority getLocalAuthority() {
@@ -81,4 +105,59 @@ public class AssemblyType {
         this.localAuthority = localAuthority;
     }
 
+    public Integer getDelay() {
+        return delay;
+    }
+
+    public void setDelay(Integer delay) {
+        this.delay = delay;
+    }
+
+    public Boolean getReminder() {
+        return reminder;
+    }
+
+    public void setReminder(Boolean reminder) {
+        this.reminder = reminder;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Boolean getUseProcuration() {
+        return useProcuration;
+    }
+
+    public void setUseProcuration(Boolean useProcuration) {
+        this.useProcuration = useProcuration;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public LocalDateTime getInactivityDate() {
+        return inactivityDate;
+    }
+
+    public void setInactivityDate(LocalDateTime inactivityDate) {
+        this.inactivityDate = inactivityDate;
+    }
+
+    public String getProfileUuid() {
+        return profileUuid;
+    }
+
+    public void setProfileUuid(String profileUuid) {
+        this.profileUuid = profileUuid;
+    }
 }

@@ -5,6 +5,7 @@ import moment from 'moment'
 
 import { InputFile } from './UI'
 import InputDatetime from './InputDatetime'
+import InputTimePicker from './InputTimePicker'
 
 export default class InputValidation extends Component {
     state = {
@@ -16,10 +17,11 @@ export default class InputValidation extends Component {
         type: '',
         accept: '',
         className: '',
-        style: {}
+        style: {},
+        min: 0
     }
     validateValue = () => {
-        const value = this.props.type === 'date' ? moment(this.props.value).format('YYYY-MM-DD') : this.props.value
+        const value = this.props.type === 'date' && this.props.value ? moment(this.props.value).format('YYYY-MM-DD') : this.props.value
         const validation = new Validator({ field: value }, { field: this.props.validationRule }, this.props.customErrorMessages)
         validation.setAttributeNames({ field: this.props.fieldName })
         const isValid = validation.passes()
@@ -33,17 +35,42 @@ export default class InputValidation extends Component {
                 {(this.props.type === 'text' || this.props.type === '') && (
                     <input id={this.props.id}
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
-                        className={this.props.className}
+                        className={this.props.className + (this.state.errorMessage ? ' error' : '')}
                         placeholder={this.props.placeholder}
                         value={this.props.value}
                         onChange={e => this.props.onChange(this.props.id, e.target.value)}
                         onBlur={this.validateValue} />
                 )}
+                {this.props.type === 'number' && (
+                    <input id={this.props.id}
+                        aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
+                        className={this.props.className + (this.state.errorMessage ? ' error' : '')}
+                        placeholder={this.props.placeholder}
+                        value={this.props.value}
+                        type='number'
+                        min={this.props.min}
+                        onChange={e => this.props.onChange(this.props.id, e.target.value)}
+                        onBlur={this.validateValue}/>
+                )}
 
                 {this.props.type === 'date' && (
                     <InputDatetime {...rest}
                         timeFormat={false}
+                        onBlur={this.validateValue}
+                        placeholder={this.props.placeholder}
+                        error={this.state.errorMessage ? true : false}
                         onChange={date => onChange(this.props.id, date, this.validateValue)} />
+                )}
+
+                {this.props.type === 'time' && (
+                    <InputTimePicker
+                        dropdown={this.props.dropdown}
+                        placeholder={this.props.placeholder}
+                        value={this.props.value}
+                        id={this.props.id}
+                        error={this.state.errorMessage ? true : false}
+                        onChange={hour => this.props.onChange(this.props.id, hour)}
+                        onBlur={this.validateValue}/>
                 )}
 
                 {this.props.type === 'file' && (
@@ -86,10 +113,13 @@ export default class InputValidation extends Component {
                 )}
 
                 <div>
-                    {!this.state.isValid && (
+                    {!this.state.isValid && this.props.errorTypePointing && (
                         <Label color='red' pointing>{this.state.errorMessage}</Label>
                     )}
                 </div>
+                {!this.state.isValid && !this.props.errorTypePointing && (
+                    <p className='error-message-form'>{this.state.errorMessage}</p>
+                )}
             </div>
         )
     }

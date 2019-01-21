@@ -33,6 +33,7 @@
     "react-draggable": "^3.0.5",
     "react-dropzone": "^7.0.1",
     "react-i18next": "^7.10.1",
+    "react-input-mask": "^2.0.4",
     "react-markdown": "3.3.0",
     "react-notification-system": "^0.2.17",
     "react-paginate": "^5.2.3",

@@ -8,7 +8,7 @@ import moment from 'moment'
 import InputValidation from '../../_components/InputValidation'
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
-import { Field, Page, InputTextControlled } from '../../_components/UI'
+import { FieldInline, Page, InputTextControlled } from '../../_components/UI'
 import { checkStatus } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
@@ -126,15 +126,15 @@ class ActeModuleParams extends Component {
             <Page title={t('admin.modules.acte.module_settings.title')}>
                 <Segment>
                     <Form onSubmit={this.submitForm}>
-                        <Field htmlFor='mainEmail' label={t('admin.modules.acte.module_settings.main_email')}>
+                        <FieldInline htmlFor='mainEmail' label={t('admin.modules.acte.module_settings.main_email')}>
                             <InputValidation id='mainEmail'
                                 value={this.state.fields.mainEmail}
                                 fieldName={t('admin.modules.acte.module_settings.main_email')}
                                 validationRule='required|email'
                                 onChange={this.handleFieldChange}
                                 className='simpleInput' />
-                        </Field>
-                        <Field htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
                             <div style={{ marginBottom: '0.5em' }}>
                                 {listEmail.length > 0 ? listEmail : t('admin.modules.acte.module_settings.no_additional_email')}
                             </div>
@@ -146,13 +146,13 @@ class ActeModuleParams extends Component {
                             <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addMail(event)}>
                                 {t('api-gateway:form.add')}
                             </Button>
-                        </Field>
-                        <Field htmlFor='miatAvailable' label={t('admin.modules.acte.module_settings.miatAvailable')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='miatAvailable' label={t('admin.modules.acte.module_settings.miatAvailable')}>
                             <Checkbox id="miatAvailable"
                                 toggle checked={this.state.fields.miatAvailable}
                                 onChange={this.handleCheckboxChange} />
-                        </Field>
-                        <Field htmlFor='unavailabilityMiat' label={t('admin.modules.acte.module_settings.unavailabilityMiat')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='unavailabilityMiat' label={t('admin.modules.acte.module_settings.unavailabilityMiat')}>
                             <Form.Group style={{ marginBottom: 0, flexDirection: 'column' }} className='test'>
                                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                                     <label htmlFor='unavailabilityMiatStartDate' style={{ marginRight: '0.5em' }}>{t('api-gateway:form.from')}</label>
@@ -174,20 +174,20 @@ class ActeModuleParams extends Component {
                                     </div>
                                 )}
                             </Form.Group>
-                        </Field>
-                        <Field htmlFor='alertMessageDisplayed' label={t('admin.modules.acte.module_settings.alertMessageDisplayed')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='alertMessageDisplayed' label={t('admin.modules.acte.module_settings.alertMessageDisplayed')}>
                             <Checkbox id='alertMessageDisplayed'
                                 toggle checked={this.state.fields.alertMessageDisplayed}
                                 onChange={this.handleCheckboxChange} />
-                        </Field>
-                        <Field htmlFor='alertMessage' label={t('admin.modules.acte.module_settings.alertMessage')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='alertMessage' label={t('admin.modules.acte.module_settings.alertMessage')}>
                             <InputTextControlled component={TextArea}
                                 id='alertMessage'
                                 maxLength={250}
                                 placeholder={`${t('admin.modules.acte.module_settings.alertMessage')}...`}
                                 value={this.state.fields.alertMessage || ''}
                                 onChange={this.handleFieldChange} />
-                        </Field>
+                        </FieldInline>
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>
                                 {t('api-gateway:form.update')}

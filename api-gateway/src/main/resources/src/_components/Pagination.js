@@ -13,7 +13,15 @@ class Pagination extends Component {
         pageCount: PropTypes.number.isRequired,
         itemPerPage: PropTypes.number.isRequired,
         updateItemPerPage: PropTypes.func.isRequired,
-        handlePageClick: PropTypes.func.isRequired
+        handlePageClick: PropTypes.func.isRequired,
+        options: PropTypes.array
+    }
+    static defaultProps = {
+        options: [
+            { key: 25, text: 25, value: 25 },
+            { key: 50, text: 50, value: 50 },
+            { key: 100, text: 100, value: 100 }
+        ]
     }
     state = {
         localItemPerPage: this.props.itemPerPage
@@ -33,12 +41,8 @@ class Pagination extends Component {
     }
     render() {
         const { t } = this.context
-        const { columns, pageCount, handlePageClick, currentPage } = this.props
-        const options = [
-            { key: 25, text: 25, value: 25 },
-            { key: 50, text: 50, value: 50 },
-            { key: 100, text: 100, value: 100 }
-        ]
+        const { columns, pageCount, handlePageClick, currentPage, options } = this.props
+
         return (
             <Table.Footer>
                 <Table.Row>

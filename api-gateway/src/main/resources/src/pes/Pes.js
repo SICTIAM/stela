@@ -5,7 +5,7 @@ import { Button, Segment, Label } from 'semantic-ui-react'
 import moment from 'moment'
 
 import History from '../_components/History'
-import { Field, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
+import { FieldInline, Page, FieldValue, LoadingContent, LinkFile } from '../_components/UI'
 import Anomaly from '../_components/Anomaly'
 import ConfirmModal from '../_components/ConfirmModal'
 import { notifications } from '../_util/Notifications'
@@ -108,29 +108,29 @@ class Pes extends Component {
                                 </ConfirmModal>
                             )}
                         </div>
-                        <Field htmlFor="objet" label={t('pes.fields.objet')}>
+                        <FieldInline htmlFor="objet" label={t('pes.fields.objet')}>
                             <FieldValue id="objet">{pes.objet}</FieldValue>
-                        </Field>
+                        </FieldInline>
                         {pes.comment && (
-                            <Field htmlFor="comment" label={t('pes.fields.comment')}>
+                            <FieldInline htmlFor="comment" label={t('pes.fields.comment')}>
                                 <FieldValue id="comment">{pes.comment}</FieldValue>
-                            </Field>
+                            </FieldInline>
                         )}
-                        <Field htmlFor="creation" label={t('pes.fields.creation')}>
+                        <FieldInline htmlFor="creation" label={t('pes.fields.creation')}>
                             <FieldValue id="creation">
                                 {moment(pes.creation).format('DD/MM/YYYY')}
                             </FieldValue>
-                        </Field>
+                        </FieldInline>
                         {agent && (
-                            <Field htmlFor="agent" label={t('pes.fields.agent')}>
+                            <FieldInline htmlFor="agent" label={t('pes.fields.agent')}>
                                 <FieldValue id="agent">{agent}</FieldValue>
-                            </Field>
+                            </FieldInline>
                         )}
-                        <Field htmlFor="attachment" label={t('pes.fields.attachment')}>
+                        <FieldInline htmlFor="attachment" label={t('pes.fields.attachment')}>
                             <FieldValue id="attachment">
                                 <LinkFile url={`/api/pes/${pes.uuid}/file`} text={pes.attachment.filename} />
                             </FieldValue>
-                        </Field>
+                        </FieldInline>
                     </Segment>
                     <History title={t('pes.page.historic')} moduleName="pes" emptyMessage={t('pes.page.no_history')}
                         history={this.state.pes.pesHistories} sesileClasseurUrl={pes.sesileClasseurUrl} />

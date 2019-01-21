@@ -4,11 +4,17 @@ import { NavLink } from 'react-router-dom'
 import { Menu, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
+import { withAuthContext } from '../Auth'
+
 import { getLocalAuthoritySlug } from '../_util/utils'
 
 class AdminMenuBar extends Component {
     static contextTypes = {
         t: PropTypes.func
+    }
+    checkActivatedModule = (module) => {
+        const { profile } = this.props.authContext
+        return profile.localAuthority.activatedModules.includes(module)
     }
     render() {
         const { t } = this.context
@@ -24,30 +30,48 @@ class AdminMenuBar extends Component {
                         </Menu.Header>
                         <Menu.Menu>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/ma-collectivite`}>{t('admin.my_local_authority')}</Menu.Item>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/parametrage-instance`}>Paramètre d'instance</Menu.Item>
+                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/parametrage-instance`}>{t('admin.instance_params.instance_params')}</Menu.Item>
                             <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/compte-generique/liste`}>{t('admin.generic_account.title')}</Menu.Item>
                         </Menu.Menu>
                     </Menu.Item>
 
-                    <Menu.Item style={{ width: '100%' }}>
-                        <Menu.Header className="secondary">
-                            {t('menu.acte.legality_control')}
-                            <Icon name='checkmark box' className="float-right" size='large' />
-                        </Menu.Header>
-                        <Menu.Menu>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/actes/parametrage-module`}>Paramètres</Menu.Item>
-                        </Menu.Menu>
-                    </Menu.Item>
-
-                    <Menu.Item style={{ width: '100%' }}>
-                        <Menu.Header className="secondary">
-                            {t('menu.pes.accounting_flow')}
-                            <Icon name='calculator' size='large' className="float-right" />
-                        </Menu.Header>
-                        <Menu.Menu>
-                            <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/pes/parametrage-module`}>Paramètres</Menu.Item>
-                        </Menu.Menu>
-                    </Menu.Item>
+                    {this.checkActivatedModule('ACTES') && (
+                        <Menu.Item style={{ width: '100%' }}>
+                            <Menu.Header className="secondary">
+                                {t('menu.acte.legality_control')}
+                                <Icon name='checkmark box' className="float-right" size='large' />
+                            </Menu.Header>
+                            <Menu.Menu>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/actes/parametrage-module`}>{t('admin.parameters')}</Menu.Item>
+                            </Menu.Menu>
+                        </Menu.Item>
+                    )}
+                    {this.checkActivatedModule('PES') && (
+                        <Menu.Item style={{ width: '100%' }}>
+                            <Menu.Header className="secondary">
+                                {t('menu.pes.accounting_flow')}
+                                <Icon name='calculator' size='large' className="float-right" />
+                            </Menu.Header>
+                            <Menu.Menu>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/pes/parametrage-module`}>{t('admin.parameters')}</Menu.Item>
+                            </Menu.Menu>
+                        </Menu.Item>
+                    )}
+                    {this.checkActivatedModule('CONVOCATION') && (
+                        <Menu.Item style={{ width: '100%' }}>
+                            <Menu.Header className="secondary">
+                                {t('menu.convocation.convocation')}
+                                <Icon name='calendar outline' size='large' className="float-right" />
+                            </Menu.Header>
+                            <Menu.Menu>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/parametrage-module`}>{t('admin.parameters')}</Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee/nouveau`}>{t('admin.convocation.assembly_type')}</Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`}>{t('admin.convocation.assembly_type_list')}</Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/destinataire/nouveau`}>{t('admin.convocation.recipent')}</Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`}>{t('admin.convocation.recipient_list')}</Menu.Item>
+                            </Menu.Menu>
+                        </Menu.Item>
+                    )}
                 </div>
 
                 <div>
@@ -66,4 +90,4 @@ class AdminMenuBar extends Component {
     }
 }
 
-export default translate(['api-gateway', 'acte', 'pes'])(AdminMenuBar)
+export default translate(['api-gateway', 'acte', 'pes'])(withAuthContext(AdminMenuBar))

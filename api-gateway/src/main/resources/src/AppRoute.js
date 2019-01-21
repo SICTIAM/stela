@@ -26,6 +26,8 @@ import PesRetourList from './pes/PesRetourList'
 import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
+import Convocation from './convocation/Convocation'
+import ConvocationForm from './convocation/ConvocationForm'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminInstance from './admin/AdminInstance'
 import GenericAccount from './admin/genericAccount/GenericAccount'
@@ -42,6 +44,11 @@ import PesLocalAuthorityMigration from './admin/pes/PesLocalAuthorityMigration'
 import AgentProfile from './admin/localAuthority/AgentProfile'
 import ActeModuleParams from './admin/acte/ActeModuleParams'
 import PesModuleParams from './admin/pes/PesModuleParams'
+import AssemblyTypeConfig from './admin/convocation/AssemblyTypeConfig'
+import AssemblyTypeList from './admin/convocation/AssemblyTypeList'
+import RecipentConfig from './admin/convocation/RecipentConfig'
+import RecipientsList from './admin/convocation/RecipientsList'
+import ConvocationModuleParams from './admin/convocation/ConvocationModuleParams'
 
 import { withAuthContext, AuthConsumer } from './Auth'
 
@@ -161,6 +168,7 @@ class AppRoute extends Component {
         const params = this.state
 
         // TODO: Fix redirects, cf https://github.com/ReactTraining/react-router/pull/5209
+
         return (
             <Switch>
                 <PublicRoute exact path="/" {...params} component={Home} />
@@ -191,6 +199,8 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/liste/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
+                <AuthRoute path="/:localAuthoritySlug/convocation/nouveau" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ConvocationForm} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={Convocation} menu={MenuBar}/>
 
                 <Route exact path="/:localAuthoritySlug/admin" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/admin/ma-collectivite`} />
@@ -212,6 +222,13 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/actes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes/migration" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeList} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/destinataire/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipentConfig} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/destinataire/liste-destinataires/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipentConfig} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/convocation/destinataire/liste-destinataires" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={RecipientsList} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={LocalAuthority} menu={AdminMenuBar} admin={true} />
 
                 <AuthRoute path="/:localAuthoritySlug/admin/collectivite/:localAuthorityUuid/agent/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AgentProfile} menu={AdminMenuBar} admin={true} />

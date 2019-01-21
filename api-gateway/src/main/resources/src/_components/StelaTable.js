@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
 
-import history from '../_util/history'
+// import history from '../_util/history'
 
 class StelaTable extends Component {
     static contextTypes = {
@@ -27,11 +27,14 @@ class StelaTable extends Component {
         column: PropTypes.string,
         fetchedSearch: PropTypes.func,
         additionalElements: PropTypes.array,
-        striped: PropTypes.bool
+        striped: PropTypes.bool,
+        selectable: PropTypes.bool,
+        selectedRow: PropTypes.array
     }
     static defaultProps = {
         className: '',
         header: false,
+        sortable: false,
         search: true,
         select: false,
         selectOptions: [],
@@ -43,7 +46,9 @@ class StelaTable extends Component {
         direction: '',
         column: '',
         additionalElements: [],
-        striped: true
+        striped: true,
+        selectable: true,
+        selectedRow: []
     }
     state = {
         column: null,
@@ -64,28 +69,37 @@ class StelaTable extends Component {
             if (this.props.select) {
                 this.props.data.map(data => checkboxes[data[this.props.keyProperty]] = false)
             }
-            this.setState({ data: this.props.data, originalData: this.props.data, checkboxes: checkboxes })
+            this.setState({ data: this.props.data, originalData: this.props.data, checkboxes: checkboxes }, () => {
+                if(this.props.selectedRow.length > 0) {
+                    this.defaultRowSelected()
+                }
+            })
         }
     }
     componentWillReceiveProps = (nextProps) => {
-        if (nextProps.data) {
+        if (nextProps.data && nextProps.data !== this.props.data) {
             const checkboxes = {}
             if (nextProps.select) {
                 nextProps.data.map(data => checkboxes[data[nextProps.keyProperty]] = false)
             }
-            this.setState({ data: nextProps.data, originalData: nextProps.data, checkboxes: checkboxes })
+            this.setState({ data: nextProps.data, originalData: nextProps.data, checkboxes: checkboxes }, () => {
+                if(this.props.selectedRow.length > 0) {
+                    this.defaultRowSelected()
+                }
+            })
+
         }
+    }
+    defaultRowSelected = () => {
+        const checkboxes = this.state.checkboxes
+        this.props.selectedRow.map(row => checkboxes[row[this.props.keyProperty]] = true)
+        this.setState({checkboxes})
     }
     dynamicSort = (property, direction) => {
         const sortOrder = direction === 'ASC' ? 1 : -1
         return (a, b) => {
             const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0
             return result * sortOrder
-        }
-    }
-    handleLink = linkProperty => {
-        if (this.props.link !== '') {
-            history.push(this.props.link + linkProperty)
         }
     }
     handleSearch = (e, { value }) => {
@@ -124,12 +138,14 @@ class StelaTable extends Component {
         const checkboxes = this.state.checkboxes
         checkboxes[keyProperty] = !checkboxes[keyProperty]
         this.setState({ checkboxes })
+        this.props.onSelectedRow && this.props.onSelectedRow(keyProperty, this.state.checkboxes[keyProperty])
     }
     handleChekAll = () => {
         const checkAll = !this.state.checkAll
         const checkboxes = this.state.checkboxes
         Object.keys(checkboxes).forEach(keyProperty => checkboxes[keyProperty] = checkAll)
         this.setState({ checkboxes: checkboxes, checkAll: checkAll })
+        this.props.onSelectedRow && this.props.onSelectedRow('all', checkAll)
     }
     handleSelectAction = (action) => {
         const selectedUuids = Object.entries(this.state.checkboxes)
@@ -190,81 +206,90 @@ class StelaTable extends Component {
                         <span key={'element-' + index} style={this.floatRightStyle}>{element}</span>
                     )
                 }
-
-                <Table role="presentation" summary={this.props.title ? this.props.title : 'Tableau'} selectable striped={this.props.striped} sortable={this.props.header} basic={this.props.basic} celled={this.props.celled}>
-                    {title &&
-                        <Table.Header>
-                            <Table.Row>
-                                <Table.HeaderCell colSpan={displayedColumns.length}>{this.props.headerTitle}</Table.HeaderCell>
-                            </Table.Row>
-                        </Table.Header>
-                    }
-                    {header &&
-                        <Table.Header>
-                            <Table.Row>
-                                {this.props.metaData.map((metaData, index) =>
-                                    !undisplayedColumnsProperties.includes(metaData.property) &&
-                                    <Table.HeaderCell scope="col" key={index + '-' + metaData.displayName}
-                                        sorted={column === metaData.property ? direction : null}
-                                        onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
-                                        {metaData.displayName}
-                                    </Table.HeaderCell>
-                                )}
-                                {select &&
-                                    <Table.HeaderCell scope="col" style={{ width: '40px' }} onClick={this.handleChekAll}>
-                                        <Checkbox aria-label={t('api-gateway:list.check_all')} checked={this.state.checkAll} onClick={this.handleChekAll} label={<div className='box'></div>}/>
-                                    </Table.HeaderCell>
-                                }
-                            </Table.Row>
-                        </Table.Header>
-                    }
-                    <Table.Body>
-                        {isEmpty &&
-                            <Table.Row>
-                                <Table.Cell colSpan={displayedColumns.length}>
-                                    <p style={{ fontStyle: 'italic', textAlign: 'center' }}>{this.props.noDataMessage}</p>
-                                </Table.Cell>
-                            </Table.Row>
+                <div className={this.props.containerTable}>
+                    <Table role="presentation" summary={this.props.title ? this.props.title : 'Tableau'}
+                        selectable={this.props.selectable}
+                        striped={this.props.striped}
+                        sortable={this.props.sortable}
+                        basic={this.props.basic}
+                        celled={this.props.celled}>
+                        {title &&
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell colSpan={displayedColumns.length}>{this.props.headerTitle}</Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
                         }
-                        {isFilled &&
-                            data.map(row =>
-                                <Table.Row key={row[this.props.keyProperty]} negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}>
-                                    {displayedColumns.map((displayedColumn, index) =>
-                                        <Table.Cell
-                                            style={this.props.link !== '' ? { cursor: 'pointer' } : null}
-                                            key={index + '-' + row[displayedColumn.property]}
-                                            collapsing={!!displayedColumn.collapsing}
-                                            selectable={this.props.link !== '' ? true : false}
-                                            className={this.props.link !== '' ? 'no-hover' : ''}>
-                                            {this.props.link !== '' && (
-                                                <Link to={this.props.link + row[this.props.linkProperty]}>{displayedColumn.displayComponent ?
-                                                    displayedColumn.property === '_self' ?
-                                                        displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
-                                                    : row[displayedColumn.property]}
-                                                </Link>
-                                            )}
-                                            {this.props.link === '' && (
-                                                <div>
-                                                    { displayedColumn.displayComponent ?
+                        {header &&
+                            <Table.Header>
+                                <Table.Row>
+                                    {this.props.metaData.map((metaData, index) =>
+                                        !undisplayedColumnsProperties.includes(metaData.property) &&
+                                        <Table.HeaderCell scope="col" key={index + '-' + metaData.displayName}
+                                            sorted={column === metaData.property ? direction : null}
+                                            onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
+                                            {metaData.displayName}
+                                        </Table.HeaderCell>
+                                    )}
+                                    {select &&
+                                        <Table.HeaderCell scope="col" style={{ width: '40px' }} onClick={this.handleChekAll}>
+                                            <Checkbox aria-label={t('api-gateway:list.check_all')} checked={this.state.checkAll} onClick={this.handleChekAll} label={<div className='box'></div>}/>
+                                        </Table.HeaderCell>
+                                    }
+                                </Table.Row>
+                            </Table.Header>
+                        }
+                        <Table.Body>
+                            {isEmpty &&
+                                <Table.Row>
+                                    <Table.Cell colSpan={displayedColumns.length}>
+                                        <p style={{ fontStyle: 'italic', textAlign: 'center' }}>{this.props.noDataMessage}</p>
+                                    </Table.Cell>
+                                </Table.Row>
+                            }
+                            {isFilled &&
+                                data.map(row =>
+                                    <Table.Row active={this.state.checkboxes[row[this.props.keyProperty]]} key={row[this.props.keyProperty]}
+                                        negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}
+                                        className={this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : ''}>
+                                        {displayedColumns.map((displayedColumn, index) =>
+                                            <Table.Cell
+                                                style={(this.props.link !== '' || this.props.click) ? { cursor: 'pointer' } : null}
+                                                key={index + '-' + row[displayedColumn.property]}
+                                                collapsing={!!displayedColumn.collapsing}
+                                                selectable={(this.props.link !== '' || this.props.click) ? true : false}
+                                                className={(this.props.link !== '' || this.props.click) ? 'no-hover' : ''}
+                                                onClick={(e) => this.props.onClick && this.props.onClick(e, displayedColumn.property, row)}>
+                                                {this.props.link !== '' && (
+                                                    <Link to={this.props.link + row[this.props.linkProperty]}>{displayedColumn.displayComponent ?
                                                         displayedColumn.property === '_self' ?
                                                             displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
                                                         : row[displayedColumn.property]}
-                                                </div>
-                                            )}
-                                        </Table.Cell>
-                                    )}
-                                    {select &&
-                                        <Table.Cell style={{ width: '40px' }}>
-                                            <Checkbox aria-label={t('api-gateway:item.select_item')} checked={this.state.checkboxes[row[this.props.keyProperty]]} label={<div className='box'></div>}
-                                                onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
-                                        </Table.Cell>
-                                    }
-                                </Table.Row>
-                            )
-                        }
-                    </Table.Body>
-                    {pagination && this.props.pagination}
-                </Table>
+                                                    </Link>
+                                                )}
+                                                {this.props.link === '' && (
+                                                    <div>
+                                                        { displayedColumn.displayComponent ?
+                                                            displayedColumn.property === '_self' ?
+                                                                displayedColumn.displayComponent(row) : displayedColumn.displayComponent(row[displayedColumn.property])
+                                                            : row[displayedColumn.property]}
+                                                    </div>
+                                                )}
+                                            </Table.Cell>
+                                        )}
+                                        {select &&
+                                            <Table.Cell style={{ width: '40px' }}>
+                                                <Checkbox aria-label={t('api-gateway:item.select_item')} checked={this.state.checkboxes[row[this.props.keyProperty]]} label={<div className='box'></div>}
+                                                    onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
+                                            </Table.Cell>
+                                        }
+                                    </Table.Row>
+                                )
+                            }
+                        </Table.Body>
+                        {pagination && this.props.pagination}
+                    </Table>
+                </div>
             </div>
         )
     }

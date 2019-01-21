@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import { Segment, Label, Icon, Dropdown, Form, Button, Checkbox } from 'semantic-ui-react'
 
 import history from '../../_util/history'
-import { Field, Page } from '../../_components/UI'
+import { FieldInline, Page } from '../../_components/UI'
 import ConfirmModal from '../../_components/ConfirmModal'
 import InputPassword from '../../_components/InputPassword'
 import { notifications } from '../../_util/Notifications'
@@ -127,31 +127,31 @@ class GenericAccountCreation extends Component {
             <Page title={t('admin.generic_account.new.title')} >
                 <Segment>
                     <Form>
-                        <Field htmlFor='software' label={t('admin.generic_account.fields.software')}>
+                        <FieldInline htmlFor='software' label={t('admin.generic_account.fields.software')}>
                             <input id='software' required value={genericAccount.software} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
-                        </Field>
-                        <Field htmlFor='email' label={t('admin.generic_account.fields.email')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='email' label={t('admin.generic_account.fields.email')}>
                             <input id='email' required value={genericAccount.email} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
-                        </Field>
-                        <Field htmlFor='password' label={t('admin.generic_account.fields.password')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='password' label={t('admin.generic_account.fields.password')}>
                             <InputPassword id='password' value={this.state.fields.password} disabled={!!this.props.uuid && this.state.keepPassword} fluid required onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
                             {this.props.uuid &&
                                 <Checkbox style={{marginTop: '0.5em'}} checked={this.state.keepPassword} onChange={this.toggleKeepPassword} label={t('admin.generic_account.keep_password')} />
                             }
-                        </Field>
-                        <Field htmlFor='serial' label={t('admin.generic_account.fields.serial')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='serial' label={t('admin.generic_account.fields.serial')}>
                             <input id='serial' value={genericAccount.serial} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
-                        </Field>
-                        <Field htmlFor='vendor' label={t('admin.generic_account.fields.vendor')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='vendor' label={t('admin.generic_account.fields.vendor')}>
                             <input id='vendor' value={genericAccount.vendor} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
-                        </Field>
+                        </FieldInline>
 
-                        <Field htmlFor='localAuthorities' label={t('admin.generic_account.fields.localAuthorities')}>
+                        <FieldInline htmlFor='localAuthorities' label={t('admin.generic_account.fields.localAuthorities')}>
                             <div style={{ marginBottom: '0.5em' }}>{localAuthorities.length > 0 ? localAuthorities : t('admin.generic_account.new.no_localAuthorities')}</div>
                             <div style={{ marginBottom: '1em' }}>
                                 <Dropdown id='localAuthorities' value='' placeholder={t('admin.generic_account.new.add_localAuthority')} fluid selection options={localAuthorityOptions} onChange={this.handleChange} />
                             </div>
-                        </Field>
+                        </FieldInline>
                         <div style={{ textAlign: 'right' }}>
                             {this.props.uuid &&
                                 <ConfirmModal onConfirm={this.delete} text={t('admin.generic_account.delete_confirm')}>

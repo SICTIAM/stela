@@ -43,20 +43,10 @@
 }
 
 /********** Utils **********/
+/* position */
 .float-right {
     float: right;
 }
-.ml-20-inline-block {
-    margin-left: 20px;
-    display: inline-block;
-}
-i.icon.xl-icon {
-    font-size: 2em;
-}
-.text-center {
-    text-align: center
-}
-
 .flex-container-column {
     display:flex;
     flex-direction: column;
@@ -65,7 +55,96 @@ i.icon.xl-icon {
     align-content: flex-start;
     align-items: center;
 }
+.flexyItem {
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 200px;
+}
 
+/* Margin and padding */
+.ml-20-inline-block {
+    margin-left: 20px;
+    display: inline-block;
+}
+.mr-20 {
+    margin-right: 20px;
+}
+.mt-15 {
+    margin-top: 15px;
+}
+.mb-0 {
+    margin-bottom: 0px;
+}
+.my-0 {
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+.pt-0 {
+    padding-top: 0;
+}
+.pl-5 {
+    padding-left: 5px
+}
+
+/* Max height */
+.maxh-300 {
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+/* Width */
+.w-100 {
+    width: 100%
+}
+
+/* icon */
+i.icon.l-icon {
+    font-size: 1.5em;
+}
+i.icon.xl-icon {
+    font-size: 2em;
+}
+/* text */
+.text-center {
+    text-align: center
+}
+.text-bold {
+    font-weight: bold;
+}
+.text-muted {
+    font-size: 0.8em;
+    color: #767676;
+}
+
+/* button */
+.ui.basic.primary.button.link {
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+.ui.basic.primary.button.link:hover {
+    box-shadow: none !important;
+    text-decoration: underline;
+}
+.ui.basic.primary.button.link:focus  {
+    box-shadow: none !important;
+}
+
+/* I don't know but it's usefull */
+.pointer {
+    cursor: pointer;
+}
+.cursor-default {
+    cursor: default;
+}
+.text-ellipsis {
+    max-width: 300px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.mw-200 {
+    max-width: 200px;
+}
 /********** Components **********/
 
 /* Skip to content */
@@ -135,6 +214,11 @@ span.fieldValue {
     opacity: 1;
 }
 
+.fieldLabel {
+    display: block;
+    color: #767676;
+}
+
 /* Footer */
 footer {
     position: absolute;
@@ -142,6 +226,22 @@ footer {
     width: 100%;
 }
 
+/* Form */
+.footerForm {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.footerForm button {
+    width: 125px;
+}
+
+/* Contener */
+.block-information {
+    padding: 10px;
+    box-shadow: 0px 0px 8px -0.5px rgba(0,0,0,0.40);
+}
 /* Tooltip */
 /* Home made tooltip, to replace with React SemanticUI Popup once fixed: https://github.com/Semantic-Org/Semantic-UI-React/issues/1126 */
 .tooltip {
@@ -209,6 +309,144 @@ i.collapsed-text-icon.circular.icon {
     cursor: default;
 }
 
+/* Quick View */
+.quick-view {
+    position: fixed;
+    display: flex;
+    background-color: #ffffff;
+    padding: 10px 15px;
+    right: -600px;
+    left: auto;
+    animation: close-slide-left-to-right 0.5s ease;
+    box-shadow: 0px 0px 8px -0.5px rgba(0,0,0,0.40);
+    width: 600px;
+    z-index: 100;
+}
+.quick-view.open {
+    right: 10px;
+    animation: open-slide-right-to-left 0.5s ease;
+}
+
+/* Animations */
+@keyframes close-slide-left-to-right {
+    from {
+        right: 10px;
+    }
+    to {
+        right: -600px;
+    }
+}
+@keyframes open-slide-right-to-left {
+    from {
+        right: -600px;
+    }
+    to {
+        right: 10px;
+    }
+}
+
+/* Deletable List */
+.deletableListItem {
+    border-bottom: 1px solid rgba(34,36,38,.15);
+    padding: 5px 10px;
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: center;
+}
+.deletableListItem:last-child {
+    border: none;
+}
+
+/* Chips */
+.chip {
+    border-radius: 15px;
+    border: 1px solid rgba(34,36,38,.3);
+    display: inline-block;
+    padding: 5px 10px;
+    margin-right: 20px;
+}
+
+.chip .remove {
+    display: inline-block;
+    cursor: pointer;
+}
+.chip .remove i {
+    padding: 0px 5px;
+}
+
+/* Mobile Picker */
+.picker-container {
+    z-index: 10001;
+    width: 100%;
+}
+.picker-container,
+.picker-container *,
+.picker-container *:before,
+.picker-container *:after {
+    box-sizing: border-box;
+}
+.picker-container .picker-inner {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    padding: 0 20px;
+    font-size: 1.2em;
+    -webkit-mask-box-image: linear-gradient(to top, transparent, transparent 5%, #ffffff 20%, #ffffff 80%, transparent 95%, transparent);
+}
+.picker-container .picker-column {
+    flex: 1 1;
+    position: relative;
+    max-height: 100%;
+    overflow: hidden;
+    text-align: center;
+}
+.picker-container .picker-column .picker-scroller {
+    transition: 300ms;
+    transition-timing-function: ease-out;
+}
+.picker-container .picker-column .picker-item {
+    position: relative;
+    padding: 0 10px;
+    white-space: nowrap;
+    color: #999999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.picker-container .picker-column .picker-item.picker-item-selected {
+    color: #222;
+}
+.picker-container .picker-highlight {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+}
+.picker-container .picker-highlight:before,
+.picker-container .picker-highlight:after {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    right: auto;
+    display: block;
+    width: 100%;
+    height: 1px;
+    background-color: #d9d9d9;
+    transform: scaleY(0.5);
+}
+.picker-container .picker-highlight:before {
+    top: 0;
+    bottom: auto;
+}
+.picker-container .picker-highlight:after {
+    bottom: 0;
+    top: auto;
+}
+  
 /********** Responsive **********/
 
 @media (min-height: 550px) {

@@ -3,6 +3,8 @@ package fr.sictiam.stela.convocationservice.service;
 import fr.sictiam.stela.convocationservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
+import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +20,23 @@ public class LocalAuthorityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
-    private final LocalAuthorityRepository localAuthorityRepository;
-
     @Autowired
-    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
-        this.localAuthorityRepository = localAuthorityRepository;
-    }
+    private LocalAuthorityRepository localAuthorityRepository;
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
+    }
+
+    public LocalAuthority getLocalAuthority(String uuid) {
+        return localAuthorityRepository.findByUuid(uuid).orElseThrow(NotFoundException::new);
+    }
+
+    public LocalAuthority update(String uuid, LocalAuthority params) {
+
+        LocalAuthority localAuthority = getLocalAuthority(uuid);
+        ConvocationBeanUtils.mergeProperties(params, localAuthority, "uuid", "name");
+
+        return localAuthorityRepository.saveAndFlush(localAuthority);
     }
 
     public void delete(LocalAuthority localAuthority) {
@@ -48,11 +58,11 @@ public class LocalAuthorityService {
     @Transactional
     public void handleEvent(LocalAuthorityEvent event) throws IOException {
         LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
-                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren()));
+                .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSlugName(), event.getSiren()));
 
-        if (event.getActivatedModules().contains("PES")) {
-            localAuthority.setActive(true);
-        }
+        // Update existing local authorities with new slug name
+        localAuthority.setSlugName(event.getSlugName());
+
         createOrUpdate(localAuthority);
     }
 

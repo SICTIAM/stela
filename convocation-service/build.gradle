@@ -1,19 +1,26 @@
 archivesBaseName = 'stela-convocation-service'
 
+dependencyManagement {
+    imports {
+        mavenBom 'software.amazon.awssdk:bom:2.1.0'
+    }
+}
+
 dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-json')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+    compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-webflux')
     // the following two libs are required for Spring Cloud Config retry
     compile("org.springframework.retry:spring-retry")
     compile("org.springframework.boot:spring-boot-starter-aop")
     compile('org.apache.commons:commons-compress:1.14')
     compile('org.apache.commons:commons-lang3:3.8.1')
+    compile('org.apache.httpcomponents:httpclient:4.5.6')
     compile('commons-beanutils:commons-beanutils:1.8.3')
     compile('commons-io:commons-io:2.4')
     compile('com.sun.mail:javax.mail:1.6.0')
@@ -22,6 +29,7 @@ dependencies {
     compile('net.sf.supercsv:super-csv:2.4.0')
     compile('net.logstash.logback:logstash-logback-encoder:5.2')
     compile('ch.qos.logback:logback-classic:1.2.3')
+    compile('software.amazon.awssdk:s3')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.mockito:mockito-core:2.13.0')

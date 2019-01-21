@@ -8,7 +8,7 @@ import moment from 'moment'
 import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
 import { notifications } from '../../_util/Notifications'
-import { Field, Page } from '../../_components/UI'
+import { FieldInline, Page } from '../../_components/UI'
 import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
@@ -174,7 +174,7 @@ class ActeLocalAuthorityParams extends Component {
                         <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.title')}</h2>
 
                         <Form onSubmit={this.submitForm}>
-                            <Field htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
+                            <FieldInline htmlFor="nomenclatureDate" label={t('api-gateway:local_authority.nomenclatureDate')}>
                                 <span id="nomenclatureDate">{moment(this.state.constantFields.nomenclatureDate).format('DD/MM/YYYY')}</span>
                                 <Button basic primary style={{ marginLeft: '1em' }} onClick={e => this.askClassificationUpdate(e, false)}>
                                     {t('admin.modules.acte.local_authority_settings.askClassification')}
@@ -182,34 +182,34 @@ class ActeLocalAuthorityParams extends Component {
                                 <Button basic negative style={{ marginLeft: '1em' }} onClick={e => this.askClassificationUpdate(e, true)}>
                                     {t('admin.modules.acte.local_authority_settings.askClassificationForce')}
                                 </Button>
-                            </Field>
-                            <Field htmlFor="department" label={t('api-gateway:local_authority.department')}>
+                            </FieldInline>
+                            <FieldInline htmlFor="department" label={t('api-gateway:local_authority.department')}>
                                 <InputValidation id='department'
                                     value={this.state.fields.department}
                                     onChange={this.handleFieldChange}
                                     validationRule={this.validationRules.department}
                                     fieldName={t('api-gateway:local_authority.department')}
                                     className='simpleInput' />
-                            </Field>
-                            <Field htmlFor="district" label={t('api-gateway:local_authority.district')}>
+                            </FieldInline>
+                            <FieldInline htmlFor="district" label={t('api-gateway:local_authority.district')}>
                                 <InputValidation id='district'
                                     value={this.state.fields.district}
                                     onChange={this.handleFieldChange}
                                     validationRule={this.validationRules.district}
                                     fieldName={t('api-gateway:local_authority.district')}
                                     className='simpleInput' />
-                            </Field>
-                            <Field htmlFor="nature" label={t('api-gateway:local_authority.nature')}>
+                            </FieldInline>
+                            <FieldInline htmlFor="nature" label={t('api-gateway:local_authority.nature')}>
                                 <InputValidation id='nature'
                                     value={this.state.fields.nature}
                                     onChange={this.handleFieldChange}
                                     validationRule={this.validationRules.nature}
                                     fieldName={t('api-gateway:local_authority.nature')}
                                     className='simpleInput' />
-                            </Field>
+                            </FieldInline>
 
                             <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
-                            <Field htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
+                            <FieldInline htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
                                 <DraggablePosition
                                     label={t('acte.stamp_pad.pad_label')}
                                     height={300}
@@ -218,18 +218,18 @@ class ActeLocalAuthorityParams extends Component {
                                     labelColor='#000'
                                     position={this.state.fields.stampPosition}
                                     handleChange={this.handleChangeDeltaPosition} />
-                            </Field>
-                            <Field htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
+                            </FieldInline>
+                            <FieldInline htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
                                 <Checkbox id="canPublishRegistre" toggle checked={this.state.fields.canPublishRegistre}
                                     onChange={e => handleFieldCheckboxChange(this, 'canPublishRegistre')} />
-                            </Field>
-                            <Field htmlFor='canPublishWebSite' label={t('api-gateway:local_authority.canPublishWebSite')}>
+                            </FieldInline>
+                            <FieldInline htmlFor='canPublishWebSite' label={t('api-gateway:local_authority.canPublishWebSite')}>
                                 <Checkbox id="canPublishWebSite" toggle checked={this.state.fields.canPublishWebSite}
                                     onChange={e => handleFieldCheckboxChange(this, 'canPublishWebSite')} />
-                            </Field>
+                            </FieldInline>
 
                             <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.paull_parameters')}</h2>
-                            <Field htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
+                            <FieldInline htmlFor='genericProfileUuid' label={t('api-gateway:local_authority.genericProfileUuid')}>
                                 <Dropdown compact search selection
                                     id='genericProfileUuid'
                                     field='genericProfileUuid'
@@ -238,43 +238,43 @@ class ActeLocalAuthorityParams extends Component {
                                     value={this.state.fields.genericProfileUuid}
                                     onChange={this.handleStateChange}
                                     placeholder={`${t('api-gateway:local_authority.genericProfileUuid')}...`} />
-                            </Field>
+                            </FieldInline>
 
                             <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.archive_parameters')}</h2>
-                            <Field htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
+                            <FieldInline htmlFor="archiveActivated" label={t('api-gateway:local_authority.archiveActivated')}>
                                 <Checkbox id="archiveActivated" toggle checked={this.state.fields.archiveSettings.archiveActivated}
                                     onChange={e => handleFieldCheckboxChange(this, 'archiveSettings.archiveActivated')} />
-                            </Field>
+                            </FieldInline>
                             {this.state.fields.archiveSettings.archiveActivated && (
                                 <Fragment>
-                                    <Field htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
+                                    <FieldInline htmlFor='daysBeforeArchiving' label={t('api-gateway:local_authority.daysBeforeArchiving')}>
                                         <Input id='daysBeforeArchiving'
                                             type='number'
                                             value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
                                             onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
-                                    </Field>
-                                    <Field htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
+                                    </FieldInline>
+                                    <FieldInline htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
                                         <Input id='pastellUrl' fluid
                                             placeholder='https://...'
                                             value={this.state.fields.archiveSettings.pastellUrl || ''}
                                             onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
-                                    </Field>
-                                    <Field htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
+                                    </FieldInline>
+                                    <FieldInline htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
                                         <Input id='pastellEntity'
                                             value={this.state.fields.archiveSettings.pastellEntity || ''}
                                             onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
-                                    </Field>
-                                    <Field htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
+                                    </FieldInline>
+                                    <FieldInline htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
                                         <Input id='pastellLogin'
                                             value={this.state.fields.archiveSettings.pastellLogin || ''}
                                             onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
-                                    </Field>
-                                    <Field htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
+                                    </FieldInline>
+                                    <FieldInline htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
                                         <Input id='pastellPassword'
                                             type='password'
                                             value={this.state.fields.archiveSettings.pastellPassword || ''}
                                             onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
-                                    </Field>
+                                    </FieldInline>
                                 </Fragment>
                             )}
 

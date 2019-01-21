@@ -112,12 +112,30 @@ public class ProfileController {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, AlertMessage> alertMessageModules = new HashMap<>();
-        AlertMessage alertMessageActe = restTemplate
-                .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
-        alertMessageModules.put("actes", alertMessageActe);
-        AlertMessage alertMessagePes = restTemplate
-                .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
-        alertMessageModules.put("pes", alertMessagePes);
+        try {
+            AlertMessage alertMessageActe = restTemplate
+                    .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
+            alertMessageModules.put("actes", alertMessageActe);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module acte is probably not running : {}", e.getMessage());
+        }
+
+        try {
+            AlertMessage alertMessagePes = restTemplate
+                    .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
+            alertMessageModules.put("pes", alertMessagePes);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module pes is probably not running : {}", e.getMessage());
+        }
+
+        try {
+            AlertMessage alertMessagePes = restTemplate
+                    .getForObject(discoveryUtils.convocationServiceUrl() + "/api/convocation/admin/alert-message",
+                            AlertMessage.class);
+            alertMessageModules.put("convocation", alertMessagePes);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Module convocation is probably not running : {}", e.getMessage());
+        }
 
         return alertMessageModules;
     }

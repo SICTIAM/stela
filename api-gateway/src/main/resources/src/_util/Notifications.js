@@ -142,6 +142,12 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        moduleConvocationUpdated: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.acte.admin.admin_module.update.success',
+            level: 'success',
+            position: 'br'
+        },
         groupCreated: {
             title: 'notifications.admin.title',
             message: 'notifications.admin.group_created',
@@ -191,6 +197,31 @@ const notifications = {
         sesileUnavailableService: {
             title: 'notifications.pes.admin.sesile.unavailableService',
             level: 'error',
+            position: 'br'
+        },
+        recipientCreated: {
+            title: 'notifications.convocation.admin.recipients.recipient_created',
+            level: 'success',
+            position: 'br'
+        },
+        recipientUpdated: {
+            title: 'notifications.convocation.admin.recipients.recipient_updated',
+            level: 'success',
+            position: 'br'
+        },
+        assemblyTypeCreated: {
+            title: 'notifications.convocation.admin.recipients.assembly_type_created',
+            level: 'success',
+            position: 'br'
+        },
+        assemblyTypeUpdated: {
+            title: 'notifications.convocation.admin.recipients.assembly_type_updated',
+            level: 'success',
+            position: 'br'
+        },
+        statusUpdated: {
+            title: 'notifications.convocation.admin.recipients.status_updated',
+            level: 'success',
             position: 'br'
         }
     },

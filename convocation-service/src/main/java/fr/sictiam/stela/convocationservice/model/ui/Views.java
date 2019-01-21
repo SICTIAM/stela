@@ -16,7 +16,7 @@ public class Views {
     }
 
     public interface ConvocationResponseView extends ConvocationViewPublic, ConvocationResponseViewPublic,
-            ConvocationResponseViewPrivate, ExternalUserView, QuestionResponseViewPublic, QuestionView {
+            ConvocationResponseViewPrivate, UserView, QuestionResponseViewPublic, QuestionView {
 
     }
 
@@ -29,11 +29,11 @@ public class Views {
     }
 
     public interface AssemblyTypeView
-            extends ExternalUserViewPublic, AssemblyTypeViewPublic, AssemblyTypeViewPrivate, ConvocationViewPublic {
+            extends UserViewPublic, AssemblyTypeViewPublic, AssemblyTypeViewPrivate, ConvocationViewPublic {
 
     }
 
-    public interface AssemblyTypeViewPublic {
+    public interface AssemblyTypeViewPublic extends LocalAuthorityViewPublic, UserViewPublic {
 
     }
 
@@ -41,19 +41,27 @@ public class Views {
 
     }
 
-    public interface LocalAuthorityView {
+    public interface LocalAuthorityViewPublic {
 
     }
 
-    public interface ExternalUserView extends ExternalUserViewPrivate, ExternalUserViewPublic {
+    public interface LocalAuthorityView extends LocalAuthorityViewPublic {
 
     }
 
-    public interface ExternalUserViewPublic {
+    public interface UserView extends UserViewPrivate, UserViewPublic {
 
     }
 
-    public interface ExternalUserViewPrivate {
+    public interface UserViewPublic {
+
+    }
+
+    public interface UserViewPrivate {
+
+    }
+
+    public interface UserLocalAuthorityAssemblyTypeView extends UserViewPublic, LocalAuthorityView, AssemblyTypeViewPublic {
 
     }
 
@@ -72,6 +80,36 @@ public class Views {
 
     public interface QuestionResponseViewPrivate {
 
+    }
+
+    public interface Public {
+    }
+
+    public interface Search extends Public {
+    }
+
+    public interface SearchRecipient extends Search, RecipientInternal {
+    }
+
+    public interface SearchAssemblyType extends Search, AssemblyTypeInternal {
+    }
+
+    public interface Recipient extends Public {
+    }
+
+    public interface RecipientInternal extends Recipient {
+    }
+
+    public interface RecipientPrivate extends RecipientInternal {
+    }
+
+    public interface AssemblyType extends Public {
+    }
+
+    public interface AssemblyTypeInternal extends AssemblyType {
+    }
+
+    public interface LocalAuthority extends Public {
     }
 
 }

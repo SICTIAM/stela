@@ -3,11 +3,45 @@
     "status": {
       "CREATED": "Créé",
       "SENT": "envoyée"
-   },
+    },
+    "fields": {
+      "date": "Date de la séance",
+      "date_placeholder": "jj/mm/aaaa",
+      "hour": "Heure de la séance",
+      "hour_placeholder": "hh:mm",
+      "assembly_type": "Type d'assemblée",
+      "assembly_place": "Lieu de l'assemblée",
+      "object": "Objet",
+      "object_placeholder": "L'objet de la convocation",
+      "comment": "Commentaires",
+      "recipient": "Destinataire",
+      "default_procuration": "Modèle de procuration par défaut",
+      "custom_procuration": "Modèle de procuration personnalisé",
+      "convocation_document": "Document de la convocation",
+      "annexes": "Annexe(s)",
+      "questions": "Question(s) supplémentaire(s)",
+      "questions_placeholder": "Entrez votre question"
+    },
+    "list": {
+
+    },
+    "page": {
+
+    },
+    "new": {
+      "display": "Visualiser",
+      "add_recipients": "Ajouter un/des destinataires",
+      "delete_all_recipients": "Supprimer tous les destinataires",
+      "view_more_recipients": "Voir les {{number}} destinataires",
+      "view_less_recipients": "Voir moins de destinataires",
+      "no_recipient": "Aucun destinataire",
+      "choose_from_the_list": "Choisir dans la liste"
+    },
     "admin": {
       "modules": {
         "convocation": {
           "title": "Module Convocation",
+          "assembly_types": "Type d'assemblée",
           "local_authority_settings": {
             "title": "Paramétrage des collectivités",
             "general_informations": "Informations générales"
@@ -16,8 +50,46 @@
             "title": "Paramètres du module Convocation",
             "alertMessageDisplayed": "Affichage du message d'alerte",
             "alertMessage": "Message d'alerte"
+          },
+          "assembly_type_config": {
+            "type": "Type d'assemblée",
+            "convocation_delay": "Délai de convocation",
+            "reminder": "Relance" ,
+            "explanation_reminder": "Si vous activez la relance, un email de rappel sera envoyé deux jours avant l'assemblée aux destinataires qui n'ont pas répondu",
+            "place": "Lieu de la séance",
+            "recipients": "Destinataires",
+            "procuration": "Utilisation de procuration",
+            "status": "Statut",
+            "edit_recipients": "Editer la liste de destinataires",
+            "inactive_assembly_type_title": "Type d'assemblée inactif",
+            "inactive_assembly_type_content": "Le type d'assemblée est inactif depuis le: {{date}}."
+          },
+          "recipient_config": {
+            "firstname": "Prénom",
+            "lastname": "Nom",
+            "phonenumber": "Numéro de téléphone",
+            "email": "Email",
+            "status": "Statut",
+            "edit": "Editer",
+            "inactive_recipient_title": "Destinataire inactif",
+            "inactive_recipient_content": "Le destinataire est inactif depuis le: {{date}}."
+          },
+          "recipient_list": {
+            "active": "Actif",
+            "inactive": "Inactif",
+            "active_inactive": "Actif/Inactif",
+            "activate": "Activer",
+            "deactivate": "Désactiver"
+          },
+          "assembly_type_liste": {
+            "no_assembly_type": "Aucun type d'assemblée"
           }
         }
+      }
+    },
+    "errors": {
+      "recipient": {
+        "alreadyExists": "Un destinataire existe avec ce courriel"
       }
     }
   }

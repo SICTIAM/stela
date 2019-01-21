@@ -34,7 +34,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
         StaticOpenIdCConfiguration configuration = new OpenIdConnectConfiguration();
         configuration
                 .addSkippedPaths(Arrays.asList("/img/", "/js/", "/css/", "/status", "/api/admin/ozwillo", "/build/",
-                        "/editeur/api/acte", "/api/pes/sesile/signature-hook", "/api/pes/actuator"));
+                        "/editeur/api/acte", "/api/pes/sesile/signature-hook", "/api/pes/actuator", "/api/convocation"));
         return configuration;
     }
 
@@ -49,6 +49,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
+                .regexMatchers("/api/convocation/.*\\?token=\\w+.*").permitAll()
                 .antMatchers("/api/pes/sesile/signature-hook/**").permitAll()
                 .antMatchers("/api/acte/public/**").permitAll()
                 .antMatchers("/api/admin/instance/**").permitAll()
@@ -68,6 +69,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
                 .ignoringAntMatchers("/api/*/ws/**")
                 .ignoringAntMatchers("/editeur/api/**")
                 .ignoringAntMatchers("/api/pes/sesile/signature-hook/**")
+                .ignoringAntMatchers("/api/convocation/**")
                 .ignoringAntMatchers("/externalws/**").and()
                 .logout()
                     // session is invalidated by OasisLogoutHandler as per https://doc.ozwillo.com/#s4-sign-out

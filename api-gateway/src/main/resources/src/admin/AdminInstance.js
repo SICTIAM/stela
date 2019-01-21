@@ -4,7 +4,7 @@ import { translate } from 'react-i18next'
 import { Segment, Form, Button, Input } from 'semantic-ui-react'
 
 import TextEditor from '../_components/TextEditor'
-import { Page, Field } from '../_components/UI'
+import { Page, FieldInline } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
 import { checkStatus } from '../_util/utils'
 import { withAuthContext } from '../Auth'
@@ -66,17 +66,17 @@ class AdminInstance extends Component {
                     <Form onSubmit={this.submitForm}>
 
                         <h2 className='secondary'>{t('admin.instance_params.general_settings')}</h2>
-                        <Field htmlFor='contactEmail' label={t('admin.instance_params.contact_email')}>
+                        <FieldInline htmlFor='contactEmail' label={t('admin.instance_params.contact_email')}>
                             <Input id='contactEmail'
                                 value={this.state.fields.contactEmail || ''}
                                 onChange={(e, data) => this.handleFieldChange('contactEmail', data.value)} />
-                        </Field>
-                        <Field htmlFor='reportUrl' label={t('admin.instance_params.report_url')}>
+                        </FieldInline>
+                        <FieldInline htmlFor='reportUrl' label={t('admin.instance_params.report_url')}>
                             <Input id='reportUrl' fluid
                                 placeholder='https://...'
                                 value={this.state.fields.reportUrl || ''}
                                 onChange={(e, data) => this.handleFieldChange('reportUrl', data.value)} />
-                        </Field>
+                        </FieldInline>
 
                         <h2 className='secondary'>{t('admin.instance_params.welcome_message')}</h2>
                         <TextEditor

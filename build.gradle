@@ -94,7 +94,8 @@ subprojects {
             push = project.hasProperty('push')
 
             // Specific case for integration : avoid tagging images with hash => generates too many image tags.. Keep "latest" tag
-            tagVersion = project.hasProperty("env") ? project.getProperty("env") + "-" + gitDetails.gitHashFull : "latest"
+            def env = project.hasProperty("env") ? project.getProperty("env") : "test"
+            tagVersion = env == "prod" ? env + "-" + gitDetails.gitHashFull : env
 
             applicationName = 'stela-poc/' + jar.baseName
             dockerfile = file('src/main/docker/Dockerfile')
