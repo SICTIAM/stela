@@ -1,3 +1,23 @@
+### 21/01/2019
+
+#### Général
+
+- Améliorations des performances d'affichage
+- Informations sur le statut du certificat utilisé
+- Mise à jour du favicon
+
+#### Contrôle de légalité
+
+- Majuscules forcées pour le numéro d'acte
+
+#### Flux comptable
+
+- Ajout du lien vers le classeur Sesile lorsqu'un PES est envoyé pour signature
+
+#### Connecteurs
+
+- Amélioration de la robustesse des échanges avec Sesile
+
 ### 11/01/2019
 
 #### Général
