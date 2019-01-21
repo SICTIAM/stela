@@ -6,6 +6,7 @@ import { translate } from 'react-i18next'
 
 import { withAuthContext } from '../Auth'
 
+import { rightsModuleResolver, rightsFeatureResolver } from '../_util/utils'
 import { getLocalAuthoritySlug } from '../_util/utils'
 
 class AdminMenuBar extends Component {
@@ -18,7 +19,9 @@ class AdminMenuBar extends Component {
     }
     render() {
         const { t } = this.context
+        const { userRights } = this.props.authContext
         const localAuthoritySlug = getLocalAuthoritySlug()
+        const rights = userRights
         return (
             <Menu style={{ backgroundColor: 'white' }} fixed='left' className='mainMenu secondary' secondary vertical>
                 <div className='mainMenus'>
@@ -57,14 +60,14 @@ class AdminMenuBar extends Component {
                             </Menu.Menu>
                         </Menu.Item>
                     )}
-                    {this.checkActivatedModule('CONVOCATION') && (
+                    {this.checkActivatedModule('CONVOCATION') && rightsModuleResolver(rights, 'CONVOCATION') && rightsFeatureResolver(rights, ['CONVOCATION_ADMIN']) && (
                         <Menu.Item style={{ width: '100%' }}>
                             <Menu.Header className="secondary">
                                 {t('menu.convocation.convocation')}
                                 <Icon name='calendar outline' size='large' className="float-right" />
                             </Menu.Header>
                             <Menu.Menu>
-                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/parametrage-module`}>{t('admin.parameters')}</Menu.Item>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/ma-collectivite/convocation`}>{t('admin.parameters')}</Menu.Item>
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee/nouveau`}>{t('admin.convocation.assembly_type')}</Menu.Item>
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee`}>{t('admin.convocation.assembly_type_list')}</Menu.Item>
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/admin/convocation/destinataire/nouveau`}>{t('admin.convocation.recipent')}</Menu.Item>

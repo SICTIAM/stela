@@ -20,8 +20,6 @@ class AssemblyTypeList extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
 	    _fetchWithAuthzHandling: PropTypes.func,
-	    csrfToken: PropTypes.string,
-	    csrfTokenHeaderName: PropTypes.string,
 	    _addNotification: PropTypes.func,
 	}
 	state = {
