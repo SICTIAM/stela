@@ -5,31 +5,16 @@ import eu.europa.esig.dss.validation.policy.rules.Indication;
 import eu.europa.esig.dss.validation.reports.DetailedReport;
 import fr.sictiam.signature.pes.producer.SigningPolicies.SigningPolicy1;
 import fr.sictiam.signature.pes.verifier.CertificateProcessor.CertificatInformation1;
-import fr.sictiam.signature.pes.verifier.InvalidPesAllerFileException;
-import fr.sictiam.signature.pes.verifier.PesAllerAnalyser;
-import fr.sictiam.signature.pes.verifier.SignatureValidation;
-import fr.sictiam.signature.pes.verifier.SignatureValidationError;
-import fr.sictiam.signature.pes.verifier.SignatureVerifierResult;
-import fr.sictiam.signature.pes.verifier.SimplePesInformation;
+import fr.sictiam.signature.pes.verifier.*;
 import fr.sictiam.signature.pes.verifier.XMLDsigSignatureAndReferencesProcessor.XMLDsigReference1;
 import fr.sictiam.signature.pes.verifier.XadesInfoProcessor.XadesInfoProcessResult1;
 import fr.sictiam.signature.utils.DateUtils;
 import fr.sictiam.signature.utils.XadesUtils;
 import fr.sictiam.stela.pesservice.dao.GenericDocumentRepository;
 import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
-import fr.sictiam.stela.pesservice.model.GenericDocument;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.SesileConfiguration;
-import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.*;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
-import fr.sictiam.stela.pesservice.model.sesile.Classeur;
-import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
-import fr.sictiam.stela.pesservice.model.sesile.ClasseurSirenRequest;
-import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
-import fr.sictiam.stela.pesservice.model.sesile.ClasseurType;
-import fr.sictiam.stela.pesservice.model.sesile.Document;
-import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
+import fr.sictiam.stela.pesservice.model.sesile.*;
 import fr.sictiam.stela.pesservice.service.exceptions.MissingSignatureException;
 import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
 import org.apache.commons.lang3.StringUtils;
@@ -40,12 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -54,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Element;
 
 import javax.validation.constraints.NotNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -64,11 +43,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -180,26 +155,27 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public void checkPesSigned() {
-        LOGGER.info("Cheking for new PES signatures...");
+        LOGGER.info("[checkPesSigned] Cheking for new PES signatures...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
             if (pes.getLastHistoryStatus().equals(StatusType.PENDING_SIGNATURE) && pes.getPesHistories().stream()
                     .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus()))) {
                 try {
-                    LOGGER.debug("Checking document {} status", pes.getSesileDocumentId());
+                    LOGGER.debug("[checkPesSigned] Checking document {} status", pes.getSesileDocumentId());
                     if (pes.getSesileDocumentId() != null
                             && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
-                        LOGGER.debug("Document {} signed from Sesile", pes.getSesileDocumentId());
+                        addSignedStatus((PesAller) pes);
+                        LOGGER.debug("[checkPesSigned] Document {} signed from Sesile", pes.getSesileDocumentId());
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
-                        LOGGER.debug("Sending document {} to Stela validation process", pes.getSesileDocumentId());
+                        LOGGER.debug("[checkPesSigned] Sending document {} to Stela validation process", pes.getSesileDocumentId());
                         if (file != null) {
                             pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file);
                         } else {
-                            LOGGER.warn("Document content for {} is null");
+                            LOGGER.warn("[checkPesSigned] Document content for pes {} is null", pes.getUuid());
                         }
                     }
                 } catch (RestClientException | UnsupportedEncodingException e) {
-                    LOGGER.error("Error on PES {} : {}", pes.getUuid(), e.getMessage());
+                    LOGGER.error("[checkPesSigned] Error on PES {} : {}", pes.getUuid(), e.getMessage());
                 }
             }
         });
@@ -576,7 +552,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             LOGGER.debug("[checkClasseurStatus] check classeur on {}", url + "/api/classeur/" + classeur);
             return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                     classeur);
-        } catch (HttpClientErrorException  | HttpServerErrorException e) {
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
             LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
                     e.getMessage(), e.getResponseBodyAsString());
             // Quick fix : check on other Sesile version
@@ -768,9 +744,55 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
         if (status.equals("SIGNED")) {
+            addSignedStatus(pes);
             pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file.getBytes());
         } else {
             pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
+        }
+    }
+
+    public ResponseEntity<Classeur> getClasseur(int id, LocalAuthority localAuthority) {
+        String sesileUrl = getSesileUrl(localAuthority);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
+
+        try {
+            LOGGER.debug("[getClasseur] get classeur {} on {}", id, sesileUrl);
+            return restTemplate.exchange(sesileUrl + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
+                    id);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            LOGGER.error("[getClasseur] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
+                    e.getMessage(), e.getResponseBodyAsString());
+            return new ResponseEntity<>(e.getStatusCode());
+        }
+    }
+
+    public Optional<Action> getSignedActionOfClasseur(Classeur classeur) {
+        return classeur.getActions().stream().filter(action ->
+                (action.getAction().equals("Signature") && action.getCommentaire().equals("Classeur signé"))).findFirst();
+    }
+
+    public void addSignedStatus(PesAller pes) {
+        ResponseEntity<Classeur> responseClasseur = getClasseur(pes.getSesileClasseurId(), pes.getLocalAuthority());
+        if (responseClasseur.getStatusCode().is2xxSuccessful()) {
+            Optional<Action> signedAction = getSignedActionOfClasseur(responseClasseur.getBody());
+
+            if (signedAction.isPresent()) {
+                Map<String, String> actionInfos = new HashMap<>();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                actionInfos.put("userName", signedAction.get().getUsername());
+                actionInfos.put("date", simpleDateFormat.format(signedAction.get().getDate()));
+                String statusMessage = localesService.getMessage("fr", "pes", "$.pes.page.signed_by_on",
+                        actionInfos);
+                pesService.updateStatus(
+                        pes.getUuid(),
+                        StatusType.CLASSEUR_SIGNED,
+                        statusMessage);
+            } else {
+                pesService.updateStatus(
+                        pes.getUuid(),
+                        StatusType.CLASSEUR_SIGNED);
+                LOGGER.warn("[addSignedStatus] No signature action found for classeur {} of PES {}", pes.getSesileClasseurUrl(), pes.getUuid());
+            }
         }
     }
 

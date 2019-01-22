@@ -21,7 +21,8 @@
       "CLASSEUR_WITHDRAWN": "Le classeur a été retiré dans SESILE",
       "CLASSEUR_DELETED": "Le classeur a été supprimé dans SESILE",
       "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur",
-      "SIGNATURE_VALIDATION": "Validation de la signature"
+      "SIGNATURE_VALIDATION": "Validation de la signature",
+      "CLASSEUR_SIGNED": "Classeur signé"
     },
     "fields": {
       "objet": "Objet",
@@ -49,7 +50,8 @@
       "no_history": "Aucun historique pour ce PES",
       "re_send": "Renvoyer le flux manuellement",
       "re_send_confirm": "Voulez-vous vraiment renvoyer le flux manuellement ?",
-      "see_classeur": "voir le classeur"
+      "see_classeur": "voir le classeur",
+      "signed_by_on": "Par ${userName} le ${date}"
     },
     "signature_errors": {
       "INVALID_SIGNATURE": "La signature du fichier n'a pas pu être vérifiée",
