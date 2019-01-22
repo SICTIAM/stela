@@ -156,8 +156,8 @@ public class PesHistory implements Comparable<PesHistory> {
     }
 
     @Override
-    public int compareTo(PesHistory acteHistory) {
-        return date.compareTo(acteHistory.getDate());
+    public int compareTo(PesHistory pesHistory) {
+        return pesHistory.getDate().compareTo(this.date);
     }
 
     @Override
