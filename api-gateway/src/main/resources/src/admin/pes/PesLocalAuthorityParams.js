@@ -6,7 +6,7 @@ import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
-import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class PesLocalAuthorityParams extends Component {
@@ -115,11 +115,6 @@ class PesLocalAuthorityParams extends Component {
         const fields = this.state.fields
         fields.serverCode = value
         this.setState({ fields: fields })
-    }
-    handleFieldChange = (field, value) => {
-        const fields = this.state.fields
-        updateField(fields, field, value)
-        this.setState({ fields: fields }, this.validateForm)
     }
     sesileSubscriptionChange = (checked) => {
         const fields = this.state.fields
@@ -273,29 +268,29 @@ class PesLocalAuthorityParams extends Component {
                                     <Input id='daysBeforeArchiving'
                                         type='number'
                                         value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.daysBeforeArchiving', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
                                     <Input id='pastellUrl' fluid
                                         placeholder='https://...'
                                         value={this.state.fields.archiveSettings.pastellUrl || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellUrl', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
                                     <Input id='pastellEntity'
                                         value={this.state.fields.archiveSettings.pastellEntity || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellEntity', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
                                     <Input id='pastellLogin'
                                         value={this.state.fields.archiveSettings.pastellLogin || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellLogin', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
                                     <Input id='pastellPassword'
                                         type='password'
                                         value={this.state.fields.archiveSettings.pastellPassword || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellPassword', data.value, this.validateForm)} />
                                 </FieldInline>
                             </Fragment>
                         )}

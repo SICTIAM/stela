@@ -6,7 +6,7 @@ import { Segment, Form, Button, Input } from 'semantic-ui-react'
 import TextEditor from '../_components/TextEditor'
 import { Page, FieldInline } from '../_components/UI'
 import { notifications } from '../_util/Notifications'
-import { checkStatus } from '../_util/utils'
+import { checkStatus, handleFieldChange } from '../_util/utils'
 import { withAuthContext } from '../Auth'
 
 class AdminInstance extends Component {
@@ -37,11 +37,6 @@ class AdminInstance extends Component {
                 })
             })
     }
-    handleFieldChange = (field, value) => {
-        const fields = this.state.fields
-        fields[field] = value
-        this.setState({ fields })
-    }
     onWelcomeMessageChange = (welcomeMessage) => {
         const { fields } = this.state
         fields.welcomeMessage = welcomeMessage
@@ -69,23 +64,23 @@ class AdminInstance extends Component {
                         <FieldInline htmlFor='contactEmail' label={t('admin.instance_params.contact_email')}>
                             <Input id='contactEmail'
                                 value={this.state.fields.contactEmail || ''}
-                                onChange={(e, data) => this.handleFieldChange('contactEmail', data.value)} />
+                                onChange={(e, data) => handleFieldChange(this, 'contactEmail', data.value)} />
                         </FieldInline>
                         <FieldInline htmlFor='reportUrl' label={t('admin.instance_params.report_url')}>
                             <Input id='reportUrl' fluid
                                 placeholder='https://...'
                                 value={this.state.fields.reportUrl || ''}
-                                onChange={(e, data) => this.handleFieldChange('reportUrl', data.value)} />
+                                onChange={(e, data) => handleFieldChange(this, 'reportUrl', data.value)} />
                         </FieldInline>
 
                         <h2 className='secondary'>{t('admin.instance_params.welcome_message')}</h2>
                         <TextEditor
-                            onChange={value => this.handleFieldChange('welcomeMessage', value)}
+                            onChange={value => handleFieldChange(this, 'welcomeMessage', value)}
                             text={this.state.fields.welcomeMessage} />
 
                         <h2 className='secondary'>{t('admin.instance_params.legal_notice')}</h2>
                         <TextEditor
-                            onChange={value => this.handleFieldChange('legalNotice', value)}
+                            onChange={value => handleFieldChange(this, 'legalNotice', value)}
                             text={this.state.fields.legalNotice} />
 
                         <div style={{ textAlign: 'right' }}>

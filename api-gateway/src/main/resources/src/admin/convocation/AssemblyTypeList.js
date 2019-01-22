@@ -3,7 +3,14 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Icon, Checkbox, Button, Form } from 'semantic-ui-react'
 
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import {
+    checkStatus,
+    getLocalAuthoritySlug,
+    handleSearchChange,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable
+} from '../../_util/utils'
 import { notifications } from '../../_util/Notifications'
 import history from '../../_util/history'
 
@@ -69,33 +76,6 @@ class AssemblyTypeList extends Component {
 	negativeResolver = (recipient) => {
 	    return !recipient.active
 	}
-
-	/** Change current page */
-	handlePageClick = (data) => {
-	    const offset = Math.ceil(data.selected * this.state.limit)
-	    this.setState({ offset, currentPage: data.selected }, () => this.loadData())
-	}
-
-	/** Sort function */
-	sort = (clickedColumn) => {
-	    const { column, direction } = this.state
-	    if (column !== clickedColumn) {
-	        this.setState({ column: clickedColumn, direction: 'ASC' }, () => this.loadData())
-	        return
-	    }
-	    this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.loadData())
-	}
-
-	handleFieldChange = (field, value) => {
-	    const search = this.state.search
-	    search[field] = value
-	    this.setState({ search: search })
-	}
-
-	updateItemPerPage = (limit) => {
-	    this.setState({ limit, offset: 0, currentPage: 0 }, this.loadData)
-	}
-
 	onClickCell = (e, property, row) => {
 	    e.preventDefault()
 	    e.stopPropagation()
@@ -223,9 +203,9 @@ class AssemblyTypeList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data, this.loadData)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.loadData)}
                 currentPage={this.state.currentPage}
                 options={options} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
@@ -249,17 +229,17 @@ class AssemblyTypeList extends Component {
 	                    isDefaultOpen={false}
 	                    fieldId='multifield'
 	                    fieldValue={search.multifield}
-	                    fieldOnChange={this.handleFieldChange}
+	                    fieldOnChange={(id, value) => handleSearchChange(this, id, value)}
 	                    onSubmit={this.loadData}>
 	                    <Form onSubmit={this.loadData}>
 	                        <FormFieldInline htmlFor='name' label={t('convocation.fields.assembly_type')} >
-	                            <input id='name' aria-label={t('convocation.fields.assembly_type')} value={search.name} onChange={e => this.handleFieldChange('name', e.target.value)} />
+	                            <input id='name' aria-label={t('convocation.fields.assembly_type')} value={search.name} onChange={e => handleSearchChange(this, 'name', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='location' label={t('convocation.admin.modules.convocation.assembly_type_config.place')} >
-	                            <input id='location' aria-label={t('convocation.admin.modules.convocation.assembly_type_config.place')} value={search.location} onChange={e => this.handleFieldChange('location', e.target.value)} />
+	                            <input id='location' aria-label={t('convocation.admin.modules.convocation.assembly_type_config.place')} value={search.location} onChange={e => handleSearchChange(this, 'location', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='active' label={t('convocation.admin.modules.convocation.recipient_config.status')}>
-	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => this.handleFieldChange('active', e.target.value)}>
+	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => handleSearchChange(this, 'active', e.target.value)}>
 	                                <option value=''>{t('convocation.admin.modules.convocation.recipient_list.active_inactive')}</option>
 	                                <option value={true}>{t('convocation.admin.modules.convocation.recipient_list.active')}</option>
 	                                <option value={false}>{t('convocation.admin.modules.convocation.recipient_list.inactive')}</option>
@@ -282,7 +262,7 @@ class AssemblyTypeList extends Component {
 	                    striped={false}
 	                    negativeResolver={this.negativeResolver}
 	                    pagination={pagination}
-	                    sort={this.sort}
+	                    sort={(clickedColumn) => sortTable(this, clickedColumn, this.loadData)}
 	                    direction={this.state.direction}
 	                    column={this.state.column}
 	                    noDataMessage={t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')}

@@ -8,7 +8,7 @@ import { FieldInline, Page } from '../../_components/UI'
 import ConfirmModal from '../../_components/ConfirmModal'
 import InputPassword from '../../_components/InputPassword'
 import { notifications } from '../../_util/Notifications'
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { checkStatus, getLocalAuthoritySlug, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class GenericAccountCreation extends Component {
@@ -86,11 +86,6 @@ class GenericAccountCreation extends Component {
         fields.localAuthorities = fields.localAuthorities.filter(localAuthority => localAuthority.uuid !== uuid)
         this.setState({ fields })
     }
-    handleFieldChange = (field, value) => {
-        const { fields } = this.state
-        fields[field] = value
-        this.setState({ fields: fields })
-    }
     toggleKeepPassword = () => {
         const keepPassword = !this.state.keepPassword
         const fields = this.state.fields
@@ -128,10 +123,10 @@ class GenericAccountCreation extends Component {
                 <Segment>
                     <Form>
                         <FieldInline htmlFor='software' label={t('admin.generic_account.fields.software')}>
-                            <input id='software' required value={genericAccount.software} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
+                            <input id='software' required value={genericAccount.software} onChange={e => handleFieldChange(this, e.target.id, e.target.value)} />
                         </FieldInline>
                         <FieldInline htmlFor='email' label={t('admin.generic_account.fields.email')}>
-                            <input id='email' required value={genericAccount.email} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
+                            <input id='email' required value={genericAccount.email} onChange={e => handleFieldChange(this, e.target.id, e.target.value)} />
                         </FieldInline>
                         <FieldInline htmlFor='password' label={t('admin.generic_account.fields.password')}>
                             <InputPassword id='password' value={this.state.fields.password} disabled={!!this.props.uuid && this.state.keepPassword} fluid required onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
@@ -140,10 +135,10 @@ class GenericAccountCreation extends Component {
                             }
                         </FieldInline>
                         <FieldInline htmlFor='serial' label={t('admin.generic_account.fields.serial')}>
-                            <input id='serial' value={genericAccount.serial} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
+                            <input id='serial' value={genericAccount.serial} onChange={e => handleFieldChange(this, e.target.id, e.target.value)} />
                         </FieldInline>
                         <FieldInline htmlFor='vendor' label={t('admin.generic_account.fields.vendor')}>
-                            <input id='vendor' value={genericAccount.vendor} onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
+                            <input id='vendor' value={genericAccount.vendor} onChange={e => handleFieldChange(this, e.target.id, e.target.value)} />
                         </FieldInline>
 
                         <FieldInline htmlFor='localAuthorities' label={t('admin.generic_account.fields.localAuthorities')}>
