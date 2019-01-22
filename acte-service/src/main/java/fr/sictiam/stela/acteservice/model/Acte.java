@@ -72,7 +72,7 @@ public class Acte {
     @JsonView(Views.ActePublicView.class)
     private List<Attachment> annexes;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy("date ASC")
+    @OrderBy("date DESC")
     @JsonView(Views.ActePublicView.class)
     private SortedSet<ActeHistory> acteHistories;
     @ManyToOne

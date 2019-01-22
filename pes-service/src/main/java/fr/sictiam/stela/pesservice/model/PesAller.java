@@ -40,7 +40,7 @@ public class PesAller {
     private Attachment attachment;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy("date ASC")
+    @OrderBy("date DESC")
     private SortedSet<PesHistory> pesHistories;
 
     @ManyToOne
