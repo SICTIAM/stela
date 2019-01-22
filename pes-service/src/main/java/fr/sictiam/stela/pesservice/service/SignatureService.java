@@ -13,6 +13,7 @@ import org.apache.xml.security.utils.IdResolver;
 import org.apache.xpath.XPathAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,6 +45,9 @@ public class SignatureService {
     private static final String NAMESPACE_SPEC_NS = "http://www.w3.org/2000/xmlns/";
     private static final String SIGNATURE_SPEC_NS = "http://www.w3.org/2000/09/xmldsig#";
     private static final String QUALIFIED_NAME = "xmlns:ds";
+
+    @Value("${application.pdfValidation}")
+    private boolean validatePdfSignature;
 
     private Document loadXml(InputStream pesStream) throws ParserConfigurationException, SAXException, IOException {
         javax.xml.parsers.DocumentBuilderFactory dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -133,38 +137,40 @@ public class SignatureService {
                 }
             }
 
-            // Verify embedded pdf files
-            NodeList pdfs = XPathAPI.selectNodeList(document, "//Fichier[@MIMEType='application/pdf']",
-                    createNamespaceNode(document));
-            for (int i = 0; i < pdfs.getLength(); i++) {
-                Node pdf = pdfs.item(i);
-                InputStream bais =
-                        new ByteArrayInputStream(Base64.getMimeDecoder().decode(pdf.getTextContent()));
-                GZIPInputStream gis = new GZIPInputStream(bais);
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                try {
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = gis.read(buffer)) != -1) {
-                        out.write(buffer, 0, len);
+            if (validatePdfSignature) {
+                // Verify embedded pdf files
+                NodeList pdfs = XPathAPI.selectNodeList(document, "//Fichier[@MIMEType='application/pdf']",
+                        createNamespaceNode(document));
+                for (int i = 0; i < pdfs.getLength(); i++) {
+                    Node pdf = pdfs.item(i);
+                    InputStream bais =
+                            new ByteArrayInputStream(Base64.getMimeDecoder().decode(pdf.getTextContent()));
+                    GZIPInputStream gis = new GZIPInputStream(bais);
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    try {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = gis.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+                        List<String> errors = validatePdfAttachment(out.toByteArray());
+                        if (!errors.isEmpty()) {
+                            LOGGER.error("Error while validating pdf attachment in pes : {}",
+                                    errors.stream().collect(Collectors.joining(", ")));
+                            throw new SignatureException("PDF_ATTACHMENT");
+                        }
+                    } catch (IOException | CertificateException e) {
+                        LOGGER.error("Generic error while validating pdf attachment in pes : {}", e.getMessage());
+                        throw new SignatureException("PDF_ATTACHMENT", e);
+                    } catch (Exception e) {
+                        LOGGER.error("Unknown error while validating pdf attachment in pes : {} : {})",
+                                e.getClass().getSimpleName(), e.getMessage());
+                        throw new SignatureException("PDF_ATTACHMENT", e);
+                    } finally {
+                        bais.close();
+                        gis.close();
+                        out.close();
                     }
-                    List<String> errors = validatePdfAttachment(out.toByteArray());
-                    if (!errors.isEmpty()) {
-                        LOGGER.error("Error while validating pdf attachment in pes : {}",
-                                errors.stream().collect(Collectors.joining(", ")));
-                        throw new SignatureException("PDF_ATTACHMENT");
-                    }
-                } catch (IOException | CertificateException e) {
-                    LOGGER.error("Generic error while validating pdf attachment in pes : {}", e.getMessage());
-                    throw new SignatureException("PDF_ATTACHMENT", e);
-                } catch (Exception e) {
-                    LOGGER.error("Unknown error while validating pdf attachment in pes : {} : {})",
-                            e.getClass().getSimpleName(), e.getMessage());
-                    throw new SignatureException("PDF_ATTACHMENT", e);
-                } finally {
-                    bais.close();
-                    gis.close();
-                    out.close();
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException | TransformerException |
