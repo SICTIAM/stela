@@ -1,11 +1,9 @@
 import React, { Component } from 'react'
-import { Segment, Grid, Button, Icon, Radio, Form } from 'semantic-ui-react'
+import { Segment, Grid, Button, Radio, Form } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 
 import { Page, Field, FieldValue, FormFieldInline } from '../_components/UI'
-
-import Pagination from '../_components/Pagination'
 
 
 class ReceivedConvocation extends Component {

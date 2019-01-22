@@ -4,7 +4,7 @@ import { Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 
 import StelaTable from '../_components/StelaTable'
-import Breadcrumb from '../_components/Breadcrumb'
+//import Breadcrumb from '../_components/Breadcrumb'
 import Pagination from '../_components/Pagination'
 import { Page } from '../_components/UI'
 
@@ -33,8 +33,8 @@ class SentConvocation extends Component {
 	}
 	/** Load data list */
 	loadData = () => {
-	    const { _fetchWithAuthzHandling } = this.context
-	    const data = this.getSearchData()
+	    // const { _fetchWithAuthzHandling } = this.context
+	    // const data = this.getSearchData()
 
 	    /* TEMP */
 	    const results = [{
@@ -75,7 +75,7 @@ class SentConvocation extends Component {
 
 	render() {
 	    const { t } = this.context
-	    const { search } = this.state
+	    // const { search } = this.state
 
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
