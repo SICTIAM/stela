@@ -13,7 +13,6 @@ import fr.sictiam.stela.pesservice.service.NotificationService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
@@ -39,9 +38,9 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,7 +125,7 @@ public class ReceiverTask {
                         "Alerte - Problème potentiel de récupération des ARs PES",
                         "Pas de nouvel AR récupéré depuis plus de 4 heures et plus de 20 PES en attente");
                 alertSent = true;
-            } catch (MessagingException e) {
+            } catch (IOException | MessagingException e) {
                 LOGGER.error("Unable to send email alert for ARs retrieval", e);
             }
         }
@@ -136,27 +135,24 @@ public class ReceiverTask {
                 String fileName = ftpFile.getName();
                 LOGGER.debug("file found: " + fileName);
                 if ((ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) && ftpClient != null) {
-                    try {
-                        InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
+                    try (InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName())) {
                         if (ftpClient.completePendingCommand()) {
                             byte[] targetArray = new byte[inputStream.available()];
                             inputStream.read(targetArray);
-                            try {
-                                if (ftpFile.getName().contains("ACK")) {
-                                    readACK(targetArray, fileName);
-                                } else if (ftpFile.getName().startsWith("PES2R")) {
-                                    readPesRetour(targetArray, fileName);
-                                }
-                            } catch (IOException | ParserConfigurationException | XPathExpressionException
-                                    | SAXException e) {
-                                LOGGER.error("Error while reading the file: {}", e.getMessage());
-                                FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
-                            } finally {
-                                inputStream.close();
+                            if (ftpFile.getName().contains("ACK")) {
+                                readACK(targetArray, fileName);
+                            } else if (ftpFile.getName().startsWith("PES2R")) {
+                                readPesRetour(targetArray, fileName);
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (ParserConfigurationException | XPathExpressionException | SAXException e) {
+                        LOGGER.error("Error while parsing XML file: {}", e.getMessage());
+                    } catch (SocketTimeoutException e) {
                         LOGGER.error("Error while retrieving file {} on FTP: {}", ftpFile.getName(), e.getMessage());
+                    } catch (IOException e) {
+                        LOGGER.error("Error while reading the file: {}", e.getMessage());
+                    } catch (Exception e) {
+                        LOGGER.error("Unexpected error on FTP file processing: {}", e.getMessage());
                     }
                 }
             }
