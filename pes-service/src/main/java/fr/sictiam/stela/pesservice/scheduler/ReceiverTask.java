@@ -90,7 +90,7 @@ public class ReceiverTask {
     private Integer timeout;
 
     @Scheduled(fixedRate = 60000)
-    public void receive() throws IOException {
+    public void receive() {
         LOGGER.info("Starting receiver task...");
         defaultFtpSessionFactory.setConnectTimeout(timeout);
 
@@ -102,7 +102,7 @@ public class ReceiverTask {
             ftpSession = defaultFtpSessionFactory.getSession();
             ftpClient = ftpSession.getClientInstance();
 
-            files.addAll(Arrays.asList(ftpClient.listFiles()).stream()
+            files.addAll(Arrays.stream(ftpClient.listFiles())
                     .filter(file -> !file.getName().equals(".") && !file.getName().equals(".."))
                     .collect(Collectors.toList()));
         } catch (IllegalStateException | IOException e) {
@@ -135,10 +135,13 @@ public class ReceiverTask {
                 String fileName = ftpFile.getName();
                 LOGGER.debug("file found: " + fileName);
                 if ((ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) && ftpClient != null) {
-                    try (InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName())) {
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
                         if (ftpClient.completePendingCommand()) {
                             byte[] targetArray = new byte[inputStream.available()];
-                            inputStream.read(targetArray);
+                            int bytesRead = inputStream.read(targetArray);
+                            LOGGER.debug("Read {} bytes from file", bytesRead);
                             if (ftpFile.getName().contains("ACK")) {
                                 readACK(targetArray, fileName);
                             } else if (ftpFile.getName().startsWith("PES2R")) {
@@ -153,6 +156,14 @@ public class ReceiverTask {
                         LOGGER.error("Error while reading the file: {}", e.getMessage());
                     } catch (Exception e) {
                         LOGGER.error("Unexpected error on FTP file processing: {}", e.getMessage());
+                    } finally {
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (IOException e) {
+                                LOGGER.warn("Got an error while closing the input stream : {}", e.getMessage());
+                            }
+                        }
                     }
                 }
             }
