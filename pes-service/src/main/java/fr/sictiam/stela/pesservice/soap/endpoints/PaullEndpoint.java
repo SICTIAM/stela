@@ -14,6 +14,7 @@ import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import fr.sictiam.stela.pesservice.service.StorageService;
+import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.soap.model.paull.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import io.jsonwebtoken.Claims;
@@ -145,12 +146,9 @@ public class PaullEndpoint {
                     }
                     pesAller.setPj(depotPESAllerStruct1.getPESPJ() == 1);
 
-                    if (pesAllerService.getByFileName(pesAller.getFileName()).isPresent()) {
-                        returnMessage = "DUPLICATE_FILE";
-                    } else {
-                        Optional<LocalAuthority> localAuthority = localAuthorityService
-                                .getBySiren(paullSoapToken.getSiren());
-                        if (localAuthority.isPresent()) {
+                    Optional<LocalAuthority> localAuthority = localAuthorityService
+                            .getBySiren(paullSoapToken.getSiren());
+                    if (localAuthority.isPresent()) {
                             String currentProfileUuid;
                             String currentLocalAuthUuid = localAuthority.get().getUuid();
 
@@ -158,14 +156,17 @@ public class PaullEndpoint {
                                 currentProfileUuid = localAuthority.get().getGenericProfileUuid();
                             } else {
                                 JsonNode jsonNode = externalRestService.getProfileByLocalAuthoritySirenAndEmail(
-                                        paullSoapToken.getSiren(), depotPESAllerStruct1.getEmail());
-                                currentProfileUuid = jsonNode.get("uuid").asText();
-                            }
+                                    paullSoapToken.getSiren(), depotPESAllerStruct1.getEmail());
+                            currentProfileUuid = jsonNode.get("uuid").asText();
+                        }
+                        try {
                             PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid,
                                     pesAller, name, file);
                             status = "OK";
                             returnMessage = "SUCCES";
                             depotPESAllerStruct.setIdPesAller(result.getUuid());
+                        } catch (PesCreationException pce) {
+                            returnMessage = String.format("CREATION_ERROR : %s", pce.getMessage());
                         }
                     }
 
