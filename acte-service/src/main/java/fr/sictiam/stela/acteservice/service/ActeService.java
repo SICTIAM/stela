@@ -3,19 +3,12 @@ package fr.sictiam.stela.acteservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfReader;
 import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeExport;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.Flux;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.PendingMessage;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
@@ -803,9 +796,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public byte[] getStampedActe(Acte acte, Integer x, Integer y, LocalAuthority localAuthority)
             throws IOException, DocumentException {
+        PdfReader pdfReader = new PdfReader(acte.getActeAttachment().getFile());
         if (x == null || y == null) {
-            x = localAuthority.getStampPosition().getX();
-            y = localAuthority.getStampPosition().getY();
+            if(pdfGeneratorUtil.pdfIsRotated(pdfReader)){
+                //landscape case
+                y = localAuthority.getStampPosition().getX();
+                x = localAuthority.getStampPosition().getY();
+            }else{
+                //portrait case
+                x = localAuthority.getStampPosition().getX();
+                y = localAuthority.getStampPosition().getY();
+            }
         }
         ActeHistory ackHistory = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
@@ -826,7 +827,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), attachment.getFile(), x, y);
     }
 
-    public byte[] getActeAttachmentThumbnail(String uuid) throws IOException {
+    public Thumbnail getActeAttachmentThumbnail(String uuid) throws IOException {
         byte[] pdf = getByUuid(uuid).getActeAttachment().getFile();
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
     }
