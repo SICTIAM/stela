@@ -16,6 +16,6 @@
     position: absolute;
 }
 
-.ui.form .checkbox:not(:first-child) {
+.ui.form .checkbox:not(:last-child) {
     margin-right: 20px
 }
