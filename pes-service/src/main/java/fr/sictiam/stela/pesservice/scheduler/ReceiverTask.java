@@ -94,8 +94,6 @@ public class ReceiverTask {
     public void receive() throws IOException {
         LOGGER.info("Starting receiver task...");
         defaultFtpSessionFactory.setConnectTimeout(timeout);
-        defaultFtpSessionFactory.setDataTimeout(timeout);
-        defaultFtpSessionFactory.setDefaultTimeout(timeout);
 
         FtpSession ftpSession = null;
         FTPClient ftpClient = null;
@@ -138,23 +136,27 @@ public class ReceiverTask {
                 String fileName = ftpFile.getName();
                 LOGGER.debug("file found: " + fileName);
                 if ((ftpFile.getName().contains("ACK") || ftpFile.getName().startsWith("PES2R")) && ftpClient != null) {
-                    InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
-                    if (ftpClient.completePendingCommand()) {
-                        byte[] targetArray = new byte[inputStream.available()];
-                        inputStream.read(targetArray);
-                        try {
-                            if (ftpFile.getName().contains("ACK")) {
-                                readACK(targetArray, fileName);
-                            } else if (ftpFile.getName().startsWith("PES2R")) {
-                                readPesRetour(targetArray, fileName);
+                    try {
+                        InputStream inputStream = ftpClient.retrieveFileStream(ftpFile.getName());
+                        if (ftpClient.completePendingCommand()) {
+                            byte[] targetArray = new byte[inputStream.available()];
+                            inputStream.read(targetArray);
+                            try {
+                                if (ftpFile.getName().contains("ACK")) {
+                                    readACK(targetArray, fileName);
+                                } else if (ftpFile.getName().startsWith("PES2R")) {
+                                    readPesRetour(targetArray, fileName);
+                                }
+                            } catch (IOException | ParserConfigurationException | XPathExpressionException
+                                    | SAXException e) {
+                                LOGGER.error("Error while reading the file: {}", e.getMessage());
+                                FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
+                            } finally {
+                                inputStream.close();
                             }
-                        } catch (IOException | ParserConfigurationException | XPathExpressionException
-                                | SAXException e) {
-                            LOGGER.error("Error while reading the file: {}", e.getMessage());
-                            FileUtils.writeByteArrayToFile(new File(fileName), targetArray);
-                        } finally {
-                            inputStream.close();
                         }
+                    } catch (Exception e) {
+                        LOGGER.error("Error while retrieving file {} on FTP: {}", ftpFile.getName(), e.getMessage());
                     }
                 }
             }
