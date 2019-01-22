@@ -229,7 +229,7 @@ class ActeLocalAuthorityParams extends Component {
                                             showPercents={true}
                                             labelColor='#000'
                                             position={{x:this.state.fields.stampPosition.y, y: this.state.fields.stampPosition.x}}
-                                            handleChange={() =>  console.error("Not available to proceed changes")}
+                                            handleChange={() =>  console.error('Not available to proceed changes')}
                                             disabled={true}
                                         />
                                     </Grid.Row>

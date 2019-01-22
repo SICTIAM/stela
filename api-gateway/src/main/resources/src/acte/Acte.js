@@ -74,34 +74,34 @@ class Acte extends Component {
     }
 
     fetchThumbnail = () => {
-        const { _fetchWithAuthzHandling} = this.context;
-        const {thumbnailStatus} = this.state;
-        const uuid = this.props.uuid;
+        const { _fetchWithAuthzHandling} = this.context
+        const {thumbnailStatus} = this.state
+        const uuid = this.props.uuid
 
         if(thumbnailStatus !== 'fetched') {
-                _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
-                    .then(checkStatus)
-                    .then(res => res.json())
-                    .then(json => {
-                        let stampPosition = this.state.acteUI.stampPosition;
-                        if (json.orientation === 'LANDSCAPE') {
-                            this.setState(prevState =>
-                                ({
-                                    thumbnail: json,
-                                    thumbnailStatus: 'fetched',
-                                    acteUI: {
-                                        ...prevState.acteUI,
-                                        stampPosition: {x: stampPosition.y, y: stampPosition.x}
-                                    }
-                                }));
-                        } else {
-                            this.setState({thumbnail: json,thumbnailStatus: 'fetched'});
-                        }
-                    })
-                    .catch(err => {
-                        this.setState({thumbnailStatus: 'loading'});
-                        console.error(err)
-                    })
+            _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+                .then(checkStatus)
+                .then(res => res.json())
+                .then(json => {
+                    let stampPosition = this.state.acteUI.stampPosition
+                    if (json.orientation === 'LANDSCAPE') {
+                        this.setState(prevState =>
+                            ({
+                                thumbnail: json,
+                                thumbnailStatus: 'fetched',
+                                acteUI: {
+                                    ...prevState.acteUI,
+                                    stampPosition: {x: stampPosition.y, y: stampPosition.x}
+                                }
+                            }))
+                    } else {
+                        this.setState({thumbnail: json,thumbnailStatus: 'fetched'})
+                    }
+                })
+                .catch(err => {
+                    this.setState({thumbnailStatus: 'loading'})
+                    console.error(err)
+                })
         }
     };
 
@@ -145,29 +145,29 @@ class Acte extends Component {
     }
 
     thumbnailSize = () => {
-        let height, width = 0;
-        if(this.state.thumbnail.orientation ==="LANDSCAPE"){
-            height = 190;
-            width = 300;
+        let height, width = 0
+        if(this.state.thumbnail.orientation ==='LANDSCAPE'){
+            height = 190
+            width = 300
         }else {
-            height = 300;
-            width =  190;
+            height = 300
+            width =  190
         }
 
-        return {height: height, width: width};
+        return {height: height, width: width}
     }
 
     draggableBoxSize = () => {
-        let boxHeight, boxWidth = 0;
-        if(this.state.thumbnail.orientation ==="LANDSCAPE"){
-            boxHeight = 70;
-            boxWidth = 25;
+        let boxHeight, boxWidth = 0
+        if(this.state.thumbnail.orientation ==='LANDSCAPE'){
+            boxHeight = 70
+            boxWidth = 25
         }else {
-            boxHeight = 25;
-            boxWidth =  70;
+            boxHeight = 25
+            boxWidth =  70
         }
 
-        return {boxHeight: boxHeight, boxWidth: boxWidth};
+        return {boxHeight: boxHeight, boxWidth: boxWidth}
     }
 
     render() {
@@ -189,13 +189,13 @@ class Acte extends Component {
         )
 
         const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
-        const {boxWidth, boxHeight} = this.draggableBoxSize();
+        const {boxWidth, boxHeight} = this.draggableBoxSize()
 
         const stampPosition = (
             <div>
                 <DraggablePosition
                     style={{ marginBottom: '0.5em' }}
-                    backgroundImage={"data:image/png;base64," + this.state.thumbnail.image.trim()}
+                    backgroundImage={'data:image/png;base64,' + this.state.thumbnail.image.trim()}
                     imageOrientation={this.state.thumbnail.orientation}
                     label={t('acte.stamp_pad.pad_label')}
                     height={thumbnailHeight}
@@ -207,7 +207,7 @@ class Acte extends Component {
                     boxWidth={boxWidth}/>
                 <div style={{ textAlign: 'center' }}>
                     <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
-                       href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
+                        href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
                         {t('api-gateway:form.download')}
                     </a>
                 </div>
@@ -253,8 +253,8 @@ class Acte extends Component {
                                         <Dropdown.Item>
                                             <LoadingContent fetchStatus={thumbnailStatus}>
                                                 <Popup content={stampPosition} on='click' position='left center'
-                                                       trigger={<Dropdown item icon='none'
-                                                                          text={t('acte.stamp_pad.download_stamped_acte')}/>}
+                                                    trigger={<Dropdown item icon='none'
+                                                        text={t('acte.stamp_pad.download_stamped_acte')}/>}
                                                 />
                                             </LoadingContent>
                                         </Dropdown.Item>

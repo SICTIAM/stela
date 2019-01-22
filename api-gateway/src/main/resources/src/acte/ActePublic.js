@@ -57,57 +57,57 @@ class ActePublic extends Component {
     }
 
     fetchThumbnail = () => {
-        const {_fetchWithAuthzHandling} = this.context;
-        const {thumbnailStatus} = this.state;
-        const uuid = this.props.uuid;
+        const {_fetchWithAuthzHandling} = this.context
+        const {thumbnailStatus} = this.state
+        const uuid = this.props.uuid
 
         if (thumbnailStatus !== 'fetched') {
-             _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
-                    .then(checkStatus)
-                    .then(res => res.json())
-                    .then(json => {
-                        let stampPosition = this.state.stampPosition;
-                        if (json.orientation === 'LANDSCAPE') {
-                            this.setState({
-                                thumbnail: json,
-                                thumbnailStatus: 'fetched',
-                                stampPosition: {x: stampPosition.y, y: stampPosition.x}
-                            });
-                        } else {
-                            this.setState({thumbnail: json, thumbnailStatus: 'fetched'});
-                        }
-                    })
-                    .catch(err => {
-                        this.setState({thumbnailStatus: 'loading'});
-                        console.error(err);
-            });
+            _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+                .then(checkStatus)
+                .then(res => res.json())
+                .then(json => {
+                    let stampPosition = this.state.stampPosition
+                    if (json.orientation === 'LANDSCAPE') {
+                        this.setState({
+                            thumbnail: json,
+                            thumbnailStatus: 'fetched',
+                            stampPosition: {x: stampPosition.y, y: stampPosition.x}
+                        })
+                    } else {
+                        this.setState({thumbnail: json, thumbnailStatus: 'fetched'})
+                    }
+                })
+                .catch(err => {
+                    this.setState({thumbnailStatus: 'loading'})
+                    console.error(err)
+                })
         }
     };
 
     thumbnailSize = () => {
-        let height, width = 0;
-        if (this.state.thumbnail.orientation === "LANDSCAPE") {
-            height = 190;
-            width = 300;
+        let height, width = 0
+        if (this.state.thumbnail.orientation === 'LANDSCAPE') {
+            height = 190
+            width = 300
         } else {
-            height = 300;
-            width = 190;
+            height = 300
+            width = 190
         }
 
-        return {height: height, width: width};
+        return {height: height, width: width}
     }
 
     draggableBoxSize = () => {
-        let boxHeight, boxWidth = 0;
-        if (this.state.thumbnail.orientation === "LANDSCAPE") {
-            boxHeight = 70;
-            boxWidth = 25;
+        let boxHeight, boxWidth = 0
+        if (this.state.thumbnail.orientation === 'LANDSCAPE') {
+            boxHeight = 70
+            boxWidth = 25
         } else {
-            boxHeight = 25;
-            boxWidth = 70;
+            boxHeight = 25
+            boxWidth = 70
         }
 
-        return {boxHeight: boxHeight, boxWidth: boxWidth};
+        return {boxHeight: boxHeight, boxWidth: boxWidth}
     }
 
     handleChangeDeltaPosition = (stampPosition) => this.setState({stampPosition})
@@ -125,12 +125,12 @@ class ActePublic extends Component {
             </List.Item>
         )
         const {height: thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
-        const {boxWidth, boxHeight} = this.draggableBoxSize();
+        const {boxWidth, boxHeight} = this.draggableBoxSize()
         const stampPosition = (
             <div>
                 <DraggablePosition
                     style={{marginBottom: '0.5em'}}
-                    backgroundImage={"data:image/png;base64," + this.state.thumbnail.image.trim()}
+                    backgroundImage={'data:image/png;base64,' + this.state.thumbnail.image.trim()}
                     label={t('acte.stamp_pad.pad_label')}
                     height={thumbnailHeight}
                     width={thumbnailWidth}
@@ -141,7 +141,7 @@ class ActePublic extends Component {
                     handleChange={this.handleChangeDeltaPosition}/>
                 <div style={{textAlign: 'center'}}>
                     <a className='ui blue icon button' target='_blank'
-                       href={`/api/acte/public/${acte.uuid}/file/stamped?x=${this.state.stampPosition.x}&y=${this.state.stampPosition.y}`}>
+                        href={`/api/acte/public/${acte.uuid}/file/stamped?x=${this.state.stampPosition.x}&y=${this.state.stampPosition.y}`}>
                         {t('api-gateway:form.download')}
                     </a>
                 </div>
@@ -152,23 +152,23 @@ class ActePublic extends Component {
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
                     <Segment>
                         <Label className='labelStatus' color={'green'}
-                               ribbon>{t('acte:acte.status.ACK_RECEIVED')}</Label>
+                            ribbon>{t('acte:acte.status.ACK_RECEIVED')}</Label>
                         <div style={{textAlign: 'right'}}>
                             <Dropdown basic direction='left' trigger={dropDownButton} icon={false}
-                                      onClick={this.fetchThumbnail}>
+                                onClick={this.fetchThumbnail}>
                                 <Dropdown.Menu>
                                     <a className='item' href={`/api/acte/public/${acte.uuid}/file`} target='_blank'>
                                         {t('acte.page.download_original')}
                                     </a>
                                     <a className='item' href={`/api/acte/public/${acte.uuid}/AR_${acte.uuid}.pdf`}
-                                       target='_blank'>
+                                        target='_blank'>
                                         {t('acte.page.download_justificative')}
                                     </a>
                                     <Dropdown.Item>
                                         <LoadingContent fetchStatus={this.state.thumbnailStatus}>
                                             <Popup content={stampPosition} on='click' position='left center'
-                                                   trigger={<Dropdown item icon='none'
-                                                                      text={t('acte.stamp_pad.download_stamped_acte')}/>}
+                                                trigger={<Dropdown item icon='none'
+                                                    text={t('acte.stamp_pad.download_stamped_acte')}/>}
                                             />
                                         </LoadingContent>
                                     </Dropdown.Item>
@@ -198,12 +198,12 @@ class ActePublic extends Component {
                             <Grid>
                                 <Grid.Column width={4}>
                                     <label style={{verticalAlign: 'middle'}}
-                                           htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
+                                        htmlFor="acteAttachment">{t('acte.fields.acteAttachment')}</label>
                                 </Grid.Column>
                                 <Grid.Column width={12}>
                                     <FieldValue id="acteAttachment">
                                         <LinkFile url={`/api/acte/public/${acte.uuid}/file`}
-                                                  text={acte.acteAttachment.filename}/>
+                                            text={acte.acteAttachment.filename}/>
                                     </FieldValue>
                                 </Grid.Column>
                             </Grid>
