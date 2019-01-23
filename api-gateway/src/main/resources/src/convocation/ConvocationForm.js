@@ -6,10 +6,13 @@ import debounce from 'debounce'
 import moment from 'moment'
 import Validator from 'validatorjs'
 
+import { getLocalAuthoritySlug } from '../_util/utils'
+
 import { Page, FormField, InputTextControlled, InputFile, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import QuestionsForm from './QuestionsForm'
 import RecipientForm from './RecipientForm'
+import Breadcrumb from '../_components/Breadcrumb'
 
 class ConvocationForm extends Component {
 	static contextTypes = {
@@ -112,9 +115,16 @@ class ConvocationForm extends Component {
             <Button type='submit' primary basic disabled={!this.state.isFormValid }>
                 {t('api-gateway:form.send')}
             </Button>
-
+	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={[
+	                    {title: t('api-gateway:breadcrumb.home'), url: `/${localAuthoritySlug}`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation')},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation_creation')}
+	                ]}
+	            />
 	            <Segment>
 	                <Form onSubmit={this.submit}>
 	                    <Grid>

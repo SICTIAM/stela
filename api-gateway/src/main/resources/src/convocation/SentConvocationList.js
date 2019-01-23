@@ -3,8 +3,10 @@ import { translate } from 'react-i18next'
 import { Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 
+import { getLocalAuthoritySlug } from '../_util/utils'
+
 import StelaTable from '../_components/StelaTable'
-//import Breadcrumb from '../_components/Breadcrumb'
+import Breadcrumb from '../_components/Breadcrumb'
 import Pagination from '../_components/Pagination'
 import { Page } from '../_components/UI'
 
@@ -104,9 +106,17 @@ class SentConvocation extends Component {
                 updateItemPerPage={this.updateItemPerPage}
                 currentPage={this.state.currentPage}
                 options={options} />
+	    const localAuthoritySlug = getLocalAuthoritySlug()
 
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={[
+	                    {title: t('api-gateway:breadcrumb.home'), url: `/${localAuthoritySlug}`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation')},
+	                    {title: t('api-gateway:breadcrumb.convocation.sent_convocations_list')}
+	                ]}
+	            />
 	            <Segment>
 	                <StelaTable
 	                    header={true}

@@ -220,9 +220,9 @@ class RecipientsList extends Component {
 	        <Page>
 	            <Breadcrumb
 	                data={[
-	                    {title: 'Accueil Admin', url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	                    {title: 'Convocation', url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
-	                    {title: 'Liste des destinataires'}
+	                    {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
+	                    {title: t('api-gateway:breadcrumb.convocation.recipients_list')}
 	                ]}
 	            />
 	            <QuickView
