@@ -11,7 +11,7 @@ import StelaTable from '../_components/StelaTable'
 import Participants from './Participants'
 
 
-class Convocation extends Component {
+class SentConvocation extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
 	}
@@ -244,4 +244,4 @@ class Convocation extends Component {
 
 }
 
-export default translate(['convocation', 'api-gateway'])(Convocation)
+export default translate(['convocation', 'api-gateway'])(SentConvocation)
