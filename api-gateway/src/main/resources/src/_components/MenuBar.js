@@ -35,7 +35,7 @@ class MenuBar extends Component {
     }
     checkActivatedModule = (module) => {
         const { profile } = this.props.authContext
-        return profile.localAuthority.activatedModules.includes(module)
+        return profile && profile.localAuthority && profile.localAuthority.activatedModules.includes(module)
     }
     render() {
         const { t, isMenuOpened, _openMenu } = this.context

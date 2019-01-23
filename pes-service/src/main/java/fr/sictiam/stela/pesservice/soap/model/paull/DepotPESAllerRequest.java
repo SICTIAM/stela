@@ -133,4 +133,12 @@ public class DepotPESAllerRequest {
         return this.fichier;
     }
 
+    @Override
+    public String toString() {
+        return "DepotPESAllerRequest{" +
+                "sessionId='" + sessionId + '\'' +
+                ", infosPESAller=" + infosPESAller +
+                ", fichier=" + fichier +
+                '}';
+    }
 }

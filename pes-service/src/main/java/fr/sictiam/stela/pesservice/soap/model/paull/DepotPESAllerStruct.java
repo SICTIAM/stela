@@ -86,4 +86,11 @@ public class DepotPESAllerStruct {
         this.idPesAller = value;
     }
 
+    @Override
+    public String toString() {
+        return "DepotPESAllerStruct{" +
+                "message='" + message + '\'' +
+                ", idPesAller='" + idPesAller + '\'' +
+                '}';
+    }
 }
