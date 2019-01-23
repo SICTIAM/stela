@@ -99,10 +99,10 @@ public class PaullEndpoint {
     public @ResponsePayload
     DepotPESAllerResponse depotPESAller(@RequestPayload DepotPESAllerRequest depotPesAller)
             throws IOException, Base64DecodingException {
+        LOGGER.info("Received a PES Aller : {}", depotPesAller);
         PaullSoapToken paullSoapToken = getToken(depotPesAller.getSessionId());
 
         DepotPESAllerResponse depotPESAllerResponse = new DepotPESAllerResponse();
-
         DepotPESAllerStruct depotPESAllerStruct = new DepotPESAllerStruct();
 
         String returnMessage = "UNKNOW_ERROR";
@@ -110,45 +110,48 @@ public class PaullEndpoint {
         if (paullSoapToken == null) {
             returnMessage = "SESSION_INVALID_OR_EXPIRED";
             LOGGER.error(returnMessage);
-
         } else {
             GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
 
             if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
                 returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
-
+                LOGGER.error(returnMessage);
             } else {
                 DepotPESAllerStruct1 depotPESAllerStruct1 = depotPesAller.getInfosPESAller().get(0);
-                LOGGER.debug(depotPESAllerStruct1.toString());
                 byte[] file = Base64.decode(depotPesAller.getFichier().get(0).getBase64().getBytes("UTF-8"));
                 String name = StringUtils.stripAccents(depotPesAller.getFichier().get(0).getFilename());
                 if (pesAllerService.checkVirus(file)) {
                     returnMessage = "VIRUS_FOUND";
+                    LOGGER.error(returnMessage);
                 } else {
-                    PesAller pesAller = new PesAller();
-                    pesAller.setObjet(depotPESAllerStruct1.getTitle());
-                    pesAller.setComment(depotPESAllerStruct1.getComment());
-                    List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
-                    if (!errors.isEmpty()) {
-                        returnMessage = "INVALID_DATAS";
-                    }
+                    try {
+                        PesAller pesAller = new PesAller();
+                        pesAller.setObjet(depotPESAllerStruct1.getTitle());
+                        pesAller.setComment(depotPESAllerStruct1.getComment());
+                        List<ObjectError> errors = ValidationUtil.validatePes(pesAller);
+                        if (!errors.isEmpty()) {
+                            returnMessage = "INVALID_DATAS";
+                            LOGGER.error("Received PES is invalid : {}", errors);
+                            // TODO : don't go further is data is invalid
+                            // TODO : is there really a point validating on the two above fields ??
+                        }
 
-                    pesAller.setCreation(LocalDateTime.now());
+                        pesAller.setCreation(LocalDateTime.now());
 
-                    if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
-                        pesAller.setServiceOrganisationNumber(Integer.parseInt(depotPESAllerStruct1.getGroupid()));
-                    }
-                    if (depotPESAllerStruct1.getPESPJ() != 1
-                            && StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
-                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        LocalDate deadline = LocalDate.parse(depotPESAllerStruct1.getValidation(), dateFormatter);
-                        pesAller.setValidationLimit(deadline);
-                    }
-                    pesAller.setPj(depotPESAllerStruct1.getPESPJ() == 1);
+                        if (StringUtils.isNotBlank(depotPESAllerStruct1.getGroupid())) {
+                            pesAller.setServiceOrganisationNumber(Integer.parseInt(depotPESAllerStruct1.getGroupid()));
+                        }
+                        if (depotPESAllerStruct1.getPESPJ() != 1
+                                && StringUtils.isNotBlank(depotPESAllerStruct1.getValidation())) {
+                            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                            LocalDate deadline = LocalDate.parse(depotPESAllerStruct1.getValidation(), dateFormatter);
+                            pesAller.setValidationLimit(deadline);
+                        }
+                        pesAller.setPj(depotPESAllerStruct1.getPESPJ() == 1);
 
-                    Optional<LocalAuthority> localAuthority = localAuthorityService
-                            .getBySiren(paullSoapToken.getSiren());
-                    if (localAuthority.isPresent()) {
+                        Optional<LocalAuthority> localAuthority = localAuthorityService
+                                .getBySiren(paullSoapToken.getSiren());
+                        if (localAuthority.isPresent()) {
                             String currentProfileUuid;
                             String currentLocalAuthUuid = localAuthority.get().getUuid();
 
@@ -156,29 +159,37 @@ public class PaullEndpoint {
                                 currentProfileUuid = localAuthority.get().getGenericProfileUuid();
                             } else {
                                 JsonNode jsonNode = externalRestService.getProfileByLocalAuthoritySirenAndEmail(
-                                    paullSoapToken.getSiren(), depotPESAllerStruct1.getEmail());
-                            currentProfileUuid = jsonNode.get("uuid").asText();
+                                        paullSoapToken.getSiren(), depotPESAllerStruct1.getEmail());
+                                currentProfileUuid = jsonNode.get("uuid").asText();
+                            }
+                            try {
+                                PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid,
+                                        pesAller, name, file);
+                                status = "OK";
+                                returnMessage = "SUCCES";
+                                depotPESAllerStruct.setIdPesAller(result.getUuid());
+                                LOGGER.debug(String.format("Created PES (PJ : %b) with id : %s", result.isPj(), result.getUuid()));
+                            } catch (PesCreationException pce) {
+                                LOGGER.error("Error while creating PES", pce);
+                                returnMessage = String.format("CREATION_ERROR : %s", pce.getMessage());
+                            }
+                        } else {
+                            LOGGER.error("Unable to find local authority from SIREN found in token : {}", paullSoapToken.getSiren());
+                            returnMessage = String.format("UNKOWN_SIREN : %s", paullSoapToken.getSiren());
                         }
-                        try {
-                            PesAller result = pesAllerService.create(currentProfileUuid, currentLocalAuthUuid,
-                                    pesAller, name, file);
-                            status = "OK";
-                            returnMessage = "SUCCES";
-                            depotPESAllerStruct.setIdPesAller(result.getUuid());
-                        } catch (PesCreationException pce) {
-                            returnMessage = String.format("CREATION_ERROR : %s", pce.getMessage());
-                        }
+                    } catch (Exception e) {
+                        LOGGER.error("Error while dealing with received PES", e);
+                        returnMessage = String.format("CREATION_ERROR : %s", e.getMessage());
                     }
-
                 }
-
             }
-
         }
 
         depotPESAllerResponse.setStatusCode(status);
         depotPESAllerStruct.setMessage(returnMessage);
         depotPESAllerResponse.getRetour().add(depotPESAllerStruct);
+
+        LOGGER.info("Returning : {}", depotPESAllerResponse);
 
         return depotPESAllerResponse;
     }

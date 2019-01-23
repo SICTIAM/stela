@@ -86,4 +86,10 @@ public class DepotPESAllerStruct3 {
         this.base64 = value;
     }
 
+    @Override
+    public String toString() {
+        return "DepotPESAllerStruct3{" +
+                "filename='" + filename + '\'' +
+                '}';
+    }
 }

@@ -100,4 +100,11 @@ public class DepotPESAllerResponse {
         return this.retour;
     }
 
+    @Override
+    public String toString() {
+        return "DepotPESAllerResponse{" +
+                "statusCode='" + statusCode + '\'' +
+                ", retour=" + retour +
+                '}';
+    }
 }
