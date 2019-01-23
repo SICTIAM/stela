@@ -48,11 +48,15 @@ class Group extends Component {
                     })
                 })
         }
+        // Sometimes componentDidUpdate doesn't trigger
+        if(this.props.authContext.profile && this.props.authContext.profile.localAuthority) {
+            this.setState({activatedModules: this.props.authContext.profile.localAuthority.activatedModules}, this.fetchAllRights)
+        }
     }
     componentDidUpdate() {
         // QuickFix
         // context sometimes doen't load in ComponentDidMount
-        if (this.props.authContext.profile && this.props.authContext.profile.localAuthority && this.props.authContext.profile.localAuthority.activatedModules !== this.state.activatedModules) {
+        if (this.props.authContext.profile && this.props.authContext.profile.localAuthority && !Object.is(this.props.authContext.profile.localAuthority.activatedModules, this.state.activatedModules)) {
             this.setState({activatedModules: this.props.authContext.profile.localAuthority.activatedModules}, this.fetchAllRights)
         }
     }
