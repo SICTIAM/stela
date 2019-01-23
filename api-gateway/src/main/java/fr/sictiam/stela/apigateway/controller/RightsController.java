@@ -35,7 +35,8 @@ public class RightsController {
         List<String> rights = new ArrayList<>();
 
         try {
-            if (discoveryClient.getApplication("acte-service") != null) {
+            if (discoveryClient.getApplication("acte-service") != null
+                    && !discoveryClient.getApplication("acte-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/rights",
                         String[].class)));
             }
@@ -44,7 +45,8 @@ public class RightsController {
         }
 
         try {
-            if (discoveryClient.getApplication("convocation-service") != null) {
+            if (discoveryClient.getApplication("convocation-service") != null
+                    && !discoveryClient.getApplication("convocation-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.convocationServiceUrl() +
                                 "/api/convocation/rights", String[].class)));
             }
@@ -53,7 +55,8 @@ public class RightsController {
         }
 
         try {
-            if (discoveryClient.getApplication("pes-service") != null) {
+            if (discoveryClient.getApplication("pes-service") != null
+                    && !discoveryClient.getApplication("pes-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.pesServiceUrl() + "/api" +
                                 "/pes/rights", String[].class)));
             }
