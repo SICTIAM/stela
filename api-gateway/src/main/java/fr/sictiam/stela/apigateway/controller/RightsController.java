@@ -1,7 +1,6 @@
 package fr.sictiam.stela.apigateway.controller;
 
 import com.netflix.discovery.EurekaClient;
-import com.netflix.discovery.shared.Application;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,8 @@ public class RightsController {
         List<String> rights = new ArrayList<>();
 
         try {
-            if (discoveryClient.getApplication("acte-service") != null) {
+            if (discoveryClient.getApplication("acte-service") != null
+                    && !discoveryClient.getApplication("acte-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/rights",
                         String[].class)));
             }
@@ -45,13 +45,6 @@ public class RightsController {
         }
 
         try {
-            Application application = discoveryClient.getApplication("convocation-service");
-            LOGGER.debug("Eureka returned application : {}", application);
-            application.getInstances().forEach(instanceInfo ->
-                    LOGGER.debug("It has instance id = {}, status = {} (homepage : {})",
-                            instanceInfo.getInstanceId(),
-                            instanceInfo.getStatus(),
-                            instanceInfo.getHomePageUrl()));
             if (discoveryClient.getApplication("convocation-service") != null
                     && !discoveryClient.getApplication("convocation-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.convocationServiceUrl() +
@@ -62,7 +55,8 @@ public class RightsController {
         }
 
         try {
-            if (discoveryClient.getApplication("pes-service") != null) {
+            if (discoveryClient.getApplication("pes-service") != null
+                    && !discoveryClient.getApplication("pes-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.pesServiceUrl() + "/api" +
                                 "/pes/rights", String[].class)));
             }
