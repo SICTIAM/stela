@@ -202,67 +202,72 @@ public class PaullEndpoint {
         PaullSoapToken paullSoapToken = getToken(getDetailsPESAllerRequest.getSessionId());
 
         GetDetailsPESAllerResponse detailsPESAllerResponse = new GetDetailsPESAllerResponse();
-
         GetDetailsPESAllerStruct detailsPESAllerStruct = new GetDetailsPESAllerStruct();
 
-        String returnMessage = "UNKNOW_ERROR";
-        String status = "NOK";
-        if (paullSoapToken == null) {
-            returnMessage = "SESSION_INVALID_OR_EXPIRED";
-        } else {
-            PesAller pesAller = pesAllerService.getByUuid(getDetailsPESAllerRequest.getIdPesAller());
-            Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren());
+        if (paullSoapToken == null)
+            return getDetailsPESAllerResponseError("SESSION_INVALID_OR_EXPIRED");
 
-            GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
+        PesAller pesAller = pesAllerService.getByUuid(getDetailsPESAllerRequest.getIdPesAller());
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren());
 
-            if (localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
+        GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
 
-                ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
-                        pesAller.getSesileClasseurId());
+        if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren()))
+            return getDetailsPESAllerResponseError("LOCALAUTHORITY_NOT_GRANTED");
 
-                if (classeur.getStatusCode().isError()) {
-                    status = "NOK";
-                    returnMessage = classeur.getStatusCode() + ": " + classeur.getStatusCode().getReasonPhrase();
-                } else {
-                    JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        // PES PJ are not sent to signature, don't bother checking something impossible
+        if (!pesAller.isPj()) {
+            ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
+                    pesAller.getSesileClasseurId());
+            if (classeur.getStatusCode().isError()) {
+                return getDetailsPESAllerResponseError(classeur.getStatusCode() + ": " + classeur.getStatusCode().getReasonPhrase());
+            }
 
-                    detailsPESAllerStruct.setPESPJ(pesAller.isPj() ? "1" : "0");
-                    detailsPESAllerStruct.setObjet(pesAller.getObjet());
-                    detailsPESAllerStruct.setNomClasseur(classeur.getBody().getNom());
-                    detailsPESAllerStruct.setUserName(node.get("email").asText());
-                    detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
-                    detailsPESAllerStruct.setDateDepot(dateFormatter.format(pesAller.getCreation()));
+            detailsPESAllerStruct.setNomClasseur(classeur.getBody().getNom());
+            detailsPESAllerStruct.setEtatclasseur(classeur.getBody().getStatus().ordinal() + "");
+        }
 
-                    List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
-                            getDetailsPESAllerRequest.getIdPesAller(),
-                            Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
+        JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-                    Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
+        detailsPESAllerStruct.setPESPJ(pesAller.isPj() ? "1" : "0");
+        detailsPESAllerStruct.setObjet(pesAller.getObjet());
+        detailsPESAllerStruct.setUserName(node.get("email").asText());
+        detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
+        detailsPESAllerStruct.setDateDepot(dateFormatter.format(pesAller.getCreation()));
 
-                    if (peshistory.isPresent()) {
-                        if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
-                            detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
-                        } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
-                            detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
-                            detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
-                        }
-                    }
+        List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
+                getDetailsPESAllerRequest.getIdPesAller(),
+                Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
 
-                    detailsPESAllerStruct.setEtatclasseur(classeur.getBody().getStatus().ordinal() + "");
-                    returnMessage = "SUCCESS";
-                    status = "OK";
-                }
+        Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
 
-            } else {
-                returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
+        if (peshistory.isPresent()) {
+            if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
+                detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
+            } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
+                detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
+                detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
             }
         }
-        detailsPESAllerStruct.setMessage(returnMessage);
+
+        detailsPESAllerStruct.setMessage("SUCCESS");
         detailsPESAllerResponse.getRetour().add(detailsPESAllerStruct);
-        detailsPESAllerResponse.setStatusCode(status);
+        detailsPESAllerResponse.setStatusCode("OK");
         return detailsPESAllerResponse;
 
+    }
+
+    private GetDetailsPESAllerResponse getDetailsPESAllerResponseError(String errorMessage) {
+        GetDetailsPESAllerResponse detailsPESAllerResponse = new GetDetailsPESAllerResponse();
+        GetDetailsPESAllerStruct detailsPESAllerStruct = new GetDetailsPESAllerStruct();
+        detailsPESAllerStruct.setMessage(errorMessage);
+        detailsPESAllerResponse.getRetour().add(detailsPESAllerStruct);
+        detailsPESAllerResponse.setStatusCode("NOK");
+
+        LOGGER.info("Returning error response : {}", detailsPESAllerResponse);
+
+        return detailsPESAllerResponse;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getPESAllerRequest")
