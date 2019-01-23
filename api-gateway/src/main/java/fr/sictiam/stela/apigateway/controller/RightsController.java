@@ -1,6 +1,7 @@
 package fr.sictiam.stela.apigateway.controller;
 
 import com.netflix.discovery.EurekaClient;
+import com.netflix.discovery.shared.Application;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,15 @@ public class RightsController {
         }
 
         try {
-            if (discoveryClient.getApplication("convocation-service") != null) {
+            Application application = discoveryClient.getApplication("convocation-service");
+            LOGGER.debug("Eureka returned application : {}", application);
+            application.getInstances().forEach(instanceInfo ->
+                    LOGGER.debug("It has instance id = {}, status = {} (homepage : {})",
+                            instanceInfo.getInstanceId(),
+                            instanceInfo.getStatus(),
+                            instanceInfo.getHomePageUrl()));
+            if (discoveryClient.getApplication("convocation-service") != null
+                    && !discoveryClient.getApplication("convocation-service").getInstances().isEmpty()) {
                 rights.addAll(Arrays.asList(restTemplate.getForObject(discoveryUtils.convocationServiceUrl() +
                                 "/api/convocation/rights", String[].class)));
             }
