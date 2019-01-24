@@ -82,20 +82,22 @@ class Home extends Component {
                                         {certificate.status === 'NONE' && pairedCertificate && (
                                             <span>{t('certificate_not_inserted')}<br/></span>
                                         )}
-                                        {certificate.status !== 'VALID' && !pairedCertificate && (
+                                        {certificate.status === 'NONE' && !pairedCertificate && (
                                             <span>{t('certificate_not_paired')}<br/></span>
                                         )}
                                         {certificate.status === 'VALID'  && !pairedCertificate && (
-                                            <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}<br/></Link>
+                                            <span>{t('certificate_not_paired')}<br/>
+                                                <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}<br/></Link>
+                                            </span>
                                         )}
-                                        {certificate.status === 'EXPIRED' && ((pairedCertificate && certificate.serial === pairedCertificate.serial && certificate.issuer === pairedCertificate.issuer) || !pairedCertificate) && (
+                                        {certificate.status === 'EXPIRED' && (
                                             <span>{t('error.certificate_required.EXPIRED')}<br/></span>
                                         )}
                                         {(certificate.status === 'VALID' && pairedCertificate &&
                                             (certificate.serial !== pairedCertificate.serial || certificate.issuer !== pairedCertificate.issuer )) && (
                                                 <span>{t('certificate_not_paired_user')}<br/></span>
                                             )}
-                                        {(certificate.status !== 'NONE' && certificate.status !== 'EXPIRED' && certificate.status !== 'VALID' && !pairedCertificate) && (
+                                        {(certificate.status !== 'NONE' && certificate.status !== 'EXPIRED' && certificate.status !== 'VALID') && (
                                             <span>{t('notifications.admin.invalid_certificate')}</span>
                                         )}
                                         {isCertificatePaired && (
