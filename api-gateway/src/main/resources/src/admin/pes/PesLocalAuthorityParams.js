@@ -170,7 +170,9 @@ class PesLocalAuthorityParams extends Component {
             .then(response => response.json())
             .then(() => _addNotification(notifications.admin.sesileValidTokens))
             .catch(response => _addNotification(
-                response.status === 403 ?
+                // Status code depends on the Sesile version, new version return 401 when token is invalid and olds 403
+                ((this.state.fields.sesileNewVersion && response.status === 401) ||
+                (!this.state.fields.sesileNewVersion && response.status === 403)) ?
                     notifications.admin.sesileInvalidTokens :
                     notifications.admin.sesileUnavailableService))
     }

@@ -131,7 +131,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             pes.setSesileDocumentId(document.getId());
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
+        } catch (RestClientResponseException e) {
             LOGGER.error("[submitToSignature] Failed to send classeur to Sesile: {} ({})", e.getMessage(), e.getResponseBodyAsString());
             pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_SENDING_ERROR);
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public void checkPesWithdrawn() {
-        LOGGER.info("Cheking for PES being withdrawn...");
+        LOGGER.info("[checkPesWithdrawn] Cheking for PES being withdrawn...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
         pesAllers.forEach(pes -> {
             if (pes.getPesHistories().stream()
@@ -167,8 +167,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                         addSignedStatus((PesAller) pes);
                         LOGGER.debug("[checkPesSigned] Document {} signed from Sesile", pes.getSesileDocumentId());
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
-                        LOGGER.debug("[checkPesSigned] Sending document {} to Stela validation process", pes.getSesileDocumentId());
                         if (file != null) {
+                            LOGGER.debug("[checkPesSigned] Sending document {} to Stela validation process", pes.getSesileDocumentId());
                             pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file);
                         } else {
                             LOGGER.warn("[checkPesSigned] Document content for pes {} is null", pes.getUuid());
@@ -419,7 +419,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     }
 
     public ResponseEntity<Document> addFileToclasseur(LocalAuthority localAuthority, byte[] file, String fileName,
-            int classeur) throws HttpClientErrorException {
+            int classeur) throws RestClientResponseException {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
@@ -443,7 +443,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/{classeur}/newDocuments", HttpMethod.POST,
                     requestEntity, Document.class, classeur);
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.error("[addFileToclasseur] Receiving a status code {} from SESILE url {} for organization {}:  {}",
+                    e.getRawStatusCode(), getSesileUrl(localAuthority), localAuthority.getSiren(), e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -467,7 +468,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     HttpMethod.GET, requestEntity, Object.class);
             return response.getStatusCode();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getStatusCode(), e.getMessage());
+            LOGGER.warn("[verifyTokens] Receiving a status code {} from SESILE url {}: {}",
+                    e.getStatusCode(), getSesileUrl(sesileNewVersion), e.getMessage());
             return e.getStatusCode();
         }
     }
@@ -476,7 +478,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             throws IOException {
         JsonNode profile = externalRestService.getProfile(profileUuid);
         String email = profile.get("agent").get("email").asText();
-        //TODO: Refactor duplcate code
+        //TODO: Refactor duplicated code
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         List<ServiceOrganisation> organisations;
         try {
@@ -488,7 +490,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                                     requestEntity, ServiceOrganisation[].class, email).getBody()
             );
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.warn("[getServiceOrganisations] Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
             return new ArrayList<>();
         }
 
@@ -512,7 +514,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                                     ServiceOrganisation[].class, email).getBody()
             );
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.warn("[getServiceGenericOrganisations] Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
             return new ArrayList<>();
         }
     }
@@ -529,7 +531,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                                     ServiceOrganisation[].class, email).getBody()
             );
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.error("[getHeliosServiceOrganisations] Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
             return new ArrayList<>();
         }
 
@@ -543,7 +545,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     }
 
-    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer classeur) {
+    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, @NotNull Integer classeur) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         String url = getSesileUrl(localAuthority);
         String sesile3 = StringUtils.removeEnd(sesileUrl, "/");
@@ -553,13 +555,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
                     classeur);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
-                    e.getMessage(), e.getResponseBodyAsString());
             // Quick fix : check on other Sesile version
-            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+            if (e.getStatusCode().is4xxClientError()) {
+                LOGGER.info("[checkClasseurStatus] Receiving a status code {} from SESILE url {} for organization {} ({})", e.getStatusCode(),
+                        url, localAuthority.getSiren(), e.getResponseBodyAsString());
                 String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
-                LOGGER.warn("[checkClasseurStatus] Check classeur status on fallback url {}", fallbackUrl + "/api" +
-                        "/classeur/" + classeur);
+                LOGGER.info("[checkClasseurStatus] Check classeur status on fallback url {}{}{}", fallbackUrl, "/api/classeur/", classeur);
                 try {
                     return restTemplate.exchange(fallbackUrl + "/api/classeur/{id}",
                             HttpMethod.GET,
@@ -567,11 +568,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                             Classeur.class,
                             classeur);
                 } catch (HttpClientErrorException | HttpServerErrorException e2) {
-                    LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({}) on fallback " +
-                                    "url: {}", e2.getStatusCode(),
-                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/classeur/" + classeur);
+                    LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({}) on fallback url: {} for organization {}", e2.getStatusCode(),
+                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/classeur/" + classeur, localAuthority.getSiren());
                     return new ResponseEntity<>(e.getStatusCode());
                 }
+            } else {
+                LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE url {} for the organization SIREN {} ({})", e.getStatusCode(),
+                        url, localAuthority.getSiren(), e.getResponseBodyAsString());
             }
             return new ResponseEntity<>(e.getStatusCode());
         }
@@ -579,7 +582,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public boolean checkDocumentSigned(LocalAuthority localAuthority, int documentId) {
         Document document = getDocument(localAuthority, documentId);
-        LOGGER.debug("Document {} signed: {}", documentId, document != null && document.isSigned());
+        LOGGER.debug("[checkDocumentSigned] Document {} signed: {}", documentId, document != null && document.isSigned());
         return document != null && document.isSigned();
     }
 
@@ -601,12 +604,11 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     requestEntity, Document.class, documentId);
             return document.getStatusCode().isError() ? null : document.getBody();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            LOGGER.error("[getDocument] Receiving a status code {} from SESILE: {} ({})", e.getStatusCode(),
-                    e.getMessage(), e.getResponseBodyAsString());
-            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+            if (e.getStatusCode().is4xxClientError()) {
+                LOGGER.info("[getDocument] Receiving a status code {} from SESILE url {} for organization {} ({})", e.getStatusCode(),
+                        url, localAuthority.getSiren(), e.getMessage(), e.getResponseBodyAsString());
                 String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
-                LOGGER.warn("[getDocument] Check document status on fallback url {}",
-                        fallbackUrl + "/api/document/" + documentId);
+                LOGGER.info("[getDocument] Check document status on fallback url {}", fallbackUrl + "/api/document/" + documentId);
                 try {
                     document = restTemplate.exchange(fallbackUrl + "/api/document/{id}",
                             HttpMethod.GET,
@@ -619,6 +621,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                             e2.getStatusCode(),
                             e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/document/" + documentId);
                 }
+            } else {
+                LOGGER.error("[getDocument] Receiving a status code {} from SESILE url {} for the organization SIREN {} ({})", e.getStatusCode(),
+                        url, localAuthority.getSiren(), e.getResponseBodyAsString());
             }
             return null;
         }
@@ -627,14 +632,16 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public byte[] getDocumentBody(LocalAuthority localAuthority, int document)
             throws RestClientException, UnsupportedEncodingException {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
+        String url = getSesileUrl(localAuthority);
         try {
-            return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
+            return restTemplate.exchange( url + "/api/document/{id}/content", HttpMethod.GET, requestEntity,
                     String.class, document).getBody().getBytes("ISO-8859-1");
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.warn("[getDocumentBody] Receiving a status code {} from SESILE {} for document {}: {}",
+                    e.getRawStatusCode(), url, document, e.getResponseBodyAsString());
             return null;
         } catch (NullPointerException e) {
-            LOGGER.error("Receiving no byte from SESILE: {}", e.getMessage());
+            LOGGER.error("[getDocumentBody] Receiving no byte from SESILE {} for document {}:  {}", url, document, e.getMessage());
             return null;
         }
     }
@@ -649,7 +656,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         try {
             return restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/", HttpMethod.POST, requestEntity, Classeur.class);
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.error("[postClasseur] Receiving a status code {} from SESILE url {} for organization {} : {}",
+                    e.getRawStatusCode(), getSesileUrl(localAuthority), localAuthority.getSiren(), e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -661,7 +669,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             types = Arrays.asList(restTemplate.exchange(getSesileUrl(localAuthority) + "/api/classeur/types/", HttpMethod.GET, requestEntity,
                     ClasseurType[].class).getBody());
         } catch (RestClientResponseException e) {
-            LOGGER.error("Receiving a status code {} from SESILE: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            LOGGER.warn("[getTypes] Receiving a status code {} from SESILE url {}: {}", e.getRawStatusCode(), getSesileUrl(localAuthority), e.getResponseBodyAsString());
             types = new ArrayList<>();
         }
         return types;
