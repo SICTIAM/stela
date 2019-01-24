@@ -51,7 +51,8 @@ class Acte extends Component {
             image:'',
             orientation: ''
         },
-        thumbnailStatus: 'loading'
+        thumbnailStatus: 'loading',
+        isCertificateValid: false
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -61,7 +62,10 @@ class Acte extends Component {
             _fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, () => {
+                    this.getAgentInfos()
+                    this.checkCertificateIsValid()
+                }))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
@@ -71,6 +75,23 @@ class Acte extends Component {
 
 
         }
+    }
+
+    checkCertificateIsValid = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(certificate => {
+                this.setState({ isCertificateValid: certificate })
+            })
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
     }
 
     fetchThumbnail = () => {
@@ -275,7 +296,9 @@ class Acte extends Component {
                                 </ConfirmModal>
                             )}
 
-                            <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
+                            {this.state.isCertificateValid &&
+                                <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid}/>
+                            }
                         </div>
 
                         <FieldInline htmlFor="number" label={t('acte.fields.number')}>
