@@ -9,6 +9,11 @@ class QuestionsForm extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
 	}
+	static propTypes = {
+	    editable: PropTypes.bool,
+	    response: PropTypes.bool,
+	    questions: PropTypes.array
+	}
 	state = {
 	    currentQuestion: ''
 	}

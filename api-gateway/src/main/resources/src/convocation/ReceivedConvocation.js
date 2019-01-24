@@ -3,7 +3,10 @@ import { Segment, Grid, Button, Radio, Form } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 
+import { getLocalAuthoritySlug } from '../_util/utils'
+
 import { Page, Field, FieldValue, FormFieldInline } from '../_components/UI'
+import Breadcrumb from '../_components/Breadcrumb'
 
 
 class ReceivedConvocation extends Component {
@@ -70,9 +73,17 @@ class ReceivedConvocation extends Component {
 
 	render() {
 	    const { t } = this.context
-
+	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={[
+	                    {title: t('api-gateway:breadcrumb.home'), url: `/${localAuthoritySlug}`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation')},
+	                    {title: t('api-gateway:breadcrumb.convocation.reveived_convocations_list'), url: `/${localAuthoritySlug}/convocation/liste-reçues`},
+	                    {title: t('api-gateway:breadcrumb.convocation.reveived_convocation')},
+	                ]}
+	            />
 	            <Segment>
 	                <Form>
 	                    <h2>Titre de la convocation</h2>

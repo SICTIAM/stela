@@ -92,7 +92,7 @@
     },
     "convocation": {
       "convocation": "Convocation",
-      "send_a_convocation": "Déposer une convocation",
+      "send_a_convocation": "Envoyer une convocation",
       "reveived_convocations": "Convocations reçues",
       "sent_convocations": "Convocations envoyées"
     },
@@ -446,6 +446,7 @@
     }
   },
   "breadcrumb": {
+    "home": "Accueil",
     "admin_home": "Accueil Admin",
     "convocation": {
       "convocation": "Convocation",
@@ -454,7 +455,12 @@
       "edit_assembly_type": "Editer un type d'assemblée",
       "recipients_list": "Liste des destinataires",
       "add_recipients": "Ajouter un destinataire",
-      "edit_recipients": "Editer un destinataire"
+      "edit_recipients": "Editer un destinataire",
+      "convocation_creation": "Envoyer une convocation",
+      "reveived_convocation": "Convocation reçue",
+      "sent_convocation": "Convocation envoyée",
+      "reveived_convocations_list": "Liste des convocations reçues", 
+      "sent_convocations_list": "Liste des convocations envoyées"
     }
   },
   "made_with_love": "Créé avec ❤ par le SICTIAM"
