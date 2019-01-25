@@ -89,7 +89,7 @@ public class ReceiverTask {
     @Value("${application.ftp.timeout}")
     private Integer timeout;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedDelay = 60000)
     public void receive() {
         LOGGER.info("Starting receiver task...");
         defaultFtpSessionFactory.setConnectTimeout(timeout);
