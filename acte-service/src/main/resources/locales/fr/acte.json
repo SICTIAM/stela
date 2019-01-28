@@ -81,10 +81,12 @@
       "ARRETES_INDIVIDUELS": "Actes individuels",
       "CONTRATS_ET_CONVENTIONS": "Contrats, conventions et avenants",
       "DOCUMENTS_BUDGETAIRES_ET_FINANCIERS": "Documents budgétaires et financiers",
-      "AUTRES": "Autres"
+      "AUTRES": "Autres",
+      "AR_PREF": "AR Préfecture"
     },
     "fields": {
       "number": "Numéro d'acte",
+      "uniqueId": "Identifiant unique de l'acte",
       "decision": "Date de décision",
       "decision_from": "Date de décision début",
       "decision_to": "Date de décision fin",
@@ -94,12 +96,17 @@
       "annexes": "Fichiers annexes",
       "public": "Affichage dans le registre",
       "publicWebsite": "Affichage sur site internet",
-      "localAuthority": "Collectivité",
+      "localAuthority": "Collectivité émettrice",
+      "applicantName": "Acte transmis par",
       "objet": "Objet",
       "status": "Statut",
       "group": "Visible par",
       "agent": "Déposé par",
-      "multipleChannels": "Envoi des pièces jointes par des canaux multiples (la télétransmission sera complétée par un envoi papier ou un dépôt physique)"
+      "multipleChannels": "Envoi des pièces jointes par des canaux multiples (la télétransmission sera complétée par un envoi papier ou un dépôt physique)",
+      "sentDate": "Date d'envoi de l'acte",
+      "cancellationAskedDate": "Date de demande d'annulation de l'acte",
+      "cancelledDate": "Date de confirmation de l'annulation de l'acte",
+      "ackReceivedDate": "Date de réception de l'AR"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
