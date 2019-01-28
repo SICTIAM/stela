@@ -133,6 +133,15 @@ class Acte extends Component {
             .then(response => response.json())
             .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
     }
+    checkAgentIsPartOfTheGroup = () => {
+        const {agent, acteUi} = this.state
+        for(let group of agent.groups) {
+            if(group.uuid === acteUi.groupUuid) {
+                return true
+            }
+        }
+        return false
+    }
     handleChangeDeltaPosition = (stampPosition) => {
         const { acteUI } = this.state
         acteUI.stampPosition = stampPosition
@@ -208,6 +217,7 @@ class Acte extends Component {
                 </FieldValue>
             </List.Item>
         )
+        const isAgentPartOfTheActeGroup = this.checkAgentIsPartOfTheGroup
 
         const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
         const {boxWidth, boxHeight} = this.draggableBoxSize()
@@ -296,7 +306,7 @@ class Acte extends Component {
                                 </ConfirmModal>
                             )}
 
-                            {this.state.isCertificateValid &&
+                            {this.state.isCertificateValid && isAgentPartOfTheActeGroup &&
                                 <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid}/>
                             }
                         </div>
