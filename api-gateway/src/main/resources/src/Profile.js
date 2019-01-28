@@ -125,6 +125,7 @@ class Profile extends Component {
             agent.profiles.forEach((profile) => {
                 if (profile.localAuthority.uuid === activeProfile.localAuthority.uuid) {
                     allLocalAuthorityProfiles.unshift(
+                        /** Refactor 'current' is active only when profiles doesn't load */
                         <LocalAuthorityProfile
                             key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
                             profile={currentLocalAuthorityProfile}

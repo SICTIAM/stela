@@ -7,7 +7,13 @@ import debounce from 'debounce'
 import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import { Page } from '../_components/UI'
-import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import {
+    checkStatus,
+    getLocalAuthoritySlug,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable
+} from '../_util/utils'
 
 class AgentList extends Component {
     static contextTypes = {
@@ -36,10 +42,6 @@ class AgentList extends Component {
             .then(response => response.json())
             .then(json => { this.setState({ localAuthorities: json }) })
     }
-    handlePageClick = (data) => {
-        const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset, currentPage: data.selected }, this.fetchAgents)
-    }
     search = debounce((search) => {
         this.setState({ search }, this.fetchAgents)
     }, 500)
@@ -59,17 +61,6 @@ class AgentList extends Component {
             const selected = this.state.localAuthorities.find(localAuthority => localAuthority.uuid === value)
             this.setState({ selected }, this.fetchAgents)
         }
-    }
-    sort = (clickedColumn) => {
-        const { column, direction } = this.state
-        if (column !== clickedColumn) {
-            this.setState({ column: clickedColumn, direction: 'ASC' }, this.fetchAgents)
-            return
-        }
-        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchAgents)
-    }
-    updateItemPerPage = (limit) => {
-        this.setState({ limit, offset: 0, currentPage: 0 }, this.fetchAgents)
     }
     render() {
         const { t } = this.context
@@ -94,9 +85,9 @@ class AgentList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data, this.fetchAgents)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.fetchAgents)}
                 currentPage={this.state.currentPage} />
         return (
             <Page title={t('admin.users')}>
@@ -111,7 +102,7 @@ class AgentList extends Component {
                         link={`/${localAuthoritySlug}/admin/agents/`}
                         linkProperty='uuid'
                         pagination={pagination}
-                        sort={this.sort}
+                        sort={(clickedColumn) => sortTable(this, clickedColumn, this.fetchAgents)}
                         direction={this.state.direction}
                         column={this.state.column}
                         additionalElements={[selectLocalAuthorities]} />

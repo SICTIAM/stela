@@ -9,7 +9,15 @@ import StelaTable from '../_components/StelaTable'
 import Pagination from '../_components/Pagination'
 import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
-import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import {
+    checkStatus,
+    getLocalAuthoritySlug,
+    handleSearchChange,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable,
+    onSearch
+} from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import { FormFieldInline, FormField, Page, LoadingContent } from '../_components/UI'
 import { withAuthContext } from '../Auth'
@@ -57,11 +65,6 @@ class ActePublicList extends Component {
                 })
             })
     }
-    handleFieldChange = (field, value) => {
-        const search = this.state.search
-        search[field] = value
-        this.setState({ search: search })
-    }
     getSearchData = () => {
         const { limit, offset, direction, column } = this.state
         const data = { limit, offset, direction, column }
@@ -71,21 +74,6 @@ class ActePublicList extends Component {
         if (data.decisionFrom) data.decisionFrom = moment(data.decisionFrom).format('YYYY-MM-DD')
         if (data.decisionTo) data.decisionTo = moment(data.decisionTo).format('YYYY-MM-DD')
         return data
-    }
-    handlePageClick = (data) => {
-        const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
-    }
-    sort = (clickedColumn) => {
-        const { column, direction } = this.state
-        if (column !== clickedColumn) {
-            this.setState({ column: clickedColumn, direction: 'ASC' }, () => this.submitForm())
-            return
-        }
-        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
-    }
-    updateItemPerPage = (limit) => {
-        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     submitForm = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -100,9 +88,6 @@ class ActePublicList extends Component {
                 this.setState({ fetchStatus: 'api-gateway:error.default' })
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
-    }
-    onSearch = () => {
-        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
     }
     downloadMergedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.pdf', 'actes.pdf')
     downloadZipedStamp = (selectedUuids) => this.downloadFromSelectionOrSearch(selectedUuids, '/api/acte/actes.zip', 'actes.zip')
@@ -154,9 +139,9 @@ class ActePublicList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data, this.submitForm)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.submitForm)}
                 currentPage={this.state.currentPage} />
         return (
             <Page title={t('acte.list_public.title')}>
@@ -166,18 +151,18 @@ class ActePublicList extends Component {
                             isDefaultOpen={false}
                             fieldId='multifield'
                             fieldValue={search.multifield}
-                            fieldOnChange={this.handleFieldChange}
-                            onSubmit={this.onSearch}>
+                            fieldOnChange={(id, value) => handleSearchChange(this, id, value)}
+                            onSubmit={() => onSearch(this, this.submitForm)}>
 
-                            <Form onSubmit={this.onSearch}>
+                            <Form onSubmit={() => onSearch(this, this.submitForm)}>
                                 <FormFieldInline htmlFor='localAuthority' label={t('acte.fields.localAuthority')}>
-                                    <select id='localAuthority' value={search.siren} onBlur={e => this.handleFieldChange('siren', e.target.value)} onChange={e => this.handleFieldChange('siren', e.target.value)}>
+                                    <select id='localAuthority' value={search.siren} onBlur={e => handleSearchChange(this, 'siren', e.target.value)} onChange={e => handleSearchChange(this,'siren', e.target.value)}>
                                         <option value=''>{t('api-gateway:form.all_feminine')}</option>
                                         {localAuthoritiesOptions}
                                     </select>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='objet' label={t('acte.fields.objet')} >
-                                    <input id='objet' value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                                    <input id='objet' value={search.objet} onChange={e => handleSearchChange(this, 'objet', e.target.value)} />
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor='decisionFrom' label={t('acte.fields.decision')}>
                                     <Form.Group style={{ marginBottom: 0 }} widths='equal'>
@@ -185,13 +170,13 @@ class ActePublicList extends Component {
                                             <InputDatetime id='decisionFrom'
                                                 timeFormat={false}
                                                 value={search.decisionFrom}
-                                                onChange={date => this.handleFieldChange('decisionFrom', date)} />
+                                                onChange={date => handleSearchChange(this, 'decisionFrom', date)} />
                                         </FormField>
                                         <FormField htmlFor='decisionTo' label={t('api-gateway:form.to')}>
                                             <InputDatetime id='decisionTo'
                                                 timeFormat={false}
                                                 value={search.decisionTo}
-                                                onChange={date => this.handleFieldChange('decisionTo', date)} />
+                                                onChange={date => handleSearchChange(this, 'decisionTo', date)} />
                                         </FormField>
                                     </Form.Group>
                                 </FormFieldInline>
@@ -211,7 +196,7 @@ class ActePublicList extends Component {
                             noDataMessage='Aucun acte'
                             keyProperty='uuid'
                             pagination={pagination}
-                            sort={this.sort}
+                            sort={(clickedColumn) => sortTable(this, clickedColumn, this.submitForm)}
                             direction={this.state.direction}
                             column={this.state.column} />
                     </Segment >

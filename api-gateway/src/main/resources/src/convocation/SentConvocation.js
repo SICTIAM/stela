@@ -7,6 +7,8 @@ import { getLocalAuthoritySlug } from '../_util/utils'
 
 import { Page, Field, FieldValue } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
+import { handlePageClick, updateItemPerPage } from '../_util/utils'
+
 import QuestionsForm from './QuestionsForm'
 import Pagination from '../_components/Pagination'
 import StelaTable from '../_components/StelaTable'
@@ -94,9 +96,9 @@ class SentConvocation extends Component {
             <Pagination
                 columns={metaData.length + 1}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.submitForm)}
                 currentPage={this.state.currentPage} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 

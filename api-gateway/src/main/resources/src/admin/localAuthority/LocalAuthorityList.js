@@ -8,7 +8,13 @@ import Pagination from '../../_components/Pagination'
 import { modules } from '../../_util/constants'
 import { Page } from '../../_components/UI'
 import { notifications } from '../../_util/Notifications'
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import {
+    checkStatus,
+    getLocalAuthoritySlug,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable
+} from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class LocalAuthorityList extends Component {
@@ -33,10 +39,6 @@ class LocalAuthorityList extends Component {
         if (!itemPerPage) localStorage.setItem('itemPerPage', this.state.limit)
         else this.setState({ limit: parseInt(itemPerPage, 10) }, this.fetchLocalAuthorities)
     }
-    handlePageClick = (data) => {
-        const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset, currentPage: data.selected }, this.fetchLocalAuthorities)
-    }
     fetchLocalAuthorities = () => {
         const { _fetchWithAuthzHandling } = this.context
         const { limit, offset, column, direction } = this.state
@@ -56,17 +58,6 @@ class LocalAuthorityList extends Component {
                     _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                 })
             })
-    }
-    sort = (clickedColumn) => {
-        const { column, direction } = this.state
-        if (column !== clickedColumn) {
-            this.setState({ column: clickedColumn, direction: 'ASC' }, this.fetchLocalAuthorities)
-            return
-        }
-        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, this.fetchLocalAuthorities)
-    }
-    updateItemPerPage = (limit) => {
-        this.setState({ limit, offset: 0, currentPage: 0 }, this.fetchLocalAuthorities)
     }
     renderActivatedModule = (activatedModules, moduleName) =>
         activatedModules.includes(moduleName) ? <Icon name='checkmark' color='green' /> : <Icon name='remove' color='red' />
@@ -95,9 +86,9 @@ class LocalAuthorityList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data, this.fetchLocalAuthorities)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.fetchLocalAuthorities)}
                 currentPage={this.state.currentPage} />
         return (
             <Page title={t('admin.modules.local_authority_settings')}>
@@ -117,7 +108,7 @@ class LocalAuthorityList extends Component {
                         noDataMessage='Aucune collectivité'
                         keyProperty='uuid'
                         pagination={pagination}
-                        sort={this.sort}
+                        sort={(clickedColumn) => sortTable(this, clickedColumn, this.fetchLocalAuthorities)}
                         direction={this.state.direction}
                         column={this.state.column} />
                 </Segment>
