@@ -74,7 +74,7 @@ class AlertMessage extends Component {
         alertMessageModulesDismissed[currentModule] = true
         this.setState({ alertMessageModulesDismissed })
     }
-    getCurrentModule = () => this.props.location.pathname.split('/')[1]
+    getCurrentModule = () => this.props.location.pathname.split('/')[2]
     render() {
         const { t } = this.context
         const { alertMessageModules, alertMessageModulesDismissed } = this.state
