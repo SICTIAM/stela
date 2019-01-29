@@ -45,6 +45,7 @@ class Acte extends Component {
             }
         },
         agent: '',
+        agentGroups: [],
         fetchStatus: '',
         republished: false,
         thumbnail: {
@@ -131,16 +132,11 @@ class Acte extends Component {
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })
             .then(response => response.json())
-            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
+            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}`, agentGroups: json.groups }))
     }
-    checkAgentIsPartOfTheGroup = () => {
-        const {agent, acteUi} = this.state
-        for(let group of agent.groups) {
-            if(group.uuid === acteUi.groupUuid) {
-                return true
-            }
-        }
-        return false
+    agentBelongsToTheGroup = () => {
+        const {agentGroups, acteUI} = this.state
+        return agentGroups.map(group =>  group.uuid).includes(acteUI.acte.groupUuid)
     }
     handleChangeDeltaPosition = (stampPosition) => {
         const { acteUI } = this.state
@@ -217,7 +213,7 @@ class Acte extends Component {
                 </FieldValue>
             </List.Item>
         )
-        const isAgentPartOfTheActeGroup = this.checkAgentIsPartOfTheGroup
+        const isAgentBelongsToTheGroup = this.agentBelongsToTheGroup()
 
         const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
         const {boxWidth, boxHeight} = this.draggableBoxSize()
@@ -306,7 +302,7 @@ class Acte extends Component {
                                 </ConfirmModal>
                             )}
 
-                            {this.state.isCertificateValid && isAgentPartOfTheActeGroup &&
+                            {this.state.isCertificateValid && isAgentBelongsToTheGroup &&
                                 <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid}/>
                             }
                         </div>
