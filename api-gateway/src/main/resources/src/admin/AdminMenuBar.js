@@ -11,19 +11,20 @@ import { getLocalAuthoritySlug } from '../_util/utils'
 
 class AdminMenuBar extends Component {
     static contextTypes = {
-        t: PropTypes.func
+        t: PropTypes.func,
+        isMenuOpened: PropTypes.bool,
     }
     checkActivatedModule = (module) => {
         const { profile } = this.props.authContext
         return profile && profile.localAuthority && profile.localAuthority.activatedModules.includes(module)
     }
     render() {
-        const { t } = this.context
+        const { t, isMenuOpened } = this.context
         const { userRights } = this.props.authContext
         const localAuthoritySlug = getLocalAuthoritySlug()
         const rights = userRights
         return (
-            <Menu style={{ backgroundColor: 'white' }} fixed='left' className='mainMenu secondary' secondary vertical>
+            <Menu style={{ backgroundColor: 'white' }} fixed='left' className={'mainMenu secondary' + (isMenuOpened ? ' open' : '')} secondary vertical>
                 <div className='mainMenus'>
 
                     <Menu.Item style={{ width: '100%' }}>
