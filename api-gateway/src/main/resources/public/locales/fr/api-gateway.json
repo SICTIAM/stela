@@ -273,6 +273,7 @@
     "uuid": "UUID",
     "name": "Nom de la collectivité",
     "siren": "SIREN",
+    "sirenSize": "Un SIREN est composé de 9 chiffres",
     "department": "Département",
     "district": "Arrondissement",
     "nature": "Nature",
@@ -459,7 +460,7 @@
       "convocation_creation": "Envoyer une convocation",
       "reveived_convocation": "Convocation reçue",
       "sent_convocation": "Convocation envoyée",
-      "reveived_convocations_list": "Liste des convocations reçues", 
+      "reveived_convocations_list": "Liste des convocations reçues",
       "sent_convocations_list": "Liste des convocations envoyées"
     }
   },

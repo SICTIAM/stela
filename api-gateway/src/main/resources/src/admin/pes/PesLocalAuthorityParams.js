@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox } from 'semantic-ui-react'
+import {Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox, Popup} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
@@ -102,7 +102,7 @@ class PesLocalAuthorityParams extends Component {
         const { fields, newSiren } = this.state
         if (this.validateSiren(newSiren)) {
             fields.sirens.push(newSiren)
-            this.setState({ newSiren: '', fields: fields })
+            this.setState({ newSiren: '', fields: fields, isNewSirenValid: false })
         }
     }
     onRemoveSiren = (siren) => {
@@ -203,12 +203,17 @@ class PesLocalAuthorityParams extends Component {
                             <div style={{ marginBottom: '0.5em' }}>
                                 {listSiren.length > 0 ? listSiren : t('admin.modules.pes.local_authority_settings.no_siren')}
                             </div>
-                            <input id='sirens'
-                                onKeyPress={this.onkeyPress}
-                                value={this.state.newSiren}
-                                onChange={(e) => this.handleNewSirenChange(e.target.value)}
-                                className='simpleInput' />
-                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>
+                            <Popup trigger={
+                                <input id='sirens'
+                                    onKeyPress={this.onkeyPress}
+                                    value={this.state.newSiren}
+                                    onChange={(e) => this.handleNewSirenChange(e.target.value)}
+                                    className='simpleInput'/>
+                            } content={t('api-gateway:local_authority.sirenSize')}/>
+                            <Button basic color='grey'
+                                disabled={!this.state.isNewSirenValid}
+                                style={{marginLeft: '1em'}}
+                                onClick={(event) => this.addSiren(event)}>
                                 {t('api-gateway:form.add')}
                             </Button>
                         </FieldInline>
