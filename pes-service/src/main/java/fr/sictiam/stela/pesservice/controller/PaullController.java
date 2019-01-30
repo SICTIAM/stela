@@ -220,10 +220,17 @@ public class PaullController {
         PesAller pesAller = pesAllerService.getByUuid(idFlux);
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
 
-        ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
-                pesAller.getSesileClasseurId());
-        if (classeur.getStatusCode().isError()) {
-            return new ResponseEntity<Object>(generatePaullResponse(classeur.getStatusCode(), data), classeur.getStatusCode());
+        // PES PJ are not sent to signature
+        if(!pesAller.isPj()) {
+            ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
+                    pesAller.getSesileClasseurId());
+
+            if (classeur.getStatusCode().isError()) {
+                return new ResponseEntity<Object>(generatePaullResponse(classeur.getStatusCode(), data), classeur.getStatusCode());
+            }
+
+            data.put("Name", classeur.getBody().getNom());
+            data.put("EtatClasseur", classeur.getBody().getStatus().ordinal());
         }
 
         JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
@@ -231,11 +238,10 @@ public class PaullController {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         data.put("Title", pesAller.getObjet());
-
-        data.put("Name", classeur.getBody().getNom());
         data.put("Username", node.get("email").asText());
         data.put("NomDocument", pesAller.getFileName());
         data.put("dateDepot", dateFormatter.format(pesAller.getCreation()));
+        data.put("service", pesAller.getServiceOrganisationNumber());
 
         List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(idFlux,
                 Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
@@ -250,8 +256,7 @@ public class PaullController {
                 data.put("motifAnomalie", peshistory.get().getErrors().get(0).errorText());
             }
         }
-        data.put("service", pesAller.getServiceOrganisationNumber());
-        data.put("EtatClasseur", classeur.getBody().getStatus().ordinal());
+
         return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
 
     }

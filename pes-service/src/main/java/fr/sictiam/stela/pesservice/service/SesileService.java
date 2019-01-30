@@ -143,15 +143,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
     public void checkPesWithdrawn() {
         LOGGER.info("[checkPesWithdrawn] Cheking for PES being withdrawn...");
         List<PesAller.Light> pesAllers = pesService.getPendingSinature();
-        pesAllers.forEach(pes -> {
-            if (pes.getPesHistories().stream()
-                    .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus()))) {
-                if (pes.getSesileClasseurId() != null
-                        && checkClasseurWithdrawn(pes.getLocalAuthority(), pes.getSesileClasseurId())) {
-                    pesService.updateStatus(pes.getUuid(), StatusType.CLASSEUR_WITHDRAWN);
-                }
-            }
-        });
+        pesAllers.stream()
+                .filter(pes -> pes.getSesileClasseurId() != null && !pes.isPj())
+                .filter(pes -> pes.getPesHistories().stream()
+                        .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus())))
+                .filter(pes -> checkClasseurWithdrawn(pes.getLocalAuthority(), pes.getSesileClasseurId()))
+                .forEach(pes -> pesService.updateStatus(pes.getUuid(), StatusType.CLASSEUR_WITHDRAWN));
     }
 
     public void checkPesSigned() {
