@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,9 +20,13 @@ public class LocalAuthorityService {
 
     private final LocalAuthorityRepository localAuthorityRepository;
 
+    private final ExternalRestService externalRestService;
+
     @Autowired
-    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository) {
+    public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
+                                 ExternalRestService externalRestService) {
         this.localAuthorityRepository = localAuthorityRepository;
+        this.externalRestService = externalRestService;
     }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
@@ -63,24 +64,26 @@ public class LocalAuthorityService {
                         && localAuthority.getSiren().equals(siren));
     }
 
-    @Transactional
-    public void handleEvent(LocalAuthorityEvent event) throws IOException {
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
+    public void handleEvent(LocalAuthorityEvent event) {
+        Optional<LocalAuthority> optionalLocalAuthority = localAuthorityRepository.findByUuid(event.getUuid());
+
+        LocalAuthority localAuthority = optionalLocalAuthority
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren(), event.getSlugName()));
+
+        boolean hasToCreateGroup = !optionalLocalAuthority.isPresent() && event.getActivatedModules().contains("PES");
 
         if (event.getActivatedModules().contains("PES")) {
             localAuthority.setActive(true);
-            // If the new LocalAuthority.siren is present in other LocalAuthority.sirens, we
-            // need to remove it so the
-            // siren is present only once in the activated local authorities (needed for the
-            // PesRetour assignment)
-            List<LocalAuthority> allLocalAuthorities = localAuthorityRepository
-                    .findByActiveTrueAndSirens(localAuthority.getSiren());
-            allLocalAuthorities.forEach(localAuth -> {
-                localAuth.setSirens(localAuth.getSirens().stream()
-                        .filter(siren -> !localAuthority.getSiren().equals(localAuth.getSiren()))
-                        .collect(Collectors.toList()));
-                createOrUpdate(localAuth);
+            // If the new local authority's SIREN is present in other local authorities, we
+            // need to remove it so the siren is present only once in the activated local authorities
+            // (needed for the PesRetour assignment)
+            localAuthorityRepository
+                    .findByActiveTrueAndSirens(localAuthority.getSiren())
+                    .forEach(localAuth -> {
+                        localAuth.setSirens(localAuth.getSirens().stream()
+                                .filter(siren -> !localAuthority.getSiren().equals(localAuth.getSiren()))
+                                .collect(Collectors.toList()));
+                        createOrUpdate(localAuth);
             });
         }
 
@@ -88,6 +91,11 @@ public class LocalAuthorityService {
         localAuthority.setSlugName(event.getSlugName());
 
         createOrUpdate(localAuthority);
+
+        if (hasToCreateGroup) {
+            LOGGER.debug("PES has been activated for {}, creating default group", localAuthority.getName());
+            externalRestService.createGroup(localAuthority, PesAllerService.DEFAULT_GROUP_NAME);
+        }
     }
 
 }

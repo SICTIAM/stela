@@ -41,12 +41,17 @@ public class LocalAuthorityService {
 
     private final AttachmentTypeRepository attachmentTypeRepository;
 
+    private final ExternalRestService externalRestService;
+
     @Autowired
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
-            MaterialCodeRepository materialCodeRepository, AttachmentTypeRepository attachmentTypeRepository) {
+                                 MaterialCodeRepository materialCodeRepository,
+                                 AttachmentTypeRepository attachmentTypeRepository,
+                                 ExternalRestService externalRestService) {
         this.localAuthorityRepository = localAuthorityRepository;
         this.materialCodeRepository = materialCodeRepository;
         this.attachmentTypeRepository = attachmentTypeRepository;
+        this.externalRestService = externalRestService;
     }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
@@ -230,10 +235,13 @@ public class LocalAuthorityService {
         return null;
     }
 
-    @Transactional
     public void handleEvent(LocalAuthorityEvent event) throws IOException {
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(event.getUuid())
+        Optional<LocalAuthority> optionalLocalAuthority = localAuthorityRepository.findByUuid(event.getUuid());
+
+        LocalAuthority localAuthority = optionalLocalAuthority
                 .orElse(new LocalAuthority(event.getUuid(), event.getName(), event.getSiren(), event.getSlugName()));
+
+        boolean hasToCreateGroup = !optionalLocalAuthority.isPresent() && event.getActivatedModules().contains("ACTES");
 
         localAuthority.setActive(event.getActivatedModules().contains("ACTES"));
 
@@ -242,6 +250,10 @@ public class LocalAuthorityService {
 
         createOrUpdate(localAuthority);
 
+        if (hasToCreateGroup) {
+            LOGGER.debug("Actes has been activated for {}, creating default group", localAuthority.getName());
+            externalRestService.createGroup(localAuthority, ActeService.DEFAULT_GROUP_NAME);
+        }
     }
 
     public boolean localAuthorityGranted(GenericAccount genericAccount, String siren) {
