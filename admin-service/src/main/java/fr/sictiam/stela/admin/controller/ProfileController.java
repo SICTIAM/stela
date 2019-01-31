@@ -7,7 +7,6 @@ import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.UI.ProfileUI;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.WorkGroup;
-import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -33,11 +32,9 @@ public class ProfileController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileController.class);
 
     private final ProfileService profileService;
-    private final AgentService agentService;
 
-    public ProfileController(ProfileService profileService, AgentService agentService) {
+    public ProfileController(ProfileService profileService) {
         this.profileService = profileService;
-        this.agentService = agentService;
     }
 
     @PutMapping("/{uuid}/rights")
