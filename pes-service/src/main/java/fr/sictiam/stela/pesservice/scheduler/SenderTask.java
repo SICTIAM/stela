@@ -66,24 +66,24 @@ public class SenderTask implements ApplicationListener<PesHistoryEvent> {
         currentSizeUsed.set(0);
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedDelay = 5000)
     public void senderTask() {
 
         if (!pendingQueue.isEmpty() && adminService.isHeliosAvailable()) {
             PendingMessage pendingMessage = pendingQueue.peek();
             PesAller pes = pesService.getByUuid(pendingMessage.getPesUuid());
-            LOGGER.debug("PES {}: {}", pes.getUuid(), pes.getObjet());
 
             if ((pes.getAttachment().getSize() + currentSizeUsed.get()) < maxSizePerHour) {
 
-                StatusType sendStatus = null;
+                LOGGER.debug("Sending PES {}: {}", pes.getUuid(), pes.getObjet());
+                StatusType sendStatus;
                 try {
                     pesService.send(pes);
                     sendStatus = StatusType.SENT;
                     pendingMessageRepository.delete(pendingQueue.poll());
                     currentSizeUsed.addAndGet(pes.getAttachment().getSize());
                 } catch (PesSendException e) {
-                    LOGGER.error(e.getMessage());
+                    LOGGER.error("Error while sending PES : {}", e.getMessage());
                     sendStatus = StatusType.NOT_SENT;
                 }
                 byte[] content = storageService.getAttachmentContent(pes.getAttachment());
