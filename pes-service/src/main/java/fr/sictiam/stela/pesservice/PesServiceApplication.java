@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.annotation.PostConstruct;
 
@@ -15,7 +14,6 @@ import java.util.TimeZone;
 @EntityScan(basePackageClasses = { PesServiceApplication.class })
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableScheduling
 @EnableAsync
 @EnableRabbit
 public class PesServiceApplication {
