@@ -190,13 +190,13 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acteRepository.findByNumberAndLocalAuthoritySirenAndDraftNull(number, siren).orElseThrow(ActeNotFoundException::new);
     }
 
-    public boolean isNumberAvailable(String number, String localAuthorityUuid) {
-        return !acteRepository.findFirstByNumberAndLocalAuthority_UuidAndDraftNull(number, localAuthorityUuid).isPresent();
+    public boolean isNumberAvailable(String number, LocalDate decisionDate, ActeNature nature, String localAuthorityUuid) {
+        return !acteRepository.findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(number, decisionDate, nature, localAuthorityUuid).isPresent();
     }
 
     public List<ObjectError> metierValidation(Acte acte, List<ObjectError> errors) {
         if (errors == null) errors = new ArrayList<>();
-        if (!isNumberAvailable(acte.getNumber(), acte.getLocalAuthority().getUuid())) {
+        if (!isNumberAvailable(acte.getNumber(), acte.getDecision(), acte.getNature(), acte.getLocalAuthority().getUuid())) {
             errors.add(new ObjectError("number", "notifications.acte.sent.error.number_unavailable"));
         }
         return errors;

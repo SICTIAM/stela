@@ -5,6 +5,7 @@ import fr.sictiam.stela.acteservice.model.ActeNature;
 import fr.sictiam.stela.acteservice.model.ArchiveStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +27,7 @@ public interface ActeRepository extends JpaRepository<Acte, String> {
 
     Optional<Acte> findByUuid(String uuid);
 
-    Optional<Acte> findFirstByNumberAndLocalAuthority_UuidAndDraftNull(String number, String localAuthorityUuid);
+    Optional<Acte> findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(String number, LocalDate date, ActeNature nature, String localAuthorityUuid);
 
     Optional<Acte> findByNumberAndLocalAuthoritySirenAndDraftNull(String number, String siren);
 
