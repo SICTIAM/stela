@@ -71,6 +71,7 @@ public class MigrationService {
     private final NotificationService notificationService;
     private final DiscoveryUtils discoveryUtils;
     private final ExternalRestService externalRestService;
+    private final ActeService acteService;
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -104,12 +105,13 @@ public class MigrationService {
     private final String sql_local_authority_groups = getStringResourceFromStream("migration/local_authority_groups.sql");
 
     public MigrationService(ActeRepository acteRepository, LocalAuthorityRepository localAuthorityRepository,
-            NotificationService notificationService, DiscoveryUtils discoveryUtils, ExternalRestService externalRestService) {
+                            NotificationService notificationService, DiscoveryUtils discoveryUtils, ExternalRestService externalRestService, ActeService acteService) {
         this.acteRepository = acteRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
         this.discoveryUtils = discoveryUtils;
         this.externalRestService = externalRestService;
+        this.acteService = acteService;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -201,6 +203,7 @@ public class MigrationService {
         log(migrationLog, acteMigrations.size() + " Actes to migrate", false);
 
         // Create group in admin service
+        // FIXME : check it does not exist before creating it
         String groupUuid = externalRestService.createGroup(
                 localAuthority,
                 "acte-migration",
@@ -246,6 +249,15 @@ public class MigrationService {
                         localAuthority.getGenericProfileUuid(),
                         true
                 );
+
+                if (!acteService.isNumberAvailable(acte.getNumber(), acte.getDecision(), acte.getNature(), localAuthority.getUuid())) {
+                    LOGGER.info("There already is an acte with number = {}, date decision = {}, nature = {}, ignoring this one",
+                            acte.getNumber(),
+                            acte.getDecision(),
+                            acte.getNature());
+                    continue;
+                }
+
                 acte = acteRepository.save(acte);
 
                 List<String> annexeFilenames = Arrays.asList(acteMigration.getAnnexes().split(";"));
