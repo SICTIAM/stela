@@ -45,13 +45,15 @@ class Acte extends Component {
             }
         },
         agent: '',
+        agentGroups: [],
         fetchStatus: '',
         republished: false,
         thumbnail: {
             image:'',
             orientation: ''
         },
-        thumbnailStatus: 'loading'
+        thumbnailStatus: 'loading',
+        isCertificateValid: false
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -61,7 +63,10 @@ class Acte extends Component {
             _fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, () => {
+                    this.getAgentInfos()
+                    this.checkCertificateIsValid()
+                }))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
@@ -71,6 +76,23 @@ class Acte extends Component {
 
 
         }
+    }
+
+    checkCertificateIsValid = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(certificate => {
+                this.setState({ isCertificateValid: certificate })
+            })
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
     }
 
     fetchThumbnail = () => {
@@ -110,7 +132,11 @@ class Acte extends Component {
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })
             .then(response => response.json())
-            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
+            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}`, agentGroups: json.groups }))
+    }
+    agentBelongsToTheGroup = () => {
+        const {agentGroups, acteUI} = this.state
+        return agentGroups.map(group =>  group.uuid).includes(acteUI.acte.groupUuid)
     }
     handleChangeDeltaPosition = (stampPosition) => {
         const { acteUI } = this.state
@@ -187,6 +213,7 @@ class Acte extends Component {
                 </FieldValue>
             </List.Item>
         )
+        const isAgentBelongsToTheGroup = this.agentBelongsToTheGroup()
 
         const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
         const {boxWidth, boxHeight} = this.draggableBoxSize()
@@ -275,7 +302,9 @@ class Acte extends Component {
                                 </ConfirmModal>
                             )}
 
-                            <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
+                            {this.state.isCertificateValid && isAgentBelongsToTheGroup &&
+                                <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid}/>
+                            }
                         </div>
 
                         <FieldInline htmlFor="number" label={t('acte.fields.number')}>
