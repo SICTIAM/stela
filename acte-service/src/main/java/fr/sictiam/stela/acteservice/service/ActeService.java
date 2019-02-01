@@ -79,6 +79,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeService.class);
 
+    public static String DEFAULT_GROUP_NAME = "Service Actes";
+
     @PersistenceContext
     private EntityManager entityManager;
 

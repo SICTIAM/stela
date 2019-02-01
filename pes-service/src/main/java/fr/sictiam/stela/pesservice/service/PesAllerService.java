@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesExportRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
@@ -74,12 +73,13 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PesAllerService.class);
 
+    public static String DEFAULT_GROUP_NAME = "Service PES";
+
     @PersistenceContext
     private EntityManager entityManager;
 
     private final PesAllerRepository pesAllerRepository;
     private final PesHistoryRepository pesHistoryRepository;
-    private final AttachmentRepository attachmentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LocalAuthorityService localAuthorityService;
     private final FTPUploaderService ftpUploaderService;
@@ -101,8 +101,7 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
     public PesAllerService(PesAllerRepository pesAllerRepository, PesHistoryRepository pesHistoryRepository,
             ApplicationEventPublisher applicationEventPublisher, LocalAuthorityService localAuthorityService,
             FTPUploaderService ftpUploaderService, Environment environment, StorageService storageService,
-            AttachmentRepository attachmentRepository, ExternalRestService externalRestService,
-            PesExportRepository pesExportRepository) {
+            ExternalRestService externalRestService, PesExportRepository pesExportRepository) {
         this.pesAllerRepository = pesAllerRepository;
         this.pesHistoryRepository = pesHistoryRepository;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -112,7 +111,6 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         this.externalRestService = externalRestService;
         this.pesExportRepository = pesExportRepository;
         this.storageService = storageService;
-        this.attachmentRepository = attachmentRepository;
     }
 
     @PostConstruct

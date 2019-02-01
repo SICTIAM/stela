@@ -203,9 +203,7 @@ public class MigrationService {
         // Create group in admin service
         String groupUuid = externalRestService.createGroup(
                 localAuthority,
-                "acte-migration",
-                Right.values()
-        );
+                "acte-migration");
 
 
         for (ActeMigration acteMigration : acteMigrations) {

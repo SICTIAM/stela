@@ -2,6 +2,8 @@ package fr.sictiam.stela.pesservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sictiam.stela.pesservice.model.LocalAuthority;
+import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
 import fr.sictiam.stela.pesservice.service.util.DiscoveryUtils;
 import org.slf4j.Logger;
@@ -16,9 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExternalRestService {
@@ -157,5 +158,15 @@ public class ExternalRestService {
             LOGGER.error("Failed to retrieve local authority siret for {} : {} ({})", uuid, e.getMessage(), e.getResponseBodyAsString());
             return null;
         }
+    }
+
+    public String createGroup(LocalAuthority localAuthority, String name) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForObject(
+                discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/group/{name}",
+                new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
+                String.class,
+                localAuthority.getUuid(), name);
     }
 }

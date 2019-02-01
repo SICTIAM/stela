@@ -177,7 +177,7 @@ public class ExternalRestService {
         return localAuthority;
     }
 
-    public String createGroup(LocalAuthority localAuthority, String name, Right[] rights) {
+    public String createGroup(LocalAuthority localAuthority, String name) {
 
         RestTemplate restTemplate = new RestTemplate();
         return restTemplate.postForObject(
