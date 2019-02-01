@@ -111,7 +111,7 @@
     "modify_my_profile": "Modifier mon profil",
     "no_email": "Aucun email",
     "notifications_title": "Notifications",
-    "localAuthorityNotifications": "Être notifié pour des actes déposés par un membre du groupe",
+    "localAuthorityNotifications": "Être notifié pour des flux déposés par un membre du groupe",
     "notifications": {
       "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
       "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
