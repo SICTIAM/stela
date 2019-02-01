@@ -721,7 +721,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        for (Acte acte: actes) {
+        for (Acte acte : actes) {
             if (acte.getLastHistoryStatus().equals(StatusType.ACK_RECEIVED)) {
                 Map<String, String> mapString = extractDataFromActe(acte);
 
@@ -731,14 +731,14 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 renderer.setDocumentFromString(content);
                 renderer.layout();
 
-                // init of none unique page pdf
-                if (renderer.getWriter() == null && actes.size() > 1) {
-                    renderer.createPDF(os, false);
-                }
-
-                //none unique page need to declare NextDocument
-                if (renderer.getWriter().getCurrentPageNumber() > 0) {
+                //none unique page need to write in NextDocument
+                if (renderer.getWriter() != null && renderer.getWriter().getCurrentPageNumber() > 0) {
                     renderer.writeNextDocument();
+                }
+                
+                // init document
+                if (renderer.getWriter() == null) {
+                    renderer.createPDF(os, false);
                 }
             }
 
@@ -746,13 +746,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
 
         try {
-            if (renderer.getWriter().getCurrentPageNumber() == 1) {
-                renderer.createPDF(os);
-            } else {
-                renderer.finishPDF();
-            }
-            byte[] pdf = os.toByteArray();
-            return pdf;
+            renderer.finishPDF();
+            return os.toByteArray();
         } catch (Exception e) {
             throw new NoContentException();
         } finally {
@@ -760,6 +755,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
 
     }
+
 
 
     private Map<String, String> extractDataFromActe(Acte acte){
