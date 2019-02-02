@@ -29,7 +29,7 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
     @Override
     public boolean shouldFilter() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return !(authentication == null || !(authentication instanceof OpenIdCAuthentication));
+        return authentication instanceof OpenIdCAuthentication;
     }
 
     @Override

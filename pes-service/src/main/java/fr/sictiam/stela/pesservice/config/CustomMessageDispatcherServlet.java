@@ -12,9 +12,6 @@ import java.util.Map;
 
 public class CustomMessageDispatcherServlet extends MessageDispatcherServlet {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 8165514777144053430L;
     private Map<String, WsdlDefinition> wsdlDefinitions;
 
