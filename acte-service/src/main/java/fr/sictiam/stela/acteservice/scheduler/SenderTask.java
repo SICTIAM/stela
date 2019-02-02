@@ -61,7 +61,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
         currentSizeUsed.set(0);
     }
 
-    @Scheduled(fixedRate = 100)
+    @Scheduled(fixedDelay = 10000)
     public void senderTask() {
 
         if (!pendingQueue.isEmpty() && adminService.isMiatAvailable()) {
