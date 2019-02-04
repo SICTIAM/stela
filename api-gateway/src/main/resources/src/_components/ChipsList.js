@@ -4,7 +4,7 @@ import { Button } from 'semantic-ui-react'
 
 import Chip from './Chip'
 
-export default class ChipList extends Component {
+export default class ChipsList extends Component {
 	static propTypes = {
 	    list: PropTypes.array.isRequired,
 	    onRemoveChip: PropTypes.func,

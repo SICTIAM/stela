@@ -22,6 +22,10 @@ test:
   stage: test
   script:
   - ./gradlew --build-cache --stacktrace -g /cache test
+  artifacts:
+    when: always
+    paths:
+      - ///builds/internet/stela-poc/convocation-service/build/reports/tests/*
 # Disabled for now as artifacts uploads fail with a weird 404 error on GitLab
 #  artifacts:
 #    paths:

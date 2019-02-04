@@ -93,6 +93,14 @@ const notifications = {
             position: 'br'
         }
     },
+    convocation: {
+        sent: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.sent.success',
+            level: 'success',
+            position: 'br'
+        }
+    },
     admin: {
         instanceParamsUpdated: {
             title: 'notifications.acte.admin.title',

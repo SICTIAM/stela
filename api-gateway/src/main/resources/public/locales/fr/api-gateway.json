@@ -229,6 +229,10 @@
       }
     },
     "convocation": {
+      "title": "Module Convocation",
+      "sent": {
+        "success":  "La convocation a été envoyée avec succès" 
+      },
       "admin": {
         "title": "Admin module Convocation",
         "recipients": {

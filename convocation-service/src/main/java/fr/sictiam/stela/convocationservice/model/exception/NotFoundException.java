@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class NotFoundException extends ConvocationException {
 
     public NotFoundException() {
-        super("Not found");
+        this("Not found");
+    }
+
+    public NotFoundException(String message) {
+        super(message);
     }
 }

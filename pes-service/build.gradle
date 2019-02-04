@@ -48,8 +48,6 @@ dependencies {
     runtime('org.postgresql:postgresql')
     // dependency for pes-signature-core
     runtime('log4j:log4j:1.2.16')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('org.mockito:mockito-core')
 }
 
 sourceSets {

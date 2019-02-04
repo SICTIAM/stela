@@ -66,7 +66,7 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
     }
 
     public void proccessEvent(ConvocationHistoryEvent event) throws MessagingException, IOException {
-        Convocation convocation = convocationService.getByUuid(event.getConvocationHistory().getConvocationUuid());
+        Convocation convocation = event.getConvocationHistory().getConvocation();
         JsonNode node = externalRestService.getProfile(convocation.getProfileUuid());
 
         Notification notification = Notification.notifications.stream()
@@ -85,8 +85,8 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
 
                 if (notification.isDeactivatable()
                         || profileNotifications.stream()
-                                .anyMatch(notif -> notif.getName().equals(
-                                        event.getConvocationHistory().getStatus().toString()) && notif.isActive())
+                        .anyMatch(notif -> notif.getName().equals(
+                                event.getConvocationHistory().getStatus().toString()) && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
                         sendMail(getAgentMail(profile),
@@ -105,7 +105,7 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
             }
         });
         if (notifcationSentNumber.get() > 0) {
-            ConvocationHistory convocationHistory = new ConvocationHistory(convocation.getUuid(),
+            ConvocationHistory convocationHistory = new ConvocationHistory(convocation,
                     StatusType.GROUP_NOTIFICATION_SENT);
             applicationEventPublisher.publishEvent(new ConvocationHistoryEvent(this, convocationHistory));
         }
@@ -122,7 +122,7 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
                             "$.convocation." + event.getConvocationHistory().getStatus().name() + ".body",
                             getAgentInfo(node)));
 
-            ConvocationHistory convocationHistory = new ConvocationHistory(convocation.getUuid(),
+            ConvocationHistory convocationHistory = new ConvocationHistory(convocation,
                     StatusType.NOTIFICATION_SENT);
             applicationEventPublisher.publishEvent(new ConvocationHistoryEvent(this, convocationHistory));
         }

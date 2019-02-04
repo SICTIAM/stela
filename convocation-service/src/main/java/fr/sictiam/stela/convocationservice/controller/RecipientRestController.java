@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -51,7 +51,7 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -72,7 +72,7 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(recipientService.getRecipient(uuid, currentLocalAuthUuid), HttpStatus.OK);
@@ -87,7 +87,7 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestBody Recipient recipient) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -104,7 +104,7 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestBody Recipient recipientParams) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 

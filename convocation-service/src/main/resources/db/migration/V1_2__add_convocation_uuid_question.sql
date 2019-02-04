@@ -1,0 +1,1 @@
+ALTER TABLE question ADD COLUMN convocation_uuid varchar(255);

@@ -2,15 +2,15 @@ import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
+import moment from 'moment'
 
-import { getLocalAuthoritySlug } from '../_util/utils'
+import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { notifications } from '../_util/Notifications'
 
 import { Page, Field, FieldValue } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
-import { handlePageClick, updateItemPerPage } from '../_util/utils'
 
 import QuestionsForm from './QuestionsForm'
-import Pagination from '../_components/Pagination'
 import StelaTable from '../_components/StelaTable'
 import Participants from './Participants'
 
@@ -18,58 +18,45 @@ import Participants from './Participants'
 class SentConvocation extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
+	    _fetchWithAuthzHandling: PropTypes.func,
+	    _addNotification: PropTypes.func,
 	}
 	state = {
 	    displayListParticipants: false,
-	    totalCount: 0,
-	    limit: 25,
 	    convocation: {
-	        uuid: 'test',
-	        date: '19/12/2016 à 10h00',
-	        assemblyType: 'Bureau syndical test',
-	        assemblyPlace: 'Le lieu habituel',
-	        comments: 'Je suis un commentaire',
-	        document: '',
-	        procuration: 'Visualiser',
-	        questions: ['Je suis la question 1 ?', 'Ma question 2 ?'],
-	        transmitterGroup: 'Sictiam Test',
-	        sendBy: 'Anne-Sophie LEVEQUE',
-	        sendingDate: '20/11/2018 à 09h07',
-	        participants: [{
-	            name: 'Julie ALBALADEJO',
-	            answer: 'OK',
-	            opened: '21/10/2018 10:30',
-	            questions:['oui', 'oui']
-	        },{
-	            name: 'Anne-Sophie LEVEQUE',
-	            answer: 'KO',
-	            opened: '23/10/2018 14:24'
-	        }, {
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: 'OK',
-	            opened: '23/10/2018 14:24',
-	            questions:['non', 'oui']
-	        },
-	        {
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: 'KO',
-	            opened: '23/10/2018 14:24'
-	        },
-	        {
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: null,
-	            opened: null
-	        },{
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: null,
-	            opened: null
-	        }]
+	        uuid: '',
+	        meetingDate: '',
+	        assemblyType: {},
+	        location: '',
+	        comment: '',
+	        annexes: [],
+	        attachment: null,
+	        questions: [],
+	        recipientResponses: [],
+	        sentDate: null,
+	        subject: ''
 	    }
 	}
 
-	sumParticipantsByStatus = (answer) => {
-	    return this.state.convocation.participants.reduce( (acc, curr) => {
-	        return curr['answer'] === answer ? acc + 1: acc
+	componentDidMount() {
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	    const uuid = this.props.uuid
+	    _fetchWithAuthzHandling({ url: `/api/convocation/${uuid}`, method: 'GET' })
+	        .then(checkStatus)
+	        .then(response => response.json())
+	        .then(json => {
+	            this.setState({convocation: json})
+	        })
+	        .catch(response => {
+	            response.json().then(json => {
+	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	            })
+	        })
+	}
+
+	sumRecipientsByStatus = (answer) => {
+	    return this.state.convocation.recipientResponses.reduce( (acc, curr) => {
+	        return curr['responseType'] === answer ? acc + 1: acc
 	    }, 0)
 	}
 
@@ -80,26 +67,22 @@ class SentConvocation extends Component {
 	render() {
 	    const { t } = this.context
 
-	    const presents = this.sumParticipantsByStatus('OK')
-	    const absents = this.sumParticipantsByStatus('KO')
-	    const procurations = this.sumParticipantsByStatus('procurations')
-	    const noAnswer = this.sumParticipantsByStatus(null)
-	    const answerDisplay = (answer) => answer === 'OK' ? <p class='green text-bold'>Présent</p> : answer === 'KO' ? <p class='red'>Absent</p> : ''
-	    const statutDisplay = (opened) => opened ? <p><Icon name='envelope open'/> {opened}</p>: <Icon name='envelope'/>
+	    const presents = this.sumRecipientsByStatus('PRESENT')
+	    const absents = this.sumRecipientsByStatus('NOT_PRESENT')
+	    const procurations = this.sumRecipientsByStatus('SUBSITUTED')
+	    const noAnswer = this.sumRecipientsByStatus('DO_NOT_KNOW')
+
+	    const answerDisplay = (answer) => {
+	        return answer === 'PRESENT' ? <p className='green text-bold'>{t('convocation.page.present')}</p> : answer === 'NOT_PRESENT' ? <p className='red'>{t('convocation.page.absent')}</p> : answer === 'SUBSITUTED' ? <p className='red'>{t('convocation.page.subisituted')}</p> : ''
+	    }
+	    const statutDisplay = (opened) => opened ? <p><Icon name='envelope open'/> {moment(opened, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</p>: <Icon name='envelope'/>
+	    const recipientDisplay = (recipient) => `${recipient.firstname} ${recipient.lastname}`
 	    const metaData = [
-	        { property: 'name', displayed: true, searchable: false, displayName: 'Destinataires' },
-	        { property: 'opened', displayed: true, searchable: false, displayName: 'Statut', displayComponent: statutDisplay },
-	        { property: 'answer', displayed: true, searchable: false, displayName: 'Réponses', displayComponent: answerDisplay },
+	        { property: 'uuid', displayed: false },
+	        { property: 'recipient', displayed: true, searchable: false, displayName: 'Destinataires', displayComponent: recipientDisplay },
+	        { property: 'openDate', displayed: true, searchable: false, displayName: 'Statut', displayComponent: statutDisplay },
+	        { property: 'responseType', displayed: true, searchable: false, displayName: 'Réponses', displayComponent: answerDisplay },
 	    ]
-	    const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
-	    const pagination =
-            <Pagination
-                columns={metaData.length + 1}
-                pageCount={pageCount}
-                handlePageClick={(data) => handlePageClick(this, data)}
-                itemPerPage={this.state.limit}
-                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.submitForm)}
-                currentPage={this.state.currentPage} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 
 	    return (
@@ -113,82 +96,74 @@ class SentConvocation extends Component {
 	                ]}
 	            />
 	            <Segment>
-	                <h2>Titre de la convocation</h2>
+	                <h2>{this.state.convocation.subject}</h2>
 	                <Grid reversed='mobile tablet vertically'>
 	                    <Grid.Column mobile='16' tablet='16' computer='12'>
 	                        <Grid>
 	                            <Grid.Column computer='16'>
-	                                <Field htmlFor="comments" label={t('convocation.fields.comment')}>
-	                                    <FieldValue id="comments">{this.state.convocation.comments}</FieldValue>
+	                                <Field htmlFor="comment" label={t('convocation.fields.comment')}>
+	                                    <FieldValue id="comment">{this.state.convocation.comment}</FieldValue>
 	                                </Field>
 	                            </Grid.Column>
-	                            <Grid.Column mobile='16' computer='8'>
-	                                <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
-	                                    <FieldValue id="document"><Button className="link" primary compact basic>DEC_01_Courrier_logik.pdf</Button></FieldValue>
-	                                </Field>
-	                            </Grid.Column>
-	                            <Grid.Column mobile='16' computer='8'>
-	                                <Field htmlFor="procuration" label={t('convocation.fields.default_procuration')}>
-	                                    <FieldValue id="procuration"><Button className="link" primary compact basic>{this.state.convocation.procuration}</Button></FieldValue>
-	                                </Field>
-	                            </Grid.Column>
-	                            <Grid.Column computer='16' tablet='16'>
-	                                <Field htmlFor="questions" label={t('convocation.fields.questions')}>
-	                                    <QuestionsForm
-	                                        editable={false}
-	                                        questions={this.state.convocation.questions}
-	                                    />
-	                                </Field>
-	                            </Grid.Column>
+	                            {this.state.convocation.questions.length > 0 && (
+	                                <Grid.Column computer='16' tablet='16'>
+	                                    <Field htmlFor="questions" label={t('convocation.fields.questions')}>
+	                                        <QuestionsForm
+	                                            editable={false}
+	                                            questions={this.state.convocation.questions}
+	                                        />
+	                                    </Field>
+	                                </Grid.Column>
+	                            )}
 	                        </Grid>
 	                    </Grid.Column>
 	                    <Grid.Column mobile='16' computer='4'>
 						 	<div className='block-information'>
 	                            <Grid columns='1'>
 	                                <Grid.Column>
-	                                    <Field htmlFor="Date" label={t('convocation.fields.date')}>
-	                                        <FieldValue id="Date">{this.state.convocation.date}</FieldValue>
+	                                    <Field htmlFor="meetingDate" label={t('convocation.fields.date')}>
+	                                        <FieldValue id="meetingDate">{moment(this.state.convocation.meetingDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                                <Grid.Column>
 	                                    <Field htmlFor="assemblyType" label={t('convocation.fields.assembly_type')}>
-	                                        <FieldValue id="assemblyType">{this.state.convocation.assemblyType}</FieldValue>
+	                                        <FieldValue id="assemblyType">{this.state.convocation.assemblyType && this.state.convocation.assemblyType.name}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                                <Grid.Column>
-	                                    <Field htmlFor="assemblyPlace" label={t('convocation.fields.assembly_place')}>
-	                                        <FieldValue id="assemblyPlace">{this.state.convocation.assemblyPlace}</FieldValue>
+	                                    <Field htmlFor="location" label={t('convocation.fields.assembly_place')}>
+	                                        <FieldValue id="location">{this.state.convocation.location}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                            </Grid>
 	                        </div>
 	                    </Grid.Column>
 	                </Grid>
-	                <h2>Envoi</h2>
+	                <h2>{t('convocation.page.sent')}</h2>
 	                <Grid columns='3'>
 	                    <Grid.Column mobile='16' tablet='8' computer='6'>
-	                        <Field htmlFor="transmitterGroup" label='Groupe émétteur'>
+	                        <Field htmlFor="transmitterGroup" label={t('convocation.page.group_sender')}>
 	                            <FieldValue id="transmitterGroup">{this.state.convocation.transmitterGroup}</FieldValue>
 	                        </Field>
 	                    </Grid.Column>
 	                    <Grid.Column mobile='16' tablet='8' computer='6'>
-	                        <Field htmlFor="sendBy" label='Convocation envoyée par'>
+	                        <Field htmlFor="sendBy" label={t('convocation.page.send_by')}>
 	                            <FieldValue id="sendBy">{this.state.convocation.sendBy}</FieldValue>
 	                        </Field>
 	                    </Grid.Column>
 	                    <Grid.Column mobile='16' computer='4'>
-	                        <Field htmlFor="sendingDate" label='Date d envoie'>
-	                            <FieldValue id="sendingDate">{this.state.convocation.sendingDate}</FieldValue>
+	                        <Field htmlFor="sentDate" label={t('convocation.list.sent_date')}>
+	                            <FieldValue id="sentDate">{moment(this.state.convocation.sentDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
 	                        </Field>
 	                    </Grid.Column>
 	                </Grid>
-	                <h2>Participants</h2>
+	                <h2>{t('convocation.page.participants')}</h2>
 	                <Grid columns='1'>
 	                    <Grid.Column>
 	                        <p className='mb-0'>
 	                            {presents > 0 && (
 	                                <Fragment>
-	                                    {presents} y participe(nt)
+	                                    {t('convocation.page.numberPresents',{'number': presents})}
 	                                </Fragment>
 
 	                            )}
@@ -197,7 +172,7 @@ class SentConvocation extends Component {
 	                                    {(presents > 0) && (
 	                                        ', '
 	                                    )}
-	                                    {procurations} a/ont été donnée(s)
+	                                    {t('convocation.page.numberSubsituted',{'number': procurations})}
 	                                </Fragment>
 	                            )}
 	                            {absents > 0 && (
@@ -205,14 +180,14 @@ class SentConvocation extends Component {
 	                                    {(presents > 0 || procurations > 0) && (
 	                                        ', '
 	                                    )}
-	                                    {absents} absent(s)
+	                                    {t('convocation.page.numberAbsents',{'number': absents})}
 	                                </Fragment>
 	                            )}
 	                        </p>
 	                        <p className='red'>
 	                            {noAnswer > 0 && (
 	                                <Fragment>
-	                                    {noAnswer} n'ont pas répondu
+	                                    {t('convocation.page.numberNoAnswer',{'number': noAnswer})}
 	                                </Fragment>
 	                            )}
 	                        </p>
@@ -229,24 +204,25 @@ class SentConvocation extends Component {
 	                    {this.state.displayListParticipants && (
 	                    	<Grid.Column className='pt-0'>
 	                            <Participants
-	                                participants={this.state.convocation.participants}
+	                                participants={this.state.convocation.recipientResponses}
 	                                questions={this.state.convocation.questions}/>
 	                    	</Grid.Column>
 	                    )}
 	                </Grid>
-	                <h2>Historique</h2>
+	                <h2>{t('convocation.page.history')}</h2>
 	                <Grid columns='1'>
 	                    <Grid.Column>
 	                        <StelaTable
 	                            metaData={metaData}
-	                            data={this.state.convocation.participants}
+	                            data={this.state.convocation.recipientResponses}
 	                            header={true}
 	                            sortable={false}
 	                            greyResolver={this.greyResolver}
 	                            striped={false}
 	                            selectable= {false}
 	                            search={false}
-	                            pagination={pagination}
+	                            keyProperty="uuid"
+	                            noDataMessage={t('convocation.new.no_recipient')}
 	                        ></StelaTable>
 	                    </Grid.Column>
 	                </Grid>

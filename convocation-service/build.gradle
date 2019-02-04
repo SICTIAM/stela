@@ -31,16 +31,15 @@ dependencies {
     compile('ch.qos.logback:logback-classic:1.2.3')
     compile('software.amazon.awssdk:s3')
     runtime('org.postgresql:postgresql')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('org.mockito:mockito-core:2.13.0')
-    testCompile('org.springframework:spring-mock:2.0.8')
 }
 
 test {
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
     useJUnit {
         excludeCategories 'fr.sictiam.stela.convocationservice.IntegrationTests'
     }
 }
+
 task integrationTest(type: Test) {
     environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
 
