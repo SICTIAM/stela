@@ -147,6 +147,8 @@ class ActePublic extends Component {
                 </div>
             </div>
         )
+        const isActeAttachmentPDF = acte.acteAttachment.filename && acte.acteAttachment.filename.endsWith('.pdf')
+
         return (
             <Page title={acte.objet}>
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
@@ -194,7 +196,7 @@ class ActePublic extends Component {
                         <FieldInline htmlFor="code" label={t('acte.fields.code')}>
                             <FieldValue id="code">{acte.codeLabel} ({acte.code})</FieldValue>
                         </FieldInline>
-                        {acte.acteAttachment && (
+                        {acte.acteAttachment && isActeAttachmentPDF && (
                             <Grid>
                                 <Grid.Column width={4}>
                                     <label style={{verticalAlign: 'middle'}}

@@ -214,6 +214,7 @@ class Acte extends Component {
             </List.Item>
         )
         const isAgentBelongsToTheGroup = this.agentBelongsToTheGroup()
+        const isActeAttachmentPDF = acte.acteAttachment.filename && acte.acteAttachment.filename.endsWith('.pdf')
 
         const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
         const {boxWidth, boxHeight} = this.draggableBoxSize()
@@ -276,7 +277,7 @@ class Acte extends Component {
                         <div style={{ textAlign: 'right' }}>
                             <Dropdown basic direction='left' trigger={dropdownButton} icon={false} onClick={this.fetchThumbnail}>
                                 <Dropdown.Menu>
-                                    {acteACK &&  (
+                                    {acteACK &&  isActeAttachmentPDF && (
                                         <Dropdown.Item>
                                             <LoadingContent fetchStatus={thumbnailStatus}>
                                                 <Popup content={stampPosition} on='click' position='left center'
