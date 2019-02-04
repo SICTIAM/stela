@@ -129,25 +129,25 @@ class ReceivedConvocation extends Component {
 	                            </div>
 	                        </Grid.Column>
 	                    </Grid>
-	                    <h2>Envoi</h2>
+	                    <h2>{t('convocation.page.sent')}</h2>
 	                    <Grid columns='3'>
 	                        <Grid.Column mobile='16' tablet='8' computer='6'>
-	                            <Field htmlFor="transmitterGroup" label='Groupe émétteur'>
+	                            <Field htmlFor="transmitterGroup" label={t('convocation.page.group_sender')}>
 	                                <FieldValue id="transmitterGroup">{this.state.convocation.transmitterGroup}</FieldValue>
 	                            </Field>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' tablet='8' computer='6'>
-	                            <Field htmlFor="sendBy" label='Convocation envoyée par'>
+	                            <Field htmlFor="sendBy" label={t('convocation.page.send_by')}>
 	                                <FieldValue id="sendBy">{this.state.convocation.sendBy}</FieldValue>
 	                            </Field>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='4'>
-	                            <Field htmlFor="sendingDate" label='Date d envoie'>
+	                            <Field htmlFor="sendingDate" label={t('convocation.list.sent_date')}>
 	                                <FieldValue id="sendingDate">{this.state.convocation.sendingDate}</FieldValue>
 	                            </Field>
 	                        </Grid.Column>
 	                    </Grid>
-	                    <h2>Ma réponse</h2>
+	                    <h2>{t('convocation.page.my_answer')}</h2>
 	                    <FormFieldInline htmlFor='residentThreshold'
 	                        label='Serez-vous présent?'>
 	                        <Radio
@@ -172,7 +172,7 @@ class ReceivedConvocation extends Component {
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
 	                        ></Radio>
 	                    </FormFieldInline>
-	                    <h2>Questions supplémentaires</h2>
+	                    <h2>{t('convocation.fields.questions')}</h2>
 	                </Form>
 	            </Segment>
 	        </Page>

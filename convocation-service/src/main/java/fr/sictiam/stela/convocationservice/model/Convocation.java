@@ -1,118 +1,99 @@
 package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.SortedSet;
 
 @Entity
 public class Convocation {
 
-    public Convocation(Set<String> observerProfileUuids, Set<Recipient> externalObserver, AssemblyType assemblyType,
-            Attachment attachment, Set<Attachment> annexes, Set<Question> questions, LocalDateTime creationDate,
-            LocalDateTime meetingDate, String place, String subject, String comment, String profileUuid,
-            String groupUuid) {
-        this.observerProfileUuids = observerProfileUuids;
-        this.externalObserver = externalObserver;
-        this.assemblyType = assemblyType;
-        this.attachment = attachment;
-        this.annexes = annexes;
-        this.questions = questions;
-        this.creationDate = creationDate;
-        this.meetingDate = meetingDate;
-        this.place = place;
-        this.subject = subject;
-        this.comment = comment;
-        this.profileUuid = profileUuid;
-        this.groupUuid = groupUuid;
-    }
-
-    public interface RestValidation {
-        // validation group marker interface
-    }
-
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private String uuid;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "observer_profile_uuids", joinColumns = @JoinColumn(name = "convocation_uuid"))
-    @Column(name = "profile_uuid")
-    @JsonView(Views.ConvocationViewPublic.class)
-    private Set<String> observerProfileUuids;
+    @NotNull
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonView(Views.ConvocationInternal.class)
+    private Set<Recipient> recipients;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JsonView(Views.ConvocationViewPrivate.class)
-    private Set<Recipient> externalObserver;
-
-    @ManyToOne
-    @JsonView(Views.ConvocationViewPrivate.class)
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonView(Views.Convocation.class)
     private AssemblyType assemblyType;
 
-    @ManyToOne
-    @JsonView(Views.ConvocationViewPublic.class)
+    @OneToOne
+    @JsonView(Views.Convocation.class)
     private Attachment attachment;
 
     @OneToMany
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private Set<Attachment> annexes;
 
-    @OneToMany
-    @JsonView(Views.ConvocationViewPublic.class)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonView(Views.Convocation.class)
     private Set<Question> questions;
 
+    @OneToMany(mappedBy = "convocation")
+    @JsonView(Views.ConvocationInternal.class)
+    private Set<RecipientResponse> recipientResponses;
+
+    @OneToMany
+    @JsonView(Views.ConvocationInternal.class)
+    @OrderBy("date ASC")
+    private SortedSet<ConvocationHistory> histories;
+
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonView(Views.ConvocationViewPublic.class)
+    //@JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonView(Views.Convocation.class)
     private LocalDateTime creationDate;
 
+    @NotNull
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonView(Views.ConvocationViewPublic.class)
+    //@JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonView(Views.Convocation.class)
     private LocalDateTime meetingDate;
 
-    @JsonView(Views.ConvocationViewPublic.class)
-    private String place;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    //@JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonView(Views.Convocation.class)
+    private LocalDateTime sentDate;
 
-    @JsonView(Views.ConvocationViewPublic.class)
+    @ManyToOne
+    @JsonView(Views.ConvocationInternal.class)
+    private LocalAuthority localAuthority;
+
+    @NotNull
+    @JsonView(Views.Convocation.class)
+    private String location;
+
+    @NotNull
+    @JsonView(Views.Convocation.class)
     private String subject;
 
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private String comment;
 
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private String profileUuid;
-
-    @JsonView(Views.ConvocationViewPublic.class)
-    private String groupUuid;
 
     public Convocation() {
     }
 
     public String getUuid() {
         return uuid;
-    }
-
-    public Set<String> getObserverProfileUuids() {
-        return observerProfileUuids;
-    }
-
-    public void setObserverProfileUuids(Set<String> observerProfileUuids) {
-        this.observerProfileUuids = observerProfileUuids;
-    }
-
-    public Set<Recipient> getExternalObserver() {
-        return externalObserver;
-    }
-
-    public void setExternalObserver(Set<Recipient> externalObserver) {
-        this.externalObserver = externalObserver;
     }
 
     public AssemblyType getAssemblyType() {
@@ -163,14 +144,6 @@ public class Convocation {
         this.meetingDate = meetingDate;
     }
 
-    public String getPlace() {
-        return place;
-    }
-
-    public void setPlace(String place) {
-        this.place = place;
-    }
-
     public String getSubject() {
         return subject;
     }
@@ -195,12 +168,66 @@ public class Convocation {
         this.profileUuid = profileUuid;
     }
 
-    public String getGroupUuid() {
-        return groupUuid;
+    public Set<Recipient> getRecipients() {
+        return recipients;
     }
 
-    public void setGroupUuid(String groupUuid) {
-        this.groupUuid = groupUuid;
+    public void setRecipients(Set<Recipient> recipients) {
+        this.recipients = recipients;
     }
 
+    public Set<RecipientResponse> getRecipientResponses() {
+        return recipientResponses;
+    }
+
+    public void setRecipientResponses(Set<RecipientResponse> recipientResponses) {
+        this.recipientResponses = recipientResponses;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public SortedSet<ConvocationHistory> getHistories() {
+        return histories;
+    }
+
+    public void setHistories(SortedSet<ConvocationHistory> histories) {
+        this.histories = histories;
+    }
+
+    public LocalAuthority getLocalAuthority() {
+        return localAuthority;
+    }
+
+    public void setLocalAuthority(LocalAuthority localAuthority) {
+        this.localAuthority = localAuthority;
+    }
+
+    public LocalDateTime getSentDate() {
+        return sentDate;
+    }
+
+    public void setSentDate(LocalDateTime sentDate) {
+        this.sentDate = sentDate;
+    }
+
+    @Override public String toString() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writerWithView(Views.ConvocationInternal.class).writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "[ uuid: " + uuid +
+                    ", subject: " + subject +
+                    ", comment: " + comment +
+                    ", location: " + location +
+                    ", creation: " + creationDate +
+                    ", meetingDate: " + meetingDate + "]";
+        }
+    }
 }

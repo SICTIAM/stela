@@ -3,6 +3,7 @@ package fr.sictiam.stela.convocationservice.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
+import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +42,20 @@ public class AssemblyTypeRestController {
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
+    @JsonView(Views.Public.class)
+    @GetMapping("/all")
+    public ResponseEntity<List<AssemblyType>> getAllByLocalAuthority(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<AssemblyType> assemblyTypes = assemblyTypeService.findAllSorted(currentLocalAuthUuid);
+        return new ResponseEntity<>(assemblyTypes, HttpStatus.OK);
+    }
+
     @JsonView(Views.SearchAssemblyType.class)
     @GetMapping
     public ResponseEntity<SearchResultsUI> getAll(
@@ -54,7 +70,7 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -74,10 +90,12 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
         LOGGER.info("Current local authority {}", currentLocalAuthUuid);
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(assemblyTypeService.getAssemblyType(uuid, currentLocalAuthUuid), HttpStatus.OK);
+
+        AssemblyType assemblyType = assemblyTypeService.getAssemblyType(uuid, currentLocalAuthUuid);
+        return new ResponseEntity<>(assemblyType, HttpStatus.OK);
     }
 
 
@@ -89,7 +107,7 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestBody AssemblyType assemblyType) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         assemblyType = assemblyTypeService.create(assemblyType, currentLocalAuthUuid, currentProfileUuid);
@@ -105,7 +123,7 @@ public class AssemblyTypeRestController {
             @PathVariable String uuid,
             @RequestBody AssemblyType assemblyType) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_ADMIN))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         LOGGER.info("active {}", assemblyType.getActive());
@@ -119,14 +137,29 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         LocalAuthority localAuthority = localAuthorityService.getLocalAuthority(currentLocalAuthUuid);
         AssemblyType assemblyType = new AssemblyType();
         assemblyType.setDelay(localAuthority.getResidentThreshold() ? 5 : 3);
-        
+
         return new ResponseEntity<>(assemblyType, HttpStatus.OK);
+    }
+
+    @JsonView(Views.Public.class)
+    @GetMapping("/{uuid}/recipients")
+    public ResponseEntity<List<Recipient>> getRecipients(
+            @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<Recipient> recipients = assemblyTypeService.findRecipients(uuid, currentLocalAuthUuid);
+        return new ResponseEntity<>(recipients, HttpStatus.OK);
     }
 }

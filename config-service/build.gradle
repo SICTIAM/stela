@@ -4,5 +4,4 @@ dependencies {
 	compile('org.springframework.cloud:spring-cloud-config-server')
 	compile('net.logstash.logback:logstash-logback-encoder:5.2')
 	compile('ch.qos.logback:logback-classic:1.2.3')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

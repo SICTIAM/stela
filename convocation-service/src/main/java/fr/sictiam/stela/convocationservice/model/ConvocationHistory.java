@@ -1,11 +1,11 @@
 package fr.sictiam.stela.convocationservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +13,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 import java.time.LocalDateTime;
 
@@ -22,56 +24,56 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private String uuid;
-    @JsonView(Views.ConvocationViewPublic.class)
-    private String convocationUuid;
+
+    @ManyToOne
+    @JsonView(Views.ConvocationInternal.class)
+    private Convocation convocation;
+
     @Enumerated(EnumType.STRING)
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private StatusType status;
+
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private LocalDateTime date;
-    // Error messages can be quite lengthy
+
     @Column(length = 1024)
-    @JsonView(Views.ConvocationViewPublic.class)
+    @JsonView(Views.Convocation.class)
     private String message;
-    @JsonIgnore
-    private byte[] file;
-    @JsonView(Views.ConvocationViewPublic.class)
-    private String fileName;
+
+    @OneToOne
+    @JsonView(Views.Convocation.class)
+    private Attachment attachment;
 
     public ConvocationHistory() {
     }
 
-    public ConvocationHistory(String pesUuid, StatusType status) {
-        this.convocationUuid = pesUuid;
+    public ConvocationHistory(Convocation convocation, StatusType status) {
+        this.convocation = convocation;
         this.status = status;
-        this.date = LocalDateTime.now();
+        date = LocalDateTime.now();
     }
 
-    public ConvocationHistory(String pesUuid, StatusType status, LocalDateTime date, String message) {
-        this.convocationUuid = pesUuid;
+    public ConvocationHistory(Convocation convocation, StatusType status, LocalDateTime date, String message) {
+        this.convocation = convocation;
         this.status = status;
         this.date = date;
         this.message = message;
     }
 
-    public ConvocationHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName) {
-        this.convocationUuid = pesUuid;
+    public ConvocationHistory(Convocation convocation, StatusType status, LocalDateTime date, byte[] file, String fileName) {
+        this.convocation = convocation;
         this.status = status;
         this.date = date;
-        this.file = file;
-        this.fileName = fileName;
     }
 
-    public ConvocationHistory(String pesUuid, StatusType status, LocalDateTime date, byte[] file, String fileName,
+    public ConvocationHistory(Convocation convocation, StatusType status, LocalDateTime date, byte[] file, String fileName,
             String message) {
-        this.convocationUuid = pesUuid;
+        this.convocation = convocation;
         this.status = status;
         this.date = date;
-        this.file = file;
-        this.fileName = fileName;
         this.message = message;
     }
 
@@ -79,8 +81,8 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
         return uuid;
     }
 
-    public String getConvocationUuid() {
-        return convocationUuid;
+    public Convocation getConvocation() {
+        return convocation;
     }
 
     public LocalDateTime getDate() {
@@ -95,27 +97,27 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
         return message;
     }
 
-    public byte[] getFile() {
-        return file;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
     public void setMessage(String message) {
         this.message = message;
     }
 
-    @Override
-    public String toString() {
-        return "ActeHistory{" + "uuid='" + uuid + '\'' + ", convocationUuid='" + convocationUuid + '\'' + ", status="
-                + status + ", date=" + date + ", message='" + message + '\'' + ", fileName='" + fileName + '\'' + '}';
+    public Attachment getAttachment() {
+        return attachment;
     }
 
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
+
     @Override
-    public int compareTo(ConvocationHistory o) {
-        // TODO Auto-generated method stub
-        return 0;
+    public String toString() {
+        return "ConvocationHistory{" + "uuid='" + uuid + '\'' + ", convocationUuid='" + convocation.getUuid() + '\'' + ", " +
+                "status="
+                + status + ", date=" + date + ", message='" + message + '\'' + '}';
+    }
+
+    @Override public int compareTo(@NotNull ConvocationHistory convocationHistory) {
+        return date.compareTo(convocationHistory.getDate());
     }
 }

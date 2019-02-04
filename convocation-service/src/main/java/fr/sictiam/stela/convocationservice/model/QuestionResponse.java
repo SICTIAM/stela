@@ -25,17 +25,12 @@ public class QuestionResponse {
     @JsonView(Views.QuestionResponseViewPublic.class)
     private Question question;
 
-    @ManyToOne
-    @JsonView(Views.QuestionResponseViewPrivate.class)
-    private ConvocationResponse convocationResponse;
-
     public QuestionResponse() {
     }
 
-    public QuestionResponse(Boolean response, Question question, ConvocationResponse convocationResponse) {
+    public QuestionResponse(Boolean response, Question question) {
         this.response = response;
         this.question = question;
-        this.convocationResponse = convocationResponse;
     }
 
     public Question getQuestion() {
@@ -56,13 +51,5 @@ public class QuestionResponse {
 
     public String getUuid() {
         return uuid;
-    }
-
-    public ConvocationResponse getConvocationResponse() {
-        return convocationResponse;
-    }
-
-    public void setConvocationResponse(ConvocationResponse convocationResponse) {
-        this.convocationResponse = convocationResponse;
     }
 }

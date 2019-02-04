@@ -23,19 +23,33 @@
       "questions_placeholder": "Entrez votre question"
     },
     "list": {
-
+      "sent_date": "Date d'envoi"
     },
     "page": {
-
+      "sent": "Envoi",
+      "participants": "Participants",
+      "present": "Présent",
+      "numberPresents": "{{number}} y participe(nt)",
+      "absent": "Absent",
+      "numberAbsents": "{{number}} absent(s)",
+      "subisituted": "Procuration",
+      "numberSubsituted": "{{number}} a/ont été donnée(s)",
+      "numberNoAnswer": "{{number}} n'a/ont pas répondu",
+      "history": "Historique",
+      "group_sender": "Groupe émetteur",
+      "send_by": "Convocation envoyée par",
+      "my_answer": "Ma réponse"
     },
     "new": {
       "display": "Visualiser",
-      "add_recipients": "Ajouter un/des destinataires",
+      "add_recipients": "Editer la liste des destinataires",
+      "edit_guest": "Editer la liste des invités",
       "delete_all_recipients": "Supprimer tous les destinataires",
       "view_more_recipients": "Voir les {{number}} destinataires",
       "view_less_recipients": "Voir moins de destinataires",
       "no_recipient": "Aucun destinataire",
-      "choose_from_the_list": "Choisir dans la liste"
+      "choose_from_the_list": "Choisir dans la liste",
+      "free_email": "Email libre"
     },
     "admin": {
       "modules": {
@@ -54,7 +68,7 @@
           "assembly_type_config": {
             "type": "Type d'assemblée",
             "convocation_delay": "Délai de convocation",
-            "reminder": "Relance" ,
+            "reminder": "Relance",
             "explanation_reminder": "Si vous activez la relance, un email de rappel sera envoyé deux jours avant l'assemblée aux destinataires qui n'ont pas répondu",
             "place": "Lieu de la séance",
             "recipients": "Destinataires",
@@ -90,6 +104,9 @@
     "errors": {
       "recipient": {
         "alreadyExists": "Un destinataire existe avec ce courriel"
+      },
+      "convocation": {
+        "invalidDate": "La date de séance est invalide"
       }
     }
   }
