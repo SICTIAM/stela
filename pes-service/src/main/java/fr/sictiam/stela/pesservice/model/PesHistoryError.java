@@ -55,6 +55,6 @@ public class PesHistoryError implements Serializable {
 
     @Override
     public String toString() {
-        return "PesHistoryError { title='" + title + "\', message='" + message + "\' , source='" + message + "\' }";
+        return "PesHistoryError { title='" + title + "\', message='" + message + "\' , source='" + source + "\' }";
     }
 }
