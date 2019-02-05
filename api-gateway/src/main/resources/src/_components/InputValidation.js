@@ -102,7 +102,7 @@ export default class InputValidation extends Component {
                     <Dropdown id={!this.props.search ? this.props.id : ''}
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className}
-                        onChange={(event, data) => this.props.onChange(this.props.id, data.value)}
+                        onChange={(event, data) => this.props.onChange(this.props.id, data.value, this.validateValue)}
                         onBlur={this.validateValue}
                         options={this.props.options}
                         value={this.props.value}
