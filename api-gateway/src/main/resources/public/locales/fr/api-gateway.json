@@ -474,5 +474,10 @@
       "sent_convocations_list": "Liste des convocations envoyées"
     }
   },
+  "metrics": {
+    "PES_SENT": "PES envoyé",
+    "PES_WAITING": "PES en attente d'envoi",
+    "PES_ACK": "PES reçu"
+  },
   "made_with_love": "Créé avec ❤ par le SICTIAM"
 }
