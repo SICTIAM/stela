@@ -70,7 +70,7 @@ class TopBar extends Component {
         const multiPath = getMultiPahtFromSlug()
         const listProfile = this.state.profiles.map(profile => {
             return {
-                text: profile.localAuthority.name,
+                text: profile.localAuthorityName,
                 value: profile.uuid,
                 key: profile.uuid,
                 icon: 'building'

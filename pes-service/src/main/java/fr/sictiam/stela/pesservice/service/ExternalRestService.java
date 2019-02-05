@@ -60,20 +60,6 @@ public class ExternalRestService {
         return node;
     }
 
-    public JsonNode getAgentProfiles(String uuid) throws IOException {
-        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
-        Mono<String> profiles = webClient.get().uri("/api/admin/agent/{uuid}/profiles", uuid).retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        response -> Mono.error(new RuntimeException("Profiles not Found")))
-                .bodyToMono(String.class);
-
-        Optional<String> opt = profiles.blockOptional();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode node = objectMapper.readTree(opt.get());
-
-        return node;
-    }
-
     public JsonNode getPaullConnection(String sessionID) throws IOException {
         WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
         Mono<String> profiles = webClient.get().uri("/api/admin/generic_account/session/{sessionID}", sessionID)
