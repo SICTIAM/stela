@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -61,10 +62,10 @@ public class ArchiverService {
         localAuthorities.forEach(localAuthority -> {
             if (localAuthority.getArchiveSettings() != null &&
                     localAuthority.getArchiveSettings().isArchiveActivated()) {
-                LOGGER.info("Retrieving actes for localeAuthority {} ({})", localAuthority.getName(), localAuthority.getUuid());
+                LOGGER.info("Retrieving actes for local authority {} ({})", localAuthority.getName(), localAuthority.getUuid());
                 List<Acte> actes = acteRepository.findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(
                         localAuthority.getUuid());
-                LOGGER.info("{} actes", actes.size());
+                LOGGER.info("Got {} actes not archived", actes.size());
                 actes.forEach(acte -> {
                     if (acte.getActeHistories().last().getDate()
                             .isBefore(LocalDateTime.now().minusDays(localAuthority.getArchiveSettings().getDaysBeforeArchiving()))) {
@@ -75,10 +76,10 @@ public class ArchiverService {
                     }
                 });
             } else {
-                LOGGER.info("LocalAuthority {} ({}) archiving not activated", localAuthority.getName(), localAuthority.getUuid());
+                LOGGER.info("Archving is not activated for local authority {} ({})", localAuthority.getName(), localAuthority.getUuid());
             }
         });
-        LOGGER.info("Ending archiveActesTask job");
+        LOGGER.info("End archiveActesTask job");
     }
 
     public void checkArchivesStatusTask() {
@@ -92,67 +93,75 @@ public class ArchiverService {
                 actes.forEach(acte -> checkStatus(acte, localAuthority.getArchiveSettings()));
             }
         });
-        LOGGER.info("Ending checkArchivesStatusTask job");
+        LOGGER.info("End checkArchivesStatusTask job");
     }
 
     public void archiveActe(Acte acte, ArchiveSettings archiveSettings) {
-        LOGGER.info("Archiving acte {}...", acte.getUuid());
+        LOGGER.info("Archiving acte {}", acte.getUuid());
         Optional<ActeHistory> historyAR = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED))
                 .findFirst();
 
-        if (historyAR.isPresent() && historyAR.get().getFile() != null) {
-            LOGGER.info("Creating new Pastell document");
-            AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
-            LOGGER.info("Création: {}", asalaeDocument);
-
-            LOGGER.info("Sending acte data to Pastell");
-            AsalaeResultForm updatedAsalaeResultForm = updateAsalaeDocument(asalaeDocument, acte, archiveSettings);
-            logAsalaeResultForm(updatedAsalaeResultForm);
-
-
-            LOGGER.info("Sending acte file to Pastell");
-            updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "arrete",
-                    acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile(), archiveSettings);
-            logAsalaeResultForm(updatedAsalaeResultForm);
-
-            LOGGER.info("Sending annexes files to Pastell");
-            for (Attachment annexe : acte.getAnnexes()) {
-                updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "autre_document_attache",
-                        annexe.getFilename(), annexe.getFile(), archiveSettings);
-                logAsalaeResultForm(updatedAsalaeResultForm);
-            }
-
-            LOGGER.info("Sending ACK file to Pastell");
-            updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "aractes",
-                    historyAR.get().getFileName(), historyAR.get().getFile(), archiveSettings);
-            logAsalaeResultForm(updatedAsalaeResultForm);
-
-            LOGGER.info("Archiving Pastell document to Asalae");
-            ResponseEntity<AsalaeResultForm> response = sendAction(updatedAsalaeResultForm.getContent(),
-                    "send-archive", archiveSettings);
-            updatedAsalaeResultForm = response.getBody();
-            if (updatedAsalaeResultForm != null) {
-                logAsalaeResultForm(updatedAsalaeResultForm);
-            } else {
-                LOGGER.error("Request result is null");
-            }
-            Archive archive = new Archive(asalaeDocument.getInfo().getId_d());
-            archive.setStatus(response.getStatusCode().is2xxSuccessful() ? ArchiveStatus.SENT : ArchiveStatus.NOT_SENT);
-            acte.setArchive(archive);
-            ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.SENT_TO_SAE);
-            acte.getActeHistories().add(acteHistory);
-            acteRepository.save(acte);
-        } else {
-            LOGGER.info("No AR found for this acte");
+        if (!historyAR.isPresent() || historyAR.get().getFile() == null) {
+            LOGGER.info("No AR found for acte {}", acte.getUuid());
+            return;
         }
+
+        LOGGER.info("Creating new Pastell document");
+        AsalaeDocument asalaeDocument = createAsalaeDocument(archiveSettings);
+        LOGGER.info("Création: {}", asalaeDocument);
+
+        LOGGER.info("Sending acte data to Pastell");
+        AsalaeResultForm updatedAsalaeResultForm = updateAsalaeDocument(asalaeDocument, acte, archiveSettings);
+        logAsalaeResultForm(updatedAsalaeResultForm);
+
+
+        LOGGER.info("Sending acte file to Pastell");
+        updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "arrete",
+                acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile(), archiveSettings);
+        logAsalaeResultForm(updatedAsalaeResultForm);
+
+        LOGGER.info("Sending annexes files to Pastell");
+        for (Attachment annexe : acte.getAnnexes()) {
+            updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "autre_document_attache",
+                    annexe.getFilename(), annexe.getFile(), archiveSettings);
+            logAsalaeResultForm(updatedAsalaeResultForm);
+        }
+
+        LOGGER.info("Sending ACK file to Pastell");
+        updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "aractes",
+                historyAR.get().getFileName(), historyAR.get().getFile(), archiveSettings);
+        logAsalaeResultForm(updatedAsalaeResultForm);
+
+        LOGGER.info("Archiving Pastell document to Asalae");
+        ResponseEntity<AsalaeResultForm> response = sendAction(updatedAsalaeResultForm.getContent(),
+                "send-archive", archiveSettings);
+
+        if (response == null) {
+            // TODO : should we revert the previously created documents in Asalae (I guess so) ?
+            LOGGER.error("Received an error when sending archive, aborting");
+            return;
+        }
+
+        updatedAsalaeResultForm = response.getBody();
+        if (updatedAsalaeResultForm != null) {
+            logAsalaeResultForm(updatedAsalaeResultForm);
+        } else {
+            LOGGER.error("Request result is null");
+        }
+        Archive archive = new Archive(asalaeDocument.getInfo().getId_d());
+        archive.setStatus(response.getStatusCode().is2xxSuccessful() ? ArchiveStatus.SENT : ArchiveStatus.NOT_SENT);
+        acte.setArchive(archive);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.SENT_TO_SAE);
+        acte.getActeHistories().add(acteHistory);
+        acteRepository.save(acte);
     }
 
-    private Acte checkStatus(Acte acte, ArchiveSettings archiveSettings) {
-        LOGGER.info("Checking archive status for acte {}...", acte.getUuid());
+    private void checkStatus(Acte acte, ArchiveSettings archiveSettings) {
+        LOGGER.info("Checking archive status for acte {}", acte.getUuid());
 
         AsalaeDocument asalaeDocument = getAsalaeDocument(acte.getArchive().getAsalaeDocumentId(), archiveSettings);
-        LOGGER.info("{}", asalaeDocument.toString());
+        LOGGER.info("Retrieved ASALAE doc : {}", asalaeDocument);
 
         if (asalaeDocument.getAction_possible().contains("validation-sae")) {
             sendAction(asalaeDocument, "validation-sae", archiveSettings);
@@ -167,10 +176,8 @@ public class ArchiverService {
                     (String) (asalaeDocument.getData().get("url_archive")));
             acte.getActeHistories().add(acteHistory);
             acte = acteRepository.save(acte);
-            acte = deleteActeFiles(acte);
+            deleteActeFiles(acte);
         }
-        return acte;
-
     }
 
     private void logAsalaeResultForm(AsalaeResultForm asalaeResultForm) {
@@ -179,11 +186,11 @@ public class ArchiverService {
     }
 
     private AsalaeDocument createAsalaeDocument(ArchiveSettings archiveSettings) {
-        StringBuilder url = new StringBuilder();
-        url.append(archiveSettings.getPastellUrl())
-                .append("/api/v2/entite/")
-                .append(archiveSettings.getPastellEntity())
-                .append("/document");
+        StringBuilder url = new StringBuilder()
+            .append(archiveSettings.getPastellUrl())
+            .append("/api/v2/entite/")
+            .append(archiveSettings.getPastellEntity())
+            .append("/document");
         LinkedMultiValueMap<String, Object> params = new LinkedMultiValueMap<String, Object>() {{
             add("type", "actes-generique");
         }};
@@ -264,11 +271,11 @@ public class ArchiverService {
             HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(headers);
             try {
                 return restTemplate.exchange(url.toString(), HttpMethod.POST, request, AsalaeResultForm.class);
-            } catch (Exception e) {
+            } catch (RestClientException e) {
                 if (action.equals("validation-sae")) {
                     LOGGER.info("Received {}, archive probably not accepted yet", e.getMessage());
                 } else {
-                    LOGGER.error("Error while trying to send action: {}", e.getMessage());
+                    LOGGER.error("Error while trying to send action: {}", e);
                 }
                 return null;
             }
@@ -278,7 +285,7 @@ public class ArchiverService {
         }
     }
 
-    public Acte deleteActeFiles(Acte acte) {
+    public void deleteActeFiles(Acte acte) {
         String acteAttachmentUuid = acte.getActeAttachment().getUuid();
 
         acte.setActeAttachment(null);
@@ -288,10 +295,9 @@ public class ArchiverService {
             acteHistory.setFileName(null);
             acteHistoryRepository.save(acteHistory);
         });
-        acte = acteRepository.save(acte);
+        acteRepository.save(acte);
 
         attachmentRepository.delete(attachmentRepository.findByUuid(acteAttachmentUuid).get());
-        return acte;
     }
 
     private LinkedMultiValueMap<String, Object> acteToPastellParams(Acte acte) {
