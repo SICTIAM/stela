@@ -185,4 +185,8 @@ public class Recipient implements Comparable {
     @Override public int compareTo(@NotNull Object o) {
         return lastname.compareTo(((Recipient) o).getLastname());
     }
+
+    @Override public boolean equals(Object o) {
+        return uuid.equals(((Recipient) o).getUuid());
+    }
 }

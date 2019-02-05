@@ -44,14 +44,18 @@ public class RecipientService {
 
     private final LocalAuthorityService localAuthorityService;
 
+    private final AssemblyTypeService assemblyTypeService;
+
     private final ExternalRestService externalRestService;
 
     public RecipientService(
             RecipientRepository recipientRepository,
             LocalAuthorityService localAuthorityService,
+            AssemblyTypeService assemblyTypeService,
             ExternalRestService externalRestService) {
         this.recipientRepository = recipientRepository;
         this.localAuthorityService = localAuthorityService;
+        this.assemblyTypeService = assemblyTypeService;
         this.externalRestService = externalRestService;
     }
 
@@ -87,7 +91,12 @@ public class RecipientService {
         }
 
         if (recipientParams.getActive() != null) {
-            recipient.setInactivityDate(recipientParams.getActive() ? null : LocalDateTime.now());
+            if (recipientParams.getActive()) {
+                recipient.setInactivityDate(null);
+            } else {
+                recipient.setInactivityDate(LocalDateTime.now());
+                assemblyTypeService.removeRecipient(localAuthorityUuid, recipient);
+            }
         }
 
         return save(recipient);
@@ -107,7 +116,7 @@ public class RecipientService {
 
     public List<Recipient> getAllByLocalAuthority(String localAuthorityUuid) {
 
-        return recipientRepository.findAllByLocalAuthorityUuid(localAuthorityUuid);
+        return recipientRepository.findAllByLocalAuthorityUuidAndActiveTrue(localAuthorityUuid);
     }
 
     public Recipient findByProfileinLocalAuthority(String profileUuid, String localAuthorityUuid) {

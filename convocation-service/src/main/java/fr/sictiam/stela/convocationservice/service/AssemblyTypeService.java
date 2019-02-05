@@ -133,6 +133,14 @@ public class AssemblyTypeService {
         return recipients;
     }
 
+    public void removeRecipient(String localAuthorityUuid, Recipient recipient) {
+
+        findAllSorted(localAuthorityUuid).stream().forEach(assemblyType -> {
+            if (assemblyType.getRecipients().remove(recipient))
+                assemblyTypeRepository.save(assemblyType);
+        });
+    }
+
     private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<AssemblyType> assemblyRoot, String multifield,
             String name, String location, Boolean active, String currentLocalAuthUuid) {
 
