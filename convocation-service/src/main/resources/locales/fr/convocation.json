@@ -49,7 +49,8 @@
       "view_less_recipients": "Voir moins de destinataires",
       "no_recipient": "Aucun destinataire",
       "choose_from_the_list": "Choisir dans la liste",
-      "free_email": "Email libre"
+      "free_email": "Email libre",
+      "delayTooShort": "Le délai de convocation est inférieur à {{number}} jours. Êtes-vous sûr(e) de vouloir confirmer ?"
     },
     "admin": {
       "modules": {

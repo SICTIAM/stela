@@ -12,6 +12,7 @@ import history from '../_util/history'
 
 import { withAuthContext } from '../Auth'
 
+import ConfirmModal from '../_components/ConfirmModal'
 import ChipsList from '../_components/ChipsList'
 import { Page, FormField, InputTextControlled, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
@@ -43,6 +44,8 @@ class ConvocationForm extends Component {
 	        recipients: [],
 	        guests: []
 	    },
+	    delayTooShort: false,
+	    delay: null,
 	    assemblyTypes: [],
 	    isFormValid: false,
 	    allFormErrors: []
@@ -53,7 +56,7 @@ class ConvocationForm extends Component {
 	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
 	        .then(checkStatus)
 	        .then(response => response.json())
-	        .then(json => this.setState({assemblyTypes: json.map(item => { return {key: item.uuid, text: item.name, uuid: item.uuid, value: { 'uuid':item.uuid}}})}))
+	        .then(json => this.setState({assemblyTypes: json.map(item => { return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}})}))
 	        .catch(response => {
 	            response.json().then(json => {
 	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
@@ -67,6 +70,18 @@ class ConvocationForm extends Component {
 	    location: ['required'],
 	    subject: 'required|max:500',
 	}
+	checkDelay = () => {
+	    if(this.state.fields.meetingDate && this.state.delay) {
+	        const { fields, delay } = this.state
+	        const now = moment()
+	        const diff = fields.meetingDate.diff(now, 'days')
+	        if(diff > delay) {
+	            this.setState({delayTooShort: false})
+	        } else {
+	            this.setState({delayTooShort: true})
+	        }
+	    }
+	}
 	submit = () => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const localAuthoritySlug = getLocalAuthoritySlug()
@@ -75,6 +90,7 @@ class ConvocationForm extends Component {
 	    delete parameters.uuid
 	    delete parameters.convocationAttachment
 	    delete parameters.customeProcuration
+	    parameters['assemblyType'] = {uuid: parameters.assemblyType}
 	    parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
 	    const headers = { 'Content-Type': 'application/json' }
 	    _fetchWithAuthzHandling({url: '/api/convocation', method: 'POST', body: JSON.stringify(parameters), context: this.props.authContext, headers: headers})
@@ -109,22 +125,23 @@ class ConvocationForm extends Component {
 	    const isFormValid = validation.passes()
 	    const allFormErrors = Object.values(validation.errors.all()).map(errors => errors[0])
 	    this.setState({ isFormValid, allFormErrors })
+
+	    this.checkDelay()
 	})
 	extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
 	handleFieldChange = (field, value, callback) => {
-	    //To COMPLETE
 	    //Set set for thid field
 	    field = this.extractFieldNameFromId(field)
 	    if(field === 'assemblyType') {
 	        const { _fetchWithAuthzHandling, _addNotification } = this.context
-	        _fetchWithAuthzHandling({url: `/api/convocation/assembly-type/${value.uuid}`, method: 'GET'})
+	        _fetchWithAuthzHandling({url: `/api/convocation/assembly-type/${value}`, method: 'GET'})
 	            .then(checkStatus)
 	            .then(response => response.json())
 	            .then(json => {
 	                const fields = this.state.fields
 	                fields['recipients'] = json.recipients
 	                fields['location'] = json.location
-	                this.setState({fields})
+	                this.setState({fields, delay: json.delay})
 	            })
 	            .catch(response => {
 	                response.json().then(json => {
@@ -161,10 +178,13 @@ class ConvocationForm extends Component {
 	render() {
 	    const { t } = this.context
 
-	    const submissionButton =
-            <Button type='submit' primary basic disabled={!this.state.isFormValid }>
-                {t('api-gateway:form.send')}
-            </Button>
+	    const submissionButton = this.state.delayTooShort ?
+	        <ConfirmModal onConfirm={this.submit} text={t('convocation.new.delayTooShort', {number: this.state.delay})}>
+	        	<Button type='button' basic color={'orange'} disabled={!this.state.isFormValid}>{t('api-gateway:form.send')}</Button>
+	    	</ConfirmModal> :
+	        <Button type='submit' primary basic disabled={!this.state.isFormValid}>
+	            {t('api-gateway:form.send')}
+	        </Button>
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    return (
 	        <Page>
@@ -276,7 +296,7 @@ class ConvocationForm extends Component {
 	                                                <Modal open={this.state.modalRecipentsOpened} trigger={<Button
 	                                                    onClick={() => this.setState({modalRecipentsOpened: true})}
 	                                                    type='button'
-	                                                    disabled={!this.state.fields.assemblyType.uuid}
+	                                                    disabled={!this.state.fields.assemblyType}
 	                                                    id={`${this.state.fields.uuid}_recipient`}
 	                                                    compact basic primary>{t('convocation.new.add_recipients')}
 	                                                </Button>}>
