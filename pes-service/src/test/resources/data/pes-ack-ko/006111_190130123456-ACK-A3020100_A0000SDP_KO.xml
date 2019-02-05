@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<n:PES_ACQUIT xmlns:n="http://www.minefi.gouv.fr/cp/helios/pes_v2/Rev0/retour/v2">
+    <Enveloppe>
+        <Parametres>
+            <Version V="2"/>
+            <TypFic V="PESALR1"/>
+            <NomFic V="PesRecette-02-2018-258-258-20190129666666"/>
+        </Parametres>
+        <Emetteur>
+            <Sigle V="Appli GF"/>
+            <Adresse V="pesallrec 1.1.001"/>
+        </Emetteur>
+        <Recepteur>
+            <Sigle V="HELIOS"/>
+            <Adresse V="READRESSE"/>
+        </Recepteur>
+    </Enveloppe>
+    <EnTetePES>
+        <DteStr V="2019-01-30"/>
+        <IdPost V="006111"/>
+        <IdColl V="01234567890001"/>
+        <CodCol V="000"/>
+        <CodBud V="00"/>
+        <LibelleColBud V="STELA"/>
+    </EnTetePES>
+    <ACQUIT>
+        <EnTeteAcquit>
+            <IdVer V="2"/>
+        </EnTeteAcquit>
+        <ElementACQUIT>
+            <DomaineAck V="4"/>
+            <EtatAck V="1"/>
+            <IdUnique V="2018EC00088880"/>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="4"/>
+            <EtatAck V="1"/>
+            <IdUnique V="2018EC00088881"/>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="6"/>
+            <EtatAck V="0"/>
+            <NumBord V="258"/>
+            <ExerciceBord V="2018"/>
+            <DetailPiece>
+                <NumPiece V="5432"/>
+                <Erreur>
+                    <NumAnoAck V="ERREUR_AUTRE"/>
+                    <LibelleAnoAck
+                            V="2559 - Le code service de la structure publique destinataire est inconnu ou inactif dans Chorus Pro"/>
+                </Erreur>
+            </DetailPiece>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="6"/>
+            <EtatAck V="0"/>
+            <NumBord V="258"/>
+            <ExerciceBord V="2018"/>
+            <DetailPiece>
+                <NumPiece V="4321"/>
+                <Erreur>
+                    <NumAnoAck V="ERREUR_AUTRE"/>
+                    <LibelleAnoAck
+                            V="2559 - Le code service de la structure publique destinataire est inconnu ou inactif dans Chorus Pro"/>
+                </Erreur>
+            </DetailPiece>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="4"/>
+            <EtatAck V="1"/>
+            <IdUnique V="2018EC00088882"/>
+        </ElementACQUIT>
+    </ACQUIT>
+</n:PES_ACQUIT>
