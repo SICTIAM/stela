@@ -96,6 +96,11 @@ class MenuBar extends Component {
                                         {t('menu.pes.PES_Retour_list')}
                                     </Menu.Item>
                                 )}
+                                {rightsFeatureResolver(rights, ['PES_DISPLAY']) && (
+                                    <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/pes/statut`}>
+                                        {t('menu.pes.PES_statut')}
+                                    </Menu.Item>
+                                )}
                             </Menu.Menu>
                         </Menu.Item>
                     )}

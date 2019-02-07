@@ -21,7 +21,7 @@ export class ChartDoughnut extends Component {
                 new Chart(this.canvas, {
                     type: 'doughnut',
                     data: {
-                        datasets: datasets,
+                        datasets: nextProps.datasets,
                         labels: labels
                     }
                 })

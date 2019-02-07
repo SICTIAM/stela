@@ -89,7 +89,8 @@
       "accounting_flow": "Flux comptable",
       "submit_a_PES_Aller": "Déposer un PES Aller",
       "PES_Aller_list": "Liste des PES Aller",
-      "PES_Retour_list": "Liste des PES Retour"
+      "PES_Retour_list": "Liste des PES Retour",
+      "PES_statut": "État des flux PES"
     },
     "convocation": {
       "convocation": "Convocation",

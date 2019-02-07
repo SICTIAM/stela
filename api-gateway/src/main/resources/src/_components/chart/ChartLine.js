@@ -21,7 +21,7 @@ export class ChartLine extends Component {
             let newChart = new Chart(this.canvas, {
                 type: 'scatter',
                 data: {
-                    datasets: datasets
+                    datasets: nextProps.datasets
                 },
                 options: {
                     scales: {
