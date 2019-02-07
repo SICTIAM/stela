@@ -327,6 +327,8 @@ public class PesAller {
 
         Integer getSesileDocumentId();
 
+        String getSesileClasseurUrl();
+
         LocalDateTime getLastHistoryDate();
 
         StatusType getLastHistoryStatus();
