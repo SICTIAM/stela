@@ -37,7 +37,7 @@ export default class MetricsSegment extends Component {
                                     datasets={doughnutDatasets}/>
                             </Grid.Column>
                             <Grid.Column width={12} verticalAlign={'middle'}>
-                                <ChartLine height={100} width={250} datasets={chartDatasets} min={moment().subtract(1, this.state.activeButton)} max={moment()} />
+                                <ChartLine height={100} width={250} datasets={chartDatasets} min={moment().subtract(2, this.state.activeButton)} max={moment()} />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>

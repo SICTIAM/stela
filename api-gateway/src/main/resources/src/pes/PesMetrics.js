@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import {translate} from 'react-i18next'
 import {withAuthContext} from '../Auth'
 import {Page} from '../_components/UI'
-import faker from 'faker'
 import moment from 'moment'
 import PropTypes from 'prop-types'
 import MetricsSegment from '../_components/MetricsSegment'
@@ -34,27 +33,12 @@ class PesMetrics extends Component {
 
     componentDidMount = async () => {
         const {refDate} = this.state
-        let toDate = this._convertDateToLocalTime(refDate)
-        let fromDate = this._convertDateToLocalTime(refDate.clone().subtract(1, 'hour'))
+        const sample = 'second'
+        const toDate = this._convertDateToLocalTime(refDate)
+        const fromDate = this._convertDateToLocalTime(refDate.clone().subtract(1, 'hour'))
 
-        this._updateDataSentWaiting(fromDate, toDate)
-        this._updateDataSentACK(fromDate, toDate)
-    }
-
-    _updateDataSentWaiting = async (fromDate, toDate) => {
-        this.setState({
-            sentPesForWaiting: this._transformTimestampToChartArray(this.fetchFakeDatas()),
-            waitingPes: this._transformTimestampToChartArray(this.fetchFakeDatas()),
-            doughnutSentWaiting: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SIGNATURE_MISSING, PESstatusType.PENDING_SEND])
-        })
-    }
-
-    _updateDataSentACK = async (fromDate, toDate) => {
-        this.setState({
-            sentPesForACK: this._transformTimestampToChartArray(this.fetchFakeDatas()),
-            ackPes: this._transformTimestampToChartArray(this.fetchFakeDatas()),
-            doughnutSentACK: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SENT, PESstatusType.ACK_RECEIVED])
-        })
+        this._updateDataSentWaiting(fromDate, toDate, sample)
+        this._updateDataSentACK(fromDate, toDate, sample)
     }
 
     _getPesNumber = async (fromDate, toDate, statusType) => {
@@ -63,19 +47,10 @@ class PesMetrics extends Component {
         return await (await _fetchWithAuthzHandling({url: '/api/pes/metric', query: queryParams})).json()
     }
 
-    _getDoughnutValues = async (fromDate, toDate, statusTypeArray) => {
-        let fetchPesNumbers = statusTypeArray.map(async statusType => this._getPesNumber(fromDate, toDate, statusType))
-        return await Promise.all(fetchPesNumbers)
-    }
-
-    fetchFakeDatas = () => {
-        const {refDate} = this.state
-        let array = []
-        let minDate = refDate.clone().subtract(1, 'hour')
-        for (let i = 0; i < 100; i++) {
-            array.push(faker.date.between(minDate, refDate))
-        }
-        return array
+    _getNumberOfPesWithSample = async (fromDate, toDate, statusType, sample) => {
+        const {_fetchWithAuthzHandling} = this.context
+        const queryParams = {fromDate: fromDate, toDate: toDate, statusType: statusType, sample: sample}
+        return await (await _fetchWithAuthzHandling({url: '/api/pes/metric/sample', query: queryParams})).json()
     }
 
     _handleFetchData = async (period, metric) => {
@@ -94,95 +69,73 @@ class PesMetrics extends Component {
 
         let fromDate = null
         let toDate = moment()
+        let sample = ''
         switch (period) {
         case 'hour':
             fromDate = toDate.clone().subtract(1, 'h')
+            sample = 'second'
             break
         case 'day':
             fromDate = toDate.clone().subtract(1, 'd')
+            sample = 'minute'
             break
         case 'week':
             fromDate = toDate.clone().subtract(1, 'w')
+            sample = 'hour'
             break
         default:
             break
         }
         fromDate = this._convertDateToLocalTime(fromDate)
         toDate = this._convertDateToLocalTime(toDate)
-        updateFunction(fromDate.toString(), toDate.toString())
+        updateFunction(fromDate.toString(), toDate.toString(), sample)
     }
 
-    _convertDateToLocalTime = (date) => {
-        const fmt = 'YYYY-MM-DD HH:mm:ss'
-        return moment.utc(date, fmt).local().format(fmt)
+    _updateDataSentWaiting = async (fromDate, toDate, sample) => {
+        /*
+        TODO
+        REPLACE ALL THE SIGNATURE_MISSING by SENT
+        THEN pass min and max to props
+        */
+        let fetchSentPesForWaiting = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.SIGNATURE_MISSING, 'minute')
+        let fetchWaitingPes = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.PENDING_SEND, 'minute')
+
+        this.setState({
+            sentPesForWaiting: this._transformDataToCoordinate(fetchSentPesForWaiting[PESstatusType.SIGNATURE_MISSING]),
+            waitingPes: this._transformDataToCoordinate(fetchWaitingPes[PESstatusType.PENDING_SEND]),
+            doughnutSentWaiting: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SIGNATURE_MISSING, PESstatusType.PENDING_SEND])
+        })
     }
 
-    _transformTimestampToChartArray = (timestampsArray) => {
-        const {refDate} = this.state
-        let resArray = []
+    _updateDataSentACK = async (fromDate, toDate, sample) => {
+        let fetchSentPesForWaiting = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.SIGNATURE_MISSING, 'minute')
+        let fetchWaitingPes = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.ACK_RECEIVED, 'minute')
 
-        /*let diffTimesArray = timestampsArray
-             .map(timestamp => {
-                 let diff = refDate.clone().diff(timestamp)
-                 return Math.floor(moment.duration(diff).asMinutes())
-             })
-
-        //more powerful than a map on large arrays
-         for (let diffTime of diffTimesArray) {
-             let value = resArray[diffTime] ? resArray[diffTime]['y'] + 1 : 1
-             resArray[diffTime] = {x: diffTime, y: value}
-         }*/
-
-        for (let time of timestampsArray) {
-            let diff = refDate.clone().diff(time)
-            let index = Math.floor(moment.duration(diff).asMinutes())
-            let value = resArray[index] ? resArray[index]['y'] + 1 : 1
-            resArray[index] = {x: moment(time), y: value}
-        }
-
-        return resArray
+        this.setState({
+            sentPesForACK: this._transformDataToCoordinate(fetchSentPesForWaiting[PESstatusType.SIGNATURE_MISSING]),
+            ackPes: this._transformDataToCoordinate(fetchWaitingPes[PESstatusType.ACK_RECEIVED]),
+            doughnutSentACK: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SIGNATURE_MISSING, PESstatusType.ACK_RECEIVED])
+        })
     }
 
-    _handleChartDatasetsSentpesWaitingpes = () => {
-        const {sentPesForWaiting, waitingPes} = this.state
+    _getDoughnutValues = async (fromDate, toDate, statusTypeArray) => {
+        let fetchPesNumbers = statusTypeArray.map(async statusType => this._getPesNumber(fromDate, toDate, statusType))
+        return await Promise.all(fetchPesNumbers)
+    }
+
+    _handleChartDatasets = (chartsCoordinatesArrays) => {
         const {t} = this.context
-        return [
-            {
-                label: t('api-gateway:metrics.PES_SENT'),
-                data: sentPesForWaiting,
-                showLine: true,
-                fill: false,
-                borderColor: pesColors.SENTPes.borderColor
-            },
-            {
-                label: t('api-gateway:metrics.PES_WAITING'),
-                data: waitingPes,
-                showLine: true,
-                fill: false,
-                borderColor: pesColors.PENDING_SENDPes.borderColor
-            }]
-    }
 
-    _handleChartDatasetsSentpesACKpes = () => {
-        const {sentPesForACK, ackPes} = this.state
-        const {t} = this.context
-        return [
-            {
-                label: t('api-gateway:metrics.PES_SENT'),
-                data: sentPesForACK,
+        return chartsCoordinatesArrays.map(item => {
+            return {
+                label: t(`api-gateway:metrics.pes.${item.statusType}`),
+                data: item.coordinates,
                 showLine: true,
                 fill: false,
-                borderColor: pesColors.SENTPes.borderColor
-            },
-            {
-                label: t('api-gateway:metrics.PES_ACK'),
-                data: ackPes,
-                showLine: true,
-                fill: false,
-                borderColor: pesColors.ACK_RECEIVEDPes.borderColor
-            }]
+                borderColor: pesColors[`${item.statusType}Pes`].borderColor
+            }
+        })
     }
-
 
     _handleDoughnutDatasets = (doughnutValues) => {
         let backgroundColor = []
@@ -205,23 +158,43 @@ class PesMetrics extends Component {
         }]
     }
 
+    _convertDateToLocalTime = (date) => {
+        const fmt = 'YYYY-MM-DD HH:mm:ss'
+        return moment.utc(date, fmt).local().format(fmt)
+    }
+
+    _transformDataToCoordinate = (dataArray) => {
+        return dataArray.map(item => {
+            return {x: item.date_time, y: item.count}
+        })
+    }
+
     render() {
         const {t} = this.context
-        const {doughnutSentWaiting, doughnutSentACK} = this.state
+        const {doughnutSentWaiting, doughnutSentACK, sentPesForWaiting, waitingPes, sentPesForACK, ackPes} = this.state
+        const chart1 = [
+            {coordinates: sentPesForWaiting, statusType: PESstatusType.SIGNATURE_MISSING},
+            {coordinates: waitingPes, statusType: PESstatusType.PENDING_SEND}
+        ]
+        const chart2 = [
+            {coordinates: sentPesForACK, statusType: PESstatusType.SIGNATURE_MISSING},
+            {coordinates: ackPes, statusType: PESstatusType.ACK_RECEIVED}
+        ]
+
 
         return (
             <Page title={'Flux PES'}>
                 <MetricsSegment
-                    doughnutLabels={[t('api-gateway:metrics.PES_SENT'), t('api-gateway:metrics.PES_WAITING')]}
+                    doughnutLabels={[t('api-gateway:metrics.pes.SENT'), t('api-gateway:metrics.pes.PENDING_SEND')]}
                     doughnutDatasets={this._handleDoughnutDatasets(doughnutSentWaiting)}
-                    chartDatasets={this._handleChartDatasetsSentpesWaitingpes()}
+                    chartDatasets={this._handleChartDatasets(chart1)}
                     onClickButton={(period) => this._handleFetchData(period, 'SENT_WAITING')}
                 />
 
                 <MetricsSegment
-                    doughnutLabels={[t('api-gateway:metrics.PES_SENT'), t('api-gateway:metrics.PES_ACK')]}
+                    doughnutLabels={[t('api-gateway:metrics.pes.SENT'), t('api-gateway:metrics.pes.ACK_RECEIVED')]}
                     doughnutDatasets={this._handleDoughnutDatasets(doughnutSentACK)}
-                    chartDatasets={this._handleChartDatasetsSentpesACKpes()}
+                    chartDatasets={this._handleChartDatasets(chart2)}
                     onClickButton={(period) => this._handleFetchData(period, 'SENT_ACK')}
                 />
             </Page>

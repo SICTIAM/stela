@@ -476,9 +476,12 @@
     }
   },
   "metrics": {
-    "PES_SENT": "PES envoyé",
-    "PES_WAITING": "PES en attente d'envoi",
-    "PES_ACK": "PES reçu"
+    "pes": {
+      "SENT": "PES envoyé",
+      "PENDING_SEND": "PES en attente d'envoi",
+      "ACK_RECEIVED": "PES reçu",
+      "SIGNATURE_MISSING":  "PES signature manquante"
+    }
   },
   "made_with_love": "Créé avec ❤ par le SICTIAM"
 }
