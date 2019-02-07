@@ -58,6 +58,7 @@
       "malformedfield": "Le champ n'est pas formé correctement",
       "mandatoryfile": "Fichier obligatoire",
       "badextension": "L'extension du fichier est incorrecte",
+      "bad_extension_file": "L'extension du fichier '{{name}}' est incorrecte",
       "badbudgetfile": "Erreur lors de l'analyse du fichier",
       "badstampbudgetfile": "Erreur lors du calcul de l'empreinte du fichier",
       "budgetfilenotsealed": "Le fichier budgétaire n'est pas scellé",
@@ -230,8 +231,11 @@
     },
     "convocation": {
       "title": "Module Convocation",
+      "created": {
+        "success": "La convocation a été créée avec succès, les documents sont en cours d'envoi. Veuillez patienter."
+      },
       "sent": {
-        "success":  "La convocation a été envoyée avec succès" 
+        "success": "La convocation a été envoyée avec succès"
       },
       "admin": {
         "title": "Admin module Convocation",

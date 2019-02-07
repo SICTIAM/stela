@@ -5,16 +5,18 @@ import PropTypes from 'prop-types'
 import debounce from 'debounce'
 import moment from 'moment'
 import Validator from 'validatorjs'
+import accepts from 'attr-accept'
 
 import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
+import { acceptFileDocumentConvocation } from '../_util/constants'
 
 import { withAuthContext } from '../Auth'
 
 import ConfirmModal from '../_components/ConfirmModal'
 import ChipsList from '../_components/ChipsList'
-import { Page, FormField, InputTextControlled, ValidationPopup } from '../_components/UI'
+import { Page, FormField, InputTextControlled, ValidationPopup, File, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import QuestionsForm from './QuestionsForm'
 import RecipientForm from './RecipientForm'
@@ -38,14 +40,16 @@ class ConvocationForm extends Component {
 	        location: '',
 	        subject: '',
 	        comment: '',
-	        convocationAttachment: null,
-	        customeProcuration: null,
 	        questions: [],
 	        recipients: [],
-	        guests: []
+	        guests: [],
+	        file: null,
+	        annexes: [],
+	        sending: false
 	    },
 	    delayTooShort: false,
 	    delay: null,
+	    showAllAnnexes: false,
 	    assemblyTypes: [],
 	    isFormValid: false,
 	    allFormErrors: []
@@ -69,6 +73,7 @@ class ConvocationForm extends Component {
 	    assemblyType: 'required',
 	    location: ['required'],
 	    subject: 'required|max:500',
+	    file: ['required']
 	}
 	checkDelay = () => {
 	    if(this.state.fields.meetingDate && this.state.delay) {
@@ -83,22 +88,49 @@ class ConvocationForm extends Component {
 	    }
 	}
 	submit = () => {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
-	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    if(this.state.isFormValid) {
+	        const { _fetchWithAuthzHandling, _addNotification } = this.context
+	        const localAuthoritySlug = getLocalAuthoritySlug()
 
-	    const parameters = this.state.fields
-	    delete parameters.uuid
-	    delete parameters.convocationAttachment
-	    delete parameters.customeProcuration
-	    parameters['assemblyType'] = {uuid: parameters.assemblyType}
-	    parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
-	    const headers = { 'Content-Type': 'application/json' }
-	    _fetchWithAuthzHandling({url: '/api/convocation', method: 'POST', body: JSON.stringify(parameters), context: this.props.authContext, headers: headers})
-	        .then(checkStatus)
-	        .then(() => {
-	            _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeUpdated: notifications.convocation.sent)
-	            history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
-	        })
+	        const parameters = Object.assign({}, this.state.fields)
+	        delete parameters.uuid
+	        delete parameters.file
+	        delete parameters.annexes
+
+	        parameters['assemblyType'] = {uuid: parameters.assemblyType}
+	        parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
+	        const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
+	        _fetchWithAuthzHandling({url: '/api/convocation', method: 'POST', body: JSON.stringify(parameters), context: this.props.authContext, headers: headers})
+	            .then(checkStatus)
+	            .then(response => response.json())
+	            .then((json) => {
+	                this.setState({sending: true})
+	                _addNotification(notifications.convocation.created)
+	                const data = new FormData()
+	                data.append('file', this.state.fields.file)
+	                if(this.state.fields.annexes.length > 0) {
+	                    this.state.fields.annexes.forEach(annexe => {
+	                        data.append('annexes', annexe)
+	                    })
+	                }
+	                _fetchWithAuthzHandling({url: `/api/convocation/${json.uuid}/upload`, method: 'POST', body: data, context: this.props.authContext})
+	                	.then(checkStatus)
+	                	.then(() => {
+	                		_addNotification(notifications.convocation.sent)
+	                		history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
+	                	})
+	                .catch((error) => {
+	                	error.json().then(json => {
+	                		_addNotification(notifications.defaultError, 'notifications.title', json.message)
+	                	})
+	                })
+	            })
+	            .catch((error) => {
+	                error.json().then(json => {
+	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	                })
+	            })
+	    }
 	}
 	validateForm = debounce(() => {
 	    const { t } = this.context
@@ -108,6 +140,7 @@ class ConvocationForm extends Component {
 	        assemblyType: this.state.fields.assemblyType,
 	        location: this.state.fields.location,
 	        subject: this.state.fields.subject,
+	        file: this.state.fields.file
 	    }
 
 	    const attributeNames = {
@@ -116,6 +149,7 @@ class ConvocationForm extends Component {
 	        assemblyType: 'this.state.fields.assemblyType',
 	        location: t('convocation.fields.assembly_place'),
 	        subject: t('convocation.fields.object'),
+	        file: t('convocation.fields.convocation_document')
 	    }
 	    const validationRules = this.validationRules
 	    //add validation format file
@@ -175,17 +209,73 @@ class ConvocationForm extends Component {
 	    fields['questions'] = questions
 	    this.setState({fields})
 	}
+
+	acceptsFile = (file, acceptType) => {
+	    const { _addNotification, t } = this.context
+	    if(accepts(file, acceptType)) {
+	        return true
+	    } else {
+	        _addNotification(notifications.defaultError, 'notifications.convocation.title', t('api-gateway:form.validation.bad_extension_file', {name: file.name}))
+	        return false
+	    }
+	}
+
+	handleFileChange = (file, acceptType) => {
+	    if(this.acceptsFile(file, acceptType)) {
+	        const fields = this.state.fields
+
+	        if (file) {
+	            fields['file'] = file
+	            this.setState({ fields }, this.validateForm)
+	        }
+	    }
+	}
+
+	handleAnnexeChange = (file, acceptType) => {
+	    const fields = this.state.fields
+	    for(let i = 0; i < file.length; i++) {
+	        if(this.acceptsFile(file[i], acceptType)) {
+	            fields['annexes'].push(file[i])
+	        }
+	    }
+
+	    this.setState({ fields })
+	}
+
+	deleteFile = () => {
+	    const fields = this.state.fields
+	    fields['file'] = null
+	    this.setState({ fields }, this.validateForm)
+	}
+
+	deleteAnnexe = (index) => {
+	    const fields = this.state.fields
+	    fields['annexes'].splice(index, 1)
+	    this.setState({ fields })
+	}
+
 	render() {
 	    const { t } = this.context
 
 	    const submissionButton = this.state.delayTooShort ?
 	        <ConfirmModal onConfirm={this.submit} text={t('convocation.new.delayTooShort', {number: this.state.delay})}>
-	        	<Button type='button' basic color={'orange'} disabled={!this.state.isFormValid}>{t('api-gateway:form.send')}</Button>
-	    	</ConfirmModal> :
+	            <Button type='button' basic color={'orange'} disabled={!this.state.isFormValid}>{t('api-gateway:form.send')}</Button>
+	        </ConfirmModal> :
 	        <Button type='submit' primary basic disabled={!this.state.isFormValid}>
 	            {t('api-gateway:form.send')}
 	        </Button>
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+
+	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.fields.annexes.length > 3 ? this.state.fields.annexes.slice(0,3) : this.state.fields.annexes
+	    const annexes = annexesToDisplay.map((annexe, index)=> {
+	        return (
+	            <File
+	                key={`${this.state.fields.uuid}_${annexe.name}`}
+	                attachment={{ filename: annexe.name }}
+	                onDelete={() => this.deleteAnnexe(index)} />
+	        )
+	    })
+
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -326,7 +416,55 @@ class ConvocationForm extends Component {
 	                                        viewLessText={t('convocation.new.view_less_recipients')}/>
 	                                </Grid.Column>
 	                            </Grid>
+	                        </Grid.Column>
+	                        <Grid.Column mobile='16' computer='8'>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_file`}
+	                                label={t('convocation.fields.convocation_document')} required={true}>
+	                                <InputValidation id={`${this.state.fields.uuid}_file`}
+	                                    labelClassName="primary"
+	                                    type='file'
+	                                    ariaRequired={true}
+	                                    accept={acceptFileDocumentConvocation}
+	                                    onChange={this.handleFileChange}
+	                                    value={this.state.fields.file}
+	                                    label={`${t('api-gateway:form.add_a_file')}`}
+	                                    fieldName={t('convocation.fields._file')} />
+	                            </FormField>
+	                            {this.state.fields.file && (
+	                                <File attachment={{ filename: this.state.fields.file.name }} onDelete={this.deleteFile} />
+	                            )}
+	                        </Grid.Column>
+	                        <Grid.Column mobile='16' computer='8'>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_annexes`}
+	                                label={t('convocation.fields.annexes')}>
+	                                <InputFile labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`}
+	                                    label={`${t('api-gateway:form.add_a_file')}`}>
+	                                    <input type="file"
+	                                        id={`${this.state.fields.uuid}_annexes`}
+	                                        accept={acceptFileDocumentConvocation}
+	                                        multiple
+	                                        onChange={(e) => this.handleAnnexeChange(e.target.files, acceptFileDocumentConvocation)}
+	                                        style={{ display: 'none' }}/>
+	                                </InputFile>
+	                            </FormField>
+	                            {this.state.fields.annexes.length > 0 && (
+	                                <div>
+	                                    {annexes}
+	                                    {this.state.fields.annexes.length > 3 && (
+	                                        <div className='mt-15'>
+	                                            <Button onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
+	                                                {this.state.showAllAnnexes && (
+	                                                    <span>{t('convocation.new.show_less_annexes')}</span>
+	                                                )}
+	                                                {!this.state.showAllAnnexes && (
+	                                                    <span>{t('convocation.new.show_all_annexes', {number: this.state.fields.annexes.length})}</span>
+	                                                )}
+	                                            </Button>
+	                                        </div>
+	                                    )}
 
+	                                </div>
+	                            )}
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='16'>
 	                            <QuestionsForm

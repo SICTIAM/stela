@@ -50,7 +50,9 @@
       "no_recipient": "Aucun destinataire",
       "choose_from_the_list": "Choisir dans la liste",
       "free_email": "Email libre",
-      "delayTooShort": "Le délai de convocation est inférieur à {{number}} jours. Êtes-vous sûr(e) de vouloir confirmer ?"
+      "delayTooShort": "Le délai de convocation est inférieur à {{number}} jours. Êtes-vous sûr(e) de vouloir confirmer ?",
+      "show_all_annexes": "Voir les {{number}} annexes",
+      "show_less_annexes": "Voir moins d'annexes"
     },
     "admin": {
       "modules": {
@@ -98,6 +100,9 @@
           },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"
+          },
+          "sent_convocation_list": {
+            "no_sent_convocation": "Aucune convocation envoyée"
           }
         }
       }
@@ -107,7 +112,9 @@
         "alreadyExists": "Un destinataire existe avec ce courriel"
       },
       "convocation": {
-        "invalidDate": "La date de séance est invalide"
+        "invalidDate": "La date de séance est invalide",
+        "fileExists": "Le document de la convocation a déjà été fourni",
+        "documentMissing": "Le document de la convocation est manquant"
       }
     }
   }

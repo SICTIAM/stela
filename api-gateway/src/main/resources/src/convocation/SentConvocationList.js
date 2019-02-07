@@ -188,7 +188,7 @@ class SentConvocation extends Component {
 	                    column={this.state.column}
 	                    link={`/${localAuthoritySlug}/convocation/liste-envoyees/`}
 	                    linkProperty='uuid'
-	                    noDataMessage={t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')}
+	                    noDataMessage={t('convocation.admin.modules.convocation.sent_convocation_list.no_sent_convocation')}
 	                />
 	            </Segment>
 	        </Page>

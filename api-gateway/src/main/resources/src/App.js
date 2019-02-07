@@ -67,10 +67,10 @@ class App extends Component {
     _fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
         const httpMethod = method || 'GET'
         const data = body || undefined
-        const params = query || {}
-        const queryParams = '?' + Object.keys(params)
+        const params = query || null
+        const queryParams = params ? '?' + Object.keys(params)
             .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-            .join('&')
+            .join('&') : ''
         const additionalHeaders = headers || {}
         let httpHeaders = {}
         if (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH' || httpMethod === 'DELETE') {

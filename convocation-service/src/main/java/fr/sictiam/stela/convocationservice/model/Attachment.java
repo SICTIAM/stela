@@ -1,8 +1,10 @@
 package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -20,15 +22,18 @@ public class Attachment {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ConvocationInternal.class)
     private String uuid;
 
+    @JsonView(Views.ConvocationInternal.class)
     private String filename;
+
     private long size;
 
     private String storageKey;
 
     @JsonIgnore
-    transient private byte[] content;
+    private byte[] content;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;

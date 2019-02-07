@@ -202,7 +202,7 @@ class RecipentConfig extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_phoneNumber`}
-	                                label={t('convocation.admin.modules.convocation.recipient_config.phonenumber')} required={true}>
+	                                label={t('convocation.admin.modules.convocation.recipient_config.phonenumber')}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    id={`${this.state.fields.uuid}_phoneNumber`}
