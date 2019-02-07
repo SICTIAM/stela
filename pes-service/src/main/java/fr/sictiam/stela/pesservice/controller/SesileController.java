@@ -141,7 +141,7 @@ public class SesileController {
             LOGGER.error("PES {} not found", uuid);
             return new ResponseEntity<>("PES not found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            LOGGER.error("Failed to update PES {} status from Sesile: {}", uuid, e.getMessage());
+            LOGGER.error("Failed to update PES {} status from Sesile", uuid, e);
             return new ResponseEntity<>("Stela error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -34,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -161,20 +160,8 @@ public class PaullController {
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
             PesAller pesAller = new PesAller();
-            LOGGER.debug("Received a PES with title : {}", title);
-            String decodedTitle = new String(title.getBytes("Windows-1252"));
-            LOGGER.debug("Decoded title to {}", decodedTitle);
-            try {
-                String decodedTitleWithW1252 = new String(title.getBytes(Charset.forName("Windows-1252")), Charset.forName("UTF-8"));
-                LOGGER.debug("Decoded title with Windows-1252 to {}", decodedTitleWithW1252);
-                String decodedTitleWithISO8859 = new String(title.getBytes(Charset.forName("ISO-8859-1")), Charset.forName("UTF-8"));
-                LOGGER.debug("Decoded title with ISO-8859-1 to {}", decodedTitleWithISO8859);
-            } catch (Exception e) {
-                LOGGER.error("Error testing PES title decoding", e);
-            }
-            String decodedComment = new String(comment.getBytes("Windows-1252"));
-            pesAller.setObjet(decodedTitle);
-            pesAller.setComment(decodedComment);
+            pesAller.setObjet(title);
+            pesAller.setComment(comment);
             // Probably source of bug : PES from Ciril are not send to Sesile
             //pesAller.setPj(PESPJ == 0 ? false : true);
             if (StringUtils.isNotBlank(service)) {
@@ -232,7 +219,8 @@ public class PaullController {
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
 
         // PES PJ are not sent to signature
-        if(!pesAller.isPj()) {
+        // sometimes, an app asks for infos before the PES Aller is sent to Sesile so double check on classeur id fields
+        if (!pesAller.isPj() && pesAller.getSesileClasseurId() != null) {
             ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
                     pesAller.getSesileClasseurId());
 
