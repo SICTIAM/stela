@@ -1,12 +1,16 @@
 package fr.sictiam.stela.convocationservice.service;
 
+import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
 import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
+import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
+import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
@@ -14,7 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,6 +30,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,16 +51,28 @@ public class ConvocationService {
 
     private final LocalAuthorityService localAuthorityService;
 
+    private final StorageService storageService;
+
     private final RecipientResponseRepository recipientResponseRepository;
+
+    private final AttachmentRepository attachmentRepository;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public ConvocationService(
             ConvocationRepository convocationRepository,
             LocalAuthorityService localAuthorityService,
-            RecipientResponseRepository recipientResponseRepository) {
+            StorageService storageService,
+            RecipientResponseRepository recipientResponseRepository,
+            AttachmentRepository attachmentRepository,
+            ApplicationEventPublisher applicationEventPublisher) {
         this.convocationRepository = convocationRepository;
         this.localAuthorityService = localAuthorityService;
+        this.storageService = storageService;
         this.recipientResponseRepository = recipientResponseRepository;
+        this.attachmentRepository = attachmentRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Convocation getConvocation(String uuid) {
@@ -126,6 +145,50 @@ public class ConvocationService {
 
     public Convocation getByUuid(String uuid, String localAuthorityUuid) {
         return convocationRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(ConvocationNotFoundException::new);
+    }
+
+    public void uploadFiles(Convocation convocation, MultipartFile file, MultipartFile... annexes)
+            throws ConvocationFileException {
+
+        if (convocation.getAttachment() != null && file != null) {
+            LOGGER.error("Try to overwrite main document for convocation {} ({})", convocation.getSubject(),
+                    convocation.getUuid());
+            throw new ConvocationFileException("convocation.errors.convocation.fileExists");
+        } else if (convocation.getAttachment() == null && file == null) {
+            LOGGER.error("Main document missing for convocation {} ({})", convocation.getSubject(),
+                    convocation.getUuid());
+            throw new ConvocationFileException("convocation.errors.convocation.documentMissing");
+        }
+
+        if (file != null) {
+            Attachment attachment = saveAttachment(file);
+            convocation.setAttachment(attachment);
+        }
+
+        for (MultipartFile annexe : annexes) {
+            Attachment attachment = saveAttachment(annexe);
+            convocation.getAnnexes().add(attachment);
+        }
+
+        convocationRepository.save(convocation);
+    }
+
+    public Attachment getFile(String currentLocalAuthUuid, String uuid, String fileUuid) throws NotFoundException {
+
+        Convocation convocation = getConvocation(uuid, currentLocalAuthUuid);
+        if (convocation.getAttachment().getUuid().equals(fileUuid)) {
+            storageService.getAttachmentContent(convocation.getAttachment());
+            return convocation.getAttachment();
+        }
+
+        for (Attachment annexe : convocation.getAnnexes()) {
+            if (annexe.getUuid().equals(fileUuid)) {
+                storageService.getAttachmentContent(annexe);
+                return annexe;
+            }
+        }
+
+        throw new NotFoundException("file not found");
     }
 
     public Long countAllWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType,
@@ -219,5 +282,17 @@ public class ConvocationService {
         }
 
         return predicates;
+    }
+
+    private Attachment saveAttachment(MultipartFile file) throws ConvocationFileException {
+
+        try {
+            Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes());
+            attachment = attachmentRepository.save(attachment);
+            applicationEventPublisher.publishEvent(new FileUploadEvent(this, attachment));
+            return attachment;
+        } catch (IOException e) {
+            throw new ConvocationFileException("Failed to get bytes from file " + file.getOriginalFilename(), e);
+        }
     }
 }

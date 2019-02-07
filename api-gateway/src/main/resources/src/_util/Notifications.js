@@ -94,6 +94,12 @@ const notifications = {
         }
     },
     convocation: {
+        created: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.created.success',
+            level: 'success',
+            position: 'br'
+        },
         sent: {
             title: 'notifications.convocation.title',
             message: 'notifications.convocation.sent.success',

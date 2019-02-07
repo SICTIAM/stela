@@ -34,11 +34,11 @@ public class Convocation {
     @JsonView(Views.Convocation.class)
     private AssemblyType assemblyType;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JsonView(Views.Convocation.class)
     private Attachment attachment;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JsonView(Views.Convocation.class)
     private Set<Attachment> annexes;
 

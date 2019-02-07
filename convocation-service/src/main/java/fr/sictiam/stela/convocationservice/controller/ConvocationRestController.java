@@ -1,6 +1,7 @@
 package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
@@ -12,11 +13,13 @@ import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.RecipientService;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +31,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -187,6 +195,46 @@ public class ConvocationRestController {
         return new ResponseEntity<>(new SearchResultsUI(), HttpStatus.OK);
     }
 
+    @PostMapping("/{uuid}/upload")
+    public ResponseEntity<?> uploadFiles(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @PathVariable String uuid,
+            @RequestParam(name = "file", required = false) MultipartFile file,
+            @RequestParam(name = "annexes", required = false) MultipartFile... annexes) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Convocation convocation = convocationService.getConvocation(uuid);
+
+        convocationService.uploadFiles(convocation, file, annexes);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{uuid}/file/{fileUuid}")
+    public ResponseEntity getFile(
+            HttpServletResponse response,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String profileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
+            @PathVariable String uuid,
+            @PathVariable String fileUuid,
+            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))
+                || !hasAccess(uuid, profileUuid, recipient)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Attachment file = convocationService.getFile(currentLocalAuthUuid, uuid, fileUuid);
+        outputFile(response, file.getContent(), file.getFilename(), disposition);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
     private String getContentType(String filename) {
         String mimeType = URLConnection.guessContentTypeFromName(filename);
@@ -206,6 +254,20 @@ public class ConvocationRestController {
         } catch (NotFoundException e) {
             LOGGER.error("Access to convocation not granted: {}", e.getMessage());
             return false;
+        }
+    }
+
+    private void outputFile(HttpServletResponse response, byte[] file, String filename, String disposition) {
+        try {
+            InputStream fileInputStream = new ByteArrayInputStream(file);
+
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format(disposition + "; filename=" + filename));
+            response.addHeader(HttpHeaders.CONTENT_TYPE, getContentType(filename));
+
+            IOUtils.copy(fileInputStream, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            LOGGER.error("Error writing file to output stream. Filename was '{}'", filename, e);
         }
     }
 }

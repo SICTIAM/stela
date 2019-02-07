@@ -7,7 +7,7 @@ import moment from 'moment'
 import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
-import { Page, Field, FieldValue } from '../_components/UI'
+import { Page, Field, FieldValue, LinkFile } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
 
 import QuestionsForm from './QuestionsForm'
@@ -34,7 +34,8 @@ class SentConvocation extends Component {
 	        questions: [],
 	        recipientResponses: [],
 	        sentDate: null,
-	        subject: ''
+	        subject: '',
+	        showAllAnnexes: false
 	    }
 	}
 
@@ -84,6 +85,18 @@ class SentConvocation extends Component {
 	        { property: 'responseType', displayed: true, searchable: false, displayName: 'Réponses', displayComponent: answerDisplay },
 	    ]
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.convocation.annexes && this.state.convocation.annexes.length > 3 ? this.state.convocation.annexes.slice(0,3) : this.state.convocation.annexes
+	    const annexes = annexesToDisplay.map(annexe => {
+	        return (
+	            <div key={`div_${this.state.convocation.uuid}_${annexe.uuid}`}>
+	                <LinkFile
+	                    url={`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}`}
+	                    key={`${this.state.convocation.uuid}_${annexe.uuid}`}
+	                    text={annexe.filename}/>
+	            </div>
+
+	        )
+	    })
 
 	    return (
 	        <Page>
@@ -105,6 +118,36 @@ class SentConvocation extends Component {
 	                                    <FieldValue id="comment">{this.state.convocation.comment}</FieldValue>
 	                                </Field>
 	                            </Grid.Column>
+	                            {this.state.convocation.attachment && (
+	                                <Grid.Column mobile='16' computer='8'>
+	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
+	                                        <FieldValue id="document">
+	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.attachment.uuid}`} text={this.state.convocation.attachment.filename} />
+	                                        </FieldValue>
+	                                    </Field>
+	                                </Grid.Column>
+	                            )}
+	                            {this.state.convocation.annexes && this.state.convocation.annexes.length > 0 && (
+	                                <Grid.Column mobile='16' computer='8'>
+	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
+	                                        <FieldValue id='annexes'>
+	                                            {annexes}
+	                                            {this.state.convocation.annexes.length > 3 && (
+	                                                <div className='mt-15'>
+	                                                    <Button onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
+	                                                        {this.state.showAllAnnexes && (
+	                                                            <span>{t('convocation.new.show_less_annexes')}</span>
+	                                                        )}
+	                                                        {!this.state.showAllAnnexes && (
+	                                                            <span>{t('convocation.new.show_all_annexes', {number: this.state.convocation.annexes.length})}</span>
+	                                                        )}
+	                                                    </Button>
+	                                                </div>
+	                                            )}
+	                                        </FieldValue>
+	                                    </Field>
+	                                </Grid.Column>
+	                            )}
 	                            {this.state.convocation.questions.length > 0 && (
 	                                <Grid.Column computer='16' tablet='16'>
 	                                    <Field htmlFor="questions" label={t('convocation.fields.questions')}>
