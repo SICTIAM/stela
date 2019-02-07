@@ -62,7 +62,8 @@ public class ExternalRestService {
             return restTemplate.getForObject(discoveryUtils.adminServiceUrl() + "/api/admin/profile/{uuid}",
                     JsonNode.class, uuid);
         } catch (RestClientResponseException e) {
-            LOGGER.error("Failed to retrieve local authority siret for {} : {} ({})", uuid, e.getMessage(), e.getResponseBodyAsString());
+            LOGGER.error("Failed to retrieve profile for {} : {} ({})", uuid, e.getMessage(),
+                    e.getResponseBodyAsString());
             return null;
         }
     }

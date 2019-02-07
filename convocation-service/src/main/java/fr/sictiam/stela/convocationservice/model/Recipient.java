@@ -2,12 +2,17 @@ package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,7 +25,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-public class Recipient {
+public class Recipient implements Comparable {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(Recipient.class);
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -42,6 +49,9 @@ public class Recipient {
 
     @JsonView(Views.Public.class)
     private Boolean active;
+
+    @JsonView(Views.Public.class)
+    private Boolean additionalContact = false;
 
     @JsonIgnore
     @JsonView(Views.RecipientPrivate.class)
@@ -146,5 +156,37 @@ public class Recipient {
 
     public void setInactivityDate(LocalDateTime inactivityDate) {
         this.inactivityDate = inactivityDate;
+    }
+
+    public Boolean getAdditionalContact() {
+        return additionalContact;
+    }
+
+    public void setAdditionalContact(Boolean additionalContact) {
+        this.additionalContact = additionalContact;
+    }
+
+    @Override public String toString() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writerWithView(Views.RecipientInternal.class).writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "[ uuid: " + uuid +
+                    ", firstname: " + firstname +
+                    ", lastname: " + lastname +
+                    ", email: " + email +
+                    ", phoneNumber: " + phoneNumber +
+                    ", active: " + active +
+                    ", additionalContact: " + additionalContact + "]";
+        }
+    }
+
+    @Override public int compareTo(@NotNull Object o) {
+        return lastname.compareTo(((Recipient) o).getLastname());
+    }
+
+    @Override public boolean equals(Object o) {
+        return uuid.equals(((Recipient) o).getUuid());
     }
 }

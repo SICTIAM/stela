@@ -1,3 +1,19 @@
+### 06/02/2019
+
+#### Général
+
+- Correction de l'affichage du bandeau d'alerte
+
+#### Contrôle de légalité
+
+- Amélioration de la mise en forme du justificatif obtenu suite à la réception de l'AR
+- Amélioration de la précision du positionnement du tampon
+
+#### Flux comptable
+
+- Corrections sur les web services de récupération de l'avancement des PES PJ
+- Amélioration de la restitution des erreurs retournées par la Trésorerie
+
 ### 21/01/2019
 
 #### Général

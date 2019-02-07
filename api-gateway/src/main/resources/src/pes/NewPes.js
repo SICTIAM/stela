@@ -9,7 +9,7 @@ import { Page, FormField, File, InputTextControlled } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug, handleFieldChange } from '../_util/utils'
 import { withAuthContext } from '../Auth'
 
 class NewPes extends Component {
@@ -33,11 +33,6 @@ class NewPes extends Component {
         objet: 'required|max:500',
         comment: 'max:250',
         attachment: 'required'
-    }
-    handleFieldChange = (field, value) => {
-        const { fields } = this.state
-        fields[field] = value
-        this.setState({ fields: fields }, this.validateForm)
     }
     handleFileChange = (file) => {
         if (file) this.setState({ attachment: file }, this.validateForm)
@@ -86,7 +81,7 @@ class NewPes extends Component {
                             <InputValidation id='objet'
                                 placeholder={t('pes.fields.objet') + '...'}
                                 value={this.state.fields.objet}
-                                onChange={this.handleFieldChange}
+                                onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)}
                                 validationRule={this.validationRules.objet}
                                 fieldName={t('pes.fields.objet')} />
                         </FormField>
@@ -111,7 +106,7 @@ class NewPes extends Component {
                                 style={{ minHeight: '3em' }}
                                 placeholder={t('pes.fields.comment') + '...'}
                                 value={this.state.fields.comment}
-                                onChange={this.handleFieldChange} />
+                                onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)} />
                         </FormField>
                         <div style={{ textAlign: 'right' }}>
                             <Button type='submit' primary basic

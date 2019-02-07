@@ -7,7 +7,7 @@ import history from '../../_util/history'
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
 import InputValidation from '../../_components/InputValidation'
-import { checkStatus } from '../../_util/utils'
+import { checkStatus, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class Group extends Component {
@@ -66,11 +66,6 @@ class Group extends Component {
             .then(response => response.json())
             .then(rights => this.setState({ allRights: rights.filter(right => this.state.activatedModules.includes(right.split('_')[0])) }))
     }
-    handleFieldChange = (field, value) => {
-        const { fields } = this.state
-        fields[field] = value
-        this.setState({ fields })
-    }
     handleRightChange = (event, { value }) => {
         const { allRights, fields } = this.state
         const right = allRights.find(right => right === value)
@@ -123,7 +118,7 @@ class Group extends Component {
                             <InputValidation id='name'
                                 placeholder={t('group.name') + '...'}
                                 value={group.name}
-                                onChange={this.handleFieldChange}
+                                onChange={(id, value) => handleFieldChange(this, id, value)}
                                 validationRule={this.validationRules.name}
                                 fieldName={t('group.name')} />
                         </FieldInline>

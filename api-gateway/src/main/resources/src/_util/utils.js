@@ -66,9 +66,8 @@ const handleFieldCheckboxChange = (that, field, callback) => {
     that.setState({ fields: fields }, callback)
 }
 
-const handleFieldChange = (that, e, callback) => {
+const handleFieldChange = (that, id, value, callback) => {
     callback = callback || null
-    const { id, value } = e.target
     const fields = that.state.fields
     fields[id] = value
     that.setState({ fields: fields }, callback)
@@ -136,6 +135,41 @@ const getLastUpdate = () =>
         .then(response => response.text())
         .then(updates => /(^#{3} (?:.|\n)*?)(?=\n#{3} )/.exec(updates)[0])
 
+const handleSearchChange = (that, field, value) => {
+    const search = that.state.search
+    search[field] = value
+    that.setState({search})
+}
+
+const getSearchData = (that) => {
+    const { limit, offset, direction, column } = that.state
+    const data = { limit, offset, direction, column }
+    Object.keys(that.state.search)
+        .filter(k => that.state.search[k] !== '')
+        .map(k => data[k] = that.state.search[k])
+}
+
+const handlePageClick = (that, data, callback) => {
+    const offset = Math.ceil(data.selected * that.state.limit)
+    that.setState({ offset, currentPage: data.selected }, callback)
+}
+
+const updateItemPerPage = (that, limit, callback) => {
+    that.setState({ limit, offset: 0, currentPage: 0 }, callback)
+}
+
+const sortTable = (that, clickedColumn, callback) => {
+    const { column, direction } = that.state
+    if (column !== clickedColumn) {
+        that.setState({ column: clickedColumn, direction: 'ASC' }, callback)
+        return
+    }
+    that.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, callback)
+}
+
+const onSearch = (that, callback) => {
+    that.setState({ offset: 0, currentPage: 0 }, callback)
+}
 
 export {
     checkStatus,
@@ -155,5 +189,11 @@ export {
     isPDF,
     toUniqueArray,
     getUpdates,
-    getLastUpdate
+    getLastUpdate,
+    handleSearchChange,
+    getSearchData,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable,
+    onSearch
 }

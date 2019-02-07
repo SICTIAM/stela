@@ -1,15 +1,7 @@
 package fr.sictiam.stela.acteservice.controller;
 
 import com.lowagie.text.DocumentException;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.AttachmentType;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.Right;
-import fr.sictiam.stela.acteservice.model.StampPosition;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
@@ -320,7 +312,7 @@ public class ActeRestController {
     }
 
     @GetMapping("/{uuid}/file/thumbnail")
-    public ResponseEntity getActeAttachmentThumbnail(
+    public ResponseEntity<Thumbnail> getActeAttachmentThumbnail(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights, HttpServletResponse response,
             @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
@@ -328,9 +320,9 @@ public class ActeRestController {
         }
         if (StringUtils.isNotBlank(uuid)) {
             try {
-                byte[] thumbnail = acteService.getActeAttachmentThumbnail(uuid);
-                outputFile(response, thumbnail, "thumbnail-" + uuid + ".png", "inline");
-                return new ResponseEntity(HttpStatus.OK);
+                Thumbnail thumbnail = acteService.getActeAttachmentThumbnail(uuid);
+                //outputFile(response, thumbnail.getImage(), "thumbnail-" + uuid + ".png", "inline");
+                return new ResponseEntity<>(thumbnail, HttpStatus.OK);
             } catch (IOException e) {
                 LOGGER.error("Error trying to generate the PDF's thumbnail: {}", e);
                 return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -91,7 +91,7 @@ public class AwsS3 implements StorageService {
     public ListObjectsV2Response listObjects(String token) throws StorageException {
 
         try {
-            return s3.listObjectsV2(ListObjectsV2Request.builder().bucket(bucket).prefix("pes").continuationToken(token).build());
+            return s3.listObjectsV2(ListObjectsV2Request.builder().bucket(bucket).prefix("convocation").continuationToken(token).build());
         } catch (SdkException e) {
             LOGGER.error("Failed list objects in bucket {} with continuation token : ", bucket, token, e.getMessage());
             throw new StorageException("Failed list objects in bucket " + bucket + " with continuation token " + token, e);

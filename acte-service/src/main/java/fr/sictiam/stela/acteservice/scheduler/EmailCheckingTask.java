@@ -120,13 +120,13 @@ public class EmailCheckingTask {
 
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedDelay = 30000)
     public void check() {
         try {
 
             inbox.open(Folder.READ_WRITE);
             Message[] messages = inbox.getMessages();
-            LOGGER.debug("messages.length---" + messages.length);
+            LOGGER.debug("Got {} waiting messages in inbox", messages.length);
 
             List<Message> messagesOK = new ArrayList<>();
             List<Message> messagesKO = new ArrayList<>();
@@ -135,11 +135,7 @@ public class EmailCheckingTask {
 
                 if (!message.isSet(Flag.DELETED)) {
                     try {
-                        LOGGER.debug("---------------------------------");
-                        LOGGER.debug("Email Number " + (i + 1));
-                        LOGGER.debug("Subject: " + message.getSubject());
-                        LOGGER.debug("From: " + message.getFrom()[0]);
-                        LOGGER.debug("Text: " + message.getContent().toString());
+                        LOGGER.debug("Subject is {} (message #{})", message.getSubject(), i + 1);
 
                         Multipart multipart = (Multipart) message.getContent();
 
@@ -172,10 +168,10 @@ public class EmailCheckingTask {
                                 JAXBElement<String> je = unmarshaller.unmarshal(xmlSource, String.class);
 
                                 String rootName = je.getName().getLocalPart();
+                                LOGGER.debug("XML return type is {}", rootName);
 
                                 StreamSource classSource = new StreamSource(bodyPart.getInputStream());
                                 if ("ARActe".equals(rootName)) {
-                                    LOGGER.debug("XML is of type: ARActe");
                                     ARActe arActe = unmarshall(classSource, ARActe.class);
                                     byte[] targetArray = IOUtils.toByteArray(bodyPart.getInputStream());
 

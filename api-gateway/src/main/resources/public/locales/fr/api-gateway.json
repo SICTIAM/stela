@@ -92,7 +92,7 @@
     },
     "convocation": {
       "convocation": "Convocation",
-      "send_a_convocation": "Déposer une convocation",
+      "send_a_convocation": "Envoyer une convocation",
       "reveived_convocations": "Convocations reçues",
       "sent_convocations": "Convocations envoyées"
     },
@@ -111,7 +111,7 @@
     "modify_my_profile": "Modifier mon profil",
     "no_email": "Aucun email",
     "notifications_title": "Notifications",
-    "localAuthorityNotifications": "Être notifié pour des actes déposés par un membre du groupe",
+    "localAuthorityNotifications": "Être notifié pour des flux déposés par un membre du groupe",
     "notifications": {
       "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
       "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
@@ -229,6 +229,10 @@
       }
     },
     "convocation": {
+      "title": "Module Convocation",
+      "sent": {
+        "success":  "La convocation a été envoyée avec succès" 
+      },
       "admin": {
         "title": "Admin module Convocation",
         "recipients": {
@@ -273,6 +277,7 @@
     "uuid": "UUID",
     "name": "Nom de la collectivité",
     "siren": "SIREN",
+    "sirenSize": "Un SIREN est composé de 9 chiffres",
     "department": "Département",
     "district": "Arrondissement",
     "nature": "Nature",
@@ -446,6 +451,7 @@
     }
   },
   "breadcrumb": {
+    "home": "Accueil",
     "admin_home": "Accueil Admin",
     "convocation": {
       "convocation": "Convocation",
@@ -454,7 +460,12 @@
       "edit_assembly_type": "Editer un type d'assemblée",
       "recipients_list": "Liste des destinataires",
       "add_recipients": "Ajouter un destinataire",
-      "edit_recipients": "Editer un destinataire"
+      "edit_recipients": "Editer un destinataire",
+      "convocation_creation": "Envoyer une convocation",
+      "reveived_convocation": "Convocation reçue",
+      "sent_convocation": "Convocation envoyée",
+      "reveived_convocations_list": "Liste des convocations reçues",
+      "sent_convocations_list": "Liste des convocations envoyées"
     }
   },
   "made_with_love": "Créé avec ❤ par le SICTIAM"

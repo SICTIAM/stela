@@ -1,0 +1,197 @@
+package fr.sictiam.stela.convocationservice.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
+import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
+import fr.sictiam.stela.convocationservice.model.AssemblyType;
+import fr.sictiam.stela.convocationservice.model.Convocation;
+import fr.sictiam.stela.convocationservice.model.Question;
+import fr.sictiam.stela.convocationservice.model.Right;
+import fr.sictiam.stela.convocationservice.service.ConvocationService;
+import fr.sictiam.stela.convocationservice.service.ExternalRestService;
+import fr.sictiam.stela.convocationservice.service.RecipientService;
+import org.assertj.core.api.Assertions;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+
+import javax.persistence.EntityManagerFactory;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@RunWith(SpringRunner.class)
+@WebMvcTest(ConvocationRestController.class)
+public class ConvocationRestControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ConvocationRestController convocationRestController;
+
+    @MockBean
+    private ConvocationService convocationService;
+
+    @MockBean
+    private RecipientService recipientService;
+
+    @MockBean
+    private ExternalRestService externalRestService;
+
+    @MockBean
+    private RecipientRepository recipientRepository;
+
+    @MockBean
+    private ConvocationRepository convocationRepository;
+
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+
+
+
+    @Before
+    public void setUp() {
+        given(convocationService.getConvocation("uuid-convocation-test-one")).willReturn(createDummyConvocation());
+    }
+
+
+    @Test
+    public void getConvocation() throws Exception {
+        Set<Right> rights = new HashSet<>();
+        rights.add(Right.CONVOCATION_DISPLAY);
+        Assertions.assertThat(convocationRestController).isNotNull();
+
+        Convocation convocation = createDummyConvocation();
+
+        given(convocationService.getConvocation("uuid-convocation-test-one", "mairie-test")).willReturn(convocation);
+
+        this.mockMvc.perform(get("/api/convocation/uuid-convocation-test-one")
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.uuid").value(convocation.getUuid()))
+                    .andExpect(jsonPath("$.assemblyType").exists())
+                    .andExpect(jsonPath("$.location").value(convocation.getLocation()))
+                    .andExpect(jsonPath("$.meetingDate").value(convocation.getMeetingDate().toString()))
+                    .andExpect(jsonPath("$.creationDate").value(convocation.getCreationDate().toString()))
+                    .andExpect(jsonPath("$.questions").isArray());
+
+        verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one");
+        verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one", "mairie-test");
+        verifyNoMoreInteractions(convocationService);
+    }
+
+    @Test
+    public void createSuccessfully() throws Exception {
+        Set<Right> rights = new HashSet<>();
+        rights.add(Right.CONVOCATION_DEPOSIT);
+
+        given(convocationService.create(createDummyConvocation(),"mairie-test", "profile-one")).willReturn(createDummyConvocation());
+
+        this.mockMvc.perform(post("/api/convocation")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(createDummyConvocationAsJsonString())
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isCreated());
+
+    }
+
+    @Test
+    public void creationMissingFields() throws Exception {
+        Set<Right> rights = new HashSet<>();
+        rights.add(Right.CONVOCATION_DEPOSIT);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Map<String, String> body = new HashMap<>();
+        body.put("subject", "convocation test two");
+        body.put("comment", "comment convocation test two");
+
+        given(convocationService.create(createDummyConvocation(),"mairie-test", "profile-one")).willReturn(createDummyConvocation());
+        this.mockMvc.perform(post("/api/convocation")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsString(body))
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Convocation createDummyConvocation() {
+        Convocation convocation = new Convocation();
+
+        AssemblyType assemblyType = new AssemblyType();
+        ReflectionTestUtils.setField(assemblyType, "uuid", "assembly-type-one");
+        assemblyType.setName("Test assembly type one");
+
+        Set<Question> questions = new HashSet<>();
+
+        Question question = new Question();
+
+        ReflectionTestUtils.setField(question, "uuid", "question-uuid-one");
+        question.setConvocationUuid("convocation-uuid-one");
+        question.setQuestion("test question one ?");
+        questions.add(question);
+
+        ReflectionTestUtils.setField(convocation, "uuid", "convocation-uuid-one");
+        convocation.setSubject("convocation test one");
+        convocation.setComment("comment convocation test one");
+        convocation.setCreationDate(LocalDateTime.now());
+        convocation.setLocation("mairie");
+        convocation.setAssemblyType(assemblyType);
+        convocation.setMeetingDate(LocalDateTime.now().plusDays(15));
+        convocation.setProfileUuid("profile-one");
+        convocation.setQuestions(questions);
+
+        return convocation;
+    }
+
+    private static String createDummyConvocationAsJsonString() {
+        final JsonNodeFactory factory = JsonNodeFactory.instance;
+
+        final ObjectNode convocation = factory.objectNode();
+
+        final ObjectNode assemblyType = factory.objectNode();
+
+        assemblyType.put("uuid", "assembly-type-uuid-one");
+
+        final ArrayNode recipients = factory.arrayNode();
+
+
+        recipients.add(factory.objectNode().put("uuid", "recipient-uuid-one"));
+
+
+        convocation.set("assemblyType", assemblyType);
+        convocation.set("recipients", recipients);
+        convocation.put("subject", "Test assembly type one");
+        convocation.put("comment", "Comment convocation test one");
+        convocation.put("location", "Mairie");
+        convocation.put("meetingDate", LocalDateTime.now().plusDays(15).toString());
+        convocation.put("creationDate", LocalDateTime.now().toString());
+
+        return convocation.toString();
+    }
+}

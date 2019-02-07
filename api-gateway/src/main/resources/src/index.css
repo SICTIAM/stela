@@ -82,6 +82,9 @@
 .pt-0 {
     padding-top: 0;
 }
+.pl-0 {
+    padding-left: 0;
+}
 .pl-5 {
     padding-left: 5px
 }
@@ -463,7 +466,7 @@ i.collapsed-text-icon.circular.icon {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1100px) {
     /* Top Bar */
     .ui.secondary.menu.topBar .header.item.appTitle {
         margin-left: 0;

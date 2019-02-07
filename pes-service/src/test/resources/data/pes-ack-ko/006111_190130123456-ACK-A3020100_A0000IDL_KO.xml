@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<n:PES_ACQUIT xmlns:n="http://www.minefi.gouv.fr/cp/helios/pes_v2/Rev0/retour/v2">
+    <Enveloppe>
+        <Parametres>
+            <Version V="2"/>
+            <TypFic V="PESALR1"/>
+            <NomFic V="PesDepense-02-2019-5-11112222333344445"/>
+        </Parametres>
+        <Emetteur>
+            <Sigle V="Appli GF"/>
+            <Adresse V="pesalldep 1.1.001"/>
+        </Emetteur>
+        <Recepteur>
+            <Sigle V="HELIOS"/>
+            <Adresse V="READRESSE"/>
+        </Recepteur>
+    </Enveloppe>
+    <EnTetePES>
+        <DteStr V="2019-01-23"/>
+        <IdPost V="006111"/>
+        <IdColl V="01234567890001"/>
+        <CodCol V="000"/>
+        <CodBud V="00"/>
+        <LibelleColBud V="STELA"/>
+    </EnTetePES>
+    <ACQUIT>
+        <EnTeteAcquit>
+            <IdVer V="2"/>
+        </EnTeteAcquit>
+        <ElementACQUIT>
+            <DomaineAck V="4"/>
+            <EtatAck V="1"/>
+            <IdUnique V="2019EC00087654"/>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="5"/>
+            <EtatAck V="0"/>
+            <NumBord V="5"/>
+            <ExerciceBord V="2019"/>
+            <DetailPiece>
+                <NumPiece V="20"/>
+                <DetailLigne>
+                    <NumLigne V="1"/>
+                    <Erreur>
+                        <NumAnoAck V="ERREUR_AUTRE"/>
+                        <LibelleAnoAck V="1971 - Compte fonction présent à tort"/>
+                    </Erreur>
+                </DetailLigne>
+                <DetailLigne>
+                    <NumLigne V="2"/>
+                    <Erreur>
+                        <NumAnoAck V="ERREUR_AUTRE"/>
+                        <LibelleAnoAck V="1971 - Compte fonction présent à tort"/>
+                    </Erreur>
+                </DetailLigne>
+                <DetailLigne>
+                    <NumLigne V="3"/>
+                    <Erreur>
+                        <NumAnoAck V="ERREUR_AUTRE"/>
+                        <LibelleAnoAck V="1971 - Compte fonction présent à tort"/>
+                    </Erreur>
+                </DetailLigne>
+            </DetailPiece>
+            <DetailPiece>
+                <NumPiece V="21"/>
+                <DetailLigne>
+                    <NumLigne V="1"/>
+                    <Erreur>
+                        <NumAnoAck V="ERREUR_AUTRE"/>
+                        <LibelleAnoAck V="1971 - Compte fonction présent à tort"/>
+                    </Erreur>
+                </DetailLigne>
+                <DetailLigne>
+                    <NumLigne V="2"/>
+                    <Erreur>
+                        <NumAnoAck V="ERREUR_AUTRE"/>
+                        <LibelleAnoAck V="2559 - Le code service de la structure publique destinataire est inconnu ou inactif dans Chorus Pro"/>
+                    </Erreur>
+                </DetailLigne>
+            </DetailPiece>
+            <DetailPiece>
+                <NumPiece V="22"/>
+                <DetailLigne>
+                    <NumLigne V="1"/>
+                    <Erreur>
+                        <NumAnoAck V="ERREUR_AUTRE"/>
+                        <LibelleAnoAck V="1971 - Compte fonction présent à tort"/>
+                    </Erreur>
+                </DetailLigne>
+            </DetailPiece>
+        </ElementACQUIT>
+    </ACQUIT>
+</n:PES_ACQUIT>

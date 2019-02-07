@@ -75,7 +75,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     @Value("${application.clamav.host}")
     private String clamavHost;
 
-    private String trigraph = "SIC";
+    private final static String trigraph = "SIC";
 
     private final ActeRepository acteRepository;
     private final Jaxb2Marshaller jaxb2Marshaller;
@@ -169,7 +169,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         }
 
         if (!messages.isEmpty()) {
-            String errorMessages = messages.stream().collect(Collectors.joining("\n"));
+            String errorMessages = String.join("\n", messages);
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this,
                     new ActeHistory(acteUuid, StatusType.SIGNATURE_ERROR, errorMessages, Flux.TRANSMISSION_ACTE)));
             return false;
@@ -530,10 +530,6 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private String getArchiveName(String enveloppeName) {
         return String.format("%s-%s.%s", trigraph, StringUtils.stripFilenameExtension(enveloppeName), "tar.gz");
-    }
-
-    public String generateActeBaseFilename(Acte acte, Flux flux) {
-        return String.format("%s-%s-%s", generateMiatId(acte), acte.getNumber(), acte.getNature().getAbbreviation());
     }
 
     public String generateMiatId(Acte acte) {

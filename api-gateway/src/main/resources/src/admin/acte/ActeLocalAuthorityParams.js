@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Checkbox, Form, Button, Dropdown, Segment, Input } from 'semantic-ui-react'
+import { Checkbox, Form, Button, Dropdown, Segment, Input, Grid } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 
@@ -9,7 +9,7 @@ import InputValidation from '../../_components/InputValidation'
 import DraggablePosition from '../../_components/DraggablePosition'
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
-import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class ActeLocalAuthorityParams extends Component {
@@ -101,11 +101,6 @@ class ActeLocalAuthorityParams extends Component {
         const fields = this.defaultData({ ...rest })
         this.setState({ constantFields, fields, localAuthorityFetched: true }, this.validateForm)
     }
-    handleFieldChange = (field, value) => {
-        const fields = this.state.fields
-        updateField(fields, field, value)
-        this.setState({ fields: fields }, this.validateForm)
-    }
     handleStateChange = (event, { id, value }) => {
         const { fields } = this.state
         fields[id] = value
@@ -186,7 +181,7 @@ class ActeLocalAuthorityParams extends Component {
                             <FieldInline htmlFor="department" label={t('api-gateway:local_authority.department')}>
                                 <InputValidation id='department'
                                     value={this.state.fields.department}
-                                    onChange={this.handleFieldChange}
+                                    onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)}
                                     validationRule={this.validationRules.department}
                                     fieldName={t('api-gateway:local_authority.department')}
                                     className='simpleInput' />
@@ -194,7 +189,7 @@ class ActeLocalAuthorityParams extends Component {
                             <FieldInline htmlFor="district" label={t('api-gateway:local_authority.district')}>
                                 <InputValidation id='district'
                                     value={this.state.fields.district}
-                                    onChange={this.handleFieldChange}
+                                    onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)}
                                     validationRule={this.validationRules.district}
                                     fieldName={t('api-gateway:local_authority.district')}
                                     className='simpleInput' />
@@ -202,7 +197,7 @@ class ActeLocalAuthorityParams extends Component {
                             <FieldInline htmlFor="nature" label={t('api-gateway:local_authority.nature')}>
                                 <InputValidation id='nature'
                                     value={this.state.fields.nature}
-                                    onChange={this.handleFieldChange}
+                                    onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)}
                                     validationRule={this.validationRules.nature}
                                     fieldName={t('api-gateway:local_authority.nature')}
                                     className='simpleInput' />
@@ -210,14 +205,30 @@ class ActeLocalAuthorityParams extends Component {
 
                             <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
                             <FieldInline htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
-                                <DraggablePosition
-                                    label={t('acte.stamp_pad.pad_label')}
-                                    height={300}
-                                    width={190}
-                                    showPercents={true}
-                                    labelColor='#000'
-                                    position={this.state.fields.stampPosition}
-                                    handleChange={this.handleChangeDeltaPosition} />
+                                <Grid>
+                                    <Grid.Row style={{display:'flex', justifyContent:'space-around', alignItems:'center'}}>
+                                        <DraggablePosition
+                                            label={t('acte.stamp_pad.pad_label')}
+                                            height={300}
+                                            width={190}
+                                            showPercents={true}
+                                            labelColor='#000'
+                                            position={this.state.fields.stampPosition}
+                                            handleChange={this.handleChangeDeltaPosition} />
+                                        <DraggablePosition
+                                            label={t('acte.stamp_pad.pad_label')}
+                                            height={190}
+                                            width={300}
+                                            boxHeight={70}
+                                            boxWidth={25}
+                                            showPercents={true}
+                                            labelColor='#000'
+                                            position={{x:this.state.fields.stampPosition.y, y: this.state.fields.stampPosition.x}}
+                                            handleChange={() =>  console.error('Not available to proceed changes')}
+                                            disabled={true}
+                                        />
+                                    </Grid.Row>
+                                </Grid>
                             </FieldInline>
                             <FieldInline htmlFor="canPublishRegistre" label={t('api-gateway:local_authority.canPublishRegistre')}>
                                 <Checkbox id="canPublishRegistre" toggle checked={this.state.fields.canPublishRegistre}
@@ -251,29 +262,29 @@ class ActeLocalAuthorityParams extends Component {
                                         <Input id='daysBeforeArchiving'
                                             type='number'
                                             value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
-                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
+                                            onChange={(e, data) => handleFieldChange(this, 'archiveSettings.daysBeforeArchiving', data.value, this.validateForm)} />
                                     </FieldInline>
                                     <FieldInline htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
                                         <Input id='pastellUrl' fluid
                                             placeholder='https://...'
                                             value={this.state.fields.archiveSettings.pastellUrl || ''}
-                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
+                                            onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellUrl', data.value, this.validateForm)} />
                                     </FieldInline>
                                     <FieldInline htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
                                         <Input id='pastellEntity'
                                             value={this.state.fields.archiveSettings.pastellEntity || ''}
-                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
+                                            onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellEntity', data.value, this.validateForm)} />
                                     </FieldInline>
                                     <FieldInline htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
                                         <Input id='pastellLogin'
                                             value={this.state.fields.archiveSettings.pastellLogin || ''}
-                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
+                                            onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellLogin', data.value, this.validateForm)} />
                                     </FieldInline>
                                     <FieldInline htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
                                         <Input id='pastellPassword'
                                             type='password'
                                             value={this.state.fields.archiveSettings.pastellPassword || ''}
-                                            onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
+                                            onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellPassword', data.value, this.validateForm)} />
                                     </FieldInline>
                                 </Fragment>
                             )}

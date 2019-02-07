@@ -1,7 +1,6 @@
 package fr.sictiam.stela.pesservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import fr.sictiam.stela.pesservice.dao.SesileConfigurationRepository;
 import fr.sictiam.stela.pesservice.model.GenericDocument;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
@@ -46,14 +45,12 @@ public class PaullGenericController {
     private final SesileService sesileService;
     private final LocalAuthorityService localAuthorityService;
     private final ExternalRestService externalRestService;
-    private final SesileConfigurationRepository sesileConfigurationRepository;
 
     public PaullGenericController(SesileService sesileService, LocalAuthorityService localAuthorityService,
-            ExternalRestService externalRestService, SesileConfigurationRepository sesileConfigurationRepository) {
+            ExternalRestService externalRestService) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
         this.externalRestService = externalRestService;
-        this.sesileConfigurationRepository = sesileConfigurationRepository;
     }
 
     @JsonPropertyOrder({ "status", "status_message", "data" })
@@ -97,18 +94,26 @@ public class PaullGenericController {
             this.data = data;
         }
 
+        @Override
+        public String toString() {
+            return "PaullResponse{" +
+                    "status='" + status + '\'' +
+                    ", status_message='" + status_message + '\'' +
+                    ", data=" + data +
+                    '}';
+        }
     }
 
-    public PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
+    private PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
         return generatePaullResponse(httpStatus, datas, null);
     }
 
-    public PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas, String customMessage) {
+    private PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas, String customMessage) {
         return new PaullResponse(httpStatus.value() + "",
                 StringUtils.isNoneBlank(customMessage) ? customMessage : httpStatus.getReasonPhrase(), datas);
     }
 
-    public GenericAccount emailAuth(String email, String password) {
+    private GenericAccount emailAuth(String email, String password) {
         GenericAccount genericAccount = null;
         try {
             genericAccount = externalRestService.authWithEmailPassword(email, password);
@@ -127,7 +132,8 @@ public class PaullGenericController {
             @RequestParam(name = "validation", required = false) String validation,
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "type", required = false) Integer type,
-            @RequestParam(name = "service", required = false) String service, @RequestHeader("userid") String userid,
+            @RequestParam(name = "service", required = false) String service,
+            @RequestHeader("userid") String userid,
             @RequestHeader("password") String password) {
 
         Iterator<String> itrator = request.getFileNames();

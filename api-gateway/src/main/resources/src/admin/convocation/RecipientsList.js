@@ -4,7 +4,14 @@ import { translate } from 'react-i18next'
 import { Segment, Icon, Button, Checkbox, Form } from 'semantic-ui-react'
 
 import history from '../../_util/history'
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import {
+    checkStatus,
+    getLocalAuthoritySlug,
+    handleSearchChange,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable
+} from '../../_util/utils'
 import { notifications } from '../../_util/Notifications'
 
 import { withAuthContext } from '../../Auth'
@@ -68,25 +75,6 @@ class RecipientsList extends Component {
 	negativeResolver = (recipient) => {
 	    return !recipient.active
 	}
-
-	handlePageClick = (data) => {
-	    const offset = Math.ceil(data.selected * this.state.limit)
-	    this.setState({ offset, currentPage: data.selected }, () => this.loadData())
-	}
-
-	sort = (clickedColumn) => {
-	    const { column, direction } = this.state
-	    if (column !== clickedColumn) {
-	        this.setState({ column: clickedColumn, direction: 'ASC' }, () => this.loadData())
-	        return
-	    }
-	    this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.loadData())
-	}
-
-	updateItemPerPage = (limit) => {
-	    this.setState({ limit, offset: 0, currentPage: 0 }, this.loadData)
-	}
-
 	onClickCell = (e, property, row) => {
 	    e.preventDefault()
 	    e.stopPropagation()
@@ -138,11 +126,7 @@ class RecipientsList extends Component {
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires/${recipient.uuid}`)
 	}
-	handleFieldChange = (field, value) => {
-	    const search = this.state.search
-	    search[field] = value
-	    this.setState({ search: search })
-	}
+
 	handleFieldCheckboxChange = (row) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const url = !row.active ? `/api/convocation/recipient/${row.uuid}` : `/api/convocation/recipient/${row.uuid}`
@@ -210,9 +194,9 @@ class RecipientsList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data, this.loadData)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.loadData)}
                 currentPage={this.state.currentPage}
                 options={options} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
@@ -220,9 +204,9 @@ class RecipientsList extends Component {
 	        <Page>
 	            <Breadcrumb
 	                data={[
-	                    {title: 'Accueil Admin', url: `/${localAuthoritySlug}/admin/ma-collectivite`},
-	                    {title: 'Convocation', url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
-	                    {title: 'Liste des destinataires'}
+	                    {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
+	                    {title: t('api-gateway:breadcrumb.convocation.recipients_list')}
 	                ]}
 	            />
 	            <QuickView
@@ -235,20 +219,20 @@ class RecipientsList extends Component {
 	                    isDefaultOpen={false}
 	                    fieldId='multifield'
 	                    fieldValue={search.multifield}
-	                    fieldOnChange={this.handleFieldChange}
+	                    fieldOnChange={(id, value) => handleSearchChange(this, id, value)}
 	                    onSubmit={this.loadData}>
 	                    <Form onSubmit={this.loadData}>
 	                        <FormFieldInline htmlFor='firstname' label={t('convocation.admin.modules.convocation.recipient_config.firstname')} >
-	                            <input id='firstname' aria-label={t('convocation.admin.modules.convocation.recipient_config.firstname')} value={search.firstname} onChange={e => this.handleFieldChange('firstname', e.target.value)} />
+	                            <input id='firstname' aria-label={t('convocation.admin.modules.convocation.recipient_config.firstname')} value={search.firstname} onChange={e => handleSearchChange(this, 'firstname', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='name' label={t('convocation.admin.modules.convocation.recipient_config.lastname')} >
-	                            <input id='lastname' aria-label={t('convocation.admin.modules.convocation.recipient_config.lastname')} value={search.lastname} onChange={e => this.handleFieldChange('lastname', e.target.value)} />
+	                            <input id='lastname' aria-label={t('convocation.admin.modules.convocation.recipient_config.lastname')} value={search.lastname} onChange={e => handleSearchChange(this, 'lastname', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='email' label={t('convocation.admin.modules.convocation.recipient_config.email')} >
-	                            <input id='email' aria-label={t('convocation.admin.modules.convocation.recipient_config.email')} value={search.email} onChange={e => this.handleFieldChange('email', e.target.value)} />
+	                            <input id='email' aria-label={t('convocation.admin.modules.convocation.recipient_config.email')} value={search.email} onChange={e => handleSearchChange(this, 'email', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='active' label={t('convocation.admin.modules.convocation.recipient_config.status')}>
-	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => this.handleFieldChange('active', e.target.value)}>
+	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => handleSearchChange(this, 'active', e.target.value)}>
 	                                <option value=''>{t('convocation.admin.modules.convocation.recipient_list.active_inactive')}</option>
 	                                <option value={true}>{t('convocation.admin.modules.convocation.recipient_list.active')}</option>
 	                                <option value={false}>{t('convocation.admin.modules.convocation.recipient_list.inactive')}</option>
@@ -271,7 +255,7 @@ class RecipientsList extends Component {
 	                    striped={false}
 	                    negativeResolver={this.negativeResolver}
 	                    pagination={pagination}
-	                    sort={this.sort}
+	                    sort={(clickedColumn) => sortTable(this, clickedColumn, this.loadData)}
 	                    direction={this.state.direction}
 	                    column={this.state.column}
 	                    noDataMessage={t('convocation.new.no_recipient')}

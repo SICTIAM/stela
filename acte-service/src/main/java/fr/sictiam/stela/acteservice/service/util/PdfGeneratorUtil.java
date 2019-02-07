@@ -17,6 +17,8 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfSmartCopy;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfWriter;
+import fr.sictiam.stela.acteservice.model.Thumbnail;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -76,14 +78,28 @@ public class PdfGeneratorUtil {
         return templateEngine.process(templateName, ctx);
     }
 
-    public byte[] getPDFThumbnail(byte[] pdf) throws IOException {
+    public Thumbnail getPDFThumbnail(byte[] pdf) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PDDocument document = PDDocument.load(pdf);
+
+        PdfReader pdfReader = new PdfReader(pdf);
+        Thumbnail.OrientationEnum orientationEnum;
+        if (pdfIsRotated(pdfReader)) {
+            orientationEnum = Thumbnail.OrientationEnum.LANDSCAPE;
+        } else {
+            orientationEnum = Thumbnail.OrientationEnum.PORTRAIT;
+        }
+
+
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         BufferedImage bim = pdfRenderer.renderImageWithDPI(0, 30, ImageType.RGB);
         ImageIOUtil.writeImage(bim, "png", baos, 30);
         document.close();
-        return baos.toByteArray();
+
+        String base64Image = Base64.encodeBase64String(baos.toByteArray());
+        Thumbnail thumbnail = new Thumbnail(orientationEnum, base64Image);
+
+        return thumbnail;
     }
 
     public byte[] mergePDFs(List<byte[]> pdfs) throws DocumentException, IOException {
@@ -115,13 +131,23 @@ public class PdfGeneratorUtil {
         PdfReader reader = new PdfReader(pdf);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfStamper stamp = new PdfStamper(reader, baos, '\0', true);
+        stamp.setRotateContents(false);
 
         Color color = new Color(43, 43, 43);
         Rectangle mediabox = reader.getBoxSize(1, "media");
-        int pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
-        // Hack because the iTextPDF origin is at the lower-left, but the front is at
-        // the top-left
-        int pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
+        int pixelPositionX = 0;
+        int pixelPositionY = 0;
+        if (pdfIsRotated(reader)) {
+            //rotate axes for PDF landscape
+            pixelPositionX = Math.round((percentPositionY) * mediabox.getWidth() / 100);
+            pixelPositionY = Math.round((percentPositionX) * mediabox.getHeight() / 100);
+        } else {
+            pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
+            // Hack because the iTextPDF origin is at the lower-left, but the front is at
+            // the top-left
+            pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
+        }
+
 
         int pageNumber = reader.getNumberOfPages();
         for (int i = 1; i <= pageNumber; i++) {
@@ -150,7 +176,7 @@ public class PdfGeneratorUtil {
     }
 
     private void drawStampDetails(String ARUuid, String ARDate, PdfContentByte canvas, Color color, int pixelPositionX,
-            int pixelPositionY) throws DocumentException {
+                                  int pixelPositionY) throws DocumentException {
         ColumnText ct = new ColumnText(canvas);
         ct.setSimpleColumn(pixelPositionX + 8f, pixelPositionY + 8f, pixelPositionX + 238f, pixelPositionY + 27f);
 
@@ -184,4 +210,10 @@ public class PdfGeneratorUtil {
         canvas.lineTo(pixelPositionX + 5, pixelPositionY + 30);
         canvas.closePathStroke();
     }
+
+
+    public boolean pdfIsRotated(PdfReader pdfReader){
+        return pdfReader.getPageRotation(1) != 0 && pdfReader.getPageRotation(1) % 90 == 0;
+    }
+
 }

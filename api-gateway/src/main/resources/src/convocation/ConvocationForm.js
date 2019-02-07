@@ -6,71 +6,116 @@ import debounce from 'debounce'
 import moment from 'moment'
 import Validator from 'validatorjs'
 
-import { Page, FormField, InputTextControlled, InputFile, ValidationPopup } from '../_components/UI'
+import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { notifications } from '../_util/Notifications'
+import history from '../_util/history'
+
+import { withAuthContext } from '../Auth'
+
+import ConfirmModal from '../_components/ConfirmModal'
+import ChipsList from '../_components/ChipsList'
+import { Page, FormField, InputTextControlled, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import QuestionsForm from './QuestionsForm'
 import RecipientForm from './RecipientForm'
+import Breadcrumb from '../_components/Breadcrumb'
 
 class ConvocationForm extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
+	    _fetchWithAuthzHandling: PropTypes.func,
+	    _addNotification: PropTypes.func,
 	}
 	state = {
 	    errorTypePointing: false,
-	    modalOpened: false,
+	    modalRecipentsOpened: false,
+	    modalGuestOpened: false,
 	    fields: {
-	        uuid: 'test',
-	        date: '',
+	        uuid: '',
+	        meetingDate: '',
 	        hour: '',
 	        assemblyType: '',
-	        assemblyPlace: '',
-	        objet: '',
+	        location: '',
+	        subject: '',
 	        comment: '',
 	        convocationAttachment: null,
 	        customeProcuration: null,
-	        questions: []
+	        questions: [],
+	        recipients: [],
+	        guests: []
 	    },
+	    delayTooShort: false,
+	    delay: null,
+	    assemblyTypes: [],
 	    isFormValid: false,
 	    allFormErrors: []
 	}
 	componentDidMount() {
 	    this.validateForm(null)
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
+	        .then(checkStatus)
+	        .then(response => response.json())
+	        .then(json => this.setState({assemblyTypes: json.map(item => { return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}})}))
+	        .catch(response => {
+	            response.json().then(json => {
+	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	            })
+	        })
 	}
 	validationRules = {
-	    date: ['required', 'date'],
+	    meetingDate: ['required', 'date'],
 	    hour: ['required', 'regex:/^[0-9]{2}[:][0-9]{2}$/'],
-	    /*assemblyType: 'required',*/
-	    assemblyPlace: ['required'],
-	    objet: 'required|max:500',
-	    /*convocationAttachment: ['required']*/
-
-	    /*number: ['required', 'max:15', 'regex:/^[A-Z0-9_]+$/'],
-	    objet: 'required|max:500',
-	    acteAttachment: 'required|acteAttachmentType'*/
+	    assemblyType: 'required',
+	    location: ['required'],
+	    subject: 'required|max:500',
+	}
+	checkDelay = () => {
+	    if(this.state.fields.meetingDate && this.state.delay) {
+	        const { fields, delay } = this.state
+	        const now = moment()
+	        const diff = fields.meetingDate.diff(now, 'days')
+	        if(diff > delay) {
+	            this.setState({delayTooShort: false})
+	        } else {
+	            this.setState({delayTooShort: true})
+	        }
+	    }
 	}
 	submit = () => {
-	    console.log('SUBMIT')
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+
+	    const parameters = this.state.fields
+	    delete parameters.uuid
+	    delete parameters.convocationAttachment
+	    delete parameters.customeProcuration
+	    parameters['assemblyType'] = {uuid: parameters.assemblyType}
+	    parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
+	    const headers = { 'Content-Type': 'application/json' }
+	    _fetchWithAuthzHandling({url: '/api/convocation', method: 'POST', body: JSON.stringify(parameters), context: this.props.authContext, headers: headers})
+	        .then(checkStatus)
+	        .then(() => {
+	            _addNotification(this.state.fields.uuid ? notifications.admin.assemblyTypeUpdated: notifications.convocation.sent)
+	            history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
+	        })
 	}
 	validateForm = debounce(() => {
 	    const { t } = this.context
 	    const data = {
-	        date: this.state.fields.date,
+	        meetingDate: this.state.fields.meetingDate,
 	        hour: this.state.fields.hour,
-	        /*assemblyType: this.state.fields.assemblyType,*/
-	        assemblyPlace: this.state.fields.assemblyPlace,
-	        objet: this.state.fields.objet,
-	        /*annexes: this.state.fields.annexes,
-	        convocationAttachment: this.state.fields.convocationAttachment*/
+	        assemblyType: this.state.fields.assemblyType,
+	        location: this.state.fields.location,
+	        subject: this.state.fields.subject,
 	    }
 
 	    const attributeNames = {
-	        date: t('convocation.fields.date'),
+	        meetingDate: t('convocation.fields.date'),
 	        hour: t('convocation.fields.hour'),
-	        /*assemblyType: 'this.state.fields.assemblyType',*/
-	        assemblyPlace: t('convocation.fields.assembly_place'),
-	        objet: t('convocation.fields.object'),
-	        /*annexes: 'this.state.fields.annexes',
-	        convocationAttachment: 'this.state.fields.convocationAttachment'*/
+	        assemblyType: 'this.state.fields.assemblyType',
+	        location: t('convocation.fields.assembly_place'),
+	        subject: t('convocation.fields.object'),
 	    }
 	    const validationRules = this.validationRules
 	    //add validation format file
@@ -80,12 +125,30 @@ class ConvocationForm extends Component {
 	    const isFormValid = validation.passes()
 	    const allFormErrors = Object.values(validation.errors.all()).map(errors => errors[0])
 	    this.setState({ isFormValid, allFormErrors })
+
+	    this.checkDelay()
 	})
 	extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
 	handleFieldChange = (field, value, callback) => {
-	    //To COMPLETE
 	    //Set set for thid field
 	    field = this.extractFieldNameFromId(field)
+	    if(field === 'assemblyType') {
+	        const { _fetchWithAuthzHandling, _addNotification } = this.context
+	        _fetchWithAuthzHandling({url: `/api/convocation/assembly-type/${value}`, method: 'GET'})
+	            .then(checkStatus)
+	            .then(response => response.json())
+	            .then(json => {
+	                const fields = this.state.fields
+	                fields['recipients'] = json.recipients
+	                fields['location'] = json.location
+	                this.setState({fields, delay: json.delay})
+	            })
+	            .catch(response => {
+	                response.json().then(json => {
+	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	                })
+	            })
+	    }
 	    const fields = this.state.fields
 	    fields[field] = value
 	    this.setState({ fields: fields }, () => {
@@ -94,7 +157,18 @@ class ConvocationForm extends Component {
 	    })
 	}
 	closeModal = () => {
-	    this.setState({modalOpened: false})
+	    this.setState({modalGuestOpened: false, modalRecipentsOpened: false})
+	}
+	addUsers = (selectedUser, field) => {
+	    const fields = this.state.fields
+	    fields[field] = selectedUser
+	    this.setState({fields})
+	    this.closeModal()
+	}
+	deleteRecipients = () => {
+	    const fields = this.state.fields
+	    fields['recipients'] = []
+	    this.setState({fields})
 	}
 	updateQuestions = (questions) => {
 	    const fields = this.state.fields
@@ -104,30 +178,36 @@ class ConvocationForm extends Component {
 	render() {
 	    const { t } = this.context
 
-	    /* Accept File ? */
-	    const acceptFileDocument = '.xml, .pdf, .jpg, .png'
-	    const acceptCustomProcuration = '.xml, .pdf, .jpg, .png'
-	    const acceptAnnexeFile = '.xml, .pdf, .jpg, .png'
-	    const submissionButton =
-            <Button type='submit' primary basic disabled={!this.state.isFormValid }>
-                {t('api-gateway:form.send')}
-            </Button>
-
+	    const submissionButton = this.state.delayTooShort ?
+	        <ConfirmModal onConfirm={this.submit} text={t('convocation.new.delayTooShort', {number: this.state.delay})}>
+	        	<Button type='button' basic color={'orange'} disabled={!this.state.isFormValid}>{t('api-gateway:form.send')}</Button>
+	    	</ConfirmModal> :
+	        <Button type='submit' primary basic disabled={!this.state.isFormValid}>
+	            {t('api-gateway:form.send')}
+	        </Button>
+	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    return (
 	        <Page>
+	            <Breadcrumb
+	                data={[
+	                    {title: t('api-gateway:breadcrumb.home'), url: `/${localAuthoritySlug}`},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation')},
+	                    {title: t('api-gateway:breadcrumb.convocation.convocation_creation')}
+	                ]}
+	            />
 	            <Segment>
 	                <Form onSubmit={this.submit}>
 	                    <Grid>
 	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_date`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_meetingDate`}
 	                                label={t('convocation.fields.date')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_date`}
-	                                    value={this.state.fields.date}
+	                                    id={`${this.state.fields.uuid}_meetingDate`}
+	                                    value={this.state.fields.meetingDate}
 	                                    type='date'
 	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.date}
+	                                    validationRule={this.validationRules.meetingDate}
 	                                    fieldName={t('convocation.fields.date')}
 	                                    placeholder={t('convocation.fields.date_placeholder')}
 	                                    isValidDate={(current) => current.isAfter(new moment())}
@@ -161,36 +241,36 @@ class ConvocationForm extends Component {
 	                                    validationRule={this.validationRules.assemblyType}
 	                                    fieldName={t('convocation.fields.assembly_type')}
 	                                    ariaRequired={true}
-	                                    options={null}
+	                                    options={this.state.assemblyTypes}
 	                                    value={this.state.fields.assemblyType}
 	                                    onChange={this.handleFieldChange}
 	                                />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlForm={`${this.state.fields.uuid}_assemblyPlace`}
+	                            <FormField htmlForm={`${this.state.fields.uuid}_location`}
 	                                label={t('convocation.fields.assembly_place')} required={true}>
 	                                <InputValidation
 	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    validationRule={this.validationRules.assemblyPlace}
-	                                    id={`${this.state.fields.uuid}_assemblyPlace`}
+	                                    validationRule={this.validationRules.location}
+	                                    id={`${this.state.fields.uuid}_location`}
 	                                    fieldName={t('convocation.fields.assembly_place')}
 	                                    onChange={this.handleFieldChange}
-	                                    value={this.state.fields.assemblyPlace}
+	                                    value={this.state.fields.location}
 	                                />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_objet`}
+	                            <FormField htmlFor={`${this.state.fields.uuid}_subject`}
 	                                label={t('convocation.fields.object')}
                         			required={true}>
-	                                <InputValidation id={`${this.state.fields.uuid}_objet`}
+	                                <InputValidation id={`${this.state.fields.uuid}_subject`}
 	                                    errorTypePointing={this.state.errorTypePointing}
 	                                    ariaRequired={true}
-	                                    validationRule={this.validationRules.objet}
+	                                    validationRule={this.validationRules.subject}
 	                                    fieldName={t('convocation.fields.object')}
 	                                    placeholder={t('convocation.fields.object_placeholder')}
-	                                    value={this.state.fields.objet}
+	                                    value={this.state.fields.subject}
 	                                    onChange={this.handleFieldChange}/>
 	                            </FormField>
 	                        </Grid.Column>
@@ -207,70 +287,46 @@ class ConvocationForm extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='16'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
-	                                label={t('convocation.fields.recipient')} required={true}>
-	                                <Grid>
-	                                    <Grid.Column computer='8'>
-	                                        <Modal open={this.state.modalOpened} trigger={<Button
-	                                            onClick={() => this.setState({modalOpened: true})}
-	                                            type='button'
-	                                            id={`${this.state.fields.uuid}_recipient`}
-	                                            compact basic primary>{t('convocation.new.add_recipients')}
-	                                        </Button>}>
-	                                            <RecipientForm onCloseModal={this.closeModal}></RecipientForm>
-	                                        </Modal>
-	                                    </Grid.Column>
-	                                    <Grid.Column computer='8'>
-	                                        <Button
-	                                            type='button'
-	                                            id={`${this.state.fields.uuid}_deleteRecipient`}
-	                                            compact basic color='red'>{t('convocation.new.delete_all_recipients')}
-	                                        </Button>
-	                                    </Grid.Column>
-	                                </Grid>
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
-	                                label={t('convocation.fields.default_procuration')}>
-	                                <Button className="link" primary compact basic>{t('convocation.new.display')}</Button>
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_customProcuration`}
-	                                label={t('convocation.fields.custom_procuration')}>
-	                                <InputFile labelClassName="primary"
-	                                    htmlFor={`${this.state.fields.uuid}_customProcuration`}
-	                                    label={`${t('api-gateway:form.add_a_file')}`}>
-	                                    <input type="file" id={`${this.state.fields.uuid}_customProcuration`} accept={acceptCustomProcuration}
-	                                        style={{ display: 'none' }} />
-	                                </InputFile>
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_document`}
-	                                label={t('convocation.fields.convocation_document')} required={true}>
-	                                <InputValidation id={`${this.state.fields.uuid}_document`}
-	                                    labelClassName="primary"
-	                                    type='file'
-	                                    ariaRequired={true}
-	                                    accept={acceptFileDocument}
-	                                    value={this.state.fields.convocationAttachment}
-	                                    label={`${t('api-gateway:form.add_a_file')}`}
-	                                    fieldName={t('convocation.fields.convocation_document')} />
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_annexes`}
-	                                label={t('convocation.fields.annexes')}>
-	                                <InputValidation id={`${this.state.fields.uuid}_annexes`}
-	                                    labelClassName="primary"
-	                                    type='file'
-	                                    accept={acceptAnnexeFile}
-	                                    value={this.state.fields.convocationAttachment}
-	                                    label={`${t('api-gateway:form.add_a_file')}`}
-	                                    fieldName={t('convocation.fields.annexes')} />
-	                            </FormField>
+	                            <Grid>
+	                                <Grid.Column computer='16'>
+	                                    <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
+	                                        label={t('convocation.fields.recipient')}>
+	                                        <Grid>
+	                                            <Grid.Column computer='8'>
+	                                                <Modal open={this.state.modalRecipentsOpened} trigger={<Button
+	                                                    onClick={() => this.setState({modalRecipentsOpened: true})}
+	                                                    type='button'
+	                                                    disabled={!this.state.fields.assemblyType}
+	                                                    id={`${this.state.fields.uuid}_recipient`}
+	                                                    compact basic primary>{t('convocation.new.add_recipients')}
+	                                                </Button>}>
+	                                                    <RecipientForm
+	                                                        onCloseModal={this.closeModal}
+	                                                        onAdded={(selectedUser) => this.addUsers(selectedUser, 'recipients')}
+	                                                        selectedUser={this.state.fields.recipients}
+	                                                        uuid={this.state.fields.assemblyType.uuid}>
+	                                                    </RecipientForm>
+	                                                </Modal>
+	                                            </Grid.Column>
+	                                            <Grid.Column computer='8'>
+	                                                <Button
+	                                                    type='button'
+	                                                    id={`${this.state.fields.uuid}_deleteRecipient`}
+	                                                    onClick={this.deleteRecipients}
+	                                                    compact basic color='red'>{t('convocation.new.delete_all_recipients')}
+	                                                </Button>
+	                                            </Grid.Column>
+	                                        </Grid>
+	                                    </FormField>
+	                                    <ChipsList
+	                                        list={this.state.fields.recipients}
+	                                        labelText='email'
+	                                        removable={false}
+	                                        viewMoreText={t('convocation.new.view_more_recipients', {number: this.state.fields.recipients.length})}
+	                                        viewLessText={t('convocation.new.view_less_recipients')}/>
+	                                </Grid.Column>
+	                            </Grid>
+
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='16'>
 	                            <QuestionsForm
@@ -298,4 +354,5 @@ class ConvocationForm extends Component {
 	    )
 	}
 }
-export default translate(['convocation', 'api-gateway'])(ConvocationForm)
+
+export default translate(['convocation', 'api-gateway'])(withAuthContext(ConvocationForm))

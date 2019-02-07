@@ -1,12 +1,13 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import java.util.Set;
 
 @Entity
 public class Question {
@@ -17,8 +18,13 @@ public class Question {
     @JsonView(Views.QuestionView.class)
     private String uuid;
 
+    private String convocationUuid;
+
     @JsonView(Views.QuestionView.class)
     private String question;
+
+    @OneToMany
+    private Set<QuestionResponse> responses;
 
     public Question() {
     }
@@ -37,5 +43,13 @@ public class Question {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public String getConvocationUuid() {
+        return convocationUuid;
+    }
+
+    public void setConvocationUuid(String convocationUuid) {
+        this.convocationUuid = convocationUuid;
     }
 }

@@ -23,10 +23,11 @@ dependencies {
     compile("org.springframework.retry:spring-retry")
     compile("org.springframework.boot:spring-boot-starter-aop")
     compile('com.github.ozwillo:ozwillo-java-spring-integration:1.26.2')
+    // uncomment this when locally developing on ozwillo-java-spring-integration lib
+    //compile('com.ozwillo:ozwillo-java-spring-integration:1.28.0')
     compile('net.logstash.logback:logstash-logback-encoder:5.2')
     compile('ch.qos.logback:logback-classic:1.2.3')
     compile('org.apache.commons:commons-lang3:3.8.1')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 processResources {

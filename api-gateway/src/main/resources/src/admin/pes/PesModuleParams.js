@@ -8,7 +8,7 @@ import moment from 'moment'
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page, InputTextControlled } from '../../_components/UI'
-import { checkStatus } from '../../_util/utils'
+import { checkStatus, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class PesModuleParams extends Component {
@@ -49,12 +49,6 @@ class PesModuleParams extends Component {
                     _addNotification(notifications.defaultError, 'notifications.admin.pes.title', json.message)
                 })
             })
-    }
-
-    handleFieldChange = (field, value) => {
-        const fields = this.state.fields
-        fields[field] = value
-        this.setState({ fields: fields }, this.validateForm)
     }
     handleCheckboxChange = (event, { id }) => {
         const { fields } = this.state
@@ -112,14 +106,14 @@ class PesModuleParams extends Component {
                                     <InputDatetime id='unavailabilityHeliosStartDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityHeliosStartDate}
-                                        onChange={date => this.handleFieldChange('unavailabilityHeliosStartDate', date)} />
+                                        onChange={date => handleFieldChange(this, 'unavailabilityHeliosStartDate', date, this.validateForm)} />
                                     <label htmlFor='unavailabilityHeliosEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>
                                         {t('api-gateway:form.to')}
                                     </label>
                                     <InputDatetime id='unavailabilityHeliosEndDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityHeliosEndDate}
-                                        onChange={date => this.handleFieldChange('unavailabilityHeliosEndDate', date)} />
+                                        onChange={date => handleFieldChange(this, 'unavailabilityHeliosEndDate', date, this.validateForm)} />
                                 </div>
                                 {this.state.dateValidation && (
                                     <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -139,7 +133,7 @@ class PesModuleParams extends Component {
                                 maxLength={250}
                                 placeholder={`${t('admin.modules.pes.module_settings.alertMessage')}...`}
                                 value={this.state.fields.alertMessage || ''}
-                                onChange={this.handleFieldChange} />
+                                onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)} />
                         </FieldInline>
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<n:PES_ACQUIT xmlns:n="http://www.minefi.gouv.fr/cp/helios/pes_v2/Rev0/retour/v2">
+    <Enveloppe>
+        <Parametres>
+            <Version V="2"/>
+            <TypFic V="PESALR1"/>
+            <NomFic V="PesDepense-12-2018-209-2092019012917666666"/>
+        </Parametres>
+        <Emetteur>
+            <Sigle V="Appli GF"/>
+            <Adresse V="pesalldep 1.1.001"/>
+        </Emetteur>
+        <Recepteur>
+            <Sigle V="HELIOS"/>
+            <Adresse V="READRESSE"/>
+        </Recepteur>
+    </Enveloppe>
+    <EnTetePES>
+        <DteStr V="2019-01-30"/>
+        <IdPost V="006111"/>
+        <IdColl V="01234567890001"/>
+        <CodCol V="000"/>
+        <CodBud V="01"/>
+        <LibelleColBud V="STELA"/>
+    </EnTetePES>
+    <ACQUIT>
+        <EnTeteAcquit>
+            <IdVer V="2"/>
+        </EnTeteAcquit>
+        <ElementACQUIT>
+            <DomaineAck V="4"/>
+            <EtatAck V="0"/>
+            <IdUnique V="TI00064567"/>
+            <Erreur>
+                <NumAnoAck V="ERREUR_DOUBLON_PJ"/>
+                <LibelleAnoAck V="1984 - L'identifiant unique de la PJ a déjà été intégré dans HELIOS"/>
+            </Erreur>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="5"/>
+            <EtatAck V="1"/>
+            <NumBord V="123"/>
+            <ExerciceBord V="2018"/>
+        </ElementACQUIT>
+        <ElementACQUIT>
+            <DomaineAck V="4"/>
+            <EtatAck V="1"/>
+            <IdUnique V="CP00065678"/>
+        </ElementACQUIT>
+    </ACQUIT>
+</n:PES_ACQUIT>

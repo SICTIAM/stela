@@ -3,27 +3,17 @@ package fr.sictiam.stela.acteservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfReader;
 import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
-import fr.sictiam.stela.acteservice.model.Acte;
-import fr.sictiam.stela.acteservice.model.ActeExport;
-import fr.sictiam.stela.acteservice.model.ActeHistory;
-import fr.sictiam.stela.acteservice.model.ActeNature;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.Flux;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.PendingMessage;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.ui.ActeCSVUI;
 import fr.sictiam.stela.acteservice.model.ui.ActeUuidsAndSearchUI;
-import fr.sictiam.stela.acteservice.service.exceptions.ActeNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.CancelForbiddenException;
+import fr.sictiam.stela.acteservice.service.exceptions.*;
 import fr.sictiam.stela.acteservice.service.exceptions.FileNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.HistoryNotFoundException;
-import fr.sictiam.stela.acteservice.service.exceptions.NoContentException;
 import fr.sictiam.stela.acteservice.service.util.PdfGeneratorUtil;
 import fr.sictiam.stela.acteservice.service.util.ZipGeneratorUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -52,6 +42,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -64,9 +55,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -89,6 +78,8 @@ import java.util.stream.Stream;
 public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActeService.class);
+
+    public static String DEFAULT_GROUP_NAME = "Service Actes";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -726,29 +717,99 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public byte[] getACKPdfs(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language)
             throws IOException, DocumentException {
-        List<String> pages = new ArrayList<>();
+        ITextRenderer renderer = new ITextRenderer();
         List<Acte> actes = getActesFromUuidsOrSearch(acteUuidsAndSearchUI);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
         for (Acte acte : actes) {
             if (acte.getLastHistoryStatus().equals(StatusType.ACK_RECEIVED)) {
-                Map<String, String> mapString = new HashMap<String, String>() {
-                    {
-                        put("status", acte.getActeHistories().last().getStatus().toString());
-                        put("number", acte.getNumber());
-                        put("decision", acte.getDecision().toString());
-                        put("nature", acte.getNature().toString());
-                        put("code", acte.getCode() +
-                                (StringUtils.isNotBlank(acte.getCodeLabel()) ? " (" + acte.getCodeLabel() + ")" : ""));
-                        put("objet", acte.getObjet());
-                        put("acteAttachment", acte.getActeAttachment().getFilename());
-                    }
-                };
+                Map<String, String> mapString = extractDataFromActe(acte);
+
                 Map<String, String> data = getTranslatedFieldsAndValues(mapString, language);
-                pages.add(pdfGeneratorUtil.getContentPage("acte", data));
+                String content = pdfGeneratorUtil.getContentPage("acte", data);
+
+                renderer.setDocumentFromString(content);
+                renderer.layout();
+
+                //none unique page need to write in NextDocument
+                if (renderer.getWriter() != null && renderer.getWriter().getCurrentPageNumber() > 0) {
+                    renderer.writeNextDocument();
+                }
+                
+                // init document
+                if (renderer.getWriter() == null) {
+                    renderer.createPDF(os, false);
+                }
+            }
+
+        }
+
+
+        try {
+            renderer.finishPDF();
+            return os.toByteArray();
+        } catch (Exception e) {
+            throw new NoContentException();
+        } finally {
+            os.close();
+        }
+
+    }
+
+
+
+    private Map<String, String> extractDataFromActe(Acte acte){
+        String shortEuropeanDatePattern = "dd/MM/yyyy";
+        DateTimeFormatter shortEuropeanDateFormatter = DateTimeFormatter.ofPattern(shortEuropeanDatePattern);
+
+        String longEuropeanDatePattern = "dd/MM/yyyy HH:mm:ss";
+        DateTimeFormatter longEuropeanDateFormatter = DateTimeFormatter.ofPattern(longEuropeanDatePattern);
+
+
+        Map<String, String> map = new HashMap<String, String>() {
+            {
+                put("status", acte.getActeHistories().last().getStatus().toString());
+                put("number", acte.getNumber());
+                put("uniqueId", acte.getMiatId());
+                put("decision", acte.getDecision().format(shortEuropeanDateFormatter));
+                put("nature", acte.getNature().toString());
+                put("code", acte.getCode() +
+                        (StringUtils.isNotBlank(acte.getCodeLabel()) ? " (" + acte.getCodeLabel() + ")" : ""));
+                put("objet", acte.getObjet());
+                put("acteAttachment", acte.getActeAttachment().getFilename());
+                put("localAuthority", acte.getLocalAuthority().getName());
+            }
+        };
+
+        for(ActeHistory acteHistory : acte.getActeHistories()){
+            switch (acteHistory.getStatus()) {
+                case SENT:
+                    map.put("sentDate", acteHistory.getDate().format(longEuropeanDateFormatter));
+                    break;
+                case CANCELLATION_ASKED:
+                    map.put("cancellationAskedDate", acteHistory.getDate().format(longEuropeanDateFormatter));
+                    break;
+                case CANCELLED:
+                    map.put("cancelledDate", acteHistory.getDate().format(longEuropeanDateFormatter));
+                    break;
+                case ACK_RECEIVED:
+                    map.put("ackReceivedDate", acteHistory.getDate().format(longEuropeanDateFormatter));
+                    break;
+                default:
+                    break;
             }
         }
-        if (pages.size() == 0)
-            throw new NoContentException();
-        return pdfGeneratorUtil.createPdf(pages);
+
+        try {
+            JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
+            String applicantName = node.get("agent").get("given_name").asText() + " " +node.get("agent").get("family_name").asText();
+            map.put("applicantName",  applicantName);
+        }catch(Exception e){
+             LOGGER.error("Agent not found ",e);
+             return map;
+        }
+
+        return map;
     }
 
     // Doubles up a map into a new map with for each entry: ("entry_value", value)
@@ -774,7 +835,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 // TODO: Hack, fix me !
                 if (entry.getKey().equals("status"))
                     data.put(entry.getKey() + "_value",
-                            jsonNode.get("acte").get("status").get(entry.getValue()).asText());
+                            jsonNode.get("acte").get("nature").get("AR_PREF").asText());
                 else
                     data.put(entry.getKey() + "_fieldName",
                             jsonNode.get("acte").get("fields").get(entry.getKey()).asText());
@@ -803,9 +864,17 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public byte[] getStampedActe(Acte acte, Integer x, Integer y, LocalAuthority localAuthority)
             throws IOException, DocumentException {
+        PdfReader pdfReader = new PdfReader(acte.getActeAttachment().getFile());
         if (x == null || y == null) {
-            x = localAuthority.getStampPosition().getX();
-            y = localAuthority.getStampPosition().getY();
+            if(pdfGeneratorUtil.pdfIsRotated(pdfReader)){
+                //landscape case
+                y = localAuthority.getStampPosition().getX();
+                x = localAuthority.getStampPosition().getY();
+            }else{
+                //portrait case
+                x = localAuthority.getStampPosition().getX();
+                y = localAuthority.getStampPosition().getY();
+            }
         }
         ActeHistory ackHistory = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
@@ -826,7 +895,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), attachment.getFile(), x, y);
     }
 
-    public byte[] getActeAttachmentThumbnail(String uuid) throws IOException {
+    public Thumbnail getActeAttachmentThumbnail(String uuid) throws IOException {
         byte[] pdf = getByUuid(uuid).getActeAttachment().getFile();
         return pdfGeneratorUtil.getPDFThumbnail(pdf);
     }

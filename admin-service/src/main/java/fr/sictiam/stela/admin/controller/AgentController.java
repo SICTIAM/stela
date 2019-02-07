@@ -8,6 +8,7 @@ import fr.sictiam.stela.admin.model.Agent;
 import fr.sictiam.stela.admin.model.AgentConnection;
 import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.ProfileSummary;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.service.AgentConnectionService;
 import fr.sictiam.stela.admin.service.AgentService;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/agent")
@@ -117,16 +118,8 @@ public class AgentController {
         return new ResponseEntity<>(agentService.findByUuid(uuid).get(), HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/profiles")
-    @JsonView(Views.AgentView.class)
-    public Set<Profile> getProfiles(@PathVariable String uuid) {
-        return agentService.getProfilesByUuid(uuid);
-    }
-
-
     @GetMapping("/profiles")
-    @JsonView(Views.AgentView.class)
-    public Set<Profile> getCurrentProfiles(@RequestAttribute("STELA-Sub") String sub) {
+    public List<ProfileSummary> getCurrentProfiles(@RequestAttribute("STELA-Sub") String sub) {
         return agentService.getProfilesBySub(sub);
     }
 

@@ -41,8 +41,10 @@ public class TokenInterceptor extends HandlerInterceptorAdapter {
             // Set attributes
             Recipient recipient = opt.get();
             request.setAttribute("STELA-Current-Local-Authority-UUID", recipient.getLocalAuthority().getUuid());
+            // TODO : replace right by Right.CONVOCATION_DISPLAY
             request.setAttribute("STELA-Current-Profile-Rights", Sets.newHashSet(Right.CONVOCATION_DISPLAY));
             request.setAttribute("STELA-Current-Recipient", recipient);
+            request.setAttribute("STELA-Current-Profile-UUID", "");
         }
 
         return true;

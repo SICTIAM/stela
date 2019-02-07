@@ -26,6 +26,8 @@ public class Classeur {
 
     private String url;
 
+    private List<Action> actions;
+
     public ClasseurStatus getStatus() {
         return status;
     }
@@ -114,5 +116,13 @@ public class Classeur {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public List<Action> getActions() {
+        return actions;
+    }
+
+    public void setActions(List<Action> actions) {
+        this.actions = actions;
     }
 }

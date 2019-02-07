@@ -3,6 +3,7 @@ package fr.sictiam.stela.convocationservice.service;
 import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
+import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.exception.MissingParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -23,6 +25,7 @@ import javax.persistence.criteria.Root;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -42,7 +45,12 @@ public class AssemblyTypeService {
 
     public AssemblyType getAssemblyType(String uuid, String localAuthorityUuid) {
 
-        return assemblyTypeRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(NotFoundException::new);
+        return assemblyTypeRepository
+                .findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid)
+                .orElseThrow(() -> {
+                    LOGGER.error("Assembly type {} not found in local authority {}", uuid, localAuthorityUuid);
+                    return new NotFoundException("Assembly type " + uuid + " not found in local authority " + localAuthorityUuid);
+                });
     }
 
     public AssemblyType create(AssemblyType assemblyType, String localAuthorityUuid, String profileUuid) {
@@ -82,6 +90,12 @@ public class AssemblyTypeService {
         return entityManager.createQuery(query).getSingleResult();
     }
 
+    public List<AssemblyType> findAllSorted(String localAuthorityUuid) {
+
+        return assemblyTypeRepository.findAllByLocalAuthorityUuid(localAuthorityUuid, new Sort(Sort.Direction.ASC,
+                "name"));
+    }
+
     public List<AssemblyType> findAllWithQuery(String multifield, String name, String location,
             Boolean active, Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
@@ -109,6 +123,22 @@ public class AssemblyTypeService {
                 .orderBy(orders);
 
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
+    }
+
+    public List<Recipient> findRecipients(String uuid, String localAuthorityUuid) {
+
+        AssemblyType assemblyType = getAssemblyType(uuid, localAuthorityUuid);
+        List<Recipient> recipients = new ArrayList<>(assemblyType.getRecipients());
+        Collections.sort(recipients);
+        return recipients;
+    }
+
+    public void removeRecipient(String localAuthorityUuid, Recipient recipient) {
+
+        findAllSorted(localAuthorityUuid).stream().forEach(assemblyType -> {
+            if (assemblyType.getRecipients().remove(recipient))
+                assemblyTypeRepository.save(assemblyType);
+        });
     }
 
     private List<Predicate> getQueryPredicates(CriteriaBuilder builder, Root<AssemblyType> assemblyRoot, String multifield,

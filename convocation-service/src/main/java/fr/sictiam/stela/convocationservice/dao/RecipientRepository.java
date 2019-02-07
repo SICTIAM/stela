@@ -13,7 +13,7 @@ public interface RecipientRepository extends JpaRepository<Recipient, String> {
 
     public Optional<Recipient> findByEmailAndLocalAuthorityUuid(String email, String localAuthorityUuid);
 
-    public List<Recipient> findAllByLocalAuthorityUuid(String localAuthorityUuid);
+    public List<Recipient> findAllByLocalAuthorityUuidAndActiveTrue(String localAuthorityUuid);
 
     @Query(nativeQuery = true, value = "SELECT COUNT(1) FROM recipient WHERE uuid!=:uuid AND " +
             "local_authority_uuid=:localAuthorityUuid AND email=:email")

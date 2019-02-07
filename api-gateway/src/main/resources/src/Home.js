@@ -53,6 +53,7 @@ class Home extends Component {
         const isCertificatePaired = pairedCertificate
             && certificate.serial === pairedCertificate.serial
             && certificate.issuer === pairedCertificate.issuer
+            && certificate.status === 'VALID'
         let days = null
         if(isCertificatePaired && pairedCertificate.expiredDate) {
             let expirationDate = moment(pairedCertificate.expiredDate)
@@ -75,32 +76,38 @@ class Home extends Component {
                         </Grid.Column>
                         <Grid.Column largeScreen={6} computer={6} mobile={16}>
                             <Segment>
-                                <h2>{t('profile.certificate.title')}</h2>
-                                {certificate.status === 'NONE' && pairedCertificate && (
-                                    <span>{t('certificate_not_inserted')}</span>
-                                )}
-                                {certificate.status !== 'VALID' && !pairedCertificate && (
-                                    <span>{t('certificate_not_paired')}</span>
-                                )}
-                                {certificate.status === 'VALID'  && !pairedCertificate && (
-                                    <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}</Link>
-                                )}
-                                {certificate.status === 'EXPIRED' && pairedCertificate && (
-                                    <span>{t('error.certificate_required.EXPIRED')}</span>
-                                )}
-                                {(pairedCertificate &&
-                                    (certificate.serial !== pairedCertificate.serial || certificate.issuer !== pairedCertificate.issuer )) && (
-                                        <span>{t('certificate_not_paired_user')}</span>
-                                    )}
-                                {(certificate.status !== 'NONE' && certificate.status !== 'VALID') && (
-                                    <span>{t('notifications.admin.invalid_certificate')}</span>
-                                )}
-                                {isCertificatePaired && (
-                                    <div>
-                                        <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
-                                        <br/>
-                                        <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
-                                    </div>
+                                {certificate && (
+                                    <Fragment>
+                                        <h2>{t('profile.certificate.title')}</h2>
+                                        {certificate.status === 'NONE' && pairedCertificate && (
+                                            <span>{t('certificate_not_inserted')}<br/></span>
+                                        )}
+                                        {certificate.status === 'NONE' && !pairedCertificate && (
+                                            <span>{t('certificate_not_paired')}<br/></span>
+                                        )}
+                                        {certificate.status === 'VALID'  && !pairedCertificate && (
+                                            <span>{t('certificate_not_paired')}<br/>
+                                                <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}<br/></Link>
+                                            </span>
+                                        )}
+                                        {certificate.status === 'EXPIRED' && (
+                                            <span>{t('error.certificate_required.EXPIRED')}<br/></span>
+                                        )}
+                                        {(certificate.status === 'VALID' && pairedCertificate &&
+                                            (certificate.serial !== pairedCertificate.serial || certificate.issuer !== pairedCertificate.issuer )) && (
+                                                <span>{t('certificate_not_paired_user')}<br/></span>
+                                            )}
+                                        {(certificate.status !== 'NONE' && certificate.status !== 'EXPIRED' && certificate.status !== 'VALID') && (
+                                            <span>{t('notifications.admin.invalid_certificate')}</span>
+                                        )}
+                                        {isCertificatePaired && (
+                                            <div>
+                                                <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
+                                                <br/>
+                                                <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
+                                            </div>
+                                        )}
+                                    </Fragment>
                                 )}
                             </Segment>
                         </Grid.Column>

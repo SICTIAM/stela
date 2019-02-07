@@ -48,6 +48,8 @@ subprojects {
             // jitpack is used for publications of the ozwillo-java-spring-integration lib
             url 'https://jitpack.io' 
         }
+        // uncomment this when locally developing on ozwillo-java-spring-integration lib
+        //mavenLocal()
     }
 
     dependencies {
@@ -67,6 +69,8 @@ subprojects {
         testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.34.0')
         testCompile('com.icegreen:greenmail:1.5.5')
         testCompile('org.apache.commons:commons-email:1.4')
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+        testCompile('org.mockito:mockito-core:2.13.0')
     }
 
     ext {

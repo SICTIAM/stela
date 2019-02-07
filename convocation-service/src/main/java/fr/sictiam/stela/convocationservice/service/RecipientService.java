@@ -1,5 +1,6 @@
 package fr.sictiam.stela.convocationservice.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
@@ -9,7 +10,6 @@ import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -40,12 +40,24 @@ public class RecipientService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Autowired
-    private RecipientRepository recipientRepository;
+    private final RecipientRepository recipientRepository;
 
-    @Autowired
-    private LocalAuthorityService localAuthorityService;
+    private final LocalAuthorityService localAuthorityService;
 
+    private final AssemblyTypeService assemblyTypeService;
+
+    private final ExternalRestService externalRestService;
+
+    public RecipientService(
+            RecipientRepository recipientRepository,
+            LocalAuthorityService localAuthorityService,
+            AssemblyTypeService assemblyTypeService,
+            ExternalRestService externalRestService) {
+        this.recipientRepository = recipientRepository;
+        this.localAuthorityService = localAuthorityService;
+        this.assemblyTypeService = assemblyTypeService;
+        this.externalRestService = externalRestService;
+    }
 
     public Recipient create(Recipient recipient, String localAuthorityUuid) {
 
@@ -79,7 +91,12 @@ public class RecipientService {
         }
 
         if (recipientParams.getActive() != null) {
-            recipient.setInactivityDate(recipientParams.getActive() ? null : LocalDateTime.now());
+            if (recipientParams.getActive()) {
+                recipient.setInactivityDate(null);
+            } else {
+                recipient.setInactivityDate(LocalDateTime.now());
+                assemblyTypeService.removeRecipient(localAuthorityUuid, recipient);
+            }
         }
 
         return save(recipient);
@@ -87,7 +104,9 @@ public class RecipientService {
 
     public Recipient getRecipient(String uuid, String localAuthorityUuid) {
 
-        return recipientRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(NotFoundException::new);
+        return recipientRepository
+                .findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid)
+                .orElseThrow(() -> new NotFoundException("Recipient " + uuid + " not found in local authority " + localAuthorityUuid));
     }
 
     public Recipient save(Recipient recipient) {
@@ -97,7 +116,20 @@ public class RecipientService {
 
     public List<Recipient> getAllByLocalAuthority(String localAuthorityUuid) {
 
-        return recipientRepository.findAllByLocalAuthorityUuid(localAuthorityUuid);
+        return recipientRepository.findAllByLocalAuthorityUuidAndActiveTrue(localAuthorityUuid);
+    }
+
+    public Recipient findByProfileinLocalAuthority(String profileUuid, String localAuthorityUuid) {
+        JsonNode profile = externalRestService.getProfile(profileUuid);
+        if (profile == null) {
+            LOGGER.error("Cannot open convocation, unknown profile {}", profileUuid);
+        }
+        String email = profile.get("agent").get("email").asText();
+        LOGGER.info("Found email {}", email);
+        return recipientRepository
+                .findByEmailAndLocalAuthorityUuid(email, localAuthorityUuid)
+                .orElseThrow(() -> new NotFoundException("Recipient with profile " + profileUuid + " cannot be found in " +
+                        "local authority " + localAuthorityUuid));
     }
 
     public Long countAllWithQuery(String multifield, String firstname, String lastname, String email,

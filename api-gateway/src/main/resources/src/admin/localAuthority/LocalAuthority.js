@@ -95,6 +95,7 @@ class LocalAuthority extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const emailCertificateDisplay = email => email ||
             <span style={{ fontStyle: 'italic' }}>{t('admin.local_authority.no_certificate_email')}</span>
+        /** Module List */
         const moduleList = modules.map(moduleName => {
             const isActivated = this.state.fields.activatedModules.includes(moduleName)
             const isActivatedUrl = this.props.uuid
@@ -132,6 +133,7 @@ class LocalAuthority extends Component {
                 </ListItem>
             )
         })
+        /** End Module List */
         const groupList = this.state.fields.groups.map(group =>
             <ListItem as={Link} to={`/${localAuthoritySlug}/admin/${this.props.uuid ? `collectivite/${this.state.fields.uuid}` : 'ma-collectivite'}/groupes/${group.uuid}`}
                 key={group.uuid} title={group.name} icon='users' style={{ cursor: 'pointer' }}>

@@ -22,7 +22,7 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         servlet.setApplicationContext(applicationContext);
         servlet.setTransformWsdlLocations(true);
         servlet.setWsdlDefinitionHandlerAdapterBeanName("paull_location");
-        return new ServletRegistrationBean<CustomMessageDispatcherServlet>(servlet, "/api/pes/ws/*", "/externalws/*");
+        return new ServletRegistrationBean<>(servlet, "/api/pes/ws/*", "/externalws/*");
     }
 
     @Bean(name = "paull_location")

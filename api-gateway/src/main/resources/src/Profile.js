@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Button, Segment, Label, Input, Header, Checkbox, Dropdown } from 'semantic-ui-react'
@@ -119,82 +119,89 @@ class Profile extends Component {
     render() {
         const { t } = this.context
         const { activeProfile, agent, allNotifications } = this.state
-        const currentLocalAuthorityProfile = agent.profiles && agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
+        const currentLocalAuthorityProfile = agent && activeProfile && agent.profiles && agent.profiles.find(profile => profile.localAuthority.uuid === activeProfile.localAuthority.uuid)
         const allLocalAuthorityProfiles = []
-        agent.profiles.forEach((profile) => {
-            if (profile.localAuthority.uuid === activeProfile.localAuthority.uuid) {
-                allLocalAuthorityProfiles.unshift(
-                    <LocalAuthorityProfile
-                        key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
-                        profile={currentLocalAuthorityProfile}
-                        isDefaultOpen={true}
-                        authContext={this.props.authContext}
-                        onChange={this.onChange}
-                        updateProfile={this.updateProfile}
-                        allNotifications={allNotifications}
-                        onCheckboxChange={this.onCheckboxChange}
-                        onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
-                    />
-                )
-            }
-            else {
-                allLocalAuthorityProfiles.push(
-                    <LocalAuthorityProfile
-                        key={profile.uuid}
-                        profile={profile}
-                        isDefaultOpen={false}
-                        onChange={this.onChange}
-                        authContext={this.props.authContext}
-                        updateProfile={this.updateProfile}
-                        allNotifications={allNotifications}
-                        onCheckboxChange={this.onCheckboxChange}
-                        onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
-                    />
-                )
-            }
-        })
+        if(agent && agent.profiles) {
+            agent.profiles.forEach((profile) => {
+                if (profile.localAuthority.uuid === activeProfile.localAuthority.uuid) {
+                    allLocalAuthorityProfiles.unshift(
+                        /** Refactor 'current' is active only when profiles doesn't load */
+                        <LocalAuthorityProfile
+                            key={currentLocalAuthorityProfile ? currentLocalAuthorityProfile.uuid : 'current'}
+                            profile={currentLocalAuthorityProfile}
+                            isDefaultOpen={true}
+                            authContext={this.props.authContext}
+                            onChange={this.onChange}
+                            updateProfile={this.updateProfile}
+                            allNotifications={allNotifications}
+                            onCheckboxChange={this.onCheckboxChange}
+                            onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
+                        />
+                    )
+                }
+                else {
+                    allLocalAuthorityProfiles.push(
+                        <LocalAuthorityProfile
+                            key={profile.uuid}
+                            profile={profile}
+                            isDefaultOpen={false}
+                            onChange={this.onChange}
+                            authContext={this.props.authContext}
+                            updateProfile={this.updateProfile}
+                            allNotifications={allNotifications}
+                            onCheckboxChange={this.onCheckboxChange}
+                            onLocalAuthorityNotificationsChange={this.onLocalAuthorityNotificationsChange}
+                        />
+                    )
+                }
+            })
+        }
+
         return (
             <Page title={t('profile.title')}>
-                <Segment style={{ borderTop: '2px solid #663399' }}>
-                    <FieldInline htmlFor="family_name" label={t('agent.family_name')}>
-                        <FieldValue id="family_name">{agent.family_name}</FieldValue>
-                    </FieldInline>
-                    <FieldInline htmlFor="given_name" label={t('agent.given_name')}>
-                        <FieldValue id="given_name">{agent.given_name}</FieldValue>
-                    </FieldInline>
-                    <FieldInline htmlFor="email" label={t('agent.email')}>
-                        <FieldValue id="email">{agent.email}</FieldValue>
-                    </FieldInline>
-                    {!this.props.uuid && (
-                        <div style={{ textAlign: 'right' }}>
-                            <a href="/api/api-gateway/ozwillo-portal/my/profile" target="_blank" className="ui button"
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    color: '#663399',
-                                    boxShadow: '0 0 0 1px #663399',
-                                    background: 'transparent none'
-                                }}
-                            >
-                                <img style={{ height: '1.5em', float: 'left', marginRight: '1em' }} src={process.env.PUBLIC_URL + '/img/logo_ozwillo.png'}
-                                    alt="Ozwillo" />
-                                {t('profile.modify_my_profile')}
-                            </a>
-                        </div>
-                    )}
-                </Segment>
+                {agent && (
+                    <Fragment>
+                        <Segment style={{ borderTop: '2px solid #663399' }}>
+                            <FieldInline htmlFor="family_name" label={t('agent.family_name')}>
+                                <FieldValue id="family_name">{agent.family_name}</FieldValue>
+                            </FieldInline>
+                            <FieldInline htmlFor="given_name" label={t('agent.given_name')}>
+                                <FieldValue id="given_name">{agent.given_name}</FieldValue>
+                            </FieldInline>
+                            <FieldInline htmlFor="email" label={t('agent.email')}>
+                                <FieldValue id="email">{agent.email}</FieldValue>
+                            </FieldInline>
+                            {!this.props.uuid && (
+                                <div style={{ textAlign: 'right' }}>
+                                    <a href="/api/api-gateway/ozwillo-portal/my/profile" target="_blank" className="ui button"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            color: '#663399',
+                                            boxShadow: '0 0 0 1px #663399',
+                                            background: 'transparent none'
+                                        }}
+                                    >
+                                        <img style={{ height: '1.5em', float: 'left', marginRight: '1em' }} src={process.env.PUBLIC_URL + '/img/logo_ozwillo.png'}
+                                            alt="Ozwillo" />
+                                        {t('profile.modify_my_profile')}
+                                    </a>
+                                </div>
+                            )}
+                        </Segment>
 
-                {this.props.uuid &&
-                    <Segment style={{ borderTop: '2px solid #663399' }}>
-                        <AgentProfile uuid={this.props.uuid}/>
-                    </Segment>
-                }
+                        {this.props.uuid &&
+                            <Segment style={{ borderTop: '2px solid #663399' }}>
+                                <AgentProfile uuid={this.props.uuid}/>
+                            </Segment>
+                        }
+                        {allLocalAuthorityProfiles}
 
-                {allLocalAuthorityProfiles}
-
-                {!this.props.uuid && (
-                    <CertificateInfos pairedCertificate={agent.certificate}
-                        onPairCertification={this.onPairCertification}/>
+                        {!this.props.uuid && (
+                            <CertificateInfos pairedCertificate={agent.certificate}
+                                onPairCertification={this.onPairCertification}/>
+                        )}
+                    </Fragment>
                 )}
             </Page>
         )
@@ -292,10 +299,12 @@ class LocalAuthorityProfile extends Component {
                 )
             })
     }
-    componentDidMount() {
+    componentDidUpdate(prevProps, prevState) {
+        // QuickFix
+        // context sometimes doen't load in ComponentDidMount
         const { _fetchWithAuthzHandling } = this.context
         const { profile } = this.props
-        if (profile.uuid && profile.localAuthority.activatedModules.includes('PES')) {
+        if(profile && profile.uuid && !Object.is(profile, prevProps.profile)) {
             _fetchWithAuthzHandling({ url: `/api/pes/sesile/subscription/${profile.localAuthority.uuid}` })
                 .then(response => response.text())
                 .then(text => {

@@ -26,8 +26,11 @@ import PesRetourList from './pes/PesRetourList'
 import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
-import Convocation from './convocation/Convocation'
+import SentConvocation from './convocation/SentConvocation'
+import ReceivedConvocation from './convocation/ReceivedConvocation'
 import ConvocationForm from './convocation/ConvocationForm'
+import SentConvocationList from './convocation/SentConvocationList'
+import ReceivedConvocationList from './convocation/ReceivedConvocationList'
 import AdminMenuBar from './admin/AdminMenuBar'
 import AdminInstance from './admin/AdminInstance'
 import GenericAccount from './admin/genericAccount/GenericAccount'
@@ -199,8 +202,11 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/liste/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-reçues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={ReceivedConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-reçues" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ReceivedConvocationList} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocationList} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/nouveau" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ConvocationForm} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={Convocation} menu={MenuBar}/>
 
                 <Route exact path="/:localAuthoritySlug/admin" render={props => (
                     <Redirect to={`/${props.match.params.localAuthoritySlug}/admin/ma-collectivite`} />

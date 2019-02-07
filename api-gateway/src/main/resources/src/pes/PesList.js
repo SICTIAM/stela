@@ -9,7 +9,15 @@ import Pagination from '../_components/Pagination'
 import AdvancedSearch from '../_components/AdvancedSearch'
 import InputDatetime from '../_components/InputDatetime'
 import { Page, FormFieldInline, FormField, LoadingContent, StatusDisplay } from '../_components/UI'
-import { checkStatus, getLocalAuthoritySlug } from '../_util/utils'
+import {
+    checkStatus,
+    getLocalAuthoritySlug,
+    handleSearchChange,
+    handlePageClick,
+    updateItemPerPage,
+    sortTable,
+    onSearch
+} from '../_util/utils'
 import { anomalies } from '../_util/constants'
 import { notifications } from '../_util/Notifications'
 
@@ -58,11 +66,6 @@ class PesList extends Component {
             data.creationTo = moment(data.creationTo).format('YYYY-MM-DD')
         return data
     }
-    handleFieldChange = (field, value) => {
-        const search = this.state.search
-        search[field] = value
-        this.setState({ search: search })
-    }
     submitForm = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.setState({ fetchStatus: 'loading' })
@@ -76,24 +79,6 @@ class PesList extends Component {
                 this.setState({ fetchStatus: 'api-gateway:error.default' })
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.pes.title', text))
             })
-    }
-    handlePageClick = data => {
-        const offset = Math.ceil(data.selected * this.state.limit)
-        this.setState({ offset, currentPage: data.selected }, () => this.submitForm())
-    }
-    onSearch = () => {
-        this.setState({ offset: 0, currentPage: 0 }, this.submitForm)
-    }
-    sort = clickedColumn => {
-        const { column, direction } = this.state
-        if (column !== clickedColumn) {
-            this.setState({ column: clickedColumn, direction: 'ASC' }, () => this.submitForm())
-            return
-        }
-        this.setState({ direction: direction === 'ASC' ? 'DESC' : 'ASC' }, () => this.submitForm())
-    }
-    updateItemPerPage = limit => {
-        this.setState({ limit, offset: 0, currentPage: 0 }, this.submitForm)
     }
     negativeResolver = pes => anomalies.includes(pes.lastHistoryStatus)
     render() {
@@ -109,9 +94,9 @@ class PesList extends Component {
         const creationDisplay = (creation) => moment(creation).format('DD/MM/YYYY')
         const metaData = [
             { property: 'uuid', displayed: false, searchable: false },
-            { property: 'creation', displayed: true, displayName: t('pes.fields.creation'), searchable: true, displayComponent: creationDisplay,
+            { property: 'creation', displayed: true, sortable: true, displayName: t('pes.fields.creation'), searchable: true, displayComponent: creationDisplay,
                 collapsing: true },
-            { property: 'objet', displayed: true, displayName: t('pes.fields.objet'), searchable: true },
+            { property: 'objet', displayed: true, sortable: true, displayName: t('pes.fields.objet'), searchable: true },
             { property: 'fileType', displayed: true, displayName: t('pes.fields.fileType'), searchable: false, collapsing: true },
             { property: '_self', displayed: true, displayName: t('pes.fields.status'), searchable: false, displayComponent: statusDisplay,
                 collapsing: true }
@@ -122,9 +107,9 @@ class PesList extends Component {
             <Pagination
                 columns={displayedColumns.length}
                 pageCount={pageCount}
-                handlePageClick={this.handlePageClick}
+                handlePageClick={(data) => handlePageClick(this, data, this.submitForm)}
                 itemPerPage={this.state.limit}
-                updateItemPerPage={this.updateItemPerPage}
+                updateItemPerPage={(itemPerPage) => updateItemPerPage(this, itemPerPage, this.submitForm)}
                 currentPage={this.state.currentPage}
             />
         )
@@ -133,28 +118,28 @@ class PesList extends Component {
                 <LoadingContent fetchStatus={this.state.fetchStatus}>
                     <Segment>
                         <AdvancedSearch isDefaultOpen={false} fieldId="multifield" fieldValue={search.multifield}
-                            fieldOnChange={this.handleFieldChange} onSubmit={this.onSearch}>
-                            <Form onSubmit={this.onSearch}>
+                            fieldOnChange={(id, value ) => handleSearchChange(this, id, value)} onSubmit={() => onSearch(this, this.submitForm)}>
+                            <Form onSubmit={() => onSearch(this, this.submitForm)}>
                                 <FormFieldInline htmlFor="objet" label={t('pes.fields.objet')}>
-                                    <input id="objet" value={search.objet} onChange={e => this.handleFieldChange('objet', e.target.value)} />
+                                    <input id="objet" value={search.objet} onChange={e => handleSearchChange(this, 'objet', e.target.value)} />
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor="creationFrom" label={t('pes.fields.creation')}>
                                     <Form.Group style={{ marginBottom: 0 }} widths="equal">
                                         <FormField htmlFor="creationFrom" label={t('api-gateway:form.from')}>
                                             <InputDatetime id="creationFrom" timeFormat={false} value={search.decisionFrom}
-                                                onChange={date => this.handleFieldChange('creationFrom', date) } />
+                                                onChange={date => handleSearchChange(this, 'creationFrom', date) } />
                                         </FormField>
                                         <FormField htmlFor="creationTo" label={t('api-gateway:form.to')}>
                                             <InputDatetime
                                                 id="creationTo"
                                                 timeFormat={false}
                                                 value={search.creationTo}
-                                                onChange={date => this.handleFieldChange('creationTo', date)} />
+                                                onChange={date => handleSearchChange(this, 'creationTo', date)} />
                                         </FormField>
                                     </Form.Group>
                                 </FormFieldInline>
                                 <FormFieldInline htmlFor="status" label={t('pes.fields.status')} >
-                                    <select id="status" value={search.status} onBlur={e => this.handleFieldChange('status', e.target.value)} onChange={e => this.handleFieldChange('status', e.target.value)}>
+                                    <select id="status" value={search.status} onBlur={e => handleSearchChange(this, 'status', e.target.value)} onChange={e => handleSearchChange(this, 'status', e.target.value)}>
                                         <option value="">{t('api-gateway:form.all')}</option>
                                         {statusOptions}
                                     </select>
@@ -177,7 +162,7 @@ class PesList extends Component {
                             noDataMessage={t('pes.list.empty')}
                             keyProperty="uuid"
                             pagination={pagination}
-                            sort={this.sort}
+                            sort={(clickedColumn) => sortTable(this, clickedColumn, this.submitForm)}
                             direction={this.state.direction}
                             column={this.state.column}
                             negativeResolver={this.negativeResolver} />

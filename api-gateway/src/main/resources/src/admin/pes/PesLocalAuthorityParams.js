@@ -1,12 +1,12 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox } from 'semantic-ui-react'
+import {Form, Button, Segment, Label, Icon, Dropdown, Input, Checkbox, Popup} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page } from '../../_components/UI'
-import { checkStatus, handleFieldCheckboxChange, updateField } from '../../_util/utils'
+import { checkStatus, handleFieldCheckboxChange, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class PesLocalAuthorityParams extends Component {
@@ -102,7 +102,7 @@ class PesLocalAuthorityParams extends Component {
         const { fields, newSiren } = this.state
         if (this.validateSiren(newSiren)) {
             fields.sirens.push(newSiren)
-            this.setState({ newSiren: '', fields: fields })
+            this.setState({ newSiren: '', fields: fields, isNewSirenValid: false })
         }
     }
     onRemoveSiren = (siren) => {
@@ -115,11 +115,6 @@ class PesLocalAuthorityParams extends Component {
         const fields = this.state.fields
         fields.serverCode = value
         this.setState({ fields: fields })
-    }
-    handleFieldChange = (field, value) => {
-        const fields = this.state.fields
-        updateField(fields, field, value)
-        this.setState({ fields: fields }, this.validateForm)
     }
     sesileSubscriptionChange = (checked) => {
         const fields = this.state.fields
@@ -170,7 +165,9 @@ class PesLocalAuthorityParams extends Component {
             .then(response => response.json())
             .then(() => _addNotification(notifications.admin.sesileValidTokens))
             .catch(response => _addNotification(
-                response.status === 403 ?
+                // Status code depends on the Sesile version, new version return 401 when token is invalid and olds 403
+                ((this.state.fields.sesileNewVersion && response.status === 401) ||
+                (!this.state.fields.sesileNewVersion && response.status === 403)) ?
                     notifications.admin.sesileInvalidTokens :
                     notifications.admin.sesileUnavailableService))
     }
@@ -206,12 +203,17 @@ class PesLocalAuthorityParams extends Component {
                             <div style={{ marginBottom: '0.5em' }}>
                                 {listSiren.length > 0 ? listSiren : t('admin.modules.pes.local_authority_settings.no_siren')}
                             </div>
-                            <input id='sirens'
-                                onKeyPress={this.onkeyPress}
-                                value={this.state.newSiren}
-                                onChange={(e) => this.handleNewSirenChange(e.target.value)}
-                                className='simpleInput' />
-                            <Button basic color='grey' style={{ marginLeft: '1em' }} onClick={(event) => this.addSiren(event)}>
+                            <Popup trigger={
+                                <input id='sirens'
+                                    onKeyPress={this.onkeyPress}
+                                    value={this.state.newSiren}
+                                    onChange={(e) => this.handleNewSirenChange(e.target.value)}
+                                    className='simpleInput'/>
+                            } content={t('api-gateway:local_authority.sirenSize')}/>
+                            <Button basic color='grey'
+                                disabled={!this.state.isNewSirenValid}
+                                style={{marginLeft: '1em'}}
+                                onClick={(event) => this.addSiren(event)}>
                                 {t('api-gateway:form.add')}
                             </Button>
                         </FieldInline>
@@ -271,29 +273,29 @@ class PesLocalAuthorityParams extends Component {
                                     <Input id='daysBeforeArchiving'
                                         type='number'
                                         value={this.state.fields.archiveSettings.daysBeforeArchiving || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.daysBeforeArchiving', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.daysBeforeArchiving', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellUrl' label={t('api-gateway:local_authority.pastellUrl')}>
                                     <Input id='pastellUrl' fluid
                                         placeholder='https://...'
                                         value={this.state.fields.archiveSettings.pastellUrl || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellUrl', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellUrl', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellEntity' label={t('api-gateway:local_authority.pastellEntity')}>
                                     <Input id='pastellEntity'
                                         value={this.state.fields.archiveSettings.pastellEntity || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellEntity', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellEntity', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellLogin' label={t('api-gateway:local_authority.pastellLogin')}>
                                     <Input id='pastellLogin'
                                         value={this.state.fields.archiveSettings.pastellLogin || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellLogin', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellLogin', data.value, this.validateForm)} />
                                 </FieldInline>
                                 <FieldInline htmlFor='pastellPassword' label={t('api-gateway:local_authority.pastellPassword')}>
                                     <Input id='pastellPassword'
                                         type='password'
                                         value={this.state.fields.archiveSettings.pastellPassword || ''}
-                                        onChange={(e, data) => this.handleFieldChange('archiveSettings.pastellPassword', data.value)} />
+                                        onChange={(e, data) => handleFieldChange(this, 'archiveSettings.pastellPassword', data.value, this.validateForm)} />
                                 </FieldInline>
                             </Fragment>
                         )}

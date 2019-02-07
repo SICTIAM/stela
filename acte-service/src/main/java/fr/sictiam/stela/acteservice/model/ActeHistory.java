@@ -175,7 +175,7 @@ public class ActeHistory implements Comparable<ActeHistory> {
 
     @Override
     public int compareTo(ActeHistory acteHistory) {
-        return this.date.compareTo(acteHistory.getDate());
+        return acteHistory.getDate().compareTo(this.date);
     }
 
     @Override

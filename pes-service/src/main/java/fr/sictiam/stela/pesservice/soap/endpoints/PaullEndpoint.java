@@ -59,8 +59,8 @@ public class PaullEndpoint {
     private final StorageService storageService;
 
     public PaullEndpoint(PesAllerService pesAllerService, LocalAuthorityService localAuthorityService,
-            SoapReturnGenerator soapReturnGenerator, ExternalRestService externalRestService,
-            PesRetourService pesRetourService, SesileService sesileService, StorageService storageService) {
+            ExternalRestService externalRestService, PesRetourService pesRetourService, SesileService sesileService,
+            StorageService storageService) {
         this.pesAllerService = pesAllerService;
         this.localAuthorityService = localAuthorityService;
         this.externalRestService = externalRestService;
@@ -69,7 +69,7 @@ public class PaullEndpoint {
         this.storageService = storageService;
     }
 
-    PaullSoapToken getToken(String sessionID) {
+    private PaullSoapToken getToken(String sessionID) {
 
         if (sessionID != null) {
 

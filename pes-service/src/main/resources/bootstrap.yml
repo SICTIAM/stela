@@ -26,5 +26,8 @@ spring:
   profiles: test
   cloud:
     config:
-      uri: http://localhost:8888
+      enabled: false
 
+eureka:
+  client:
+    enabled: false

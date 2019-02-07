@@ -1,18 +1,117 @@
 <!DOCTYPE HTML>
 
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8"/>
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet"></link>
+
+        <style>
+            .content{
+                padding: 10px 50px 10px 50px;
+                border: 2px solid #006a80;
+                font-family: 'Lato', Arial, Helvetica, sans-serif;
+            }
+            .title{
+                color: #006a80;
+            }
+            .sub-title{
+                text-align: center;
+            }
+            .field{
+                color: black;
+                font-weight: 400;
+            }
+            .fieldName{
+                padding: 10px;
+                min-width: 200px;
+            }
+            .value{
+                font-weight: 200;
+                color: #006a80;
+                padding: 10px;
+            }
+            .cancel{
+                color: #c0392b;
+            }
+            table{
+                width: 100%;
+            }
+            .hr{
+                color: #006a80;
+                border-top: dashed 1px;
+                padding: 5px;
+                width:100%;
+
+            }
+            .ack-received{
+                font-weight: bold;
+                min-width: 230px;
+            }
+        </style>
+
     </head>
 
     <body>
-        <h1>[[${status_value}]]</h1>
-        <h2>[[${objet_value}]]</h2>
+    <div class="content">
+        <h2 class="title">[[${status_value}]]</h2>
+        <h3 class="sub-title">[[${objet_value}]]</h3>
         <br/>
-        <p>[[${number_fieldName}]]: [[${number_value}]]</p>
-        <p>[[${decision_fieldName}]]: [[${decision_value}]]</p>
-        <p>[[${nature_fieldName}]]: [[${nature_value}]]</p>
-        <p>[[${code_fieldName}]]: [[${code_value}]]</p>
-        <p>[[${acteAttachment_fieldName}]]: [[${acteAttachment_value}]]</p>
+        <table>
+            <tr class="field">
+                <td class="fieldName">[[${uniqueId_fieldName}]] :</td>
+                <td class="value">[[${uniqueId_value}]]</td>
+            </tr>
+            <tr class="field">
+                <td class="fieldName">[[${number_fieldName}]] :</td>
+                <td class="value">[[${number_value}]]</td>
+            </tr>
+            <tr class="field">
+                <td class="fieldName">[[${decision_fieldName}]] :</td>
+                <td class="value">[[${decision_value}]]</td>
+            </tr>
+            <tr class="field">
+                <td class="fieldName">[[${nature_fieldName}]] :</td>
+                <td class="value">[[${nature_value}]]</td>
+            </tr>
+            <tr class="field">
+                <td class="fieldName">[[${code_fieldName}]] :</td>
+                <td class="value">[[${code_value}]]</td>
+            </tr>
+            <tr class="field">
+                <td class="fieldName">[[${acteAttachment_fieldName}]] :</td>
+                <td class="value">[[${acteAttachment_value}]]</td>
+            </tr>
+            <tr class="field">
+                <td class="fieldName">[[${localAuthority_fieldName}]] :</td>
+                <td class="value">[[${localAuthority_value}]]</td>
+            </tr>
+            <tr class="field" th:if="${applicantName_fieldName}">
+                <td class="fieldName">[[${applicantName_fieldName}]] :</td>
+                <td class="value">[[${applicantName_value}]]</td>
+            </tr>
+
+            <tr>
+                <td colspan="2"><div class="hr"></div></td>
+            </tr>
+
+            <tr class="field" th:if="${sentDate_fieldName}">
+                <td class="fieldName">[[${sentDate_fieldName}]] :</td>
+                <td class="value">[[${sentDate_value}]]</td>
+            </tr>
+            <tr class="field" th:if="${ackReceivedDate_fieldName}">
+                <td class="fieldName ack-received">[[${ackReceivedDate_fieldName}]] :</td>
+                <td class="value ack-received">[[${ackReceivedDate_value}]]</td>
+            </tr>
+
+            <tr class="field cancel" th:if="${cancellationAskedDate_fieldName}">
+                <td class="fieldName">[[${cancellationAskedDate_fieldName}]] :</td>
+                <td class="value">[[${cancellationAskedDate_value}]]</td>
+            </tr>
+            <tr class="field cancel" th:if="${cancelledDate_fieldName}">
+                <td class="fieldName">[[${cancelledDate_fieldName}]] :</td>
+                <td class="value">[[${cancelledDate_value}]]</td>
+            </tr>
+        </table>
+    </div>
     </body>
 </html>

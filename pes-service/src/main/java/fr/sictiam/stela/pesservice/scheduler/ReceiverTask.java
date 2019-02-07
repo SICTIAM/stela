@@ -184,7 +184,7 @@ public class ReceiverTask {
     public void readACK(byte[] targetArray, String ackName)
             throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
 
-        LOGGER.debug("ACK RECEIVED : " + ackName);
+        LOGGER.debug("Received ack file : {}", ackName);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(targetArray);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -192,29 +192,84 @@ public class ReceiverTask {
         XPath path = xpf.newXPath();
         Document document = builder.parse(byteArrayInputStream);
         String fileName = path.evaluate("/PES_ACQUIT/Enveloppe/Parametres/NomFic/@V", document);
-        LOGGER.debug("NomFic : " + fileName);
+        LOGGER.debug("Extracted PES filename : {}", fileName);
 
         PesAller pesAller = pesService.getByFileName(fileName).orElseThrow(PesNotFoundException::new);
 
-        boolean etatAck = true;
+        boolean isAckOk = true;
         List<PesHistoryError> errors = new ArrayList<>();
         NodeList nodes = (NodeList) path.evaluate("/PES_ACQUIT/ACQUIT/ElementACQUIT", document, XPathConstants.NODESET);
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
-            etatAck = etatAck && path.evaluate("EtatAck/@V", node).equals("1");
+            boolean isCurrentNodeValid = path.evaluate("EtatAck/@V", node).equals("1");
+            isAckOk = isAckOk && isCurrentNodeValid;
+
+            if (isCurrentNodeValid)
+                continue;
 
             NodeList innerNodes = (NodeList) path.evaluate("DetailPiece", node, XPathConstants.NODESET);
             if (innerNodes.getLength() != 0) {
                 for (int j = 0; j < innerNodes.getLength(); j++) {
                     Node in = innerNodes.item(j);
-                    PesHistoryError e = new PesHistoryError(
-                            path.evaluate("Erreur/NumAnoAck/@V", in),
-                            path.evaluate("Erreur/LibelleAnoAck/@V", in),
-                            path.evaluate("NumPiece/@V", in)
-                    );
-                    errors.add(e);
+                    NodeList detailLigneNode = (NodeList) path.evaluate("DetailLigne", in, XPathConstants.NODESET);
+                    if (detailLigneNode.getLength() != 0) {
+                        /*
+                         * Error pattern #1
+                         *
+                         * <DetailPiece>
+                         *     <NumPiece V="20"/>
+                         *     <DetailLigne>
+                         *         <NumLigne V="1"/>
+                         *         <Erreur>
+                         *             <NumAnoAck V="ERREUR_AUTRE"/>
+                         *             <LibelleAnoAck V="1971 - Compte fonction présent à tort"/>
+                         *         </Erreur>
+                         *     </DetailLigne>
+                         *     [...]
+                         * </DetailPiece>
+                         * <DetailPiece>
+                         *     [...]
+                         * </DetailPiece>
+                         */
+                        for (int k = 0; k < detailLigneNode.getLength(); k++) {
+                            Node detail = detailLigneNode.item(k);
+                            PesHistoryError e = new PesHistoryError(
+                                    path.evaluate("Erreur/NumAnoAck/@V", detail),
+                                    path.evaluate("Erreur/LibelleAnoAck/@V", detail),
+                                    path.evaluate("NumPiece/@V", in)
+                            );
+                            errors.add(e);
+                        }
+                    } else {
+                        /*
+                         * Error pattern #2
+                         *
+                         * <DetailPiece>
+                         *     <NumPiece V="5129"/>
+                         *     <Erreur>
+                         *         <NumAnoAck V="ERREUR_AUTRE"/>
+                         *         <LibelleAnoAck V="2559 - Le code service de la structure publique destinataire est inconnu ou inactif dans Chorus Pro"/>
+                         *     </Erreur>
+                         * </DetailPiece>
+                         */
+                        PesHistoryError e = new PesHistoryError(
+                                path.evaluate("Erreur/NumAnoAck/@V", in),
+                                path.evaluate("Erreur/LibelleAnoAck/@V", in),
+                                path.evaluate("NumPiece/@V", in)
+                        );
+                        errors.add(e);
+                    }
                 }
             } else {
+                /*
+                 * Error pattern #3
+                 *
+                 * <IdUnique V="TI00064567"/>
+                 * <Erreur>
+                 *     <NumAnoAck V="ERREUR_DOUBLON_PJ"/>
+                 *     <LibelleAnoAck V="1984 - L'identifiant unique de la PJ a déjà été intégré dans HELIOS"/>
+                 * </Erreur>
+                 */
                 PesHistoryError e = new PesHistoryError(
                         path.evaluate("Erreur/NumAnoAck/@V", node),
                         path.evaluate("Erreur/LibelleAnoAck/@V", node),
@@ -224,7 +279,7 @@ public class ReceiverTask {
             }
         }
 
-        if (etatAck) {
+        if (isAckOk) {
             pesService.updateStatus(pesAller.getUuid(), StatusType.ACK_RECEIVED, targetArray, ackName);
         } else {
             pesService.updateStatus(pesAller.getUuid(), StatusType.NACK_RECEIVED, targetArray, ackName, errors);

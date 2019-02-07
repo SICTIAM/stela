@@ -9,6 +9,11 @@ class QuestionsForm extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
 	}
+	static propTypes = {
+	    editable: PropTypes.bool,
+	    response: PropTypes.bool,
+	    questions: PropTypes.array
+	}
 	state = {
 	    currentQuestion: ''
 	}
@@ -38,9 +43,14 @@ class QuestionsForm extends Component {
 	    const { t } = this.context
 	    const questions = this.props.questions.map((question, index) => {
 	        return (
-	            <Fragment>
+	            <Fragment key={`question_${index}`}>
 	                <div className='deletableListItem' id='questions'>
-	                    <p className='flexyItem mb-0'>{question}</p>
+	                    {!question.uuid && (
+	                        <p className='flexyItem mb-0'>{question}</p>
+	                    )}
+	                    {question.uuid && (
+	                        <p className='flexyItem mb-0'>{question.question}</p>
+	                    )}
 	                    { this.props.editable  && (
 	                        <Icon name='remove' color='red' className='pointer l-icon' onClick={() => {this.removeQuestion(index)}}/>
 	                    )}

@@ -206,9 +206,7 @@ public class MigrationService {
         // FIXME : check it does not exist before creating it
         String groupUuid = externalRestService.createGroup(
                 localAuthority,
-                "acte-migration",
-                Right.values()
-        );
+                "acte-migration");
 
 
         for (ActeMigration acteMigration : acteMigrations) {

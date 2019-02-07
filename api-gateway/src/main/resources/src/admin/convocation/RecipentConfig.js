@@ -29,7 +29,7 @@ class RecipentConfig extends Component {
 	    lastname: 'required',
 	    // eslint-disable-next-line no-useless-escape
 	    email: ['required', 'regex:/^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/'],
-	    phoneNumber: ['required', 'regex:/^(0|\\+33)[1-9]([-. ]?[0-9]{2}){4}$/']
+	    phoneNumber: ['regex:/^(0|\\+33)[1-9]([-. ]?[0-9]{2}){4}$/']
 	}
 	state = {
 	    formErrors: [],

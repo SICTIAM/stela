@@ -9,7 +9,7 @@ import InputValidation from '../../_components/InputValidation'
 import InputDatetime from '../../_components/InputDatetime'
 import { notifications } from '../../_util/Notifications'
 import { FieldInline, Page, InputTextControlled } from '../../_components/UI'
-import { checkStatus } from '../../_util/utils'
+import { checkStatus, handleFieldChange } from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class ActeModuleParams extends Component {
@@ -74,11 +74,6 @@ class ActeModuleParams extends Component {
         fields.additionalEmails.splice(index, 1)
         this.setState({ fields: fields })
     }
-    handleFieldChange = (field, value) => {
-        const fields = this.state.fields
-        fields[field] = value
-        this.setState({ fields: fields }, this.validateForm)
-    }
     handleCheckboxChange = (event, { id }) => {
         const { fields } = this.state
         fields[id] = !fields[id]
@@ -131,7 +126,7 @@ class ActeModuleParams extends Component {
                                 value={this.state.fields.mainEmail}
                                 fieldName={t('admin.modules.acte.module_settings.main_email')}
                                 validationRule='required|email'
-                                onChange={this.handleFieldChange}
+                                onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)}
                                 className='simpleInput' />
                         </FieldInline>
                         <FieldInline htmlFor='additionalEmail' label={t('admin.modules.acte.module_settings.additional_emails')}>
@@ -159,14 +154,14 @@ class ActeModuleParams extends Component {
                                     <InputDatetime id='unavailabilityMiatStartDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityMiatStartDate}
-                                        onChange={date => this.handleFieldChange('unavailabilityMiatStartDate', date)} />
+                                        onChange={date => handleFieldChange(this, 'unavailabilityMiatStartDate', date, this.validateForm)} />
                                     <label htmlFor='unavailabilityMiatEndDate' style={{ marginLeft: '1em', marginRight: '0.5em' }}>
                                         {t('api-gateway:form.to')}
                                     </label>
                                     <InputDatetime id='unavailabilityMiatEndDate'
                                         onBlur={this.updateDateValidation}
                                         value={this.state.fields.unavailabilityMiatEndDate}
-                                        onChange={date => this.handleFieldChange('unavailabilityMiatEndDate', date)} />
+                                        onChange={date => handleFieldChange(this, 'unavailabilityMiatEndDate', date, this.validateForm)} />
                                 </div>
                                 {this.state.dateValidation && (
                                     <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -186,7 +181,7 @@ class ActeModuleParams extends Component {
                                 maxLength={250}
                                 placeholder={`${t('admin.modules.acte.module_settings.alertMessage')}...`}
                                 value={this.state.fields.alertMessage || ''}
-                                onChange={this.handleFieldChange} />
+                                onChange={(id, value) => handleFieldChange(this, id, value, this.validateForm)} />
                         </FieldInline>
                         <div style={{ textAlign: 'right' }}>
                             <Button basic primary disabled={!this.state.isFormValid} style={{ marginTop: '2em' }} type='submit'>

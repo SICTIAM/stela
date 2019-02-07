@@ -8,6 +8,7 @@ import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.MigrationWrapper;
 import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.UI.ProfileSummary;
 import fr.sictiam.stela.admin.model.UserGatewayRequest;
 import fr.sictiam.stela.admin.model.UserMigration;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
@@ -33,11 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,12 +81,8 @@ public class AgentService {
         return agentRepository.findByUuid(uuid);
     }
 
-    public Set<Profile> getProfilesByUuid(String agentUuid) {
-        return profileRepository.findByAgent_UuidOrderByLocalAuthority_name(agentUuid);
-    }
-
-    public Set<Profile> getProfilesBySub(String agentUuid) {
-        return profileRepository.findByAgent_SubOrderByLocalAuthority_name(agentUuid);
+    public List<ProfileSummary> getProfilesBySub(String agentSub) {
+        return profileRepository.fetchProfilesSummaryForAgent(agentSub);
     }
 
     public Profile createAndAttach(Agent agent) {

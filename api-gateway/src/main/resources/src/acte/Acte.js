@@ -45,8 +45,15 @@ class Acte extends Component {
             }
         },
         agent: '',
+        agentGroups: [],
         fetchStatus: '',
-        republished: false
+        republished: false,
+        thumbnail: {
+            image:'',
+            orientation: ''
+        },
+        thumbnailStatus: 'loading',
+        isCertificateValid: false
     }
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
@@ -56,20 +63,80 @@ class Acte extends Component {
             _fetchWithAuthzHandling({ url: '/api/acte/' + uuid })
                 .then(checkStatus)
                 .then(response => response.json())
-                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, this.getAgentInfos))
+                .then(json => this.setState({ acteUI: json, fetchStatus: 'fetched' }, () => {
+                    this.getAgentInfos()
+                    this.checkCertificateIsValid()
+                }))
                 .catch(response => {
                     this.setState({ fetchStatus: response.status === 404 ? 'acte.page.non_existing_act' : 'api-gateway:error.default' })
                     response.json().then(json => {
                         _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
                     })
                 })
+
+
         }
     }
+
+    checkCertificateIsValid = () => {
+        const { _fetchWithAuthzHandling, _addNotification } = this.context
+        _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
+            .then(checkStatus)
+            .then(response => response.json())
+            .then(certificate => {
+                this.setState({ isCertificateValid: certificate })
+            })
+            .catch(response => {
+                if(response.status !== 401) {
+                    response.text().then(text => {
+                        _addNotification(notifications.defaultError, 'notifications.title', text)
+                    })
+                }
+            })
+    }
+
+    fetchThumbnail = () => {
+        const { _fetchWithAuthzHandling} = this.context
+        const {thumbnailStatus} = this.state
+        const uuid = this.props.uuid
+
+        if(thumbnailStatus !== 'fetched') {
+            _fetchWithAuthzHandling({url: `/api/acte/${uuid}/file/thumbnail`})
+                .then(checkStatus)
+                .then(res => res.json())
+                .then(json => {
+                    let stampPosition = this.state.acteUI.stampPosition
+                    if (json.orientation === 'LANDSCAPE') {
+                        this.setState(prevState =>
+                            ({
+                                thumbnail: json,
+                                thumbnailStatus: 'fetched',
+                                acteUI: {
+                                    ...prevState.acteUI,
+                                    stampPosition: {x: stampPosition.y, y: stampPosition.x}
+                                }
+                            }))
+                    } else {
+                        this.setState({thumbnail: json,thumbnailStatus: 'fetched'})
+                    }
+                })
+                .catch(err => {
+                    this.setState({thumbnailStatus: 'loading'})
+                    console.error(err)
+                })
+        }
+    };
+
+
     getAgentInfos = () => {
         const { _fetchWithAuthzHandling } = this.context
         _fetchWithAuthzHandling({ url: '/api/admin/profile/' + this.state.acteUI.acte.profileUuid })
             .then(response => response.json())
-            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}` }))
+            .then(json => this.setState({ agent: `${json.agent.given_name} ${json.agent.family_name}`, agentGroups: json.groups }))
+    }
+    agentBelongsToTheGroup = () => {
+        const {agentGroups, acteUI} = this.state
+        return agentGroups.map(group =>  group.uuid).includes(acteUI.acte.groupUuid)
     }
     handleChangeDeltaPosition = (stampPosition) => {
         const { acteUI } = this.state
@@ -102,9 +169,37 @@ class Acte extends Component {
         return (acteACK && isPDF(filename)) ? <Fragment><LinkFile url={`${url}/stamped`} text={filename} /> (<LinkFile url={url} text={t('acte.page.original')} />)</Fragment>
             : <LinkFile url={url} text={filename} ariaLabel={'Download '+filename}/>
     }
+
+    thumbnailSize = () => {
+        let height, width = 0
+        if(this.state.thumbnail.orientation ==='LANDSCAPE'){
+            height = 190
+            width = 300
+        }else {
+            height = 300
+            width =  190
+        }
+
+        return {height: height, width: width}
+    }
+
+    draggableBoxSize = () => {
+        let boxHeight, boxWidth = 0
+        if(this.state.thumbnail.orientation ==='LANDSCAPE'){
+            boxHeight = 70
+            boxWidth = 25
+        }else {
+            boxHeight = 25
+            boxWidth =  70
+        }
+
+        return {boxHeight: boxHeight, boxWidth: boxWidth}
+    }
+
     render() {
         const { t } = this.context
         const { acteACK, acte } = this.state.acteUI
+        const { thumbnailStatus } = this.state
         const lastMetierHistory = {
             date: acte.lastHistoryDate,
             status: acte.lastHistoryStatus,
@@ -118,17 +213,26 @@ class Acte extends Component {
                 </FieldValue>
             </List.Item>
         )
+        const isAgentBelongsToTheGroup = this.agentBelongsToTheGroup()
+        const isActeAttachmentPDF = acte.acteAttachment.filename && acte.acteAttachment.filename.endsWith('.pdf')
+
+        const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
+        const {boxWidth, boxHeight} = this.draggableBoxSize()
+
         const stampPosition = (
             <div>
                 <DraggablePosition
                     style={{ marginBottom: '0.5em' }}
-                    backgroundImage={`/api/acte/${acte.uuid}/file/thumbnail`}
+                    backgroundImage={'data:image/png;base64,' + this.state.thumbnail.image.trim()}
+                    imageOrientation={this.state.thumbnail.orientation}
                     label={t('acte.stamp_pad.pad_label')}
-                    height={300}
-                    width={190}
+                    height={thumbnailHeight}
+                    width={thumbnailWidth}
                     labelColor='#000'
                     position={this.state.acteUI.stampPosition}
-                    handleChange={this.handleChangeDeltaPosition} />
+                    handleChange={this.handleChangeDeltaPosition}
+                    boxHeight={boxHeight}AR
+                    boxWidth={boxWidth}/>
                 <div style={{ textAlign: 'center' }}>
                     <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
                         href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>
@@ -171,13 +275,16 @@ class Acte extends Component {
                             {acte.lastHistoryStatus && t(getHistoryStatusTranslationKey('acte', lastMetierHistory))}
                         </Label>
                         <div style={{ textAlign: 'right' }}>
-                            <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>
+                            <Dropdown basic direction='left' trigger={dropdownButton} icon={false} onClick={this.fetchThumbnail}>
                                 <Dropdown.Menu>
-                                    {acteACK && (
+                                    {acteACK &&  isActeAttachmentPDF && (
                                         <Dropdown.Item>
-                                            <Popup content={stampPosition} on='click' position='left center'
-                                                trigger={<Dropdown item icon='none' text={t('acte.stamp_pad.download_stamped_acte')} />}
-                                            />
+                                            <LoadingContent fetchStatus={thumbnailStatus}>
+                                                <Popup content={stampPosition} on='click' position='left center'
+                                                    trigger={<Dropdown item icon='none'
+                                                        text={t('acte.stamp_pad.download_stamped_acte')}/>}
+                                                />
+                                            </LoadingContent>
                                         </Dropdown.Item>
                                     )}
                                     {acteACK && (
@@ -196,7 +303,9 @@ class Acte extends Component {
                                 </ConfirmModal>
                             )}
 
-                            <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid} />
+                            {this.state.isCertificateValid && isAgentBelongsToTheGroup &&
+                                <ActeCancelButton isCancellable={this.state.acteUI.acteACK} uuid={this.state.acteUI.acte.uuid}/>
+                            }
                         </div>
 
                         <FieldInline htmlFor="number" label={t('acte.fields.number')}>
