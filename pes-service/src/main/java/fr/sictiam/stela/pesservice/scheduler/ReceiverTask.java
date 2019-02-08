@@ -169,6 +169,14 @@ public class ReceiverTask {
             }
         }
 
+        if (ftpClient != null) {
+            try {
+                ftpClient.disconnect();
+            } catch (IOException e) {
+                LOGGER.error("Error while disconnecting FTP client", e);
+            }
+        }
+
         if (ftpSession != null)
             ftpSession.close();
     }
@@ -297,6 +305,7 @@ public class ReceiverTask {
             PesRetour pesRetour = new PesRetour(attachment, localAuthority);
             pesRetourRepository.save(pesRetour);
         } else {
+            LOGGER.warn("Got a PES Retour for an unknown SIRET : {}", siret);
             String idPost = path.evaluate("/PES_Retour/EnTetePES/IdPost/@V", document);
             // TODO send mail to user of this idpost CF redmine issue #3140
         }

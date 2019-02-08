@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -160,7 +161,17 @@ public class PaullController {
                 return new ResponseEntity<>("notifications.pes.sent.virus", HttpStatus.BAD_REQUEST);
             }
             PesAller pesAller = new PesAller();
+            LOGGER.debug("Received a PES with title : {}", title);
             String decodedTitle = new String(title.getBytes("Windows-1252"));
+            LOGGER.debug("Decoded title to {}", decodedTitle);
+            try {
+                String decodedTitleWithW1252 = new String(title.getBytes(Charset.forName("Windows-1252")), Charset.forName("UTF-8"));
+                LOGGER.debug("Decoded title with Windows-1252 to {}", decodedTitleWithW1252);
+                String decodedTitleWithISO8859 = new String(title.getBytes(Charset.forName("ISO-8859-1")), Charset.forName("UTF-8"));
+                LOGGER.debug("Decoded title with ISO-8859-1 to {}", decodedTitleWithISO8859);
+            } catch (Exception e) {
+                LOGGER.error("Error testing PES title decoding", e);
+            }
             String decodedComment = new String(comment.getBytes("Windows-1252"));
             pesAller.setObjet(decodedTitle);
             pesAller.setComment(decodedComment);
@@ -297,7 +308,7 @@ public class PaullController {
         return getPESRetours(siren, majauto, userid, password);
     }
 
-    public ResponseEntity<?> getPESRetours(String siren, int majauto, String userid, String password) {
+    private ResponseEntity<?> getPESRetours(String siren, int majauto, String userid, String password) {
 
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
