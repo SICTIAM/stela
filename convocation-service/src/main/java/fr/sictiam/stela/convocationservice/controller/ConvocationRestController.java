@@ -8,6 +8,7 @@ import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
+import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationDetailUI;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationUI;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
@@ -157,9 +158,8 @@ public class ConvocationRestController {
         return new ResponseEntity<>(convocation, HttpStatus.OK);
     }
 
-    @JsonView(Views.Convocation.class)
     @GetMapping("/received/{uuid}")
-    public ResponseEntity<Convocation> openConvocation(
+    public ResponseEntity<ReceivedConvocationUI> openConvocation(
             @PathVariable String uuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
@@ -181,7 +181,7 @@ public class ConvocationRestController {
         }
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
         convocationService.openBy(convocation, recipient);
-        return new ResponseEntity<>(convocation, HttpStatus.OK);
+        return new ResponseEntity<>(new ReceivedConvocationDetailUI(convocation, recipient), HttpStatus.OK);
     }
 
     @JsonView(Views.ConvocationInternal.class)
@@ -295,7 +295,7 @@ public class ConvocationRestController {
         try {
             Convocation convocation = convocationService.getConvocation(convocationUuid);
             return (StringUtils.isNotEmpty(profileUuid) && convocation.getProfileUuid().equals(profileUuid))
-                    || (recipient != null && convocation.getRecipients().stream().anyMatch(r -> r.getUuid().equals(recipient.getUuid())));
+                    || (recipient != null && convocation.getRecipientResponses().stream().anyMatch(r -> r.getRecipient().equals(recipient)));
         } catch (NotFoundException e) {
             LOGGER.error("Access to convocation not granted: {}", e.getMessage());
             return false;
