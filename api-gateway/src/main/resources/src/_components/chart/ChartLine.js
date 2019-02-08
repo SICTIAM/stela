@@ -30,7 +30,6 @@ export class ChartLine extends Component {
                             time: {
                                 min: min,
                                 max: max,
-                                stepSize: 10,
                                 tooltipFormat: 'h:mm a'
                             }
                         }],
@@ -67,7 +66,6 @@ export class ChartLine extends Component {
                             time: {
                                 min: min,
                                 max: max,
-                                stepSize: 10,
                                 tooltipFormat: 'h:mm a',
                             },
                         }],

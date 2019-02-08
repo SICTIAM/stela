@@ -11,7 +11,6 @@ const pesColors = {
     PENDING_SENDPes: {color: '#e74c3c', borderColor: '#c0392b'},
     ACK_RECEIVEDPes: {color: '#2ecc71', borderColor: '#27ae60'},
     SENTPes: {color: '#9b59b6', borderColor: '#8e44ad'},
-    SIGNATURE_MISSINGPes: {color: '#9b59b6', borderColor: '#8e44ad'},
 }
 
 
@@ -26,13 +25,12 @@ class PesMetrics extends Component {
         sentPesForWaiting: [],
         sentPesForACK: [],
         ackPes: [],
-        refDate: moment(),
         doughnutSentWaiting: [],
-        doughnutSentACK: [],
+        doughnutSentACK: []
     }
 
     componentDidMount = async () => {
-        const {refDate} = this.state
+        const refDate = moment()
         const sample = 'second'
         const toDate = this._convertDateToLocalTime(refDate)
         const fromDate = this._convertDateToLocalTime(refDate.clone().subtract(1, 'hour'))
@@ -88,33 +86,29 @@ class PesMetrics extends Component {
         }
         fromDate = this._convertDateToLocalTime(fromDate)
         toDate = this._convertDateToLocalTime(toDate)
+
         updateFunction(fromDate.toString(), toDate.toString(), sample)
     }
 
     _updateDataSentWaiting = async (fromDate, toDate, sample) => {
-        /*
-        TODO
-        REPLACE ALL THE SIGNATURE_MISSING by SENT
-        THEN pass min and max to props
-        */
-        let fetchSentPesForWaiting = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.SIGNATURE_MISSING, 'minute')
-        let fetchWaitingPes = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.PENDING_SEND, 'minute')
+        let fetchSentPesForWaiting = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.SENT, sample)
+        let fetchWaitingPes = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.PENDING_SEND, sample)
 
         this.setState({
-            sentPesForWaiting: this._transformDataToCoordinate(fetchSentPesForWaiting[PESstatusType.SIGNATURE_MISSING]),
+            sentPesForWaiting: this._transformDataToCoordinate(fetchSentPesForWaiting[PESstatusType.SENT]),
             waitingPes: this._transformDataToCoordinate(fetchWaitingPes[PESstatusType.PENDING_SEND]),
-            doughnutSentWaiting: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SIGNATURE_MISSING, PESstatusType.PENDING_SEND])
+            doughnutSentWaiting: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SENT, PESstatusType.PENDING_SEND])
         })
     }
 
     _updateDataSentACK = async (fromDate, toDate, sample) => {
-        let fetchSentPesForWaiting = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.SIGNATURE_MISSING, 'minute')
-        let fetchWaitingPes = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.ACK_RECEIVED, 'minute')
+        let fetchSentPesForWaiting = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.SENT, sample)
+        let fetchWaitingPes = await this._getNumberOfPesWithSample(fromDate, toDate, PESstatusType.ACK_RECEIVED, sample)
 
         this.setState({
-            sentPesForACK: this._transformDataToCoordinate(fetchSentPesForWaiting[PESstatusType.SIGNATURE_MISSING]),
+            sentPesForACK: this._transformDataToCoordinate(fetchSentPesForWaiting[PESstatusType.SENT]),
             ackPes: this._transformDataToCoordinate(fetchWaitingPes[PESstatusType.ACK_RECEIVED]),
-            doughnutSentACK: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SIGNATURE_MISSING, PESstatusType.ACK_RECEIVED])
+            doughnutSentACK: await this._getDoughnutValues(fromDate, toDate, [PESstatusType.SENT, PESstatusType.ACK_RECEIVED])
         })
     }
 
@@ -173,17 +167,17 @@ class PesMetrics extends Component {
         const {t} = this.context
         const {doughnutSentWaiting, doughnutSentACK, sentPesForWaiting, waitingPes, sentPesForACK, ackPes} = this.state
         const chart1 = [
-            {coordinates: sentPesForWaiting, statusType: PESstatusType.SIGNATURE_MISSING},
+            {coordinates: sentPesForWaiting, statusType: PESstatusType.SENT},
             {coordinates: waitingPes, statusType: PESstatusType.PENDING_SEND}
         ]
         const chart2 = [
-            {coordinates: sentPesForACK, statusType: PESstatusType.SIGNATURE_MISSING},
+            {coordinates: sentPesForACK, statusType: PESstatusType.SENT},
             {coordinates: ackPes, statusType: PESstatusType.ACK_RECEIVED}
         ]
 
 
         return (
-            <Page title={'Flux PES'}>
+            <Page title={t('api-gateway:menu.pes.PES_statut')}>
                 <MetricsSegment
                     doughnutLabels={[t('api-gateway:metrics.pes.SENT'), t('api-gateway:metrics.pes.PENDING_SEND')]}
                     doughnutDatasets={this._handleDoughnutDatasets(doughnutSentWaiting)}
@@ -204,4 +198,4 @@ class PesMetrics extends Component {
 }
 
 
-export default translate(['pes', 'api-gateway'])(withAuthContext(PesMetrics))
+export default translate(['api-gateway'])(withAuthContext(PesMetrics))

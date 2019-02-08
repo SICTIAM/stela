@@ -8,7 +8,8 @@ import moment from 'moment'
 export default class MetricsSegment extends Component {
 
     state = {
-        activeButton: 'hour'
+        activeButton: 'hour',
+        period: {min: moment().subtract(1, 'h'), max: moment()}
     }
 
 
@@ -20,11 +21,33 @@ export default class MetricsSegment extends Component {
     _handleButtonClick = (buttonType) => {
         const {onClickButton} = this.props
         onClickButton(buttonType)
+        this._handleMinMax(buttonType)
         this.setState({activeButton: buttonType})
+    }
+
+    _handleMinMax = (timeType) => {
+        let max = moment()
+        let min = null
+
+        switch (timeType) {
+        case 'hour':
+            min = max.clone().subtract(1, 'h')
+            break
+        case 'day':
+            min = max.clone().subtract(1, 'd')
+            break
+        case 'week':
+            min = max.clone().subtract(1, 'w')
+            break
+        default:
+            break
+        }
+        this.setState({period: {min: min, max: max}})
     }
 
     render() {
         const {doughnutLabels, doughnutDatasets, chartDatasets} = this.props
+        const {period} = this.state
 
         return (
             <SegmentGroup>
@@ -37,7 +60,7 @@ export default class MetricsSegment extends Component {
                                     datasets={doughnutDatasets}/>
                             </Grid.Column>
                             <Grid.Column width={12} verticalAlign={'middle'}>
-                                <ChartLine height={100} width={250} datasets={chartDatasets} min={moment().subtract(2, this.state.activeButton)} max={moment()} />
+                                <ChartLine height={100} width={250} datasets={chartDatasets} min={period.min} max={period.max} />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
