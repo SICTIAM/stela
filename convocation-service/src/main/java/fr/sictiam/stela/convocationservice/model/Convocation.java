@@ -47,7 +47,7 @@ public class Convocation {
     private Set<Question> questions;
 
     @OneToMany(mappedBy = "convocation")
-    @JsonView(Views.ConvocationInternal.class)
+    @JsonView(Views.ConvocationReceived.class)
     private Set<RecipientResponse> recipientResponses;
 
     @OneToMany

@@ -110,7 +110,7 @@ class MenuBar extends Component {
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/nouveau`}>
                                     {t('menu.convocation.send_a_convocation')}
                                 </Menu.Item>
-                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-reçues`}>
+                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-recues`}>
                                     {t('menu.convocation.reveived_convocations')}
                                 </Menu.Item>
                                 <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-envoyees`}>

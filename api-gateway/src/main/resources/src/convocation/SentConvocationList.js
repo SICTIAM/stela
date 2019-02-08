@@ -4,15 +4,14 @@ import { Segment, Form, Button } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 
-import { checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-
 import {
     getLocalAuthoritySlug,
     handleSearchChange,
     updateItemPerPage,
     handlePageClick,
-    sortTable
+    sortTable,
+    checkStatus
 } from '../_util/utils'
 
 import StelaTable from '../_components/StelaTable'
