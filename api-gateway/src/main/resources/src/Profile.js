@@ -409,7 +409,7 @@ class LocalAuthorityProfile extends Component {
                     <Header as="h3" dividing>
                         {t('profile.notifications_title')} {activatedModule}
                     </Header>
-                    <FieldInline htmlFor={activatedModule} label={t('profile.localAuthorityNotifications')}>
+                    <FieldInline htmlFor={activatedModule} label={t(`profile.localAuthorityNotifications${activatedModule}`)}>
                         <Checkbox toggle id={activatedModule} checked={profile.localAuthorityNotifications.includes(activatedModule)}
                             onChange={(e, { id, checked }) => onLocalAuthorityNotificationsChange(profile.uuid, id, checked)} />
                     </FieldInline>
