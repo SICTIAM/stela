@@ -26,27 +26,32 @@ class AdvancedSearch extends Component {
         const { isOpen } = this.state
         const { children, fieldId, fieldValue, fieldOnChange } = this.props
         return (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <Accordion style={{ marginBottom: '1em' }} styled>
-                    <Accordion.Title active={isOpen} style={{ cursor: 'default' }}>
-                        <Input fluid
-                            aria-label={t('api-gateway:form.search')}
-                            id={fieldId}
-                            value={fieldValue}
-                            style={{borderRight: 'none'}}
-                            onKeyPress={this.handleKeyPress}
-                            onChange={(e, { id, value }) => fieldOnChange(id, value)}
-                            icon={<button aria-label={t('api-gateway:form.open_advanced_search')} onClick={this.toggle} style={{backgroundColor: '#fff', border: '1px solid rgba(34,36,38,.15)', borderLeft: 'none'}}>
-                                <Icon name={'caret ' + (isOpen ? 'down' : 'left')}/>
-                            </button>}
-                            placeholder={`${t('api-gateway:form.search')}...`}
-                        />
-                    </Accordion.Title>
-                    <Accordion.Content active={isOpen}>
-                        <Header size='small'>{t('api-gateway:form.advanced_search')}</Header>
-                        {children}
-                    </Accordion.Content>
-                </Accordion>
+            <div>
+                <div style={{display: 'flex', justifyContent: 'center' }}>
+                    <Accordion style={{ marginBottom: '1em' }} styled>
+                        <Accordion.Title active={isOpen} style={{ cursor: 'default' }}>
+                            <Input fluid
+                                aria-label={t('api-gateway:form.search')}
+                                id={fieldId}
+                                value={fieldValue}
+                                style={{borderRight: 'none'}}
+                                onKeyPress={this.handleKeyPress}
+                                onChange={(e, { id, value }) => fieldOnChange(id, value)}
+                                icon={<button aria-label={t('api-gateway:form.open_advanced_search')} onClick={this.toggle} style={{backgroundColor: '#fff', border: '1px solid rgba(34,36,38,.15)', borderLeft: 'none'}}>
+                                    <Icon name={'caret ' + (isOpen ? 'down' : 'left')}/>
+                                </button>}
+                                placeholder={`${t('api-gateway:form.search')}...`}
+                            />
+                        </Accordion.Title>
+                        <Accordion.Content active={isOpen}>
+                            <Header size='small'>{t('api-gateway:form.advanced_search')}</Header>
+                            {children}
+                        </Accordion.Content>
+                    </Accordion>
+                </div>
+                {this.props.additionnalFilter && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{this.props.additionnalFilter}</div>
+                )}
             </div>
         )
     }

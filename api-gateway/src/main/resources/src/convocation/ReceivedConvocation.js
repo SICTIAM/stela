@@ -80,7 +80,7 @@ class ReceivedConvocation extends Component {
 	                data={[
 	                    {title: t('api-gateway:breadcrumb.home'), url: `/${localAuthoritySlug}`},
 	                    {title: t('api-gateway:breadcrumb.convocation.convocation')},
-	                    {title: t('api-gateway:breadcrumb.convocation.reveived_convocations_list'), url: `/${localAuthoritySlug}/convocation/liste-reçues`},
+	                    {title: t('api-gateway:breadcrumb.convocation.reveived_convocations_list'), url: `/${localAuthoritySlug}/convocation/liste-recues`},
 	                    {title: t('api-gateway:breadcrumb.convocation.reveived_convocation')},
 	                ]}
 	            />

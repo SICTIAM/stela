@@ -8,6 +8,7 @@ import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
+import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationUI;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/convocation")
@@ -87,11 +89,54 @@ public class ConvocationRestController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<Convocation> convocations = convocationService.findAllWithQuery(multifield, sentDateFrom, sentDateTo,
+        List<Convocation> convocations = convocationService.findSentWithQuery(multifield, sentDateFrom, sentDateTo,
                 assemblyType, meetingDateFrom, meetingDateTo, subject, limit, offset, column, direction, currentLocalAuthUuid);
 
-        Long count = convocationService.countAllWithQuery(multifield, sentDateFrom, sentDateTo, assemblyType,
-                meetingDateFrom, meetingDateTo, subject, limit, offset, column, direction, currentLocalAuthUuid);
+        Long count = convocationService.countSentWithQuery(multifield, sentDateFrom, sentDateTo, assemblyType,
+                meetingDateFrom, meetingDateTo, subject, currentLocalAuthUuid);
+
+        return new ResponseEntity<>(new SearchResultsUI(count, convocations), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/received")
+    public ResponseEntity<SearchResultsUI> getReceivedConvocation(
+            @RequestParam(value = "multifield", required = false) String multifield,
+            @RequestParam(value = "meetingDateFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate meetingDateFrom,
+            @RequestParam(value = "meetingDateTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate meetingDateTo,
+            @RequestParam(value = "assemblyType", required = false) String assemblyType,
+            @RequestParam(value = "subject", required = false) String subject,
+            @RequestParam(value = "filter", required = false) String filter,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+            @RequestParam(value = "column", required = false, defaultValue = "meetingDate") String column,
+            @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient) {
+
+        if (StringUtils.isNotEmpty(currentProfileUuid) && recipient == null) {
+            try {
+                recipient = recipientService.findByProfileinLocalAuthority(currentProfileUuid, currentLocalAuthUuid);
+            } catch (NotFoundException e) {
+                LOGGER.error(e.getMessage());
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        final Recipient currentRecipient = recipient;
+        List<ReceivedConvocationUI> convocations = convocationService.findReceivedWithQuery(multifield, assemblyType,
+                meetingDateFrom, meetingDateTo, subject, filter, limit, offset, column, direction, currentLocalAuthUuid,
+                recipient).stream().map(convocation -> new ReceivedConvocationUI(convocation, currentRecipient)).collect(Collectors.toList());
+
+
+        Long count = convocationService.countReceivedWithQuery(multifield, assemblyType,
+                meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid, recipient);
 
         return new ResponseEntity<>(new SearchResultsUI(count, convocations), HttpStatus.OK);
     }

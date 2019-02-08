@@ -26,14 +26,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.persistence.EntityManagerFactory;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -68,7 +72,6 @@ public class ConvocationRestControllerTest {
     private EntityManagerFactory entityManagerFactory;
 
 
-
     @Before
     public void setUp() {
         given(convocationService.getConvocation("uuid-convocation-test-one")).willReturn(createDummyConvocation());
@@ -85,17 +88,18 @@ public class ConvocationRestControllerTest {
 
         given(convocationService.getConvocation("uuid-convocation-test-one", "mairie-test")).willReturn(convocation);
 
-        this.mockMvc.perform(get("/api/convocation/uuid-convocation-test-one")
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        mockMvc.perform(get("/api/convocation/uuid-convocation-test-one")
                 .requestAttr("STELA-Current-Profile-Rights", rights)
                 .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
                 .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uuid").value(convocation.getUuid()))
-                    .andExpect(jsonPath("$.assemblyType").exists())
-                    .andExpect(jsonPath("$.location").value(convocation.getLocation()))
-                    .andExpect(jsonPath("$.meetingDate").value(convocation.getMeetingDate().toString()))
-                    .andExpect(jsonPath("$.creationDate").value(convocation.getCreationDate().toString()))
-                    .andExpect(jsonPath("$.questions").isArray());
+                .andExpect(jsonPath("$.assemblyType").exists())
+                .andExpect(jsonPath("$.location").value(convocation.getLocation()))
+                .andExpect(jsonPath("$.meetingDate").value(formatter.format(convocation.getMeetingDate())))
+                .andExpect(jsonPath("$.creationDate").value(formatter.format(convocation.getCreationDate())))
+                .andExpect(jsonPath("$.questions").isArray());
 
         verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one");
         verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one", "mairie-test");
@@ -107,9 +111,9 @@ public class ConvocationRestControllerTest {
         Set<Right> rights = new HashSet<>();
         rights.add(Right.CONVOCATION_DEPOSIT);
 
-        given(convocationService.create(createDummyConvocation(),"mairie-test", "profile-one")).willReturn(createDummyConvocation());
+        given(convocationService.create(createDummyConvocation(), "mairie-test", "profile-one")).willReturn(createDummyConvocation());
 
-        this.mockMvc.perform(post("/api/convocation")
+        mockMvc.perform(post("/api/convocation")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(createDummyConvocationAsJsonString())
                 .requestAttr("STELA-Current-Profile-Rights", rights)
@@ -130,8 +134,8 @@ public class ConvocationRestControllerTest {
         body.put("subject", "convocation test two");
         body.put("comment", "comment convocation test two");
 
-        given(convocationService.create(createDummyConvocation(),"mairie-test", "profile-one")).willReturn(createDummyConvocation());
-        this.mockMvc.perform(post("/api/convocation")
+        given(convocationService.create(createDummyConvocation(), "mairie-test", "profile-one")).willReturn(createDummyConvocation());
+        mockMvc.perform(post("/api/convocation")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(body))
                 .requestAttr("STELA-Current-Profile-Rights", rights)
@@ -141,6 +145,7 @@ public class ConvocationRestControllerTest {
     }
 
     private static Convocation createDummyConvocation() {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         Convocation convocation = new Convocation();
 
         AssemblyType assemblyType = new AssemblyType();
@@ -183,14 +188,14 @@ public class ConvocationRestControllerTest {
 
         recipients.add(factory.objectNode().put("uuid", "recipient-uuid-one"));
 
-
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         convocation.set("assemblyType", assemblyType);
         convocation.set("recipients", recipients);
         convocation.put("subject", "Test assembly type one");
         convocation.put("comment", "Comment convocation test one");
         convocation.put("location", "Mairie");
-        convocation.put("meetingDate", LocalDateTime.now().plusDays(15).toString());
-        convocation.put("creationDate", LocalDateTime.now().toString());
+        convocation.put("meetingDate", formatter.format(LocalDateTime.now().plusDays(15)));
+        convocation.put("creationDate", formatter.format(LocalDateTime.now()));
 
         return convocation.toString();
     }

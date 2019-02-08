@@ -23,7 +23,12 @@
       "questions_placeholder": "Entrez votre question"
     },
     "list": {
-      "sent_date": "Date d'envoi"
+      "sent_date": "Date d'envoi",
+      "no_received_convocation": "Aucune convocation reçue",
+      "future_convocation": "Convocations à venir",
+      "past_convocation": "Convocations passées",
+      "all_convocation": "Toutes les convocations",
+      "convocation_filters": "Filtres convocation"
     },
     "page": {
       "sent": "Envoi",

@@ -70,7 +70,7 @@ class SentConvocation extends Component {
 
 	    const presents = this.sumRecipientsByStatus('PRESENT')
 	    const absents = this.sumRecipientsByStatus('NOT_PRESENT')
-	    const procurations = this.sumRecipientsByStatus('SUBSITUTED')
+	    const procurations = this.sumRecipientsByStatus('SUBSTITUTED')
 	    const noAnswer = this.sumRecipientsByStatus('DO_NOT_KNOW')
 
 	    const answerDisplay = (answer) => {

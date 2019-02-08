@@ -138,7 +138,7 @@ const getLastUpdate = () =>
 const handleSearchChange = (that, field, value) => {
     const search = that.state.search
     search[field] = value
-    that.setState({search})
+    that.setState({search, offset: 0, currentPage: 0})
 }
 
 const getSearchData = (that) => {
