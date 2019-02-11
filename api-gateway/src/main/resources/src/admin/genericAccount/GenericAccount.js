@@ -129,7 +129,7 @@ class GenericAccountCreation extends Component {
                             <input id='email' required value={genericAccount.email} onChange={e => handleFieldChange(this, e.target.id, e.target.value)} />
                         </FieldInline>
                         <FieldInline htmlFor='password' label={t('admin.generic_account.fields.password')}>
-                            <InputPassword id='password' value={this.state.fields.password} disabled={!!this.props.uuid && this.state.keepPassword} fluid required onChange={e => this.handleFieldChange(e.target.id, e.target.value)} />
+                            <InputPassword id='password' value={this.state.fields.password} disabled={!!this.props.uuid && this.state.keepPassword} fluid required onChange={e => handleFieldChange(this, e.target.id, e.target.value)} />
                             {this.props.uuid &&
                                 <Checkbox style={{marginTop: '0.5em'}} checked={this.state.keepPassword} onChange={this.toggleKeepPassword} label={t('admin.generic_account.keep_password')} />
                             }
