@@ -4,6 +4,7 @@ import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 
+import { withAuthContext } from '../Auth'
 import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
@@ -23,11 +24,11 @@ class ReceivedConvocation extends Component {
 	    convocation: {
 	        uuid: '',
 	        meetingDate: '',
-	        assemblyType: {},
+	        assemblyType: '',
 	        location: '',
 	        comment: '',
 	        annexes: [],
-	        responses: null,
+	        response: null,
 	        attachment: null,
 	        questions: [],
 	        recipientResponses: [],
@@ -55,8 +56,19 @@ class ReceivedConvocation extends Component {
 	}
 
 	handleChangeRadio = (e, value, field) => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = this.context
+
 	    const convocation = this.state.convocation
 	    convocation[field] = value
+	    _fetchWithAuthzHandling({url: `/api/convocation/received/${this.props.uuid}/${value}`, method: 'PUT', context: this.props.authContext})
+	        .then(checkStatus)
+	        .catch(response => {
+	            if (response.status === 400) {
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.badRequest'))
+	            } else if(response.status === 403) {
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.forbidden'))
+	            }
+	        })
 	    this.setState({convocation})
 	}
 
@@ -149,7 +161,7 @@ class ReceivedConvocation extends Component {
 	                                    </Grid.Column>
 	                                    <Grid.Column>
 	                                        <Field htmlFor="assemblyType" label={t('convocation.fields.assembly_type')}>
-	                                            <FieldValue id="assemblyType">{this.state.convocation.assemblyType && this.state.convocation.assemblyType.name}</FieldValue>
+	                                            <FieldValue id="assemblyType">{this.state.convocation.assemblyType}</FieldValue>
 	                                        </Field>
 	                                    </Grid.Column>
 	                                    <Grid.Column>
@@ -181,22 +193,22 @@ class ReceivedConvocation extends Component {
 	                            label={t('convocation.page.present')}
 	                            value='PRESENT'
 	                            name='presentQuestion'
-	                            checked={this.state.convocation.responses === 'PRESENT'}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
+	                            checked={this.state.convocation.response === 'PRESENT'}
+	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
 	                        <Radio
 	                            label={t('convocation.page.absent')}
 	                            value='NOT_PRESENT'
 	                            name='presentQuestion'
-	                            checked={this.state.convocation.responses === 'NOT_PRESENT'}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
+	                            checked={this.state.convocation.response === 'NOT_PRESENT'}
+	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
 	                        <Radio
-	                            label={t('convocation.page.subisituted')}
+	                            label={t('convocation.page.substituted')}
 	                            name='presentQuestion'
 	                            value='SUBSTITUTED'
-	                            checked={this.state.convocation.responses === 'SUBSTITUTED'}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
+	                            checked={this.state.convocation.response === 'SUBSTITUTED'}
+	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
 	                    </FormFieldInline>
 	                    {this.state.convocation.questions.length > 0 && (
@@ -218,4 +230,4 @@ class ReceivedConvocation extends Component {
 
 }
 
-export default translate(['convocation', 'api-gateway'])(ReceivedConvocation)
+export default translate(['convocation', 'api-gateway'])(withAuthContext(ReceivedConvocation))
