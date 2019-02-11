@@ -299,24 +299,33 @@ class LocalAuthorityProfile extends Component {
                 )
             })
     }
+    fetchSesileSubscription = (profile) => {
+        const { _fetchWithAuthzHandling } = this.context
+        _fetchWithAuthzHandling({ url: `/api/pes/sesile/subscription/${profile.localAuthority.uuid}` })
+            .then(response => response.text())
+            .then(text => {
+                const sesileSub = text === 'true'
+                this.setState({ sesileSubscription: sesileSub })
+                if (sesileSub) this.fetchSesileInformation()
+            })
+            .catch(response => {
+                response.text().then(text =>
+                    this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text)
+                )
+            })
+    }
+    componentDidMount() {
+        const { profile } = this.props
+        if(profile && profile.localAuthority && profile.localAuthority.uuid) {
+            this.fetchSesileSubscription(profile)
+        }
+    }
     componentDidUpdate(prevProps, prevState) {
         // QuickFix
         // context sometimes doen't load in ComponentDidMount
-        const { _fetchWithAuthzHandling } = this.context
         const { profile } = this.props
         if(profile && profile.uuid && !Object.is(profile, prevProps.profile)) {
-            _fetchWithAuthzHandling({ url: `/api/pes/sesile/subscription/${profile.localAuthority.uuid}` })
-                .then(response => response.text())
-                .then(text => {
-                    const sesileSub = text === 'true'
-                    this.setState({ sesileSubscription: sesileSub })
-                    if (sesileSub) this.fetchSesileInformation()
-                })
-                .catch(response => {
-                    response.text().then(text =>
-                        this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text)
-                    )
-                })
+            this.fetchSesileSubscription(profile)
         }
     }
     render() {
