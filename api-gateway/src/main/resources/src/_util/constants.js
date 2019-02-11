@@ -54,6 +54,8 @@ const hoursBeforeResendPes = 24
 
 const acceptFileDocumentConvocation = '.doc, docx, .pdf, .jpg, .png, .zip, .odt, .ott, .oth, and .odm, .dwg'
 
+const publicPages = ['/choix-collectivite', '/', 'mentions-legales', 'registre-des-deliberations']
+
 export {
     modules,
     natures,
@@ -64,5 +66,6 @@ export {
     monthBeforeArchiving,
     hoursBeforeResendActe,
     hoursBeforeResendPes,
-    acceptFileDocumentConvocation
+    acceptFileDocumentConvocation,
+    publicPages
 }

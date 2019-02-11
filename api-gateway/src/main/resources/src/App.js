@@ -6,7 +6,7 @@ import { translate } from 'react-i18next'
 import './semantic/dist/semantic.min.css'
 import AuthProvider from './Auth'
 
-import { getLocalAuthoritySlug } from './_util/utils'
+import {fetchWithAuthzHandling} from './_util/utils'
 
 class App extends Component {
     constructor() {
@@ -49,7 +49,7 @@ class App extends Component {
             isMenuOpened: this.state.isMenuOpened,
             _openMenu: this._openMenu,
             _addNotification: this._addNotification,
-            _fetchWithAuthzHandling: this._fetchWithAuthzHandling
+            _fetchWithAuthzHandling: fetchWithAuthzHandling
         }
     }
     _openMenu = () => {
@@ -62,32 +62,6 @@ class App extends Component {
         if (this._notificationSystem) {
             this._notificationSystem.addNotification(notification)
         }
-    }
-    // TODO: add 403 controls
-    _fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
-        const httpMethod = method || 'GET'
-        const data = body || undefined
-        const params = query || null
-        const queryParams = params ? '?' + Object.keys(params)
-            .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-            .join('&') : ''
-        const additionalHeaders = headers || {}
-        let httpHeaders = {}
-        if (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH' || httpMethod === 'DELETE') {
-            httpHeaders = { [context.csrfTokenHeaderName]: context.csrfToken }
-        }
-        const localAuthoritySlug = getLocalAuthoritySlug()
-        if (localAuthoritySlug) {
-            httpHeaders.localAuthoritySlug = localAuthoritySlug
-        }
-        httpHeaders = Object.assign({}, httpHeaders, additionalHeaders)
-
-        return fetch(url + queryParams, {
-            method: httpMethod,
-            credentials: 'same-origin',
-            headers: httpHeaders,
-            body: data
-        })
     }
 
     render() {
