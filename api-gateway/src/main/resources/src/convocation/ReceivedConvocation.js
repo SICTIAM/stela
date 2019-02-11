@@ -1,64 +1,65 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Radio, Form } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
+import moment from 'moment'
 
-import { getLocalAuthoritySlug } from '../_util/utils'
+import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { notifications } from '../_util/Notifications'
 
-import { Page, Field, FieldValue, FormFieldInline } from '../_components/UI'
+import { Page, Field, FieldValue, FormFieldInline, LinkFile } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
+import QuestionsAnswerForm from './QuestionsAnswerForm'
 
 
 class ReceivedConvocation extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
+	    _fetchWithAuthzHandling: PropTypes.func,
+	    _addNotification: PropTypes.func,
 	}
 	state = {
 	    displayListParticipants: false,
 	    totalCount: 0,
 	    limit: 25,
 	    convocation: {
-	        uuid: 'test',
-	        date: '19/12/2016 à 10h00',
-	        assemblyType: 'Bureau syndical test',
-	        assemblyPlace: 'Le lieu habituel',
-	        comments: 'Je suis un commentaire',
-	        document: '',
-	        procuration: 'Visualiser',
-	        questions: ['Je suis la question 1 ?', 'Ma question 2 ?'],
-	        transmitterGroup: 'Sictiam Test',
-	        sendBy: 'Anne-Sophie LEVEQUE',
-	        sendingDate: '20/11/2018 à 09h07',
-	        participants: [{
-	            name: 'Julie ALBALADEJO',
-	            answer: 'OK',
-	            opened: '21/10/2018 10:30',
-	            questions:['oui', 'oui']
-	        },{
-	            name: 'Anne-Sophie LEVEQUE',
-	            answer: 'KO',
-	            opened: '23/10/2018 14:24'
-	        }, {
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: 'OK',
-	            opened: '23/10/2018 14:24',
-	            questions:['non', 'oui']
-	        },
-	        {
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: 'KO',
-	            opened: '23/10/2018 14:24'
-	        },
-	        {
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: null,
-	            opened: null
-	        },{
-	            name: 'Anne-Sophie LEVEQUES',
-	            answer: null,
-	            opened: null
-	        }]
+	        uuid: '',
+	        meetingDate: '',
+	        assemblyType: {},
+	        location: '',
+	        comment: '',
+	        annexes: [],
+	        responses: null,
+	        attachment: null,
+	        questions: [],
+	        recipientResponses: [],
+	        sentDate: null,
+	        profile: {},
+	        subject: '',
+	        showAllAnnexes: false
 	    }
+	}
+
+	componentDidMount() {
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	    const uuid = this.props.uuid
+	    _fetchWithAuthzHandling({ url: `/api/convocation/received/${uuid}`, method: 'GET' })
+	        .then(checkStatus)
+	        .then(response => response.json())
+	        .then(json => {
+	            this.setState({convocation: json})
+	        })
+	        .catch(response => {
+	            response.json().then(json => {
+	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	            })
+	        })
+	}
+
+	handleChangeRadio = (e, value, field) => {
+	    const convocation = this.state.convocation
+	    convocation[field] = value
+	    this.setState({convocation})
 	}
 
 	sumParticipantsByStatus = (answer) => {
@@ -74,6 +75,19 @@ class ReceivedConvocation extends Component {
 	render() {
 	    const { t } = this.context
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.convocation.annexes && this.state.convocation.annexes.length > 3 ? this.state.convocation.annexes.slice(0,3) : this.state.convocation.annexes
+	    const annexes = annexesToDisplay.map(annexe => {
+	        return (
+	            <div key={`div_${this.state.convocation.uuid}_${annexe.uuid}`}>
+	                <LinkFile
+	                    url={`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}`}
+	                    key={`${this.state.convocation.uuid}_${annexe.uuid}`}
+	                    text={annexe.filename}/>
+	            </div>
+
+	        )
+	    })
+
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -86,25 +100,45 @@ class ReceivedConvocation extends Component {
 	            />
 	            <Segment>
 	                <Form>
-	                    <h2>Titre de la convocation</h2>
+	                    <h2>{this.state.convocation.subject}</h2>
 	                    <Grid reversed='mobile tablet vertically'>
 	                        <Grid.Column mobile='16' tablet='16' computer='12'>
 	                            <Grid>
 	                                <Grid.Column computer='16'>
 	                                    <Field htmlFor="comments" label={t('convocation.fields.comment')}>
-	                                        <FieldValue id="comments">{this.state.convocation.comments}</FieldValue>
+	                                        <FieldValue id="comments">{this.state.convocation.comment}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
+	                                {this.state.convocation.attachment && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
-	                                        <FieldValue id="document"><Button className="link" primary compact basic>DEC_01_Courrier_logik.pdf</Button></FieldValue>
+	                                        <FieldValue id="document">
+	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.attachment.uuid}`} text={this.state.convocation.attachment.filename} />
+	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
+	                            )}
+	                            {this.state.convocation.annexes && this.state.convocation.annexes.length > 0 && (
 	                                <Grid.Column mobile='16' computer='8'>
-	                                    <Field htmlFor="procuration" label={t('convocation.fields.default_procuration')}>
-	                                        <FieldValue id="procuration"><Button className="link" primary compact basic>{this.state.convocation.procuration}</Button></FieldValue>
+	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
+	                                        <FieldValue id='annexes'>
+	                                            {annexes}
+	                                            {this.state.convocation.annexes.length > 3 && (
+	                                                <div className='mt-15'>
+	                                                    <Button onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
+	                                                        {this.state.showAllAnnexes && (
+	                                                            <span>{t('convocation.new.show_less_annexes')}</span>
+	                                                        )}
+	                                                        {!this.state.showAllAnnexes && (
+	                                                            <span>{t('convocation.new.show_all_annexes', {number: this.state.convocation.annexes.length})}</span>
+	                                                        )}
+	                                                    </Button>
+	                                                </div>
+	                                            )}
+	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
+	                            )}
 	                            </Grid>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='4'>
@@ -112,17 +146,17 @@ class ReceivedConvocation extends Component {
 	                                <Grid columns='1'>
 	                                    <Grid.Column>
 	                                        <Field htmlFor="Date" label={t('convocation.fields.date')}>
-	                                            <FieldValue id="Date">{this.state.convocation.date}</FieldValue>
+	                                            <FieldValue id="Date">{moment(this.state.convocation.meetingDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
 	                                        </Field>
 	                                    </Grid.Column>
 	                                    <Grid.Column>
 	                                        <Field htmlFor="assemblyType" label={t('convocation.fields.assembly_type')}>
-	                                            <FieldValue id="assemblyType">{this.state.convocation.assemblyType}</FieldValue>
+	                                            <FieldValue id="assemblyType">{this.state.convocation.assemblyType && this.state.convocation.assemblyType.name}</FieldValue>
 	                                        </Field>
 	                                    </Grid.Column>
 	                                    <Grid.Column>
 	                                        <Field htmlFor="assemblyPlace" label={t('convocation.fields.assembly_place')}>
-	                                            <FieldValue id="assemblyPlace">{this.state.convocation.assemblyPlace}</FieldValue>
+	                                            <FieldValue id="assemblyPlace">{this.state.convocation.location}</FieldValue>
 	                                        </Field>
 	                                    </Grid.Column>
 	                                </Grid>
@@ -130,20 +164,15 @@ class ReceivedConvocation extends Component {
 	                        </Grid.Column>
 	                    </Grid>
 	                    <h2>{t('convocation.page.sent')}</h2>
-	                    <Grid columns='3'>
-	                        <Grid.Column mobile='16' tablet='8' computer='6'>
-	                            <Field htmlFor="transmitterGroup" label={t('convocation.page.group_sender')}>
-	                                <FieldValue id="transmitterGroup">{this.state.convocation.transmitterGroup}</FieldValue>
-	                            </Field>
-	                        </Grid.Column>
+	                    <Grid columns='2'>
 	                        <Grid.Column mobile='16' tablet='8' computer='6'>
 	                            <Field htmlFor="sendBy" label={t('convocation.page.send_by')}>
-	                                <FieldValue id="sendBy">{this.state.convocation.sendBy}</FieldValue>
+	                                <FieldValue id="sendBy">{this.state.convocation.profile.firstname} {this.state.convocation.profile.lastname}</FieldValue>
 	                            </Field>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='4'>
 	                            <Field htmlFor="sendingDate" label={t('convocation.list.sent_date')}>
-	                                <FieldValue id="sendingDate">{this.state.convocation.sendingDate}</FieldValue>
+	                                <FieldValue id="sendingDate">{moment(this.state.convocation.sentDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
 	                            </Field>
 	                        </Grid.Column>
 	                    </Grid>
@@ -152,27 +181,37 @@ class ReceivedConvocation extends Component {
 	                        label='Serez-vous présent?'>
 	                        <Radio
 	                            label='Présent'
-	                            value='Présent'
+	                            value='PRESENT'
 	                            name='residentThreshold'
-	                            //checked={this.state.fields.residentThreshold === true}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
+	                            checked={this.state.convocation.responses === 'PRESENT'}
+	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
 	                        ></Radio>
 	                        <Radio
 	                            label='Absent'
-	                            value='Absent'
+	                            value='NOT_PRESENT'
 	                            name='residentThreshold'
-	                            //checked={this.state.fields.residentThreshold === true}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
+	                            checked={this.state.convocation.responses === 'NOT_PRESENT'}
+	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
 	                        ></Radio>
 	                        <Radio
 	                            label='Procuration'
 	                            name='residentThreshold'
-	                            value='Procuration'
-	                            //checked={this.state.fields.residentThreshold === false}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
+	                            value='SUBSTITUTED'
+	                            checked={this.state.convocation.responses === 'SUBSTITUTED'}
+	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
 	                        ></Radio>
 	                    </FormFieldInline>
-	                    <h2>{t('convocation.fields.questions')}</h2>
+	                    {this.state.convocation.questions.length > 0 && (
+	                        <Fragment>
+	                            <h2>{t('convocation.fields.questions')}</h2>
+	                            <Grid column='1'>
+	                                <Grid.Column mobile='16' computer='16'>
+	                                    <QuestionsAnswerForm questions={this.state.convocation.questions}></QuestionsAnswerForm>
+	                                </Grid.Column>
+	                            </Grid>
+	                        </Fragment>
+	                    )}
+
 	                </Form>
 	            </Segment>
 	        </Page>

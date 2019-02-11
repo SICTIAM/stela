@@ -36,7 +36,7 @@ export default class ChipsList extends Component {
 	                    {chipsList}
 	                    { this.props.numberChipDisplay > 0 && this.props.list.length > this.props.numberChipDisplay &&(
 	                        <div className='mt-15'>
-	                                <Button onClick={() => this.setState({showMore: !this.state.showMore})} className="link" primary compact basic>
+	                                <Button type='button' onClick={() => this.setState({showMore: !this.state.showMore})} className="link" primary compact basic>
 	                                {this.state.showMore && (
 	                                    <span>{this.props.viewMoreText}</span>
 	                                )}
