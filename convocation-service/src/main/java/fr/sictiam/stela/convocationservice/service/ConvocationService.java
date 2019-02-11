@@ -1,11 +1,13 @@
 package fr.sictiam.stela.convocationservice.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
 import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
+import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
@@ -53,6 +55,8 @@ public class ConvocationService {
 
     private final StorageService storageService;
 
+    private final ExternalRestService externalRestService;
+
     private final RecipientResponseRepository recipientResponseRepository;
 
     private final AttachmentRepository attachmentRepository;
@@ -64,12 +68,14 @@ public class ConvocationService {
             ConvocationRepository convocationRepository,
             LocalAuthorityService localAuthorityService,
             StorageService storageService,
+            ExternalRestService externalRestService,
             RecipientResponseRepository recipientResponseRepository,
             AttachmentRepository attachmentRepository,
             ApplicationEventPublisher applicationEventPublisher) {
         this.convocationRepository = convocationRepository;
         this.localAuthorityService = localAuthorityService;
         this.storageService = storageService;
+        this.externalRestService = externalRestService;
         this.recipientResponseRepository = recipientResponseRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -80,6 +86,15 @@ public class ConvocationService {
     }
 
     public Convocation openBy(Convocation convocation, Recipient recipient) {
+
+        JsonNode jsonProfile = externalRestService.getProfile(convocation.getProfileUuid());
+        if (jsonProfile != null) {
+            convocation.setProfile(new Profile(
+                    jsonProfile.get("uuid").asText(""),
+                    jsonProfile.get("agent").get("given_name").asText(""),
+                    jsonProfile.get("agent").get("family_name").asText(""),
+                    jsonProfile.get("agent").get("email").asText("")));
+        }
 
         RecipientResponse response =
                 convocation.getRecipientResponses()

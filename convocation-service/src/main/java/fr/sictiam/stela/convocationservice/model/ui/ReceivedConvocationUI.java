@@ -10,17 +10,17 @@ import java.util.Optional;
 
 public class ReceivedConvocationUI {
 
-    private String uuid;
+    protected String uuid;
 
-    private String subject;
+    protected String subject;
 
-    private LocalDateTime meetingDate;
+    protected LocalDateTime meetingDate;
 
-    private ResponseType response;
+    protected ResponseType response;
 
-    private String assemblyType;
+    protected String assemblyType;
 
-    private boolean opened;
+    protected boolean opened;
 
     public ReceivedConvocationUI(Convocation convocation, Recipient recipient) {
         uuid = convocation.getUuid();

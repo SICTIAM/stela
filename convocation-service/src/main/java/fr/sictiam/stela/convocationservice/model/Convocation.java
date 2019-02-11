@@ -24,12 +24,7 @@ public class Convocation {
     @JsonView(Views.Convocation.class)
     private String uuid;
 
-    @NotNull
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JsonView(Views.ConvocationInternal.class)
-    private Set<Recipient> recipients;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonView(Views.Convocation.class)
     private AssemblyType assemblyType;
@@ -62,12 +57,10 @@ public class Convocation {
 
     @NotNull
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    //@JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonView(Views.Convocation.class)
     private LocalDateTime meetingDate;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    //@JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonView(Views.Convocation.class)
     private LocalDateTime sentDate;
 
@@ -88,6 +81,13 @@ public class Convocation {
 
     @JsonView(Views.Convocation.class)
     private String profileUuid;
+
+    @Transient
+    private Profile profile;
+
+    @Transient
+    private Set<Recipient> recipients;
+
 
     public Convocation() {
     }
@@ -214,6 +214,14 @@ public class Convocation {
 
     public void setSentDate(LocalDateTime sentDate) {
         this.sentDate = sentDate;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     @Override public String toString() {
