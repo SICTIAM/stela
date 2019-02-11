@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
+import fr.sictiam.stela.convocationservice.model.util.RecipientResponseComparator;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.SortComparator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -43,6 +45,7 @@ public class Convocation {
 
     @OneToMany(mappedBy = "convocation")
     @JsonView(Views.ConvocationReceived.class)
+    @SortComparator(RecipientResponseComparator.class)
     private Set<RecipientResponse> recipientResponses;
 
     @OneToMany
