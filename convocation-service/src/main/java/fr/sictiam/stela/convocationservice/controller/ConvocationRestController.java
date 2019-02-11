@@ -7,6 +7,7 @@ import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
+import fr.sictiam.stela.convocationservice.model.exception.InvalidParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationDetailUI;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationUI;
@@ -280,6 +281,40 @@ public class ConvocationRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PutMapping("/received/{uuid}/{responseType}")
+    public ResponseEntity answerConvocation(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String profileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
+            @PathVariable String uuid,
+            @PathVariable String responseType) {
+
+        LOGGER.info("/received/{}", responseType);
+        if (StringUtils.isNotEmpty(profileUuid) && recipient == null) {
+            try {
+                recipient = recipientService.findByProfileinLocalAuthority(profileUuid, currentLocalAuthUuid);
+            } catch (NotFoundException e) {
+                LOGGER.error(e.getMessage());
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }
+
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))
+                || !hasAccess(uuid, null, recipient)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        try {
+            convocationService.answer(convocation, recipient, responseType);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (InvalidParameterException e) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+    }
 
     private String getContentType(String filename) {
         String mimeType = URLConnection.guessContentTypeFromName(filename);

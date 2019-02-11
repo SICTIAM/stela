@@ -10,9 +10,11 @@ import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
+import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
+import fr.sictiam.stela.convocationservice.model.exception.InvalidParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
@@ -39,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -204,6 +207,25 @@ public class ConvocationService {
         }
 
         throw new NotFoundException("file not found");
+    }
+
+    public void answer(Convocation convocation, Recipient recipient, String responseTypeString) {
+
+        Optional<RecipientResponse> recipientResponse =
+                convocation.getRecipientResponses().stream().filter(rr -> rr.getRecipient().equals(recipient)).findFirst();
+        if (!recipientResponse.isPresent()) {
+            LOGGER.error("Recipient {} not found in convocation {}", recipient.getUuid(), convocation.getUuid());
+            throw new NotFoundException("Recipient " + recipient.getUuid() + " not found in convocation " + convocation.getUuid());
+        }
+
+        try {
+            ResponseType responseType = ResponseType.valueOf(responseTypeString);
+            recipientResponse.get().setResponseType(responseType);
+            convocationRepository.save(convocation);
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Invalid response type {}", responseTypeString);
+            throw new InvalidParameterException("responseType");
+        }
     }
 
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType,
