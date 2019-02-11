@@ -45,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -202,9 +203,15 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return acte;
     }
 
-    public Acte receiveAREvent(String number, LocalDate decisionDate, ActeNature nature, StatusType statusType, Attachment attachment) {
+    public Acte receiveAREvent(String idActe, String number, LocalDate decisionDate, ActeNature nature, StatusType statusType, Attachment attachment) {
+        // FIXME : quick and dirty fix
+        String[] idActeSplit = idActe.split("-");
+        String siren = idActeSplit[1];
+        LocalAuthority localAuthority = localAuthorityService.getBySiren(siren)
+                .orElseThrow(EntityNotFoundException::new);
         Acte acte =
-                acteRepository.findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(number, decisionDate, nature, null)
+                acteRepository.findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(number,
+                        decisionDate, nature, localAuthority.getUuid())
                     .orElseThrow(ActeNotFoundException::new);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType, LocalDateTime.now(), attachment.getFile(),
                 attachment.getFilename());

@@ -174,9 +174,9 @@ public class EmailCheckingTask {
 
                                     Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
                                             bodyPart.getSize());
-                                    acteService.receiveAREvent(arActe.getActeRecu().getNumeroInterne(), arActe.getActeRecu().getDate(),
-                                            ActeNature.code(arActe.getActeRecu().getCodeNatureActe()), StatusType.ACK_RECEIVED,
-                                            attachment);
+                                    acteService.receiveAREvent(arActe.getIDActe(), arActe.getActeRecu().getNumeroInterne(),
+                                            arActe.getActeRecu().getDate(), ActeNature.code(arActe.getActeRecu().getCodeNatureActe()),
+                                            StatusType.ACK_RECEIVED, attachment);
 
                                 } else if ("ARAnnulation".equals(rootName)) {
                                     LOGGER.debug("XML is of type: ARAnnulation");
