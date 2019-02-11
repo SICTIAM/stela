@@ -33,12 +33,16 @@ const customFetch = async (URL, options) => {
         return response
     }catch (errorResponse) {
         console.error(`Error : ${errorResponse.status} on ${errorResponse.url}`)
-        const pageLocation = window.location
         const localAuthority = options.headers.localAuthoritySlug
+        const pageLocation =
+            localAuthority && window.location.pathname !== `/${localAuthority}` ?
+                '/' + window.location.pathname.split('/').splice(2,2).join('/') :
+                window.location.pathname
+        const certificateRequest = '/api/admin/certificate/is-valid'
         switch (errorResponse.status) {
         case 401:
         case 403:
-            if(!publicPages.includes(pageLocation.pathname)) {
+            if(!publicPages.includes(pageLocation) && pageLocation !== certificateRequest) {
                 localAuthority ?
                     window.location.replace(`/api/api-gateway/loginWithSlug/${localAuthority}`) :
                     window.location.replace('/')
