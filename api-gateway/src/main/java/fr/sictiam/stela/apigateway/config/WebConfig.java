@@ -3,9 +3,12 @@ package fr.sictiam.stela.apigateway.config;
 import org.oasis_eu.spring.kernel.security.TokenRefreshInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -37,4 +40,16 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/" + localAuthority + "/registre-des-deliberations/**").setViewName("forward:/index.html");
         registry.addViewController("/choix-collectivite").setViewName("forward:/index.html");
     }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/public/static/")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+
+        registry.addResourceHandler("/img/**")
+                .addResourceLocations("classpath:/public/img/")
+                .setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS));
+    }
+
 }
