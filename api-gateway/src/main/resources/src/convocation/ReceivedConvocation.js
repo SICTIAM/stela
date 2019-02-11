@@ -20,8 +20,6 @@ class ReceivedConvocation extends Component {
 	}
 	state = {
 	    displayListParticipants: false,
-	    totalCount: 0,
-	    limit: 25,
 	    convocation: {
 	        uuid: '',
 	        meetingDate: '',
@@ -177,25 +175,25 @@ class ReceivedConvocation extends Component {
 	                        </Grid.Column>
 	                    </Grid>
 	                    <h2>{t('convocation.page.my_answer')}</h2>
-	                    <FormFieldInline htmlFor='residentThreshold'
-	                        label='Serez-vous présent?'>
+	                    <FormFieldInline htmlFor='presentQuestion'
+	                        label={t('convocation.page.present_question')}>
 	                        <Radio
-	                            label='Présent'
+	                            label={t('convocation.page.present')}
 	                            value='PRESENT'
-	                            name='residentThreshold'
+	                            name='presentQuestion'
 	                            checked={this.state.convocation.responses === 'PRESENT'}
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
 	                        ></Radio>
 	                        <Radio
-	                            label='Absent'
+	                            label={t('convocation.page.absent')}
 	                            value='NOT_PRESENT'
-	                            name='residentThreshold'
+	                            name='presentQuestion'
 	                            checked={this.state.convocation.responses === 'NOT_PRESENT'}
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}
 	                        ></Radio>
 	                        <Radio
-	                            label='Procuration'
-	                            name='residentThreshold'
+	                            label={t('convocation.page.subisituted')}
+	                            name='presentQuestion'
 	                            value='SUBSTITUTED'
 	                            checked={this.state.convocation.responses === 'SUBSTITUTED'}
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'responses')}

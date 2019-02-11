@@ -43,7 +43,8 @@
       "history": "Historique",
       "group_sender": "Groupe émetteur",
       "send_by": "Convocation envoyée par",
-      "my_answer": "Ma réponse"
+      "my_answer": "Ma réponse",
+      "present_question": "Serez-vous présent ?"
     },
     "new": {
       "display": "Visualiser",
