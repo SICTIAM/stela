@@ -174,7 +174,7 @@ public class EmailCheckingTask {
 
                                     Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
                                             bodyPart.getSize());
-                                    acteService.receiveAREvent(arActe.getIDActe(), arActe.getActeRecu().getDate(),
+                                    acteService.receiveAREvent(arActe.getActeRecu().getNumeroInterne(), arActe.getActeRecu().getDate(),
                                             ActeNature.code(arActe.getActeRecu().getCodeNatureActe()), StatusType.ACK_RECEIVED,
                                             attachment);
 
