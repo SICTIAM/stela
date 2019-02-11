@@ -2,10 +2,7 @@ package fr.sictiam.stela.acteservice.scheduler;
 
 import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.MailSSLSocketFactory;
-import fr.sictiam.stela.acteservice.model.Attachment;
-import fr.sictiam.stela.acteservice.model.Flux;
-import fr.sictiam.stela.acteservice.model.LocalAuthority;
-import fr.sictiam.stela.acteservice.model.StatusType;
+import fr.sictiam.stela.acteservice.model.*;
 import fr.sictiam.stela.acteservice.model.xml.*;
 import fr.sictiam.stela.acteservice.service.ActeService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
@@ -177,7 +174,9 @@ public class EmailCheckingTask {
 
                                     Attachment attachment = new Attachment(targetArray, bodyPart.getFileName(),
                                             bodyPart.getSize());
-                                    acteService.receiveAREvent(arActe.getIDActe(), StatusType.ACK_RECEIVED, attachment);
+                                    acteService.receiveAREvent(arActe.getActeRecu().getNumeroInterne(), arActe.getActeRecu().getDate(),
+                                            ActeNature.code(arActe.getActeRecu().getCodeNatureActe()), StatusType.ACK_RECEIVED,
+                                            attachment);
 
                                 } else if ("ARAnnulation".equals(rootName)) {
                                     LOGGER.debug("XML is of type: ARAnnulation");
@@ -225,7 +224,6 @@ public class EmailCheckingTask {
                                     LOGGER.debug("XML is of type: DemandePieceComplementaire");
                                     DemandePieceComplementaire demandePieceComplementaire = unmarshall(classSource,
                                             DemandePieceComplementaire.class);
-                                    demandePieceComplementaire.getIDActe();
                                     Attachment attachment = getFileAttachmentByName(
                                             demandePieceComplementaire.getDocument().getNomFichier(),
                                             originalMultipart);

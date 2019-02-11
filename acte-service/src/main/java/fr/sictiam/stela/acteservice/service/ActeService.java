@@ -193,8 +193,19 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return errors;
     }
 
-    public Acte receiveAREvent(String iDActe, StatusType statusType, Attachment attachment) {
-        Acte acte = findByIdActe(iDActe);
+    public Acte receiveAREvent(String idActe, StatusType statusType, Attachment attachment) {
+        Acte acte = findByIdActe(idActe);
+        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType, LocalDateTime.now(), attachment.getFile(),
+                attachment.getFilename());
+        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
+        LOGGER.info("Acte {} {} with id {}", acte.getNumber(), statusType, acte.getUuid());
+        return acte;
+    }
+
+    public Acte receiveAREvent(String number, LocalDate decisionDate, ActeNature nature, StatusType statusType, Attachment attachment) {
+        Acte acte =
+                acteRepository.findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(number, decisionDate, nature, null)
+                    .orElseThrow(ActeNotFoundException::new);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType, LocalDateTime.now(), attachment.getFile(),
                 attachment.getFilename());
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
