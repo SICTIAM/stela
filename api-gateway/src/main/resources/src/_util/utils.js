@@ -171,6 +171,16 @@ const onSearch = (that, callback) => {
     that.setState({ offset: 0, currentPage: 0 }, callback)
 }
 
+const sortAlphabetically = (arrayOfObject, attribute) => {
+    arrayOfObject.sort((a,b) => {
+        if(a[attribute] < b[attribute]) { return -1 }
+        if(a[attribute] > b[attribute]) { return 1 }
+        return 0
+    })
+
+    return arrayOfObject
+}
+
 export {
     checkStatus,
     fetchWithAuthzHandling,
@@ -195,5 +205,6 @@ export {
     handlePageClick,
     updateItemPerPage,
     sortTable,
-    onSearch
+    onSearch,
+    sortAlphabetically
 }

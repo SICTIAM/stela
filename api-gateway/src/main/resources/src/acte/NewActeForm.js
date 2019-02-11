@@ -11,7 +11,7 @@ import { FormField, File, ValidationPopup, DragAndDropFile, InputFile } from '..
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize } from '../_util/utils'
+import {checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize, sortAlphabetically} from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
 import { withAuthContext } from '../Auth'
 
@@ -511,7 +511,7 @@ class NewActeForm extends Component {
         const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) && (
             <Dropdown fluid selection
                 placeholder={t('acte.new.PJ_types')}
-                options={attachmentTypes}
+                options={sortAlphabetically(attachmentTypes, 'text')}
                 value={this.state.fields.acteAttachment.attachmentTypeCode}
                 onChange={(e, { value }) => this.onFileAttachmentTypeChange(value)} />
         )
@@ -519,7 +519,7 @@ class NewActeForm extends Component {
             const extraContent = attachmentTypes.length > 0 && (
                 <Dropdown fluid selection
                     placeholder={t('acte.new.PJ_types')}
-                    options={attachmentTypes}
+                    options={sortAlphabetically(attachmentTypes, 'text')}
                     value={annexe.attachmentTypeCode}
                     onChange={(e, { value }) => this.onAnnexeAttachmentTypeChange(value, annexe.uuid)} />
             )
