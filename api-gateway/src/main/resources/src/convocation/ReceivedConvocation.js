@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Radio, Form } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
@@ -63,10 +64,16 @@ class ReceivedConvocation extends Component {
 	    _fetchWithAuthzHandling({url: `/api/convocation/received/${this.props.uuid}/${value}`, method: 'PUT', context: this.props.authContext})
 	        .then(checkStatus)
 	        .catch(response => {
-	            if (response.status === 400) {
-	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.badRequest'))
-	            } else if(response.status === 403) {
+	            switch(response.status) {
+	            case 400:
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.bad_request'))
+	                break
+	            case 403:
 	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.forbidden'))
+	                break
+	            case 404:
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.not_found'))
+	                break
 	            }
 	        })
 	    this.setState({convocation})

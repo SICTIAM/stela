@@ -121,8 +121,9 @@
         "invalidDate": "La date de séance est invalide",
         "fileExists": "Le document de la convocation a déjà été fourni",
         "documentMissing": "Le document de la convocation est manquant",
-        "badRequest": "Paramètre invalide",
-        "forbidden": "Accès interdit"
+        "bad_request": "Paramètre invalide",
+        "forbidden": "Non autorisé",
+        "not_found": "La convocation n'a pas été trouvée dans la collectivité courante"
       }
     }
   }
