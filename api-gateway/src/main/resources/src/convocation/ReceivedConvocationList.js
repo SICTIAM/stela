@@ -104,7 +104,7 @@ class ReceivedConvocation extends Component {
 	    const answerDisplay = (answer) => {
 	        return answer === 'PRESENT' ? <p className='green text-bold'>{t('convocation.page.present')}</p> :
 	            	answer === 'NOT_PRESENT' ? <p className='red'>{t('convocation.page.absent')}</p> :
-	                answer === 'SUBSTITUTED' ? <p className='red'>{t('convocation.page.subisituted')}</p> : ''
+	                answer === 'SUBSTITUTED' ? <p className='red'>{t('convocation.page.substituted')}</p> : ''
 	    }
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
