@@ -161,7 +161,7 @@ class NewActeForm extends Component {
         _fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ attachmentTypes: json }))
+            .then(json => this.setState({ attachmentTypes: sortAlphabetically(json, 'code')}))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
@@ -511,7 +511,7 @@ class NewActeForm extends Component {
         const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) && (
             <Dropdown fluid selection
                 placeholder={t('acte.new.PJ_types')}
-                options={sortAlphabetically(attachmentTypes, 'text')}
+                options={attachmentTypes}
                 value={this.state.fields.acteAttachment.attachmentTypeCode}
                 onChange={(e, { value }) => this.onFileAttachmentTypeChange(value)} />
         )
@@ -519,7 +519,7 @@ class NewActeForm extends Component {
             const extraContent = attachmentTypes.length > 0 && (
                 <Dropdown fluid selection
                     placeholder={t('acte.new.PJ_types')}
-                    options={sortAlphabetically(attachmentTypes, 'text')}
+                    options={attachmentTypes}
                     value={annexe.attachmentTypeCode}
                     onChange={(e, { value }) => this.onAnnexeAttachmentTypeChange(value, annexe.uuid)} />
             )
