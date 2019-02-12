@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,7 +16,7 @@ import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
 
 @Entity
-public class RecipientResponse {
+public class RecipientResponse implements Comparable<RecipientResponse> {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -115,5 +116,9 @@ public class RecipientResponse {
 
     public String getUuid() {
         return uuid;
+    }
+
+    @Override public int compareTo(@NotNull RecipientResponse recipientResponse) {
+        return recipient.compareTo(recipientResponse.getRecipient());
     }
 }

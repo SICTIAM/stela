@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
+import fr.sictiam.stela.convocationservice.model.util.RecipientResponseComparator;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.SortComparator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 public class Convocation {
@@ -43,7 +46,9 @@ public class Convocation {
 
     @OneToMany(mappedBy = "convocation")
     @JsonView(Views.ConvocationReceived.class)
-    private Set<RecipientResponse> recipientResponses;
+    @SortComparator(RecipientResponseComparator.class)
+    //@OrderBy("recipient ASC")
+    private SortedSet<RecipientResponse> recipientResponses;
 
     @OneToMany
     @JsonView(Views.ConvocationInternal.class)
@@ -176,11 +181,13 @@ public class Convocation {
         this.recipients = recipients;
     }
 
-    public Set<RecipientResponse> getRecipientResponses() {
+    public SortedSet<RecipientResponse> getRecipientResponses() {
+        if (recipientResponses == null)
+            recipientResponses = new TreeSet<>();
         return recipientResponses;
     }
 
-    public void setRecipientResponses(Set<RecipientResponse> recipientResponses) {
+    public void setRecipientResponses(SortedSet<RecipientResponse> recipientResponses) {
         this.recipientResponses = recipientResponses;
     }
 

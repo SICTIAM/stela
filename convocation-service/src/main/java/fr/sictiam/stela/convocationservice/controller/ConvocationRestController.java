@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Recipient;
+import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.model.Right;
-import fr.sictiam.stela.convocationservice.model.StatusType;
+import fr.sictiam.stela.convocationservice.model.exception.AccessNotGrantedException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationDetailUI;
@@ -24,17 +25,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -86,9 +80,8 @@ public class ConvocationRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        validateAccess(currentLocalAuthUuid, null, currentProfileUuid, null,
+                rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN), false);
 
         List<Convocation> convocations = convocationService.findSentWithQuery(multifield, sentDateFrom, sentDateTo,
                 assemblyType, meetingDateFrom, meetingDateTo, subject, limit, offset, column, direction, currentLocalAuthUuid);
@@ -117,27 +110,16 @@ public class ConvocationRestController {
             @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
             @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient) {
 
-        if (StringUtils.isNotEmpty(currentProfileUuid) && recipient == null) {
-            try {
-                recipient = recipientService.findByProfileinLocalAuthority(currentProfileUuid, currentLocalAuthUuid);
-            } catch (NotFoundException e) {
-                LOGGER.error(e.getMessage());
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-        }
+        final Recipient currentRecipient = validateAccess(currentLocalAuthUuid, null, currentProfileUuid, recipient, rights, Arrays.asList(Right.values()),
+                true);
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
-        final Recipient currentRecipient = recipient;
         List<ReceivedConvocationUI> convocations = convocationService.findReceivedWithQuery(multifield, assemblyType,
                 meetingDateFrom, meetingDateTo, subject, filter, limit, offset, column, direction, currentLocalAuthUuid,
-                recipient).stream().map(convocation -> new ReceivedConvocationUI(convocation, currentRecipient)).collect(Collectors.toList());
+                currentRecipient).stream().map(convocation -> new ReceivedConvocationUI(convocation, currentRecipient)).collect(Collectors.toList());
 
 
         Long count = convocationService.countReceivedWithQuery(multifield, assemblyType,
-                meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid, recipient);
+                meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid, currentRecipient);
 
         return new ResponseEntity<>(new SearchResultsUI(count, convocations), HttpStatus.OK);
     }
@@ -151,9 +133,9 @@ public class ConvocationRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values())) || !hasAccess(uuid, currentProfileUuid, null)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights, Arrays.asList(Right.values()),
+                false);
+
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
         return new ResponseEntity<>(convocation, HttpStatus.OK);
     }
@@ -166,22 +148,12 @@ public class ConvocationRestController {
             @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String profileUuid,
             @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient) {
 
-        if (StringUtils.isNotEmpty(profileUuid) && recipient == null) {
-            try {
-                recipient = recipientService.findByProfileinLocalAuthority(profileUuid, currentLocalAuthUuid);
-            } catch (NotFoundException e) {
-                LOGGER.error(e.getMessage());
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-        }
+        final Recipient currentRecipient = validateAccess(currentLocalAuthUuid, uuid, profileUuid, recipient, rights,
+                Arrays.asList(Right.values()), true);
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))
-                || !hasAccess(uuid, null, recipient)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
-        convocationService.openBy(convocation, recipient);
-        return new ResponseEntity<>(new ReceivedConvocationDetailUI(convocation, recipient), HttpStatus.OK);
+        convocationService.openBy(convocation, currentRecipient);
+        return new ResponseEntity<>(new ReceivedConvocationDetailUI(convocation, currentRecipient), HttpStatus.OK);
     }
 
     @JsonView(Views.ConvocationInternal.class)
@@ -192,9 +164,8 @@ public class ConvocationRestController {
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @Valid @RequestBody Convocation params) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        validateAccess(currentLocalAuthUuid, null, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
 
         try {
             Convocation convocation = convocationService.create(params, currentLocalAuthUuid, currentProfileUuid);
@@ -210,34 +181,14 @@ public class ConvocationRestController {
             @PathVariable String uuid,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestBody Convocation params) {
 
-        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_DISPLAY))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
 
         Convocation convocation = convocationService.update(uuid, currentLocalAuthUuid, params);
         return new ResponseEntity<>(convocation, HttpStatus.OK);
-    }
-
-    @GetMapping
-    public ResponseEntity<SearchResultsUI> getAll(@RequestParam(value = "objet", required = false) String objet,
-            @RequestParam(value = "creationFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate
-                    creationFrom,
-            @RequestParam(value = "creationTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate
-                    creationTo,
-            @RequestParam(value = "status", required = false) StatusType status,
-            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
-            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
-            @RequestParam(value = "column", required = false, defaultValue = "creation") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
-            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
-            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
-
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        return new ResponseEntity<>(new SearchResultsUI(), HttpStatus.OK);
     }
 
     @PostMapping("/{uuid}/upload")
@@ -249,9 +200,8 @@ public class ConvocationRestController {
             @RequestParam(name = "file", required = false) MultipartFile file,
             @RequestParam(name = "annexes", required = false) MultipartFile... annexes) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
 
         Convocation convocation = convocationService.getConvocation(uuid);
 
@@ -264,22 +214,44 @@ public class ConvocationRestController {
             HttpServletResponse response,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String profileUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
             @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
             @PathVariable String uuid,
             @PathVariable String fileUuid,
             @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))
-                || !hasAccess(uuid, profileUuid, recipient)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Arrays.asList(Right.values()), false);
 
         Attachment file = convocationService.getFile(currentLocalAuthUuid, uuid, fileUuid);
         outputFile(response, file.getContent(), file.getFilename(), disposition);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PutMapping("/received/{uuid}/{responseTypeString}")
+    public ResponseEntity answerConvocation(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
+            @PathVariable String uuid,
+            @PathVariable String responseTypeString) {
+
+        final Recipient currentRecipient = validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, recipient,
+                rights, Arrays.asList(Right.values()), true);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        try {
+            ResponseType responseType = ResponseType.valueOf(responseTypeString.toUpperCase());
+            convocationService.answer(convocation, currentRecipient, responseType);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Invalid value for response type : {}", responseTypeString);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+    }
 
     private String getContentType(String filename) {
         String mimeType = URLConnection.guessContentTypeFromName(filename);
@@ -290,7 +262,7 @@ public class ConvocationRestController {
         return mimeType;
     }
 
-    private boolean hasAccess(String convocationUuid, String profileUuid, Recipient recipient) {
+    private boolean isRecipient(String convocationUuid, String profileUuid, Recipient recipient) {
 
         try {
             Convocation convocation = convocationService.getConvocation(convocationUuid);
@@ -300,6 +272,26 @@ public class ConvocationRestController {
             LOGGER.error("Access to convocation not granted: {}", e.getMessage());
             return false;
         }
+    }
+
+    private Recipient validateAccess(String localAuthorityUuid, String convocationUuid, String profileUuid,
+            Recipient recipient, Set<Right> rights, List<Right> authorizedRights, boolean recipientOnly)
+            throws AccessNotGrantedException {
+
+        if (StringUtils.isNotEmpty(profileUuid) && recipient == null) {
+            try {
+                recipient = recipientService.findByProfileinLocalAuthority(profileUuid, localAuthorityUuid);
+            } catch (NotFoundException e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
+
+        if (!RightUtils.hasRight(rights, authorizedRights)
+                || (recipientOnly && convocationUuid != null && !isRecipient(convocationUuid, profileUuid, recipient))) {
+            throw new AccessNotGrantedException();
+        }
+
+        return recipient;
     }
 
     private void outputFile(HttpServletResponse response, byte[] file, String filename, String disposition) {
@@ -314,5 +306,10 @@ public class ConvocationRestController {
         } catch (IOException e) {
             LOGGER.error("Error writing file to output stream. Filename was '{}'", filename, e);
         }
+    }
+
+    @ExceptionHandler(AccessNotGrantedException.class)
+    public ResponseEntity accessNotGrantedHandler(HttpServletRequest request, AccessNotGrantedException exception) {
+        return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 }

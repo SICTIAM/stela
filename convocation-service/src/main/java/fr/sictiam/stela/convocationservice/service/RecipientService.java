@@ -125,7 +125,6 @@ public class RecipientService {
             LOGGER.error("Cannot open convocation, unknown profile {}", profileUuid);
         }
         String email = profile.get("agent").get("email").asText();
-        LOGGER.info("Found email {}", email);
         return recipientRepository
                 .findByEmailAndLocalAuthorityUuid(email, localAuthorityUuid)
                 .orElseThrow(() -> new NotFoundException("Recipient with profile " + profileUuid + " cannot be found in " +

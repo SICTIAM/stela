@@ -37,7 +37,7 @@
       "numberPresents": "{{number}} y participe(nt)",
       "absent": "Absent",
       "numberAbsents": "{{number}} absent(s)",
-      "subisituted": "Procuration",
+      "substituted": "Procuration",
       "numberSubsituted": "{{number}} a/ont été donnée(s)",
       "numberNoAnswer": "{{number}} n'a/ont pas répondu",
       "history": "Historique",
@@ -120,7 +120,10 @@
       "convocation": {
         "invalidDate": "La date de séance est invalide",
         "fileExists": "Le document de la convocation a déjà été fourni",
-        "documentMissing": "Le document de la convocation est manquant"
+        "documentMissing": "Le document de la convocation est manquant",
+        "400": "Paramètre invalide",
+        "403": "Non autorisé",
+        "404": "La convocation n'a pas été trouvée dans la collectivité courante"
       }
     }
   }

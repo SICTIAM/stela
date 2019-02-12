@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-public class Recipient implements Comparable {
+public class Recipient implements Comparable<Recipient> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Recipient.class);
 
@@ -182,8 +182,11 @@ public class Recipient implements Comparable {
         }
     }
 
-    @Override public int compareTo(@NotNull Object o) {
-        return lastname.compareTo(((Recipient) o).getLastname());
+    @Override public int compareTo(@NotNull Recipient recipient) {
+        String r1 = lastname + firstname + email;
+        String r2 = recipient.getLastname() + getFirstname() + getEmail();
+
+        return r1.compareTo(r2);
     }
 
     @Override public boolean equals(Object o) {

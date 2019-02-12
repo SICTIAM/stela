@@ -101,7 +101,6 @@ public class ConvocationRestControllerTest {
                 .andExpect(jsonPath("$.creationDate").value(formatter.format(convocation.getCreationDate())))
                 .andExpect(jsonPath("$.questions").isArray());
 
-        verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one");
         verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one", "mairie-test");
         verifyNoMoreInteractions(convocationService);
     }
