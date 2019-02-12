@@ -47,7 +47,10 @@ class ReceivedConvocation extends Component {
 
 	componentDidMount() {
 	    const itemPerPage = localStorage.getItem('itemPerPage')
-	    if (!itemPerPage) localStorage.setItem('itemPerPage', 10)
+	    if (!itemPerPage) {
+	        localStorage.setItem('itemPerPage', 10)
+	        this.loadData()
+	    }
 	    else this.setState({ limit: 10 }, this.loadData)
 	}
 	/** Load data list */
@@ -102,9 +105,12 @@ class ReceivedConvocation extends Component {
 	    const dateDisplay = (date) => date && moment(date, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY HH:mm')
 
 	    const answerDisplay = (answer) => {
-	        return answer === 'PRESENT' ? <p className='green text-bold'>{t('convocation.page.present')}</p> :
-	            	answer === 'NOT_PRESENT' ? <p className='red'>{t('convocation.page.absent')}</p> :
-	                answer === 'SUBSTITUTED' ? <p className='red'>{t('convocation.page.substituted')}</p> : ''
+	        switch(answer) {
+	        case 'PRESENT': return <p className='green text-bold'>{t('convocation.page.present')}</p>
+	        case 'NOT_PRESENT': return <p className='red'>{t('convocation.page.absent')}</p>
+	        case 'SUBSTITUTED': return <p className='red'>{t('convocation.page.substituted')}</p>
+	        default: return ''
+	        }
 	    }
 	    const metaData = [
 	        { property: 'uuid', displayed: false },

@@ -204,9 +204,9 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
                 <AuthRoute path="/:localAuthoritySlug/pes/statut" {...params} allowedRights={['PES_DISPLAY']}  component={PesMetrics} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={ReceivedConvocation} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ReceivedConvocationList} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocationList} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocationList} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/nouveau" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ConvocationForm} menu={MenuBar}/>
 
