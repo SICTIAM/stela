@@ -66,13 +66,13 @@ class ReceivedConvocation extends Component {
 	        .catch(response => {
 	            switch(response.status) {
 	            case 400:
-	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.bad_request'))
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.400'))
 	                break
 	            case 403:
-	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.forbidden'))
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.403'))
 	                break
 	            case 404:
-	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.not_found'))
+	                _addNotification(notifications.defaultError, 'notifications.title', t('convocation.errors.convocation.404'))
 	                break
 	            }
 	        })
