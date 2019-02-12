@@ -212,21 +212,26 @@ public class PaullGenericController {
             if (!classeurResponse.getStatusCode().isError() && classeurResponse.hasBody() && genericDocument.isPresent()) {
                 Classeur classeur = classeurResponse.getBody();
 
-                if (!classeur.getDocuments().isEmpty()) {
-                    Document document = classeur.getDocuments().get(0);
-                    data.put("Title", classeur.getNom());
+                if (classeur != null) {
+                    if (!classeur.getDocuments().isEmpty()) {
+                        Document document = classeur.getDocuments().get(0);
+                        data.put("Title", classeur.getNom());
 
-                    data.put("Name", classeur.getNom());
-                    data.put("Username", genericDocument.get().getDepositEmail());
-                    data.put("NomDocument", document.getName());
-                    data.put("dateDepot", classeur.getCreation());
-                    data.put("datevalide", classeur.getValidation());
+                        data.put("Name", classeur.getNom());
+                        data.put("Username", genericDocument.get().getDepositEmail());
+                        data.put("NomDocument", document.getName());
+                        data.put("dateDepot", classeur.getCreation());
+                        data.put("datevalide", classeur.getValidation());
 
-                    data.put("service", classeur.getCircuit());
-                    data.put("EtatClasseur", classeur.getStatus().ordinal());
+                        data.put("service", classeur.getCircuit());
+                        data.put("EtatClasseur", classeur.getStatus().ordinal());
+                    } else {
+                        status = HttpStatus.BAD_REQUEST;
+                        message = "No document in Classeur";
+                    }
                 } else {
                     status = HttpStatus.BAD_REQUEST;
-                    message = "No document in Classeur";
+                    message = "Error occurred while searching Classeur";
                 }
 
             } else {
@@ -263,17 +268,22 @@ public class PaullGenericController {
             if (!classeurResponse.getStatusCode().isError() && classeurResponse.hasBody()) {
                 Classeur classeur = classeurResponse.getBody();
 
-                if (!classeur.getDocuments().isEmpty()) {
-                    Document document = classeur.getDocuments().get(0);
-                    data.put("NomDocument", document.getName());
+                if (classeur != null) {
+                    if (!classeur.getDocuments().isEmpty()) {
+                        Document document = classeur.getDocuments().get(0);
+                        data.put("NomDocument", document.getName());
 
-                    data.put("Contenu",
-                            Base64.encode(sesileService.getDocumentBody(localAuthority.get(), document.getId())));
-                    data.put("datevalide", classeur.getValidation());
+                        data.put("Contenu",
+                                Base64.encode(sesileService.getDocumentBody(localAuthority.get(), document.getId())));
+                        data.put("datevalide", classeur.getValidation());
 
+                    } else {
+                        status = HttpStatus.BAD_REQUEST;
+                        message = "No document in Classeur";
+                    }
                 } else {
                     status = HttpStatus.BAD_REQUEST;
-                    message = "No document in Classeur";
+                    message = "Error occurred while searching Classeur";
                 }
 
             } else {
