@@ -44,7 +44,9 @@
       "group_sender": "Groupe émetteur",
       "send_by": "Convocation envoyée par",
       "my_answer": "Ma réponse",
-      "present_question": "Serez-vous présent ?"
+      "present_question": "Serez-vous présent ?",
+      "see_list": "Voir la liste",
+      "hide_list": "Cacher la liste"
     },
     "new": {
       "display": "Visualiser",

@@ -74,7 +74,12 @@ class SentConvocation extends Component {
 	    const noAnswer = this.sumRecipientsByStatus('DO_NOT_KNOW')
 
 	    const answerDisplay = (answer) => {
-	        return answer === 'PRESENT' ? <p className='green text-bold'>{t('convocation.page.present')}</p> : answer === 'NOT_PRESENT' ? <p className='red'>{t('convocation.page.absent')}</p> : answer === 'SUBSITUTED' ? <p className='red'>{t('convocation.page.subisituted')}</p> : ''
+	        switch(answer) {
+	        case 'PRESENT': return <p className='green text-bold'>{t('convocation.page.present')}</p>
+	        case 'NOT_PRESENT': return <p className='red'>{t('convocation.page.absent')}</p>
+	        case 'SUBSTITUTED': return <p className='red'>{t('convocation.page.substituted')}</p>
+	        default: return ''
+	        }
 	    }
 	    const statutDisplay = (opened) => opened ? <p><Icon name='envelope open'/> {moment(opened, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</p>: <Icon name='envelope'/>
 	    const recipientDisplay = (recipient) => `${recipient.firstname} ${recipient.lastname}`
@@ -239,7 +244,7 @@ class SentConvocation extends Component {
 	                                <Button onClick={() => {
 	                                    this.setState({displayListParticipants: !this.state.displayListParticipants})}}
 	                                className="link" primary compact basic>
-	                                    { this.state.displayListParticipants ? 'Masquer la liste...' : 'Voir la liste'}
+	                                    { this.state.displayListParticipants ? t('convocation.page.hide_list') : t('convocation.page.see_list')}
 	                                </Button>
 	                            )}
 	                        </p>

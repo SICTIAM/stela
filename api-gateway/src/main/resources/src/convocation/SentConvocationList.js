@@ -46,7 +46,10 @@ class SentConvocation extends Component {
 
 	componentDidMount() {
 	    const itemPerPage = localStorage.getItem('itemPerPage')
-	    if (!itemPerPage) localStorage.setItem('itemPerPage', 10)
+	    if (!itemPerPage) {
+	        localStorage.setItem('itemPerPage', 10)
+	        this.loadData()
+	    }
 	    else this.setState({ limit: 10 }, this.loadData)
 	}
 	/** Load data list */
