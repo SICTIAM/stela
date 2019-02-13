@@ -29,10 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @Service
@@ -63,6 +60,7 @@ public class ArchiverService {
             if (localAuthority.getArchiveSettings() != null &&
                     localAuthority.getArchiveSettings().isArchiveActivated()) {
                 LOGGER.info("Retrieving actes for local authority {} ({})", localAuthority.getName(), localAuthority.getUuid());
+                // FIXME : this is absolutely inefficient
                 List<Acte> actes = acteRepository.findAllByDraftNullAndLocalAuthorityUuidAndArchiveNull(
                         localAuthority.getUuid());
                 LOGGER.info("Got {} actes not archived", actes.size());
@@ -76,7 +74,7 @@ public class ArchiverService {
                     }
                 });
             } else {
-                LOGGER.info("Archving is not activated for local authority {} ({})", localAuthority.getName(), localAuthority.getUuid());
+                LOGGER.info("Archiving is not activated for local authority {} ({})", localAuthority.getName(), localAuthority.getUuid());
             }
         });
         LOGGER.info("End archiveActesTask job");
@@ -118,19 +116,21 @@ public class ArchiverService {
 
         LOGGER.info("Sending acte file to Pastell");
         updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "arrete",
-                acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile(), archiveSettings);
+                acte.getActeAttachment().getFilename(), acte.getActeAttachment().getFile(), archiveSettings,
+                Optional.empty());
         logAsalaeResultForm(updatedAsalaeResultForm);
 
-        LOGGER.info("Sending annexes files to Pastell");
-        for (Attachment annexe : acte.getAnnexes()) {
+        for (int i = 0; i < acte.getAnnexes().size(); i++) {
+            Attachment annexe = acte.getAnnexes().get(i);
+            LOGGER.info("Sending annexe file {} to Pastell", annexe.getFilename());
             updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "autre_document_attache",
-                    annexe.getFilename(), annexe.getFile(), archiveSettings);
+                    annexe.getFilename(), annexe.getFile(), archiveSettings, Optional.of(i));
             logAsalaeResultForm(updatedAsalaeResultForm);
         }
 
         LOGGER.info("Sending ACK file to Pastell");
         updatedAsalaeResultForm = updateFileAsalaeDocument(updatedAsalaeResultForm.getContent(), "aractes",
-                historyAR.get().getFileName(), historyAR.get().getFile(), archiveSettings);
+                historyAR.get().getFileName(), historyAR.get().getFile(), archiveSettings, Optional.empty());
         logAsalaeResultForm(updatedAsalaeResultForm);
 
         LOGGER.info("Archiving Pastell document to Asalae");
@@ -167,6 +167,7 @@ public class ArchiverService {
             sendAction(asalaeDocument, "validation-sae", archiveSettings);
         }
 
+        // FIXME : WTF is this call ?!
         asalaeDocument = getAsalaeDocument(acte.getArchive().getAsalaeDocumentId(), archiveSettings);
         if (asalaeDocument.getData().containsKey("has_archive") && asalaeDocument.getData().containsKey("url_archive") &&
                 !StringUtils.isEmpty(asalaeDocument.getData().get("url_archive"))) {
@@ -234,15 +235,17 @@ public class ArchiverService {
     }
 
     private AsalaeResultForm updateFileAsalaeDocument(AsalaeDocument asalaeDocument, String fileType, String filename,
-            byte[] file, ArchiveSettings archiveSettings) {
-        StringBuilder url = new StringBuilder();
-        url.append(archiveSettings.getPastellUrl())
+            byte[] file, ArchiveSettings archiveSettings, Optional<Integer> annexeIndex) {
+        StringBuilder url = new StringBuilder()
+                .append(archiveSettings.getPastellUrl())
                 .append("/api/v2/entite/")
                 .append(archiveSettings.getPastellEntity())
                 .append("/document/")
                 .append(asalaeDocument.getInfo().getId_d())
                 .append("/file/")
                 .append(fileType);
+        annexeIndex.ifPresent(index -> url.append("/").append(index));
+
         LinkedMultiValueMap<String, Object> params = new LinkedMultiValueMap<String, Object>() {{
             add("file_name", filename);
             add("file_content", new ByteArrayResource(file));
@@ -317,8 +320,7 @@ public class ArchiverService {
         params.add("classification", codeToSmallPointFormat(acte.getCode()));
         params.add("date_de_lacte", acte.getDecision().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
-        if (historyAR.isPresent())
-            params.add("date_tdt_postage", historyAR.get().getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        historyAR.ifPresent(acteHistory -> params.add("date_tdt_postage", acteHistory.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
 
         return params;
     }
@@ -333,7 +335,7 @@ public class ArchiverService {
         return newCode.toString();
     }
 
-    HttpHeaders createAuthHeaders(String username, String password) {
+    private HttpHeaders createAuthHeaders(String username, String password) {
         return new HttpHeaders() {{
             String auth = String.format("%s:%s", username, password);
             String encodedAuth = new String(Base64.getEncoder().encode(auth.getBytes()));
