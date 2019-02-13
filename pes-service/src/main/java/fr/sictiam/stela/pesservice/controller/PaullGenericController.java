@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.controller;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import fr.sictiam.stela.pesservice.model.GenericDocument;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
@@ -8,6 +7,7 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
+import fr.sictiam.stela.pesservice.model.util.PaullResponse;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.SesileService;
@@ -17,24 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/rest/externalws/{siren}/fr/classic/webservgeneriques/services/api/rest.php/")
@@ -53,57 +43,6 @@ public class PaullGenericController {
         this.externalRestService = externalRestService;
     }
 
-    @JsonPropertyOrder({ "status", "status_message", "data" })
-    class PaullResponse {
-
-        String status;
-        String status_message;
-        Object data;
-
-        public PaullResponse() {
-
-        }
-
-        public PaullResponse(String status, String status_message, Object data) {
-            this.status = status;
-            this.status_message = status_message;
-            this.data = data;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        public String getStatus_message() {
-            return status_message;
-        }
-
-        public void setStatus_message(String status_message) {
-            this.status_message = status_message;
-        }
-
-        public Object getData() {
-            return data;
-        }
-
-        public void setData(Object data) {
-            this.data = data;
-        }
-
-        @Override
-        public String toString() {
-            return "PaullResponse{" +
-                    "status='" + status + '\'' +
-                    ", status_message='" + status_message + '\'' +
-                    ", data=" + data +
-                    '}';
-        }
-    }
-
     private PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
         return generatePaullResponse(httpStatus, datas, null);
     }
@@ -114,6 +53,7 @@ public class PaullGenericController {
     }
 
     private GenericAccount emailAuth(String email, String password) {
+        //TODO: #5784 Create PaullService, needed by infosDocument, getDocument and PaullController
         GenericAccount genericAccount = null;
         try {
             genericAccount = externalRestService.authWithEmailPassword(email, password);
@@ -138,30 +78,22 @@ public class PaullGenericController {
 
         Iterator<String> itrator = request.getFileNames();
         MultipartFile multiFile = request.getFile(itrator.next());
-
-        GenericAccount genericAccount = emailAuth(userid, password);
-        siren = StringUtils.removeStart(siren, "sys");
-        HttpStatus status = HttpStatus.OK;
         Map<String, Object> data = new HashMap<>();
 
-        if (genericAccount == null) {
-            status = HttpStatus.FORBIDDEN;
-            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-        }
+        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
 
-        if (service == null) {
-            status = HttpStatus.BAD_REQUEST;
-            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-        }
-        if (type == null) {
-            status = HttpStatus.BAD_REQUEST;
-            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-        }
+        HttpStatus status = HttpStatus.OK;
+
+        if (service == null)
+            return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.BAD_REQUEST, data), HttpStatus.BAD_REQUEST);
+
+        if (type == null)
+            return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.BAD_REQUEST, data), HttpStatus.BAD_REQUEST);
 
         if (email != null) email = email.trim();
 
         Integer serviceOrganisation = Integer.parseInt(service);
-        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
 
         if (localAuthority.isPresent()) {
 
@@ -195,55 +127,36 @@ public class PaullGenericController {
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
         Map<String, Object> data = new HashMap<>();
-        HttpStatus status = HttpStatus.OK;
-        siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
-        String message = "OK";
-        if (genericAccount == null) {
-            status = HttpStatus.FORBIDDEN;
-            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-        }
 
-        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
+        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
 
-        if (localAuthority.isPresent()) {
-            ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
-            Optional<GenericDocument> genericDocument = sesileService.getGenericDocument(idFlux);
-            if (!classeurResponse.getStatusCode().isError() && classeurResponse.hasBody() && genericDocument.isPresent()) {
-                Classeur classeur = classeurResponse.getBody();
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
 
-                if (classeur != null) {
-                    if (!classeur.getDocuments().isEmpty()) {
-                        Document document = classeur.getDocuments().get(0);
-                        data.put("Title", classeur.getNom());
+        if (!localAuthority.isPresent()) return this.notFoundLocalAuthority(data);
 
-                        data.put("Name", classeur.getNom());
-                        data.put("Username", genericDocument.get().getDepositEmail());
-                        data.put("NomDocument", document.getName());
-                        data.put("dateDepot", classeur.getCreation());
-                        data.put("datevalide", classeur.getValidation());
+        ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
+        Optional<GenericDocument> genericDocument = sesileService.getGenericDocument(idFlux);
 
-                        data.put("service", classeur.getCircuit());
-                        data.put("EtatClasseur", classeur.getStatus().ordinal());
-                    } else {
-                        status = HttpStatus.BAD_REQUEST;
-                        message = "No document in Classeur";
-                    }
-                } else {
-                    status = HttpStatus.BAD_REQUEST;
-                    message = "Error occurred while searching Classeur";
-                }
+        if (classeurResponse.getStatusCode().isError() && !classeurResponse.hasBody() && !genericDocument.isPresent())
+            return this.notFoundClasseur(data);
 
-            } else {
-                status = HttpStatus.BAD_REQUEST;
-                message = "Classeur was not found";
-            }
+        Classeur classeur = classeurResponse.getBody();
 
-        } else {
-            status = HttpStatus.BAD_REQUEST;
-            message = "LocalAuthority was not found";
-        }
-        return new ResponseEntity<Object>(generatePaullResponse(status, data, message), status);
+        if (classeur == null) return this.errorWhileSearchingClasseur(data);
+
+        if (classeur.getDocuments().isEmpty()) return this.noDocumentInClasseur(data);
+
+        Document document = classeur.getDocuments().get(0);
+        data.put("Title", classeur.getNom());
+        data.put("Name", classeur.getNom());
+        data.put("Username", genericDocument.get().getDepositEmail());
+        data.put("NomDocument", document.getName());
+        data.put("dateDepot", classeur.getCreation());
+        data.put("datevalide", classeur.getValidation());
+        data.put("service", classeur.getCircuit());
+        data.put("EtatClasseur", classeur.getStatus().ordinal());
+
+        return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.OK, data, "OK"), HttpStatus.OK);
     }
 
     @GetMapping("/doc/{idFlux}")
@@ -251,75 +164,68 @@ public class PaullGenericController {
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) throws IOException {
 
         Map<String, Object> data = new HashMap<>();
-        HttpStatus status = HttpStatus.OK;
-        siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null) {
-            status = HttpStatus.FORBIDDEN;
-            return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
-        }
-        String message = "OK";
 
-        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
+        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
 
-        if (localAuthority.isPresent()) {
-            ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
 
-            if (!classeurResponse.getStatusCode().isError() && classeurResponse.hasBody()) {
-                Classeur classeur = classeurResponse.getBody();
+        if (!localAuthority.isPresent()) return this.notFoundLocalAuthority(data);
 
-                if (classeur != null) {
-                    if (!classeur.getDocuments().isEmpty()) {
-                        Document document = classeur.getDocuments().get(0);
-                        data.put("NomDocument", document.getName());
+        ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
 
-                        data.put("Contenu",
-                                Base64.encode(sesileService.getDocumentBody(localAuthority.get(), document.getId())));
-                        data.put("datevalide", classeur.getValidation());
+        if (classeurResponse.getStatusCode().isError() && !classeurResponse.hasBody()) return this.notFoundClasseur(data);
 
-                    } else {
-                        status = HttpStatus.BAD_REQUEST;
-                        message = "No document in Classeur";
-                    }
-                } else {
-                    status = HttpStatus.BAD_REQUEST;
-                    message = "Error occurred while searching Classeur";
-                }
+        Classeur classeur = classeurResponse.getBody();
 
-            } else {
-                status = HttpStatus.BAD_REQUEST;
-                message = "Classeur was not found";
-            }
+        if (classeur == null) return this.errorWhileSearchingClasseur(data);
 
-        } else {
-            status = HttpStatus.BAD_REQUEST;
-            message = "LocalAuthority was not found";
-        }
+        if (classeur.getDocuments().isEmpty()) return this.noDocumentInClasseur(data);
 
-        return new ResponseEntity<Object>(generatePaullResponse(status, data, message), status);
+        Document document = classeur.getDocuments().get(0);
+        data.put("NomDocument", document.getName());
+        data.put("Contenu", Base64.encode(sesileService.getDocumentBody(localAuthority.get(), document.getId())));
+        data.put("datevalide", classeur.getValidation());
+
+        return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.OK, data, "OK"), HttpStatus.OK);
     }
 
     @GetMapping("/servicesorganisationnels/{email}")
     public ResponseEntity<?> getServices(@PathVariable String siren, @PathVariable String email,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
+        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(null);
 
-        HttpStatus status = HttpStatus.OK;
-        siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
-        if (genericAccount == null) {
-            status = HttpStatus.FORBIDDEN;
-            return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
-        }
-
-        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(siren);
+        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
         if (localAuthority.isPresent()) {
             List<ServiceOrganisation> validationCircuits = sesileService
                     .getServiceGenericOrganisations(localAuthority.get(), email);
-            return new ResponseEntity<Object>(generatePaullResponse(status, validationCircuits), status);
+            return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.OK, validationCircuits), HttpStatus.OK);
 
         } else {
-            status = HttpStatus.BAD_REQUEST;
-            return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
+            return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.BAD_REQUEST, null), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private ResponseEntity<Object> notFoundLocalAuthority(Map data) {
+        return new ResponseEntity<>(
+                generatePaullResponse(HttpStatus.BAD_REQUEST, data, "LocalAuthority was not found"), HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> notFoundClasseur(Map data) {
+        return new ResponseEntity<>(
+                generatePaullResponse(HttpStatus.BAD_REQUEST, data, "Classeur was not found"), HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> errorWhileSearchingClasseur(Map data) {
+        return new ResponseEntity<>(
+                generatePaullResponse(HttpStatus.BAD_REQUEST, data, "Error occurred while searching Classeur"), HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> noDocumentInClasseur(Map data) {
+        return new ResponseEntity<>(
+                generatePaullResponse(HttpStatus.BAD_REQUEST, data, "No document in Classeur"), HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> authGenericAccountForbidden(Map data) {
+        return new ResponseEntity<>(generatePaullResponse(HttpStatus.FORBIDDEN, data), HttpStatus.FORBIDDEN);
     }
 }
