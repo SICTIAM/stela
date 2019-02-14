@@ -32,17 +32,20 @@ class Home extends Component {
             .then(json => this.setState({ welcomeMessage: json }))
         getLastUpdate()
             .then(lastUpdate => this.setState({ lastUpdate }))
-        _fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(certificate => this.setState({ certificate }))
-            .catch(response => {
-                if(response.status !== 401) {
-                    response.text().then(text => {
-                        _addNotification(notifications.defaultError, 'notifications.title', text)
-                    })
-                }
-            })
+
+        if(this.props.authContext.isLoggedIn) {
+            _fetchWithAuthzHandling({url: '/api/api-gateway/certInfos'})
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(certificate => this.setState({certificate}))
+                .catch(response => {
+                    if (response.status !== 401) {
+                        response.text().then(text => {
+                            _addNotification(notifications.defaultError, 'notifications.title', text)
+                        })
+                    }
+                })
+        }
     }
     render() {
         const { t } = this.context

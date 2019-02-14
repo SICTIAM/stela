@@ -54,7 +54,7 @@ const hoursBeforeResendPes = 24
 
 const acceptFileDocumentConvocation = '.doc, docx, .pdf, .jpg, .png, .zip, .odt, .ott, .oth, and .odm, .dwg'
 
-const unauthorizedRequestAllowed = ['api/admin/certificate/is-valid', 'api/admin/certificate/is-valid', 'api/api-gateway/certInfos', 'api/csrf-token']
+const unauthorizedRequestAllowed = ['api/csrf-token']
 
 export {
     modules,
