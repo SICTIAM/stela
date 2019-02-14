@@ -21,7 +21,7 @@ public class GenericAccount {
 
     private Set<LocalAuthorityGeneric> localAuthorities;
 
-    protected GenericAccount() {
+    public GenericAccount() {
     }
 
     public String getUuid() {

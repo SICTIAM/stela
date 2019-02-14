@@ -105,6 +105,7 @@ public class PesEndpoint {
         return genericAccount;
     }
 
+    //TODO: duplicated function, see PaullService
     public GenericAccount emailAuth(String email, String password) {
 
         GenericAccount genericAccount = null;

@@ -41,32 +41,22 @@ public class PaullController {
     private final ExternalRestService externalRestService;
     private final PesRetourService pesRetourService;
     private final StorageService storageService;
+    private final PaullService paullService;
 
     public PaullController(SesileService sesileService, LocalAuthorityService localAuthorityService,
             PesAllerService pesAllerService, ExternalRestService externalRestService,
-            PesRetourService pesRetourService, StorageService storageService) {
+            PesRetourService pesRetourService, StorageService storageService, PaullService paullService) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
         this.pesAllerService = pesAllerService;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
         this.storageService = storageService;
+        this.paullService = paullService;
     }
 
     public PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
         return new PaullResponse(httpStatus.value() + "", httpStatus.getReasonPhrase(), datas);
-    }
-
-    public GenericAccount emailAuth(String email, String password) {
-
-        GenericAccount genericAccount = null;
-        try {
-
-            genericAccount = externalRestService.authWithEmailPassword(email, password);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        }
-        return genericAccount;
     }
 
     @PostMapping("/depotpes")
@@ -87,7 +77,7 @@ public class PaullController {
         MultipartFile multiFile = request.getFile(itrator.next());
 
         LOGGER.debug("FILENAME : " + multiFile.getName());
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         siren = StringUtils.removeStart(siren, "sys");
         HttpStatus status = HttpStatus.OK;
         Map<String, Object> data = new HashMap<>();
@@ -163,7 +153,7 @@ public class PaullController {
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
@@ -220,7 +210,7 @@ public class PaullController {
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
@@ -253,7 +243,7 @@ public class PaullController {
 
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
@@ -272,7 +262,7 @@ public class PaullController {
 
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
@@ -304,7 +294,7 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
 
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);

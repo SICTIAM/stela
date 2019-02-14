@@ -6,10 +6,9 @@ import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
-import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
 import fr.sictiam.stela.pesservice.model.util.PaullResponse;
-import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
+import fr.sictiam.stela.pesservice.service.PaullService;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.utils.Base64;
@@ -34,13 +33,13 @@ public class PaullGenericController {
 
     private final SesileService sesileService;
     private final LocalAuthorityService localAuthorityService;
-    private final ExternalRestService externalRestService;
+    private PaullService paullService;
 
     public PaullGenericController(SesileService sesileService, LocalAuthorityService localAuthorityService,
-            ExternalRestService externalRestService) {
+                                  PaullService paullService) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
-        this.externalRestService = externalRestService;
+        this.paullService = paullService;
     }
 
     private PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
@@ -50,17 +49,6 @@ public class PaullGenericController {
     private PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas, String customMessage) {
         return new PaullResponse(httpStatus.value() + "",
                 StringUtils.isNoneBlank(customMessage) ? customMessage : httpStatus.getReasonPhrase(), datas);
-    }
-
-    private GenericAccount emailAuth(String email, String password) {
-        //TODO: #5784 Create PaullService, needed by infosDocument, getDocument and PaullController
-        GenericAccount genericAccount = null;
-        try {
-            genericAccount = externalRestService.authWithEmailPassword(email, password);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        }
-        return genericAccount;
     }
 
     @PostMapping("/depot")
@@ -80,7 +68,7 @@ public class PaullGenericController {
         MultipartFile multiFile = request.getFile(itrator.next());
         Map<String, Object> data = new HashMap<>();
 
-        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
+        if (paullService.emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
 
         HttpStatus status = HttpStatus.OK;
 
@@ -128,7 +116,7 @@ public class PaullGenericController {
 
         Map<String, Object> data = new HashMap<>();
 
-        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
+        if (paullService.emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
 
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
 
@@ -137,14 +125,16 @@ public class PaullGenericController {
         ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
         Optional<GenericDocument> genericDocument = sesileService.getGenericDocument(idFlux);
 
-        if (classeurResponse.getStatusCode().isError() && !classeurResponse.hasBody() && !genericDocument.isPresent())
+        if ((classeurResponse.getStatusCode().isError() && !classeurResponse.hasBody()) || !genericDocument.isPresent())
             return this.notFoundClasseur(data);
 
         Classeur classeur = classeurResponse.getBody();
 
-        if (classeur == null) return this.errorWhileSearchingClasseur(data);
+        if (classeur == null)
+            return this.errorWhileSearchingClasseur(data);
 
-        if (classeur.getDocuments().isEmpty()) return this.noDocumentInClasseur(data);
+        if (classeur.getDocuments().isEmpty())
+            return this.noDocumentInClasseur(data);
 
         Document document = classeur.getDocuments().get(0);
         data.put("Title", classeur.getNom());
@@ -165,7 +155,7 @@ public class PaullGenericController {
 
         Map<String, Object> data = new HashMap<>();
 
-        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
+        if (paullService.emailAuth(userid, password) == null) return this.authGenericAccountForbidden(data);
 
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
 
@@ -173,7 +163,8 @@ public class PaullGenericController {
 
         ResponseEntity<Classeur> classeurResponse = sesileService.checkClasseurStatus(localAuthority.get(), idFlux);
 
-        if (classeurResponse.getStatusCode().isError() && !classeurResponse.hasBody()) return this.notFoundClasseur(data);
+        if (classeurResponse.getStatusCode().isError() && !classeurResponse.hasBody())
+            return this.notFoundClasseur(data);
 
         Classeur classeur = classeurResponse.getBody();
 
@@ -192,7 +183,7 @@ public class PaullGenericController {
     @GetMapping("/servicesorganisationnels/{email}")
     public ResponseEntity<?> getServices(@PathVariable String siren, @PathVariable String email,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
-        if (emailAuth(userid, password) == null) return this.authGenericAccountForbidden(null);
+        if (paullService.emailAuth(userid, password) == null) return this.authGenericAccountForbidden(null);
 
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
         if (localAuthority.isPresent()) {
