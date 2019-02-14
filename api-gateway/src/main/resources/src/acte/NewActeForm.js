@@ -292,7 +292,7 @@ class NewActeForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const acteData = this.getActeData()
         const headers = { 'Content-Type': 'application/json' }
-        if(this.state.fields.number || this.state.fields.object || this.state.fields.decision) {
+        if(this.state.fields.number || this.state.fields.objet || this.state.fields.decision) {
             const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
             _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.props.authContext })
                 .then(checkStatus)
