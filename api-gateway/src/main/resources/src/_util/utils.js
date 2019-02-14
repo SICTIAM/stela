@@ -1,6 +1,6 @@
 import updatesFile from '../updates.md'
 import moment from 'moment'
-import { publicPages } from './constants'
+import {unauthorizedRequestAllowed} from './constants'
 
 
 const checkStatus = (response) => {
@@ -34,18 +34,15 @@ const customFetch = async (URL, options) => {
     }catch (errorResponse) {
         console.error(`Error : ${errorResponse.status} on ${errorResponse.url}`)
         const localAuthority = options.headers.localAuthoritySlug
-        const pageLocation =
-            localAuthority && window.location.pathname !== `/${localAuthority}` ?
-                '/' + window.location.pathname.split('/').splice(2,2).join('/') :
-                window.location.pathname
-        const certificateRequest = '/api/admin/certificate/is-valid'
+        const errorUrl = errorResponse.url.split('/').slice(3).join('/')
         switch (errorResponse.status) {
         case 401:
         case 403:
-            if(!publicPages.includes(pageLocation) && pageLocation !== certificateRequest) {
-                localAuthority ?
-                    window.location.replace(`/api/api-gateway/loginWithSlug/${localAuthority}`) :
-                    window.location.replace('/')
+            if(!unauthorizedRequestAllowed.includes(errorUrl)) {
+                const redirectPath = localAuthority ?
+                    `/api/api-gateway/loginWithSlug/${localAuthority}`:
+                    '/'
+                window.location.replace(redirectPath)
             }
             break
         default:
