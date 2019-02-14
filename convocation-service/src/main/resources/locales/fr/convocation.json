@@ -28,7 +28,8 @@
       "future_convocation": "Convocations à venir",
       "past_convocation": "Convocations passées",
       "all_convocation": "Toutes les convocations",
-      "convocation_filters": "Filtres convocation"
+      "convocation_filters": "Filtres convocation",
+      "all_convocation_type": "Tous les types d'assemblée"
     },
     "page": {
       "sent": "Envoi",

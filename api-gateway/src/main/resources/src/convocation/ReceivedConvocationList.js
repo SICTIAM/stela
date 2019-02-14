@@ -43,15 +43,28 @@ class ReceivedConvocation extends Component {
 	    offset: 0,
 	    currentPage: 0,
 	    totalCount: 0,
+	    assemblyTypes: []
 	}
 
 	componentDidMount() {
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+
 	    const itemPerPage = localStorage.getItem('itemPerPage')
 	    if (!itemPerPage) {
 	        localStorage.setItem('itemPerPage', 10)
 	        this.loadData()
 	    }
 	    else this.setState({ limit: 10 }, this.loadData)
+
+	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
+	        .then(checkStatus)
+	        .then(response => response.json())
+	        .then(json => this.setState({assemblyTypes: json.map(item => { return {text: item.name, uuid: item.uuid}})}))
+	        .catch(response => {
+	            response.json().then(json => {
+	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	            })
+	        })
 	}
 	/** Load data list */
 	loadData = () => {
@@ -137,6 +150,10 @@ class ReceivedConvocation extends Component {
                 options={options} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 
+	    const assemblyTypesFilter = this.state.assemblyTypes.map(assemblyType => {
+	        return <option key={assemblyType.uuid} value={assemblyType.uuid}>{assemblyType.text}</option>
+	    })
+
 	    const additionnalFilter =
 			<Form>
 			    <select id='convocationFilter' aria-label={t('convocation.list.convocation_filters')} value={this.state.search.filter} onChange={e => this.handleSearchChange('filter', e.target.value, this.loadData)}>
@@ -165,7 +182,10 @@ class ReceivedConvocation extends Component {
 	                    additionnalFilter={additionnalFilter}>
 	                    <Form onSubmit={this.loadData}>
 	                        <FormFieldInline htmlFor='assemblyType' label={t('convocation.fields.assembly_type')} >
-	                            <input id='assemblyType' aria-label={t('convocation.fields.assembly_type')} value={search.assemblyType} onChange={e => this.handleSearchChange('assemblyType', e.target.value)} />
+	                            <select id='assemblyType' aria-label={t('convocation.fields.assembly_type')} onBlur={e => this.handleSearchChange('assemblyType', e.target.value)}>
+	                                <option key='all' value=''>{t('convocation.list.all_convocation_type')}</option>
+	                                {assemblyTypesFilter}
+	                            </select>
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='subject' label={t('convocation.fields.object')} >
 	                            <input id='subject' aria-label={t('convocation.fields.object')} value={search.subject} onChange={e => this.handleSearchChange('subject', e.target.value)} />
