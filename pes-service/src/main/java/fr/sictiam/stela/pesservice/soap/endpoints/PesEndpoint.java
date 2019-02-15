@@ -112,7 +112,7 @@ public class PesEndpoint {
         try {
 
             genericAccount = externalRestService.authWithEmailPassword(email, password);
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
         }
         return genericAccount;

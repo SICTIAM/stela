@@ -22,7 +22,7 @@ public class PaullService {
     public GenericAccount emailAuth(String email, String password) {
         try {
             return externalRestService.authWithEmailPassword(email, password);
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             LOGGER.error("[emailAuth] Authentication with generic account {} failed: {}", email, e.getMessage());
             return null;
         }

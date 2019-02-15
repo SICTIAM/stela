@@ -23,17 +23,17 @@ public class PaullServiceTest {
     ExternalRestService externalRestService;
 
     @Test
-    public void emailAuth() throws Exception {
+    public void emailAuth() throws RuntimeException {
         given(externalRestService.authWithEmailPassword("test1@test.fr", "test1password")).willReturn(new GenericAccount());
 
-        Assert.assertNotNull(externalRestService.authWithEmailPassword("test1@test.fr", "test1password"));
+        Assert.assertNotNull(paullService.emailAuth("test1@test.fr", "test1password"));
     }
 
     @Test
-    public void emailAuthFailed() throws Exception {
+    public void emailAuthFailed() throws RuntimeException {
         GenericAccount genericAccount = null;
         given(externalRestService.authWithEmailPassword("test1@test.fr", "test1password")).willReturn(genericAccount);
 
-        Assert.assertNull(externalRestService.authWithEmailPassword("test1@test.fr", "test1password"));
+        Assert.assertNull(paullService.emailAuth("test1@test.fr", "test1password"));
     }
 }
