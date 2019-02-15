@@ -76,21 +76,25 @@ class AuthProvider extends Component {
 	 * true -> get profile and agent
 	 */
 	async checkAuthentication() {
-		const isAuthenticateResponse = await this.isAuthenticate()
-		const statusAuthentication = isAuthenticateResponse.status
-		const isLoggedIn = statusAuthentication !== 401
-		if(isLoggedIn !== this.state.isLoggedIn) {
-			this.setState({isLoggedIn}, () => {
-				if(this.state.isLoggedIn) {
-					this.getProfile()
-					this.getUser()
-				}
+		try {
+			const isAuthenticateResponse = await this.isAuthenticate()
+			const statusAuthentication = isAuthenticateResponse.status
+			const isLoggedIn = statusAuthentication !== 401
+			if (isLoggedIn !== this.state.isLoggedIn) {
+				this.setState({isLoggedIn}, () => {
+					if (this.state.isLoggedIn) {
+						this.getProfile()
+						this.getUser()
+					}
+				})
+			}
+			this.setState({
+				csrfToken: isAuthenticateResponse.headers.get('X-CSRF-TOKEN'),
+				csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
 			})
+		}catch(e){
+			console.error('Auth error', e)
 		}
-		this.setState({
-			csrfToken: isAuthenticateResponse.headers.get('X-CSRF-TOKEN'),
-			csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
-		})
 	}
 	getProfile = () => {
 	    const {_fetchWithAuthzHandling, _addNotification } = this.context
