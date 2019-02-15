@@ -114,7 +114,7 @@ class ReceivedConvocation extends Component {
 
 	render() {
 	    const { t } = this.context
-	    const { search } = this.state
+	    const { search, assemblyTypes } = this.state
 	    const dateDisplay = (date) => date && moment(date, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY HH:mm')
 
 	    const answerDisplay = (answer) => {
@@ -150,7 +150,7 @@ class ReceivedConvocation extends Component {
                 options={options} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 
-	    const assemblyTypesFilter = this.state.assemblyTypes.map(assemblyType => {
+	    const assemblyTypesFilter = assemblyTypes.map(assemblyType => {
 	        return <option key={assemblyType.uuid} value={assemblyType.uuid}>{assemblyType.text}</option>
 	    })
 
