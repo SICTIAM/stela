@@ -462,6 +462,10 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         return sb.toString();
     }
 
+    public Long countPesAllerByStatusTypeAndDate(StatusType statusType, LocalDateTime localDateTime) {
+        return pesAllerRepository.countByLastHistoryStatusAndLastHistoryDateAfter(statusType, localDateTime);
+    }
+
     @Override
     public void onApplicationEvent(PesCreationEvent event) {
         Attachment attachment = event.getPesAller().getAttachment();
