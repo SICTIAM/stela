@@ -161,7 +161,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     LOGGER.debug("[checkPesSigned] Checking document {} status", pes.getSesileDocumentId());
                     if (pes.getSesileDocumentId() != null
                             && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
-                        addSignedStatus((PesAller) pes);
+                        addSignedStatus(pes.getSesileClasseurId(), pes.getLocalAuthority(), pes.getUuid(), pes.getSesileClasseurUrl());
                         LOGGER.debug("[checkPesSigned] Document {} signed from Sesile", pes.getSesileDocumentId());
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
                         if (file != null) {
@@ -749,7 +749,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     public void updatePesStatus(PesAller pes, String status, MultipartFile file) throws IOException {
         if (status.equals("SIGNED")) {
-            addSignedStatus(pes);
+            addSignedStatus(pes.getSesileClasseurId(), pes.getLocalAuthority(), pes.getUuid(), pes.getSesileClasseurUrl());
             pesService.updateStatusAndAttachment(pes.getUuid(), StatusType.SIGNATURE_VALIDATION, file.getBytes());
         } else {
             pesService.updateStatus(pes.getUuid(), StatusType.valueOf("CLASSEUR_" + status));
@@ -771,13 +771,13 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         }
     }
 
-    public Optional<Action> getSignedActionOfClasseur(Classeur classeur) {
+    private Optional<Action> getSignedActionOfClasseur(Classeur classeur) {
         return classeur.getActions().stream().filter(action ->
                 (action.getAction().equals("Signature") && action.getCommentaire().equals("Classeur signé"))).findFirst();
     }
 
-    public void addSignedStatus(PesAller pes) {
-        ResponseEntity<Classeur> responseClasseur = getClasseur(pes.getSesileClasseurId(), pes.getLocalAuthority());
+    private void addSignedStatus(Integer classeurId, LocalAuthority localAuthority, String pesUuid, String classeurUrl) {
+        ResponseEntity<Classeur> responseClasseur = getClasseur(classeurId, localAuthority);
         if (responseClasseur.getStatusCode().is2xxSuccessful()) {
             Optional<Action> signedAction = getSignedActionOfClasseur(responseClasseur.getBody());
 
@@ -789,14 +789,14 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 String statusMessage = localesService.getMessage("fr", "pes", "$.pes.page.signed_by_on",
                         actionInfos);
                 pesService.updateStatus(
-                        pes.getUuid(),
+                        pesUuid,
                         StatusType.CLASSEUR_SIGNED,
                         statusMessage);
             } else {
                 pesService.updateStatus(
-                        pes.getUuid(),
+                        pesUuid,
                         StatusType.CLASSEUR_SIGNED);
-                LOGGER.warn("[addSignedStatus] No signature action found for classeur {} of PES {}", pes.getSesileClasseurUrl(), pes.getUuid());
+                LOGGER.warn("[addSignedStatus] No signature action found for classeur {} of PES {}", classeurUrl, pesUuid);
             }
         }
     }
