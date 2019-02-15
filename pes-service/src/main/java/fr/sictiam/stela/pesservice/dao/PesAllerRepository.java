@@ -42,4 +42,6 @@ public interface PesAllerRepository extends JpaRepository<PesAller, String> {
             @Param("statusType") String type,
             @Param("fromLocalDate") LocalDateTime fromLocalDate,
             @Param("toLocalDate") LocalDateTime toLocaleDate);
+
+    Long countByLastHistoryStatusAndLastHistoryDateAfter(StatusType statusType, LocalDateTime localDateTime);
 }
