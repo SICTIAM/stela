@@ -121,11 +121,12 @@ class ReceivedConvocation extends Component {
 	                    <Grid reversed='mobile tablet vertically'>
 	                        <Grid.Column mobile='16' tablet='16' computer='12'>
 	                            <Grid>
+	                                {this.state.convocation.comment && (
 	                                <Grid.Column computer='16'>
 	                                    <Field htmlFor="comments" label={t('convocation.fields.comment')}>
 	                                        <FieldValue id="comments">{this.state.convocation.comment}</FieldValue>
 	                                    </Field>
-	                                </Grid.Column>
+	                                </Grid.Column>)}
 	                                {this.state.convocation.attachment && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
