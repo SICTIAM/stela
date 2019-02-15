@@ -454,11 +454,13 @@ class NewActeForm extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const fields = this.state.fields
+        this.props.setStatus('saving')
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 fields['draft'] = false
+                this.props.setStatus('saved')
                 this.setState({ fields }, () => {
                     _addNotification(notifications.acte.sent)
                     history.push(`/${localAuthoritySlug}/actes/liste/${acteUuid}`)
