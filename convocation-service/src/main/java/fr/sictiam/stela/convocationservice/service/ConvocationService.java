@@ -404,8 +404,7 @@ public class ConvocationService {
 
         if (StringUtils.isNotBlank(assemblyType))
             predicates.add(
-                    builder.and(builder.like(builder.lower(convocationRoot.get("assemblyType").get("name")),
-                            "%" + assemblyType.toLowerCase() + "%")));
+                    builder.and(builder.equal(convocationRoot.get("assemblyType").get("uuid"), assemblyType)));
 
         if (StringUtils.isNotBlank(subject))
             predicates.add(
