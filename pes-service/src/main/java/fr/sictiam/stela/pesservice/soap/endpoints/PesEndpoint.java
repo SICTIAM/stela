@@ -105,13 +105,14 @@ public class PesEndpoint {
         return genericAccount;
     }
 
+    //TODO: duplicated function, see PaullService
     public GenericAccount emailAuth(String email, String password) {
 
         GenericAccount genericAccount = null;
         try {
 
             genericAccount = externalRestService.authWithEmailPassword(email, password);
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
         }
         return genericAccount;

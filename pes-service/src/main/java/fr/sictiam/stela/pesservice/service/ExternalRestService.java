@@ -121,7 +121,7 @@ public class ExternalRestService {
         return opt.get();
     }
 
-    public GenericAccount authWithEmailPassword(String email, String password) throws IOException {
+    public GenericAccount authWithEmailPassword(String email, String password) throws RuntimeException {
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
         body.put("password", password);

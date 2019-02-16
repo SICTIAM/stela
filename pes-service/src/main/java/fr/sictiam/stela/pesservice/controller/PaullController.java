@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.controller;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
@@ -8,12 +7,8 @@ import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
-import fr.sictiam.stela.pesservice.service.ExternalRestService;
-import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
-import fr.sictiam.stela.pesservice.service.PesAllerService;
-import fr.sictiam.stela.pesservice.service.PesRetourService;
-import fr.sictiam.stela.pesservice.service.SesileService;
-import fr.sictiam.stela.pesservice.service.StorageService;
+import fr.sictiam.stela.pesservice.model.util.PaullResponse;
+import fr.sictiam.stela.pesservice.service.*;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -23,25 +18,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,75 +40,22 @@ public class PaullController {
     private final ExternalRestService externalRestService;
     private final PesRetourService pesRetourService;
     private final StorageService storageService;
+    private final PaullService paullService;
 
     public PaullController(SesileService sesileService, LocalAuthorityService localAuthorityService,
             PesAllerService pesAllerService, ExternalRestService externalRestService,
-            PesRetourService pesRetourService, StorageService storageService) {
+            PesRetourService pesRetourService, StorageService storageService, PaullService paullService) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
         this.pesAllerService = pesAllerService;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
         this.storageService = storageService;
-    }
-
-    @JsonPropertyOrder({ "status", "status_message", "data" })
-    class PaullResponse {
-
-        String status;
-        String status_message;
-        Object data;
-
-        public PaullResponse() {
-
-        }
-
-        public PaullResponse(String status, String status_message, Object data) {
-            this.status = status;
-            this.status_message = status_message;
-            this.data = data;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        public String getStatus_message() {
-            return status_message;
-        }
-
-        public void setStatus_message(String status_message) {
-            this.status_message = status_message;
-        }
-
-        public Object getData() {
-            return data;
-        }
-
-        public void setData(Object data) {
-            this.data = data;
-        }
-
+        this.paullService = paullService;
     }
 
     public PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
         return new PaullResponse(httpStatus.value() + "", httpStatus.getReasonPhrase(), datas);
-    }
-
-    public GenericAccount emailAuth(String email, String password) {
-
-        GenericAccount genericAccount = null;
-        try {
-
-            genericAccount = externalRestService.authWithEmailPassword(email, password);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        }
-        return genericAccount;
     }
 
     @PostMapping("/depotpes")
@@ -145,7 +76,7 @@ public class PaullController {
         MultipartFile multiFile = request.getFile(itrator.next());
 
         LOGGER.debug("FILENAME : " + multiFile.getName());
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         siren = StringUtils.removeStart(siren, "sys");
         HttpStatus status = HttpStatus.OK;
         Map<String, Object> data = new HashMap<>();
@@ -209,7 +140,7 @@ public class PaullController {
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
@@ -267,7 +198,7 @@ public class PaullController {
         Map<String, Object> data = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
@@ -300,7 +231,7 @@ public class PaullController {
 
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
@@ -319,7 +250,7 @@ public class PaullController {
 
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
@@ -351,7 +282,7 @@ public class PaullController {
         HttpStatus status = HttpStatus.OK;
         siren = StringUtils.removeStart(siren, "sys");
 
-        GenericAccount genericAccount = emailAuth(userid, password);
+        GenericAccount genericAccount = paullService.emailAuth(userid, password);
         if (genericAccount == null || !localAuthorityService.localAuthorityGranted(genericAccount, siren)) {
             status = HttpStatus.FORBIDDEN;
             return new ResponseEntity<Object>(generatePaullResponse(status, null), status);
