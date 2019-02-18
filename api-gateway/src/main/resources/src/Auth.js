@@ -45,6 +45,7 @@ class AuthProvider extends Component {
 	static contextTypes = {
 	    _fetchWithAuthzHandling: PropTypes.func,
 	    _addNotification: PropTypes.func,
+		t: PropTypes.func
 	}
 	getUser = () => {
 	    const {_fetchWithAuthzHandling, _addNotification } = this.context
@@ -66,7 +67,10 @@ class AuthProvider extends Component {
 		user: null,
 		getUser: this.getUser,
 		csrfToken: null,
-		csrfTokenHeaderName: null
+		csrfTokenHeaderName: null,
+		_fetchWithAuthzHandling: this.context._fetchWithAuthzHandling,
+		_addNotification: this.context._addNotification,
+		t: this.context.t
 	}
 	componentDidMount() {
 	    this.checkAuthentication()
