@@ -33,21 +33,20 @@ public class Convocation {
     private AssemblyType assemblyType;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JsonView(Views.Convocation.class)
+    @JsonView(Views.ConvocationInternal.class)
     private Attachment attachment;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JsonView(Views.Convocation.class)
+    @JsonView(Views.ConvocationInternal.class)
     private Set<Attachment> annexes;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonView(Views.Convocation.class)
+    @JsonView(Views.ConvocationInternal.class)
     private Set<Question> questions;
 
     @OneToMany(mappedBy = "convocation")
     @JsonView(Views.ConvocationReceived.class)
     @SortComparator(RecipientResponseComparator.class)
-    //@OrderBy("recipient ASC")
     private SortedSet<RecipientResponse> recipientResponses;
 
     @OneToMany

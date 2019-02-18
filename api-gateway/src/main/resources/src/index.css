@@ -89,6 +89,21 @@
     padding-left: 5px
 }
 
+.py-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.px-10 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* Border */
+.bb-1 {
+    border-bottom: 1px solid rgba(34,36,38,.15);
+}
+
 /* Max height */
 .maxh-300 {
     max-height: 300px;

@@ -1,4 +1,5 @@
 import updatesFile from '../updates.md'
+import moment from 'moment'
 
 const checkStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
@@ -180,6 +181,9 @@ const sortAlphabetically = (arrayOfObject, attribute) => {
 
     return arrayOfObject
 }
+const convertDateBackFormatToUIFormat = (date, format = 'DD/MM/YYYY') => {
+    return moment(date, 'YYYY-MM-DDTHH:mm:ss').format(format)
+}
 
 export {
     checkStatus,
@@ -206,5 +210,6 @@ export {
     updateItemPerPage,
     sortTable,
     onSearch,
-    sortAlphabetically
+    sortAlphabetically,
+    convertDateBackFormatToUIFormat
 }

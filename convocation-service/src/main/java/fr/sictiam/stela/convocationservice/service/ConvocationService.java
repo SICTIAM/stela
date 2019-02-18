@@ -3,11 +3,14 @@ package fr.sictiam.stela.convocationservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
+import fr.sictiam.stela.convocationservice.dao.QuestionResponseRepository;
 import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Profile;
+import fr.sictiam.stela.convocationservice.model.Question;
+import fr.sictiam.stela.convocationservice.model.QuestionResponse;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
@@ -61,6 +64,8 @@ public class ConvocationService {
 
     private final RecipientResponseRepository recipientResponseRepository;
 
+    private final QuestionResponseRepository questionResponseRepository;
+
     private final AttachmentRepository attachmentRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -72,6 +77,7 @@ public class ConvocationService {
             StorageService storageService,
             ExternalRestService externalRestService,
             RecipientResponseRepository recipientResponseRepository,
+            QuestionResponseRepository questionResponseRepository,
             AttachmentRepository attachmentRepository,
             ApplicationEventPublisher applicationEventPublisher) {
         this.convocationRepository = convocationRepository;
@@ -79,6 +85,7 @@ public class ConvocationService {
         this.storageService = storageService;
         this.externalRestService = externalRestService;
         this.recipientResponseRepository = recipientResponseRepository;
+        this.questionResponseRepository = questionResponseRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -208,7 +215,7 @@ public class ConvocationService {
         throw new NotFoundException("file not found");
     }
 
-    public void answer(Convocation convocation, Recipient recipient, ResponseType responseType) {
+    public void answerConvocation(Convocation convocation, Recipient recipient, ResponseType responseType) {
 
         Optional<RecipientResponse> recipientResponse =
                 convocation.getRecipientResponses().stream().filter(rr -> rr.getRecipient().equals(recipient)).findFirst();
@@ -219,6 +226,33 @@ public class ConvocationService {
 
         recipientResponse.get().setResponseType(responseType);
         convocationRepository.save(convocation);
+    }
+
+    public void answerQuestion(Convocation convocation, Recipient currentRecipient, String questionUuid,
+            Boolean response) {
+
+        Question question = convocation.getQuestions()
+                .stream().filter(q -> q.getUuid().equals(questionUuid))
+                .findFirst().orElseThrow(() -> {
+                    LOGGER.error("Question {} not found in convocation {}", questionUuid,
+                            convocation.getUuid());
+                    return new NotFoundException();
+                });
+
+        Optional<QuestionResponse> opt =
+                question.getResponses().stream().filter(questionResponse -> questionResponse.getRecipient().equals(currentRecipient)).findFirst();
+
+        QuestionResponse questionResponse;
+        if (!opt.isPresent()) {
+            questionResponse = new QuestionResponse();
+            questionResponse.setRecipient(currentRecipient);
+            questionResponse.setQuestion(question);
+            question.getResponses().add(questionResponse);
+        } else {
+            questionResponse = opt.get();
+        }
+        questionResponse.setResponse(response);
+        questionResponseRepository.save(questionResponse);
     }
 
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType,

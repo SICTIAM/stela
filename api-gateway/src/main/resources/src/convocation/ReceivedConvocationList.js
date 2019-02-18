@@ -11,7 +11,8 @@ import {
     updateItemPerPage,
     handlePageClick,
     sortTable,
-    checkStatus
+    checkStatus,
+    convertDateBackFormatToUIFormat
 } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
@@ -115,7 +116,7 @@ class ReceivedConvocation extends Component {
 	render() {
 	    const { t } = this.context
 	    const { search, assemblyTypes } = this.state
-	    const dateDisplay = (date) => date && moment(date, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY HH:mm')
+	    const dateDisplay = (date) => date && convertDateBackFormatToUIFormat(date, 'DD/MM/YYYY HH:mm')
 
 	    const answerDisplay = (answer) => {
 	        switch(answer) {
@@ -209,8 +210,6 @@ class ReceivedConvocation extends Component {
 	                                        onChange={date => this.handleSearchChange('meetingDateTo', date)} />
 	                                </FormField>
 	                            </Form.Group>
-	                        </FormFieldInline>
-	                        <FormFieldInline htmlFor='subject' label={t('convocation.fields.object')}>
 	                        </FormFieldInline>
 	                        <div style={{ textAlign: 'right' }}>
 	                            <Button type='submit' basic primary>{t('api-gateway:form.search')}</Button>

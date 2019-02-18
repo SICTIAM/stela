@@ -15,7 +15,7 @@ class QuestionsAnswerForm extends Component {
 	    const { t } = this.context
 	    const questions = this.props.questions.map((question, index) => {
 	        return (
-	            <div key={`question_${index}`}>
+	            <div key={`question_${index}`} className='bb-1 px-10 py-5'>
 	                <Form.Field inline>
 	                    <Grid>
 	                        <Grid.Column className="inline-grid" width={12}>
@@ -25,14 +25,18 @@ class QuestionsAnswerForm extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column className="inline-grid" width={4}>
 	                            <Radio
-	                                value='yes'
+	                                value='true'
 	                                name={`question_${index}`}
 	                                label={t('api-gateway:yes')}
+	                                checked={question.response === true}
+	                                onChange={(e, {value}) => this.props.handleChangeRadio(e, value, question.uuid)}
 	                            ></Radio>
 	                            <Radio
-	                                value='no'
+	                                value='false'
 	                                name={`question_${index}`}
 	                                label={t('api-gateway:no')}
+	                                checked={question.response === false}
+	                                onChange={(e, {value}) => this.props.handleChangeRadio(e, value, question.uuid)}
 	                            ></Radio>
 	                        </Grid.Column>
 	                    </Grid>

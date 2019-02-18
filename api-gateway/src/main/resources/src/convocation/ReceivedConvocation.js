@@ -3,10 +3,9 @@ import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Radio, Form } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import moment from 'moment'
 
 import { withAuthContext } from '../Auth'
-import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { getLocalAuthoritySlug, checkStatus, convertDateBackFormatToUIFormat } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
 import { Page, Field, FieldValue, FormFieldInline, LinkFile } from '../_components/UI'
@@ -32,7 +31,6 @@ class ReceivedConvocation extends Component {
 	        response: null,
 	        attachment: null,
 	        questions: [],
-	        recipientResponses: [],
 	        sentDate: null,
 	        profile: {},
 	        subject: '',
@@ -56,13 +54,34 @@ class ReceivedConvocation extends Component {
 	        })
 	}
 
-	handleChangeRadio = (e, value, field) => {
+	handleChangeRadio = (e, value, field, question_uuid) => {
 	    const { _fetchWithAuthzHandling, _addNotification, t } = this.context
 
-	    const convocation = this.state.convocation
-	    convocation[field] = value
-	    _fetchWithAuthzHandling({url: `/api/convocation/received/${this.props.uuid}/${value}`, method: 'PUT', context: this.props.authContext})
+	    const { convocation } = this.state
+	    var url = ''
+	    /*
+			response: for presence or not
+			additional_questions: for additional questions responses. field name -> questions (contains questions list and answer)
+		*/
+	    switch(field) {
+	    case 'additional_questions':
+	        var questionIndex = convocation.questions.findIndex((question) => {
+	            return question.uuid === question_uuid
+	        })
+	        convocation.questions[questionIndex].response = value === 'true'
+	        url = `/api/convocation/received/${this.props.uuid}/question/${question_uuid}/${value}`
+	        break
+	    case 'response':
+	        convocation.response = value
+	        url = `/api/convocation/received/${this.props.uuid}/${value}`
+	        break
+	    }
+
+	    _fetchWithAuthzHandling({url: url, method: 'PUT', context: this.props.authContext})
 	        .then(checkStatus)
+	        .then(() => {
+	            _addNotification(notifications.convocation.reponseSent)
+	        })
 	        .catch(response => {
 	            switch(response.status) {
 	            case 400:
@@ -143,7 +162,7 @@ class ReceivedConvocation extends Component {
 	                                            {annexes}
 	                                            {this.state.convocation.annexes.length > 3 && (
 	                                                <div className='mt-15'>
-	                                                    <Button onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
+	                                                    <Button type='button' onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
 	                                                        {this.state.showAllAnnexes && (
 	                                                            <span>{t('convocation.new.show_less_annexes')}</span>
 	                                                        )}
@@ -164,7 +183,7 @@ class ReceivedConvocation extends Component {
 	                                <Grid columns='1'>
 	                                    <Grid.Column>
 	                                        <Field htmlFor="Date" label={t('convocation.fields.date')}>
-	                                            <FieldValue id="Date">{moment(this.state.convocation.meetingDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
+	                                            <FieldValue id="Date">{convertDateBackFormatToUIFormat(this.state.convocation.meetingDate, 'DD/MM/YYYY à HH:mm')}</FieldValue>
 	                                        </Field>
 	                                    </Grid.Column>
 	                                    <Grid.Column>
@@ -190,7 +209,7 @@ class ReceivedConvocation extends Component {
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='4'>
 	                            <Field htmlFor="sendingDate" label={t('convocation.list.sent_date')}>
-	                                <FieldValue id="sendingDate">{moment(this.state.convocation.sentDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
+	                                <FieldValue id="sendingDate">{convertDateBackFormatToUIFormat(this.state.convocation.sentDate, 'DD/MM/YYYY à HH:mm')}</FieldValue>
 	                            </Field>
 	                        </Grid.Column>
 	                    </Grid>
@@ -224,7 +243,9 @@ class ReceivedConvocation extends Component {
 	                            <h2>{t('convocation.fields.questions')}</h2>
 	                            <Grid column='1'>
 	                                <Grid.Column mobile='16' computer='16'>
-	                                    <QuestionsAnswerForm questions={this.state.convocation.questions}></QuestionsAnswerForm>
+	                                    <QuestionsAnswerForm
+	                                        questions={this.state.convocation.questions}
+	                                        handleChangeRadio={(e, value, uuid) => this.handleChangeRadio(e, value, 'additional_questions', uuid)}></QuestionsAnswerForm>
 	                                </Grid.Column>
 	                            </Grid>
 	                        </Fragment>
