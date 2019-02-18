@@ -25,11 +25,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,6 +78,17 @@ public class ConvocationServiceTest {
     public void setUp() {
         Convocation convocation = createDummyConvocation();
         doReturn(convocation).when(convocationService).getConvocation(any(), any());
+    }
+
+    @Test
+    public void questionOrder() {
+        Convocation convocation = convocationService.getConvocation("anything", "anything");
+        long i = 1;
+
+        for (Iterator<Question> it = convocation.getQuestions().iterator(); it.hasNext(); i++) {
+            Question q = it.next();
+            assertEquals(q.getRank().longValue(), i);
+        }
     }
 
     @Test
@@ -147,7 +158,7 @@ public class ConvocationServiceTest {
         ReflectionTestUtils.setField(assemblyType, "uuid", "assembly-type-one");
         assemblyType.setName("Test assembly type one");
 
-        Set<Question> questions = new HashSet<>();
+        SortedSet<Question> questions = new TreeSet<>();
 
         ReflectionTestUtils.setField(convocation, "uuid", "convocation-uuid-one");
         convocation.setSubject("convocation test one");
@@ -166,11 +177,17 @@ public class ConvocationServiceTest {
         recipientResponses.add(recipientResponse);
         convocation.setRecipientResponses(recipientResponses);
 
-        Question question = new Question();
+        Question question1 = new Question();
+        ReflectionTestUtils.setField(question1, "uuid", "question-uuid-one");
+        question1.setQuestion("test question one ?");
+        question1.setRank(1);
+        questions.add(question1);
 
-        ReflectionTestUtils.setField(question, "uuid", "question-uuid-one");
-        question.setQuestion("test question one ?");
-        questions.add(question);
+        Question question2 = new Question();
+        ReflectionTestUtils.setField(question2, "uuid", "question-uuid-two");
+        question2.setQuestion("test question two ?");
+        question2.setRank(2);
+        questions.add(question2);
 
         convocation.setQuestions(questions);
 

@@ -15,7 +15,8 @@ class QuestionsForm extends Component {
 	    questions: PropTypes.array
 	}
 	state = {
-	    currentQuestion: ''
+	    currentQuestion: '',
+	    currentRank: 1
 	}
 	handleKeyPress = (event) => {
 	    if(event.key === 'Enter') {
@@ -27,8 +28,9 @@ class QuestionsForm extends Component {
 	addQuestion = () => {
 	    if(this.state.currentQuestion.trim().length > 0 ) {
 	        const questions = this.props.questions
-	        questions.push(this.state.currentQuestion)
-	        this.setState({currentQuestion: ''})
+	        const rank = this.state.currentRank
+	        questions.push({ question: this.state.currentQuestion, rank: rank })
+	        this.setState({currentQuestion: '', currentRank: rank + 1 })
 	        this.props.onUpdateQuestions(questions)
 	    }
 	}
@@ -45,12 +47,7 @@ class QuestionsForm extends Component {
 	        return (
 	            <Fragment key={`question_${index}`}>
 	                <div className='deletableListItem' id='questions'>
-	                    {!question.uuid && (
-	                        <p className='flexyItem mb-0'>{question}</p>
-	                    )}
-	                    {question.uuid && (
-	                        <p className='flexyItem mb-0'>{question.question}</p>
-	                    )}
+	                    <p className='flexyItem mb-0'>{question.question}</p>
 	                    { this.props.editable  && (
 	                        <Icon name='remove' color='red' className='pointer l-icon' onClick={() => {this.removeQuestion(index)}}/>
 	                    )}

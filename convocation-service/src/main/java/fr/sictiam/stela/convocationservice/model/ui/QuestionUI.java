@@ -11,12 +11,15 @@ public class QuestionUI {
 
     private Boolean response;
 
+    private Integer rank;
+
     public QuestionUI(Question question, Recipient recipient) {
         uuid = question.getUuid();
         this.question = question.getQuestion();
+        rank = question.getRank();
 
         // extract current recipient response if exists
-        question.getResponses().stream().filter(qr -> qr.getRecipient().equals(recipient)).findFirst().ifPresent(qr -> this.response = qr.getResponse());
+        question.getResponses().stream().filter(qr -> qr.getRecipient().equals(recipient)).findFirst().ifPresent(qr -> response = qr.getResponse());
     }
 
     public String getUuid() {
@@ -29,5 +32,9 @@ public class QuestionUI {
 
     public Boolean getResponse() {
         return response;
+    }
+
+    public Integer getRank() {
+        return rank;
     }
 }

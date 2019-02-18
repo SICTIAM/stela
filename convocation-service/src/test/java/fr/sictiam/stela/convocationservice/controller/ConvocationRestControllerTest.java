@@ -246,7 +246,7 @@ public class ConvocationRestControllerTest {
         ReflectionTestUtils.setField(assemblyType, "uuid", "assembly-type-one");
         assemblyType.setName("Test assembly type one");
 
-        Set<Question> questions = new HashSet<>();
+        SortedSet<Question> questions = new TreeSet<>();
 
         ReflectionTestUtils.setField(convocation, "uuid", "convocation-uuid-one");
         convocation.setSubject("convocation test one");
@@ -269,6 +269,7 @@ public class ConvocationRestControllerTest {
 
         ReflectionTestUtils.setField(question, "uuid", "question-uuid-one");
         question.setQuestion("test question one ?");
+        question.setRank(1);
         questions.add(question);
 
         convocation.setQuestions(questions);
