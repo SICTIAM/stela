@@ -2,8 +2,6 @@ package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
@@ -167,19 +165,15 @@ public class Recipient implements Comparable<Recipient> {
     }
 
     @Override public String toString() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writerWithView(Views.RecipientInternal.class).writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "[ uuid: " + uuid +
-                    ", firstname: " + firstname +
-                    ", lastname: " + lastname +
-                    ", email: " + email +
-                    ", phoneNumber: " + phoneNumber +
-                    ", active: " + active +
-                    ", additionalContact: " + additionalContact + "]";
-        }
+        return '{' +
+                "\"uuid\": \"" + uuid + "\"" +
+                ",\"firstname\": \"" + firstname + "\"" +
+                ",\"lastname\": \"" + lastname + "\"" +
+                ",\"email\": \"" + email + "\"" +
+                ",\"phoneNumber\": \"" + phoneNumber + "\"" +
+                ",\"active\": " + active +
+                ",\"additionalContact\": " + additionalContact +
+                '}';
     }
 
     @Override public int compareTo(@NotNull Recipient recipient) {

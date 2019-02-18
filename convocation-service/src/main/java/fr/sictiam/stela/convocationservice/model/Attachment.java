@@ -29,7 +29,8 @@ public class Attachment {
     private String filename;
 
     private long size;
-
+    
+    @JsonIgnore
     private String storageKey;
 
     @JsonIgnore

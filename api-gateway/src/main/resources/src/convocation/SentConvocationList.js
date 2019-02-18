@@ -11,7 +11,8 @@ import {
     updateItemPerPage,
     handlePageClick,
     sortTable,
-    checkStatus
+    checkStatus,
+    convertDateBackFormatToUIFormat
 } from '../_util/utils'
 
 import StelaTable from '../_components/StelaTable'
@@ -85,7 +86,7 @@ class SentConvocation extends Component {
 	render() {
 	    const { t } = this.context
 	    const { search } = this.state
-	    const dateDisplay = (date) => date && moment(date, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY HH:mm')
+	    const dateDisplay = (date) => date && convertDateBackFormatToUIFormat(date, 'DD/MM/YYYY HH:mm')
 	    const assemblyTypeDisplay = (type) => type && type.name
 	    const metaData = [
 	        { property: 'uuid', displayed: false },

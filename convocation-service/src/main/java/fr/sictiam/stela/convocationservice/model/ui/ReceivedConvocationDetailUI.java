@@ -3,11 +3,11 @@ package fr.sictiam.stela.convocationservice.model.ui;
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Profile;
-import fr.sictiam.stela.convocationservice.model.Question;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
@@ -15,7 +15,7 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
     protected Set<Attachment> annexes;
 
-    protected Set<Question> questions;
+    protected Set<QuestionUI> questions;
 
     protected LocalDateTime sentDate;
 
@@ -29,11 +29,13 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
         super(convocation, recipient);
         attachment = convocation.getAttachment();
         annexes = convocation.getAnnexes();
-        questions = convocation.getQuestions();
         sentDate = convocation.getSentDate();
         location = convocation.getLocation();
         comment = convocation.getComment();
         profile = convocation.getProfile();
+
+        questions =
+                convocation.getQuestions().stream().map(question -> new QuestionUI(question, recipient)).collect(Collectors.toSet());
     }
 
 
@@ -45,7 +47,7 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
         return annexes;
     }
 
-    public Set<Question> getQuestions() {
+    public Set<QuestionUI> getQuestions() {
         return questions;
     }
 

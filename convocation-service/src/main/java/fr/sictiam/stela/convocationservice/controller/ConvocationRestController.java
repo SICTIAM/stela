@@ -243,14 +243,31 @@ public class ConvocationRestController {
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
         try {
             ResponseType responseType = ResponseType.valueOf(responseTypeString.toUpperCase());
-            convocationService.answer(convocation, currentRecipient, responseType);
+            convocationService.answerConvocation(convocation, currentRecipient, responseType);
             return new ResponseEntity(HttpStatus.OK);
-        } catch (NotFoundException e) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid value for response type : {}", responseTypeString);
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PutMapping("/received/{uuid}/question/{questionUuid}/{value}")
+    public ResponseEntity answerQuestion(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
+            @PathVariable String uuid,
+            @PathVariable String questionUuid,
+            @PathVariable Boolean value) {
+
+        final Recipient currentRecipient = validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, recipient,
+                rights, Arrays.asList(Right.values()), true);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        convocationService.answerQuestion(convocation, currentRecipient, questionUuid, value);
+
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     private String getContentType(String filename) {
@@ -266,8 +283,8 @@ public class ConvocationRestController {
 
         try {
             Convocation convocation = convocationService.getConvocation(convocationUuid);
-            return (StringUtils.isNotEmpty(profileUuid) && convocation.getProfileUuid().equals(profileUuid))
-                    || (recipient != null && convocation.getRecipientResponses().stream().anyMatch(r -> r.getRecipient().equals(recipient)));
+            return recipient != null && convocation.getRecipientResponses()
+                    .stream().anyMatch(r -> r.getRecipient().equals(recipient));
         } catch (NotFoundException e) {
             LOGGER.error("Access to convocation not granted: {}", e.getMessage());
             return false;
@@ -311,5 +328,10 @@ public class ConvocationRestController {
     @ExceptionHandler(AccessNotGrantedException.class)
     public ResponseEntity accessNotGrantedHandler(HttpServletRequest request, AccessNotGrantedException exception) {
         return new ResponseEntity(HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity notFoundHandler(HttpServletRequest request, NotFoundException exception) {
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 }

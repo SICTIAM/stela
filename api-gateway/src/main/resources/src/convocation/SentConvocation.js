@@ -2,9 +2,8 @@ import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import moment from 'moment'
 
-import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { getLocalAuthoritySlug, checkStatus, convertDateBackFormatToUIFormat } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
 import { Page, Field, FieldValue, LinkFile } from '../_components/UI'
@@ -81,7 +80,7 @@ class SentConvocation extends Component {
 	        default: return ''
 	        }
 	    }
-	    const statutDisplay = (opened) => opened ? <p><Icon name='envelope open'/> {moment(opened, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</p>: <Icon name='envelope'/>
+	    const statutDisplay = (opened) => opened ? <p><Icon name='envelope open'/> {convertDateBackFormatToUIFormat(opened, 'DD/MM/YYYY à HH:mm')}</p>: <Icon name='envelope'/>
 	    const recipientDisplay = (recipient) => `${recipient.firstname} ${recipient.lastname}`
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
@@ -170,7 +169,7 @@ class SentConvocation extends Component {
 	                            <Grid columns='1'>
 	                                <Grid.Column>
 	                                    <Field htmlFor="meetingDate" label={t('convocation.fields.date')}>
-	                                        <FieldValue id="meetingDate">{moment(this.state.convocation.meetingDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
+	                                        <FieldValue id="meetingDate">{convertDateBackFormatToUIFormat(this.state.convocation.meetingDate, 'DD/MM/YYYY à HH:mm')}</FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                                <Grid.Column>
@@ -201,7 +200,7 @@ class SentConvocation extends Component {
 	                    </Grid.Column>
 	                    <Grid.Column mobile='16' computer='4'>
 	                        <Field htmlFor="sentDate" label={t('convocation.list.sent_date')}>
-	                            <FieldValue id="sentDate">{moment(this.state.convocation.sentDate, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY à HH:mm')}</FieldValue>
+	                            <FieldValue id="sentDate">{convertDateBackFormatToUIFormat(this.state.convocation.sentDate, 'DD/MM/YYYY à HH:mm')}</FieldValue>
 	                        </Field>
 	                    </Grid.Column>
 	                </Grid>

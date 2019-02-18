@@ -118,7 +118,7 @@ public class Views {
     public interface LocalAuthority extends Public {
     }
 
-    public interface Convocation extends Recipient, LocalAuthority, QuestionView {
+    public interface Convocation extends Recipient, LocalAuthority, Question {
     }
 
     public interface ConvocationSent extends Convocation {
@@ -130,5 +130,10 @@ public class Views {
     public interface ConvocationInternal extends ConvocationReceived, ConvocationSent {
     }
 
+    public interface Question extends Public {
+    }
+
+    public interface QuestionInternal extends Question {
+    }
 
 }

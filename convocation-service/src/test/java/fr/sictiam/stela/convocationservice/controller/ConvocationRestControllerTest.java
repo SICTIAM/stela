@@ -9,6 +9,8 @@ import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Question;
+import fr.sictiam.stela.convocationservice.model.Recipient;
+import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.ExternalRestService;
@@ -29,10 +31,7 @@ import javax.persistence.EntityManagerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -40,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -74,7 +74,9 @@ public class ConvocationRestControllerTest {
 
     @Before
     public void setUp() {
-        given(convocationService.getConvocation("uuid-convocation-test-one")).willReturn(createDummyConvocation());
+        Convocation convocation = createDummyConvocation();
+        given(convocationService.getConvocation("convocation-uuid-one", "mairie-test")).willReturn(convocation);
+        given(convocationService.getConvocation("convocation-uuid-one")).willReturn(convocation);
     }
 
 
@@ -143,8 +145,50 @@ public class ConvocationRestControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void answerQuestionBadParameter() throws Exception {
+
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DISPLAY);
+        Convocation convocation = createDummyConvocation();
+
+        given(convocationService.getConvocation("uuid-convocation-test-one", "mairie-test"))
+                .willReturn(convocation);
+
+        mockMvc.perform(put("/api/convocation/received/convocation-uuid-one/question/question-uuid-one/tru")
+                .requestAttr("STELA-Current-Recipient", createRecipient())
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void notRecipientAnswersQuestion() throws Exception {
+
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DISPLAY);
+
+        mockMvc.perform(put("/api/convocation/received/convocation-uuid-one/question/question-uuid-one/true")
+                .requestAttr("STELA-Current-Recipient", createFakeRecipient())
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void answersQuestionWithCorrectFieldsAndRecipient() throws Exception {
+
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DISPLAY);
+
+        mockMvc.perform(put("/api/convocation/received/convocation-uuid-one/question/question-uuid-one/true")
+                .requestAttr("STELA-Current-Recipient", createRecipient())
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isOk());
+    }
+
     private static Convocation createDummyConvocation() {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         Convocation convocation = new Convocation();
 
         AssemblyType assemblyType = new AssemblyType();
@@ -152,13 +196,6 @@ public class ConvocationRestControllerTest {
         assemblyType.setName("Test assembly type one");
 
         Set<Question> questions = new HashSet<>();
-
-        Question question = new Question();
-
-        ReflectionTestUtils.setField(question, "uuid", "question-uuid-one");
-        question.setConvocationUuid("convocation-uuid-one");
-        question.setQuestion("test question one ?");
-        questions.add(question);
 
         ReflectionTestUtils.setField(convocation, "uuid", "convocation-uuid-one");
         convocation.setSubject("convocation test one");
@@ -168,9 +205,44 @@ public class ConvocationRestControllerTest {
         convocation.setAssemblyType(assemblyType);
         convocation.setMeetingDate(LocalDateTime.now().plusDays(15));
         convocation.setProfileUuid("profile-one");
+
+
+        RecipientResponse recipientResponse = new RecipientResponse();
+        ReflectionTestUtils.setField(recipientResponse, "uuid", "recipient-response-uuid-one");
+        recipientResponse.setRecipient(createRecipient());
+        SortedSet<RecipientResponse> recipientResponses = new TreeSet<>();
+        recipientResponses.add(recipientResponse);
+        convocation.setRecipientResponses(recipientResponses);
+
+        Question question = new Question();
+
+        ReflectionTestUtils.setField(question, "uuid", "question-uuid-one");
+        question.setQuestion("test question one ?");
+        questions.add(question);
+
         convocation.setQuestions(questions);
 
         return convocation;
+    }
+
+    private static Recipient createRecipient() {
+        Recipient recipient = new Recipient();
+        ReflectionTestUtils.setField(recipient, "uuid", "recipient-uuid-one");
+        recipient.setFirstname("firstname");
+        recipient.setLastname("lastname");
+        recipient.setEmail("firstname.lastname@mail.com");
+        recipient.setToken("recipient-token");
+        return recipient;
+    }
+
+    private static Recipient createFakeRecipient() {
+        Recipient recipient = new Recipient();
+        ReflectionTestUtils.setField(recipient, "uuid", "fake-recipient");
+        recipient.setFirstname("firstname");
+        recipient.setLastname("lastname");
+        recipient.setEmail("fake.recipient@mail.com");
+        recipient.setToken("fake-recipient-token");
+        return recipient;
     }
 
     private static String createDummyConvocationAsJsonString() {

@@ -105,6 +105,12 @@ const notifications = {
             message: 'notifications.convocation.sent.success',
             level: 'success',
             position: 'br'
+        },
+        reponseSent: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.reponseSent.success',
+            level: 'success',
+            position: 'br'
         }
     },
     admin: {
