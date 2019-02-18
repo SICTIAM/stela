@@ -1,5 +1,7 @@
 import updatesFile from '../updates.md'
 import moment from 'moment'
+import {unauthorizedRequestAllowed} from './constants'
+
 
 const checkStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
@@ -21,21 +23,53 @@ const bytesToSize = (bytes) => {
     return `${(bytes / (1024 ** i)).toFixed(1)} ${sizes[i]}`
 }
 
-// TODO: add 403 controls
+
+const customFetch = async (URL, options) => {
+    try {
+        const response = await fetch(URL, options)
+        if(!response.ok){
+            throw response
+        }
+        return response
+    }catch (errorResponse) {
+        console.error(`Error : ${errorResponse.status} on ${errorResponse.url}`)
+        const localAuthority = options.headers.localAuthoritySlug
+        const errorUrl = errorResponse.url.split('/').slice(3).join('/')
+        switch (errorResponse.status) {
+        case 401:
+        case 403:
+            if(!unauthorizedRequestAllowed.includes(errorUrl)) {
+                const redirectPath = localAuthority ?
+                    `/api/api-gateway/loginWithSlug/${localAuthority}`:
+                    '/'
+                window.location.replace(redirectPath)
+            }
+            break
+        default:
+            break
+        }
+    }
+}
+
 const fetchWithAuthzHandling = ({ url, method, body, query, context, headers }) => {
     const httpMethod = method || 'GET'
     const data = body || undefined
-    const params = query || {}
-    const queryParams = '?' + Object.keys(params)
+    const params = query || null
+    const queryParams = params ? '?' + Object.keys(params)
         .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-        .join('&')
+        .join('&') : ''
     const additionalHeaders = headers || {}
     let httpHeaders = {}
-    if (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH' || httpMethod === 'DELETE')
+    if (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH' || httpMethod === 'DELETE') {
         httpHeaders = { [context.csrfTokenHeaderName]: context.csrfToken }
+    }
+    const localAuthoritySlug = getLocalAuthoritySlug()
+    if (localAuthoritySlug) {
+        httpHeaders.localAuthoritySlug = localAuthoritySlug
+    }
     httpHeaders = Object.assign({}, httpHeaders, additionalHeaders)
 
-    return fetch(url + queryParams, {
+    return customFetch(url + queryParams, {
         method: httpMethod,
         credentials: 'same-origin',
         headers: httpHeaders,
