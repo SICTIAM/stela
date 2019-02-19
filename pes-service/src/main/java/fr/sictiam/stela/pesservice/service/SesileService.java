@@ -127,8 +127,10 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     pes.getAttachment().getFilename(), classeur.getBody().getId()).getBody();
 
             pes.setSesileClasseurId(classeur.getBody().getId());
-            pes.setSesileClasseurUrl(classeur.getBody().getUrl());
             pes.setSesileDocumentId(document.getId());
+            if(pes.getLocalAuthority().getSesileNewVersion())
+                pes.setSesileClasseurUrl(classeur.getBody().getUrl());
+
             pesService.save(pes);
             pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SIGNATURE);
         } catch (RestClientResponseException e) {
@@ -161,7 +163,16 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                     LOGGER.debug("[checkPesSigned] Checking document {} status", pes.getSesileDocumentId());
                     if (pes.getSesileDocumentId() != null
                             && checkDocumentSigned(pes.getLocalAuthority(), pes.getSesileDocumentId())) {
-                        addSignedStatus(pes.getSesileClasseurId(), pes.getLocalAuthority(), pes.getUuid(), pes.getSesileClasseurUrl());
+                        if(pes.getLocalAuthority().getSesileNewVersion() && pes.getSesileClasseurUrl() != null)
+                            addSignedStatus(
+                                    pes.getSesileClasseurId(),
+                                    pes.getLocalAuthority(),
+                                    pes.getUuid(),
+                                    pes.getSesileClasseurUrl());
+                        else
+                            pesService.updateStatus(
+                                    pes.getUuid(),
+                                    StatusType.CLASSEUR_SIGNED);
                         LOGGER.debug("[checkPesSigned] Document {} signed from Sesile", pes.getSesileDocumentId());
                         byte[] file = getDocumentBody(pes.getLocalAuthority(), pes.getSesileDocumentId());
                         if (file != null) {
