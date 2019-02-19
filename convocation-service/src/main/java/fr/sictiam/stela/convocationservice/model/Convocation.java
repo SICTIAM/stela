@@ -42,7 +42,8 @@ public class Convocation {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonView(Views.ConvocationInternal.class)
-    private Set<Question> questions;
+    @OrderBy("rank ASC")
+    private SortedSet<Question> questions;
 
     @OneToMany(mappedBy = "convocation")
     @JsonView(Views.ConvocationReceived.class)
@@ -93,6 +94,7 @@ public class Convocation {
     private LocalDateTime cancellationDate;
 
     @Transient
+    @JsonView(Views.Convocation.class)
     private Profile profile;
 
     @Transient
@@ -134,7 +136,7 @@ public class Convocation {
         return questions;
     }
 
-    public void setQuestions(Set<Question> questions) {
+    public void setQuestions(SortedSet<Question> questions) {
         this.questions = questions;
     }
 

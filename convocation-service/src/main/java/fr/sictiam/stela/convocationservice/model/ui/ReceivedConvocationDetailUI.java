@@ -6,8 +6,9 @@ import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
@@ -15,7 +16,7 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
     protected Set<Attachment> annexes;
 
-    protected Set<QuestionUI> questions;
+    protected List<QuestionUI> questions;
 
     protected LocalDateTime sentDate;
 
@@ -34,8 +35,8 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
         comment = convocation.getComment();
         profile = convocation.getProfile();
 
-        questions =
-                convocation.getQuestions().stream().map(question -> new QuestionUI(question, recipient)).collect(Collectors.toSet());
+        questions = new ArrayList<>();
+        convocation.getQuestions().forEach(question -> questions.add(new QuestionUI(question, recipient)));
     }
 
 
@@ -47,7 +48,7 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
         return annexes;
     }
 
-    public Set<QuestionUI> getQuestions() {
+    public List<QuestionUI> getQuestions() {
         return questions;
     }
 

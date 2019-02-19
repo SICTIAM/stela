@@ -12,13 +12,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Entity
-public class Question {
+public class Question implements Comparable<Question> {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -34,11 +35,15 @@ public class Question {
     @JsonView(Views.Public.class)
     private SortedSet<QuestionResponse> responses;
 
+    @JsonView(Views.Question.class)
+    private Integer rank = 0;
+
     public Question() {
     }
 
-    public Question(String question) {
+    public Question(String question, Integer rank) {
         this.question = question;
+        this.rank = rank;
     }
 
     public String getQuestion() {
@@ -47,6 +52,10 @@ public class Question {
 
     public void setQuestion(String question) {
         this.question = question;
+    }
+
+    public void setRank(Integer rank) {
+        this.rank = rank;
     }
 
     public String getUuid() {
@@ -59,6 +68,10 @@ public class Question {
         return responses;
     }
 
+    public Integer getRank() {
+        return rank;
+    }
+
     public void setResponses(SortedSet<QuestionResponse> responses) {
         this.responses = responses;
     }
@@ -66,7 +79,12 @@ public class Question {
     @Override public String toString() {
         return "{ \"uuid\": \"" + uuid + "\"" +
                 ", \"question\": \"" + question + "\"" +
+                ", \"rank\": \"" + rank + "\"" +
                 ", \"responses\": [" + getResponses().stream().map(QuestionResponse::toString).collect(Collectors.joining(",")) + "]}";
 
+    }
+
+    @Override public int compareTo(@NotNull Question question) {
+        return rank.compareTo(question.getRank());
     }
 }
