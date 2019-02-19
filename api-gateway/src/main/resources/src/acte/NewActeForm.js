@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Button, Form, Checkbox, Card, Dropdown, Grid } from 'semantic-ui-react'
+import {Button, Form, Checkbox, Card, Dropdown, Grid, Table, Popup} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
@@ -16,6 +16,7 @@ import { natures, materialCodeBudgetaire } from '../_util/constants'
 import { withAuthContext } from '../Auth'
 import ActeService from '../_util/acte-service'
 import AdminService from '../_util/admin-service'
+import FormFiles from '../_components/FormFiles'
 
 class NewActeForm extends Component {
     static contextTypes = {
@@ -397,13 +398,23 @@ class NewActeForm extends Component {
         // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
         groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
         const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
-        const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) && (
-            <Dropdown fluid selection
+        const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) ? (
+            <Dropdown scrolling
                 placeholder={t('acte.new.PJ_types')}
                 options={attachmentTypes}
                 value={this.state.fields.acteAttachment.attachmentTypeCode}
                 onChange={(e, { value }) => this.onAttachmentTypeChange(value)} />
         )
+            : (
+                <Popup className='validation-popup' trigger={<span><Dropdown scrolling
+                    placeholder={t('acte.new.PJ_types')}
+                    disabled={true}/></span>
+                } position='top right' verticalOffset={10}
+                content={
+                    ['lalala']
+                }
+                />
+            )
         const annexes = this.state.fields.annexes.map(annexe => {
             const extraContent = attachmentTypes.length > 0 && (
                 <Dropdown fluid selection
@@ -456,7 +467,6 @@ class NewActeForm extends Component {
                         </Grid.Column>
                         {(this.props.mode !== 'ACTE_BATCH') && (
                             <Grid.Column mobile={16} tablet={16} computer={7}>
-
                                 <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}
                                     required={true}>
                                     <InputValidation id={`${this.state.fields.uuid}_nature`}
@@ -523,8 +533,8 @@ class NewActeForm extends Component {
                     </Grid>
 
 
-                    <Grid centered columns={1}>
-                        <Grid.Column textAlign={'center'} column={16}>
+                    <Grid centered columns={3}>
+                        <Grid.Column textAlign={'center'} computer={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
                                 helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
                                 <DragAndDropFile
@@ -546,15 +556,16 @@ class NewActeForm extends Component {
                                         fieldName={t('acte.fields.acteAttachment')} />
                                 </DragAndDropFile>
                             </FormField>
-
-                            {this.state.fields.acteAttachment && (
-                                <File
-                                    key={`${this.state.fields.uuid}_acteAttachment`}
-                                    attachment={this.state.fields.acteAttachment}
-                                    onDelete={(res) => this.deleteDraftAttachment(res, 'file')}
-                                    extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
-                            )}
                         </Grid.Column>
+
+                        {this.state.fields.acteAttachment && (
+                            <Grid.Column textAlign={'center'} computer={16}>
+                                <FormFiles files={[this.state.fields.acteAttachment]}
+                                    attachmentTypeOptions={attachmentTypes}
+                                    onAttachmentTypeChange={(e, { value }) => this.onAttachmentTypeChange(value)}
+                                />
+                            </Grid.Column>
+                        )}
                     </Grid>
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
