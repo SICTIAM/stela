@@ -94,7 +94,7 @@
       "pes": {
         "title": "Module PES",
         "local_authority_settings": {
-          "title": "Paramétrage des du module PES de la collectivité",
+          "title": "Paramétrage du module PES de la collectivité",
           "general_informations": "Informations générales",
           "HELIOS_transmission": "Transmission Helios",
           "serverCode": "Code serveur trésorerie",
