@@ -280,15 +280,15 @@ public class ConvocationService {
     }
 
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType,
-            LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject, String currentLocalAuthUuid) {
+            LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,
+            String filter, String currentLocalAuthUuid) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<Convocation> convocationRoot = query.from(Convocation.class);
 
         List<Predicate> predicates = getSentQueryPredicates(builder, convocationRoot, multifield, sentDateFrom,
-                sentDateTo, assemblyType,
-                meetingDateFrom, meetingDateTo, subject, currentLocalAuthUuid);
+                sentDateTo, assemblyType, meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid);
         query.select(builder.count(convocationRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -311,8 +311,8 @@ public class ConvocationService {
     }
 
     public List<Convocation> findSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo,
-            String assemblyType,
-            LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject, Integer limit, Integer offset, String column, String direction,
+            String assemblyType, LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject, String filter,
+            Integer limit, Integer offset, String column, String direction,
             String currentLocalAuthUuid) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -322,8 +322,7 @@ public class ConvocationService {
         query.select(convocationRoot);
         String columnAttribute = StringUtils.isEmpty(column) ? "meetingDate" : column;
         List<Predicate> predicates = getSentQueryPredicates(builder, convocationRoot, multifield, sentDateFrom,
-                sentDateTo, assemblyType,
-                meetingDateFrom, meetingDateTo, subject, currentLocalAuthUuid);
+                sentDateTo, assemblyType, meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid);
 
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
@@ -354,7 +353,8 @@ public class ConvocationService {
     }
 
     private List<Predicate> getSentQueryPredicates(CriteriaBuilder builder, Root<Convocation> convocationRoot,
-            String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType, LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject, String currentLocalAuthUuid) {
+            String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType, LocalDate meetingDateFrom,
+            LocalDate meetingDateTo, String subject, String filter, String currentLocalAuthUuid) {
 
         List<Predicate> predicates = new ArrayList<>();
         if (StringUtils.isNotBlank(multifield)) {
@@ -385,8 +385,7 @@ public class ConvocationService {
 
         if (StringUtils.isNotBlank(assemblyType))
             predicates.add(
-                    builder.and(builder.like(builder.lower(convocationRoot.get("assemblyType").get("name")),
-                            "%" + assemblyType.toLowerCase() + "%")));
+                    builder.and(builder.equal(convocationRoot.get("assemblyType").get("uuid"), assemblyType)));
 
         if (StringUtils.isNotBlank(subject))
             predicates.add(
@@ -410,6 +409,15 @@ public class ConvocationService {
             predicates.add(
                     builder.and(builder.lessThan(convocationRoot.get("meetingDate"),
                             meetingDateTo.plusDays(1).atStartOfDay())));
+
+        if (meetingDateFrom == null && meetingDateTo == null && StringUtils.isNotBlank(filter)) {
+            if (filter.equals("past"))
+                predicates.add(
+                        builder.and(builder.lessThan(convocationRoot.get("meetingDate"), LocalDateTime.now())));
+            else if (filter.equals("future"))
+                predicates.add(
+                        builder.and(builder.greaterThan(convocationRoot.get("meetingDate"), LocalDateTime.now())));
+        }
 
         if (StringUtils.isNotBlank(currentLocalAuthUuid)) {
             Join<LocalAuthority, Convocation> LocalAuthorityJoin = convocationRoot.join("localAuthority");
