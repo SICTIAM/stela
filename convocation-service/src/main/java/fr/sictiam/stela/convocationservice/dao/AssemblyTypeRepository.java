@@ -12,5 +12,5 @@ public interface AssemblyTypeRepository extends JpaRepository<AssemblyType, Stri
     public Optional<AssemblyType> findByUuidAndLocalAuthorityUuid(String uuid, String localAuthorityUuid);
 
 
-    public List<AssemblyType> findAllByLocalAuthorityUuid(String localAuthorityUuid, Sort order);
+    public List<AssemblyType> findAllByLocalAuthorityUuidAndActiveTrue(String localAuthorityUuid, Sort order);
 }

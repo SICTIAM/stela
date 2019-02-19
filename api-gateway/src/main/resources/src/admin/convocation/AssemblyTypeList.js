@@ -122,7 +122,7 @@ class AssemblyTypeList extends Component {
 	            {label: t('convocation.admin.modules.convocation.assembly_type_config.place'), value: row.location, id: 'location', computer: '16'},
 	            {label: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay'), value: row.delay, id: 'delay', computer: '8'},
 	            {label: t('convocation.admin.modules.convocation.assembly_type_config.reminder'), value: row.reminder ? <Icon name='check' color='green'/>: <Icon name='close' color='red'/>, id: 'reminder', computer: '8'},
-	            {label: t('convocation.admin.modules.convocation.assembly_types'), value: recipients, id: 'recipients', computer: '16'}
+	            {label: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), value: recipients, id: 'recipients', computer: '16'}
 	        ]
 	    }
 	}
