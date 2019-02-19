@@ -10,7 +10,8 @@ import InputTimePicker from './InputTimePicker'
 export default class InputValidation extends Component {
     state = {
         isValid: true,
-        errorMessage: ''
+        errorMessage: '',
+        dropdownSearchValue: ''
     }
     static defaultProps = {
         value: '',
@@ -102,11 +103,28 @@ export default class InputValidation extends Component {
                     <Dropdown id={!this.props.search ? this.props.id : ''}
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className}
-                        onChange={(event, data) => this.props.onChange(this.props.id, data.value, this.validateValue)}
+                        onChange={(event, data) => {
+                            this.props.search ? this.setState({dropdownSearchValue: ''}) : null
+                            this.props.onChange(this.props.id, data.value, this.validateValue)
+                        }}
                         onBlur={this.validateValue}
                         options={this.props.options}
                         value={this.props.value}
-                        searchInput={this.props.search ? <input id={this.props.id}/> : null}
+                        searchQuery={this.props.search ? this.state.dropdownSearchValue : null}
+                        searchInput={this.props.search ?
+                            <input
+                                value={this.state.dropdownSearchValue}
+                                onChange={(event) => {
+                                    event.stopPropagation()
+                                    this.setState({dropdownSearchValue: event.target.value})
+                                }}
+                                id={this.props.id}
+                                className={'search'}
+                                type={'text'}
+                                aria-autocomplete={'list'}
+                                autoComplete={'off'}
+                                tabIndex={'0'} />
+                            : null}
                         search={this.props.search || false}
                         fluid selection>
                     </Dropdown>
