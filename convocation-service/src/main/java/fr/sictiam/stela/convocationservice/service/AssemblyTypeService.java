@@ -92,8 +92,8 @@ public class AssemblyTypeService {
 
     public List<AssemblyType> findAllSorted(String localAuthorityUuid) {
 
-        return assemblyTypeRepository.findAllByLocalAuthorityUuid(localAuthorityUuid, new Sort(Sort.Direction.ASC,
-                "name"));
+        return assemblyTypeRepository.findAllByLocalAuthorityUuidAndActiveTrue(localAuthorityUuid,
+                new Sort(Sort.Direction.ASC, "name"));
     }
 
     public List<AssemblyType> findAllWithQuery(String multifield, String name, String location,
