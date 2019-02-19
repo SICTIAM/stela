@@ -169,7 +169,7 @@ class SentConvocation extends Component {
 	                                            {annexes}
 	                                            {this.state.convocation.annexes.length > 3 && (
 	                                                <div className='mt-15'>
-	                                                    <Button onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
+	                                                    <Button type='button' onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
 	                                                        {this.state.showAllAnnexes && (
 	                                                            <span>{t('convocation.new.show_less_annexes')}</span>
 	                                                        )}

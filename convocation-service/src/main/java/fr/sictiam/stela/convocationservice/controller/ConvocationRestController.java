@@ -73,6 +73,7 @@ public class ConvocationRestController {
             @RequestParam(value = "meetingDateTo", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate meetingDateTo,
             @RequestParam(value = "assemblyType", required = false) String assemblyType,
             @RequestParam(value = "subject", required = false) String subject,
+            @RequestParam(value = "filter", required = false) String filter,
             @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
             @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @RequestParam(value = "column", required = false, defaultValue = "meetingDate") String column,
@@ -85,10 +86,11 @@ public class ConvocationRestController {
                 rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN), false);
 
         List<Convocation> convocations = convocationService.findSentWithQuery(multifield, sentDateFrom, sentDateTo,
-                assemblyType, meetingDateFrom, meetingDateTo, subject, limit, offset, column, direction, currentLocalAuthUuid);
+                assemblyType, meetingDateFrom, meetingDateTo, subject, filter, limit, offset, column, direction,
+                currentLocalAuthUuid);
 
         Long count = convocationService.countSentWithQuery(multifield, sentDateFrom, sentDateTo, assemblyType,
-                meetingDateFrom, meetingDateTo, subject, currentLocalAuthUuid);
+                meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid);
 
         return new ResponseEntity<>(new SearchResultsUI(count, convocations), HttpStatus.OK);
     }
