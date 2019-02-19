@@ -243,6 +243,9 @@
       "reponseSent": {
         "success": "La réponse a été prise en compte"
       },
+      "cancel": {
+        "success": "La convocation a été annulée avec succès"
+      },
       "admin": {
         "title": "Admin module Convocation",
         "recipients": {

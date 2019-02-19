@@ -7,6 +7,7 @@ import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.exception.AccessNotGrantedException;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationDetailUI;
@@ -270,6 +271,22 @@ public class ConvocationRestController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @PutMapping("/{uuid}/cancel")
+    public ResponseEntity cancelConvocation(
+            @PathVariable String uuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        convocationService.cancelConvocation(convocation);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     private String getContentType(String filename) {
         String mimeType = URLConnection.guessContentTypeFromName(filename);
         if (mimeType == null) {
@@ -331,7 +348,14 @@ public class ConvocationRestController {
     }
 
     @ExceptionHandler(NotFoundException.class)
+
     public ResponseEntity notFoundHandler(HttpServletRequest request, NotFoundException exception) {
         return new ResponseEntity(HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConvocationCancelledException.class)
+    public ResponseEntity<String> convocationCancelledHandler(HttpServletRequest request,
+            ConvocationCancelledException exception) {
+        return new ResponseEntity<>("convocation.errors.convocation.alreadyCancelled", HttpStatus.CONFLICT);
     }
 }

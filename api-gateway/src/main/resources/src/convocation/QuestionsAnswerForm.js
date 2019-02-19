@@ -8,7 +8,8 @@ class QuestionsAnswerForm extends Component {
 	    t: PropTypes.func,
 	}
 	static propTypes = {
-	    questions: PropTypes.array
+	    questions: PropTypes.array,
+	    disabled: PropTypes.bool
 	}
 
 	render() {
@@ -28,6 +29,7 @@ class QuestionsAnswerForm extends Component {
 	                                value='true'
 	                                name={`question_${index}`}
 	                                label={t('api-gateway:yes')}
+	                                disabled={this.props.disabled}
 	                                checked={question.response === true}
 	                                onChange={(e, {value}) => this.props.handleChangeRadio(e, value, question.uuid)}
 	                            ></Radio>
@@ -35,6 +37,7 @@ class QuestionsAnswerForm extends Component {
 	                                value='false'
 	                                name={`question_${index}`}
 	                                label={t('api-gateway:no')}
+	                                disabled={this.props.disabled}
 	                                checked={question.response === false}
 	                                onChange={(e, {value}) => this.props.handleChangeRadio(e, value, question.uuid)}
 	                            ></Radio>

@@ -86,6 +86,12 @@ public class Convocation {
     @JsonView(Views.Convocation.class)
     private String profileUuid;
 
+    @JsonView(Views.Convocation.class)
+    private boolean cancelled = false;
+
+    @JsonView(Views.Convocation.class)
+    private LocalDateTime cancellationDate;
+
     @Transient
     private Profile profile;
 
@@ -228,6 +234,22 @@ public class Convocation {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public LocalDateTime getCancellationDate() {
+        return cancellationDate;
+    }
+
+    public void setCancellationDate(LocalDateTime cancellationDate) {
+        this.cancellationDate = cancellationDate;
     }
 
     @Override public String toString() {

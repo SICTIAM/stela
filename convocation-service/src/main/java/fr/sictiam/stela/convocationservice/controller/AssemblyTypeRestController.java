@@ -48,7 +48,7 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        if (!RightUtils.hasRight(rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN))) {
+        if (!RightUtils.hasRight(rights, Arrays.asList(Right.values()))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -89,7 +89,6 @@ public class AssemblyTypeRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
 
-        LOGGER.info("Current local authority {}", currentLocalAuthUuid);
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }

@@ -4,7 +4,13 @@ import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
 import fr.sictiam.stela.convocationservice.dao.QuestionResponseRepository;
 import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
-import fr.sictiam.stela.convocationservice.model.*;
+import fr.sictiam.stela.convocationservice.model.AssemblyType;
+import fr.sictiam.stela.convocationservice.model.Convocation;
+import fr.sictiam.stela.convocationservice.model.Question;
+import fr.sictiam.stela.convocationservice.model.QuestionResponse;
+import fr.sictiam.stela.convocationservice.model.Recipient;
+import fr.sictiam.stela.convocationservice.model.RecipientResponse;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +34,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
@@ -113,6 +119,25 @@ public class ConvocationServiceTest {
 
         Convocation convocation = convocationService.getConvocation("anything", "anything");
         convocationService.answerQuestion(convocation, createRecipient(), "unknown-question-uuid", true);
+    }
+
+    @Test
+    public void cancelConvocation() {
+
+        Convocation convocation = convocationService.getConvocation("anything", "anything");
+        convocationService.cancelConvocation(convocation);
+
+        assertTrue(convocation.isCancelled());
+
+        verify(convocationRepository).save(argThat(Convocation::isCancelled));
+    }
+
+    @Test(expected = ConvocationCancelledException.class)
+    public void cancelConvocationTwice() {
+
+        Convocation convocation = convocationService.getConvocation("anything", "anything");
+        convocationService.cancelConvocation(convocation);
+        convocationService.cancelConvocation(convocation);
     }
 
     private static Convocation createDummyConvocation() {

@@ -31,9 +31,17 @@ import javax.persistence.EntityManagerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -188,6 +196,49 @@ public class ConvocationRestControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void cancelConvocationOk() throws Exception {
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DEPOSIT);
+
+        mockMvc.perform(put("/api/convocation/convocation-uuid-one/cancel")
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isOk());
+
+        verify(convocationService).cancelConvocation(any());
+    }
+
+    @Test
+    public void cancelConvocationInvalidRights() throws Exception {
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DISPLAY);
+
+        mockMvc.perform(put("/api/convocation/convocation-uuid-one/cancel")
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void alreadyCancelledConvocation() throws Exception {
+
+        given(convocationService.getConvocation("convocation-uuid-one", "mairie-test"))
+                .willReturn(createCancelledConvocation());
+
+        doCallRealMethod().when(convocationService).cancelConvocation(any());
+
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DEPOSIT);
+
+        mockMvc.perform(put("/api/convocation/convocation-uuid-one/cancel")
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isConflict());
+
+        verify(convocationService).cancelConvocation(any());
+    }
+
     private static Convocation createDummyConvocation() {
         Convocation convocation = new Convocation();
 
@@ -222,6 +273,13 @@ public class ConvocationRestControllerTest {
 
         convocation.setQuestions(questions);
 
+        return convocation;
+    }
+
+    private static Convocation createCancelledConvocation() {
+        Convocation convocation = createDummyConvocation();
+        convocation.setCancelled(true);
+        convocation.setCancellationDate(LocalDateTime.now());
         return convocation;
     }
 

@@ -27,6 +27,7 @@ class ReceivedConvocation extends Component {
 	static contextTypes = {
 	    t: PropTypes.func,
 	    _fetchWithAuthzHandling: PropTypes.func,
+	    _addNotification: PropTypes.func
 	}
 	state = {
 	    receivedConvocation: [],
@@ -96,6 +97,10 @@ class ReceivedConvocation extends Component {
 
 	greyResolver = (convocation) => {
 	    return !convocation.opened
+	}
+
+	negativeResolver = (convocation) => {
+	    return convocation.cancelled
 	}
 
 	handleSearchChange = (field, value, callback) => {
@@ -232,6 +237,7 @@ class ReceivedConvocation extends Component {
 	                    link={`/${localAuthoritySlug}/convocation/liste-recues/`}
 	                    linkProperty='uuid'
 	                    noDataMessage={t('convocation.list.no_received_convocation')}
+	                    negativeResolver={this.negativeResolver}
 	                />
 	            </Segment>
 	        </Page>
