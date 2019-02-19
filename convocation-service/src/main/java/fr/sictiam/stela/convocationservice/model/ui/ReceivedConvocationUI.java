@@ -22,6 +22,10 @@ public class ReceivedConvocationUI {
 
     protected boolean opened;
 
+    protected boolean cancelled;
+
+    protected LocalDateTime cancellationDate;
+
     public ReceivedConvocationUI(Convocation convocation, Recipient recipient) {
         uuid = convocation.getUuid();
         subject = convocation.getSubject();
@@ -34,6 +38,9 @@ public class ReceivedConvocationUI {
 
         response = opt.isPresent() ? opt.get().getResponseType() : ResponseType.DO_NOT_KNOW;
         opened = opt.isPresent() && opt.get().isOpened();
+
+        cancelled = convocation.isCancelled();
+        cancellationDate = convocation.getCancellationDate();
     }
 
     public String getUuid() {
@@ -58,5 +65,13 @@ public class ReceivedConvocationUI {
 
     public boolean isOpened() {
         return opened;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public LocalDateTime getCancellationDate() {
+        return cancellationDate;
     }
 }

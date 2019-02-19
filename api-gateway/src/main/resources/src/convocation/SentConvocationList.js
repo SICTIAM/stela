@@ -83,6 +83,10 @@ class SentConvocation extends Component {
 	    return data
 	}
 
+	negativeResolver = (convocation) => {
+	    return convocation.cancelled
+	}
+
 	render() {
 	    const { t } = this.context
 	    const { search } = this.state
@@ -192,6 +196,7 @@ class SentConvocation extends Component {
 	                    link={`/${localAuthoritySlug}/convocation/liste-envoyees/`}
 	                    linkProperty='uuid'
 	                    noDataMessage={t('convocation.admin.modules.convocation.sent_convocation_list.no_sent_convocation')}
+	                    negativeResolver={this.negativeResolver}
 	                />
 	            </Segment>
 	        </Page>

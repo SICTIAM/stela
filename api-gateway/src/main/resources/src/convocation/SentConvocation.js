@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 import { getLocalAuthoritySlug, checkStatus, convertDateBackFormatToUIFormat } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
+import { withAuthContext } from '../Auth'
 import { Page, Field, FieldValue, LinkFile } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
 
@@ -34,11 +35,16 @@ class SentConvocation extends Component {
 	        recipientResponses: [],
 	        sentDate: null,
 	        subject: '',
-	        showAllAnnexes: false
+	        showAllAnnexes: false,
+	        cancelled: false
 	    }
 	}
 
 	componentDidMount() {
+	    this.fetchConvocation()
+	}
+
+	fetchConvocation = () => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const uuid = this.props.uuid
 	    _fetchWithAuthzHandling({ url: `/api/convocation/${uuid}`, method: 'GET' })
@@ -62,6 +68,26 @@ class SentConvocation extends Component {
 
 	greyResolver = (participant) => {
 	    return !participant.opened
+	}
+
+	onCancelConvocation = () => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = this.context
+
+	    _fetchWithAuthzHandling({url: `/api/convocation/${this.props.uuid}/cancel`, method: 'PUT', context: this.props.authContext})
+	        .then(checkStatus)
+	        .then(() => {
+	            _addNotification(notifications.convocation.cancel)
+	            this.fetchConvocation()
+	        })
+	        .catch((error) => {
+	            if(error.body) {
+	            	error.text().then(text => {
+	            		_addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
+	            	})
+	            } else {
+	            	_addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.${error.status}`))
+	            }
+	        })
 	}
 
 	render() {
@@ -113,6 +139,11 @@ class SentConvocation extends Component {
 	                ]}
 	            />
 	            <Segment>
+	                <div className='float-right'>
+	                    {!this.state.convocation.cancelled && (
+	                        <Button type='button' basic color={'orange'} onClick={this.onCancelConvocation}>{t('api-gateway:form.cancel')}</Button>
+	                    )}
+	                </div>
 	                <h2>{this.state.convocation.subject}</h2>
 	                <Grid reversed='mobile tablet vertically'>
 	                    <Grid.Column mobile='16' tablet='16' computer='12'>
@@ -280,4 +311,4 @@ class SentConvocation extends Component {
 
 }
 
-export default translate(['convocation', 'api-gateway'])(SentConvocation)
+export default translate(['convocation', 'api-gateway'])(withAuthContext(SentConvocation))

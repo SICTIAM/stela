@@ -15,6 +15,7 @@ import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
@@ -167,6 +168,18 @@ public class ConvocationService {
         convocationRepository.delete(convocation);
     }
 
+    public void cancelConvocation(Convocation convocation) {
+
+        if (convocation.isCancelled()) {
+            LOGGER.error("Try to cancel an already cancelled convocation : {}", convocation.getUuid());
+            throw new ConvocationCancelledException();
+        }
+        convocation.setCancelled(true);
+        convocation.setCancellationDate(LocalDateTime.now());
+        convocationRepository.save(convocation);
+        // TODO: send email to recipients
+    }
+
     public Convocation getByUuid(String uuid, String localAuthorityUuid) {
         return convocationRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(ConvocationNotFoundException::new);
     }
@@ -217,6 +230,11 @@ public class ConvocationService {
 
     public void answerConvocation(Convocation convocation, Recipient recipient, ResponseType responseType) {
 
+        if (convocation.isCancelled()) {
+            LOGGER.warn("Cannot answer to convocation {}, it has been cancelled", convocation.getUuid());
+            throw new ConvocationCancelledException();
+        }
+
         Optional<RecipientResponse> recipientResponse =
                 convocation.getRecipientResponses().stream().filter(rr -> rr.getRecipient().equals(recipient)).findFirst();
         if (!recipientResponse.isPresent()) {
@@ -230,6 +248,12 @@ public class ConvocationService {
 
     public void answerQuestion(Convocation convocation, Recipient currentRecipient, String questionUuid,
             Boolean response) {
+
+        if (convocation.isCancelled()) {
+            LOGGER.warn("Cannot answer to convocation question {}, convocation {} has been cancelled", questionUuid,
+                    convocation.getUuid());
+            throw new ConvocationCancelledException();
+        }
 
         Question question = convocation.getQuestions()
                 .stream().filter(q -> q.getUuid().equals(questionUuid))

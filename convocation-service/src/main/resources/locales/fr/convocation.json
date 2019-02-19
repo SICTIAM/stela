@@ -47,7 +47,9 @@
       "my_answer": "Ma réponse",
       "present_question": "Serez-vous présent ?",
       "see_list": "Voir la liste",
-      "hide_list": "Cacher la liste"
+      "hide_list": "Cacher la liste",
+      "cancelled_convocation_title": "Convocation annulée",
+      "cancelled_convocation_text": "La convocation a été annulée le {{date}}. Vous ne pouvez plus modifier vos réponses."
     },
     "new": {
       "display": "Visualiser",
@@ -124,6 +126,7 @@
         "invalidDate": "La date de séance est invalide",
         "fileExists": "Le document de la convocation a déjà été fourni",
         "documentMissing": "Le document de la convocation est manquant",
+        "alreadyCancelled": "La convocation a déjà été annulée",
         "400": "Paramètre invalide",
         "403": "Non autorisé",
         "404": "La convocation n'a pas été trouvée dans la collectivité courante"
