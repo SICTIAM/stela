@@ -303,7 +303,7 @@ class NewActeForm extends Component {
     onAttachmentTypeChange = async (code, annexeUuid) => {
         try {
             const {fields} = this.state
-            if (annexeUuid) {
+            if (!!annexeUuid) {
                 await this._acteService.updateAttachmentType(fields.draft.uuid, fields.uuid, code, this.props.authContext, annexeUuid)
                 const annexe = this.state.fields.annexes.find(annexe => annexe.uuid === annexeUuid)
                 annexe.attachmentTypeCode = code
@@ -429,8 +429,8 @@ class NewActeForm extends Component {
         return (
             (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) && (
                 <Form onSubmit={this.saveAndSubmitForm}>
-                    <Grid columns={this.props.mode !== 'ACTE_BATCH' ? 3 : 1} style={{ marginBottom: 'auto' }}>
-                        <Grid.Column>
+                    <Grid columns={3}>
+                        <Grid.Column mobile={16} tablet={16} computer={4}>
                             <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}
                                 helpText={t('acte.help_text.number')} required={true}>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
@@ -442,14 +442,47 @@ class NewActeForm extends Component {
                                     fieldName={t('acte.fields.number')} />
                             </FormField>
                         </Grid.Column>
+                        <Grid.Column mobile={16} tablet={16} computer={5}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}
+                                required={true}>
+                                <InputValidation id={`${this.state.fields.uuid}_objet`}
+                                    ariaRequired={true}
+                                    placeholder={t('acte.fields.objet') + '...'}
+                                    value={this.state.fields.objet}
+                                    onChange={this.handleFieldChange}
+                                    validationRule={this.validationRules.objet}
+                                    fieldName={t('acte.fields.objet')} />
+                            </FormField>
+                        </Grid.Column>
+                        {(this.props.mode !== 'ACTE_BATCH') && (
+                            <Grid.Column mobile={16} tablet={16} computer={7}>
+
+                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}
+                                    required={true}>
+                                    <InputValidation id={`${this.state.fields.uuid}_nature`}
+                                        type='dropdown'
+                                        search={true}
+                                        disabled={this.props.mode === 'ACTE_BUDGETAIRE'}
+                                        placeholder={`${t('acte.fields.nature')}...`}
+                                        ariaRequired={true}
+                                        value={this.state.fields.nature}
+                                        onChange={this.handleFieldChange}
+                                        validationRule={this.validationRules.nature}
+                                        fieldName={t('acte.fields.nature')}
+                                        options={natureOptions}
+                                    />
+                                </FormField>
+                            </Grid.Column>
+                        )}
+
                         {this.props.mode !== 'ACTE_BATCH' && (
-                            <Grid.Column>
+                            <Grid.Column mobile={16} tablet={16} computer={4}>
                                 <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}
                                     helpText={t('acte.help_text.decision')} required={true}>
                                     <InputValidation id={`${this.state.fields.uuid}_decision`}
                                         type='date'
                                         ariaRequired={true}
-                                        value={this.state.fields.decision}
+                                        value={this.state.fields.decision ? this.state.fields.decision : moment()}
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
                                         fieldName={t('acte.fields.decision')}
@@ -457,8 +490,9 @@ class NewActeForm extends Component {
                                 </FormField>
                             </Grid.Column>
                         )}
+
                         {this.props.mode !== 'ACTE_BATCH' && (
-                            <Grid.Column>
+                            <Grid.Column mobile={16} tablet={16} computer={5}>
                                 <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}
                                     helpText={t('acte.help_text.group')}>
                                     <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
@@ -469,95 +503,83 @@ class NewActeForm extends Component {
                                 </FormField>
                             </Grid.Column>
                         )}
+
+                        <Grid.Column mobile={16} tablet={16} computer={7}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}
+                                required={true}>
+                                <InputValidation id={`${this.state.fields.uuid}_code`}
+                                    type='dropdown'
+                                    placeholder={`${t('acte.fields.code')}...`}
+                                    search={true}
+                                    ariaRequired={true}
+                                    value={this.state.fields.code}
+                                    onChange={this.handleFieldChange}
+                                    validationRule={this.validationRules.code}
+                                    fieldName={t('acte.fields.code')}
+                                    options={codeOptions}
+                                    ariaLabel="Acte code" />
+                            </FormField>
+                        </Grid.Column>
                     </Grid>
-                    <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}
-                        required={true}>
-                        <InputValidation id={`${this.state.fields.uuid}_objet`}
-                            ariaRequired={true}
-                            placeholder={t('acte.fields.objet') + '...'}
-                            value={this.state.fields.objet}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.objet}
-                            fieldName={t('acte.fields.objet')} />
-                    </FormField>
-                    {(this.props.mode !== 'ACTE_BUDGETAIRE' && this.props.mode !== 'ACTE_BATCH') && (
-                        <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}
-                            required={true}>
-                            <InputValidation id={`${this.state.fields.uuid}_nature`}
-                                type='dropdown'
-                                ariaRequired={true}
-                                value={this.state.fields.nature}
-                                onChange={this.handleFieldChange}
-                                validationRule={this.validationRules.nature}
-                                fieldName={t('acte.fields.nature')}
-                                options={natureOptions} />
-                        </FormField>
-                    )}
-                    <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}
-                        required={true}>
-                        <InputValidation id={`${this.state.fields.uuid}_code`}
-                            type='dropdown' search
-                            ariaRequired={true}
-                            value={this.state.fields.code}
-                            onChange={this.handleFieldChange}
-                            validationRule={this.validationRules.code}
-                            fieldName={t('acte.fields.code')}
-                            options={codeOptions}
-                            ariaLabel="Acte code" />
-                    </FormField>
-                    <FormField label={t('acte.fields.multipleChannels')} helpText={t('acte.help_text.multipleChannels')}>
-                        <Checkbox id={`${this.state.fields.uuid}_multipleChannels`}
-                            checked={this.state.fields.multipleChannels} toggle
-                            onChange={e => handleFieldCheckboxChange(this, 'multipleChannels', this.saveDraft)} aria-label={t('acte.help_text.multipleChannels')}/>
-                    </FormField>
-                    <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
-                        helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
-                        <DragAndDropFile
-                            key={`${this.state.fields.uuid}_acteAttachment`}
-                            multiple={false}
-                            acceptFile={acceptFile}
-                            onDrop={this.onDropActeAttachment}
-                            disableClick={true}>
-                            <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
-                                labelClassName="primary"
-                                type='file'
-                                icon={false}
-                                ariaRequired={true}
-                                accept={acceptFile}
-                                onChange={(file, accept) => this.saveDraftFile(file, accept, 'file')}
-                                value={this.state.fields.acteAttachment}
-                                validationRule={this.validationRules.acteAttachment}
-                                label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}
-                                fieldName={t('acte.fields.acteAttachment')} />
-                        </DragAndDropFile>
-                    </FormField>
-                    {this.state.fields.acteAttachment && (
-                        <File
-                            key={`${this.state.fields.uuid}_acteAttachment`}
-                            attachment={this.state.fields.acteAttachment}
-                            onDelete={(res) => this.deleteDraftAttachment(res, 'file')}
-                            extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
-                    )}
-                    <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                        helpText={t('acte.help_text.annexes', { acceptAnnexes })}
-                        required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false}>
-                        <DragAndDropFile
-                            key={`${this.state.fields.uuid}_annexes`}
-                            acceptFile={acceptAnnexes}
-                            onDrop={this.onDropAnnexe}
-                            disableClick={true}
-                            multiple={false}>
-                            <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
-                                <input type="file" aria-required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? true : false} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
-                                    onChange={e => this.saveDraftFile(e.target.files[0], acceptAnnexes, 'annexe')} style={{ display: 'none' }} />
-                            </InputFile>
-                        </DragAndDropFile>
-                    </FormField>
-                    {this.state.fields.annexes.length > 0 && (
-                        <Card.Group>
-                            {annexes}
-                        </Card.Group>
-                    )}
+
+
+                    <Grid centered columns={1}>
+                        <Grid.Column textAlign={'center'} column={16}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
+                                helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
+                                <DragAndDropFile
+                                    key={`${this.state.fields.uuid}_acteAttachment`}
+                                    multiple={false}
+                                    acceptFile={acceptFile}
+                                    onDrop={this.onDropActeAttachment}
+                                    disableClick={true}>
+                                    <InputValidation id={`${this.state.fields.uuid}_acteAttachment`}
+                                        labelClassName="primary"
+                                        type='file'
+                                        icon={false}
+                                        ariaRequired={true}
+                                        accept={acceptFile}
+                                        onChange={(file, accept) => this.saveDraftFile(file, accept, 'file')}
+                                        value={this.state.fields.acteAttachment}
+                                        validationRule={this.validationRules.acteAttachment}
+                                        label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}
+                                        fieldName={t('acte.fields.acteAttachment')} />
+                                </DragAndDropFile>
+                            </FormField>
+
+                            {this.state.fields.acteAttachment && (
+                                <File
+                                    key={`${this.state.fields.uuid}_acteAttachment`}
+                                    attachment={this.state.fields.acteAttachment}
+                                    onDelete={(res) => this.deleteDraftAttachment(res, 'file')}
+                                    extraContent={fileAttachmentTypeDropdown && fileAttachmentTypeDropdown} />
+                            )}
+                        </Grid.Column>
+                    </Grid>
+                    <Grid centered columns={1}>
+                        <Grid.Column textAlign={'center'} column={16}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
+                                helpText={t('acte.help_text.annexes', { acceptAnnexes })}
+                                required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'}>
+                                <DragAndDropFile
+                                    key={`${this.state.fields.uuid}_annexes`}
+                                    acceptFile={acceptAnnexes}
+                                    onDrop={this.onDropAnnexe}
+                                    disableClick={true}
+                                    multiple={false}>
+                                    <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
+                                        <input type="file" aria-required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                            onChange={e => this.saveDraftFile(e.target.files[0], acceptAnnexes, 'annexe')} style={{ display: 'none' }} />
+                                    </InputFile>
+                                </DragAndDropFile>
+                            </FormField>
+                            {this.state.fields.annexes.length > 0 && (
+                                <Card.Group>
+                                    {annexes}
+                                </Card.Group>
+                            )}
+                        </Grid.Column>
+                    </Grid>
                     {(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
                     && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') && (
                             <Grid columns={3} style={{ marginBottom: 'auto' }}>
@@ -581,6 +603,12 @@ class NewActeForm extends Component {
                             </Grid>
                         )
                     }
+
+                    <FormField label={t('acte.fields.multipleChannels')} helpText={t('acte.help_text.multipleChannels')}>
+                        <Checkbox id={`${this.state.fields.uuid}_multipleChannels`}
+                            checked={this.state.fields.multipleChannels} toggle
+                            onChange={e => handleFieldCheckboxChange(this, 'multipleChannels', this.saveDraft)} aria-label={t('acte.help_text.multipleChannels')}/>
+                    </FormField>
                     {this.props.mode !== 'ACTE_BATCH' && (
                         <div style={{ textAlign: 'right' }}>
                             {(sum(this.state.fields.annexes, 'size') !== 0 || this.state.fields.acteAttachment !== null) && (

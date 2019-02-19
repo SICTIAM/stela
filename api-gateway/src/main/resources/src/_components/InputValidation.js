@@ -35,6 +35,7 @@ export default class InputValidation extends Component {
             <div style={style}>
                 {(this.props.type === 'text' || this.props.type === '') && (
                     <input id={this.props.id}
+                        disabled={this.props.disabled}
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className + (this.state.errorMessage ? ' error' : '')}
                         placeholder={this.props.placeholder}
@@ -44,6 +45,7 @@ export default class InputValidation extends Component {
                 )}
                 {this.props.type === 'number' && (
                     <input id={this.props.id}
+                        disabled={this.props.disabled}
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className + (this.state.errorMessage ? ' error' : '')}
                         placeholder={this.props.placeholder}
@@ -77,6 +79,8 @@ export default class InputValidation extends Component {
                 {this.props.type === 'file' && (
                     <InputFile icon={this.props.icon} htmlFor={this.props.id} label={this.props.label} labelClassName={this.props.labelClassName}>
                         <input id={this.props.id}
+                            disabled={this.props.disabled}
+
                             type='file'
                             aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                             style={{ display: 'none' }}
@@ -103,6 +107,8 @@ export default class InputValidation extends Component {
                     <Dropdown id={!this.props.search ? this.props.id : ''}
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false }
                         className={this.props.className}
+                        disabled={this.props.disabled}
+                        placeholder={this.props.placeholder}
                         onChange={(event, data) => {
                             this.props.search ? this.setState({dropdownSearchValue: ''}) : null
                             this.props.onChange(this.props.id, data.value, this.validateValue)

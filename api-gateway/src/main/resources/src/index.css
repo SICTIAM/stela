@@ -52,7 +52,7 @@
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
-    align-content: flex-start;
+    align-content: center;
     align-items: center;
 }
 .flexyItem {
@@ -178,14 +178,14 @@ i.icon.xl-icon {
     text-align: left;
     overflow: hidden;
 }
-a.skip:active, 
-a.skip:focus, 
+a.skip:active,
+a.skip:focus,
 a.skip:hover {
     left: 180px;
     top: 30px;
-    width: auto; 
-    height: auto; 
-    overflow: visible; 
+    width: auto;
+    height: auto;
+    overflow: visible;
 }
 
 /* Overlay */
@@ -467,7 +467,7 @@ i.collapsed-text-icon.circular.icon {
     bottom: 0;
     top: auto;
 }
-  
+
 /********** Responsive **********/
 
 @media (min-height: 550px) {

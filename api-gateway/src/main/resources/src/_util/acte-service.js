@@ -123,9 +123,10 @@ export default class ActeService {
         const {_fetchWithAuthzHandling, _addNotification} = context
         let url = ''
         if (annexeUuid) {
-            url = `/api/acte/drafts/${draftUuid}/${uuid}/file/type/${code}`
-        } else {
             url = `/api/acte/drafts/${draftUuid}/${uuid}/annexe/${annexeUuid}/type/${code}`
+        } else {
+            url = `/api/acte/drafts/${draftUuid}/${uuid}/file/type/${code}`
+
         }
 
         try {
