@@ -60,7 +60,7 @@ public class ActeEndpoint {
     private ObjectFactory objectFactory;
 
     public ActeEndpoint(ActeService acteService, LocalAuthorityService localAuthorityService,
-            SoapReturnGenerator soapReturnGenerator, ExternalRestService externalRestService) {
+                        SoapReturnGenerator soapReturnGenerator, ExternalRestService externalRestService) {
         this.acteService = acteService;
         this.localAuthorityService = localAuthorityService;
         this.soapReturnGenerator = soapReturnGenerator;
@@ -273,7 +273,7 @@ public class ActeEndpoint {
             return returnObject;
         }
 
-        Acte acte = acteService.findByIdActe(documentInput.getMiatID());
+        Acte acte = acteService.getByMiatId(documentInput.getMiatID());
 
         byte[] document = null;
         if ("1".equals(documentInput.getTampon()) && acteService.isActeACK(acte)) {
@@ -314,7 +314,7 @@ public class ActeEndpoint {
             return returnObject;
         }
 
-        Acte acte = acteService.findByIdActe(annexesInput.getMiatID());
+        Acte acte = acteService.getByMiatId(annexesInput.getMiatID());
 
         if ("1".equals(annexesInput.getTampon()) && acteService.isActeACK(acte)) {
             returnObject.setJsonGetAnnexes(
@@ -387,7 +387,7 @@ public class ActeEndpoint {
             return returnObject;
         }
 
-        Acte acte = acteService.findByIdActe(detailsActeInput.getMiatID());
+        Acte acte = acteService.getByMiatId(detailsActeInput.getMiatID());
 
         Map<String, Object> returnMap = new HashMap<>();
 
@@ -572,7 +572,7 @@ public class ActeEndpoint {
         List<List<Object>> rows = actes.stream().map(acte -> {
             String numberCol = acte.getNumber();
             if (!StringUtils.isEmpty(listeDeliberationsInput.getLienDetail())) {
-                numberCol = "<a href='" + listeDeliberationsInput.getLienDetail() + acteService.generateMiatId(acte)
+                numberCol = "<a href='" + listeDeliberationsInput.getLienDetail() + acte.getMiatId()
                         + "'>" + numberCol + "</a>";
             }
 
@@ -580,7 +580,7 @@ public class ActeEndpoint {
             String statusString = dateFormatter.format(acteHistory.getDate()) + " : "
                     + acteService.getActeHistoryDefinition(acteHistory);
 
-            List<Object> list = Arrays.asList(acte.getNature().name(), acteService.generateMiatId(acte), numberCol,
+            List<Object> list = Arrays.asList(acte.getNature().name(), acte.getMiatId(), numberCol,
                     dateFormatter.format(acte.getDecision()), statusString);
             return list;
         }).collect(Collectors.toList());
@@ -768,7 +768,7 @@ public class ActeEndpoint {
             return output;
         }
         try {
-            Acte acte = acteService.findByIdActe(annulationActeInput.getMiatID());
+            Acte acte = acteService.getByMiatId(annulationActeInput.getMiatID());
             acteService.cancel(acte.getUuid());
             output.setJsonAnnulationActe(
                     soapReturnGenerator.generateReturn("OK", "_MIAT_ANNULATION_ASKED " + acte.getUuid()));

@@ -45,7 +45,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -175,13 +174,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         LOGGER.info("Acte recreated with id {}", acteUuid);
     }
 
-    public Acte findByIdActe(String iDActe) {
-        String[] idActeSplit = iDActe.split("-");
-        String siren = idActeSplit[1];
-        String number = idActeSplit[3];
-        return acteRepository.findByNumberAndLocalAuthoritySirenAndDraftNull(number, siren).orElseThrow(ActeNotFoundException::new);
-    }
-
     public boolean isNumberAvailable(String number, LocalDate decisionDate, ActeNature nature, String localAuthorityUuid) {
         return !acteRepository.findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(number, decisionDate, nature, localAuthorityUuid).isPresent();
     }
@@ -194,69 +186,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return errors;
     }
 
-    public Acte receiveAREvent(String idActe, StatusType statusType, Attachment attachment) {
-        Acte acte = findByIdActe(idActe);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType, LocalDateTime.now(), attachment.getFile(),
-                attachment.getFilename());
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} {} with id {}", acte.getNumber(), statusType, acte.getUuid());
-        return acte;
-    }
-
-    public Acte receiveAREvent(String idActe, String number, LocalDate decisionDate, ActeNature nature, StatusType statusType, Attachment attachment) {
-        // FIXME : quick and dirty fix
-        String[] idActeSplit = idActe.split("-");
-        String siren = idActeSplit[1];
-        LocalAuthority localAuthority = localAuthorityService.getBySiren(siren)
-                .orElseThrow(EntityNotFoundException::new);
-        Acte acte =
-                acteRepository.findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(number,
-                        decisionDate, nature, localAuthority.getUuid())
-                    .orElseThrow(ActeNotFoundException::new);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), statusType, LocalDateTime.now(), attachment.getFile(),
-                attachment.getFilename());
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} {} with id {}", acte.getNumber(), statusType, acte.getUuid());
-        return acte;
-    }
-
-    public void receiveAnomalieActe(String siren, String number, String detail, Attachment attachment) {
-        Acte acte = acteRepository.findByNumberAndLocalAuthoritySirenAndDraftNull(number, siren)
-                .orElseThrow(ActeNotFoundException::new);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, LocalDateTime.now(),
-                attachment.getFile(), attachment.getFilename(), detail);
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} anomalie with id {}", acte.getNumber(), acte.getUuid());
-    }
-
-    public void receiveAnomalieEnveloppe(String anomalieFilename, String detail, Attachment attachment) {
-        String[] splited = anomalieFilename.split("--");
-        splited = Arrays.copyOfRange(splited, 1, splited.length);
-        String sourceTarGz = String.join("--", splited).replace(".xml", ".tar.gz");
-        ActeHistory acteHistorySource = acteHistoryRepository.findFirstByFileNameContaining(sourceTarGz)
-                .orElseThrow(ActeNotFoundException::new);
-        Acte acte = acteRepository.findByUuidAndDraftNull(acteHistorySource.getActeUuid())
-                .orElseThrow(ActeNotFoundException::new);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NACK_RECEIVED, LocalDateTime.now(),
-                attachment.getFile(), attachment.getFilename(), detail);
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} anomalie with id {}", acte.getNumber(), acte.getUuid());
-    }
-
-    public void receiveAdditionalPiece(StatusType status, String idActe, Attachment attachment, String message,
-            Flux flux) {
-        Acte acte = findByIdActe(idActe);
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now(), attachment.getFile(),
-                attachment.getFilename(), flux);
-        if (StringUtils.isNotBlank(message)) {
-            acteHistory.setMessage(message);
-        }
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} addtional piece with id {}", acte.getNumber(), acte.getUuid());
-    }
-
-    public void registerAdditionalPieces(StatusType status, String acteUuid, List<Attachment> attachments,
-            String message, Flux flux) {
+    private void registerAdditionalPieces(StatusType status, String acteUuid, List<Attachment> attachments,
+                                          String message, Flux flux) {
         Acte acte = getByUuid(acteUuid);
         Attachment attachment = attachments.get(0);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now(),
@@ -267,29 +198,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
         applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory, attachments));
         LOGGER.info("Acte {} addtional piece with id {}", acte.getNumber(), acte.getUuid());
-    }
-
-    public void receiveDefere(StatusType status, String idActe, List<Attachment> attachments, String message)
-            throws IOException {
-        Acte acte = findByIdActe(idActe);
-        byte[] file;
-        String fileName;
-        if (attachments.size() == 1) {
-            file = attachments.get(0).getFile();
-            fileName = attachments.get(0).getFilename();
-        } else {
-            fileName = "DefereTA_" + idActe + ".zip";
-            file = zipGeneratorUtil.createZip(
-                    attachments.stream().collect(Collectors.toMap(Attachment::getFilename, Attachment::getFile)));
-
-        }
-        ActeHistory acteHistory = new ActeHistory(acte.getUuid(), status, LocalDateTime.now(), file, fileName);
-        if (StringUtils.isNotBlank(message)) {
-            acteHistory.setMessage(message);
-        }
-        applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
-        LOGGER.info("Acte {} defere with id {}", acte.getNumber(), acte.getUuid());
-
     }
 
     public Long countAllWithQuery(String multifield, String number, String objet, ActeNature nature,
@@ -370,12 +278,6 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 : builder.desc(acteRoot.get(columnAttribute)));
 
         return entityManager.createQuery(query).setFirstResult(offset).setMaxResults(limit).getResultList();
-    }
-
-    public List<Acte> getAllWithQueryNoSearch(Integer limit, Integer offset, String column, String direction,
-            String currentLocalAuthUuid) {
-        return getAllWithQuery(null, null, null, null, null, null,
-                null, limit, offset, column, direction, currentLocalAuthUuid, Collections.emptySet());
     }
 
     public List<Acte> getAllWithQuery(String multifield, String number, String objet, ActeNature nature,
@@ -525,6 +427,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     public Acte getByUuid(String uuid) {
         return acteRepository.findByUuidAndDraftNull(uuid).orElseThrow(ActeNotFoundException::new);
+    }
+
+    public Acte getByMiatId(String miatId) {
+        return acteRepository.findByMiatId(miatId).orElseThrow(ActeNotFoundException::new);
     }
 
     public List<Attachment> getAnnexes(String acteUuid) {
@@ -872,12 +778,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     }
 
     public List<String> getActeHistoryDefinitions(ActeHistory acteHistory) {
-        return Arrays.asList(generateMiatId(getByUuid(acteHistory.getActeUuid())),
+        return Arrays.asList(getByUuid(acteHistory.getActeUuid()).getMiatId(),
                 getActeHistoryDefinition(acteHistory));
-    }
-
-    public String generateMiatId(Acte acte) {
-        return archiveService.generateMiatId(acte);
     }
 
     public byte[] getStampedActe(Acte acte, Integer x, Integer y, LocalAuthority localAuthority)
@@ -896,7 +798,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
         ActeHistory ackHistory = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
-        return pdfGeneratorUtil.stampPDF(generateMiatId(acte),
+        return pdfGeneratorUtil.stampPDF(acte.getMiatId(),
                 ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")),
                 acte.getActeAttachment().getFile(), x, y);
     }
@@ -909,7 +811,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         }
         ActeHistory ackHistory = acte.getActeHistories().stream()
                 .filter(acteHistory -> acteHistory.getStatus().equals(StatusType.ACK_RECEIVED)).findFirst().get();
-        return pdfGeneratorUtil.stampPDF(generateMiatId(acte),
+        return pdfGeneratorUtil.stampPDF(acte.getMiatId(),
                 ackHistory.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), attachment.getFile(), x, y);
     }
 
@@ -949,7 +851,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
         System.setProperty("javax.net.debug", "all");
 
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
         map.add("name", fileName);
         map.add("filename", fileName);
@@ -966,16 +868,15 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         headers.set("X-User-Agent", "stela");
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
-                map, headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
 
-        HttpStatus httpStatus = null;
+        HttpStatus httpStatus;
         try {
             ResponseEntity<String> result = miatRestTemplate.exchange(acteUrl, HttpMethod.POST, requestEntity,
                     String.class);
             httpStatus = result.getStatusCode();
         } catch (ResourceAccessException e) {
-            LOGGER.error("Miat rescue server unavailable: {}", e.getMessage());
+            LOGGER.error("Miat main server unavailable: {}", e.getMessage());
             httpStatus = HttpStatus.NOT_FOUND;
         } catch (Exception e) {
             LOGGER.error("Miat main server unavailable (might be an error on our side): {}", e.getMessage());

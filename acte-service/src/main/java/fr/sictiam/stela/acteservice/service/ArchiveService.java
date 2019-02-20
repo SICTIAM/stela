@@ -247,6 +247,10 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ARCHIVE_CREATED, LocalDateTime.now(),
                     baos.toByteArray(), archiveName, flux);
 
+            // save the MIAT id for easier retrieving later on (especially when receiving responses from MIAT)
+            acte.setMiatId(generateMiatId(acte));
+            acteRepository.save(acte);
+
             applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
 
             LOGGER.info("Archive created : {}", archiveName);
@@ -257,10 +261,13 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         }
     }
 
-    private String generateIdActe(Acte acte) {
-        return String.format("%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
-                acte.getLocalAuthority().getSiren(), acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")),
-                acte.getNumber(), acte.getNature().getAbbreviation());
+    private String generateMiatId(Acte acte) {
+        return String.format("%s-%s-%s-%s-%s",
+                acte.getLocalAuthority().getDepartment(),
+                acte.getLocalAuthority().getSiren(),
+                acte.getDecision().format(DateTimeFormatter.ofPattern("YYYYMMdd")),
+                acte.getNumber(),
+                acte.getNature().getAbbreviation());
     }
 
     private void createMessageArchive(String acteUuid, Flux flux) {
@@ -281,8 +288,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
             if (Flux.ANNULATION_TRANSMISSION.equals(flux)) {
                 Annulation annulation = objectFactory.createAnnulation();
-                String idActe = generateIdActe(acte);
-                annulation.setIDActe(idActe);
+                annulation.setIDActe(acte.getMiatId());
                 reponse = annulation;
             } else if (Flux.AR_LETTRE_OBSERVATION.equals(flux)) {
                 reponse = objectFactory.createARLettreObservations(generateDonneesCourrierPref(acte));
@@ -448,7 +454,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private RefusPieceComplementaire generateRefusPieceComplementaire(Acte acte, String repFilename) {
         RefusPieceComplementaire refusPieceComplementaire = new RefusPieceComplementaire();
-        refusPieceComplementaire.setIDActe(generateIdActe(acte));
+        refusPieceComplementaire.setIDActe(acte.getMiatId());
         refusPieceComplementaire.setDateCourrierPref(LocalDate.now());
 
         FichierSigne fichierSigne = new FichierSigne();
@@ -459,7 +465,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private PieceComplementaire generatePieceComplementaire(Acte acte, Set<String> annexesFilenames) {
         PieceComplementaire pieceComplementaire = new PieceComplementaire();
-        pieceComplementaire.setIDActe(generateIdActe(acte));
+        pieceComplementaire.setIDActe(acte.getMiatId());
         pieceComplementaire.setDateCourrierPref(LocalDate.now());
 
         FichiersSignes fichiersSignes = new FichiersSignes();
@@ -475,7 +481,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private RejetLettreObservations generateRejetLettreObservations(Acte acte, String repFilename) {
         RejetLettreObservations rejetLettreObservations = new RejetLettreObservations();
-        rejetLettreObservations.setIDActe(generateIdActe(acte));
+        rejetLettreObservations.setIDActe(acte.getMiatId());
         rejetLettreObservations.setDateCourrierPref(LocalDate.now());
 
         FichierSigne fichierSigne = new FichierSigne();
@@ -486,7 +492,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private ReponseLettreObservations generateReponseLettreObservations(Acte acte, String repFilename) {
         ReponseLettreObservations reponseLettreObservations = new ReponseLettreObservations();
-        reponseLettreObservations.setIDActe(generateIdActe(acte));
+        reponseLettreObservations.setIDActe(acte.getMiatId());
         reponseLettreObservations.setDateCourrierPref(LocalDate.now());
 
         FichierSigne fichierSigne = new FichierSigne();
@@ -497,7 +503,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private ReponseCourrierSimple generateReponseCourrierSimple(Acte acte, String fileName) {
         ReponseCourrierSimple reponseCourrierSimple = new ReponseCourrierSimple();
-        reponseCourrierSimple.setIDActe(generateIdActe(acte));
+        reponseCourrierSimple.setIDActe(acte.getMiatId());
         reponseCourrierSimple.setDateCourrierPref(LocalDate.now());
 
         FichierSigne fichierSigne = new FichierSigne();
@@ -509,7 +515,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
 
     private DonneesCourrierPref generateDonneesCourrierPref(Acte acte) {
         DonneesCourrierPref donneesCourrierPref = new DonneesCourrierPref();
-        donneesCourrierPref.setIDActe(generateIdActe(acte));
+        donneesCourrierPref.setIDActe(acte.getMiatId());
         donneesCourrierPref.setDateCourrierPref(LocalDate.now());
         return donneesCourrierPref;
     }
@@ -532,14 +538,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         return String.format("%s-%s.%s", trigraph, StringUtils.stripFilenameExtension(enveloppeName), "tar.gz");
     }
 
-    public String generateMiatId(Acte acte) {
-        String today = acte.getCreation().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
-
-        return String.format("%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
-                acte.getLocalAuthority().getSiren(), today, acte.getNumber(), acte.getNature().getAbbreviation());
-    }
-
-    public String generateBaseFilename(Acte acte, Flux flux) {
+    private String generateBaseFilename(Acte acte, Flux flux) {
         String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"));
 
         return String.format("%s-%s-%s-%s-%s-%s-%s", acte.getLocalAuthority().getDepartment(),
