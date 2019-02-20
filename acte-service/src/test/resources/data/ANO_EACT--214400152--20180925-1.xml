@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<actes:AnomalieEnveloppe xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" xmlns:insee="http://xml.insee.fr/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.interieur.gouv.fr/ACTES#v1.1-20040216 actesv1_1.xsd">
+  <actes:Date>2018-09-25</actes:Date>
+  <actes:Nature>999</actes:Nature>
+  <actes:Detail>ODT-VERIF-17 : La transaction que vous avez envoyé n'est pas reconnu dans l'application ACTES.</actes:Detail>
+  <actes:EnveloppeRecue>
+    <actes:Emetteur>
+      <actes:IDCL actes:Arrondissement="1" actes:Departement="044" actes:Nature="31" insee:SIREN="214400152"/>
+      <actes:Referent>
+        <actes:Nom>Demat SICTIAM</actes:Nom>
+        <actes:Telephone>0101010101</actes:Telephone>
+        <actes:Email>stelasictiam.test@gmail.com</actes:Email>
+      </actes:Referent>
+    </actes:Emetteur>
+    <actes:AdressesRetour>
+      <actes:Email>stelasictiam.test@gmail.com</actes:Email>
+    </actes:AdressesRetour>
+    <actes:FormulairesEnvoyes>
+      <actes:Formulaire>
+        <actes:NomFichier>044-214400152-20180905-4365-DE-4365-DE_0.xml</actes:NomFichier>
+      </actes:Formulaire>
+    </actes:FormulairesEnvoyes>
+  </actes:EnveloppeRecue>
+</actes:AnomalieEnveloppe>

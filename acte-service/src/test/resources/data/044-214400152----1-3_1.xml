@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<actes:AnomalieActe xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216" xmlns:insee="http://xml.insee.fr/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.interieur.gouv.fr/ACTES#v1.1-20040216 actesv1_1.xsd">
+  <actes:Date>2018-10-12</actes:Date>
+  <actes:Nature>002</actes:Nature>
+  <actes:Detail>ODT-VERIF-01 : Votre acte a été transmis avec une date de classification qui n'est pas à jour</actes:Detail>
+  <actes:ActeRecu actes:CodeNatureActe="1" actes:Date="2018-10-01" actes:NumeroInterne="123456">
+    <actes:CodeMatiere1 actes:CodeMatiere="1"/>
+    <actes:CodeMatiere2 actes:CodeMatiere="1"/>
+    <actes:CodeMatiere3 actes:CodeMatiere="1"/>
+    <actes:CodeMatiere5 actes:CodeMatiere="1"/>
+    <actes:Objet>Sans session encore</actes:Objet>
+    <actes:ClassificationDateVersion>2017-04-19</actes:ClassificationDateVersion>
+    <actes:Document>
+      <actes:NomFichier>99_DE-044-214400152-20181012-123456-DE-1-1_1.pdf</actes:NomFichier>
+    </actes:Document>
+    <actes:Annexes actes:Nombre="1">
+      <actes:Annexe>
+        <actes:NomFichier>01_01-044-214400152-20181012-123456-DE-1-1_2.xml</actes:NomFichier>
+      </actes:Annexe>
+    </actes:Annexes>
+    <actes:DocumentPapier/>
+  </actes:ActeRecu>
+  <actes:ClassificationDateVersionEnCours>2018-10-10</actes:ClassificationDateVersionEnCours>
+</actes:AnomalieActe>
