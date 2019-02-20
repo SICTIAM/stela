@@ -119,7 +119,7 @@ public class EmailCheckingTask {
         }
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedDelay = 30000)
     public void check() {
         try {
 
