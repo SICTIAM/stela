@@ -2,6 +2,7 @@ package fr.sictiam.stela.pesservice.service.util;
 
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.service.StorageService;
+import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
@@ -35,9 +36,10 @@ public class FTPUploaderService {
     @Autowired
     StorageService storageService;
 
-    public void uploadFile(PesAller pesAller) throws IOException {
+    public void uploadFile(PesAller pesAller) throws PesSendException {
+        FTPClient ftpClient = null;
         try {
-            FTPClient ftpClient = createFTPClient();
+            ftpClient = createFTPClient();
             LOGGER.info("Sending commands before uploading...");
             ftpClient.sendSiteCommand("P_DEST " + pesAller.getLocalAuthority().getServerCode().name());
             ftpClient.sendSiteCommand("P_APPLI GHELPES2");
@@ -45,14 +47,21 @@ public class FTPUploaderService {
                     + "#" + pesAller.getPostId() + "#" + pesAller.getBudCode());
 
             LOGGER.info("Uploading file {} to FTP server", pesAller.getAttachment().getFilename());
-            InputStream input = new ByteArrayInputStream(storageService.getAttachmentContent(pesAller.getAttachment()));
+            byte[] attachementContent = storageService.getAttachmentContent(pesAller.getAttachment());
+            if (attachementContent == null) {
+                LOGGER.warn("Unable to retrieve attachement content for PES Aller {}", pesAller.getUuid());
+                throw new PesSendException();
+            }
+            InputStream input = new ByteArrayInputStream(attachementContent);
             ftpClient.storeFile(pesAller.getAttachment().getFilename(), input);
             int reply = ftpClient.getReplyCode();
             LOGGER.info("Reply from FTP server: {}", reply);
-            disconnect(ftpClient);
         } catch (IOException e) {
             LOGGER.error("Error while trying to upload file to FTP server: {}", e.getMessage());
-            throw e;
+            throw new PesSendException("IO exception while trying to upload file to FTP server", e);
+        } finally {
+            if (ftpClient != null)
+                disconnect(ftpClient);
         }
     }
 
