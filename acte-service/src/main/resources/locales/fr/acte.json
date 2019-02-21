@@ -187,14 +187,6 @@
         "submit_rejet": "Déposer un rejet"
       }
     },
-    "stamp_pad": {
-      "title": "Position du tampon",
-      "choose_position": "Choisir la position",
-      "download_stamped_acte": "Télécharger l'acte visé précisément",
-      "pad_label": "AR",
-      "height": "Hauteur",
-      "width": "Largeur"
-    },
     "new": {
       "title": "Télétransmission d'acte",
       "formStatus": {
@@ -214,6 +206,10 @@
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",
       "every_group": "Toute la collectivité"
     }
+  },
+  "stamp_pad": {
+    "download_stamped_acte": "Télécharger l'acte visé précisément",
+    "pad_label": "AR"
   },
   "admin": {
     "modules": {

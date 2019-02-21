@@ -77,6 +77,12 @@
     "previous": "Précédent",
     "actions": "Choisisser une action à effectuer"
   },
+  "stamp_pad": {
+    "title": "Position du tampon",
+    "choose_position": "Choisir la position",
+    "height": "Hauteur",
+    "width": "Largeur"
+  },
   "menu": {
     "acte": {
       "legality_control": "Contrôle de légalité",

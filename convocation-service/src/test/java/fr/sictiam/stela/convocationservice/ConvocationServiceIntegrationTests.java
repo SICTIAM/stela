@@ -7,6 +7,7 @@ import fr.sictiam.stela.convocationservice.dao.ConvocationHistoryRepository;
 import fr.sictiam.stela.convocationservice.model.Admin;
 import fr.sictiam.stela.convocationservice.model.ConvocationHistory;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
+import fr.sictiam.stela.convocationservice.model.StampPosition;
 import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.service.AdminService;
 import fr.sictiam.stela.convocationservice.service.ExternalRestService;
@@ -85,7 +86,7 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
     public void createLocalAuthority() {
         if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
             LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test",
-                    "sictiam", "999888777", true);
+                    "sictiam", "999888777", true, new StampPosition(10, 10));
             localAuthorityService.createOrUpdate(localAuthority);
 
             String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","

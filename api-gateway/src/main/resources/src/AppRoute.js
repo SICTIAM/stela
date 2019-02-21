@@ -51,7 +51,7 @@ import AssemblyTypeConfig from './admin/convocation/AssemblyTypeConfig'
 import AssemblyTypeList from './admin/convocation/AssemblyTypeList'
 import RecipentConfig from './admin/convocation/RecipentConfig'
 import RecipientsList from './admin/convocation/RecipientsList'
-import ConvocationModuleParams from './admin/convocation/ConvocationModuleParams'
+import ConvocationLocalAuthorityParams from './admin/convocation/ConvocationLocalAuthorityParams'
 import PesMetrics from './pes/PesMetrics'
 
 import { withAuthContext, AuthConsumer } from './Auth'
@@ -230,7 +230,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/actes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes/migration" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeList} menu={AdminMenuBar} admin={true} />

@@ -1,6 +1,8 @@
 package fr.sictiam.stela.convocationservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfReader;
 import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
 import fr.sictiam.stela.convocationservice.dao.QuestionResponseRepository;
@@ -21,6 +23,7 @@ import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileExcept
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
+import fr.sictiam.stela.convocationservice.service.util.PdfGeneratorUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +74,8 @@ public class ConvocationService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final PdfGeneratorUtil pdfGeneratorUtil;
+
     @Autowired
     public ConvocationService(
             ConvocationRepository convocationRepository,
@@ -80,7 +85,8 @@ public class ConvocationService {
             RecipientResponseRepository recipientResponseRepository,
             QuestionResponseRepository questionResponseRepository,
             AttachmentRepository attachmentRepository,
-            ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher,
+            PdfGeneratorUtil pdfGeneratorUtil) {
         this.convocationRepository = convocationRepository;
         this.localAuthorityService = localAuthorityService;
         this.storageService = storageService;
@@ -89,6 +95,7 @@ public class ConvocationService {
         this.questionResponseRepository = questionResponseRepository;
         this.attachmentRepository = attachmentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.pdfGeneratorUtil = pdfGeneratorUtil;
     }
 
     public Convocation getConvocation(String uuid) {
@@ -226,6 +233,24 @@ public class ConvocationService {
         }
 
         throw new NotFoundException("file not found");
+    }
+
+    public byte[] getStampedFile(Attachment file, LocalDateTime sentDate, LocalAuthority localAuthority, Integer x,
+            Integer y) throws IOException, DocumentException {
+
+        PdfReader pdfReader = new PdfReader(file.getContent());
+        if (x == null || y == null) {
+            if (pdfGeneratorUtil.pdfIsRotated(pdfReader)) {
+                //landscape case
+                y = localAuthority.getStampPosition().getX();
+                x = localAuthority.getStampPosition().getY();
+            } else {
+                //portrait case
+                x = localAuthority.getStampPosition().getX();
+                y = localAuthority.getStampPosition().getY();
+            }
+        }
+        return pdfGeneratorUtil.stampPDF(sentDate, file.getContent(), x, y);
     }
 
     public void answerConvocation(Convocation convocation, Recipient recipient, ResponseType responseType) {
