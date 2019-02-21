@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import {bytesToSize} from '../_util/utils'
-import {Dropdown, Popup, Table} from 'semantic-ui-react'
+import {Dropdown, Popup, Table, Button, Icon} from 'semantic-ui-react'
 import {translate} from 'react-i18next'
 import {withAuthContext} from '../Auth'
+import {ErrorListPopup} from '../_components/UI'
 
 class FormFiles extends Component{
     static contextTypes = {
@@ -11,12 +12,12 @@ class FormFiles extends Component{
     }
 
     createDropDownAttachmentType = (file) => {
-        const {attachmentTypeOptions, onAttachmentTypeChange} = this.props
+        const {attachmentTypeOptions, onAttachmentTypeChange, errors} = this.props
         if(attachmentTypeOptions && attachmentTypeOptions.length > 0) {
             return (<Dropdown scrolling
                 placeholder={this.context.t('acte.new.PJ_types')}
                 options={attachmentTypeOptions}
-                onChange={onAttachmentTypeChange}
+                onChange={(e, {value}) => onAttachmentTypeChange(e, {value}, file.uuid)}
                 value={file.attachmentTypeCode}
             />)
         } else {
@@ -28,21 +29,24 @@ class FormFiles extends Component{
                             disabled={true}/>
                     </span>
                 } position='top right' verticalOffset={10}
-                content={
-                    ['lalala']
-                }
+                content={<ErrorListPopup errorList={errors} />}
             />
             )
         }
     }
 
     createRowFromFiles = () => {
-        const {files} = this.props
+        const {files, onDelete} = this.props
         return files.map((file,index) => (
             <Table.Row key={`${file.filename}_${index}`}>
                 <Table.Cell width={4}>{file.filename}</Table.Cell>
                 <Table.Cell width={8}> {this.createDropDownAttachmentType(file)}</Table.Cell>
-                <Table.Cell width={4}> {bytesToSize(file.size)}</Table.Cell>
+                <Table.Cell width={2}> {bytesToSize(file.size)}</Table.Cell>
+                <Table.Cell width={2}><Icon color={'red'}
+                    style={{cursor:'pointer'}}
+                    name={'trash'}
+                    onClick={() => onDelete(file)}/>
+                </Table.Cell>
             </Table.Row>))
     }
 
@@ -53,9 +57,10 @@ class FormFiles extends Component{
             <Table basic='very' textAlign={'center'}>
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell width={4}>File Name</Table.HeaderCell>
-                        <Table.HeaderCell width={8}>Attachment Type</Table.HeaderCell>
-                        <Table.HeaderCell width={4}>Size</Table.HeaderCell>
+                        <Table.HeaderCell width={4}>{this.context.t('acte.new.file')}</Table.HeaderCell>
+                        <Table.HeaderCell width={8}>{this.context.t('acte.new.PJ_type')}</Table.HeaderCell>
+                        <Table.HeaderCell width={2}>{this.context.t('acte.new.file_size')}</Table.HeaderCell>
+                        <Table.HeaderCell width={2}>{this.context.t('acte.new.delete_file')}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -69,7 +74,9 @@ class FormFiles extends Component{
 FormFiles.proptypes = {
     files: PropTypes.array,
     attachmentTypeOptions: PropTypes.array,
-    onAttachmentTypeChange: PropTypes.func
+    onAttachmentTypeChange: PropTypes.func,
+    onDelete: PropTypes.func,
+    errors: PropTypes.array
 }
 
 

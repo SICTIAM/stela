@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import {Button, Form, Checkbox, Card, Dropdown, Grid, Table, Popup} from 'semantic-ui-react'
+import {Button, Form, Checkbox, Card, Dropdown, Grid} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
@@ -58,6 +58,7 @@ class NewActeForm extends Component {
         codesMatieres: [],
         isFormValid: false,
         formErrors: [],
+        formFilesErrors: [],
         acteFetched: false
     }
     validationRules = {
@@ -160,7 +161,6 @@ class NewActeForm extends Component {
     }
     extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
     handleFieldChange = (field, value, callback) => {
-        console.warn('Change', field, value)
         field = this.extractFieldNameFromId(field)
         const fields = this.state.fields
         fields[field] = value
@@ -243,14 +243,14 @@ class NewActeForm extends Component {
         validation.setAttributeNames(attributeNames)
         const isFormValid = validation.passes()
         const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
-        this.setState({ isFormValid, formErrors })
+        this.setState({ isFormValid, formErrors, formFilesErrors: [validation.errors.all().nature, validation.errors.all().code] })
         if (this.props.mode === 'ACTE_BATCH') {
             this.props.setFormValidForId(isFormValid, this.state.fields.uuid, formErrors)
         }
     }, 500)
     saveDraft = debounce(async (callback) => {
         const {fields} = this.state
-        if(fields.number || fields.objet || fields.decision) {
+        if(fields.number || fields.objet || fields.decision ) {
             const acteData = this.getActeData()
             const acteUuid = await this._acteService.saveDraft(acteData.draft.uuid, acteData.uuid, acteData, this.props.authContext)
             fields.uuid = acteUuid
@@ -274,6 +274,9 @@ class NewActeForm extends Component {
             data.append('nature', this.state.fields.nature)
             try {
                 // TODO: Work only Attachments without file content, so it can scale with the multiple acte form
+                const acteData = this.getActeData()
+                await this._acteService.saveDraft(acteData.draft.uuid, acteData.uuid, acteData, this.props.authContext)
+
                 const response = await this._acteService.saveDraftAttachment(data, draftUuid, uuid, type, this.props.authContext)
                 this.props.setStatus('saved', this.state.fields.uuid)
                 const acte = this._acteService.deserializeActe(response)
@@ -398,39 +401,6 @@ class NewActeForm extends Component {
         // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
         groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
         const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
-        const fileAttachmentTypeDropdown = (attachmentTypes.length > 0 && this.state.fields.acteAttachment) ? (
-            <Dropdown scrolling
-                placeholder={t('acte.new.PJ_types')}
-                options={attachmentTypes}
-                value={this.state.fields.acteAttachment.attachmentTypeCode}
-                onChange={(e, { value }) => this.onAttachmentTypeChange(value)} />
-        )
-            : (
-                <Popup className='validation-popup' trigger={<span><Dropdown scrolling
-                    placeholder={t('acte.new.PJ_types')}
-                    disabled={true}/></span>
-                } position='top right' verticalOffset={10}
-                content={
-                    ['lalala']
-                }
-                />
-            )
-        const annexes = this.state.fields.annexes.map(annexe => {
-            const extraContent = attachmentTypes.length > 0 && (
-                <Dropdown fluid selection
-                    placeholder={t('acte.new.PJ_types')}
-                    options={attachmentTypes}
-                    value={annexe.attachmentTypeCode}
-                    onChange={(e, { value }) => this.onAttachmentTypeChange(value, annexe.uuid)} />
-            )
-            return (
-                <File
-                    key={`${this.state.fields.uuid}_${annexe.uuid}`}
-                    attachment={annexe}
-                    onDelete={(res) => this.deleteDraftAttachment(res, 'annexe')}
-                    extraContent={extraContent && extraContent} />
-            )
-        })
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.xml' : '.pdf, .jpg, .png'
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.pdf, .jpg, .png' : '.pdf, .xml, .jpg, .png'
         const submissionButton =
@@ -443,7 +413,7 @@ class NewActeForm extends Component {
                     <Grid columns={3}>
                         <Grid.Column mobile={16} tablet={16} computer={4}>
                             <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}
-                                helpText={t('acte.help_text.number')} required={true}>
+                                helpText={t('acte.help_text.number')}>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     placeholder={t('acte.fields.number') + '...'}
                                     ariaRequired={true}
@@ -454,8 +424,7 @@ class NewActeForm extends Component {
                             </FormField>
                         </Grid.Column>
                         <Grid.Column mobile={16} tablet={16} computer={5}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} helpText={t('acte.help_text.objet')}
-                                required={true}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')}>
                                 <InputValidation id={`${this.state.fields.uuid}_objet`}
                                     ariaRequired={true}
                                     placeholder={t('acte.fields.objet') + '...'}
@@ -467,8 +436,7 @@ class NewActeForm extends Component {
                         </Grid.Column>
                         {(this.props.mode !== 'ACTE_BATCH') && (
                             <Grid.Column mobile={16} tablet={16} computer={7}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}
-                                    required={true}>
+                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')}>
                                     <InputValidation id={`${this.state.fields.uuid}_nature`}
                                         type='dropdown'
                                         search={true}
@@ -487,9 +455,9 @@ class NewActeForm extends Component {
 
                         {this.props.mode !== 'ACTE_BATCH' && (
                             <Grid.Column mobile={16} tablet={16} computer={4}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}
-                                    helpText={t('acte.help_text.decision')} required={true}>
-                                    <InputValidation id={`${this.state.fields.uuid}_decision`}
+                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
+                                    <InputValidation
+                                        id={`${this.state.fields.uuid}_decision`}
                                         type='date'
                                         ariaRequired={true}
                                         value={this.state.fields.decision ? this.state.fields.decision : moment()}
@@ -515,8 +483,7 @@ class NewActeForm extends Component {
                         )}
 
                         <Grid.Column mobile={16} tablet={16} computer={7}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}
-                                required={true}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
                                 <InputValidation id={`${this.state.fields.uuid}_code`}
                                     type='dropdown'
                                     placeholder={`${t('acte.fields.code')}...`}
@@ -536,7 +503,7 @@ class NewActeForm extends Component {
                     <Grid centered columns={3}>
                         <Grid.Column textAlign={'center'} computer={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
-                                helpText={t('acte.help_text.acteAttachment', { acceptFile })} required={true}>
+                                helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_acteAttachment`}
                                     multiple={false}
@@ -563,6 +530,9 @@ class NewActeForm extends Component {
                                 <FormFiles files={[this.state.fields.acteAttachment]}
                                     attachmentTypeOptions={attachmentTypes}
                                     onAttachmentTypeChange={(e, { value }) => this.onAttachmentTypeChange(value)}
+                                    errors={this.state.formFilesErrors}
+                                    onDelete={(res) => this.deleteDraftAttachment(res)}
+
                                 />
                             </Grid.Column>
                         )}
@@ -570,6 +540,7 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
+                                optionalLabelText={t('acte.fields.optional_field')}
                                 helpText={t('acte.help_text.annexes', { acceptAnnexes })}
                                 required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'}>
                                 <DragAndDropFile
@@ -585,9 +556,14 @@ class NewActeForm extends Component {
                                 </DragAndDropFile>
                             </FormField>
                             {this.state.fields.annexes.length > 0 && (
-                                <Card.Group>
-                                    {annexes}
-                                </Card.Group>
+                                <Grid.Column textAlign={'center'} computer={16}>
+                                    <FormFiles files={this.state.fields.annexes}
+                                        attachmentTypeOptions={attachmentTypes}
+                                        onAttachmentTypeChange={(e, { value }, annexeUuid) => this.onAttachmentTypeChange(value, annexeUuid)}
+                                        errors={this.state.formFilesErrors}
+                                        onDelete={(res) => this.deleteDraftAttachment(res, 'annexe')}
+                                    />
+                                </Grid.Column>
                             )}
                         </Grid.Column>
                     </Grid>
@@ -624,7 +600,7 @@ class NewActeForm extends Component {
                         <div style={{ textAlign: 'right' }}>
                             {(sum(this.state.fields.annexes, 'size') !== 0 || this.state.fields.acteAttachment !== null) && (
                                 <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
-                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))}
+                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))} / 150Mo
                                 </label>
                             )}
                             {this.state.fields.uuid && (
