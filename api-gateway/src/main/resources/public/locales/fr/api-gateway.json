@@ -252,6 +252,12 @@
       "cancel": {
         "success": "La convocation a été annulée avec succès"
       },
+      "complet_with_document": {
+        "success":  "Les questions et commentaire ont bien été ajoutés avec succès, les documents sont en cours d'envoi. Veuillez patienter."
+      },
+      "complet": {
+        "success": "La convocation a été mise à jour avec succès."
+      },
       "admin": {
         "title": "Admin module Convocation",
         "recipients": {

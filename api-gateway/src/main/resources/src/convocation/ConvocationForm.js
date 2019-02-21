@@ -254,6 +254,10 @@ class ConvocationForm extends Component {
 	    this.setState({ fields })
 	}
 
+	goBack = () => {
+	    history.goBack()
+	}
+
 	render() {
 	    const { t } = this.context
 
@@ -475,7 +479,7 @@ class ConvocationForm extends Component {
 	                        </Grid.Column>
 	                    </Grid>
 	                    <div className='footerForm'>
-	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} basic color='red'>
+	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.goBack()} basic color='red'>
 	                            {t('api-gateway:form.cancel')}
 	                        </Button>
 

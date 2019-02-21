@@ -219,6 +219,10 @@ const convertDateBackFormatToUIFormat = (date, format = 'DD/MM/YYYY') => {
     return moment(date, 'YYYY-MM-DDTHH:mm:ss').format(format)
 }
 
+const extractFieldNameFromId = (str) => {
+    return str.split('_').slice(-1)[0]
+}
+
 export {
     checkStatus,
     fetchWithAuthzHandling,
@@ -245,5 +249,6 @@ export {
     sortTable,
     onSearch,
     sortAlphabetically,
-    convertDateBackFormatToUIFormat
+    convertDateBackFormatToUIFormat,
+    extractFieldNameFromId
 }

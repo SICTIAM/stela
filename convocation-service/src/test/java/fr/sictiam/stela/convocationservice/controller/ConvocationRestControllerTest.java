@@ -117,8 +117,7 @@ public class ConvocationRestControllerTest {
 
     @Test
     public void createSuccessfully() throws Exception {
-        Set<Right> rights = new HashSet<>();
-        rights.add(Right.CONVOCATION_DEPOSIT);
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DEPOSIT);
 
         given(convocationService.create(createDummyConvocation(), "mairie-test", "profile-one")).willReturn(createDummyConvocation());
 
@@ -129,8 +128,23 @@ public class ConvocationRestControllerTest {
                 .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
                 .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
                 .andExpect(status().isCreated());
-
     }
+
+    @Test
+    public void updateSuccessfully() throws Exception {
+        Set<Right> rights = Collections.singleton(Right.CONVOCATION_DEPOSIT);
+        Convocation convocation = createDummyConvocation();
+        given(convocationService.update("convocation-uuid-one", "mairie-test", convocation)).willReturn(convocation);
+
+        mockMvc.perform(put("/api/convocation/convocation-uuid-one")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(createDummyConvocationAsJsonString())
+                .requestAttr("STELA-Current-Profile-Rights", rights)
+                .requestAttr("STELA-Current-Local-Authority-UUID", "mairie-test")
+                .requestAttr("STELA-Current-Profile-UUID", "profile-one"))
+                .andExpect(status().isOk());
+    }
+
 
     @Test
     public void creationMissingFields() throws Exception {
@@ -265,12 +279,18 @@ public class ConvocationRestControllerTest {
         recipientResponses.add(recipientResponse);
         convocation.setRecipientResponses(recipientResponses);
 
-        Question question = new Question();
+        Question question1 = new Question();
+        ReflectionTestUtils.setField(question1, "uuid", "question-uuid-one");
+        question1.setQuestion("question one ?");
+        question1.setRank(1);
 
-        ReflectionTestUtils.setField(question, "uuid", "question-uuid-one");
-        question.setQuestion("test question one ?");
-        question.setRank(1);
-        questions.add(question);
+        Question question2 = new Question();
+        ReflectionTestUtils.setField(question2, "uuid", "question-uuid-two");
+        question2.setQuestion("question two ?");
+        question2.setRank(2);
+
+        questions.add(question1);
+        questions.add(question2);
 
         convocation.setQuestions(questions);
 
@@ -314,13 +334,16 @@ public class ConvocationRestControllerTest {
         assemblyType.put("uuid", "assembly-type-uuid-one");
 
         final ArrayNode recipients = factory.arrayNode();
-
-
         recipients.add(factory.objectNode().put("uuid", "recipient-uuid-one"));
+
+        final ArrayNode questions = factory.arrayNode();
+        questions.add(factory.objectNode().put("question", "question one ?").put("rank", 1));
+        questions.add(factory.objectNode().put("question", "question two ?").put("rank", 2));
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         convocation.set("assemblyType", assemblyType);
         convocation.set("recipients", recipients);
+        convocation.set("questions", questions);
         convocation.put("subject", "Test assembly type one");
         convocation.put("comment", "Comment convocation test one");
         convocation.put("location", "Mairie");

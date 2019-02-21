@@ -18,6 +18,12 @@ class QuestionsForm extends Component {
 	    currentQuestion: '',
 	    currentRank: 1
 	}
+
+	componentDidMount() {
+	    if(this.props.initialRank) {
+	        this.setState({ currentRank: this.props.initialRank })
+	    }
+	}
 	handleKeyPress = (event) => {
 	    if(event.key === 'Enter') {
 	        event.preventDefault()
