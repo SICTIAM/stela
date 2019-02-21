@@ -404,13 +404,8 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
 
     public void send(PesAller pes) throws PesSendException {
         LOGGER.info("Sending PES {} ({})...", pes.getObjet(), pes.getUuid());
-        try {
-            ftpUploaderService.uploadFile(pes);
-            persistPesExport(pes);
-        } catch (IOException e) {
-            LOGGER.error("Error sending PES on FTP: {}", e.getMessage());
-            throw new PesSendException();
-        }
+        ftpUploaderService.uploadFile(pes);
+        persistPesExport(pes);
     }
 
     public List<PesAller> getPesInError(String localAuthorityUuid) {
