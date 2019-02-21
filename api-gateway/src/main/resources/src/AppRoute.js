@@ -27,6 +27,7 @@ import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
 import SentConvocation from './convocation/SentConvocation'
+import CompleteSentConvocation from './convocation/CompleteSentConvocation'
 import ReceivedConvocation from './convocation/ReceivedConvocation'
 import ConvocationForm from './convocation/ConvocationForm'
 import SentConvocationList from './convocation/SentConvocationList'
@@ -206,6 +207,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/statut" {...params} allowedRights={['PES_DISPLAY']}  component={PesMetrics} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocationList} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid/completer" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={CompleteSentConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocationList} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/nouveau" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ConvocationForm} menu={MenuBar}/>

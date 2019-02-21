@@ -214,6 +214,23 @@ public class ConvocationRestController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PutMapping("/{uuid}/upload")
+    public ResponseEntity<?> uploadAdditionalFiles(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @PathVariable String uuid,
+            @RequestParam(name = "annexes", required = false) MultipartFile... annexes) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid);
+
+        convocationService.uploadAdditionalFiles(convocation, annexes);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
     @GetMapping("/{uuid}/file/{fileUuid}")
     public ResponseEntity getFile(
             HttpServletResponse response,
@@ -235,13 +252,16 @@ public class ConvocationRestController {
         Attachment file = convocationService.getFile(currentLocalAuthUuid, uuid, fileUuid);
 
         try {
-            byte[] content;
+            byte[] content = file.getContent();
+            if (content == null) {
+                LOGGER.error("Cannot retrieve file {} content", file.getUuid());
+                return new ResponseEntity(HttpStatus.NOT_FOUND);
+            }
+
             if (convocation.getSentDate() != null && stamped != null && stamped == Boolean.TRUE
                     && getContentType(file.getFilename()).equals(MediaType.APPLICATION_PDF_VALUE)) {
-                content = convocationService.getStampedFile(file, convocation.getSentDate(),
+                content = convocationService.getStampedFile(content, convocation.getSentDate(),
                         convocation.getLocalAuthority(), x, y);
-            } else {
-                content = file.getContent();
             }
             outputFile(response, content, file.getFilename(), disposition);
             return new ResponseEntity<>(HttpStatus.OK);

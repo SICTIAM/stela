@@ -49,7 +49,10 @@
       "see_list": "Voir la liste",
       "hide_list": "Cacher la liste",
       "cancelled_convocation_title": "Convocation annulée",
-      "cancelled_convocation_text": "La convocation a été annulée le {{date}}. Vous ne pouvez plus modifier vos réponses."
+      "cancelled_convocation_text": "La convocation a été annulée le {{date}}. Vous ne pouvez plus modifier vos réponses.",
+      "to_complete": "Compléter",
+      "additional_information": "Informations complémentaires",
+      "additional_documents": "Document(s) complémentaires"
     },
     "new": {
       "display": "Visualiser",

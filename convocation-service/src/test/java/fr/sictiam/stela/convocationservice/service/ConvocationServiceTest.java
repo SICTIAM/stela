@@ -155,6 +155,23 @@ public class ConvocationServiceTest {
         convocationService.cancelConvocation(convocation);
     }
 
+    @Test
+    public void updateConvocation() {
+        Convocation convocation = convocationService.getConvocation("anything", "anything");
+
+        SortedSet<Question> questions = new TreeSet<>();
+        questions.add(new Question("question three ?", 3));
+
+        Convocation updateParams = new Convocation();
+        updateParams.setComment("comment updated");
+        updateParams.setQuestions(questions);
+
+        convocation = convocationService.update("anything", "anything", updateParams);
+
+        verify(convocationRepository).saveAndFlush(argThat(c -> c.getComment().equals("comment updated") &&
+                c.getQuestions().size() == 3));
+    }
+
     private static Convocation createDummyConvocation() {
         Convocation convocation = new Convocation();
 

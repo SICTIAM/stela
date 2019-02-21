@@ -21,7 +21,6 @@ import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledE
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
-import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
 import fr.sictiam.stela.convocationservice.service.util.PdfGeneratorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -158,8 +157,29 @@ public class ConvocationService {
     }
 
     public Convocation update(String uuid, String localAuthorityUuid, Convocation params) {
-        Convocation convocation = getByUuid(uuid, localAuthorityUuid);
-        ConvocationBeanUtils.mergeProperties(params, convocation, "uuid", "creationDate");
+
+        Convocation convocation = getConvocation(uuid, localAuthorityUuid);
+
+        // Add questions
+        if (params.getQuestions() != null) {
+            convocation.getQuestions().addAll(params.getQuestions());
+        }
+
+        // Comment
+        if (StringUtils.isNotBlank(params.getComment())) {
+            convocation.setComment(params.getComment());
+        }
+
+        // Create recipient responses
+        if (params.getRecipients() != null) {
+            convocation.getRecipientResponses().addAll(
+                    params.getRecipients().stream().map(recipient -> {
+                        RecipientResponse recipientResponse = new RecipientResponse(recipient);
+                        recipientResponse.setConvocation(convocation);
+                        recipientResponseRepository.save(recipientResponse);
+                        return recipientResponse;
+                    }).collect(Collectors.toSet()));
+        }
 
         return convocationRepository.saveAndFlush(convocation);
     }
@@ -205,12 +225,23 @@ public class ConvocationService {
         }
 
         if (file != null) {
-            Attachment attachment = saveAttachment(file);
+            Attachment attachment = saveAttachment(file, false);
             convocation.setAttachment(attachment);
         }
 
         for (MultipartFile annexe : annexes) {
-            Attachment attachment = saveAttachment(annexe);
+            Attachment attachment = saveAttachment(annexe, false);
+            convocation.getAnnexes().add(attachment);
+        }
+
+        convocationRepository.save(convocation);
+    }
+
+    public void uploadAdditionalFiles(Convocation convocation, MultipartFile... annexes)
+            throws ConvocationFileException {
+
+        for (MultipartFile annexe : annexes) {
+            Attachment attachment = saveAttachment(annexe, true);
             convocation.getAnnexes().add(attachment);
         }
 
@@ -235,10 +266,10 @@ public class ConvocationService {
         throw new NotFoundException("file not found");
     }
 
-    public byte[] getStampedFile(Attachment file, LocalDateTime sentDate, LocalAuthority localAuthority, Integer x,
+    public byte[] getStampedFile(byte[] content, LocalDateTime sentDate, LocalAuthority localAuthority, Integer x,
             Integer y) throws IOException, DocumentException {
 
-        PdfReader pdfReader = new PdfReader(file.getContent());
+        PdfReader pdfReader = new PdfReader(content);
         if (x == null || y == null) {
             if (pdfGeneratorUtil.pdfIsRotated(pdfReader)) {
                 //landscape case
@@ -250,7 +281,7 @@ public class ConvocationService {
                 y = localAuthority.getStampPosition().getY();
             }
         }
-        return pdfGeneratorUtil.stampPDF(sentDate, file.getContent(), x, y);
+        return pdfGeneratorUtil.stampPDF(sentDate, content, x, y);
     }
 
     public void answerConvocation(Convocation convocation, Recipient recipient, ResponseType responseType) {
@@ -452,10 +483,10 @@ public class ConvocationService {
         return predicates;
     }
 
-    private Attachment saveAttachment(MultipartFile file) throws ConvocationFileException {
+    private Attachment saveAttachment(MultipartFile file, boolean additionalDocument) throws ConvocationFileException {
 
         try {
-            Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes());
+            Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes(), additionalDocument);
             attachment = attachmentRepository.save(attachment);
             applicationEventPublisher.publishEvent(new FileUploadEvent(this, attachment));
             return attachment;

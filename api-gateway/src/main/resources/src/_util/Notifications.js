@@ -117,6 +117,18 @@ const notifications = {
             message: 'notifications.convocation.cancel.success',
             level: 'success',
             position: 'br'
+        },
+        complet: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.complet.success',
+            level: 'success',
+            position: 'br'
+        },
+        complet_with_document: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.complet_with_document.success',
+            level: 'success',
+            position: 'br'
         }
     },
     admin: {
