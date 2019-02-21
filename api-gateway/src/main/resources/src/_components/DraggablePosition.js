@@ -86,8 +86,8 @@ class DraggablePosition extends Component {
             <div style={{ ...style, width: this.props.width }}>
                 {this.props.showPercents && (
                     <p style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{t('acte.stamp_pad.width')}: {position.x}%</span>
-                        <span>{t('acte.stamp_pad.height')}: {position.y}%</span>
+                        <span>{t('api-gateway:stamp_pad.width')}: {position.x}%</span>
+                        <span>{t('api-gateway:stamp_pad.height')}: {position.y}%</span>
                     </p>
                 )}
                 <div style={{ ...globalStyle, ...backgroundImageStyle }}>
@@ -103,4 +103,4 @@ class DraggablePosition extends Component {
     }
 }
 
-export default translate(['acte'])(DraggablePosition)
+export default translate('api-gateway')(DraggablePosition)

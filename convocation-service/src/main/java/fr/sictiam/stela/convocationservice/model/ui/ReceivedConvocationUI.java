@@ -1,6 +1,7 @@
 package fr.sictiam.stela.convocationservice.model.ui;
 
 import fr.sictiam.stela.convocationservice.model.Convocation;
+import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
@@ -26,6 +27,8 @@ public class ReceivedConvocationUI {
 
     protected LocalDateTime cancellationDate;
 
+    protected LocalAuthority localAuthority;
+
     public ReceivedConvocationUI(Convocation convocation, Recipient recipient) {
         uuid = convocation.getUuid();
         subject = convocation.getSubject();
@@ -41,6 +44,7 @@ public class ReceivedConvocationUI {
 
         cancelled = convocation.isCancelled();
         cancellationDate = convocation.getCancellationDate();
+        localAuthority = convocation.getLocalAuthority();
     }
 
     public String getUuid() {
@@ -73,5 +77,9 @@ public class ReceivedConvocationUI {
 
     public LocalDateTime getCancellationDate() {
         return cancellationDate;
+    }
+
+    public LocalAuthority getLocalAuthority() {
+        return localAuthority;
     }
 }

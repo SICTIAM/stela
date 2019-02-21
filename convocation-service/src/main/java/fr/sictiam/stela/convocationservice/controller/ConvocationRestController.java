@@ -1,6 +1,7 @@
 package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.lowagie.text.DocumentException;
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Recipient;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -221,14 +223,32 @@ public class ConvocationRestController {
             @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
             @PathVariable String uuid,
             @PathVariable String fileUuid,
-            @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
+            @RequestParam(required = false) Boolean stamped,
+            @RequestParam(required = false) Integer x,
+            @RequestParam(required = false) Integer y,
+            @RequestParam(required = false, defaultValue = "inline") String disposition) {
 
         validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
                 Arrays.asList(Right.values()), false);
 
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
         Attachment file = convocationService.getFile(currentLocalAuthUuid, uuid, fileUuid);
-        outputFile(response, file.getContent(), file.getFilename(), disposition);
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        try {
+            byte[] content;
+            if (convocation.getSentDate() != null && stamped != null && stamped == Boolean.TRUE
+                    && getContentType(file.getFilename()).equals(MediaType.APPLICATION_PDF_VALUE)) {
+                content = convocationService.getStampedFile(file, convocation.getSentDate(),
+                        convocation.getLocalAuthority(), x, y);
+            } else {
+                content = file.getContent();
+            }
+            outputFile(response, content, file.getFilename(), disposition);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IOException | DocumentException e) {
+            LOGGER.error("Error during getting file {} for convocation {}: {}", fileUuid, uuid, e.getMessage());
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/received/{uuid}/{responseTypeString}")

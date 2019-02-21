@@ -120,7 +120,7 @@ class SentConvocation extends Component {
 	        return (
 	            <div key={`div_${this.state.convocation.uuid}_${annexe.uuid}`}>
 	                <LinkFile
-	                    url={`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}`}
+	                    url={`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true`}
 	                    key={`${this.state.convocation.uuid}_${annexe.uuid}`}
 	                    text={annexe.filename}/>
 	            </div>
@@ -157,7 +157,7 @@ class SentConvocation extends Component {
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
 	                                        <FieldValue id="document">
-	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.attachment.uuid}`} text={this.state.convocation.attachment.filename} />
+	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.attachment.uuid}?stamped=true`} text={this.state.convocation.attachment.filename} />
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>

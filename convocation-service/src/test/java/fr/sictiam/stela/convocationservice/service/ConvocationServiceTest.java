@@ -12,6 +12,7 @@ import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
+import fr.sictiam.stela.convocationservice.service.util.PdfGeneratorUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +74,9 @@ public class ConvocationServiceTest {
 
     @MockBean
     EntityManagerFactory entityManagerFactory;
+
+    @MockBean
+    PdfGeneratorUtil pdfGeneratorUtil;
 
     @Before
     public void setUp() {

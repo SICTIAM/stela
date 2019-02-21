@@ -65,6 +65,12 @@
       "show_all_annexes": "Voir les {{number}} annexes",
       "show_less_annexes": "Voir moins d'annexes"
     },
+    "stamp": {
+      "title": "Convocation envoyée le\n${date} à ${time}"
+    },
+    "stamp_pad": {
+      "pad_label": "Tampon"
+    },
     "admin": {
       "modules": {
         "convocation": {
