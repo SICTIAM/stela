@@ -301,6 +301,7 @@ class NewActeBatchedForm extends Component {
         )
         const submissionButton =
             <Button primary basic onClick={this.submitDraft} disabled={!this.state.isAllFormValid || isFormSaving || wrappedActes.length === 0} loading={isFormSaving}>
+                <Icon name={'paper plane'}/>
                 {t('api-gateway:form.submit')}
             </Button>
         return (
@@ -343,21 +344,25 @@ class NewActeBatchedForm extends Component {
                 </Segment>
                 <Accordion>
                     {wrappedActes}
-                    <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>{t('acte.new.add_an_acte')}</Button>
+                    <Button onClick={this.addBatchedActe} style={{ marginBottom: '1em' }} basic fluid>
+                        <Icon size={'large'} name={'plus'}/>
+                    </Button>
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
+                    {errorList.length > 0 &&
+                    <ValidationPopup errorList={errorList}>
+                        {submissionButton}
+                    </ValidationPopup>
+                    }
+                    {errorList.length === 0 && submissionButton}
                     {this.state.fields.uuid && (
                         <Button style={{ marginRight: '1em' }} onClick={this.deleteDraft} compact basic color='red'
                             disabled={isFormSaving} loading={isFormSaving}>
+                            <Icon name={'trash'}/>
                             {t('api-gateway:form.delete_draft')}
                         </Button>
                     )}
-                    {errorList.length > 0 &&
-                        <ValidationPopup errorList={errorList}>
-                            {submissionButton}
-                        </ValidationPopup>
-                    }
-                    {errorList.length === 0 && submissionButton}
+
                 </div>
             </div>
         )

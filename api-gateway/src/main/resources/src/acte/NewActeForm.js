@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import {Button, Form, Checkbox, Card, Dropdown, Grid} from 'semantic-ui-react'
+import {Button, Form, Checkbox, Icon, Dropdown, Grid} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
 import accepts from 'attr-accept'
 
-import { FormField, File, ValidationPopup, DragAndDropFile, InputFile } from '../_components/UI'
+import { FormField, ValidationPopup, DragAndDropFile, InputFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
@@ -89,13 +89,10 @@ class NewActeForm extends Component {
         if (!this.props.draftUuid && !this.props.uuid && depositFields.publicField) {
             acteResponse.public = true
         }
+        const groups = await this._adminService.getGroups(this.context)
 
-        this.setState({ fields: acteResponse, acteFetched: true, codesMatieres: subjectCodes, depositFields }, () => this.reloadActe())
+        this.setState({ fields: acteResponse, acteFetched: true, codesMatieres: subjectCodes, depositFields, groups }, () => this.reloadActe())
 
-        if (this.props.mode !== 'ACTE_BATCH') {
-            const groups = await this._adminService.getGroups(this.context)
-            this.setState({ groups })
-        }
     }
 
     componentWillReceiveProps = async (nextProps) => {
@@ -405,6 +402,7 @@ class NewActeForm extends Component {
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.pdf, .jpg, .png' : '.pdf, .xml, .jpg, .png'
         const submissionButton =
             <Button type='submit' primary basic disabled={!this.state.isFormValid || isFormSaving} loading={isFormSaving}>
+                <Icon name={'paper plane'}/>
                 {t('api-gateway:form.submit')}
             </Button>
         return (
@@ -412,11 +410,11 @@ class NewActeForm extends Component {
                 <Form onSubmit={this.saveAndSubmitForm}>
                     <Grid columns={3}>
                         <Grid.Column mobile={16} tablet={16} computer={4}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}
-                                helpText={t('acte.help_text.number')}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     placeholder={t('acte.fields.number') + '...'}
                                     ariaRequired={true}
+                                    helper={t('acte.help_text.number')}
                                     value={this.state.fields.number}
                                     onChange={(id, value) => this.handleFieldChange(id,value.toUpperCase())}
                                     validationRule={this.validationRules.number}
@@ -603,18 +601,19 @@ class NewActeForm extends Component {
                                     {this.context.t('acte.help_text.annexes_size')} {bytesToSize(sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))} / 150Mo
                                 </label>
                             )}
+                            {this.state.formErrors.length === 0 && submissionButton}
+                            {this.state.formErrors.length > 0 &&
+                            <ValidationPopup errorList={this.state.formErrors}>
+                                {submissionButton}
+                            </ValidationPopup>
+                            }
                             {this.state.fields.uuid && (
                                 <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red'
                                     disabled={isFormSaving} loading={isFormSaving}>
+                                    <Icon name={'trash'}/>
                                     {t('api-gateway:form.delete_draft')}
                                 </Button>
                             )}
-                            {this.state.formErrors.length > 0 &&
-                                <ValidationPopup errorList={this.state.formErrors}>
-                                    {submissionButton}
-                                </ValidationPopup>
-                            }
-                            {this.state.formErrors.length === 0 && submissionButton}
                         </div>
                     )}
                 </Form>
