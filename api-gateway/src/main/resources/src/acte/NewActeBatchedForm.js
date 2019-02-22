@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Accordion, Icon, Segment, Grid, Button, Header, Form, Dropdown } from 'semantic-ui-react'
+import { Accordion, Icon, Segment, Grid, Button, Header, Form, Dropdown, Popup } from 'semantic-ui-react'
 import moment from 'moment'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
@@ -33,6 +33,7 @@ class NewActeBatchedForm extends Component {
             nature: '',
             groupUuid: null
         },
+        errors:{},
         groups: [],
         draftStatus: null,
         draftValid: false,
@@ -258,6 +259,13 @@ class NewActeBatchedForm extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
+
+    updateErrors = (acteUuid, newErrors) => {
+        const {errors} = this.state
+        errors[acteUuid] = newErrors
+        this.setState({errors: errors })
+    }
+
     render() {
         const { t } = this.context
         const isFormSaving = this.props.status === 'saving'
@@ -278,6 +286,7 @@ class NewActeBatchedForm extends Component {
                 key={acte.uuid}
                 acte={acte}
                 formValid={this.state.formValid[acte.uuid]}
+                errors={this.state.errors[acte.uuid]}
                 isActive={this.state.active === acte.uuid}
                 handleClick={this.handleClick}
                 labelDelete={t('acte.new.batch_title_placeholder')}
@@ -296,6 +305,7 @@ class NewActeBatchedForm extends Component {
                     setFormValidForId={this.setFormValidForId}
                     setField={this.setField}
                     shouldUnmount={this.state.shouldUnmount}
+                    callBackErrorMessages={(acteUuid, errors) => this.updateErrors(acteUuid, errors) }
                 />
             </WrappedActeForm>
         )
@@ -373,7 +383,11 @@ const styles = {
     overflow: {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
-        textOverflow: 'ellipsis'
+        textOverflow: 'ellipsis',
+        fontWeight: 800
+    },
+    textNumber:{
+        fontWeight: 800
     },
     centered: {
         display: 'flex',
@@ -381,32 +395,34 @@ const styles = {
     }
 }
 
-const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, formValid, labelDelete }) =>
+const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, errors, formValid, labelDelete }) =>
     <Segment style={{ paddingTop: '0', paddingBottom: '0' }}>
         <Accordion.Title active={isActive}>
-            <Grid>
-                <Grid.Column style={styles.centered} width={1} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small'><Icon name='dropdown' /></Header>
-                </Grid.Column>
-                <Grid.Column style={styles.centered} width={3} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small' style={styles.overflow}>
-                        {!acte.number && !acte.objet ? titlePlaceholder
-                            : acte.number ? `N° ${acte.number}` : ''}
-                    </Header>
-                </Grid.Column>
-                <Grid.Column style={styles.centered} width={10} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small' style={styles.overflow}>
-                        {acte.objet}
-                    </Header>
-                </Grid.Column>
-                <Grid.Column width={1} style={styles.centered}>
-                    {formValid ? <Icon color='green' name='checkmark' size='large' />
-                        : <Icon color='red' name='warning circle' size='large' />}
+            <Grid stretched verticalAlign={'middle'}>
+                <Grid.Column width={1} onClick={() => handleClick(acte.uuid)}>
+                    <Icon name='dropdown' size={'large'} />
                 </Grid.Column>
                 <Grid.Column width={1}>
-                    <Button color='red' aria-label={labelDelete} basic size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
-                        <Icon name='remove' />
-                    </Button>
+                    {
+                        formValid ?
+                            <Icon color='green' name='checkmark' size={'large'}/>
+                            :
+                            <ValidationPopup errorList= {errors}>
+                                <Icon color='orange' name='warning sign' size={'large'}/>
+                            </ValidationPopup>
+                    }
+                </Grid.Column>
+                <Grid.Column width={3} onClick={() => handleClick(acte.uuid)}>
+                    <p style={{...styles.overflow, ...styles.textNumber}}>
+                        {!acte.number && !acte.objet ? titlePlaceholder
+                            : acte.number ? `N° ${acte.number}` : ''}
+                    </p>
+                </Grid.Column>
+                <Grid.Column width={10} onClick={() => handleClick(acte.uuid)}>
+                    <p style={styles.overflow}>{acte.objet}</p>
+                </Grid.Column>
+                <Grid.Column width={1} textAlign={'right'} floated={'right'}>
+                    <Popup trigger={<Icon name='close' color='red' aria-label={labelDelete} onClick={() => deleteBatchedActe(acte.uuid)} size={'large'}/>} content={'Delete Acte'}/>
                 </Grid.Column>
             </Grid>
         </Accordion.Title>

@@ -262,6 +262,8 @@ class NewActeForm extends Component {
         if (this.props.mode === 'ACTE_BATCH') {
             this.props.setFormValidForId(isFormValid, this.state.fields.uuid, formErrors)
         }
+        //return errors to the parent component (useful for the batchedForm)
+        this.props.callBackErrorMessages && this.props.callBackErrorMessages(this.state.fields.uuid, formErrors)
     }, 500)
     saveDraft = debounce(async (callback) => {
         const {fields} = this.state
