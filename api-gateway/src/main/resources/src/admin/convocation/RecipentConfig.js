@@ -97,7 +97,7 @@ class RecipentConfig extends Component {
 	        })
 	        .catch(response => {
 	            response.json().then((json) => {
-	                _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`convocation.${json.message}`))
+	                _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(json.message))
 	            })
 	        })
 	}

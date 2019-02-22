@@ -129,7 +129,8 @@
     },
     "errors": {
       "recipient": {
-        "alreadyExists": "Un destinataire existe avec ce courriel"
+        "alreadyExists": "Un destinataire existe avec ce courriel",
+        "invalidEmail": "Le courriel ne semble pas exister"
       },
       "convocation": {
         "invalidDate": "La date de séance est invalide",

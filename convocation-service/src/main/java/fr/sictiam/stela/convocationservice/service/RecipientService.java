@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
+import fr.sictiam.stela.convocationservice.model.exception.InvalidEmailAddressException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.exception.RecipientExistsException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
+import fr.sictiam.stela.convocationservice.service.util.EmailChecker;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,11 @@ public class RecipientService {
         if (exist.isPresent()) {
             LOGGER.error("A recipient with email {} already exists in local authority {}", recipient.getEmail(), localAuthority.getName());
             throw new RecipientExistsException();
+        }
+
+        if (!EmailChecker.isValid(recipient.getEmail())) {
+            LOGGER.error("email {} does not seem to exist", recipient.getEmail());
+            throw new InvalidEmailAddressException();
         }
 
         recipient.setLocalAuthority(localAuthority);
