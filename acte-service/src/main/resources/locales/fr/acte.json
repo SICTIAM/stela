@@ -212,6 +212,9 @@
       "file_size": "Taille du fichier",
       "delete_file": "Supprimer"
 
+    },
+    "error": {
+      "xml_not_valid": "Le fichier XML ne présente pas la balise 'Scellement'"
     }
   },
   "stamp_pad": {

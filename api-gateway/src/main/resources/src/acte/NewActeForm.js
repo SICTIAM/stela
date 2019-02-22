@@ -69,6 +69,7 @@ class NewActeForm extends Component {
         decision: ['required', 'date'],
         acteAttachment: 'required|acteAttachmentType',
         archiveSize: `max:${maxArchiveSize}`,
+        annexe: 'annexeCheckXML'
     }
 
     componentDidMount = async () => {
@@ -205,6 +206,19 @@ class NewActeForm extends Component {
             _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
         }
     }
+    isBudgetXMLFileValid = (file, type) => {
+        if((this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
+            || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') && type !== 'annexe') {
+            let reader = new FileReader()
+            reader.readAsText(file)
+            reader.onloadend = () => {
+                let xmlData = reader.result
+                return xmlData.search('<Scellement') > 0
+            }
+        }else{
+            return true
+        }
+    }
     validateActeAttachmentType = () => {
         const { annexes, acteAttachment } = this.state.fields
         let annexesValidation = true
@@ -213,6 +227,7 @@ class NewActeForm extends Component {
         })
         return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
     }
+
     validateForm = debounce(() => {
         const { t } = this.context
         const data = {
@@ -232,8 +247,7 @@ class NewActeForm extends Component {
             decision: t('acte.fields.decision'),
             acteAttachment: t('acte.fields.acteAttachment'),
             annexes: t('acte.fields.annexes'),
-            code: t('acte.fields.code'),
-            archiveSize: 'lalalal'
+            code: t('acte.fields.code')
         }
         const validationRules = this.validationRules
 
@@ -273,12 +287,19 @@ class NewActeForm extends Component {
             const data = new FormData()
             data.append('file', file)
             data.append('nature', this.state.fields.nature)
+
+            if(!this.isBudgetXMLFileValid(file, type)){
+                this.props.setStatus('saved', this.state.fields.uuid)
+                return this.props.authContext._addNotification(notifications.defaultError, 'notifications.acte.title', this.context.t('acte.error.xml_not_valid'))
+            }
+
             try {
                 // TODO: Work only Attachments without file content, so it can scale with the multiple acte form
                 const acteData = this.getActeData()
                 await this._acteService.saveDraft(acteData.draft.uuid, acteData.uuid, acteData, this.props.authContext)
 
                 const response = await this._acteService.saveDraftAttachment(data, draftUuid, uuid, type, this.props.authContext)
+
                 this.props.setStatus('saved', this.state.fields.uuid)
                 const acte = this._acteService.deserializeActe(response)
                 this.setState({ fields: acte, acteFetched: true }, this.validateForm)
