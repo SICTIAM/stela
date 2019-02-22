@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Label, Dropdown, Popup} from 'semantic-ui-react'
+import {Label, Dropdown, Popup, Grid} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 import PropTypes from 'prop-types'
@@ -32,13 +32,14 @@ export default class InputValidation extends Component {
     }
 
     selectInput = () => {
-        const {onChange, ...rest } = this.props
+        const {onChange, maxChar, ...rest } = this.props
 
         switch (this.props.type) {
         case(''):
         case('text'):
             return (
                 <input id={this.props.id}
+                    maxLength={maxChar}
                     disabled={this.props.disabled}
                     aria-required={this.props.ariaRequired ? this.props.ariaRequired : false}
                     className={this.props.className + (this.state.errorMessage ? ' error' : '')}
@@ -50,6 +51,7 @@ export default class InputValidation extends Component {
         case ('number'):
             return(
                 <input id={this.props.id}
+                    maxLength={maxChar}
                     disabled={this.props.disabled}
                     aria-required={this.props.ariaRequired ? this.props.ariaRequired : false}
                     className={this.props.className + (this.state.errorMessage ? ' error' : '')}
@@ -84,7 +86,6 @@ export default class InputValidation extends Component {
                 <InputFile icon={this.props.icon} htmlFor={this.props.id} label={this.props.label} labelClassName={this.props.labelClassName}>
                     <input id={this.props.id}
                         disabled={this.props.disabled}
-
                         type='file'
                         aria-required={this.props.ariaRequired ? this.props.ariaRequired : false}
                         style={{display: 'none'}}
@@ -144,7 +145,7 @@ export default class InputValidation extends Component {
 
 
     render() {
-        const { style, helper } = this.props
+        const { style, helper, maxChar, value } = this.props
         const input = this.selectInput()
         return (
             <div style={style}>
@@ -156,16 +157,39 @@ export default class InputValidation extends Component {
                     : input
                 }
 
-                <div>
-                    {!this.state.isValid && this.props.errorTypePointing && (
-                        <Label color='red' pointing>{this.state.errorMessage}</Label>
-                    )}
-                </div>
-                {!this.state.isValid && !this.props.errorTypePointing && (
-                    <p className='error-message-form'>{this.state.errorMessage}</p>
-                )}
+                {(this.props.errorTypePointing || maxChar) &&
+                    <Grid columns={2}>
+                        {!this.state.isValid && !this.props.errorTypePointing && (
+                            <Grid.Column stretched width={maxChar ? 12 : 16}>
+                                <p className='error-message-form'>{this.state.errorMessage}</p>
+                            </Grid.Column>
+                        )}
+                        {!this.state.isValid && this.props.errorTypePointing && (
+                            <Grid.Column stretched width={maxChar ? 12 : 16}>
+                                <Label color='red' pointing>{this.state.errorMessage}</Label>
+                            </Grid.Column>
+
+                        )}
+                        {maxChar &&
+                        <Grid.Column streched floated={'right'} textAlign={'right'} width={4}>
+                            <p style={value.length > maxChar || value.length===0 ? styles.errorMessage : styles.messageForm}>{value.length}/{maxChar}</p>
+                        </Grid.Column>
+                        }
+                    </Grid>
+                }
+
             </div>
         )
+    }
+}
+
+const styles = {
+    messageForm: {
+        fontSize: '12px',
+    },
+    errorMessage:{
+        fontSize: '12px',
+        color: '#9f3a38'
     }
 }
 

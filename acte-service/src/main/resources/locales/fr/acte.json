@@ -206,6 +206,7 @@
       "PJ_type": "Type de pièce jointe",
       "PJ_types": "Types de pièce jointe...",
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",
+      "maxArchiveSize":"La taille total des fichiers ne doit pas dépasser 150Mo",
       "every_group": "Toute la collectivité",
       "file": "Fichier",
       "file_size": "Taille du fichier",

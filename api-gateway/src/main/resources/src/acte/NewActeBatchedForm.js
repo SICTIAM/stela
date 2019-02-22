@@ -349,19 +349,19 @@ class NewActeBatchedForm extends Component {
                     </Button>
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
+                    {this.state.fields.uuid && (
+                        <Button style={{ marginRight: '1em' }} onClick={this.deleteDraft} basic color='red'
+                            disabled={isFormSaving} loading={isFormSaving}>
+                            <Icon name={'trash'}/>
+                            {t('api-gateway:form.delete_draft')}
+                        </Button>
+                    )}
                     {errorList.length > 0 &&
                     <ValidationPopup errorList={errorList}>
                         {submissionButton}
                     </ValidationPopup>
                     }
                     {errorList.length === 0 && submissionButton}
-                    {this.state.fields.uuid && (
-                        <Button style={{ marginRight: '1em' }} onClick={this.deleteDraft} compact basic color='red'
-                            disabled={isFormSaving} loading={isFormSaving}>
-                            <Icon name={'trash'}/>
-                            {t('api-gateway:form.delete_draft')}
-                        </Button>
-                    )}
 
                 </div>
             </div>

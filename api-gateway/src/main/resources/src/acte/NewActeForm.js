@@ -12,7 +12,7 @@ import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import {checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize, sortAlphabetically, sum} from '../_util/utils'
-import { natures, materialCodeBudgetaire } from '../_util/constants'
+import { natures, materialCodeBudgetaire, maxArchiveSize } from '../_util/constants'
 import { withAuthContext } from '../Auth'
 import ActeService from '../_util/acte-service'
 import AdminService from '../_util/admin-service'
@@ -67,7 +67,8 @@ class NewActeForm extends Component {
         nature: 'required',
         code: 'required',
         decision: ['required', 'date'],
-        acteAttachment: 'required|acteAttachmentType'
+        acteAttachment: 'required|acteAttachmentType',
+        archiveSize: `max:${maxArchiveSize}`,
     }
 
     componentDidMount = async () => {
@@ -179,14 +180,6 @@ class NewActeForm extends Component {
             }
         })
     }
-    validateActeAttachmentType = () => {
-        const { annexes, acteAttachment } = this.state.fields
-        let annexesValidation = true
-        annexes.forEach(annexe => {
-            if (!annexe.attachmentTypeCode) annexesValidation = false
-        })
-        return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
-    }
     fileAccept = (file, accept) => {
         const { _addNotification, t } = this.context
         if(file.type === 'application/x-moz-file' || accepts(file, accept)) {
@@ -212,6 +205,14 @@ class NewActeForm extends Component {
             _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
         }
     }
+    validateActeAttachmentType = () => {
+        const { annexes, acteAttachment } = this.state.fields
+        let annexesValidation = true
+        annexes.forEach(annexe => {
+            if (!annexe.attachmentTypeCode) annexesValidation = false
+        })
+        return acteAttachment && acteAttachment.attachmentTypeCode && annexesValidation
+    }
     validateForm = debounce(() => {
         const { t } = this.context
         const data = {
@@ -221,7 +222,8 @@ class NewActeForm extends Component {
             decision: this.state.fields.decision,
             acteAttachment: this.state.fields.acteAttachment,
             annexes: this.state.fields.annexes,
-            code: this.state.fields.code
+            code: this.state.fields.code,
+            archiveSize: sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0)
         }
         const attributeNames = {
             number: t('acte.fields.number'),
@@ -230,13 +232,15 @@ class NewActeForm extends Component {
             decision: t('acte.fields.decision'),
             acteAttachment: t('acte.fields.acteAttachment'),
             annexes: t('acte.fields.annexes'),
-            code: t('acte.fields.code')
+            code: t('acte.fields.code'),
+            archiveSize: 'lalalal'
         }
         const validationRules = this.validationRules
+
         if (this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.mode === 'ACTE_BUDGETAIRE')
             validationRules.annexes = 'required'
+        const validation = new Validator(data, validationRules, {'max.archiveSize': this.context.t('acte.new.maxArchiveSize')})
         Validator.register('acteAttachmentType', this.validateActeAttachmentType, this.context.t('acte.new.PJ_types_validation'))
-        const validation = new Validator(data, validationRules)
         validation.setAttributeNames(attributeNames)
         const isFormValid = validation.passes()
         const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
@@ -405,6 +409,8 @@ class NewActeForm extends Component {
                 <Icon name={'paper plane'}/>
                 {t('api-gateway:form.submit')}
             </Button>
+        const isBudgetActe = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
+
         return (
             (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) && (
                 <Form onSubmit={this.saveAndSubmitForm}>
@@ -412,6 +418,7 @@ class NewActeForm extends Component {
                         <Grid.Column mobile={16} tablet={16} computer={4}>
                             <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
+                                    maxChar={15}
                                     placeholder={t('acte.fields.number') + '...'}
                                     ariaRequired={true}
                                     helper={t('acte.help_text.number')}
@@ -425,6 +432,7 @@ class NewActeForm extends Component {
                             <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')}>
                                 <InputValidation id={`${this.state.fields.uuid}_objet`}
                                     ariaRequired={true}
+                                    maxChar={500}
                                     placeholder={t('acte.fields.objet') + '...'}
                                     value={this.state.fields.objet}
                                     onChange={this.handleFieldChange}
@@ -498,8 +506,8 @@ class NewActeForm extends Component {
                     </Grid>
 
 
-                    <Grid centered columns={3}>
-                        <Grid.Column textAlign={'center'} computer={16}>
+                    <Grid centered columns={1}>
+                        <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
                                 helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
                                 <DragAndDropFile
@@ -538,9 +546,8 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                                optionalLabelText={t('acte.fields.optional_field')}
-                                helpText={t('acte.help_text.annexes', { acceptAnnexes })}
-                                required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'}>
+                                optionalLabelText={!isBudgetActe ? t('acte.fields.optional_field') : null}
+                                helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_annexes`}
                                     acceptFile={acceptAnnexes}
@@ -548,7 +555,7 @@ class NewActeForm extends Component {
                                     disableClick={true}
                                     multiple={false}>
                                     <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
-                                        <input type="file" aria-required={this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                        <input type="file" aria-required={isBudgetActe} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
                                             onChange={e => this.saveDraftFile(e.target.files[0], acceptAnnexes, 'annexe')} style={{ display: 'none' }} />
                                     </InputFile>
                                 </DragAndDropFile>
@@ -565,28 +572,27 @@ class NewActeForm extends Component {
                             )}
                         </Grid.Column>
                     </Grid>
-                    {(this.state.fields.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
-                    && this.props.nature !== 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') && (
-                            <Grid columns={3} style={{ marginBottom: 'auto' }}>
+                    {(!isBudgetActe) && (
+                        <Grid columns={3} style={{ marginBottom: 'auto' }}>
+                            <Grid.Column>
+                                <FormField label={t('acte.fields.public')}
+                                    helpText={t('acte.help_text.public')}>
+                                    <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled}
+                                        checked={this.state.fields.public} toggle
+                                        onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} aria-label={t('acte.help_text.public')}/>
+                                </FormField>
+                            </Grid.Column>
+                            {this.state.depositFields.publicWebsiteField && (
                                 <Grid.Column>
-                                    <FormField label={t('acte.fields.public')}
-                                        helpText={t('acte.help_text.public')}>
-                                        <Checkbox id={`${this.state.fields.uuid}_public`} disabled={isPublicFieldDisabled}
-                                            checked={this.state.fields.public} toggle
-                                            onChange={e => handleFieldCheckboxChange(this, 'public', this.saveDraft)} aria-label={t('acte.help_text.public')}/>
+                                    <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}
+                                        helpText={t('acte.help_text.publicWebsite')}>
+                                        <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite}
+                                            onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
                                     </FormField>
                                 </Grid.Column>
-                                {this.state.depositFields.publicWebsiteField && (
-                                    <Grid.Column>
-                                        <FormField htmlFor={`${this.state.fields.uuid}_publicWebsite`} label={t('acte.fields.publicWebsite')}
-                                            helpText={t('acte.help_text.publicWebsite')}>
-                                            <Checkbox id={`${this.state.fields.uuid}_publicWebsite`} checked={this.state.fields.publicWebsite}
-                                                onChange={e => handleFieldCheckboxChange(this, 'publicWebsite', this.saveDraft)} toggle />
-                                        </FormField>
-                                    </Grid.Column>
-                                )}
-                            </Grid>
-                        )
+                            )}
+                        </Grid>
+                    )
                     }
 
                     <FormField label={t('acte.fields.multipleChannels')} helpText={t('acte.help_text.multipleChannels')}>
@@ -601,19 +607,19 @@ class NewActeForm extends Component {
                                     {this.context.t('acte.help_text.annexes_size')} {bytesToSize(sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))} / 150Mo
                                 </label>
                             )}
+                            {this.state.fields.uuid && (
+                                <Button type="button" basic style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} color='red'
+                                    disabled={isFormSaving} loading={isFormSaving}>
+                                    <Icon name={'trash'}/>
+                                    {t('api-gateway:form.delete_draft')}
+                                </Button>
+                            )}
                             {this.state.formErrors.length === 0 && submissionButton}
                             {this.state.formErrors.length > 0 &&
                             <ValidationPopup errorList={this.state.formErrors}>
                                 {submissionButton}
                             </ValidationPopup>
                             }
-                            {this.state.fields.uuid && (
-                                <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.deteleDraft(e)} compact basic color='red'
-                                    disabled={isFormSaving} loading={isFormSaving}>
-                                    <Icon name={'trash'}/>
-                                    {t('api-gateway:form.delete_draft')}
-                                </Button>
-                            )}
                         </div>
                     )}
                 </Form>
