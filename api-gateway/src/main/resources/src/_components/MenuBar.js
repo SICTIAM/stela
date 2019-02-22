@@ -96,6 +96,11 @@ class MenuBar extends Component {
                                         {t('menu.pes.PES_Retour_list')}
                                     </Menu.Item>
                                 )}
+                                {rightsFeatureResolver(rights, ['PES_DISPLAY']) && (
+                                    <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/pes/statut`}>
+                                        {t('menu.pes.PES_statut')}
+                                    </Menu.Item>
+                                )}
                             </Menu.Menu>
                         </Menu.Item>
                     )}
@@ -107,15 +112,21 @@ class MenuBar extends Component {
                                 <Icon name="calendar outline" className="float-right" size="large" />
                             </Menu.Header>
                             <Menu.Menu>
-                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/nouveau`}>
-                                    {t('menu.convocation.send_a_convocation')}
-                                </Menu.Item>
-                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-reçues`}>
-                                    {t('menu.convocation.reveived_convocations')}
-                                </Menu.Item>
-                                <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-envoyees`}>
-                                    {t('menu.convocation.sent_convocations')}
-                                </Menu.Item>
+                                {rightsFeatureResolver(rights, ['CONVOCATION_DEPOSIT']) && (
+                                    <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/nouveau`}>
+                                        {t('menu.convocation.send_a_convocation')}
+                                    </Menu.Item>
+                                )}
+                                {rightsFeatureResolver(rights, ['CONVOCATION_DISPLAY']) && (
+                                    <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-recues`}>
+                                        {t('menu.convocation.reveived_convocations')}
+                                    </Menu.Item>
+                                )}
+                                {rightsFeatureResolver(rights, ['CONVOCATION_DEPOSIT']) && (
+                                    <Menu.Item as={NavLink} to={`/${localAuthoritySlug}/convocation/liste-envoyees`}>
+                                        {t('menu.convocation.sent_convocations')}
+                                    </Menu.Item>
+                                )}
                             </Menu.Menu>
                         </Menu.Item>
                     )}

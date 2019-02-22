@@ -94,7 +94,10 @@ public class Views {
     public interface SearchAssemblyType extends Search, AssemblyTypeInternal {
     }
 
-    public interface SearchSentConvocation extends Search, Convocation {
+    public interface SearchSentConvocation extends Search, ConvocationSent {
+    }
+
+    public interface SearchReceivedConvocation extends Search, ConvocationReceived {
     }
 
     public interface Recipient extends Public {
@@ -115,11 +118,22 @@ public class Views {
     public interface LocalAuthority extends Public {
     }
 
-    public interface Convocation extends Recipient, LocalAuthority, QuestionView {
+    public interface Convocation extends Recipient, LocalAuthority, Question {
     }
 
-    public interface ConvocationInternal extends Convocation {
+    public interface ConvocationSent extends Convocation {
     }
 
+    public interface ConvocationReceived extends Convocation {
+    }
+
+    public interface ConvocationInternal extends ConvocationReceived, ConvocationSent {
+    }
+
+    public interface Question extends Public {
+    }
+
+    public interface QuestionInternal extends Question {
+    }
 
 }

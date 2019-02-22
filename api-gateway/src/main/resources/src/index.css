@@ -66,14 +66,17 @@
     margin-left: 20px;
     display: inline-block;
 }
+.mr-10 {
+    margin-right: 10px !important;
+}
 .mr-20 {
-    margin-right: 20px;
+    margin-right: 20px !important;
 }
 .mt-15 {
-    margin-top: 15px;
+    margin-top: 15px !important;
 }
 .mb-0 {
-    margin-bottom: 0px;
+    margin-bottom: 0px !important;
 }
 .my-0 {
     margin-left: 0px !important;
@@ -87,6 +90,21 @@
 }
 .pl-5 {
     padding-left: 5px
+}
+
+.py-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.px-10 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* Border */
+.bb-1 {
+    border-bottom: 1px solid rgba(34,36,38,.15);
 }
 
 /* Max height */

@@ -1,0 +1,1 @@
+alter table question add rank integer default 0;

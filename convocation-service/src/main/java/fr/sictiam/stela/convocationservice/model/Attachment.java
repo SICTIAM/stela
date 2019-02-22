@@ -1,8 +1,10 @@
 package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
+import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -20,28 +22,43 @@ public class Attachment {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonView(Views.ConvocationInternal.class)
     private String uuid;
 
+    @JsonView(Views.ConvocationInternal.class)
     private String filename;
+
     private long size;
 
+    @JsonIgnore
     private String storageKey;
 
     @JsonIgnore
-    transient private byte[] content;
+    private byte[] content;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
+    @JsonView(Views.ConvocationInternal.class)
+    private boolean additional = false;
+
     public Attachment() {
-        this(null, null, 0, LocalDateTime.now());
+        this(null, null, 0, LocalDateTime.now(), false);
     }
 
     public Attachment(String filename, byte[] content) {
-        this(filename, content, content != null ? content.length : 0, LocalDateTime.now());
+        this(filename, content, content != null ? content.length : 0, LocalDateTime.now(), false);
+    }
+
+    public Attachment(String filename, byte[] content, boolean additional) {
+        this(filename, content, content != null ? content.length : 0, LocalDateTime.now(), additional);
     }
 
     public Attachment(String filename, byte[] content, long size, LocalDateTime date) {
+        this(filename, content, content != null ? content.length : 0, date, false);
+    }
+
+    public Attachment(String filename, byte[] content, long size, LocalDateTime date, boolean additional) {
         if (filename != null) {
             Path path = Paths.get(filename);
             this.filename = path.getFileName().toString();
@@ -50,6 +67,7 @@ public class Attachment {
         this.size = size;
         this.date = date;
         storageKey = "convocation/" + UUID.randomUUID().toString();
+        this.additional = additional;
     }
 
     public String getUuid() {
@@ -87,5 +105,13 @@ public class Attachment {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public boolean isAdditional() {
+        return additional;
+    }
+
+    public void setAdditional(boolean additional) {
+        this.additional = additional;
     }
 }

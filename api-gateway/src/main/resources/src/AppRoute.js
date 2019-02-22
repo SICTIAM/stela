@@ -27,6 +27,7 @@ import PesList from './pes/PesList'
 import NewPes from './pes/NewPes'
 import Pes from './pes/Pes'
 import SentConvocation from './convocation/SentConvocation'
+import CompleteSentConvocation from './convocation/CompleteSentConvocation'
 import ReceivedConvocation from './convocation/ReceivedConvocation'
 import ConvocationForm from './convocation/ConvocationForm'
 import SentConvocationList from './convocation/SentConvocationList'
@@ -51,7 +52,8 @@ import AssemblyTypeConfig from './admin/convocation/AssemblyTypeConfig'
 import AssemblyTypeList from './admin/convocation/AssemblyTypeList'
 import RecipentConfig from './admin/convocation/RecipentConfig'
 import RecipientsList from './admin/convocation/RecipientsList'
-import ConvocationModuleParams from './admin/convocation/ConvocationModuleParams'
+import ConvocationLocalAuthorityParams from './admin/convocation/ConvocationLocalAuthorityParams'
+import PesMetrics from './pes/PesMetrics'
 
 import { withAuthContext, AuthConsumer } from './Auth'
 
@@ -155,17 +157,17 @@ class AppRoute extends Component {
 
     checkCertificateIsValid = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(certificate => this.setState({ certificate }))
-            .catch(response => {
-                if(response.status !== 401) {
+        if(this.props.authContext.isLoggedIn) {
+            _fetchWithAuthzHandling({url: '/api/admin/certificate/is-valid'})
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(certificate => this.setState({certificate}))
+                .catch(response => {
                     response.text().then(text => {
                         _addNotification(notifications.defaultError, 'notifications.title', text)
                     })
-                }
-            })
+                })
+        }
     }
     render() {
         const params = this.state
@@ -202,9 +204,11 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/liste/:uuid" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={Pes} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-reçues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={ReceivedConvocation} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-reçues" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ReceivedConvocationList} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY', 'CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/pes/statut" {...params} allowedRights={['PES_DISPLAY']}  component={PesMetrics} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocationList} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid/completer" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={CompleteSentConvocation} menu={MenuBar}/>
+                <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocationList} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/nouveau" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={ConvocationForm} menu={MenuBar}/>
 
@@ -228,7 +232,7 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/actes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ActeLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes/migration" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityMigration} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/pes" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={PesLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
-                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationModuleParams} menu={AdminMenuBar} admin={true} />
+                <AuthRoute path="/:localAuthoritySlug/admin/ma-collectivite/convocation" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={ConvocationLocalAuthorityParams} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/nouveau" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee/:uuid" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeConfig} menu={AdminMenuBar} admin={true} />
                 <AuthRoute path="/:localAuthoritySlug/admin/convocation/type-assemblee/liste-type-assemblee" {...params} allowedRights={['LOCAL_AUTHORITY_ADMIN']} component={AssemblyTypeList} menu={AdminMenuBar} admin={true} />

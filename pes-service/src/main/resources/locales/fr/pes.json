@@ -36,7 +36,8 @@
     "help_text": {
       "objet": "L'objet/titre de l'enveloppe (texte libre)'",
       "comment": "Commentaire(s) éventuel(s) sur l'envoi du courrier",
-      "attachment": "Fichier de l'enveloppe aux formats : {{acceptFile}}"
+      "attachment": "Fichier de l'enveloppe aux formats : {{acceptFile}}",
+      "potential_anomamlies_detected": "Des anomalies potentielles ont été detectées"
     },
     "new": {
       "title": "Télétransmission d'une enveloppe"
@@ -93,7 +94,7 @@
       "pes": {
         "title": "Module PES",
         "local_authority_settings": {
-          "title": "Paramétrage des du module PES de la collectivité",
+          "title": "Paramétrage du module PES de la collectivité",
           "general_informations": "Informations générales",
           "HELIOS_transmission": "Transmission Helios",
           "serverCode": "Code serveur trésorerie",

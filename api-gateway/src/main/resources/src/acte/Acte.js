@@ -80,19 +80,19 @@ class Acte extends Component {
 
     checkCertificateIsValid = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({ url: '/api/admin/certificate/is-valid' })
-            .then(checkStatus)
-            .then(response => response.json())
-            .then(certificate => {
-                this.setState({ isCertificateValid: certificate })
-            })
-            .catch(response => {
-                if(response.status !== 401) {
+        if(this.props.authContext.isLoggedIn) {
+            _fetchWithAuthzHandling({url: '/api/admin/certificate/is-valid'})
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(certificate => {
+                    this.setState({isCertificateValid: certificate})
+                })
+                .catch(response => {
                     response.text().then(text => {
                         _addNotification(notifications.defaultError, 'notifications.title', text)
                     })
-                }
-            })
+                })
+        }
     }
 
     fetchThumbnail = () => {

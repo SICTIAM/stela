@@ -84,7 +84,7 @@ class ActeLocalAuthorityMigration extends Component {
     reset = (migrationType) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = `/api/acte/localAuthority/${this.props.uuid || 'current'}/migration/${migrationType}/reset`
-        _fetchWithAuthzHandling({ url, method: 'POST', context: this.props.authContextt })
+        _fetchWithAuthzHandling({ url, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
                 const { fields } = this.state

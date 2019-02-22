@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
+import fr.sictiam.stela.pesservice.model.util.NotificationAttachement;
 import fr.sictiam.stela.pesservice.service.util.DiscoveryUtils;
+import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -119,7 +121,7 @@ public class ExternalRestService {
         return opt.get();
     }
 
-    public GenericAccount authWithEmailPassword(String email, String password) throws IOException {
+    public GenericAccount authWithEmailPassword(String email, String password) throws RuntimeException {
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
         body.put("password", password);
@@ -154,5 +156,20 @@ public class ExternalRestService {
                 new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
                 String.class,
                 localAuthority.getUuid(), name);
+    }
+
+        public ResponseEntity<String> notifyAnomalyByMattermost(List<NotificationAttachement> attachements, String notificationLink) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);;
+
+        JSONObject body = new JSONObject();
+
+        body.put("attachments", attachements);
+
+        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(body, headers);
+        return restTemplate.exchange(notificationLink, HttpMethod.POST,
+                requestEntity, String.class);
     }
 }

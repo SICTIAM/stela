@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ActeRepository extends JpaRepository<Acte, String> {
-    Optional<Acte> findByNumber(String number);
 
     List<Acte> findAllByDraftNotNullOrderByDraft_LastModifiedDesc();
 
@@ -26,6 +25,8 @@ public interface ActeRepository extends JpaRepository<Acte, String> {
     Optional<Acte> findByUuidAndDraftNotNull(String uuid);
 
     Optional<Acte> findByUuid(String uuid);
+
+    Optional<Acte> findByMiatId(String miatId);
 
     Optional<Acte> findFirstByNumberAndDecisionAndNatureAndLocalAuthority_UuidAndDraftNull(String number, LocalDate date, ActeNature nature, String localAuthorityUuid);
 

@@ -37,9 +37,11 @@ class CertificateInfos extends Component {
     }
     certificateInfo = () => {
         const { _fetchWithAuthzHandling } = this.context
-        _fetchWithAuthzHandling({ url: '/api/api-gateway/certInfos' })
-            .then(response => response.json())
-            .then(certificate => this.setState({ certificate }))
+        if(this.prop.authContext.isLoggedIn) {
+            _fetchWithAuthzHandling({url: '/api/api-gateway/certInfos'})
+                .then(response => response.json())
+                .then(certificate => this.setState({certificate}))
+        }
     }
     pairCertificate = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context

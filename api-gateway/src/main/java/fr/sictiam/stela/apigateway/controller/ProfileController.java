@@ -90,7 +90,7 @@ public class ProfileController {
 
         try {
             notificationFiltered.addAll(mapNotififaction("CONVOCATION_",
-                    restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/convocation/notifications/all",
+                    restTemplate.getForObject(discoveryUtils.convocationServiceUrl() + "/api/convocation/notifications/all",
                             Notification[].class)));
         } catch (RuntimeException e) {
             LOGGER.warn("Module convocation is probably not running : {}", e.getMessage());

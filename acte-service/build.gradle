@@ -47,6 +47,7 @@ sourceSets {
     }
 }
 test {
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
     useJUnit {
         excludeCategories 'fr.sictiam.stela.acteservice.IntegrationTests'
     }

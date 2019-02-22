@@ -1,0 +1,1 @@
+alter table local_authority add x integer default 10, add y integer default 10;

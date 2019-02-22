@@ -94,9 +94,39 @@ const notifications = {
         }
     },
     convocation: {
+        created: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.created.success',
+            level: 'success',
+            position: 'br'
+        },
         sent: {
             title: 'notifications.convocation.title',
             message: 'notifications.convocation.sent.success',
+            level: 'success',
+            position: 'br'
+        },
+        reponseSent: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.reponseSent.success',
+            level: 'success',
+            position: 'br'
+        },
+        cancel: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.cancel.success',
+            level: 'success',
+            position: 'br'
+        },
+        complet: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.complet.success',
+            level: 'success',
+            position: 'br'
+        },
+        complet_with_document: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.complet_with_document.success',
             level: 'success',
             position: 'br'
         }

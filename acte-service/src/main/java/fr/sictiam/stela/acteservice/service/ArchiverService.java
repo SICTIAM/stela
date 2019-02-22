@@ -154,6 +154,7 @@ public class ArchiverService {
         acte.setArchive(archive);
         ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.SENT_TO_SAE);
         acte.getActeHistories().add(acteHistory);
+        this.setLastHistory(acte, acteHistory);
         acteRepository.save(acte);
     }
 
@@ -176,6 +177,7 @@ public class ArchiverService {
             ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.ACCEPTED_BY_SAE,
                     (String) (asalaeDocument.getData().get("url_archive")));
             acte.getActeHistories().add(acteHistory);
+            this.setLastHistory(acte, acteHistory);
             acte = acteRepository.save(acte);
             deleteActeFiles(acte);
         }
@@ -341,5 +343,11 @@ public class ArchiverService {
             String encodedAuth = new String(Base64.getEncoder().encode(auth.getBytes()));
             set("Authorization", "Basic " + encodedAuth);
         }};
+    }
+
+    private void setLastHistory(Acte acte, ActeHistory history){
+        acte.setLastHistoryStatus(history.getStatus());
+        acte.setLastHistoryDate(history.getDate());
+        acte.setLastHistoryFlux(history.getFlux());
     }
 }

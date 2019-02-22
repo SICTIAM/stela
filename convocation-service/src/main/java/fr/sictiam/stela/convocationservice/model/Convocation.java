@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
+import fr.sictiam.stela.convocationservice.model.util.RecipientResponseComparator;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.SortComparator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 public class Convocation {
@@ -24,31 +27,28 @@ public class Convocation {
     @JsonView(Views.Convocation.class)
     private String uuid;
 
-    @NotNull
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JsonView(Views.ConvocationInternal.class)
-    private Set<Recipient> recipients;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonView(Views.Convocation.class)
     private AssemblyType assemblyType;
 
-    @OneToOne
-    @JsonView(Views.Convocation.class)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonView(Views.ConvocationInternal.class)
     private Attachment attachment;
 
-    @OneToMany
-    @JsonView(Views.Convocation.class)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JsonView(Views.ConvocationInternal.class)
     private Set<Attachment> annexes;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonView(Views.Convocation.class)
-    private Set<Question> questions;
+    @JsonView(Views.ConvocationInternal.class)
+    @OrderBy("rank ASC")
+    private SortedSet<Question> questions;
 
     @OneToMany(mappedBy = "convocation")
-    @JsonView(Views.ConvocationInternal.class)
-    private Set<RecipientResponse> recipientResponses;
+    @JsonView(Views.ConvocationReceived.class)
+    @SortComparator(RecipientResponseComparator.class)
+    private SortedSet<RecipientResponse> recipientResponses;
 
     @OneToMany
     @JsonView(Views.ConvocationInternal.class)
@@ -62,12 +62,10 @@ public class Convocation {
 
     @NotNull
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    //@JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonView(Views.Convocation.class)
     private LocalDateTime meetingDate;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    //@JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonView(Views.Convocation.class)
     private LocalDateTime sentDate;
 
@@ -88,6 +86,20 @@ public class Convocation {
 
     @JsonView(Views.Convocation.class)
     private String profileUuid;
+
+    @JsonView(Views.Convocation.class)
+    private boolean cancelled = false;
+
+    @JsonView(Views.Convocation.class)
+    private LocalDateTime cancellationDate;
+
+    @Transient
+    @JsonView(Views.Convocation.class)
+    private Profile profile;
+
+    @Transient
+    private Set<Recipient> recipients;
+
 
     public Convocation() {
     }
@@ -124,7 +136,7 @@ public class Convocation {
         return questions;
     }
 
-    public void setQuestions(Set<Question> questions) {
+    public void setQuestions(SortedSet<Question> questions) {
         this.questions = questions;
     }
 
@@ -176,11 +188,13 @@ public class Convocation {
         this.recipients = recipients;
     }
 
-    public Set<RecipientResponse> getRecipientResponses() {
+    public SortedSet<RecipientResponse> getRecipientResponses() {
+        if (recipientResponses == null)
+            recipientResponses = new TreeSet<>();
         return recipientResponses;
     }
 
-    public void setRecipientResponses(Set<RecipientResponse> recipientResponses) {
+    public void setRecipientResponses(SortedSet<RecipientResponse> recipientResponses) {
         this.recipientResponses = recipientResponses;
     }
 
@@ -214,6 +228,30 @@ public class Convocation {
 
     public void setSentDate(LocalDateTime sentDate) {
         this.sentDate = sentDate;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public LocalDateTime getCancellationDate() {
+        return cancellationDate;
+    }
+
+    public void setCancellationDate(LocalDateTime cancellationDate) {
+        this.cancellationDate = cancellationDate;
     }
 
     @Override public String toString() {

@@ -2,8 +2,6 @@ package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
@@ -25,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-public class Recipient implements Comparable {
+public class Recipient implements Comparable<Recipient> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Recipient.class);
 
@@ -167,23 +165,22 @@ public class Recipient implements Comparable {
     }
 
     @Override public String toString() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writerWithView(Views.RecipientInternal.class).writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "[ uuid: " + uuid +
-                    ", firstname: " + firstname +
-                    ", lastname: " + lastname +
-                    ", email: " + email +
-                    ", phoneNumber: " + phoneNumber +
-                    ", active: " + active +
-                    ", additionalContact: " + additionalContact + "]";
-        }
+        return '{' +
+                "\"uuid\": \"" + uuid + "\"" +
+                ",\"firstname\": \"" + firstname + "\"" +
+                ",\"lastname\": \"" + lastname + "\"" +
+                ",\"email\": \"" + email + "\"" +
+                ",\"phoneNumber\": \"" + phoneNumber + "\"" +
+                ",\"active\": " + active +
+                ",\"additionalContact\": " + additionalContact +
+                '}';
     }
 
-    @Override public int compareTo(@NotNull Object o) {
-        return lastname.compareTo(((Recipient) o).getLastname());
+    @Override public int compareTo(@NotNull Recipient recipient) {
+        String r1 = lastname + firstname + email;
+        String r2 = recipient.getLastname() + getFirstname() + getEmail();
+
+        return r1.compareTo(r2);
     }
 
     @Override public boolean equals(Object o) {

@@ -16,7 +16,7 @@ public class LocalesRestController {
     @Autowired
     private LocalesService localesService;
 
-    @GetMapping(value = "/{lng}/{ns}.json", produces = "application/json")
+    @GetMapping(value = "/{lng}/{ns}.json", produces = "application/json; charset=UTF-8")
     public String getJsonTranslation(HttpServletResponse response, @PathVariable String lng, @PathVariable String ns) {
         return localesService.getJsonTranslation(lng, ns);
     }

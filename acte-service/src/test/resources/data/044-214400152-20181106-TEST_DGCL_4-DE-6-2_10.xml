@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<actes:ARAnnulation xmlns:actes="http://www.interieur.gouv.fr/ACTES#v1.1-20040216"
+                    xmlns:insee="http://xml.insee.fr/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    actes:DateReception="2018-11-28" actes:IDActe="044-214400152-20181106-TEST_DGCL_4-DE"
+                    xsi:schemaLocation="http://www.interieur.gouv.fr/ACTES#v1.1-20040216 actesv1_1.xsd"/>

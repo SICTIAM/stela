@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Datetime from 'react-datetime'
 import 'react-datetime/css/react-datetime.css'
+import moment from 'moment'
 
 class InputDatetime extends Component {
     render() {
@@ -13,6 +14,7 @@ class InputDatetime extends Component {
                         locale="fr-fr" dateFormat="DD/MM/YYYY"
                         closeOnSelect={true}
                         onBlur={this.props.onBlur}
+                        viewDate={this.props.viewDate || moment()}
                         {...this.props} />
                 )}
                 {!this.props.ariaLabel && (
@@ -22,6 +24,7 @@ class InputDatetime extends Component {
                         locale="fr-fr"
                         dateFormat="DD/MM/YYYY"
                         closeOnSelect={true}
+                        viewDate={this.props.viewDate || moment()}
                         onBlur={this.props.onBlur}
                         {...this.props} />
                 )}

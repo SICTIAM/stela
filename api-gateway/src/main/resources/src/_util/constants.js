@@ -52,6 +52,10 @@ const monthBeforeArchiving = 6
 const hoursBeforeResendActe = 24
 const hoursBeforeResendPes = 24
 
+const acceptFileDocumentConvocation = '.doc, docx, .pdf, .jpg, .png, .zip, .odt, .ott, .oth, and .odm, .dwg'
+
+const unauthorizedRequestAllowed = ['api/csrf-token']
+
 export {
     modules,
     natures,
@@ -61,5 +65,7 @@ export {
     materialCodeBudgetaire,
     monthBeforeArchiving,
     hoursBeforeResendActe,
-    hoursBeforeResendPes
+    hoursBeforeResendPes,
+    acceptFileDocumentConvocation,
+    unauthorizedRequestAllowed
 }

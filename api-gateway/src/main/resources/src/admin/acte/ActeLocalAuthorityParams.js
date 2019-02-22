@@ -204,11 +204,11 @@ class ActeLocalAuthorityParams extends Component {
                             </FieldInline>
 
                             <h2 className='secondary'>{t('admin.modules.acte.local_authority_settings.deposit_parameters')}</h2>
-                            <FieldInline htmlFor="positionPad" label={t('acte.stamp_pad.title')}>
+                            <FieldInline htmlFor="positionPad" label={t('api-gateway:stamp_pad.title')}>
                                 <Grid>
                                     <Grid.Row style={{display:'flex', justifyContent:'space-around', alignItems:'center'}}>
                                         <DraggablePosition
-                                            label={t('acte.stamp_pad.pad_label')}
+                                            label={t('api-gateway:stamp_pad.pad_label')}
                                             height={300}
                                             width={190}
                                             showPercents={true}
@@ -216,7 +216,7 @@ class ActeLocalAuthorityParams extends Component {
                                             position={this.state.fields.stampPosition}
                                             handleChange={this.handleChangeDeltaPosition} />
                                         <DraggablePosition
-                                            label={t('acte.stamp_pad.pad_label')}
+                                            label={t('api-gateway:stamp_pad.pad_label')}
                                             height={190}
                                             width={300}
                                             boxHeight={70}

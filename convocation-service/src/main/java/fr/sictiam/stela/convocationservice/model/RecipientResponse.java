@@ -11,11 +11,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 @Entity
-public class RecipientResponse {
+public class RecipientResponse implements Comparable<RecipientResponse> {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -115,5 +116,9 @@ public class RecipientResponse {
 
     public String getUuid() {
         return uuid;
+    }
+
+    @Override public int compareTo(@NotNull RecipientResponse recipientResponse) {
+        return recipient.compareTo(recipientResponse.getRecipient());
     }
 }

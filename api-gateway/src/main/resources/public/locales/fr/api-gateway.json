@@ -58,6 +58,7 @@
       "malformedfield": "Le champ n'est pas formé correctement",
       "mandatoryfile": "Fichier obligatoire",
       "badextension": "L'extension du fichier est incorrecte",
+      "bad_extension_file": "L'extension du fichier '{{name}}' est incorrecte",
       "badbudgetfile": "Erreur lors de l'analyse du fichier",
       "badstampbudgetfile": "Erreur lors du calcul de l'empreinte du fichier",
       "budgetfilenotsealed": "Le fichier budgétaire n'est pas scellé",
@@ -76,6 +77,12 @@
     "previous": "Précédent",
     "actions": "Choisisser une action à effectuer"
   },
+  "stamp_pad": {
+    "title": "Position du tampon",
+    "choose_position": "Choisir la position",
+    "height": "Hauteur",
+    "width": "Largeur"
+  },
   "menu": {
     "acte": {
       "legality_control": "Contrôle de légalité",
@@ -88,7 +95,8 @@
       "accounting_flow": "Flux comptable",
       "submit_a_PES_Aller": "Déposer un PES Aller",
       "PES_Aller_list": "Liste des PES Aller",
-      "PES_Retour_list": "Liste des PES Retour"
+      "PES_Retour_list": "Liste des PES Retour",
+      "PES_statut": "État des flux PES"
     },
     "convocation": {
       "convocation": "Convocation",
@@ -111,7 +119,9 @@
     "modify_my_profile": "Modifier mon profil",
     "no_email": "Aucun email",
     "notifications_title": "Notifications",
-    "localAuthorityNotifications": "Être notifié pour des flux déposés par un membre du groupe",
+    "localAuthorityNotificationsPES": "Être notifié pour des flux déposés par un membre du groupe",
+    "localAuthorityNotificationsACTES": "Être notifié pour des actes déposés par un membre du groupe",
+    "localAuthorityNotificationsCONVOCATION": "Être notifié pour des convocations déposés par un membre du groupe",
     "notifications": {
       "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
       "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
@@ -230,8 +240,23 @@
     },
     "convocation": {
       "title": "Module Convocation",
+      "created": {
+        "success": "La convocation a été créée avec succès, les documents sont en cours d'envoi. Veuillez patienter."
+      },
       "sent": {
-        "success":  "La convocation a été envoyée avec succès" 
+        "success": "La convocation a été envoyée avec succès"
+      },
+      "reponseSent": {
+        "success": "La réponse a été prise en compte"
+      },
+      "cancel": {
+        "success": "La convocation a été annulée avec succès"
+      },
+      "complet_with_document": {
+        "success":  "Les questions et commentaire ont bien été ajoutés avec succès, les documents sont en cours d'envoi. Veuillez patienter."
+      },
+      "complet": {
+        "success": "La convocation a été mise à jour avec succès."
       },
       "admin": {
         "title": "Admin module Convocation",
@@ -466,6 +491,14 @@
       "sent_convocation": "Convocation envoyée",
       "reveived_convocations_list": "Liste des convocations reçues",
       "sent_convocations_list": "Liste des convocations envoyées"
+    }
+  },
+  "metrics": {
+    "pes": {
+      "SENT": "PES envoyé",
+      "PENDING_SEND": "PES en attente d'envoi",
+      "ACK_RECEIVED": "PES reçu",
+      "SIGNATURE_MISSING":  "PES signature manquante"
     }
   },
   "made_with_love": "Créé avec ❤ par le SICTIAM"

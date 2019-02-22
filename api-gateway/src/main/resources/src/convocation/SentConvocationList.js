@@ -1,18 +1,18 @@
+/* eslint-disable jsx-a11y/no-onchange */
 import React, { Component } from 'react'
 import { translate } from 'react-i18next'
 import { Segment, Form, Button } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 
-import { checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
-
 import {
     getLocalAuthoritySlug,
-    handleSearchChange,
     updateItemPerPage,
     handlePageClick,
-    sortTable
+    sortTable,
+    checkStatus,
+    convertDateBackFormatToUIFormat
 } from '../_util/utils'
 
 import StelaTable from '../_components/StelaTable'
@@ -35,10 +35,12 @@ class SentConvocation extends Component {
 	        subject: '',
 	        assemblyType: '',
 	        sentDateFrom: '',
-	        sentDateTo: ''
+	        sentDateTo: '',
+	        filter: 'future'
 	    },
+	    assemblyTypes: [],
 	    column: '',
-	    direction: '',
+	    direction: 'ASC',
 	    limit: 10,
 	    offset: 0,
 	    currentPage: 0,
@@ -46,9 +48,24 @@ class SentConvocation extends Component {
 	}
 
 	componentDidMount() {
+	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+
 	    const itemPerPage = localStorage.getItem('itemPerPage')
-	    if (!itemPerPage) localStorage.setItem('itemPerPage', 10)
+	    if (!itemPerPage) {
+	        localStorage.setItem('itemPerPage', 10)
+	        this.loadData()
+	    }
 	    else this.setState({ limit: 10 }, this.loadData)
+
+	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
+	        .then(checkStatus)
+	        .then(response => response.json())
+	        .then(json => this.setState({assemblyTypes: json.map(item => { return {text: item.name, uuid: item.uuid}})}))
+	        .catch(response => {
+	            response.json().then(json => {
+	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	            })
+	        })
 	}
 	/** Load data list */
 	loadData = () => {
@@ -80,17 +97,36 @@ class SentConvocation extends Component {
 	    return data
 	}
 
+	negativeResolver = (convocation) => {
+	    return convocation.cancelled
+	}
+
+	handleSearchChange = (field, value, callback) => {
+	    const search = this.state.search
+	    search[field] = value
+	    let direction = 'DESC'
+	    if(field === 'meetingDateFrom' || field === 'meetingDateTo') {
+	        search['filter'] = ''
+	    }
+	    if(field === 'filter' && value !== '') {
+	        search['meetingDateFrom'] = ''
+	        search['meetingDateTo'] = ''
+	        direction = value === 'future' ? 'ASC' : 'DESC'
+	    }
+	    this.setState({search, offset: 0, currentPage: 0, direction}, callback)
+	}
+
 	render() {
 	    const { t } = this.context
-	    const { search } = this.state
-	    const dateDisplay = (date) => date && moment(date, 'YYYY-MM-DDTHH:mm:ss').format('DD-MM-YYYY HH:mm')
+	    const { search, assemblyTypes } = this.state
+	    const dateDisplay = (date) => date && convertDateBackFormatToUIFormat(date, 'DD/MM/YYYY HH:mm')
 	    const assemblyTypeDisplay = (type) => type && type.name
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
-	        { property: 'sentDate', displayed: true, searchable: true, sortable: true, displayName: t('convocation.list.sent_date'), displayComponent: dateDisplay},
-	        { property: 'assemblyType', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.assembly_type'), displayComponent: assemblyTypeDisplay},
 	        { property: 'meetingDate', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.date'), displayComponent: dateDisplay},
-	        { property: 'subject', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.object')}
+	        { property: 'assemblyType', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.assembly_type'), displayComponent: assemblyTypeDisplay},
+	        { property: 'subject', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.object')},
+	        { property: 'sentDate', displayed: true, searchable: true, sortable: true, displayName: t('convocation.list.sent_date'), displayComponent: dateDisplay}
 	    ]
 	    const options = [
 	        { key: 10, text: 10, value: 10 },
@@ -110,6 +146,19 @@ class SentConvocation extends Component {
                 options={options} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 
+	    const assemblyTypesFilter = assemblyTypes.map(assemblyType => {
+	        return <option key={assemblyType.uuid} value={assemblyType.uuid}>{assemblyType.text}</option>
+	    })
+
+	    const additionnalFilter =
+			<Form>
+			    <select id='convocationFilter' aria-label={t('convocation.list.convocation_filters')} value={this.state.search.filter} onChange={e => this.handleSearchChange('filter', e.target.value, this.loadData)}>
+			        <option value='future'>{t('convocation.list.future_convocation')}</option>
+			        <option value='past'>{t('convocation.list.past_convocation')}</option>
+			        <option value=''>{t('convocation.list.all_convocation')}</option>
+			    </select>
+			</Form>
+
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -124,14 +173,18 @@ class SentConvocation extends Component {
 	                    isDefaultOpen={false}
 	                    fieldId='multifield'
 	                    fieldValue={search.multifield}
-	                    fieldOnChange={(id, value) => handleSearchChange(this, id, value)}
-	                    onSubmit={this.loadData}>
+	                    fieldOnChange={(id, value) => this.handleSearchChange(id, value)}
+	                    onSubmit={this.loadData}
+	                    additionnalFilter={additionnalFilter}>
 	                    <Form onSubmit={this.loadData}>
 	                        <FormFieldInline htmlFor='assemblyType' label={t('convocation.fields.assembly_type')} >
-	                            <input id='assemblyType' aria-label={t('convocation.fields.assembly_type')} value={search.assemblyType} onChange={e => handleSearchChange(this, 'assemblyType', e.target.value)} />
+	                            <select id='assemblyType' aria-label={t('convocation.fields.assembly_type')} onBlur={e => this.handleSearchChange('assemblyType', e.target.value)}>
+	                                <option key='all' value=''>{t('convocation.list.all_convocation_type')}</option>
+	                                {assemblyTypesFilter}
+	                            </select>
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='subject' label={t('convocation.fields.object')} >
-	                            <input id='subject' aria-label={t('convocation.fields.object')} value={search.subject} onChange={e => handleSearchChange(this, 'subject', e.target.value)} />
+	                            <input id='subject' aria-label={t('convocation.fields.object')} value={search.subject} onChange={e => this.handleSearchChange('subject', e.target.value)} />
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='sentDateFrom' label={t('convocation.list.sent_date')}>
 	                            <Form.Group style={{ marginBottom: 0 }} widths='equal'>
@@ -140,14 +193,14 @@ class SentConvocation extends Component {
 	                                        ariaLabel={t('api-gateway:form.decision_from')}
 	                                        timeFormat={false}
 	                                        value={search.sentDateFrom}
-	                                        onChange={date => handleSearchChange(this, 'sentDateFrom', date)} />
+	                                        onChange={date => this.handleSearchChange('sentDateFrom', date)} />
 	                                </FormField>
 	                                <FormField htmlFor='sentDateTo' label={t('api-gateway:form.to')}>
 	                                    <InputDatetime id='sentDateTo'
 	                                        timeFormat={false}
 	                                        ariaLabel={t('api-gateway:form.decision_to')}
 	                                        value={search.sentDateTo}
-	                                        onChange={date => handleSearchChange(this, 'sentDateTo', date)} />
+	                                        onChange={date => this.handleSearchChange('sentDateTo', date)} />
 	                                </FormField>
 	                            </Form.Group>
 	                        </FormFieldInline>
@@ -158,14 +211,14 @@ class SentConvocation extends Component {
 	                                        ariaLabel={t('api-gateway:form.decision_from')}
 	                                        timeFormat={false}
 	                                        value={search.meetingDateFrom}
-	                                        onChange={date => handleSearchChange(this, 'meetingDateFrom', date)} />
+	                                        onChange={date => this.handleSearchChange('meetingDateFrom', date)} />
 	                                </FormField>
 	                                <FormField htmlFor='meetingDateTo' label={t('api-gateway:form.to')}>
 	                                    <InputDatetime id='meetingDateTo'
 	                                        timeFormat={false}
 	                                        ariaLabel={t('api-gateway:form.decision_to')}
 	                                        value={search.meetingDateTo}
-	                                        onChange={date => handleSearchChange(this, 'meetingDateTo', date)} />
+	                                        onChange={date => this.handleSearchChange('meetingDateTo', date)} />
 	                                </FormField>
 	                            </Form.Group>
 	                        </FormFieldInline>
@@ -188,7 +241,8 @@ class SentConvocation extends Component {
 	                    column={this.state.column}
 	                    link={`/${localAuthoritySlug}/convocation/liste-envoyees/`}
 	                    linkProperty='uuid'
-	                    noDataMessage={t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')}
+	                    noDataMessage={t('convocation.admin.modules.convocation.sent_convocation_list.no_sent_convocation')}
+	                    negativeResolver={this.negativeResolver}
 	                />
 	            </Segment>
 	        </Page>

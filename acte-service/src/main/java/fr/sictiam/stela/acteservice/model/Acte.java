@@ -8,7 +8,6 @@ import fr.sictiam.stela.acteservice.config.LocalDateSerializer;
 import fr.sictiam.stela.acteservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.acteservice.model.ui.Views;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -88,14 +87,6 @@ public class Acte {
     @JsonView(Views.ActePublicView.class)
     private boolean multipleChannels = false;
 
-    public String getMiatId() {
-        return miatId;
-    }
-
-    @Formula("(select concat(la.department,'-',la.siren, '-',to_char(creation, 'YYYYMMdd'),'-', number,'-', CASE WHEN nature = '0' THEN 'DE' "
-            + " WHEN nature = '1' THEN 'AR' " + " WHEN nature = '2' THEN 'AI' " + " WHEN nature = '3' THEN 'CC' "
-            + " WHEN nature = '4' THEN 'BF' "
-            + " WHEN nature = '5' THEN 'AU' ELSE '' END)  from local_authority la where la.uuid=local_authority_uuid)")
     private String miatId;
     private boolean imported;
 
@@ -103,11 +94,11 @@ public class Acte {
     private Archive archive;
 
     @Enumerated(EnumType.STRING)
-    StatusType lastHistoryStatus;
+    private StatusType lastHistoryStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    LocalDateTime lastHistoryDate;
+    private LocalDateTime lastHistoryDate;
     @Enumerated(EnumType.STRING)
-    Flux lastHistoryFlux;
+    private Flux lastHistoryFlux;
 
     public Acte() {
     }
@@ -171,7 +162,7 @@ public class Acte {
         this.groupUuid = groupUuid;
         this.acteAttachment = acteAttachment;
         this.annexes = annexes;
-        acteHistories = Collections.emptySortedSet();
+        this.acteHistories = Collections.emptySortedSet();
         this.profileUuid = profileUuid;
         this.localAuthority = localAuthority;
     }
@@ -354,6 +345,14 @@ public class Acte {
 
     public void setMultipleChannels(boolean multipleChannels) {
         this.multipleChannels = multipleChannels;
+    }
+
+    public String getMiatId() {
+        return miatId;
+    }
+
+    public void setMiatId(String miatId) {
+        this.miatId = miatId;
     }
 
     public boolean empty() {

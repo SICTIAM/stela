@@ -11,7 +11,7 @@ import { FormField, File, ValidationPopup, DragAndDropFile, InputFile } from '..
 import InputValidation from '../_components/InputValidation'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
-import { checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize } from '../_util/utils'
+import {checkStatus, handleFieldCheckboxChange, getLocalAuthoritySlug, bytesToSize, sortAlphabetically} from '../_util/utils'
 import { natures, materialCodeBudgetaire } from '../_util/constants'
 import { withAuthContext } from '../Auth'
 
@@ -161,7 +161,7 @@ class NewActeForm extends Component {
         _fetchWithAuthzHandling({ url: `/api/acte/attachment-types/${nature}/${materialCode}`, headers: headers, context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.json())
-            .then(json => this.setState({ attachmentTypes: json }))
+            .then(json => this.setState({ attachmentTypes: sortAlphabetically(json, 'code')}))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
@@ -292,7 +292,7 @@ class NewActeForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const acteData = this.getActeData()
         const headers = { 'Content-Type': 'application/json' }
-        if(this.state.fields.number || this.state.fields.object || this.state.fields.decision) {
+        if(this.state.fields.number || this.state.fields.objet || this.state.fields.decision) {
             const url = `/api/acte/drafts/${acteData.draft.uuid}/${acteData.uuid}`
             _fetchWithAuthzHandling({ url, body: JSON.stringify(acteData), headers: headers, method: 'PUT', context: this.props.authContext })
                 .then(checkStatus)
@@ -454,11 +454,13 @@ class NewActeForm extends Component {
         const localAuthoritySlug = getLocalAuthoritySlug()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const fields = this.state.fields
+        this.props.setStatus('saving')
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.draft.uuid}/${fields.uuid}`, method: 'POST', context: this.props.authContext })
             .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 fields['draft'] = false
+                this.props.setStatus('saved')
                 this.setState({ fields }, () => {
                     _addNotification(notifications.acte.sent)
                     history.push(`/${localAuthoritySlug}/actes/liste/${acteUuid}`)
