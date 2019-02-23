@@ -75,7 +75,7 @@ subprojects {
 
     ext {
         // need Greenwich for SB 2.1.x compatibility, upgrade to SR version when available
-        springCloudVersion = 'Greenwich.RC1'
+        springCloudVersion = 'Greenwich.RELEASE'
     }
 
     bootRun {
