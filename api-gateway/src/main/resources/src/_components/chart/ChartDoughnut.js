@@ -10,7 +10,7 @@ export class ChartDoughnut extends Component {
 
     componentWillUpdate(nextProps, nextState, nextContext) {
         //that is to avoid the chart to display old data when you are hover it
-        const {datasets, labels} = this.props
+        const {datasets, labels, displayLegends} = this.props
         const {doughnut} = this.state
         const refDatasets = datasets && datasets.map(sets => JSON.stringify(sets.data)).join()
         const newDatasets = nextProps.datasets && nextProps.datasets.map(sets => JSON.stringify(sets.data)).join()
@@ -23,6 +23,11 @@ export class ChartDoughnut extends Component {
                     data: {
                         datasets: nextProps.datasets,
                         labels: labels
+                    },
+                    options:{
+                        legend:{
+                            display: displayLegends
+                        }
                     }
                 })
             this.setState({doughnut: newDoughnut})
@@ -31,7 +36,7 @@ export class ChartDoughnut extends Component {
 
     _initDoughnut = () => {
         const {rendered, doughnut} = this.state
-        const {datasets, labels} = this.props
+        const {datasets, labels, displayLegends} = this.props
 
         if (!rendered) {
             this.setState({rendered: true})
@@ -44,6 +49,11 @@ export class ChartDoughnut extends Component {
                     data: {
                         datasets: datasets,
                         labels: labels
+                    },
+                    options:{
+                        legend:{
+                            display: displayLegends
+                        }
                     }
                 })
             this.setState({doughnut: newDoughnut})
@@ -68,6 +78,7 @@ ChartDoughnut.defaultProps = {
 ChartDoughnut.propTypes = {
     size: PropTypes.number,
     datasets: PropTypes.array,
-    labels: PropTypes.array
+    labels: PropTypes.array,
+    displayLegends: PropTypes.bool
 }
 

@@ -12,7 +12,6 @@ export default class MetricsSegment extends Component {
         period: {min: moment().subtract(1, 'h'), max: moment()}
     }
 
-
     _handleActiveButton = (buttonType) => {
         const {activeButton} = this.state
         return activeButton === buttonType
@@ -45,6 +44,22 @@ export default class MetricsSegment extends Component {
         this.setState({period: {min: min, max: max}})
     }
 
+    _displayLegends = (chartDatasets) => {
+        const res = chartDatasets.map(item => {
+            return (
+                <React.Fragment>
+                    <div style={{backgroundColor: item.borderColor, ...styles.legend}}/>
+                    <p style={{margin: 0}}>{item.label}</p>
+                </React.Fragment>
+            )
+        })
+        return (
+            <div style={styles.row}>
+                {res}
+            </div>
+        )
+    }
+
     render() {
         const {doughnutLabels, doughnutDatasets, chartDatasets} = this.props
         const {period} = this.state
@@ -54,20 +69,24 @@ export default class MetricsSegment extends Component {
                 <Segment>
                     <Grid>
                         <Grid.Row>
-                            <Grid.Column width={4} verticalAlign={'middle'}>
+                            <Grid.Column width={4} verticalAlign={'middle'} textAlign={'center'}>
                                 <ChartDoughnut
                                     labels={doughnutLabels}
-                                    datasets={doughnutDatasets}/>
+                                    datasets={doughnutDatasets}
+                                    displayLegends={false}/>
                             </Grid.Column>
                             <Grid.Column width={12} verticalAlign={'middle'}>
-                                <ChartLine height={100} width={250} datasets={chartDatasets} min={period.min} max={period.max} />
+                                <ChartLine height={100} width={250} datasets={chartDatasets} min={period.min} max={period.max} displayLegends={false}/>
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
                 </Segment>
                 <Segment>
                     <Grid>
-                        <Grid.Row style={{padding: '0.5rem 0 0.5rem 0'}}>
+                        <Grid.Row style={{padding: '0.5rem 0 0.5rem 0'}} verticalAlign={'middle'}>
+                            <Grid.Column width={10} floated={'left'}>
+                                {this._displayLegends(chartDatasets)}
+                            </Grid.Column>
                             <Grid.Column width={6} floated={'right'}>
                                 <Button.Group size={'mini'} floated={'right'} basic>
                                     <Button onClick={() => this._handleButtonClick('hour')} active={this._handleActiveButton('hour')}>1h</Button>
@@ -82,6 +101,19 @@ export default class MetricsSegment extends Component {
         )
 
 
+    }
+}
+
+const styles = {
+    legend:{
+        width: '30px',
+        height: '10px',
+        margin: '0.5em'
+    },
+    row: {
+        display: 'flex',
+        flexDirection:'row',
+        alignItems: 'center'
     }
 }
 

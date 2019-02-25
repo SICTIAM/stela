@@ -11,7 +11,7 @@ export class ChartLine extends Component {
 
     componentWillUpdate(nextProps, nextState, nextContext) {
         //that is to avoid the chart to display old data when you are hover it
-        const {datasets, min, max} = this.props
+        const {datasets, min, max, displayLegends} = this.props
         const {chart} = this.state
         const refDatasets = datasets && datasets.map(sets => JSON.stringify(sets.data)).join()
         const newDatasets = nextProps.datasets && nextProps.datasets.map(sets => JSON.stringify(sets.data)).join()
@@ -24,6 +24,9 @@ export class ChartLine extends Component {
                     datasets: nextProps.datasets
                 },
                 options: {
+                    legend: {
+                        display: displayLegends
+                    },
                     scales: {
                         xAxes: [{
                             type: 'time',
@@ -47,7 +50,7 @@ export class ChartLine extends Component {
 
     _initChart = () => {
         const {rendered, chart} = this.state
-        const {datasets, min, max} = this.props
+        const {datasets, min, max, displayLegends} = this.props
 
         if (!rendered) {
             this.setState({rendered: true})
@@ -60,6 +63,9 @@ export class ChartLine extends Component {
                     datasets: datasets
                 },
                 options: {
+                    legend:{
+                        display: displayLegends
+                    },
                     scales: {
                         xAxes: [{
                             type: 'time',
@@ -103,5 +109,6 @@ ChartLine.propTypes = {
     width: PropTypes.number,
     datasets: PropTypes.array,
     min: PropTypes.object,
-    max: PropTypes.object
+    max: PropTypes.object,
+    displayLegends: PropTypes.bool
 }
