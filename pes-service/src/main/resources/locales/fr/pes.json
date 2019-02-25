@@ -92,7 +92,16 @@
       "no_data_to_display": "Aucune donnée disponible",
       "no_data_to_display_hour": "sur une heure",
       "no_data_to_display_day": "sur un jour",
-      "no_data_to_display_week": "sur une semaine"
+      "no_data_to_display_week": "sur une semaine",
+      "status": {
+        "SENT": "PES envoyé",
+        "PENDING_SEND": "PES en attente d'envoi",
+        "ACK_RECEIVED": "PES reçu",
+        "SIGNATURE_MISSING":  "PES signature manquante",
+        "PENDING_SIGNATURE": "En attente de signature",
+        "CLASSEUR_SIGNED": "Classeur signé",
+        "CREATED": "PES créé"
+      }
     }
   },
   "admin": {
