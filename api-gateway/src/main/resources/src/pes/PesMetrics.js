@@ -183,6 +183,7 @@ class PesMetrics extends Component {
                     doughnutDatasets={this._handleDoughnutDatasets(doughnutSentWaiting)}
                     chartDatasets={this._handleChartDatasets(chart1)}
                     onClickButton={(period) => this._handleFetchData(period, 'SENT_WAITING')}
+                    t={this.context.t}
                 />
 
                 <MetricsSegment
@@ -190,6 +191,7 @@ class PesMetrics extends Component {
                     doughnutDatasets={this._handleDoughnutDatasets(doughnutSentACK)}
                     chartDatasets={this._handleChartDatasets(chart2)}
                     onClickButton={(period) => this._handleFetchData(period, 'SENT_ACK')}
+                    t={this.context.t}
                 />
             </Page>
         )

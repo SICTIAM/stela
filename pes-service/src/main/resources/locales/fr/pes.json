@@ -87,6 +87,12 @@
         "title": "Liste des PES Retour",
         "empty": "Aucun PES Retour"
       }
+    },
+    "metrics": {
+      "no_data_to_display": "Aucune donnée disponible",
+      "no_data_to_display_hour": "sur une heure",
+      "no_data_to_display_day": "sur un jour",
+      "no_data_to_display_week": "sur une semaine"
     }
   },
   "admin": {

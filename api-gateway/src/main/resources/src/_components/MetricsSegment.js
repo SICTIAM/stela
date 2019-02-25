@@ -44,6 +44,13 @@ export default class MetricsSegment extends Component {
         this.setState({period: {min: min, max: max}})
     }
 
+    _isDataPresent = (chart) => {
+        const res = chart.filter(item => {
+            return item.data.length > 0
+        })
+        return res.length > 0
+    }
+
     _displayLegends = (chartDatasets) => {
         const res = chartDatasets.map(item => {
             return (
@@ -63,22 +70,35 @@ export default class MetricsSegment extends Component {
     render() {
         const {doughnutLabels, doughnutDatasets, chartDatasets} = this.props
         const {period} = this.state
+        const isDataPresent= this._isDataPresent(chartDatasets)
 
         return (
             <SegmentGroup>
                 <Segment>
                     <Grid>
-                        <Grid.Row>
-                            <Grid.Column width={4} verticalAlign={'middle'} textAlign={'center'}>
-                                <ChartDoughnut
-                                    labels={doughnutLabels}
-                                    datasets={doughnutDatasets}
-                                    displayLegends={false}/>
-                            </Grid.Column>
-                            <Grid.Column width={12} verticalAlign={'middle'}>
-                                <ChartLine height={100} width={250} datasets={chartDatasets} min={period.min} max={period.max} displayLegends={false}/>
-                            </Grid.Column>
-                        </Grid.Row>
+                        { isDataPresent &&
+                            <Grid.Row>
+                                <Grid.Column width={4} verticalAlign={'middle'} textAlign={'center'}>
+                                    <ChartDoughnut
+                                        labels={doughnutLabels}
+                                        datasets={doughnutDatasets}
+                                        displayLegends={false}/>
+                                </Grid.Column>
+                                <Grid.Column width={12} verticalAlign={'middle'}>
+                                    <ChartLine height={100} width={250} datasets={chartDatasets} min={period.min} max={period.max} displayLegends={false}/>
+                                </Grid.Column>
+                            </Grid.Row>
+                        }
+                        {
+                            !isDataPresent &&
+                            <Grid.Row>
+                                <Grid.Column width={16}>
+                                    <div style={{height:'20vh', display: 'flex', alignItems:'center', justifyContent: 'center'}}>
+                                        <p>{`${this.props.t('pes:pes.metrics.no_data_to_display')} ${this.props.t('pes:pes.metrics.no_data_to_display', {context: this.state.activeButton})}`}</p>
+                                    </div>
+                                </Grid.Column>
+                            </Grid.Row>
+                        }
                     </Grid>
                 </Segment>
                 <Segment>
