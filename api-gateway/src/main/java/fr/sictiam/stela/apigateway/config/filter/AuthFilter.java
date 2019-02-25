@@ -6,8 +6,6 @@ import fr.sictiam.stela.apigateway.model.Certificate;
 import fr.sictiam.stela.apigateway.service.CertUtilService;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,8 +20,6 @@ import java.io.IOException;
 
 @Component
 public class AuthFilter extends OncePerRequestFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthFilter.class);
 
     @Value("${application.jwt.secret}")
     String SECRET;
@@ -54,7 +50,6 @@ public class AuthFilter extends OncePerRequestFilter {
             request.setAttribute("STELA-Current-Local-Authority-UUID",
                     token.get("localAuthority").get("uuid").asText());
             request.setAttribute("STELA-Certificate", certificate);
-            LOGGER.info("GERALD STELA-Current-Local-Authority-UUID " + token.get("localAuthority").get("uuid").asText());
         }
 
         filterChain.doFilter(request, response);
