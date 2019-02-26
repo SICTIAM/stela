@@ -114,7 +114,7 @@ export default class InputValidation extends Component {
                     disabled={this.props.disabled}
                     placeholder={this.props.placeholder}
                     onChange={(event, data) => {
-                        this.props.search ? this.setState({dropdownSearchValue: ''}) : null
+                        this.props.search && this.setState({dropdownSearchValue: ''})
                         this.props.onChange(this.props.id, data.value, this.validateValue)
                     }}
                     onBlur={this.validateValue}
