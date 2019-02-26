@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import {bytesToSize} from '../_util/utils'
-import {Dropdown, Popup, Table, Button, Icon} from 'semantic-ui-react'
+import {Dropdown, Popup, Table, Icon} from 'semantic-ui-react'
 import {translate} from 'react-i18next'
 import {withAuthContext} from '../Auth'
 import {ErrorListPopup} from '../_components/UI'
