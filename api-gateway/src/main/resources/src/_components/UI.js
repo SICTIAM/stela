@@ -7,11 +7,12 @@ import Dropzone from 'react-dropzone'
 
 import { bytesToSize } from '../_util/utils'
 
-const FormField = ({ htmlFor, label, children, inline, helpText, required }) => (
+const FormField = ({ htmlFor, label, children, inline, helpText, required, optionalLabelText }) => (
     <Form.Field inline={inline ? true : false}>
         <label htmlFor={htmlFor}>
             {label}
             {required && <span style={{color: '#db2828'}}>*</span>}
+            {optionalLabelText && <span style={{fontStyle: 'oblique', fontWeight: 100}}> - {optionalLabelText}</span>}
             {helpText && <Tooltip icon="question" text={helpText} />}
         </label>
         {children}
@@ -273,5 +274,6 @@ export {
     StatusDisplay,
     PesErrorList,
     ValidationPopup,
-    DragAndDropFile
+    DragAndDropFile,
+    ErrorListPopup
 }

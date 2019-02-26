@@ -106,7 +106,8 @@
       "sentDate": "Date d'envoi de l'acte",
       "cancellationAskedDate": "Date de demande d'annulation de l'acte",
       "cancelledDate": "Date de confirmation de l'annulation de l'acte",
-      "ackReceivedDate": "Date de réception de l'AR"
+      "ackReceivedDate": "Date de réception de l'AR",
+      "optional_field": "Optionnel"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
@@ -202,9 +203,18 @@
       "add_an_acte": "Ajouter un acte",
       "delete_an_acte": "Supprimer l'acte",
       "batch_title_placeholder": "Nouvel acte...",
+      "PJ_type": "Type de pièce jointe",
       "PJ_types": "Types de pièce jointe...",
       "PJ_types_validation": "Le fichier doit avoir un type de pièce jointe",
-      "every_group": "Toute la collectivité"
+      "maxArchiveSize":"La taille total des fichiers ne doit pas dépasser 150Mo",
+      "every_group": "Toute la collectivité",
+      "file": "Fichier",
+      "file_size": "Taille du fichier",
+      "delete_file": "Supprimer"
+
+    },
+    "error": {
+      "xml_not_valid": "Le fichier XML ne présente pas la balise 'Scellement'"
     }
   },
   "stamp_pad": {

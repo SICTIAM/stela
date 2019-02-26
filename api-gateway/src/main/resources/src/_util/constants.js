@@ -52,6 +52,8 @@ const monthBeforeArchiving = 6
 const hoursBeforeResendActe = 24
 const hoursBeforeResendPes = 24
 
+const maxArchiveSize = (150*1024*1024)
+
 const acceptFileDocumentConvocation = '.doc, docx, .pdf, .jpg, .png, .zip, .odt, .ott, .oth, and .odm, .dwg'
 
 const unauthorizedRequestAllowed = ['api/csrf-token']
@@ -67,5 +69,6 @@ export {
     hoursBeforeResendActe,
     hoursBeforeResendPes,
     acceptFileDocumentConvocation,
-    unauthorizedRequestAllowed
+    unauthorizedRequestAllowed,
+    maxArchiveSize
 }

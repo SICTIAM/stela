@@ -219,6 +219,15 @@ const convertDateBackFormatToUIFormat = (date, format = 'DD/MM/YYYY') => {
     return moment(date, 'YYYY-MM-DDTHH:mm:ss').format(format)
 }
 
+const sum = (items, prop) => {
+    if (items == null) {
+        return 0
+    }
+    return items.reduce( (a, b) => {
+        return b[prop] == null ? a : a + b[prop]
+    }, 0)
+}
+
 const extractFieldNameFromId = (str) => {
     return str.split('_').slice(-1)[0]
 }
@@ -250,5 +259,6 @@ export {
     onSearch,
     sortAlphabetically,
     convertDateBackFormatToUIFormat,
-    extractFieldNameFromId
+    extractFieldNameFromId,
+    sum
 }
