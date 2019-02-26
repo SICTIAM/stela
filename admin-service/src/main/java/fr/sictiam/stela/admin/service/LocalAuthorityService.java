@@ -10,6 +10,7 @@ import fr.sictiam.stela.admin.dao.ProfileRepository;
 import fr.sictiam.stela.admin.model.Certificate;
 import fr.sictiam.stela.admin.model.LocalAuthority;
 import fr.sictiam.stela.admin.model.Module;
+import fr.sictiam.stela.admin.model.TokenResponse;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
@@ -30,25 +31,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
+import javax.persistence.criteria.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class LocalAuthorityService {
@@ -65,11 +68,20 @@ public class LocalAuthorityService {
     @Autowired
     private AmqpTemplate amqpTemplate;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Value("${application.amqp.admin.createdKey}")
     private String createdKey;
 
     @Value("${application.amqp.admin.exchange}")
     private String exchange;
+
+    @Value("${kernel.refreshToken}")
+    private String refreshToken;
+
+    @Value("${kernel.auth.token_endpoint}")
+    private String tokenEndpoint;
 
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
             CertificateRepository certificateRepository, ProfileRepository profileRepository) {
@@ -251,5 +263,41 @@ public class LocalAuthorityService {
     public boolean isAgentAdmin(String agentUuid, String localAuthorityUuid) {
 
         return profileRepository.isAdmin(agentUuid, localAuthorityUuid);
+    }
+
+    public Optional<TokenResponse> getAccessTokenFromKernel(String uuid) {
+        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_not_found"));
+
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("grant_type", "refresh_token");
+        form.add("refresh_token", this.refreshToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(
+                HttpHeaders.AUTHORIZATION,
+                this.buildKernelAuthorizationHeaderValue(
+                        localAuthority.getOzwilloInstanceInfo().getClientId(),
+                        localAuthority.getOzwilloInstanceInfo().getClientSecret()));
+
+        LOGGER.debug("[getSyncAccessTokenFromKernel] Token endpoint: {}", tokenEndpoint);
+
+        try {
+            ResponseEntity<TokenResponse> response = restTemplate.exchange(tokenEndpoint,
+                    HttpMethod.POST, new HttpEntity<>(form, headers), TokenResponse.class);
+
+            return Optional.ofNullable(response.getBody());
+        } catch (RestClientResponseException e) {
+            LOGGER.error(
+                    "[getSyncAccessTokenFromKernel] Error while trying to retrieve access token from kernel : HTTP status {}, {}",
+                    e.getRawStatusCode(),
+                    e.getResponseBodyAsString());
+            return Optional.empty();
+        }
+    }
+
+    private String buildKernelAuthorizationHeaderValue(String clientId, String clientSecret) {
+         byte[] encodedAuth = Base64.getEncoder().encode(String.format(Locale.ROOT, "%s:%s", clientId, clientSecret).getBytes(StandardCharsets.UTF_8));
+        return "Basic " + new String(encodedAuth);
     }
 }

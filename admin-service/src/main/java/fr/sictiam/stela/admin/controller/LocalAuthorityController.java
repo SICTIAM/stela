@@ -1,14 +1,9 @@
 package fr.sictiam.stela.admin.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.sictiam.stela.admin.model.Certificate;
-import fr.sictiam.stela.admin.model.LocalAuthority;
-import fr.sictiam.stela.admin.model.Module;
-import fr.sictiam.stela.admin.model.OzwilloInstanceInfo;
-import fr.sictiam.stela.admin.model.Profile;
+import fr.sictiam.stela.admin.model.*;
 import fr.sictiam.stela.admin.model.UI.Views;
 import fr.sictiam.stela.admin.model.UI.WorkGroupUI;
-import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.LocalAuthorityService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.WorkGroupService;
@@ -404,5 +399,19 @@ public class LocalAuthorityController {
         LocalAuthority localAuthority = localAuthorityService.getByUuid(uuid);
         String dcId = localAuthority.getOzwilloInstanceInfo().getDcId();
         return dcId.substring(dcId.lastIndexOf('/') + 1);
+    }
+
+    @GetMapping("/{uuid}/accessToken")
+    public ResponseEntity<String> getAccessToken(@PathVariable String uuid) {
+        Optional<TokenResponse> tokenResponse = localAuthorityService.getAccessTokenFromKernel(uuid);
+
+        return tokenResponse
+                .map(tokenResponse1 -> new ResponseEntity<>(tokenResponse1.getAccessToken(), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+    }
+
+    @GetMapping("/{uuid}/dcId")
+    public String getDcId(@PathVariable String uuid) {
+        return localAuthorityService.getByUuid(uuid).getOzwilloInstanceInfo().getDcId();
     }
 }

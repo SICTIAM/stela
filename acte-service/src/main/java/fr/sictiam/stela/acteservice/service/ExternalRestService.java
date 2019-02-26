@@ -14,18 +14,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -185,5 +181,43 @@ public class ExternalRestService {
                 new HashSet<>(Arrays.stream(Right.values()).map(Right::toString).collect(Collectors.toSet())),
                 String.class,
                 localAuthority.getUuid(), name);
+    }
+
+    public Optional<String> getAccessTokenFromKernel(LocalAuthority localAuthority) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            String accessToken = restTemplate.getForObject(
+                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/accessToken",
+                    String.class,
+                    localAuthority.getUuid());
+            return Optional.ofNullable(accessToken);
+        } catch (RestClientResponseException e){
+            LOGGER.error(
+                    "[getAccessTokenFromKernel] An error was occured when tried to get kernel access token from {} : Status {} Body {} ",
+                    discoveryUtils.adminServiceUrl(),
+                    e.getRawStatusCode(),
+                    e.getResponseBodyAsString());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> getLocalAuthorityDcId(LocalAuthority localAuthority) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            String dcId = restTemplate.getForObject(
+                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/dcId",
+                    String.class,
+                    localAuthority.getUuid());
+            return Optional.ofNullable(dcId);
+        } catch (RestClientResponseException e){
+            LOGGER.error(
+                    "[getAccessTokenFromKernel] An error was occured when tried to get kernel access token from {} : Status {} Body {} ",
+                    discoveryUtils.adminServiceUrl(),
+                    e.getRawStatusCode(),
+                    e.getResponseBodyAsString());
+            return Optional.empty();
+        }
     }
 }
