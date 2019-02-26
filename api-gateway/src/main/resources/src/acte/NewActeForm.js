@@ -134,6 +134,7 @@ class NewActeForm extends Component {
         if (fields.nature && fields.code) this.fetchAttachmentTypes()
         this.updateGroup()
         this.validateForm()
+        this.props.callBackActeFilesSize && this.props.callBackActeFilesSize(this._sumAttachements())
     }
     fetchAttachmentTypes = async () => {
         const {nature, code : subjectCode} = this.state.fields
@@ -219,6 +220,9 @@ class NewActeForm extends Component {
             return true
         }
     }
+    _sumAttachements = () => {
+        return sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0)
+    }
     validateActeAttachmentType = () => {
         const { annexes, acteAttachment } = this.state.fields
         let annexesValidation = true
@@ -263,7 +267,7 @@ class NewActeForm extends Component {
             this.props.setFormValidForId(isFormValid, this.state.fields.uuid, formErrors)
         }
         //return errors to the parent component (useful for the batchedForm)
-        this.props.callBackErrorMessages && this.props.callBackErrorMessages(this.state.fields.uuid, formErrors)
+        this.props.callBackErrorMessages && this.props.callBackErrorMessages(formErrors)
     }, 500)
     saveDraft = debounce(async (callback) => {
         const {fields} = this.state
@@ -305,6 +309,7 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
                 const acte = this._acteService.deserializeActe(response)
                 this.setState({ fields: acte, acteFetched: true }, this.validateForm)
+                this.props.callBackActeFilesSize && this.props.callBackActeFilesSize(this._sumAttachements())
             }catch(error){
                 this.props.setStatus('', this.state.fields.uuid)
                 this.validateForm()
@@ -324,6 +329,7 @@ class NewActeForm extends Component {
             }
             this.setState({ fields }, this.validateForm)
             this.props.setStatus('saved', this.state.fields.uuid)
+            this.props.callBackActeFilesSize && this.props.callBackActeFilesSize(0)
         }catch(error){
             this.props.setStatus('', this.state.fields.uuid)
         }
@@ -489,10 +495,11 @@ class NewActeForm extends Component {
                                         id={`${this.state.fields.uuid}_decision`}
                                         type='date'
                                         ariaRequired={true}
-                                        value={this.state.fields.decision ? this.state.fields.decision : moment()}
+                                        value={this.state.fields.decision}
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
                                         fieldName={t('acte.fields.decision')}
+                                        placeholder={'jj/mm/yyyy'}
                                         isValidDate={(current) => current.isBefore(new moment())} />
                                 </FormField>
                             </Grid.Column>
@@ -561,7 +568,6 @@ class NewActeForm extends Component {
                                     onAttachmentTypeChange={(e, { value }) => this.onAttachmentTypeChange(value)}
                                     errors={this.state.formFilesErrors}
                                     onDelete={(res) => this.deleteDraftAttachment(res)}
-
                                 />
                             </Grid.Column>
                         )}
@@ -627,7 +633,7 @@ class NewActeForm extends Component {
                         <div style={{ textAlign: 'right' }}>
                             {(sum(this.state.fields.annexes, 'size') !== 0 || this.state.fields.acteAttachment !== null) && (
                                 <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
-                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))} / 150Mo
+                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumAttachements())} / 150Mo
                                 </label>
                             )}
                             {this.state.fields.uuid && (
@@ -649,6 +655,23 @@ class NewActeForm extends Component {
             )
         )
     }
+}
+
+NewActeForm.propTypes = {
+    uuid: PropTypes.string,
+    draftUuid: PropTypes.string,
+    mode: PropTypes.string,
+    nature: PropTypes.string,
+    decision: PropTypes.string,
+    groupeUuid: PropTypes.string,
+    setField: PropTypes.func,
+    shouldUnmount: PropTypes.bool,
+    active: PropTypes.bool,
+    setStatus: PropTypes.func,
+    status: PropTypes.string,
+    setFormValidForId: PropTypes.func,
+    callBackErrorMessages:PropTypes.func,
+    callBackActeFilesSize:PropTypes.func
 }
 
 export default translate(['acte', 'api-gateway'])(withAuthContext(NewActeForm))

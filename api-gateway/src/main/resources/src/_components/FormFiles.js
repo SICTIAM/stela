@@ -25,6 +25,7 @@ class FormFiles extends Component{
                 trigger={
                     <span>
                         <Dropdown scrolling
+                            className={'disabled-error'}
                             placeholder={this.context.t('acte.new.PJ_types')}
                             disabled={true}/>
                     </span>

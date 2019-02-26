@@ -10,7 +10,7 @@ import history from '../_util/history'
 import { notifications } from '../_util/Notifications'
 import { FormField, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import { checkStatus, getLocalAuthoritySlug, toUniqueArray } from '../_util/utils'
+import {bytesToSize, checkStatus, getLocalAuthoritySlug, toUniqueArray} from '../_util/utils'
 import NewActeForm from './NewActeForm'
 import { natures } from '../_util/constants'
 import { withAuthContext } from '../Auth'
@@ -41,7 +41,8 @@ class NewActeBatchedForm extends Component {
         formValid: {},
         formErrors: {},
         isAllFormValid: false,
-        shouldUnmount: true
+        shouldUnmount: true,
+        totalActesSize: {}
     }
     validationRules = {
         nature: 'required',
@@ -121,12 +122,13 @@ class NewActeBatchedForm extends Component {
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.props.authContext })
             .then(checkStatus)
             .then(() => {
-                const { fields, statuses, formValid, formErrors } = this.state
+                const { fields, statuses, formValid, formErrors, totalActesSize } = this.state
                 fields.actes = fields.actes.filter(acte => acte.uuid !== uuid)
                 delete statuses[uuid]
                 delete formValid[uuid]
                 delete formErrors[uuid]
-                this.setState({ fields, statuses, formValid, formErrors }, this.updateAllFormValid)
+                delete totalActesSize[uuid]
+                this.setState({ fields, statuses, formValid, formErrors, totalActesSize }, this.updateAllFormValid)
             })
             .catch(response => {
                 response.json().then(json => {
@@ -164,7 +166,8 @@ class NewActeBatchedForm extends Component {
             nature: this.state.fields.nature,
             decision: this.state.fields.decision,
         }
-        const validation = new Validator(data, this.validationRules)
+        const validationRules = this.validationRules
+        const validation = new Validator(data, validationRules)
         const draftValid = validation.passes()
         this.setState({ draftValid }, this.updateAllFormValid)
     }, 500)
@@ -263,7 +266,18 @@ class NewActeBatchedForm extends Component {
     updateErrors = (acteUuid, newErrors) => {
         const {errors} = this.state
         errors[acteUuid] = newErrors
-        this.setState({errors: errors })
+        this.setState({errors})
+    }
+
+    updateActesSizes = (acteUuid, size) => {
+        const {totalActesSize} = this.state
+        totalActesSize[acteUuid] = size
+        this.setState({totalActesSize})
+    }
+
+    _sumActesSize = () => {
+        const {totalActesSize} = this.state
+        return Object.keys(totalActesSize).reduce((accumulator, key) => accumulator + totalActesSize[key], 0)
     }
 
     render() {
@@ -291,7 +305,8 @@ class NewActeBatchedForm extends Component {
                 handleClick={this.handleClick}
                 labelDelete={t('acte.new.batch_title_placeholder')}
                 titlePlaceholder={t('acte.new.batch_title_placeholder')}
-                deleteBatchedActe={this.deleteBatchedActe}>
+                deleteBatchedActe={this.deleteBatchedActe}
+                size={this.state.totalActesSize[acte.uuid]}>
                 <NewActeForm
                     uuid={acte.uuid}
                     draftUuid={draftUuid}
@@ -305,7 +320,8 @@ class NewActeBatchedForm extends Component {
                     setFormValidForId={this.setFormValidForId}
                     setField={this.setField}
                     shouldUnmount={this.state.shouldUnmount}
-                    callBackErrorMessages={(acteUuid, errors) => this.updateErrors(acteUuid, errors) }
+                    callBackErrorMessages={(errors) => this.updateErrors(acte.uuid, errors)}
+                    callBackActeFilesSize={(size) => this.updateActesSizes(acte.uuid, size)}
                 />
             </WrappedActeForm>
         )
@@ -324,6 +340,7 @@ class NewActeBatchedForm extends Component {
                                 <FormField htmlFor={'decision'} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
                                     <InputValidation id={'decision'}
                                         type='date'
+                                        placeholder={'jj/mm/yyyy'}
                                         value={this.state.fields.decision}
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
@@ -359,6 +376,11 @@ class NewActeBatchedForm extends Component {
                     </Button>
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
+                    {(this._sumActesSize()) > 0  && (
+                        <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
+                            {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumActesSize())} / 150Mo
+                        </label>
+                    )}
                     {this.state.fields.uuid && (
                         <Button style={{ marginRight: '1em' }} onClick={this.deleteDraft} basic color='red'
                             disabled={isFormSaving} loading={isFormSaving}>
@@ -395,7 +417,7 @@ const styles = {
     }
 }
 
-const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, errors, formValid, labelDelete }) =>
+const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, errors, formValid, labelDelete, size}) =>
     <Segment style={{ paddingTop: '0', paddingBottom: '0' }}>
         <Accordion.Title active={isActive}>
             <Grid stretched verticalAlign={'middle'}>
@@ -418,8 +440,15 @@ const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedA
                             : acte.number ? `N° ${acte.number}` : ''}
                     </p>
                 </Grid.Column>
-                <Grid.Column width={10} onClick={() => handleClick(acte.uuid)}>
+                <Grid.Column width={8} onClick={() => handleClick(acte.uuid)}>
                     <p style={styles.overflow}>{acte.objet}</p>
+                </Grid.Column>
+                <Grid.Column width={2} onClick={() => handleClick(acte.uuid)} textAlign={'right'}>
+                    {size > 0  && (
+                        <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)'}}>
+                            {bytesToSize(size)}
+                        </label>
+                    )}
                 </Grid.Column>
                 <Grid.Column width={1} textAlign={'right'} floated={'right'}>
                     <Popup trigger={<Icon name='close' color='red' aria-label={labelDelete} onClick={() => deleteBatchedActe(acte.uuid)} size={'large'}/>} content={'Delete Acte'}/>

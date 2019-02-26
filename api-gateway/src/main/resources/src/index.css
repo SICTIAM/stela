@@ -348,6 +348,13 @@ i.collapsed-text-icon.circular.icon {
     animation: open-slide-right-to-left 0.5s ease;
 }
 
+.disabled-error .text,
+.disabled-error .default.text,
+.disabled-error .icon{
+    color: #db2828 !important;
+}
+
+
 /* Animations */
 @keyframes close-slide-left-to-right {
     from {
