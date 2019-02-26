@@ -40,6 +40,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -108,10 +109,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
 
     @Autowired
     public ActeService(ActeRepository acteRepository, ActeHistoryRepository acteHistoryRepository,
-            AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
-            LocalAuthorityService localAuthorityService, ArchiveService archiveService,
-            PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService,
-            ExternalRestService externalRestService, ActeExportRepository acteExportRepository) {
+                       AttachmentRepository attachmentRepository, ApplicationEventPublisher applicationEventPublisher,
+                       LocalAuthorityService localAuthorityService, ArchiveService archiveService,
+                       PdfGeneratorUtil pdfGeneratorUtil, ZipGeneratorUtil zipGeneratorUtil, LocalesService localesService,
+                       ExternalRestService externalRestService, ActeExportRepository acteExportRepository) {
         this.acteRepository = acteRepository;
         this.acteHistoryRepository = acteHistoryRepository;
         this.attachmentRepository = attachmentRepository;

@@ -38,6 +38,7 @@ dependencies {
     compile('ch.qos.logback:logback-classic:1.2.3')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework:spring-mock:2.0.8')
+    testCompile('com.github.tomakehurst:wiremock-standalone:2.20.0')
 }
 sourceSets {
     main {
