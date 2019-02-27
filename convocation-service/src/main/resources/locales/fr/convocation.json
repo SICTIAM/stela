@@ -87,6 +87,21 @@
     "stamp_pad": {
       "pad_label": "Tampon"
     },
+    "export": {
+      "presence": "Présence",
+      "PRESENT": "Présent",
+      "NOT_PRESENT": "Absent",
+      "SUBSTITUTED": "Procuration donnée à ${substitute}",
+      "DO_NOT_KNOW": "",
+      "pdf": {
+        "signature": "Signature",
+        "title": "Convocation ${title}",
+        "meetingDate": "Séance le ${date} à ${hours}h${minutes}",
+        "presentList": "Liste des personnes présentes",
+        "notPresentList": "Liste des personnes absentes",
+        "localAuthority": "Collectivité"
+      }
+    },
     "admin": {
       "modules": {
         "convocation": {

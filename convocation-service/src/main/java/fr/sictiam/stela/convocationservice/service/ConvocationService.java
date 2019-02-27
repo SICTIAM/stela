@@ -1,8 +1,8 @@
 package fr.sictiam.stela.convocationservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.PdfReader;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfReader;
 import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
 import fr.sictiam.stela.convocationservice.dao.QuestionResponseRepository;
