@@ -1,6 +1,6 @@
 package fr.sictiam.stela.pesservice.controller;
 
-import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.service.MetricService;
 import fr.sictiam.stela.pesservice.service.util.CertUtilService;
@@ -34,7 +34,7 @@ public class MetricControllerTest {
     private MetricService metricService;
 
     @MockBean
-    private PesAllerRepository pesAllerRepository;
+    private PesHistoryRepository pesHistoryRepository;
 
     @MockBean
     EntityManagerFactory entityManagerFactory;
@@ -54,8 +54,6 @@ public class MetricControllerTest {
             listPesNumberByType.put(statusType.name(), (long) 0);
         }
 
-        System.out.printf("test %s", listPesNumberByType.size());
-
         given(metricService.getNumberOfPes(any(), any(), eq(null))).willReturn(listPesNumberByType);
 
         this.mockMvc.perform(get("/api/pes/metric")
@@ -64,6 +62,28 @@ public class MetricControllerTest {
                 .andExpect(status().isOk());
 
         verify(metricService, times(1)).getNumberOfPes(any(), any(),eq(null));
+        verifyNoMoreInteractions(metricService);
+    }
+
+    @Test
+    public void getNumberOfPesWithType() throws Exception {
+        LocalDateTime localDateTimeNow = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String formatedDateTime = localDateTimeNow.format(formatter);
+
+        Map<String, Long> listPesNumberByType = new HashMap<>();
+        listPesNumberByType.put(StatusType.CLASSEUR_SIGNED.name(), (long) 0);
+
+        given(metricService.getNumberOfPes(any(), any(), eq(StatusType.CLASSEUR_SIGNED))).willReturn(listPesNumberByType);
+
+        this.mockMvc.perform(get("/api/pes/metric")
+                .param("fromDate", formatedDateTime)
+                .param("toDate", formatedDateTime)
+                .param("statusType", StatusType.CLASSEUR_SIGNED.name()))
+                .andExpect(status().isOk());
+
+        verify(metricService, times(1)).getNumberOfPes(any(), any(),eq(StatusType.CLASSEUR_SIGNED));
         verifyNoMoreInteractions(metricService);
     }
 }
