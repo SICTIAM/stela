@@ -1,14 +1,20 @@
 package fr.sictiam.stela.convocationservice.service;
 
+import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.LocalAuthorityRepository;
+import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
+import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.event.LocalAuthorityEvent;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 
@@ -20,8 +26,22 @@ public class LocalAuthorityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalAuthorityService.class);
 
+
+    private final LocalAuthorityRepository localAuthorityRepository;
+
+    private final AttachmentRepository attachmentRepository;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     @Autowired
-    private LocalAuthorityRepository localAuthorityRepository;
+    public LocalAuthorityService(
+            LocalAuthorityRepository localAuthorityRepository,
+            AttachmentRepository attachmentRepository,
+            ApplicationEventPublisher applicationEventPublisher) {
+        this.localAuthorityRepository = localAuthorityRepository;
+        this.attachmentRepository = attachmentRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
 
     public LocalAuthority createOrUpdate(LocalAuthority localAuthority) {
         return localAuthorityRepository.save(localAuthority);
@@ -53,6 +73,19 @@ public class LocalAuthorityService {
 
     public Optional<LocalAuthority> getBySiren(String siren) {
         return localAuthorityRepository.findBySiren(siren);
+    }
+
+    public void addProcuration(LocalAuthority localAuthority, MultipartFile procuration) {
+
+        try {
+            Attachment attachment = new Attachment(procuration.getOriginalFilename(), procuration.getBytes());
+            attachment = attachmentRepository.save(attachment);
+            localAuthority.setDefaultProcuration(attachment);
+            localAuthorityRepository.save(localAuthority);
+            applicationEventPublisher.publishEvent(new FileUploadEvent(this, attachment));
+        } catch (IOException e) {
+            throw new ConvocationFileException("Failed to get bytes from file " + procuration.getOriginalFilename(), e);
+        }
     }
 
     @Transactional

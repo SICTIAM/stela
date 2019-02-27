@@ -52,7 +52,14 @@
       "cancelled_convocation_text": "La convocation a été annulée le {{date}}. Vous ne pouvez plus modifier vos réponses.",
       "to_complete": "Compléter",
       "additional_information": "Informations complémentaires",
-      "additional_documents": "Document(s) complémentaires"
+      "additional_documents": "Document(s) complémentaires",
+      "select_user_for_substituted": "Sélectionner la personne à qui donner la procuration:",
+      "information_message_substituted": "(les personnes ayant déjà répondu présent sont en vert)",
+      "presents": "Présents",
+      "not_presents": "Absents",
+      "substitution": "Procurations",
+      "substitution_of": "donne procuration à",
+      "cancel_convocation": "Êtes-vous sûr(e) de vouloir annuler la convocation ?"
     },
     "new": {
       "display": "Visualiser",
@@ -137,9 +144,13 @@
         "fileExists": "Le document de la convocation a déjà été fourni",
         "documentMissing": "Le document de la convocation est manquant",
         "alreadyCancelled": "La convocation a déjà été annulée",
+        "notAvailable": "La date de séance est déjà passée",
         "400": "Paramètre invalide",
         "403": "Non autorisé",
         "404": "La convocation n'a pas été trouvée dans la collectivité courante"
+      },
+      "validation": {
+        "missingParameter": "Un paramètre est manquant"
       }
     }
   }

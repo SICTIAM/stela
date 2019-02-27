@@ -10,6 +10,7 @@ import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.exception.AccessNotGrantedException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationNotAvailableException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationDetailUI;
 import fr.sictiam.stela.convocationservice.model.ui.ReceivedConvocationUI;
@@ -142,6 +143,7 @@ public class ConvocationRestController {
                 false);
 
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        convocation.setProfile(convocationService.retrieveProfile(convocation.getProfileUuid()));
         return new ResponseEntity<>(convocation, HttpStatus.OK);
     }
 
@@ -202,7 +204,8 @@ public class ConvocationRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @PathVariable String uuid,
-            @RequestParam(name = "file", required = false) MultipartFile file,
+            @RequestParam(name = "file") MultipartFile file,
+            @RequestParam(name = "procuration", required = false) MultipartFile procuration,
             @RequestParam(name = "annexes", required = false) MultipartFile... annexes) {
 
         validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
@@ -210,7 +213,7 @@ public class ConvocationRestController {
 
         Convocation convocation = convocationService.getConvocation(uuid);
 
-        convocationService.uploadFiles(convocation, file, annexes);
+        convocationService.uploadFiles(convocation, file, procuration, annexes);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -249,7 +252,7 @@ public class ConvocationRestController {
                 Arrays.asList(Right.values()), false);
 
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
-        Attachment file = convocationService.getFile(currentLocalAuthUuid, uuid, fileUuid);
+        Attachment file = convocationService.getFile(convocation, fileUuid);
 
         try {
             byte[] content = file.getContent();
@@ -271,27 +274,31 @@ public class ConvocationRestController {
         }
     }
 
-    @PutMapping("/received/{uuid}/{responseTypeString}")
+    @PutMapping("/received/{uuid}/{responseType}")
     public ResponseEntity answerConvocation(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
             @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
             @PathVariable String uuid,
-            @PathVariable String responseTypeString) {
+            @PathVariable ResponseType responseType) {
 
-        final Recipient currentRecipient = validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, recipient,
-                rights, Arrays.asList(Right.values()), true);
+        return handleConvocationResponse(rights, currentLocalAuthUuid, currentProfileUuid, recipient, uuid,
+                responseType, null);
+    }
 
-        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
-        try {
-            ResponseType responseType = ResponseType.valueOf(responseTypeString.toUpperCase());
-            convocationService.answerConvocation(convocation, currentRecipient, responseType);
-            return new ResponseEntity(HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            LOGGER.error("Invalid value for response type : {}", responseTypeString);
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+    @PutMapping("/received/{uuid}/{responseType}/{substituteUuid}")
+    public ResponseEntity answerConvocationWithProcuration(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
+            @PathVariable String uuid,
+            @PathVariable ResponseType responseType,
+            @PathVariable String substituteUuid) {
+
+        return handleConvocationResponse(rights, currentLocalAuthUuid, currentProfileUuid, recipient, uuid,
+                responseType, substituteUuid);
     }
 
     @PutMapping("/received/{uuid}/question/{questionUuid}/{value}")
@@ -384,13 +391,23 @@ public class ConvocationRestController {
         }
     }
 
+    private ResponseEntity handleConvocationResponse(Set<Right> rights, String currentLocalAuthUuid, String currentProfileUuid,
+            Recipient recipient, String uuid, ResponseType responseType, String substituteUuid) {
+
+        final Recipient currentRecipient = validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, recipient,
+                rights, Arrays.asList(Right.values()), true);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        convocationService.answerConvocation(convocation, currentRecipient, responseType, substituteUuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @ExceptionHandler(AccessNotGrantedException.class)
     public ResponseEntity accessNotGrantedHandler(HttpServletRequest request, AccessNotGrantedException exception) {
         return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(NotFoundException.class)
-
     public ResponseEntity notFoundHandler(HttpServletRequest request, NotFoundException exception) {
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
@@ -399,5 +416,11 @@ public class ConvocationRestController {
     public ResponseEntity<String> convocationCancelledHandler(HttpServletRequest request,
             ConvocationCancelledException exception) {
         return new ResponseEntity<>("convocation.errors.convocation.alreadyCancelled", HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ConvocationNotAvailableException.class)
+    public ResponseEntity<String> convocationCancelledHandler(HttpServletRequest request,
+            ConvocationNotAvailableException exception) {
+        return new ResponseEntity<>("convocation.errors.convocation.notAvailable", HttpStatus.CONFLICT);
     }
 }

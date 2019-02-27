@@ -6,9 +6,9 @@ import fr.sictiam.stela.convocationservice.dao.AdminRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationHistoryRepository;
 import fr.sictiam.stela.convocationservice.model.Admin;
 import fr.sictiam.stela.convocationservice.model.ConvocationHistory;
+import fr.sictiam.stela.convocationservice.model.HistoryType;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.StampPosition;
-import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.service.AdminService;
 import fr.sictiam.stela.convocationservice.service.ExternalRestService;
 import fr.sictiam.stela.convocationservice.service.LocalAuthorityService;
@@ -153,13 +153,13 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(localAuthority.get().getSiren(), is("999888777"));
     }
 
-    private Optional<ConvocationHistory> getConvocationHistoryForStatus(String pesUuid, StatusType status) {
-        return getConvocationHistoryForStatus(convocationHistoryRepository.findByconvocationUuidOrderByDate(pesUuid),
+    private Optional<ConvocationHistory> getConvocationHistoryForStatus(String uuid, HistoryType status) {
+        return getConvocationHistoryForStatus(convocationHistoryRepository.findByConvocationUuidOrderByDate(uuid),
                 status);
     }
 
     private Optional<ConvocationHistory> getConvocationHistoryForStatus(List<ConvocationHistory> pesHistory,
-            StatusType status) {
-        return pesHistory.stream().filter(ah -> ah.getStatus().equals(status)).findFirst();
+            HistoryType status) {
+        return pesHistory.stream().filter(ah -> ah.getType().equals(status)).findFirst();
     }
 }

@@ -6,12 +6,15 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 
 import { withAuthContext } from '../Auth'
-import { getLocalAuthoritySlug, checkStatus, convertDateBackFormatToUIFormat } from '../_util/utils'
+import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 
 import { Page, Field, FieldValue, FormFieldInline, LinkFile } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
 import QuestionsAnswerForm from './QuestionsAnswerForm'
+import StelaTable from '../_components/StelaTable'
+import InformationBlockConvocation from './_components/InformationBlock'
+import SenderInformation from './_components/SenderInformation'
 
 
 class ReceivedConvocation extends Component {
@@ -22,6 +25,7 @@ class ReceivedConvocation extends Component {
 	}
 	state = {
 	    displayListParticipants: false,
+	    displayListParticipantsSubstituted: false,
 	    convocation: {
 	        uuid: '',
 	        meetingDate: '',
@@ -37,7 +41,9 @@ class ReceivedConvocation extends Component {
 	        subject: '',
 	        showAllAnnexes: false,
 	        cancelled: false,
-	        cancellationDate: ''
+	        cancellationDate: '',
+	        procuration: null,
+	        substitute: null
 	    }
 	}
 
@@ -52,6 +58,9 @@ class ReceivedConvocation extends Component {
 	        .then(checkStatus)
 	        .then(response => response.json())
 	        .then(json => {
+	            if(json.response === 'SUBSTITUTED') {
+	                this.setState({displayListParticipantsSubstituted: true})
+	            }
 	            this.setState({convocation: json})
 	        })
 	        .catch(response => {
@@ -60,10 +69,30 @@ class ReceivedConvocation extends Component {
 	            })
 	        })
 	}
-
-	handleChangeRadio = (e, value, field, question_uuid) => {
+	saveAdditionnalQuestionResponse = (url) => {
 	    const { _fetchWithAuthzHandling, _addNotification, t } = this.context
 
+	    if(url) {
+	        _fetchWithAuthzHandling({url: url, method: 'PUT', context: this.props.authContext})
+	        .then(checkStatus)
+	        .then(() => {
+	            _addNotification(notifications.convocation.reponseSent)
+	        })
+	        .catch((error) => {
+	            if(error.body) {
+	            	error.text().then(text => {
+	            		_addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
+	            	})
+	            } else {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.${error.status}`))
+	            }
+	            this.fetchConvocation()
+	        })
+	    }
+
+	}
+
+	handleChangeRadio = (e, value, field, question_uuid) => {
 	    const { convocation } = this.state
 	    var url = ''
 	    /*
@@ -80,36 +109,29 @@ class ReceivedConvocation extends Component {
 	        break
 	    case 'response':
 	        convocation.response = value
-	        url = `/api/convocation/received/${this.props.uuid}/${value}`
+	        if(value !== 'SUBSTITUTED') {
+	            url = `/api/convocation/received/${this.props.uuid}/${value}`
+	            this.setState({displayListParticipantsSubstituted: false})
+	        } else {
+	            this.setState({displayListParticipantsSubstituted: true})
+	        }
 	        break
 	    }
-
-	    _fetchWithAuthzHandling({url: url, method: 'PUT', context: this.props.authContext})
-	        .then(checkStatus)
-	        .then(() => {
-	            _addNotification(notifications.convocation.reponseSent)
-	        })
-	        .catch((error) => {
-	            if(error.body) {
-	            	error.text().then(text => {
-	            		_addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
-	            	})
-	            } else {
-	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.${error.status}`))
-	            }
-	            this.fetchConvocation()
-	        })
+	    this.saveAdditionnalQuestionResponse(url)
 	    this.setState({convocation})
 	}
 
-	sumParticipantsByStatus = (answer) => {
-	    return this.state.convocation.participants.reduce( (acc, curr) => {
-	        return curr['answer'] === answer ? acc + 1: acc
-	    }, 0)
+	onSelectedUser = (userUuid) => {
+	    var url = `/api/convocation/received/${this.props.uuid}/SUBSTITUTED/${userUuid}`
+	    this.saveAdditionnalQuestionResponse(url)
 	}
 
-	greyResolver = (participant) => {
-	    return !participant.opened
+	negativeResolver = (recipients) => {
+	    return recipients.response === 'NOT_PRESENT' || recipients.response === 'SUBSTITUTED'
+	}
+
+	positiveResolver = (recipients) => {
+	    return recipients.response === 'PRESENT'
 	}
 
 	render() {
@@ -127,6 +149,12 @@ class ReceivedConvocation extends Component {
 
 	        )
 	    })
+
+	    const metaData = [
+	        { property: 'uuid', displayed: false, searchable: false },
+	        { property: 'firstname', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true, collapsing: true },
+	        { property: 'lastname', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true }
+	    ]
 
 	    return (
 	        <Page>
@@ -164,7 +192,7 @@ class ReceivedConvocation extends Component {
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
-	                            )}
+	                                )}
 	                            {this.state.convocation.annexes && this.state.convocation.annexes.length > 0 && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
@@ -186,43 +214,20 @@ class ReceivedConvocation extends Component {
 	                                    </Field>
 	                                </Grid.Column>
 	                            )}
-	                            </Grid>
+	                            {this.state.convocation.procuration && (
+	                                <Grid.Column mobile='16' computer='16'>
+	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
+	                                        <FieldValue id='procuration'>
+	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.procuration.uuid}`} text={this.state.convocation.procuration.filename} />
+	                                        </FieldValue>
+	                                    </Field>
+	                                </Grid.Column>
+	                            )}
+	                        	</Grid>
 	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='4'>
-	                            <div className='block-information'>
-	                                <Grid columns='1'>
-	                                    <Grid.Column>
-	                                        <Field htmlFor="Date" label={t('convocation.fields.date')}>
-	                                            <FieldValue id="Date">{convertDateBackFormatToUIFormat(this.state.convocation.meetingDate, 'DD/MM/YYYY à HH:mm')}</FieldValue>
-	                                        </Field>
-	                                    </Grid.Column>
-	                                    <Grid.Column>
-	                                        <Field htmlFor="assemblyType" label={t('convocation.fields.assembly_type')}>
-	                                            <FieldValue id="assemblyType">{this.state.convocation.assemblyType}</FieldValue>
-	                                        </Field>
-	                                    </Grid.Column>
-	                                    <Grid.Column>
-	                                        <Field htmlFor="assemblyPlace" label={t('convocation.fields.assembly_place')}>
-	                                            <FieldValue id="assemblyPlace">{this.state.convocation.location}</FieldValue>
-	                                        </Field>
-	                                    </Grid.Column>
-	                                </Grid>
-	                            </div>
-	                        </Grid.Column>
+	                        <InformationBlockConvocation convocation={this.state.convocation}/>
 	                    </Grid>
-	                    <h2>{t('convocation.page.sent')}</h2>
-	                    <Grid columns='2'>
-	                        <Grid.Column mobile='16' tablet='8' computer='6'>
-	                            <Field htmlFor="sendBy" label={t('convocation.page.send_by')}>
-	                                <FieldValue id="sendBy">{this.state.convocation.profile.firstname} {this.state.convocation.profile.lastname}</FieldValue>
-	                            </Field>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='4'>
-	                            <Field htmlFor="sendingDate" label={t('convocation.list.sent_date')}>
-	                                <FieldValue id="sendingDate">{convertDateBackFormatToUIFormat(this.state.convocation.sentDate, 'DD/MM/YYYY à HH:mm')}</FieldValue>
-	                            </Field>
-	                        </Grid.Column>
-	                    </Grid>
+	                    <SenderInformation convocation={this.state.convocation}/>
 	                    <h2>{t('convocation.page.my_answer')}</h2>
 	                    <FormFieldInline htmlFor='presentQuestion'
 	                        label={t('convocation.page.present_question')}>
@@ -251,6 +256,31 @@ class ReceivedConvocation extends Component {
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
 	                    </FormFieldInline>
+	                    {this.state.displayListParticipantsSubstituted && (
+	                        <div>
+	                            <p className='text-bold mb-0'>{t('convocation.page.select_user_for_substituted')}</p>
+	                            <p className='text-muted'>{t('convocation.page.information_message_substituted')}</p>
+	                            <Grid>
+	                                <Grid.Column mobile='16' computer='8'>
+	                                    <StelaTable
+	                                        data={this.state.convocation.recipients}
+	                                        metaData={metaData}
+	                                        containerTable='maxh-300 w-100'
+	                                        header={false}
+	                                        search={true}
+	                                        noDataMessage={t('convocation.new.no_recipient')}
+	                                        keyProperty='uuid'
+	                                        uniqueSelect={true}
+	                                        selectedRadio={this.state.convocation.substitute && this.state.convocation.substitute.uuid}
+	                                        onSelectedRow={this.onSelectedUser}
+	                                        negativeResolver={this.negativeResolver}
+	                                        positiveResolver={this.positiveResolver}
+	                                    />
+	                                </Grid.Column>
+	                            </Grid>
+
+	                        </div>
+	                    )}
 	                    {this.state.convocation.questions.length > 0 && (
 	                        <Fragment>
 	                            <h2>{t('convocation.fields.questions')}</h2>

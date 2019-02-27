@@ -3,9 +3,11 @@ package fr.sictiam.stela.convocationservice.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
 public class LocalAuthority {
@@ -29,12 +31,17 @@ public class LocalAuthority {
     @Embedded
     @JsonView(Views.LocalAuthority.class)
     private StampPosition stampPosition;
+
     /**
      * true if inhabitant number is > 3500, false otherwise
      * Used for legal convocation delay
      */
     @JsonView(Views.LocalAuthority.class)
     private Boolean residentThreshold = true;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonView(Views.LocalAuthority.class)
+    private Attachment defaultProcuration;
 
     public LocalAuthority() {
     }
@@ -106,5 +113,13 @@ public class LocalAuthority {
 
     public void setStampPosition(StampPosition stampPosition) {
         this.stampPosition = stampPosition;
+    }
+
+    public Attachment getDefaultProcuration() {
+        return defaultProcuration;
+    }
+
+    public void setDefaultProcuration(Attachment defaultProcuration) {
+        this.defaultProcuration = defaultProcuration;
     }
 }

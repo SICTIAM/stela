@@ -36,6 +36,10 @@ public class Convocation {
     @JsonView(Views.ConvocationInternal.class)
     private Attachment attachment;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonView(Views.ConvocationInternal.class)
+    private Attachment procuration;
+
     @OneToMany(cascade = CascadeType.ALL)
     @JsonView(Views.ConvocationInternal.class)
     private Set<Attachment> annexes;
@@ -50,13 +54,12 @@ public class Convocation {
     @SortComparator(RecipientResponseComparator.class)
     private SortedSet<RecipientResponse> recipientResponses;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "convocation", fetch = FetchType.EAGER)
     @JsonView(Views.ConvocationInternal.class)
     @OrderBy("date ASC")
     private SortedSet<ConvocationHistory> histories;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    //@JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonView(Views.Convocation.class)
     private LocalDateTime creationDate;
 
@@ -207,6 +210,9 @@ public class Convocation {
     }
 
     public SortedSet<ConvocationHistory> getHistories() {
+        if (histories == null)
+            histories = new TreeSet<>();
+
         return histories;
     }
 
@@ -252,6 +258,14 @@ public class Convocation {
 
     public void setCancellationDate(LocalDateTime cancellationDate) {
         this.cancellationDate = cancellationDate;
+    }
+
+    public Attachment getProcuration() {
+        return procuration;
+    }
+
+    public void setProcuration(Attachment procuration) {
+        this.procuration = procuration;
     }
 
     @Override public String toString() {

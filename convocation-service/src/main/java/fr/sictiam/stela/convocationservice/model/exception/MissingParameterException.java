@@ -3,7 +3,7 @@ package fr.sictiam.stela.convocationservice.model.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+@ResponseStatus(value = HttpStatus.PRECONDITION_FAILED)
 public class MissingParameterException extends ConvocationException {
 
     private String parameter;
@@ -14,7 +14,7 @@ public class MissingParameterException extends ConvocationException {
 
     public MissingParameterException(String parameter) {
 
-        super("errors.validation.missingParameter");
+        super("convocation.errors.validation.missingParameter");
         this.parameter = parameter;
     }
 

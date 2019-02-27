@@ -29,6 +29,8 @@ public class ReceivedConvocationUI {
 
     protected LocalAuthority localAuthority;
 
+    protected RecipientUI substitute;
+
     public ReceivedConvocationUI(Convocation convocation, Recipient recipient) {
         uuid = convocation.getUuid();
         subject = convocation.getSubject();
@@ -41,6 +43,8 @@ public class ReceivedConvocationUI {
 
         response = opt.isPresent() ? opt.get().getResponseType() : ResponseType.DO_NOT_KNOW;
         opened = opt.isPresent() && opt.get().isOpened();
+        substitute = opt.isPresent() && opt.get().getResponseType() == ResponseType.SUBSTITUTED ?
+                new RecipientUI(opt.get().getSubstituteRecipient()) : null;
 
         cancelled = convocation.isCancelled();
         cancellationDate = convocation.getCancellationDate();
@@ -81,5 +85,9 @@ public class ReceivedConvocationUI {
 
     public LocalAuthority getLocalAuthority() {
         return localAuthority;
+    }
+
+    public RecipientUI getSubstitute() {
+        return substitute;
     }
 }

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import { Table, Input, Checkbox, Dropdown, Button, Icon } from 'semantic-ui-react'
+import { Table, Input, Checkbox, Dropdown, Button, Icon, Radio } from 'semantic-ui-react'
 
 // import history from '../_util/history'
 
@@ -16,6 +16,7 @@ class StelaTable extends Component {
         header: PropTypes.bool,
         search: PropTypes.bool,
         select: PropTypes.bool,
+        uniqueSelect: PropTypes.bool,
         selectOptions: PropTypes.array,
         headerTitle: PropTypes.string,
         keyProperty: PropTypes.string.isRequired,
@@ -29,7 +30,8 @@ class StelaTable extends Component {
         additionalElements: PropTypes.array,
         striped: PropTypes.bool,
         selectable: PropTypes.bool,
-        selectedRow: PropTypes.array
+        selectedRow: PropTypes.array,
+        selectedRadio: PropTypes.string
     }
     static defaultProps = {
         className: '',
@@ -37,6 +39,7 @@ class StelaTable extends Component {
         sortable: false,
         search: true,
         select: false,
+        uniqueSelect: false,
         selectOptions: [],
         headerTitle: '',
         link: '',
@@ -48,7 +51,8 @@ class StelaTable extends Component {
         additionalElements: [],
         striped: true,
         selectable: true,
-        selectedRow: []
+        selectedRow: [],
+        selectedRadio: null
     }
     state = {
         column: null,
@@ -56,6 +60,7 @@ class StelaTable extends Component {
         direction: null,
         originalData: [],
         checkboxes: {},
+        radio: null,
         checkAll: false
     }
     floatRightStyle = {
@@ -73,6 +78,9 @@ class StelaTable extends Component {
                 if(this.props.selectedRow.length > 0) {
                     this.defaultRowSelected()
                 }
+                if(this.props.selectedRadio) {
+                    this.defaultSelectedRadio()
+                }
             })
         }
     }
@@ -86,9 +94,15 @@ class StelaTable extends Component {
                 if(this.props.selectedRow.length > 0) {
                     this.defaultRowSelected()
                 }
+                if(this.props.selectedRadio) {
+                    this.defaultSelectedRadio()
+                }
             })
 
         }
+    }
+    defaultSelectedRadio = () => {
+        this.setState({radio: this.props.selectedRadio})
     }
     defaultRowSelected = () => {
         const checkboxes = this.state.checkboxes
@@ -140,6 +154,11 @@ class StelaTable extends Component {
         this.setState({ checkboxes })
         this.props.onSelectedRow && this.props.onSelectedRow(keyProperty, this.state.checkboxes[keyProperty])
     }
+
+    handleRadio = (value) => {
+        this.setState({radio: value})
+        this.props.selectedRow && this.props.onSelectedRow(value)
+    }
     handleChekAll = () => {
         const checkAll = !this.state.checkAll
         const checkboxes = this.state.checkboxes
@@ -164,14 +183,10 @@ class StelaTable extends Component {
         const { data } = this.state
         const column = this.props.column ? this.props.column : this.state.column
         const direction = this.getDirectionClass()
-
+        const { header, search, uniqueSelect, select, pagination } = this.props
         const title = this.props.headerTitle !== ''
-        const header = this.props.header
-        const search = this.props.search
         const isEmpty = data.length === 0
         const isFilled = data.length > 0
-        const select = this.props.select
-        const pagination = this.props.pagination
         const options = this.props.selectOptions.length > 0 && this.state.originalData.length > 0
         const additionalElements = this.props.additionalElements.length > 0
 
@@ -236,6 +251,9 @@ class StelaTable extends Component {
                                             <Checkbox aria-label={t('api-gateway:list.check_all')} checked={this.state.checkAll} onClick={this.handleChekAll} label={<div className='box'></div>}/>
                                         </Table.HeaderCell>
                                     }
+                                    {uniqueSelect && (
+                                        <Table.HeaderCell scope="col" style={{ width: '40px' }}></Table.HeaderCell>
+                                    )}
                                 </Table.Row>
                             </Table.Header>
                         }
@@ -251,6 +269,7 @@ class StelaTable extends Component {
                                 data.map(row =>
                                     <Table.Row active={this.state.checkboxes[row[this.props.keyProperty]]} key={row[this.props.keyProperty]}
                                         negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}
+                                        positive={this.props.positiveResolver ? this.props.positiveResolver(row) : false }
                                         className={this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : ''}>
                                         {displayedColumns.map((displayedColumn, index) =>
                                             <Table.Cell
@@ -283,6 +302,16 @@ class StelaTable extends Component {
                                                     onClick={() => this.handleCheckbox(row[this.props.keyProperty])} />
                                             </Table.Cell>
                                         }
+                                        {uniqueSelect && (
+                                            <Table.Cell style={{ width: '40px' }}>
+                                                <Radio
+                                                    name='radioGroupe'
+                                                    value={row[this.props.keyProperty]}
+                                                    checked={this.state.radio === row[this.props.keyProperty]}
+                                                    onChange={() => this.handleRadio(row[this.props.keyProperty])}
+                                                />
+                                            </Table.Cell>
+                                        )}
                                     </Table.Row>
                                 )
                             }

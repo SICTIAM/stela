@@ -3,9 +3,9 @@ package fr.sictiam.stela.convocationservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.ConvocationHistory;
+import fr.sictiam.stela.convocationservice.model.HistoryType;
 import fr.sictiam.stela.convocationservice.model.Notification;
 import fr.sictiam.stela.convocationservice.model.NotificationValue;
-import fr.sictiam.stela.convocationservice.model.StatusType;
 import fr.sictiam.stela.convocationservice.model.event.ConvocationHistoryEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,9 +52,9 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
 
     @Override
     public void onApplicationEvent(@NotNull ConvocationHistoryEvent event) {
-        List<StatusType> notificationTypes = Notification.notifications.stream().map(Notification::getStatusType)
+        List<HistoryType> notificationTypes = Notification.notifications.stream().map(Notification::getHistoryType)
                 .collect(Collectors.toList());
-        if (notificationTypes.contains(event.getConvocationHistory().getStatus())) {
+        if (notificationTypes.contains(event.getConvocationHistory().getType())) {
             try {
                 proccessEvent(event);
             } catch (MessagingException e) {
@@ -70,7 +70,7 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
         JsonNode node = externalRestService.getProfile(convocation.getProfileUuid());
 
         Notification notification = Notification.notifications.stream()
-                .filter(notif -> notif.getStatusType().equals(event.getConvocationHistory().getStatus())).findFirst()
+                .filter(notif -> notif.getHistoryType().equals(event.getConvocationHistory().getType())).findFirst()
                 .get();
 
         JsonNode profiles = externalRestService
@@ -86,16 +86,16 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
                 if (notification.isDeactivatable()
                         || profileNotifications.stream()
                         .anyMatch(notif -> notif.getName().equals(
-                                event.getConvocationHistory().getStatus().toString()) && notif.isActive())
+                                event.getConvocationHistory().getType().toString()) && notif.isActive())
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
                         sendMail(getAgentMail(profile),
                                 localesService.getMessage("fr", "convocation_notification",
-                                        "$.convocation.copy." + event.getConvocationHistory().getStatus().name()
+                                        "$.convocation.copy." + event.getConvocationHistory().getType().name()
                                                 + ".subject"),
                                 localesService.getMessage(
                                         "fr", "convocation_notification", "$.convocation.copy."
-                                                + event.getConvocationHistory().getStatus().name() + ".body",
+                                                + event.getConvocationHistory().getType().name() + ".body",
                                         getAgentInfo(profile)));
                         notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
@@ -106,24 +106,24 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
         });
         if (notifcationSentNumber.get() > 0) {
             ConvocationHistory convocationHistory = new ConvocationHistory(convocation,
-                    StatusType.GROUP_NOTIFICATION_SENT);
+                    HistoryType.GROUP_NOTIFICATION_SENT);
             applicationEventPublisher.publishEvent(new ConvocationHistoryEvent(this, convocationHistory));
         }
         List<NotificationValue> notifications = getNotificationValues(node);
 
         if (notification.isDeactivatable() || notifications.stream()
-                .anyMatch(notif -> notif.getName().equals(event.getConvocationHistory().getStatus().toString())
+                .anyMatch(notif -> notif.getName().equals(event.getConvocationHistory().getType().toString())
                         && notif.isActive())
                 || (notification.isDefaultValue() && notifications.isEmpty())) {
             sendMail(getAgentMail(node),
                     localesService.getMessage("fr", "convocation_notification",
-                            "$.convocation." + event.getConvocationHistory().getStatus().name() + ".subject"),
+                            "$.convocation." + event.getConvocationHistory().getType().name() + ".subject"),
                     localesService.getMessage("fr", "convocation_notification",
-                            "$.convocation." + event.getConvocationHistory().getStatus().name() + ".body",
+                            "$.convocation." + event.getConvocationHistory().getType().name() + ".body",
                             getAgentInfo(node)));
 
             ConvocationHistory convocationHistory = new ConvocationHistory(convocation,
-                    StatusType.NOTIFICATION_SENT);
+                    HistoryType.NOTIFICATION_SENT);
             applicationEventPublisher.publishEvent(new ConvocationHistoryEvent(this, convocationHistory));
         }
     }

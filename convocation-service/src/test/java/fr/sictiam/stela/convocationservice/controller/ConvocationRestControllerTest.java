@@ -44,7 +44,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -112,7 +111,6 @@ public class ConvocationRestControllerTest {
                 .andExpect(jsonPath("$.questions").isArray());
 
         verify(convocationService, times(1)).getConvocation("uuid-convocation-test-one", "mairie-test");
-        verifyNoMoreInteractions(convocationService);
     }
 
     @Test

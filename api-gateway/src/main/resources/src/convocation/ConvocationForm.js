@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { translate } from 'react-i18next'
 import { Segment, Form, TextArea, Grid, Button, Modal } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
@@ -7,7 +7,7 @@ import moment from 'moment'
 import Validator from 'validatorjs'
 import accepts from 'attr-accept'
 
-import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { getLocalAuthoritySlug, checkStatus, extractFieldNameFromId } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { acceptFileDocumentConvocation } from '../_util/constants'
@@ -16,7 +16,7 @@ import { withAuthContext } from '../Auth'
 
 import ConfirmModal from '../_components/ConfirmModal'
 import ChipsList from '../_components/ChipsList'
-import { Page, FormField, InputTextControlled, ValidationPopup, File, InputFile } from '../_components/UI'
+import { Page, FormField, InputTextControlled, ValidationPopup, File, InputFile, LinkFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import QuestionsForm from './QuestionsForm'
 import RecipientForm from './RecipientForm'
@@ -45,7 +45,10 @@ class ConvocationForm extends Component {
 	        guests: [],
 	        file: null,
 	        annexes: [],
-	        sending: false
+	        sending: false,
+	        defaultProcuration: null,
+	        customProcuration: null,
+	        useProcuration: false
 	    },
 	    delayTooShort: false,
 	    delay: null,
@@ -113,6 +116,9 @@ class ConvocationForm extends Component {
 	                        data.append('annexes', annexe)
 	                    })
 	                }
+	                if(this.state.fields.customProcuration) {
+	                    data.append('procuration', this.state.fields.customProcuration)
+	                }
 	                _fetchWithAuthzHandling({url: `/api/convocation/${json.uuid}/upload`, method: 'POST', body: data, context: this.props.authContext})
 	                	.then(checkStatus)
 	                	.then(() => {
@@ -146,7 +152,7 @@ class ConvocationForm extends Component {
 	    const attributeNames = {
 	        meetingDate: t('convocation.fields.date'),
 	        hour: t('convocation.fields.hour'),
-	        assemblyType: 'this.state.fields.assemblyType',
+	        assemblyType: t('convocation.fields.assembly_type'),
 	        location: t('convocation.fields.assembly_place'),
 	        subject: t('convocation.fields.object'),
 	        file: t('convocation.fields.convocation_document')
@@ -162,10 +168,9 @@ class ConvocationForm extends Component {
 
 	    this.checkDelay()
 	})
-	extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
 	handleFieldChange = (field, value, callback) => {
 	    //Set set for thid field
-	    field = this.extractFieldNameFromId(field)
+	    field = extractFieldNameFromId(field)
 	    if(field === 'assemblyType') {
 	        const { _fetchWithAuthzHandling, _addNotification } = this.context
 	        _fetchWithAuthzHandling({url: `/api/convocation/assembly-type/${value}`, method: 'GET'})
@@ -173,8 +178,20 @@ class ConvocationForm extends Component {
 	            .then(response => response.json())
 	            .then(json => {
 	                const fields = this.state.fields
-	                fields['recipients'] = json.recipients
-	                fields['location'] = json.location
+	                fields.recipients = json.recipients
+	                fields.location = json.location
+	                fields.useProcuration = json.useProcuration
+	                // if(fields.useProcuration) {
+	                //     _fetchWithAuthzHandling({url: '/api/convocation/local-authority/procuration'})
+	                //         .then(checkStatus)
+	                //         .then(response => response.json())
+	                //         .then(json => {
+	                //             fields.defaultProcuration = json
+	                //             this.setState({fields, delay: json.delay})
+	                //         })
+	                // } else {
+	                //     this.setState({fields, delay: json.delay})
+	                // }
 	                this.setState({fields, delay: json.delay})
 	            })
 	            .catch(response => {
@@ -220,16 +237,17 @@ class ConvocationForm extends Component {
 	    }
 	}
 
-	handleFileChange = (file, acceptType) => {
+	handleFileChange = (field, file, acceptType) => {
 	    if(this.acceptsFile(file, acceptType)) {
 	        const fields = this.state.fields
 
 	        if (file) {
-	            fields['file'] = file
+	            fields[field] = file
 	            this.setState({ fields }, this.validateForm)
 	        }
 	    }
 	}
+
 
 	handleAnnexeChange = (file, acceptType) => {
 	    const fields = this.state.fields
@@ -242,9 +260,9 @@ class ConvocationForm extends Component {
 	    this.setState({ fields })
 	}
 
-	deleteFile = () => {
+	deleteFile = (field) => {
 	    const fields = this.state.fields
-	    fields['file'] = null
+	    fields[field] = null
 	    this.setState({ fields }, this.validateForm)
 	}
 
@@ -421,6 +439,32 @@ class ConvocationForm extends Component {
 	                                </Grid.Column>
 	                            </Grid>
 	                        </Grid.Column>
+	                        {this.state.fields.useProcuration && (
+	                            <Fragment>
+	                                <Grid.Column mobile='16' computer='8'>
+	                                    <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
+	                                        label={t('convocation.fields.default_procuration')}>
+	                                        <LinkFile url='/api/convocation/local-authority/procuration' text={t('convocation.new.display')}/>
+	                                    </FormField>
+	                                </Grid.Column>
+	                                <Grid.Column mobile='16' computer='8'>
+	                                    <FormField htmlFor={`${this.state.fields.uuid}_customProcuration`}
+	                                        label={t('convocation.fields.custom_procuration')}>
+	                                        <InputFile labelClassName="primary" htmlFor={`${this.state.fields.uuid}_customProcuration`}
+	                                            label={`${t('api-gateway:form.add_a_file')}`}>
+	                                            <input type="file"
+	                                                id={`${this.state.fields.uuid}_customProcuration`}
+	                                                accept={acceptFileDocumentConvocation}
+	                                                onChange={(e) => this.handleFileChange('customProcuration', e.target.files[0], acceptFileDocumentConvocation)}
+	                                                style={{ display: 'none' }}/>
+	                                        </InputFile>
+	                                    </FormField>
+	                                    {this.state.fields.customProcuration && (
+	                                        <File attachment={{ filename: this.state.fields.customProcuration.name }} onDelete={() => this.deleteFile('customProcuration')} />
+	                                    )}
+	                                </Grid.Column>
+	                            </Fragment>
+	                        )}
 	                        <Grid.Column mobile='16' computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_file`}
 	                                label={t('convocation.fields.convocation_document')} required={true}>
@@ -429,13 +473,13 @@ class ConvocationForm extends Component {
 	                                    type='file'
 	                                    ariaRequired={true}
 	                                    accept={acceptFileDocumentConvocation}
-	                                    onChange={this.handleFileChange}
+	                                    onChange={(file, accept) => this.handleFileChange('file', file, accept)}
 	                                    value={this.state.fields.file}
 	                                    label={`${t('api-gateway:form.add_a_file')}`}
 	                                    fieldName={t('convocation.fields._file')} />
 	                            </FormField>
 	                            {this.state.fields.file && (
-	                                <File attachment={{ filename: this.state.fields.file.name }} onDelete={this.deleteFile} />
+	                                <File attachment={{ filename: this.state.fields.file.name }} onDelete={() => this.deleteFile('file')} />
 	                            )}
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>
