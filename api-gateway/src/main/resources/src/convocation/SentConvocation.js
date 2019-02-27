@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import { Segment, Button, Message } from 'semantic-ui-react'
+import { Segment, Button, Message, Dropdown } from 'semantic-ui-react'
 import moment from 'moment'
 
 import { notifications } from '../_util/Notifications'
@@ -100,14 +100,30 @@ class SentConvocation extends Component {
 	                </Message>
 	            )}
 	            <Segment>
-	                {!this.state.convocation.cancelled && (
-	                    <div className='float-right'>
-	                        <Button type='button' className='mr-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
-	                        <ConfirmModal onConfirm={this.onCancelConvocation} text={t('convocation.page.cancel_convocation', {number: this.state.delay})}>
-	                            <Button type='button' basic color={'orange'}>{t('api-gateway:form.cancel')}</Button>
-	                        </ConfirmModal>
-	                    </div>
-	                )}
+	                <div className='float-right'>
+	                    <Dropdown basic direction='left' trigger={dropdownButton} icon={false} className='mr-10'>
+	                        <Dropdown.Menu>
+	                            <Dropdown.Item>
+	                                <a className='item' aria-label={t('convocation.page.download_pdf')} href={`/api/convocation/${this.state.convocation.uuid}/presence.pdf`} target='_blank'>
+	                                    {t('convocation.page.download_pdf')}
+	                                </a>
+	                            </Dropdown.Item>
+	                            <Dropdown.Item>
+	                                <a className='item' aria-label={t('convocation.page.download_csv')} href={`/api/convocation/${this.state.convocation.uuid}/presence.csv`} target='_blank'>
+	                                    {t('convocation.page.download_csv')}
+	                                </a>
+	                            </Dropdown.Item>
+	                        </Dropdown.Menu>
+	                    </Dropdown>
+	                    {!this.state.convocation.cancelled && (
+	                        <Fragment>
+	                            <Button type='button' className='mr-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
+	                            <ConfirmModal onConfirm={this.onCancelConvocation} text={t('convocation.page.cancel_convocation', {number: this.state.delay})}>
+	                                <Button type='button' basic color={'orange'}>{t('api-gateway:form.cancel')}</Button>
+	                            </ConfirmModal>
+	                        </Fragment>
+	                    )}
+	                </div>
 	                <SentConvocationFragment convocation={convocation}/>
 	                <ParticipantsFragment
 	                    title={t('convocation.fields.recipient')}
