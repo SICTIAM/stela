@@ -7,19 +7,14 @@ import fr.sictiam.stela.convocationservice.dao.AttachmentRepository;
 import fr.sictiam.stela.convocationservice.dao.ConvocationRepository;
 import fr.sictiam.stela.convocationservice.dao.QuestionResponseRepository;
 import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
-import fr.sictiam.stela.convocationservice.model.Attachment;
-import fr.sictiam.stela.convocationservice.model.Convocation;
-import fr.sictiam.stela.convocationservice.model.LocalAuthority;
-import fr.sictiam.stela.convocationservice.model.Profile;
-import fr.sictiam.stela.convocationservice.model.Question;
-import fr.sictiam.stela.convocationservice.model.QuestionResponse;
-import fr.sictiam.stela.convocationservice.model.Recipient;
-import fr.sictiam.stela.convocationservice.model.RecipientResponse;
-import fr.sictiam.stela.convocationservice.model.ResponseType;
+import fr.sictiam.stela.convocationservice.model.*;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
+import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
+import fr.sictiam.stela.convocationservice.model.exception.ConvocationNotAvailableException;
+import fr.sictiam.stela.convocationservice.model.exception.MissingParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
 import fr.sictiam.stela.convocationservice.service.util.PdfGeneratorUtil;
@@ -103,14 +98,7 @@ public class ConvocationService {
 
     public Convocation openBy(Convocation convocation, Recipient recipient) {
 
-        JsonNode jsonProfile = externalRestService.getProfile(convocation.getProfileUuid());
-        if (jsonProfile != null) {
-            convocation.setProfile(new Profile(
-                    jsonProfile.get("uuid").asText(""),
-                    jsonProfile.get("agent").get("given_name").asText(""),
-                    jsonProfile.get("agent").get("family_name").asText(""),
-                    jsonProfile.get("agent").get("email").asText("")));
-        }
+        convocation.setProfile(retrieveProfile(convocation.getProfileUuid()));
 
         RecipientResponse response =
                 convocation.getRecipientResponses()
@@ -143,7 +131,9 @@ public class ConvocationService {
 
         createRecipientResponse(convocation);
 
-        return convocationRepository.save(convocation);
+        convocation = convocationRepository.save(convocation);
+        addHistory(convocation, HistoryType.CREATED);
+        return convocation;
     }
 
     private void createRecipientResponse(Convocation convocation) {
@@ -161,17 +151,19 @@ public class ConvocationService {
         Convocation convocation = getConvocation(uuid, localAuthorityUuid);
 
         // Add questions
-        if (params.getQuestions() != null) {
+        if (params.getQuestions() != null && params.getQuestions().size() > 0) {
             convocation.getQuestions().addAll(params.getQuestions());
+            addHistory(convocation, HistoryType.QUESTIONS_ADDED);
         }
 
         // Comment
-        if (StringUtils.isNotBlank(params.getComment())) {
+        if (StringUtils.isNotBlank(params.getComment()) && !params.getComment().equals(convocation.getComment())) {
             convocation.setComment(params.getComment());
+            addHistory(convocation, HistoryType.COMMENT_MODIFIED);
         }
 
         // Create recipient responses
-        if (params.getRecipients() != null) {
+        if (params.getRecipients() != null && params.getRecipients().size() > 0) {
             convocation.getRecipientResponses().addAll(
                     params.getRecipients().stream().map(recipient -> {
                         RecipientResponse recipientResponse = new RecipientResponse(recipient);
@@ -179,6 +171,7 @@ public class ConvocationService {
                         recipientResponseRepository.save(recipientResponse);
                         return recipientResponse;
                     }).collect(Collectors.toSet()));
+            addHistory(convocation, HistoryType.RECIPIENTS_ADDED);
         }
 
         return convocationRepository.saveAndFlush(convocation);
@@ -204,6 +197,7 @@ public class ConvocationService {
         convocation.setCancelled(true);
         convocation.setCancellationDate(LocalDateTime.now());
         convocationRepository.save(convocation);
+        addHistory(convocation, HistoryType.CANCELLED);
         // TODO: send email to recipients
     }
 
@@ -211,7 +205,8 @@ public class ConvocationService {
         return convocationRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(ConvocationNotFoundException::new);
     }
 
-    public void uploadFiles(Convocation convocation, MultipartFile file, MultipartFile... annexes)
+    public void uploadFiles(Convocation convocation, MultipartFile file,
+            MultipartFile procuration, MultipartFile... annexes)
             throws ConvocationFileException {
 
         if (convocation.getAttachment() != null && file != null) {
@@ -227,6 +222,11 @@ public class ConvocationService {
         if (file != null) {
             Attachment attachment = saveAttachment(file, false);
             convocation.setAttachment(attachment);
+        }
+
+        if (procuration != null) {
+            Attachment attachment = saveAttachment(procuration, false);
+            convocation.setProcuration(attachment);
         }
 
         for (MultipartFile annexe : annexes) {
@@ -246,14 +246,19 @@ public class ConvocationService {
         }
 
         convocationRepository.save(convocation);
+        addHistory(convocation, HistoryType.ANNEXES_ADDED);
     }
 
-    public Attachment getFile(String currentLocalAuthUuid, String uuid, String fileUuid) throws NotFoundException {
+    public Attachment getFile(Convocation convocation, String fileUuid) throws NotFoundException {
 
-        Convocation convocation = getConvocation(uuid, currentLocalAuthUuid);
         if (convocation.getAttachment().getUuid().equals(fileUuid)) {
             storageService.getAttachmentContent(convocation.getAttachment());
             return convocation.getAttachment();
+        }
+
+        if (convocation.getProcuration() != null && convocation.getProcuration().getUuid().equals(fileUuid)) {
+            storageService.getAttachmentContent(convocation.getProcuration());
+            return convocation.getProcuration();
         }
 
         for (Attachment annexe : convocation.getAnnexes()) {
@@ -284,18 +289,37 @@ public class ConvocationService {
         return pdfGeneratorUtil.stampPDF(sentDate, content, x, y);
     }
 
-    public void answerConvocation(Convocation convocation, Recipient recipient, ResponseType responseType) {
+    public void answerConvocation(Convocation convocation, Recipient recipient, ResponseType responseType,
+            String substituteUuid) {
 
-        if (convocation.isCancelled()) {
-            LOGGER.warn("Cannot answer to convocation {}, it has been cancelled", convocation.getUuid());
-            throw new ConvocationCancelledException();
-        }
+        checkConvocationValidity(convocation);
 
         Optional<RecipientResponse> recipientResponse =
                 convocation.getRecipientResponses().stream().filter(rr -> rr.getRecipient().equals(recipient)).findFirst();
         if (!recipientResponse.isPresent()) {
             LOGGER.error("Recipient {} not found in convocation {}", recipient.getUuid(), convocation.getUuid());
             throw new NotFoundException("Recipient " + recipient.getUuid() + " not found in convocation " + convocation.getUuid());
+        }
+
+        if (responseType == ResponseType.SUBSTITUTED) {
+            if (substituteUuid == null) {
+                LOGGER.error("Recipient {} wants to give procuration but does not provide his substitute",
+                        recipient.getUuid());
+                throw new MissingParameterException("substituteUuid");
+            }
+
+            Optional<RecipientResponse> substituteResponse =
+                    convocation.getRecipientResponses().stream().filter(rr -> rr.getRecipient().getUuid().equals(substituteUuid)).findFirst();
+            if (!substituteResponse.isPresent()) {
+                LOGGER.error("Recipient {} not found in convocation {} to receive procuration", substituteUuid,
+                        convocation.getUuid());
+                throw new NotFoundException("Recipient " + recipient.getUuid() + " not found in convocation " + convocation.getUuid() + " for procuration");
+            } else {
+                recipientResponse.get().setSubstituteRecipient(substituteResponse.get().getRecipient());
+            }
+        } else {
+            // reset substitute if already set by a previous response
+            recipientResponse.get().setSubstituteRecipient(null);
         }
 
         recipientResponse.get().setResponseType(responseType);
@@ -305,11 +329,7 @@ public class ConvocationService {
     public void answerQuestion(Convocation convocation, Recipient currentRecipient, String questionUuid,
             Boolean response) {
 
-        if (convocation.isCancelled()) {
-            LOGGER.warn("Cannot answer to convocation question {}, convocation {} has been cancelled", questionUuid,
-                    convocation.getUuid());
-            throw new ConvocationCancelledException();
-        }
+        checkConvocationValidity(convocation);
 
         Question question = convocation.getQuestions()
                 .stream().filter(q -> q.getUuid().equals(questionUuid))
@@ -333,6 +353,17 @@ public class ConvocationService {
         }
         questionResponse.setResponse(response);
         questionResponseRepository.save(questionResponse);
+    }
+
+    public Profile retrieveProfile(String profileUuid) {
+        JsonNode jsonProfile = externalRestService.getProfile(profileUuid);
+        return jsonProfile != null
+                ? new Profile(
+                jsonProfile.get("uuid").asText(""),
+                jsonProfile.get("agent").get("given_name").asText(""),
+                jsonProfile.get("agent").get("family_name").asText(""),
+                jsonProfile.get("agent").get("email").asText(""))
+                : new Profile();
     }
 
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType,
@@ -561,4 +592,28 @@ public class ConvocationService {
 
         return predicates;
     }
+
+    private void checkConvocationValidity(Convocation convocation) throws ConvocationCancelledException,
+            ConvocationNotAvailableException {
+
+        if (convocation.isCancelled()) {
+            LOGGER.warn("Cannot answer to convocation {}, it has been cancelled", convocation.getUuid());
+            throw new ConvocationCancelledException();
+        }
+
+        if (convocation.getMeetingDate().isBefore(LocalDateTime.now())) {
+            LOGGER.warn("Cannot answer to convocation {}, it has been spent", convocation.getUuid());
+            throw new ConvocationNotAvailableException();
+        }
+    }
+
+    private void addHistory(Convocation convocation, HistoryType type) {
+        addHistory(convocation, type, null);
+    }
+
+    private void addHistory(Convocation convocation, HistoryType type, String message) {
+        LOGGER.info("Publish event {} | {}", type, message);
+        applicationEventPublisher.publishEvent(new HistoryEvent(this, convocation, type, message));
+    }
 }
+

@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import { Segment, Grid, Button, Icon } from 'semantic-ui-react'
+import { Segment, Grid, Button, Icon, Message } from 'semantic-ui-react'
+import moment from 'moment'
 
 import { notifications } from '../_util/Notifications'
 import { getLocalAuthoritySlug, checkStatus, convertDateBackFormatToUIFormat } from '../_util/utils'
@@ -10,6 +11,7 @@ import history from '../_util/history'
 import { withAuthContext } from '../Auth'
 import { Page } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
+import ConfirmModal from '../_components/ConfirmModal'
 
 import StelaTable from '../_components/StelaTable'
 import Participants from './Participants'
@@ -26,7 +28,7 @@ class SentConvocation extends Component {
 	    convocation: {
 	        uuid: '',
 	        meetingDate: '',
-	        assemblyType: {},
+	        assemblyType: null,
 	        location: '',
 	        comment: '',
 	        annexes: [],
@@ -133,11 +135,19 @@ class SentConvocation extends Component {
 	                        {title: t('api-gateway:breadcrumb.convocation.sent_convocation')},
 	                    ]}
 	            />
+	            {this.state.convocation.cancelled && (
+	                <Message warning>
+	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.page.cancelled_convocation_title')}</Message.Header>
+	                    <p>{t('convocation.page.cancelled_convocation_text', {date: moment(this.state.convocation.cancellationDate).format('DD/MM/YYYY')})}</p>
+	                </Message>
+	            )}
 	            <Segment>
 	                {!this.state.convocation.cancelled && (
 	                    <div className='float-right'>
 	                        <Button type='button' className='mr-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
-	                        <Button type='button' basic color={'orange'} onClick={this.onCancelConvocation}>{t('api-gateway:form.cancel')}</Button>
+	                        <ConfirmModal onConfirm={this.onCancelConvocation} text={t('convocation.page.cancel_convocation', {number: this.state.delay})}>
+	                            <Button type='button' basic color={'orange'}>{t('api-gateway:form.cancel')}</Button>
+	                        </ConfirmModal>
 	                    </div>
 	                )}
 	                <SentConvocationFragment convocation={convocation}/>

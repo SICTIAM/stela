@@ -1,6 +1,6 @@
 package fr.sictiam.stela.convocationservice;
 
-import fr.sictiam.stela.convocationservice.model.StatusType;
+import fr.sictiam.stela.convocationservice.model.HistoryType;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class LocalesServiceTest {
     @Test
     public void testGetVariableMessage() {
 
-        StatusType statusType = StatusType.SENT;
+        HistoryType historyType = HistoryType.SENT;
         String firstName = "John";
         String lastName = "Doe";
         Map<String, String> variables = new HashMap<>();
@@ -41,7 +41,7 @@ public class LocalesServiceTest {
         variables.put("lastname", lastName);
 
         String text = localService.getMessage("fr", "convocation_notification",
-                "$.convocation." + statusType.name() + ".body", variables);
+                "$.convocation." + historyType.name() + ".body", variables);
 
         assertThat(text, is(
                 "Bonjour John Doe, <br/> Votre convocation a bien été envoyée aux elus <br/> Cordialement le Sictiam"));

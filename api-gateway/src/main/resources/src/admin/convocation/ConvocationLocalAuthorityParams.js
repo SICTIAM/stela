@@ -3,13 +3,15 @@ import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { Segment, Form, Button, Grid, Radio } from 'semantic-ui-react'
 import Validator from 'validatorjs'
+import accepts from 'attr-accept'
 
 import { withAuthContext } from '../../Auth'
 
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { getLocalAuthoritySlug } from '../../_util/utils'
+import { acceptFileDocumentConvocation } from '../../_util/constants'
 import { notifications } from '../../_util/Notifications'
 
-import {  Page, FormField, ValidationPopup } from '../../_components/UI'
+import {  Page, FormField, ValidationPopup, InputFile, File } from '../../_components/UI'
 import Breadcrumb from '../../_components/Breadcrumb'
 import DraggablePosition from '../../_components/DraggablePosition'
 
@@ -28,6 +30,8 @@ class ConvocationLocalAuthorityParams extends Component {
         fields: {
             uuid: '',
             residentThreshold: null,
+            procuration: null,
+            defaultProcuration: null,
             stampPosition: {
                 x: 10,
                 y: 10
@@ -39,13 +43,13 @@ class ConvocationLocalAuthorityParams extends Component {
     componentDidMount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({url: '/api/convocation/local-authority'})
-            .then(checkStatus)
             .then(response => response.json())
             .then(json => {
                 const fields = this.state.fields
                 fields.uuid = json.uuid
                 fields.residentThreshold = json.residentThreshold
                 fields.stampPosition = json.stampPosition
+                fields.defaultProcuration = json.defaultProcuration
                 this.setState({fields})
             })
             .catch(response => {
@@ -82,14 +86,52 @@ class ConvocationLocalAuthorityParams extends Component {
 	    this.setState({ fields }, this.validateForm())
 	}
 
+    handleProcurationChange = (file, acceptType) => {
+        if(file && this.acceptsFile(file, acceptType)) {
+            const fields = this.state.fields
+            fields.procuration = file
+            this.setState({ fields }, this.validateForm)
+
+        }
+    }
+
+    acceptsFile = (file, acceptType) => {
+	    const { _addNotification, t } = this.context
+	    if(accepts(file, acceptType)) {
+	        return true
+	    } else {
+	        _addNotification(notifications.defaultError, 'notifications.convocation.title', t('api-gateway:form.validation.badextension'))
+	        return false
+	    }
+    }
+
+    deleteFile = () => {
+	    const fields = this.state.fields
+	    fields.procuration = null
+	    this.setState({ fields }, this.validateForm)
+    }
+
     submitForm = (e) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         e.preventDefault()
         const headers = { 'Content-Type': 'application/json' }
         _fetchWithAuthzHandling({url: '/api/convocation/local-authority', method: 'PUT', headers: headers, body: JSON.stringify(this.state.fields), context: this.props.authContext})
-            .then(checkStatus)
             .then(() => {
-                _addNotification(notifications.admin.moduleConvocationUpdated)
+                if(this.state.fields.procuration) {
+                    const data = new FormData()
+                    data.append('procuration', this.state.fields.procuration)
+                    _fetchWithAuthzHandling({url: '/api/convocation/local-authority/procuration', method: 'POST', body: data, context: this.props.authContext})
+                        .then(() => {
+                            _addNotification(notifications.admin.moduleConvocationUpdated)
+                        })
+                        .catch(error => {
+                            error.json().then(json => {
+                                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+                            })
+                        })
+                } else {
+                    _addNotification(notifications.admin.moduleConvocationUpdated)
+                }
             })
             .catch(response => {
                 response.json().then(json => {
@@ -161,6 +203,23 @@ class ConvocationLocalAuthorityParams extends Component {
                                         </Grid.Row>
                                     </Grid>
                                 </FormField>
+                            </Grid.Column>
+                            <Grid.Column mobile='16' computer='16'>
+                                <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
+	                                label={t('convocation.fields.default_procuration')}>
+	                                <InputFile labelClassName="primary" htmlFor={`${this.state.fields.uuid}_procuration`}
+	                                    label={`${t('api-gateway:form.add_a_file')}`}>
+	                                    <input type="file"
+	                                        id={`${this.state.fields.uuid}_procuration`}
+	                                        accept={acceptFileDocumentConvocation}
+	                                        multiple
+	                                        onChange={(e) => this.handleProcurationChange(e.target.files[0], acceptFileDocumentConvocation)}
+	                                        style={{ display: 'none' }}/>
+	                                </InputFile>
+	                            </FormField>
+                                {this.state.fields.procuration && (
+	                                <File attachment={{ filename: this.state.fields.procuration.name }} onDelete={() => this.deleteFile()} />
+	                            )}
                             </Grid.Column>
                         </Grid>
                         <div className='footerForm'>

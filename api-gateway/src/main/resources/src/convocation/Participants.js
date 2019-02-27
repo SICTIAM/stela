@@ -4,6 +4,9 @@ import { Tab, Popup, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
 class Participants extends Component {
+	static contextTypes = {
+	    t: PropTypes.func
+	}
 	static propTypes = {
 	    questions: PropTypes.array.isRequired,
 	    participants: PropTypes.array.isRequired,
@@ -73,6 +76,8 @@ class Participants extends Component {
 	    })
 	}
 	render() {
+	    const { t } = this.context
+
 	    const questions = this.props.questions.map((question) => {
 	        return (
 	            <Popup key={question.uuid} trigger={<th className='text-ellipsis mw-200 cursor-default' id={question.uuid}>{question.question}</th>}  content={question.question}/>
@@ -104,10 +109,22 @@ class Participants extends Component {
 			    {absent}
 			</div>
 
+	    const substitution = this.filterRecipientsByResponses('SUBSTITUTED').map(part => {
+	        return(
+	            <p key={part.recipient.uuid}>
+	                {`${part.recipient.firstname} ${part.recipient.lastname} ${t('convocation.page.substitution_of')} ${part.substituteRecipient.firstname} ${part.substituteRecipient.lastname}`}
+	            </p>
+	        )
+	    })
+	    const substitutionContent =
+			<div>
+			    {substitution}
+			</div>
+
 	    const panes = [
-	        { menuItem: 'Présents', render: () => <Tab.Pane>{presentContent}</Tab.Pane> },
-	        { menuItem: 'Absents', render: () => <Tab.Pane>{absentContent}</Tab.Pane> },
-	        { menuItem: 'Procurations', render: () => <Tab.Pane>Tab 3 Content</Tab.Pane> },
+	        { menuItem: t('convocation.page.sent'), render: () => <Tab.Pane>{presentContent}</Tab.Pane> },
+	        { menuItem: t('convocation.page.not_presents'), render: () => <Tab.Pane>{absentContent}</Tab.Pane> },
+	        { menuItem: t('convocation.page.substitution'), render: () => <Tab.Pane>{substitutionContent}</Tab.Pane> },
 		  ]
 	    return (
 	        <Tab panes={panes} />
@@ -115,4 +132,4 @@ class Participants extends Component {
 	}
 }
 
-export default translate(['api-gateway'])(Participants)
+export default translate(['convocation', 'api-gateway'])(Participants)

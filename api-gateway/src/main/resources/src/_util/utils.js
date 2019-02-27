@@ -46,7 +46,7 @@ const customFetch = async (URL, options) => {
             }
             break
         default:
-            return errorResponse
+            throw errorResponse
         }
     }
 }

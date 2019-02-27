@@ -2,8 +2,6 @@ package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -28,6 +26,7 @@ public class Attachment {
     @JsonView(Views.ConvocationInternal.class)
     private String filename;
 
+    @JsonIgnore
     private long size;
 
     @JsonIgnore
@@ -36,7 +35,7 @@ public class Attachment {
     @JsonIgnore
     private byte[] content;
 
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonIgnore
     private LocalDateTime date;
 
     @JsonView(Views.ConvocationInternal.class)

@@ -1,5 +1,6 @@
 package fr.sictiam.stela.convocationservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
@@ -13,8 +14,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
 import java.time.LocalDateTime;
 
@@ -28,12 +29,13 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
     private String uuid;
 
     @ManyToOne
-    @JsonView(Views.ConvocationInternal.class)
+    @JoinColumn(name = "convocation_uuid")
+    @JsonIgnore
     private Convocation convocation;
 
     @Enumerated(EnumType.STRING)
     @JsonView(Views.Convocation.class)
-    private StatusType status;
+    private HistoryType type;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonView(Views.Convocation.class)
@@ -43,38 +45,18 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
     @JsonView(Views.Convocation.class)
     private String message;
 
-    @OneToOne
-    @JsonView(Views.Convocation.class)
-    private Attachment attachment;
-
     public ConvocationHistory() {
     }
 
-    public ConvocationHistory(Convocation convocation, StatusType status) {
+    public ConvocationHistory(Convocation convocation, HistoryType type) {
+        this(convocation, type, "");
+    }
+
+    public ConvocationHistory(Convocation convocation, HistoryType type, String message) {
         this.convocation = convocation;
-        this.status = status;
+        this.type = type;
+        this.message = message;
         date = LocalDateTime.now();
-    }
-
-    public ConvocationHistory(Convocation convocation, StatusType status, LocalDateTime date, String message) {
-        this.convocation = convocation;
-        this.status = status;
-        this.date = date;
-        this.message = message;
-    }
-
-    public ConvocationHistory(Convocation convocation, StatusType status, LocalDateTime date, byte[] file, String fileName) {
-        this.convocation = convocation;
-        this.status = status;
-        this.date = date;
-    }
-
-    public ConvocationHistory(Convocation convocation, StatusType status, LocalDateTime date, byte[] file, String fileName,
-            String message) {
-        this.convocation = convocation;
-        this.status = status;
-        this.date = date;
-        this.message = message;
     }
 
     public String getUuid() {
@@ -89,8 +71,8 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
         return date;
     }
 
-    public StatusType getStatus() {
-        return status;
+    public HistoryType getType() {
+        return type;
     }
 
     public String getMessage() {
@@ -101,20 +83,11 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
         this.message = message;
     }
 
-    public Attachment getAttachment() {
-        return attachment;
-    }
-
-    public void setAttachment(Attachment attachment) {
-        this.attachment = attachment;
-    }
-
-
     @Override
     public String toString() {
         return "ConvocationHistory{" + "uuid='" + uuid + '\'' + ", convocationUuid='" + convocation.getUuid() + '\'' + ", " +
-                "status="
-                + status + ", date=" + date + ", message='" + message + '\'' + '}';
+                "type="
+                + type + ", date=" + date + ", message='" + message + '\'' + '}';
     }
 
     @Override public int compareTo(@NotNull ConvocationHistory convocationHistory) {

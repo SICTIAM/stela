@@ -24,7 +24,7 @@ class InformationBlockConvocation extends Component {
 	                    </Grid.Column>
 	                    <Grid.Column>
 	                        <Field htmlFor="assemblyType" label={t('convocation.fields.assembly_type')}>
-	                            <FieldValue id="assemblyType">{convocation.assemblyType && convocation.assemblyType.name}</FieldValue>
+	                            <FieldValue id="assemblyType">{convocation.assemblyType && convocation.assemblyType.name ? convocation.assemblyType.name : convocation.assemblyType}</FieldValue>
 	                        </Field>
 	                    </Grid.Column>
 	                	<Grid.Column>

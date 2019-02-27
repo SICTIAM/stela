@@ -5,20 +5,20 @@ import java.util.List;
 
 public class Notification {
 
-    private StatusType statusType;
+    private HistoryType historyType;
     private boolean deactivatable;
     private boolean defaultValue;
 
-    public static List<Notification> notifications = Arrays.asList(new Notification(StatusType.SENT, false, true));
+    public static List<Notification> notifications = Arrays.asList(new Notification(HistoryType.SENT, false, true));
 
-    private Notification(StatusType statusType, boolean deactivatable, boolean defaultValue) {
-        this.statusType = statusType;
+    private Notification(HistoryType statusType, boolean deactivatable, boolean defaultValue) {
+        historyType = statusType;
         this.deactivatable = deactivatable;
         this.defaultValue = defaultValue;
     }
 
-    public StatusType getStatusType() {
-        return statusType;
+    public HistoryType getHistoryType() {
+        return historyType;
     }
 
     public boolean isDeactivatable() {
