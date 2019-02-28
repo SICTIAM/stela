@@ -77,14 +77,14 @@ export default class MetricsSegment extends Component {
                 <Segment>
                     <Grid>
                         { isDataPresent &&
-                            <Grid.Row>
-                                <Grid.Column width={4} verticalAlign={'middle'} textAlign={'center'}>
+                            <Grid.Row centered>
+                                <Grid.Column computer={4} mobile={8} verticalAlign={'middle'} textAlign={'center'}>
                                     <ChartDoughnut
                                         labels={doughnutLabels}
                                         datasets={doughnutDatasets}
                                         displayLegends={false}/>
                                 </Grid.Column>
-                                <Grid.Column width={12} verticalAlign={'middle'}>
+                                <Grid.Column computer={12} mobile={16} verticalAlign={'middle'}>
                                     <ChartLine height={100} width={250} datasets={chartDatasets} min={period.min} max={period.max} displayLegends={false}/>
                                 </Grid.Column>
                             </Grid.Row>
