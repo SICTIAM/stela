@@ -49,7 +49,7 @@ public class WebSecurityConfig extends OasisSecurityConfiguration {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(oasisAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
-                    .regexMatchers("/api/convocation.*\\?token=\\w+.*").permitAll()
+                    .regexMatchers("/api/convocation.*(\\?|&)token=\\w+.*").permitAll()
                     .antMatchers("/api/pes/sesile/signature-hook/**").permitAll()
                     .antMatchers("/api/acte/public/**").permitAll()
                     .antMatchers("/api/admin/instance/**").permitAll()
