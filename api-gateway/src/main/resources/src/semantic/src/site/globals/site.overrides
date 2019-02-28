@@ -30,3 +30,6 @@ p.red {
 p.green {
     color: @green
 }
+p.warning {
+    color: @orange
+}

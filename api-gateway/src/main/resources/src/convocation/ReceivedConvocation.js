@@ -218,7 +218,7 @@ class ReceivedConvocation extends Component {
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
 	                                        <FieldValue id='procuration'>
-	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.procuration.uuid}`} text={this.state.convocation.procuration.filename} />
+	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.procuration.uuid}`} text={t('convocation.page.download_procuration')} />
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
@@ -258,6 +258,9 @@ class ReceivedConvocation extends Component {
 	                    </FormFieldInline>
 	                    {this.state.displayListParticipantsSubstituted && (
 	                        <div>
+	                            {this.state.convocation.procuration && (
+	                                <p className='warning text-bold'>{t('convocation.page.print_and_complete_procuration')} <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.procuration.uuid}`} text={t('convocation.page.download_procuration')} /></p>
+	                            )}
 	                            <p className='text-bold mb-0'>{t('convocation.page.select_user_for_substituted')}</p>
 	                            <p className='text-muted'>{t('convocation.page.information_message_substituted')}</p>
 	                            <Grid>
