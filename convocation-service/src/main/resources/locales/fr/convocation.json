@@ -59,7 +59,9 @@
       "not_presents": "Absents",
       "substitution": "Procurations",
       "substitution_of": "donne procuration à",
-      "cancel_convocation": "Êtes-vous sûr(e) de vouloir annuler la convocation ?"
+      "cancel_convocation": "Êtes-vous sûr(e) de vouloir annuler la convocation ?",
+      "print_and_complete_procuration": "Pensez à imprimer et compléter la procuration pour qu'elle soit valide",
+      "download_procuration": "Téléchargez la procuration"
     },
     "new": {
       "display": "Visualiser",
