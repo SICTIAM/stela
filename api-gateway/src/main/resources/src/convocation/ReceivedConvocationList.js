@@ -11,10 +11,9 @@ import {
     updateItemPerPage,
     handlePageClick,
     sortTable,
-    checkStatus,
     convertDateBackFormatToUIFormat
 } from '../_util/utils'
-import { notifications } from '../_util/Notifications'
+import ConvocationService from '../_util/convocation-service'
 
 import StelaTable from '../_components/StelaTable'
 import Breadcrumb from '../_components/Breadcrumb'
@@ -48,40 +47,24 @@ class ReceivedConvocation extends Component {
 	    assemblyTypes: []
 	}
 
-	componentDidMount() {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	componentDidMount = async() => {
+	    this._convocationService = new ConvocationService()
 
 	    const itemPerPage = localStorage.getItem('itemPerPage')
 	    if (!itemPerPage) {
 	        localStorage.setItem('itemPerPage', 10)
-	        this.loadData()
-	    }
-	    else this.setState({ limit: 10 }, this.loadData)
+	        await this.loadData()
 
-	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then(json => this.setState({assemblyTypes: json.map(item => { return {text: item.name, uuid: item.uuid}})}))
-	        .catch(response => {
-	            response.json().then(json => {
-	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	            })
-	        })
+	    }
+	    else this.setState({ limit: 10 }, await this.loadData)
+	    const assemblyTypesResponse = await this._convocationService.getAllAssemblyType(this.context, this.props.location.search)
+	    this.setState({assemblyTypes: assemblyTypesResponse.map(item => { return {text: item.name, uuid: item.uuid}})})
 	}
 	/** Load data list */
-	loadData = () => {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
-	    const data = this.getSearchData()
-
-	    _fetchWithAuthzHandling({ url: '/api/convocation/received', query: data, method: 'GET' })
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then((response) => this.setState({receivedConvocation: response.results, totalCount: response.totalCount}))
-	        .catch(response => {
-	            response.json().then(json => {
-	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	            })
-	        })
+	loadData = async () => {
+	    const search = this.getSearchData()
+	    const convocationsResponse = await this._convocationService.getReceivedConvocationList(this.context, search, this.props.location.search)
+	    this.setState({receivedConvocation: convocationsResponse.results, totalCount: convocationsResponse.totalCount})
 	}
 	/** Search Function */
 	getSearchData = () => {

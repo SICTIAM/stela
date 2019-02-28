@@ -6,8 +6,9 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 
 import { withAuthContext } from '../Auth'
-import { getLocalAuthoritySlug, checkStatus } from '../_util/utils'
+import { getLocalAuthoritySlug } from '../_util/utils'
 import { notifications } from '../_util/Notifications'
+import ConvocationService from '../_util/convocation-service'
 
 import { Page, Field, FieldValue, FormFieldInline, LinkFile } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
@@ -47,54 +48,23 @@ class ReceivedConvocation extends Component {
 	    }
 	}
 
-	componentDidMount() {
-	    this.fetchConvocation()
+	componentDidMount = async() => {
+	    this._convocationService = new ConvocationService()
+	    await this.fetchConvocation()
 	}
 
-	fetchConvocation = () => {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	fetchConvocation = async() => {
 	    const uuid = this.props.uuid
-	    _fetchWithAuthzHandling({ url: `/api/convocation/received/${uuid}`, method: 'GET' })
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then(json => {
-	            if(json.response === 'SUBSTITUTED') {
-	                this.setState({displayListParticipantsSubstituted: true})
-	            }
-	            this.setState({convocation: json})
-	        })
-	        .catch(response => {
-	            response.json().then(json => {
-	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	            })
-	        })
-	}
-	saveAdditionnalQuestionResponse = (url) => {
-	    const { _fetchWithAuthzHandling, _addNotification, t } = this.context
-
-	    if(url) {
-	        _fetchWithAuthzHandling({url: url, method: 'PUT', context: this.props.authContext})
-	        .then(checkStatus)
-	        .then(() => {
-	            _addNotification(notifications.convocation.reponseSent)
-	        })
-	        .catch((error) => {
-	            if(error.body) {
-	            	error.text().then(text => {
-	            		_addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
-	            	})
-	            } else {
-	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.${error.status}`))
-	            }
-	            this.fetchConvocation()
-	        })
+	    const convocationResponse = await this._convocationService.getReceivedConvocation(this.context, uuid, this.props.location.search)
+	    if(convocationResponse.response === 'SUBSTITUTED') {
+	        this.setState({displayListParticipantsSubstituted: true})
 	    }
-
+	    this.setState({convocation: convocationResponse})
 	}
 
-	handleChangeRadio = (e, value, field, question_uuid) => {
+	handleChangeRadio = async (e, value, field, question_uuid) => {
+	    const { _addNotification } = this.context
 	    const { convocation } = this.state
-	    var url = ''
 	    /*
 			response: for presence or not
 			additional_questions: for additional questions responses. field name -> questions (contains questions list and answer)
@@ -105,25 +75,27 @@ class ReceivedConvocation extends Component {
 	            return question.uuid === question_uuid
 	        })
 	        convocation.questions[questionIndex].response = value === 'true'
-	        url = `/api/convocation/received/${this.props.uuid}/question/${question_uuid}/${value}`
+	        await this._convocationService.saveAdditionnalQuestionResponse(this.context, this.props.uuid, value, question_uuid, this.props.location.search)
+	        _addNotification(notifications.convocation.reponseSent)
 	        break
 	    case 'response':
 	        convocation.response = value
 	        if(value !== 'SUBSTITUTED') {
-	            url = `/api/convocation/received/${this.props.uuid}/${value}`
-	            this.setState({displayListParticipantsSubstituted: false})
+	            await this._convocationService.savePresentResponse(this.context, this.props.uuid, {response: value}, this.props.location.search)
+	            this.setState({displayListParticipantsSubstituted: false, substitute: null})
+	            _addNotification(notifications.convocation.reponseSent)
 	        } else {
 	            this.setState({displayListParticipantsSubstituted: true})
 	        }
 	        break
 	    }
-	    this.saveAdditionnalQuestionResponse(url)
 	    this.setState({convocation})
 	}
 
-	onSelectedUser = (userUuid) => {
-	    var url = `/api/convocation/received/${this.props.uuid}/SUBSTITUTED/${userUuid}`
-	    this.saveAdditionnalQuestionResponse(url)
+	onSelectedUser = async (userUuid) => {
+	    const { _addNotification } = this.context
+	    await this._convocationService.savePresentResponse(this.context, this.props.uuid, {response: 'SUBSTITUTED', userUuid: userUuid}, this.props.location.search)
+	    _addNotification(notifications.convocation.reponseSent)
 	}
 
 	negativeResolver = (recipients) => {
@@ -136,19 +108,30 @@ class ReceivedConvocation extends Component {
 
 	render() {
 	    const { t } = this.context
+	    const { convocation } = this.state
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const token = this._convocationService && this._convocationService.getTokenInUrl(this.props.location.search)
 	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.convocation.annexes && this.state.convocation.annexes.length > 3 ? this.state.convocation.annexes.slice(0,3) : this.state.convocation.annexes
 	    const annexes = annexesToDisplay.map(annexe => {
+	        const url = token ? `/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true&token=${token.token}`:`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true`
 	        return (
 	            <div key={`div_${this.state.convocation.uuid}_${annexe.uuid}`}>
 	                <LinkFile
-	                    url={`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true`}
+	                    url={url}
 	                    key={`${this.state.convocation.uuid}_${annexe.uuid}`}
 	                    text={annexe.filename}/>
 	            </div>
 
 	        )
 	    })
+	    let urlDocument = null
+	    if(convocation.attachment) {
+	        urlDocument = token ? `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true`
+	    }
+	    let urlProcuration = null
+	    if(convocation.procuration) {
+	        urlProcuration = token && convocation && convocation.procuration && convocation.procuration.uuid ? `/api/convocation/${convocation.uuid}/file/${this.state.convocation.procuration.uuid}?token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.procuration.uuid}`
+	    }
 
 	    const metaData = [
 	        { property: 'uuid', displayed: false, searchable: false },
@@ -188,7 +171,7 @@ class ReceivedConvocation extends Component {
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
 	                                        <FieldValue id="document">
-	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.attachment.uuid}?stamped=true`} text={this.state.convocation.attachment.filename} />
+	                                            <LinkFile url={urlDocument} text={this.state.convocation.attachment.filename} />
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
@@ -218,7 +201,7 @@ class ReceivedConvocation extends Component {
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
 	                                        <FieldValue id='procuration'>
-	                                            <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.procuration.uuid}`} text={t('convocation.page.download_procuration')} />
+	                                            <LinkFile url={urlProcuration} text={t('convocation.page.download_procuration')} />
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
