@@ -31,6 +31,8 @@ public class ReceivedConvocationUI {
 
     protected RecipientUI substitute;
 
+    protected boolean guest;
+
     public ReceivedConvocationUI(Convocation convocation, Recipient recipient) {
         uuid = convocation.getUuid();
         subject = convocation.getSubject();
@@ -45,6 +47,7 @@ public class ReceivedConvocationUI {
         opened = opt.isPresent() && opt.get().isOpened();
         substitute = opt.isPresent() && opt.get().getResponseType() == ResponseType.SUBSTITUTED ?
                 new RecipientUI(opt.get().getSubstituteRecipient()) : null;
+        guest = opt.isPresent() && opt.get().isGuest();
 
         cancelled = convocation.isCancelled();
         cancellationDate = convocation.getCancellationDate();
@@ -89,5 +92,9 @@ public class ReceivedConvocationUI {
 
     public RecipientUI getSubstitute() {
         return substitute;
+    }
+
+    public boolean isGuest() {
+        return guest;
     }
 }

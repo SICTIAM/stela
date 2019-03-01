@@ -44,7 +44,8 @@ class ReceivedConvocation extends Component {
 	        cancelled: false,
 	        cancellationDate: '',
 	        procuration: null,
-	        substitute: null
+	        substitute: null,
+	        guest: true
 	    }
 	}
 
@@ -197,7 +198,7 @@ class ReceivedConvocation extends Component {
 	                                    </Field>
 	                                </Grid.Column>
 	                            )}
-	                            {this.state.convocation.procuration && (
+	                            {this.state.convocation.procuration && !this.state.convocation.guest && this.state.convocation.useProcuration && (
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
 	                                        <FieldValue id='procuration'>
@@ -230,14 +231,16 @@ class ReceivedConvocation extends Component {
 	                            disabled={this.state.convocation.cancelled}
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
-	                        <Radio
-	                            label={t('convocation.page.substituted')}
-	                            name='presentQuestion'
-	                            value='SUBSTITUTED'
-	                            checked={this.state.convocation.response === 'SUBSTITUTED'}
-	                            disabled={this.state.convocation.cancelled}
-	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
-	                        ></Radio>
+	                        {!this.state.convocation.guest && this.state.convocation.useProcuration && (
+	                            <Radio
+	                                label={t('convocation.page.substituted')}
+	                                name='presentQuestion'
+	                                value='SUBSTITUTED'
+	                                checked={this.state.convocation.response === 'SUBSTITUTED'}
+	                                disabled={this.state.convocation.cancelled}
+	                                onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
+	                        	></Radio>
+	                        )}
 	                    </FormFieldInline>
 	                    {this.state.displayListParticipantsSubstituted && (
 	                        <div>

@@ -14,7 +14,8 @@
       "object": "Objet",
       "object_placeholder": "L'objet de la convocation",
       "comment": "Commentaires",
-      "recipient": "Destinataire",
+      "recipient": "Destinataires",
+      "guest": "Invités",
       "default_procuration": "Modèle de procuration par défaut",
       "custom_procuration": "Modèle de procuration personnalisé",
       "convocation_document": "Document de la convocation",
@@ -70,12 +71,15 @@
       "delete_all_recipients": "Supprimer tous les destinataires",
       "view_more_recipients": "Voir les {{number}} destinataires",
       "view_less_recipients": "Voir moins de destinataires",
+      "view_more_guests": "Voir les {{number}} invités",
+      "view_less_guests": "Voir moins d'invités",
       "no_recipient": "Aucun destinataire",
       "choose_from_the_list": "Choisir dans la liste",
       "free_email": "Email libre",
       "delayTooShort": "Le délai de convocation est inférieur à {{number}} jours. Êtes-vous sûr(e) de vouloir confirmer ?",
       "show_all_annexes": "Voir les {{number}} annexes",
-      "show_less_annexes": "Voir moins d'annexes"
+      "show_less_annexes": "Voir moins d'annexes",
+      "delete_all_guests": "Supprimer tous les invités"
     },
     "stamp": {
       "title": "Convocation envoyée le\n${date} à ${time}"

@@ -16,6 +16,7 @@ import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileExcept
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationNotAvailableException;
 import fr.sictiam.stela.convocationservice.model.exception.MissingParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
+import fr.sictiam.stela.convocationservice.model.exception.ProcurationNotPermittedException;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
 import fr.sictiam.stela.convocationservice.service.util.PdfGeneratorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -139,8 +140,8 @@ public class ConvocationService {
     private void createRecipientResponse(Convocation convocation) {
         convocation.getRecipientResponses().addAll(
                 convocation.getRecipients().stream().map(recipient -> {
-                    RecipientResponse recipientResponse = new RecipientResponse(recipient);
-                    recipientResponse.setConvocation(convocation);
+                    RecipientResponse recipientResponse = new RecipientResponse(recipient, convocation);
+                    recipientResponse.setGuest(recipient.isGuest());
                     recipientResponseRepository.save(recipientResponse);
                     return recipientResponse;
                 }).collect(Collectors.toSet()));
@@ -294,14 +295,25 @@ public class ConvocationService {
 
         checkConvocationValidity(convocation);
 
-        Optional<RecipientResponse> recipientResponse =
+        // Search recipient response object from recipient in convocation response list
+        Optional<RecipientResponse> opt =
                 convocation.getRecipientResponses().stream().filter(rr -> rr.getRecipient().equals(recipient)).findFirst();
-        if (!recipientResponse.isPresent()) {
+        if (!opt.isPresent()) {
             LOGGER.error("Recipient {} not found in convocation {}", recipient.getUuid(), convocation.getUuid());
             throw new NotFoundException("Recipient " + recipient.getUuid() + " not found in convocation " + convocation.getUuid());
         }
 
+        RecipientResponse recipientResponse = opt.get();
+
         if (responseType == ResponseType.SUBSTITUTED) {
+
+            // If recipient is a guest, he can't give a procuration to anyone else
+            if (recipientResponse.isGuest()) {
+                LOGGER.error("Recipient {} is a guest for convocation {}, procuration not allowed",
+                        recipient.getUuid(), convocation.getUuid());
+                throw new ProcurationNotPermittedException();
+            }
+
             if (substituteUuid == null) {
                 LOGGER.error("Recipient {} wants to give procuration but does not provide his substitute",
                         recipient.getUuid());
@@ -315,14 +327,20 @@ public class ConvocationService {
                         convocation.getUuid());
                 throw new NotFoundException("Recipient " + recipient.getUuid() + " not found in convocation " + convocation.getUuid() + " for procuration");
             } else {
-                recipientResponse.get().setSubstituteRecipient(substituteResponse.get().getRecipient());
+                // if substitute is a guest, he can't receive a procuration
+                if (substituteResponse.get().isGuest()) {
+                    LOGGER.error("Procuration given to a guest ({}) for convocation {}. Not permitted",
+                            substituteResponse.get().getRecipient().getUuid(), convocation.getUuid());
+                    throw new ProcurationNotPermittedException();
+                }
+                recipientResponse.setSubstituteRecipient(substituteResponse.get().getRecipient());
             }
         } else {
             // reset substitute if already set by a previous response
-            recipientResponse.get().setSubstituteRecipient(null);
+            recipientResponse.setSubstituteRecipient(null);
         }
 
-        recipientResponse.get().setResponseType(responseType);
+        recipientResponse.setResponseType(responseType);
         convocationRepository.save(convocation);
     }
 
