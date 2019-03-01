@@ -45,11 +45,11 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
         questions =
                 convocation.getQuestions().stream().map(question -> new QuestionUI(question, recipient)).collect(Collectors.toList());
-        
+
         recipients =
                 convocation.getRecipientResponses()
                         .stream()
-                        .filter(recipientResponse -> !recipientResponse.getRecipient().equals(recipient))
+                        .filter(recipientResponse -> !recipientResponse.getRecipient().equals(recipient) && !recipientResponse.isGuest())
                         .map(recipientResponse -> new RecipientResponseUI(recipientResponse))
                         .collect(Collectors.toList());
     }

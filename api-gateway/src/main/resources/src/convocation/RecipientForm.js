@@ -20,6 +20,7 @@ class RecipientForm extends Component {
 	    selectedUser: [],
 	    uuid: null,
 	    recipient: true,
+	    userToDisabled: []
 	}
 	state = {
 	    selectedUser: [],
@@ -37,7 +38,15 @@ class RecipientForm extends Component {
 	        .then(checkStatus)
 	        .then(response => response.json())
 	        .then(json => {
-	            this.setState({users: json})
+	                let users = json
+	                if(this.props.userToDisabled.length > 0) {
+	                    users = json.filter((user) => {
+	                        return !this.props.userToDisabled.some(userDisabled => {
+	                            return userDisabled.uuid === user.uuid
+	                        })
+	                    })
+	                }
+	            this.setState({users: users})
 	        })
 	    } else if(this.props.uuid && this.props.recipient){
 	        _fetchWithAuthzHandling({url: `/api/convocation/assembly-type/${this.props.uuid}/recipients`, method: 'GET'})

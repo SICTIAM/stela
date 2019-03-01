@@ -99,7 +99,11 @@ class ConvocationForm extends Component {
 	        delete parameters.uuid
 	        delete parameters.file
 	        delete parameters.annexes
-
+	        parameters.guests.forEach((guest) => {
+			   guest.guest = true
+			   parameters.recipients.push(guest)
+	        })
+	        delete parameters.guests
 	        parameters['assemblyType'] = {uuid: parameters.assemblyType}
 	        parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
 	        const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
@@ -216,9 +220,9 @@ class ConvocationForm extends Component {
 	    this.setState({fields})
 	    this.closeModal()
 	}
-	deleteRecipients = () => {
+	deleteUsers = (field) => {
 	    const fields = this.state.fields
-	    fields['recipients'] = []
+	    fields[field] = []
 	    this.setState({fields})
 	}
 	updateQuestions = (questions) => {
@@ -424,7 +428,7 @@ class ConvocationForm extends Component {
 	                                                <Button
 	                                                    type='button'
 	                                                    id={`${this.state.fields.uuid}_deleteRecipient`}
-	                                                    onClick={this.deleteRecipients}
+	                                                    onClick={() => this.deleteUsers('recipients')}
 	                                                    compact basic color='red'>{t('convocation.new.delete_all_recipients')}
 	                                                </Button>
 	                                            </Grid.Column>
@@ -436,6 +440,47 @@ class ConvocationForm extends Component {
 	                                        removable={false}
 	                                        viewMoreText={t('convocation.new.view_more_recipients', {number: this.state.fields.recipients.length})}
 	                                        viewLessText={t('convocation.new.view_less_recipients')}/>
+	                                </Grid.Column>
+	                            </Grid>
+	                        </Grid.Column>
+	                        <Grid.Column mobile='16' computer='16'>
+	                            <Grid>
+	                                <Grid.Column computer='16'>
+	                                    <FormField htmlFor={`${this.state.fields.uuid}_guest`}
+	                                        label={t('convocation.fields.guest')}>
+	                                        <Grid>
+	                                            <Grid.Column computer='8'>
+	                                                <Modal open={this.state.modalGuestOpened} trigger={<Button
+	                                                    onClick={() => this.setState({modalGuestOpened: true})}
+	                                                    type='button'
+	                                                    id={`${this.state.fields.uuid}_guest`}
+	                                                    compact basic primary>{t('convocation.new.edit_guest')}
+	                                                </Button>}>
+	                                                    <RecipientForm
+	                                                        onCloseModal={this.closeModal}
+	                                                        onAdded={(selectedUser) => this.addUsers(selectedUser, 'guests')}
+	                                                        userToDisabled={this.state.fields.recipients}
+	                                                        selectedUser={this.state.fields.guests}
+	                                                        uuid={this.state.fields.assemblyType.uuid}>
+	                                                    </RecipientForm>
+	                                                </Modal>
+	                                            </Grid.Column>
+	                                            <Grid.Column computer='8'>
+	                                                <Button
+	                                                    type='button'
+	                                                    id={`${this.state.fields.uuid}_deleteGuest`}
+	                                                    onClick={() => this.deleteUsers('guests')}
+	                                                    compact basic color='red'>{t('convocation.new.delete_all_guests')}
+	                                                </Button>
+	                                            </Grid.Column>
+	                                        </Grid>
+	                                    </FormField>
+	                                    <ChipsList
+	                                        list={this.state.fields.guests}
+	                                        labelText='email'
+	                                        removable={false}
+	                                        viewMoreText={t('convocation.new.view_more_guests', {number: this.state.fields.guests.length})}
+	                                        viewLessText={t('convocation.new.view_less_guests')}/>
 	                                </Grid.Column>
 	                            </Grid>
 	                        </Grid.Column>

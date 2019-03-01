@@ -49,7 +49,7 @@ public class Recipient implements Comparable<Recipient> {
     private Boolean active;
 
     @JsonView(Views.Public.class)
-    private Boolean additionalContact = false;
+    private Boolean guest = false;
 
     @JsonIgnore
     @JsonView(Views.RecipientPrivate.class)
@@ -156,12 +156,12 @@ public class Recipient implements Comparable<Recipient> {
         this.inactivityDate = inactivityDate;
     }
 
-    public Boolean getAdditionalContact() {
-        return additionalContact;
+    public Boolean isGuest() {
+        return guest;
     }
 
-    public void setAdditionalContact(Boolean additionalContact) {
-        this.additionalContact = additionalContact;
+    public void setGuest(Boolean guest) {
+        this.guest = guest;
     }
 
     @Override public String toString() {
@@ -172,7 +172,7 @@ public class Recipient implements Comparable<Recipient> {
                 ",\"email\": \"" + email + "\"" +
                 ",\"phoneNumber\": \"" + phoneNumber + "\"" +
                 ",\"active\": " + active +
-                ",\"additionalContact\": " + additionalContact +
+                ",\"guest\": " + guest +
                 '}';
     }
 

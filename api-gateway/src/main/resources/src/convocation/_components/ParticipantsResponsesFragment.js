@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Tab, Popup, Icon } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 
-class Participants extends Component {
+class ParticipantsResponsesFragment extends Component {
 	static contextTypes = {
 	    t: PropTypes.func
 	}
@@ -132,4 +132,4 @@ class Participants extends Component {
 	}
 }
 
-export default translate(['convocation', 'api-gateway'])(Participants)
+export default translate(['convocation', 'api-gateway'])(ParticipantsResponsesFragment)

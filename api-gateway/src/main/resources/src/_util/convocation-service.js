@@ -17,6 +17,19 @@ export default class ConvocationService {
 	    }
 	}
 
+	getSentConvocation = async (context, uuid) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    try {
+	        const response = await (await _fetchWithAuthzHandling({ url: `/api/convocation/${uuid}`, method: 'GET'})).json()
+	        return response
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
 	getReceivedConvocationList = async (context, search, paramsUrl) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = context
 	    const token = this.getTokenInUrl(paramsUrl)
@@ -77,6 +90,23 @@ export default class ConvocationService {
 	                _addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
 	            } else {
 	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.convocation.${error.status}`))
+	            }
+	        })
+	        throw error
+	    }
+	}
+
+	cancelConvocation = async (context, uuid) => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}/cancel`, method: 'PUT', context: context})
+	    } catch(error) {
+	        error.text().then(text => {
+	            if(text) {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
+	            } else {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.${error.status}`))
 	            }
 	        })
 	        throw error

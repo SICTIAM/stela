@@ -46,6 +46,9 @@ public class RecipientResponse implements Comparable<RecipientResponse> {
     @JsonView(Views.Public.class)
     private LocalDateTime openDate;
 
+    @JsonView(Views.Recipient.class)
+    private boolean guest = false;
+
     public RecipientResponse() {
     }
 
@@ -116,6 +119,14 @@ public class RecipientResponse implements Comparable<RecipientResponse> {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public boolean isGuest() {
+        return guest;
+    }
+
+    public void setGuest(boolean guest) {
+        this.guest = guest;
     }
 
     @Override public int compareTo(@NotNull RecipientResponse recipientResponse) {
