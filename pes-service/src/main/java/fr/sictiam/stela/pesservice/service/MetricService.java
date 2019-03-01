@@ -1,6 +1,6 @@
 package fr.sictiam.stela.pesservice.service;
 
-import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
+import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,11 +13,11 @@ import java.util.Map;
 @Service
 public class MetricService {
 
-    private final PesAllerRepository pesAllerRepository;
+    private final PesHistoryRepository pesHistoryRepository;
 
     @Autowired
-    public MetricService(PesAllerRepository pesAllerRepository) {
-        this.pesAllerRepository = pesAllerRepository;
+    public MetricService(PesHistoryRepository pesHistoryRepository) {
+        this.pesHistoryRepository = pesHistoryRepository;
     }
 
     public Map<String, Long> getNumberOfPes(LocalDateTime fromLocalDate, LocalDateTime toLocalDate, StatusType statusType) {
@@ -27,12 +27,12 @@ public class MetricService {
             for (StatusType type : StatusType.values()) {
                 listNumberPesByType.put(
                         type.name(),
-                        pesAllerRepository.countByCreationBetweenAndLastHistoryStatus(fromLocalDate, toLocalDate, type));
+                        pesHistoryRepository.countByDateBetweenAndStatus(fromLocalDate, toLocalDate, type));
             }
         } else {
             listNumberPesByType.put(
                     statusType.name(),
-                    pesAllerRepository.countByCreationBetweenAndLastHistoryStatus(fromLocalDate, toLocalDate, statusType));
+                    pesHistoryRepository.countByDateBetweenAndStatus(fromLocalDate, toLocalDate, statusType));
         }
         return listNumberPesByType;
     }
@@ -44,12 +44,12 @@ public class MetricService {
             for (StatusType type : StatusType.values()) {
                 listNumberPesByType.put(
                         type.name(),
-                        pesAllerRepository.countByCreationBetweenAndGroupByDay(sample, type.name(), fromLocalDate, toLocalDate));
+                        pesHistoryRepository.countByDateBetweenAndGroupBySample(sample, type.name(), fromLocalDate, toLocalDate));
             }
         } else {
             listNumberPesByType.put(
                     statusType.name(),
-                    pesAllerRepository.countByCreationBetweenAndGroupByDay(sample, statusType.name(), fromLocalDate, toLocalDate));
+                    pesHistoryRepository.countByDateBetweenAndGroupBySample(sample, statusType.name(), fromLocalDate, toLocalDate));
         }
         return listNumberPesByType;
     }
