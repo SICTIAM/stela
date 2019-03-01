@@ -82,7 +82,7 @@ class ReceivedConvocation extends Component {
 	    return !convocation.opened
 	}
 
-	negativeResolver = (convocation) => {
+	lineThroughResolver = (convocation) => {
 	    return convocation.cancelled
 	}
 
@@ -220,7 +220,7 @@ class ReceivedConvocation extends Component {
 	                    link={`/${localAuthoritySlug}/convocation/liste-recues/`}
 	                    linkProperty='uuid'
 	                    noDataMessage={t('convocation.list.no_received_convocation')}
-	                    negativeResolver={this.negativeResolver}
+	                    lineThroughResolver={this.lineThroughResolver}
 	                />
 	            </Segment>
 	        </Page>

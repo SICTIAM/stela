@@ -270,7 +270,7 @@ class StelaTable extends Component {
                                     <Table.Row active={this.state.checkboxes[row[this.props.keyProperty]]} key={row[this.props.keyProperty]}
                                         negative={this.props.negativeResolver ? this.props.negativeResolver(row) : false}
                                         positive={this.props.positiveResolver ? this.props.positiveResolver(row) : false }
-                                        className={this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : ''}>
+                                        className={(this.props.greyResolver && this.props.greyResolver(row) ? 'grey' : '') + (this.props.lineThroughResolver && this.props.lineThroughResolver(row) ? 'line-through' : '')}>
                                         {displayedColumns.map((displayedColumn, index) =>
                                             <Table.Cell
                                                 style={(this.props.link !== '' || this.props.click) ? { cursor: 'pointer' } : null}
