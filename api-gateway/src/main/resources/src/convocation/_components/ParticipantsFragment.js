@@ -80,7 +80,7 @@ class ParticipantsFragment extends Component {
                                     {(presents > 0) && (
                                         ', '
                                     )}
-                                    {t('convocation.page.numberSubsituted',{'number': procurations})}
+                                    {t('convocation.page.numberSubstituted',{'number': procurations})}
  	                            </Fragment>
  	                        )}
  	                        {absents > 0 && (
