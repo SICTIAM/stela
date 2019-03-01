@@ -75,6 +75,29 @@ const PublicRoute = ({ component: Component, ...rest }) => (
     )}
     />
 )
+const TokenRoute = ({component: Component, ...rest },
+    {isMenuOpened}) => (
+    <Route {...rest} render={props => (
+        <div>
+            <header>
+                <TopBar/>
+            </header>
+            <div className="wrapperContainer">
+                {isMenuOpened && (
+                    <Overlay />
+                )}
+                <aside>
+                    <MenuBar />
+                </aside>
+                <main>
+                    <Container className="mainContainer" id="content">
+                        <Component {...props} {...props.match.params} />
+                    </Container>
+                </main>
+            </div>
+        </div>
+    )}/>
+)
 const AuthRoute = ({ component: Component, menu: Menu, admin, allowedRights, certificate, certRequired = false, ...rest },
     { isMenuOpened } ) => (
     <AuthConsumer>
@@ -205,8 +228,8 @@ class AppRoute extends Component {
                 <AuthRoute path="/:localAuthoritySlug/pes/liste" {...params} allowedRights={['PES_DEPOSIT', 'PES_DISPLAY']} component={PesList} menu={MenuBar} />
                 <AuthRoute path="/:localAuthoritySlug/pes/nouveau" {...params} allowedRights={['PES_DEPOSIT']} component={NewPes} menu={MenuBar} certRequired />
                 <AuthRoute path="/:localAuthoritySlug/pes/statut" {...params} allowedRights={['PES_DISPLAY']}  component={PesMetrics} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocation} menu={MenuBar}/>
-                <AuthRoute path="/:localAuthoritySlug/convocation/liste-recues" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocationList} menu={MenuBar}/>
+                <TokenRoute path="/:localAuthoritySlug/convocation/liste-recues/:uuid" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocation} menu={MenuBar}/>
+                <TokenRoute path="/:localAuthoritySlug/convocation/liste-recues" {...params} allowedRights={['CONVOCATION_DISPLAY']} component={ReceivedConvocationList} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid/completer" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={CompleteSentConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees/:uuid" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocation} menu={MenuBar}/>
                 <AuthRoute path="/:localAuthoritySlug/convocation/liste-envoyees" {...params} allowedRights={['CONVOCATION_DEPOSIT']} component={SentConvocationList} menu={MenuBar}/>
