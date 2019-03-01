@@ -137,6 +137,10 @@ i.icon.xl-icon {
     color: #767676;
 }
 
+.line-through {
+    text-decoration: line-through;
+}
+
 /* button */
 .ui.basic.primary.button.link {
     box-shadow: none !important;
