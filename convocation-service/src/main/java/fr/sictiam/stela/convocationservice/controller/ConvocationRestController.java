@@ -20,6 +20,7 @@ import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.RecipientService;
 import fr.sictiam.stela.convocationservice.service.util.DocumentGenerator;
+import fr.sictiam.stela.convocationservice.service.util.DocumentGeneratorFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -281,10 +282,10 @@ public class ConvocationRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @PathVariable String uuid,
-            @PathVariable DocumentGenerator.Extension extension) {
+            @PathVariable DocumentGeneratorFactory.Extension extension) {
 
 
-        DocumentGenerator document = DocumentGenerator.of(extension);
+        DocumentGenerator document = DocumentGeneratorFactory.of(extension);
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
 
         byte[] content = document.generatePresenceList(convocation);
