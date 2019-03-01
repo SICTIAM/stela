@@ -423,7 +423,7 @@
       "title": "Comptes génériques",
       "empty": "Aucun compte générique",
       "delete_confirm": "Voulez-vous vraiment supprimer ce compte générique ?",
-      "keep_password": "Concerver le même mot de passe",
+      "keep_password": "Conserver le même mot de passe",
       "add_new": "Ajouter un nouveau compte",
       "new": {
         "title": "Compte générique",
