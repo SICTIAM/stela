@@ -582,7 +582,7 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                                       required={isBudgetActe}
+                                required={isBudgetActe}
                                 helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_annexes`}
