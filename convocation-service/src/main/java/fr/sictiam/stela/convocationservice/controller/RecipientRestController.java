@@ -85,13 +85,14 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(name = "force", defaultValue = "false") Boolean force,
             @RequestBody Recipient recipient) {
 
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        recipient = recipientService.create(recipient, currentLocalAuthUuid);
+        recipient = recipientService.create(recipient, currentLocalAuthUuid, force);
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }
 
@@ -102,13 +103,14 @@ public class RecipientRestController {
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam(name = "force", defaultValue = "false") Boolean force,
             @RequestBody Recipient recipientParams) {
 
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        Recipient recipient = recipientService.update(uuid, currentLocalAuthUuid, recipientParams);
+        Recipient recipient = recipientService.update(uuid, currentLocalAuthUuid, recipientParams, force);
 
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }

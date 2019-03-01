@@ -266,6 +266,11 @@
           "status_updated": "Le statut a bien été mis à jour.",
           "assembly_type_created": "Le type d'assemblée a été créé avec succès.",
           "assembly_type_updated": "Le type d'assemblée a été mis à jour avec succès"
+        },
+        "email_validation": {
+          "in_progress": "L'email est en cours de validation",
+          "success": "L'email est validé.",
+          "error": "L'email ne semble pas valide, êtes-vous sûr(e) de vouloir l'ajouter ?"
         }
       }
     },
