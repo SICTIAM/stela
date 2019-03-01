@@ -40,7 +40,7 @@
       "absent": "Absent",
       "numberAbsents": "{{number}} absent(s)",
       "substituted": "Procuration",
-      "numberSubsituted": "{{number}} procuration(s) a/ont été donnée(s)",
+      "numberSubstituted": "{{number}} procuration(s) a(ont) été donnée(s)",
       "numberNoAnswer": "{{number}} n'a/ont pas répondu",
       "history": "Historique",
       "group_sender": "Groupe émetteur",
