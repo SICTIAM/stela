@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Accordion, Icon, Segment, Grid, Button, Header, Form, Dropdown } from 'semantic-ui-react'
+import { Accordion, Icon, Segment, Grid, Button, Header, Form, Dropdown, Popup } from 'semantic-ui-react'
 import moment from 'moment'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
@@ -10,9 +10,9 @@ import history from '../_util/history'
 import { notifications } from '../_util/Notifications'
 import { FormField, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import { checkStatus, getLocalAuthoritySlug, toUniqueArray } from '../_util/utils'
+import {bytesToSize, getLocalAuthoritySlug, toUniqueArray} from '../_util/utils'
 import NewActeForm from './NewActeForm'
-import { natures } from '../_util/constants'
+import {maxArchiveSize, natures} from '../_util/constants'
 import { withAuthContext } from '../Auth'
 
 class NewActeBatchedForm extends Component {
@@ -33,6 +33,7 @@ class NewActeBatchedForm extends Component {
             nature: '',
             groupUuid: null
         },
+        errors:{},
         groups: [],
         draftStatus: null,
         draftValid: false,
@@ -40,7 +41,8 @@ class NewActeBatchedForm extends Component {
         formValid: {},
         formErrors: {},
         isAllFormValid: false,
-        shouldUnmount: true
+        shouldUnmount: true,
+        totalActesSize: {}
     }
     validationRules = {
         nature: 'required',
@@ -50,7 +52,6 @@ class NewActeBatchedForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = this.props.uuid ? '/api/acte/drafts/' + this.props.uuid : '/api/acte/draft/batch'
         _fetchWithAuthzHandling({ url })
-            .then(checkStatus)
             .then(response => response.json())
             .then(json =>
                 this.loadDraft(json, () => {
@@ -65,7 +66,6 @@ class NewActeBatchedForm extends Component {
                 })
             })
         _fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
-            .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ groups: json }))
             .catch(response => {
@@ -101,7 +101,6 @@ class NewActeBatchedForm extends Component {
     addBatchedActe = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/newActe`, method: 'POST', context: this.props.authContext })
-            .then(checkStatus)
             .then(response => response.json())
             .then(json => {
                 const { fields, formValid } = this.state
@@ -118,14 +117,14 @@ class NewActeBatchedForm extends Component {
     deleteBatchedActe = (uuid) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.props.authContext })
-            .then(checkStatus)
             .then(() => {
-                const { fields, statuses, formValid, formErrors } = this.state
+                const { fields, statuses, formValid, formErrors, totalActesSize } = this.state
                 fields.actes = fields.actes.filter(acte => acte.uuid !== uuid)
                 delete statuses[uuid]
                 delete formValid[uuid]
                 delete formErrors[uuid]
-                this.setState({ fields, statuses, formValid, formErrors }, this.updateAllFormValid)
+                delete totalActesSize[uuid]
+                this.setState({ fields, statuses, formValid, formErrors, totalActesSize }, this.updateAllFormValid)
             })
             .catch(response => {
                 response.json().then(json => {
@@ -136,7 +135,6 @@ class NewActeBatchedForm extends Component {
     removeAttachmentTypes = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/types`, method: 'DELETE', context: this.props.authContext })
-            .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus()))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -163,7 +161,8 @@ class NewActeBatchedForm extends Component {
             nature: this.state.fields.nature,
             decision: this.state.fields.decision,
         }
-        const validation = new Validator(data, this.validationRules)
+        const validationRules = this.validationRules
+        const validation = new Validator(data, validationRules)
         const draftValid = validation.passes()
         this.setState({ draftValid }, this.updateAllFormValid)
     }, 500)
@@ -174,7 +173,6 @@ class NewActeBatchedForm extends Component {
         const headers = { 'Content-Type': 'application/json' }
         const url= `/api/acte/drafts/${draftData.uuid}`
         _fetchWithAuthzHandling({ url, body: JSON.stringify(draftData), headers: headers, method: 'PATCH', context: this.props.authContext })
-            .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -224,7 +222,6 @@ class NewActeBatchedForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'POST', context: this.props.authContext })
-            .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.setState({ shouldUnmount: false }, () => {
@@ -242,7 +239,6 @@ class NewActeBatchedForm extends Component {
         const { fields } = this.state
         const regex = /brouillons/g
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.props.authContext })
-            .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.setState({ shouldUnmount: false }, () => {
@@ -258,6 +254,24 @@ class NewActeBatchedForm extends Component {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
             })
     }
+
+    updateErrors = (acteUuid, newErrors) => {
+        const {errors} = this.state
+        errors[acteUuid] = newErrors
+        this.setState({errors})
+    }
+
+    updateActesSizes = (acteUuid, size) => {
+        const {totalActesSize} = this.state
+        totalActesSize[acteUuid] = size
+        this.setState({totalActesSize})
+    }
+
+    _sumActesSize = () => {
+        const {totalActesSize} = this.state
+        return Object.keys(totalActesSize).reduce((accumulator, key) => accumulator + totalActesSize[key], 0)
+    }
+
     render() {
         const { t } = this.context
         const isFormSaving = this.props.status === 'saving'
@@ -278,11 +292,13 @@ class NewActeBatchedForm extends Component {
                 key={acte.uuid}
                 acte={acte}
                 formValid={this.state.formValid[acte.uuid]}
+                errors={this.state.errors[acte.uuid]}
                 isActive={this.state.active === acte.uuid}
                 handleClick={this.handleClick}
                 labelDelete={t('acte.new.batch_title_placeholder')}
                 titlePlaceholder={t('acte.new.batch_title_placeholder')}
-                deleteBatchedActe={this.deleteBatchedActe}>
+                deleteBatchedActe={this.deleteBatchedActe}
+                size={this.state.totalActesSize[acte.uuid]}>
                 <NewActeForm
                     uuid={acte.uuid}
                     draftUuid={draftUuid}
@@ -296,6 +312,8 @@ class NewActeBatchedForm extends Component {
                     setFormValidForId={this.setFormValidForId}
                     setField={this.setField}
                     shouldUnmount={this.state.shouldUnmount}
+                    callBackErrorMessages={(errors) => this.updateErrors(acte.uuid, errors)}
+                    callBackActeFilesSize={(size) => this.updateActesSizes(acte.uuid, size)}
                 />
             </WrappedActeForm>
         )
@@ -311,9 +329,10 @@ class NewActeBatchedForm extends Component {
                     <Form>
                         <Grid columns={2} style={{ marginBottom: 'auto' }}>
                             <Grid.Column>
-                                <FormField htmlFor={'decision'} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
+                                <FormField htmlFor={'decision'} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')} required>
                                     <InputValidation id={'decision'}
                                         type='date'
+                                        placeholder={t('acte:acte.fields.date')}
                                         value={this.state.fields.decision}
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
@@ -322,7 +341,7 @@ class NewActeBatchedForm extends Component {
                                 </FormField>
                             </Grid.Column>
                             <Grid.Column>
-                                <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')} helpText={t('acte.help_text.group')}>
+                                <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')} helpText={t('acte.help_text.group')} required>
                                     <Dropdown id='groupUuid'
                                         value={groupOptionValue}
                                         onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
@@ -331,7 +350,7 @@ class NewActeBatchedForm extends Component {
                                 </FormField>
                             </Grid.Column>
                         </Grid>
-                        <FormField htmlFor={'nature'} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')}>
+                        <FormField htmlFor={'nature'} label={t('acte.fields.nature')} helpText={t('acte.help_text.nature')} required>
                             <InputValidation id={'nature'}
                                 type='dropdown'
                                 value={this.state.fields.nature}
@@ -349,6 +368,11 @@ class NewActeBatchedForm extends Component {
                     </Button>
                 </Accordion>
                 <div style={{ textAlign: 'right' }}>
+                    {(this._sumActesSize()) > 0  && (
+                        <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
+                            {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumActesSize())} / {bytesToSize(maxArchiveSize)}
+                        </label>
+                    )}
                     {this.state.fields.uuid && (
                         <Button style={{ marginRight: '1em' }} onClick={this.deleteDraft} basic color='red'
                             disabled={isFormSaving} loading={isFormSaving}>
@@ -373,7 +397,11 @@ const styles = {
     overflow: {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
-        textOverflow: 'ellipsis'
+        textOverflow: 'ellipsis',
+        fontWeight: 800
+    },
+    textNumber:{
+        fontWeight: 800
     },
     centered: {
         display: 'flex',
@@ -381,32 +409,41 @@ const styles = {
     }
 }
 
-const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, formValid, labelDelete }) =>
+const WrappedActeForm = ({ children, isActive, handleClick, acte, deleteBatchedActe, titlePlaceholder, errors, formValid, labelDelete, size}) =>
     <Segment style={{ paddingTop: '0', paddingBottom: '0' }}>
         <Accordion.Title active={isActive}>
-            <Grid>
-                <Grid.Column style={styles.centered} width={1} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small'><Icon name='dropdown' /></Header>
-                </Grid.Column>
-                <Grid.Column style={styles.centered} width={3} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small' style={styles.overflow}>
-                        {!acte.number && !acte.objet ? titlePlaceholder
-                            : acte.number ? `N° ${acte.number}` : ''}
-                    </Header>
-                </Grid.Column>
-                <Grid.Column style={styles.centered} width={10} onClick={() => handleClick(acte.uuid)}>
-                    <Header size='small' style={styles.overflow}>
-                        {acte.objet}
-                    </Header>
-                </Grid.Column>
-                <Grid.Column width={1} style={styles.centered}>
-                    {formValid ? <Icon color='green' name='checkmark' size='large' />
-                        : <Icon color='red' name='warning circle' size='large' />}
+            <Grid stretched verticalAlign={'middle'}>
+                <Grid.Column width={1} onClick={() => handleClick(acte.uuid)}>
+                    <Icon name='dropdown' size={'large'} />
                 </Grid.Column>
                 <Grid.Column width={1}>
-                    <Button color='red' aria-label={labelDelete} basic size='tiny' icon onClick={() => deleteBatchedActe(acte.uuid)}>
-                        <Icon name='remove' />
-                    </Button>
+                    {
+                        formValid ?
+                            <Icon color='green' name='checkmark' size={'large'}/>
+                            :
+                            <ValidationPopup errorList= {errors}>
+                                <Icon color='orange' name='warning sign' size={'large'}/>
+                            </ValidationPopup>
+                    }
+                </Grid.Column>
+                <Grid.Column width={3} onClick={() => handleClick(acte.uuid)}>
+                    <p style={{...styles.overflow, ...styles.textNumber}}>
+                        {!acte.number && !acte.objet ? titlePlaceholder
+                            : acte.number ? `N° ${acte.number}` : ''}
+                    </p>
+                </Grid.Column>
+                <Grid.Column width={8} onClick={() => handleClick(acte.uuid)}>
+                    <p style={styles.overflow}>{acte.objet}</p>
+                </Grid.Column>
+                <Grid.Column width={2} onClick={() => handleClick(acte.uuid)} textAlign={'right'}>
+                    {size > 0  && (
+                        <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)'}}>
+                            {bytesToSize(size)}
+                        </label>
+                    )}
+                </Grid.Column>
+                <Grid.Column width={1} textAlign={'right'} floated={'right'}>
+                    <Popup trigger={<Icon name='close' color='red' aria-label={labelDelete} onClick={() => deleteBatchedActe(acte.uuid)} size={'large'}/>} content={'Delete Acte'}/>
                 </Grid.Column>
             </Grid>
         </Accordion.Title>

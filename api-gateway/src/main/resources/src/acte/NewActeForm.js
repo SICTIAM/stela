@@ -134,6 +134,7 @@ class NewActeForm extends Component {
         if (fields.nature && fields.code) this.fetchAttachmentTypes()
         this.updateGroup()
         this.validateForm()
+        this.props.callBackActeFilesSize && this.props.callBackActeFilesSize(this._sumAttachements())
     }
     fetchAttachmentTypes = async () => {
         const {nature, code : subjectCode} = this.state.fields
@@ -219,6 +220,9 @@ class NewActeForm extends Component {
             return true
         }
     }
+    _sumAttachements = () => {
+        return sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0)
+    }
     validateActeAttachmentType = () => {
         const { annexes, acteAttachment } = this.state.fields
         let annexesValidation = true
@@ -262,6 +266,8 @@ class NewActeForm extends Component {
         if (this.props.mode === 'ACTE_BATCH') {
             this.props.setFormValidForId(isFormValid, this.state.fields.uuid, formErrors)
         }
+        //return errors to the parent component (useful for the batchedForm)
+        this.props.callBackErrorMessages && this.props.callBackErrorMessages(formErrors)
     }, 500)
     saveDraft = debounce(async (callback) => {
         const {fields} = this.state
@@ -303,6 +309,7 @@ class NewActeForm extends Component {
                 this.props.setStatus('saved', this.state.fields.uuid)
                 const acte = this._acteService.deserializeActe(response)
                 this.setState({ fields: acte, acteFetched: true }, this.validateForm)
+                this.props.callBackActeFilesSize && this.props.callBackActeFilesSize(this._sumAttachements())
             }catch(error){
                 this.props.setStatus('', this.state.fields.uuid)
                 this.validateForm()
@@ -322,6 +329,7 @@ class NewActeForm extends Component {
             }
             this.setState({ fields }, this.validateForm)
             this.props.setStatus('saved', this.state.fields.uuid)
+            this.props.callBackActeFilesSize && this.props.callBackActeFilesSize(0)
         }catch(error){
             this.props.setStatus('', this.state.fields.uuid)
         }
@@ -431,13 +439,30 @@ class NewActeForm extends Component {
                 {t('api-gateway:form.submit')}
             </Button>
         const isBudgetActe = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
+        const isBatchActe = this.props.mode === 'ACTE_BATCH'
 
         return (
             (this.props.mode !== 'ACTE_BATCH' || this.props.active === this.state.fields.uuid) && (
                 <Form onSubmit={this.saveAndSubmitForm}>
                     <Grid columns={3}>
-                        <Grid.Column mobile={16} tablet={16} computer={4}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}>
+                        {this.props.mode !== 'ACTE_BATCH' && (
+                            <Grid.Column mobile={16} tablet={16} computer={5}>
+                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')} required>
+                                    <InputValidation
+                                        id={`${this.state.fields.uuid}_decision`}
+                                        type='date'
+                                        ariaRequired={true}
+                                        value={this.state.fields.decision}
+                                        onChange={this.handleFieldChange}
+                                        validationRule={this.validationRules.decision}
+                                        fieldName={t('acte.fields.decision')}
+                                        placeholder={t('acte:acte.fields.date')}
+                                        isValidDate={(current) => current.isBefore(new moment())} />
+                                </FormField>
+                            </Grid.Column>
+                        )}
+                        <Grid.Column mobile={16} tablet={16} computer={!isBatchActe ? 6 : 8 }>
+                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     maxChar={15}
                                     placeholder={t('acte.fields.number') + '...'}
@@ -449,21 +474,23 @@ class NewActeForm extends Component {
                                     fieldName={t('acte.fields.number')} />
                             </FormField>
                         </Grid.Column>
-                        <Grid.Column mobile={16} tablet={16} computer={5}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')}>
-                                <InputValidation id={`${this.state.fields.uuid}_objet`}
-                                    ariaRequired={true}
-                                    maxChar={500}
-                                    placeholder={t('acte.fields.objet') + '...'}
-                                    value={this.state.fields.objet}
-                                    onChange={this.handleFieldChange}
-                                    validationRule={this.validationRules.objet}
-                                    fieldName={t('acte.fields.objet')} />
-                            </FormField>
-                        </Grid.Column>
-                        {(this.props.mode !== 'ACTE_BATCH') && (
-                            <Grid.Column mobile={16} tablet={16} computer={7}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')}>
+                        {!isBatchActe && (
+                            <Grid.Column mobile={16} tablet={16} computer={5}>
+                                <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}
+                                    helpText={t('acte.help_text.group')} required>
+                                    <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
+                                        value={groupOptionValue}
+                                        onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+                                        options={groupOptions}
+                                        fluid selection />
+                                </FormField>
+                            </Grid.Column>
+                        )}
+
+
+                        {!isBatchActe && (
+                            <Grid.Column mobile={16} tablet={16} computer={8}>
+                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} required>
                                     <InputValidation id={`${this.state.fields.uuid}_nature`}
                                         type='dropdown'
                                         search={true}
@@ -480,37 +507,9 @@ class NewActeForm extends Component {
                             </Grid.Column>
                         )}
 
-                        {this.props.mode !== 'ACTE_BATCH' && (
-                            <Grid.Column mobile={16} tablet={16} computer={4}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
-                                    <InputValidation
-                                        id={`${this.state.fields.uuid}_decision`}
-                                        type='date'
-                                        ariaRequired={true}
-                                        value={this.state.fields.decision ? this.state.fields.decision : moment()}
-                                        onChange={this.handleFieldChange}
-                                        validationRule={this.validationRules.decision}
-                                        fieldName={t('acte.fields.decision')}
-                                        isValidDate={(current) => current.isBefore(new moment())} />
-                                </FormField>
-                            </Grid.Column>
-                        )}
 
-                        {this.props.mode !== 'ACTE_BATCH' && (
-                            <Grid.Column mobile={16} tablet={16} computer={5}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}
-                                    helpText={t('acte.help_text.group')}>
-                                    <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
-                                        value={groupOptionValue}
-                                        onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
-                                        options={groupOptions}
-                                        fluid selection />
-                                </FormField>
-                            </Grid.Column>
-                        )}
-
-                        <Grid.Column mobile={16} tablet={16} computer={7}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
+                        <Grid.Column mobile={16} tablet={16} computer={8}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_code`}
                                     type='dropdown'
                                     placeholder={`${t('acte.fields.code')}...`}
@@ -524,13 +523,30 @@ class NewActeForm extends Component {
                                     ariaLabel="Acte code" />
                             </FormField>
                         </Grid.Column>
+
+                        <Grid.Column mobile={16} tablet={16} computer={16}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} required>
+                                <InputValidation id={`${this.state.fields.uuid}_objet`}
+                                    type={'text-area'}
+                                    ariaRequired={true}
+                                    maxChar={500}
+                                    placeholder={`${t('acte.fields.objet')}...`}
+                                    value={this.state.fields.objet}
+                                    onChange={this.handleFieldChange}
+                                    validationRule={this.validationRules.objet}
+                                    fieldName={t('acte.fields.objet')} />
+                            </FormField>
+                        </Grid.Column>
+
                     </Grid>
+
+
 
 
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
-                                helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
+                                helpText={t('acte.help_text.acteAttachment', { acceptFile })} required>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_acteAttachment`}
                                     multiple={false}
@@ -559,7 +575,6 @@ class NewActeForm extends Component {
                                     onAttachmentTypeChange={(e, { value }) => this.onAttachmentTypeChange(value)}
                                     errors={this.state.formFilesErrors}
                                     onDelete={(res) => this.deleteDraftAttachment(res)}
-
                                 />
                             </Grid.Column>
                         )}
@@ -567,7 +582,7 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                                optionalLabelText={!isBudgetActe ? t('acte.fields.optional_field') : null}
+                                       required={isBudgetActe}
                                 helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_annexes`}
@@ -621,11 +636,11 @@ class NewActeForm extends Component {
                             checked={this.state.fields.multipleChannels} toggle
                             onChange={e => handleFieldCheckboxChange(this, 'multipleChannels', this.saveDraft)} aria-label={t('acte.help_text.multipleChannels')}/>
                     </FormField>
-                    {this.props.mode !== 'ACTE_BATCH' && (
+                    {!isBatchActe && (
                         <div style={{ textAlign: 'right' }}>
                             {(sum(this.state.fields.annexes, 'size') !== 0 || this.state.fields.acteAttachment !== null) && (
                                 <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
-                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(sum(this.state.fields.annexes, 'size') + (this.state.fields.acteAttachment ? this.state.fields.acteAttachment.size : 0))} / 150Mo
+                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumAttachements())} / {bytesToSize(maxArchiveSize)}
                                 </label>
                             )}
                             {this.state.fields.uuid && (
@@ -647,6 +662,23 @@ class NewActeForm extends Component {
             )
         )
     }
+}
+
+NewActeForm.propTypes = {
+    uuid: PropTypes.string,
+    draftUuid: PropTypes.string,
+    mode: PropTypes.string,
+    nature: PropTypes.string,
+    decision: PropTypes.string,
+    groupeUuid: PropTypes.string,
+    setField: PropTypes.func,
+    shouldUnmount: PropTypes.bool,
+    active: PropTypes.bool,
+    setStatus: PropTypes.func,
+    status: PropTypes.string,
+    setFormValidForId: PropTypes.func,
+    callBackErrorMessages:PropTypes.func,
+    callBackActeFilesSize:PropTypes.func
 }
 
 export default translate(['acte', 'api-gateway'])(withAuthContext(NewActeForm))

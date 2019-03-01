@@ -37,7 +37,7 @@ class CertificateInfos extends Component {
     }
     certificateInfo = () => {
         const { _fetchWithAuthzHandling } = this.context
-        if(this.prop.authContext.isLoggedIn) {
+        if(this.props.authContext.isLoggedIn) {
             _fetchWithAuthzHandling({url: '/api/api-gateway/certInfos'})
                 .then(response => response.json())
                 .then(certificate => this.setState({certificate}))

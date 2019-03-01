@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Label, Dropdown, Popup, Grid} from 'semantic-ui-react'
+import {Label, Dropdown, Popup, Grid, TextArea} from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import moment from 'moment'
 import PropTypes from 'prop-types'
@@ -47,6 +47,20 @@ export default class InputValidation extends Component {
                     value={this.props.value}
                     onChange={e => this.props.onChange(this.props.id, e.target.value)}
                     onBlur={this.validateValue}/>
+            )
+        case('text-area'):
+            return(
+                <TextArea
+                    id={this.props.id}
+                    maxLength={maxChar}
+                    disabled={this.props.disabled}
+                    aria-required={this.props.ariaRequired ? this.props.ariaRequired : false}
+                    className={this.props.className + (this.state.errorMessage ? ' error' : '')}
+                    placeholder={this.props.placeholder}
+                    value={this.props.value}
+                    onChange={e => this.props.onChange(this.props.id, e.target.value)}
+                    onBlur={this.validateValue}
+                />
             )
         case ('number'):
             return(
@@ -158,6 +172,7 @@ export default class InputValidation extends Component {
                 }
 
                 {(this.props.errorTypePointing || maxChar) &&
+                <div style={styles.infoArea}>
                     <Grid columns={2}>
                         {!this.state.isValid && !this.props.errorTypePointing && (
                             <Grid.Column stretched width={maxChar ? 12 : 16}>
@@ -176,6 +191,7 @@ export default class InputValidation extends Component {
                         </Grid.Column>
                         }
                     </Grid>
+                </div>
                 }
 
             </div>
@@ -190,6 +206,11 @@ const styles = {
     errorMessage:{
         fontSize: '12px',
         color: '#9f3a38'
+    },
+    infoArea:{
+        position: 'absolute',
+        width: '100%',
+        paddingRight: '2em'
     }
 }
 

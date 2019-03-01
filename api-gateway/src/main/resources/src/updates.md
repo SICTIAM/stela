@@ -1,3 +1,21 @@
+### 22/02/2019
+
+#### Général
+
+- Optimisation du chargement de l'interface utilisateur
+- Correction de la gestion du temps de session utilisateur
+- Mise en place de la supervision des flux PES
+- Expérimentation de la détection d'anomalies sur les flux PES
+
+#### Contrôle de légalité
+
+- Amélioration de la gestion d'unicité des actes
+- Amélioration du suivi de l'archivage des actes
+
+#### Flux comptable
+
+- Corrections sur les connecteurs Pastell & Sesile
+
 ### 06/02/2019
 
 #### Général

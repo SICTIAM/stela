@@ -30,10 +30,10 @@ services:
     depends_on:
      - postgresql
      - rabbitmq
-    volumes: 
-     - ../stela-config:/stela-config 
-    environment: 
-      - "SPRING_PROFILES_ACTIVE=native" 
+    volumes:
+     - ../stela-config:/stela-config
+    environment:
+      - "SPRING_PROFILES_ACTIVE=native"
   discovery:
     image: forge-registry.sictiam.fr/internet/stela-poc/discovery-service
     container_name: discovery
@@ -102,6 +102,6 @@ services:
      - discovery
      - postgresql
      - rabbitmq
-     - clamav    
+     - clamav
     environment:
      - "SPRING_PROFILES_ACTIVE=dev-docker"

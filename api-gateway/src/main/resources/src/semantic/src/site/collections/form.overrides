@@ -19,3 +19,10 @@
 .ui.form .checkbox:not(:last-child) {
     margin-right: 20px
 }
+
+.ui.form textarea.error{
+    background-color: @negativeBackgroundColor;
+    border-color: @negativeBorderColor;
+    color: @negativeTextColor;
+    box-shadow: none;
+}

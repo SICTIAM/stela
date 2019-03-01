@@ -107,7 +107,8 @@
       "cancellationAskedDate": "Date de demande d'annulation de l'acte",
       "cancelledDate": "Date de confirmation de l'annulation de l'acte",
       "ackReceivedDate": "Date de réception de l'AR",
-      "optional_field": "Optionnel"
+      "optional_field": "Optionnel",
+      "date": "jj/mm/yyyy"
     },
     "help_text": {
       "number": "Un maximum de 15 caractères ne contenant que les caractères majuscule de A à Z, les chiffres 0 à 9 et le caractère _ (les espaces ne sont pas autorisés)",
