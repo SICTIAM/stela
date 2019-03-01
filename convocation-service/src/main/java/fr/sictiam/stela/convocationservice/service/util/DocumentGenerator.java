@@ -1,24 +1,18 @@
 package fr.sictiam.stela.convocationservice.service.util;
 
 import fr.sictiam.stela.convocationservice.model.Convocation;
-import fr.sictiam.stela.convocationservice.service.LocalesService;
 import org.springframework.stereotype.Service;
 
 @Service
-public abstract class DocumentGenerator {
+public interface DocumentGenerator {
 
-    public enum Extension {
+    enum Extension {
         pdf,
         csv
     }
 
-    protected LocalesService localesService;
 
-    protected DocumentGenerator() {
-        localesService = new LocalesService();
-    }
-
-    public static DocumentGenerator of(Extension extension) {
+    static DocumentGenerator of(Extension extension) {
         if (extension == Extension.csv)
             return new CsvDocumentGenerator();
 
@@ -28,5 +22,5 @@ public abstract class DocumentGenerator {
         throw new RuntimeException("Unable to handle " + extension + " extension");
     }
 
-    public abstract byte[] generatePresenceList(Convocation convocation);
+    byte[] generatePresenceList(Convocation convocation);
 }

@@ -14,6 +14,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.lowagie.text.Cell;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
+import fr.sictiam.stela.convocationservice.service.LocalesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +25,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class PdfDocumentGenerator extends DocumentGenerator {
+public class PdfDocumentGenerator implements DocumentGenerator {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PdfDocumentGenerator.class);
+
+    private LocalesService localesService;
+
+    public PdfDocumentGenerator() {
+        localesService = new LocalesService();
+    }
 
     @Override public byte[] generatePresenceList(Convocation convocation) {
 

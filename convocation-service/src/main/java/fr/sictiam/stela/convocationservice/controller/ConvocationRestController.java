@@ -288,7 +288,9 @@ public class ConvocationRestController {
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
 
         byte[] content = document.generatePresenceList(convocation);
-        outputFile(response, content, convocation.getSubject().replaceAll(" ", "_") + "." + extension.name(), "inline");
+        outputFile(response, content,
+                convocation.getSubject().replaceAll("[\\\"/<>:\\?\\*|]", "_") + "." + extension.name(),
+                "inline");
 
         return new ResponseEntity(HttpStatus.OK);
     }

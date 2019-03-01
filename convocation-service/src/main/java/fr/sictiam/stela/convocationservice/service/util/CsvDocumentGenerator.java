@@ -3,48 +3,94 @@ package fr.sictiam.stela.convocationservice.service.util;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
+import fr.sictiam.stela.convocationservice.model.csv.PresenceBean;
+import fr.sictiam.stela.convocationservice.service.LocalesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class CsvDocumentGenerator extends DocumentGenerator {
+public class CsvDocumentGenerator implements DocumentGenerator {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(CsvDocumentGenerator.class);
+
+    private LocalesService localesService;
+
+    public CsvDocumentGenerator() {
+        localesService = new LocalesService();
+    }
 
     @Override public byte[] generatePresenceList(Convocation convocation) {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.join(";",
-                localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
-                        ".recipient_config.lastname"),
-                localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
-                        ".recipient_config.firstname"),
-                localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
-                        ".recipient_config.email"),
-                localesService.getMessage("fr", "convocation", "$.convocation.export.presence"))).append('\n');
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(baos));
+        ICsvBeanWriter writer = null;
 
-        convocation.getRecipientResponses().forEach(recipientResponse -> {
-            Recipient r = recipientResponse.getRecipient();
+        try {
 
-            sb.append(r.getLastname()).append(';')
-                    .append(r.getFirstname()).append(';')
-                    .append(r.getEmail()).append(';');
+            writer = new CsvBeanWriter(bw, CsvPreference.STANDARD_PREFERENCE);
 
-            if (recipientResponse.getResponseType() == ResponseType.SUBSTITUTED && recipientResponse.getSubstituteRecipient() != null) {
-                Map<String, String> params = new HashMap<String, String>() {
-                    {
-                        put("substitute",
-                                recipientResponse.getSubstituteRecipient().getFirstname() + " " + recipientResponse.getSubstituteRecipient().getLastname());
-                    }
-                };
-                sb.append(localesService.getMessage("fr", "convocation",
-                        "$.convocation.export." + recipientResponse.getResponseType(), params)).append('\n');
-            } else {
-                sb.append(localesService.getMessage("fr", "convocation",
-                        "$.convocation.export." + recipientResponse.getResponseType())).append('\n');
+            String[] headers = new String[]{
+                    localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
+                            ".recipient_config.lastname"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
+                            ".recipient_config.firstname"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
+                            ".recipient_config.email"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.export.presence")
+            };
+
+            final List<PresenceBean> beans = new ArrayList<>();
+
+            writer.writeHeader(headers);
+            convocation.getRecipientResponses().forEach(recipientResponse -> {
+                Recipient r = recipientResponse.getRecipient();
+                String presence;
+                if (recipientResponse.getResponseType() == ResponseType.SUBSTITUTED && recipientResponse.getSubstituteRecipient() != null) {
+                    Map<String, String> params = new HashMap<String, String>() {
+                        {
+                            put("substitute",
+                                    recipientResponse.getSubstituteRecipient().getFirstname() + " " + recipientResponse.getSubstituteRecipient().getLastname());
+                        }
+                    };
+                    presence = localesService.getMessage("fr", "convocation",
+                            "$.convocation.export." + recipientResponse.getResponseType(), params);
+                } else {
+                    presence = localesService.getMessage("fr", "convocation",
+                            "$.convocation.export." + recipientResponse.getResponseType());
+                }
+
+                beans.add(new PresenceBean(r.getLastname(), r.getFirstname(), r.getEmail(), presence));
+            });
+
+            for (PresenceBean bean : beans) {
+                writer.write(bean, PresenceBean.fields());
             }
 
-        });
-
-        return sb.toString().getBytes();
+            writer.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            LOGGER.error("Failed to write CSV content: {}", e.getMessage());
+            return new byte[0];
+        } finally {
+            try {
+                if (writer != null) writer.close();
+                bw.close();
+                baos.close();
+            } catch (IOException e) {
+                LOGGER.error("Failed to close stream and/or writer: {}", e.getMessage());
+            }
+        }
     }
 }
+
