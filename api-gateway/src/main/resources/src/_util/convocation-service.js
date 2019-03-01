@@ -113,6 +113,21 @@ export default class ConvocationService {
 	    }
 	}
 
+	saveRecipient = async (context, body, uuid, force) => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = context
+	    const headers = { 'Content-Type': 'application/json' }
+	    const url = '/api/convocation/recipient' + (uuid ? `/${uuid}` : '')
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: url, method: uuid ? 'PUT' : 'POST', headers: headers, body: body, context: context, query: {force: force}})
+	    } catch(error) {
+	        error.json().then((json) => {
+	            _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(json.message))
+	        })
+	        throw error
+	    }
+	}
+
 	getTokenInUrl = (search) => {
 	    const arrayParams = search && search.substr(1).split('&')
 	    const regex = /token/

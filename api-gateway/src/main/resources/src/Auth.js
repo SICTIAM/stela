@@ -20,7 +20,9 @@ export const AuthContext = createContext({
 	user: null,
 	getUser: () => {},
 	csrfToken: null,
-	csrfTokenHeaderName: null
+	csrfTokenHeaderName: null,
+	_fetchWithAuthzHandling: () => {},
+	t: () => {}
 })
 
 /** export Consumer, to use easily when we need */

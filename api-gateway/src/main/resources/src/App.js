@@ -45,7 +45,7 @@ class App extends Component {
         return {
             csrfToken: this.state.csrfToken,
             csrfTokenHeaderName: this.state.csrfTokenHeaderName,
-            t: this.t,
+            t: this.context.t,
             isMenuOpened: this.state.isMenuOpened,
             _openMenu: this._openMenu,
             _addNotification: this._addNotification,

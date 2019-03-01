@@ -61,7 +61,7 @@ public class RecipientService {
         this.externalRestService = externalRestService;
     }
 
-    public Recipient create(Recipient recipient, String localAuthorityUuid) {
+    public Recipient create(Recipient recipient, String localAuthorityUuid, Boolean force) {
 
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
 
@@ -72,7 +72,7 @@ public class RecipientService {
             throw new RecipientExistsException();
         }
 
-        if (!EmailChecker.isValid(recipient.getEmail())) {
+        if (!force && !EmailChecker.isValid(recipient.getEmail())) {
             LOGGER.error("email {} does not seem to exist", recipient.getEmail());
             throw new InvalidEmailAddressException();
         }
@@ -84,18 +84,25 @@ public class RecipientService {
         return save(recipient);
     }
 
-    public Recipient update(String uuid, String localAuthorityUuid, Recipient recipientParams) {
+    public Recipient update(String uuid, String localAuthorityUuid, Recipient recipientParams, Boolean force) {
 
         Recipient recipient = getRecipient(uuid, localAuthorityUuid);
 
-        ConvocationBeanUtils.mergeProperties(recipientParams, recipient, "uuid", "token", "localAuthority", "inactivityDate");
+
         if (StringUtils.isNotEmpty(recipientParams.getEmail())) {
             if (recipientRepository.recipientExists(uuid, recipient.getLocalAuthority().getUuid(),
                     recipientParams.getEmail()) > 0) {
                 LOGGER.error("A recipient with email {} already exists in local authority {}", recipientParams.getEmail(), recipient.getLocalAuthority().getName());
                 throw new RecipientExistsException();
             }
+
+            if (!recipientParams.getEmail().equals(recipient.getEmail()) && !force && !EmailChecker.isValid(recipientParams.getEmail())) {
+                LOGGER.error("email {} does not seem to exist", recipientParams.getEmail());
+                throw new InvalidEmailAddressException();
+            }
         }
+
+        ConvocationBeanUtils.mergeProperties(recipientParams, recipient, "uuid", "token", "localAuthority", "inactivityDate");
 
         if (recipientParams.getActive() != null) {
             if (recipientParams.getActive()) {
