@@ -447,7 +447,7 @@ class NewActeForm extends Component {
                     <Grid columns={3}>
                         {this.props.mode !== 'ACTE_BATCH' && (
                             <Grid.Column mobile={16} tablet={16} computer={5}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')}>
+                                <FormField htmlFor={`${this.state.fields.uuid}_decision`} label={t('acte.fields.decision')} required>
                                     <InputValidation
                                         id={`${this.state.fields.uuid}_decision`}
                                         type='date'
@@ -462,7 +462,7 @@ class NewActeForm extends Component {
                             </Grid.Column>
                         )}
                         <Grid.Column mobile={16} tablet={16} computer={!isBatchActe ? 6 : 8 }>
-                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     maxChar={15}
                                     placeholder={t('acte.fields.number') + '...'}
@@ -477,7 +477,7 @@ class NewActeForm extends Component {
                         {!isBatchActe && (
                             <Grid.Column mobile={16} tablet={16} computer={5}>
                                 <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}
-                                    helpText={t('acte.help_text.group')}>
+                                    helpText={t('acte.help_text.group')} required>
                                     <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
                                         value={groupOptionValue}
                                         onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
@@ -490,7 +490,7 @@ class NewActeForm extends Component {
 
                         {!isBatchActe && (
                             <Grid.Column mobile={16} tablet={16} computer={8}>
-                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')}>
+                                <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} required>
                                     <InputValidation id={`${this.state.fields.uuid}_nature`}
                                         type='dropdown'
                                         search={true}
@@ -509,7 +509,7 @@ class NewActeForm extends Component {
 
 
                         <Grid.Column mobile={16} tablet={16} computer={8}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_code`}
                                     type='dropdown'
                                     placeholder={`${t('acte.fields.code')}...`}
@@ -525,7 +525,7 @@ class NewActeForm extends Component {
                         </Grid.Column>
 
                         <Grid.Column mobile={16} tablet={16} computer={16}>
-                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')}>
+                            <FormField htmlFor={`${this.state.fields.uuid}_objet`} label={t('acte.fields.objet')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_objet`}
                                     type={'text-area'}
                                     ariaRequired={true}
@@ -546,7 +546,7 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_acteAttachment`} label={t('acte.fields.acteAttachment')}
-                                helpText={t('acte.help_text.acteAttachment', { acceptFile })}>
+                                helpText={t('acte.help_text.acteAttachment', { acceptFile })} required>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_acteAttachment`}
                                     multiple={false}
@@ -582,7 +582,7 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                                optionalLabelText={!isBudgetActe ? t('acte.fields.optional_field') : null}
+                                       required={isBudgetActe}
                                 helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_annexes`}
