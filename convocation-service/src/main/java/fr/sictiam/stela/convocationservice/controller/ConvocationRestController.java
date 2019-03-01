@@ -1,7 +1,7 @@
 package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.lowagie.text.DocumentException;
+import com.itextpdf.text.DocumentException;
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.Recipient;
@@ -19,6 +19,8 @@ import fr.sictiam.stela.convocationservice.model.ui.Views;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.RecipientService;
+import fr.sictiam.stela.convocationservice.service.util.DocumentGenerator;
+import fr.sictiam.stela.convocationservice.service.util.DocumentGeneratorFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -274,6 +276,26 @@ public class ConvocationRestController {
         }
     }
 
+    @GetMapping("/{uuid}/presence.{extension}")
+    public ResponseEntity getPresenceList(
+            HttpServletResponse response,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @PathVariable String uuid,
+            @PathVariable DocumentGeneratorFactory.Extension extension) {
+
+
+        DocumentGenerator document = DocumentGeneratorFactory.of(extension);
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+
+        byte[] content = document.generatePresenceList(convocation);
+        outputFile(response, content,
+                convocation.getSubject().replaceAll("[\\\"/<>:\\?\\*|]", "_") + "." + extension.name(),
+                "inline");
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @PutMapping("/received/{uuid}/{responseType}")
     public ResponseEntity answerConvocation(
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
@@ -340,7 +362,7 @@ public class ConvocationRestController {
         String mimeType = URLConnection.guessContentTypeFromName(filename);
         if (mimeType == null) {
             LOGGER.info("Mimetype is not detectable, will take default");
-            mimeType = "application/octet-stream";
+            mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
         return mimeType;
     }

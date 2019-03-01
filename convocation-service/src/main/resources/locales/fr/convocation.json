@@ -40,7 +40,7 @@
       "absent": "Absent",
       "numberAbsents": "{{number}} absent(s)",
       "substituted": "Procuration",
-      "numberSubsituted": "{{number}} a/ont été donnée(s)",
+      "numberSubstituted": "{{number}} procuration(s) a(ont) été donnée(s)",
       "numberNoAnswer": "{{number}} n'a/ont pas répondu",
       "history": "Historique",
       "group_sender": "Groupe émetteur",
@@ -62,7 +62,10 @@
       "substitution_of": "donne procuration à",
       "cancel_convocation": "Êtes-vous sûr(e) de vouloir annuler la convocation ?",
       "print_and_complete_procuration": "Pensez à imprimer et compléter la procuration pour qu'elle soit valide",
-      "download_procuration": "Téléchargez la procuration"
+      "download_procuration": "Téléchargez la procuration",
+      "presence_list": "Liste de présence",
+      "download_pdf": "Télécharger au format PDF",
+      "download_csv": "Télécharger au format CSV"
     },
     "new": {
       "display": "Visualiser",
@@ -86,6 +89,24 @@
     },
     "stamp_pad": {
       "pad_label": "Tampon"
+    },
+    "export": {
+      "yes": "Oui",
+      "guest": "Invité",
+      "presence": "Présence",
+      "PRESENT": "Présent",
+      "NOT_PRESENT": "Absent",
+      "SUBSTITUTED": "Procuration donnée à ${substitute}",
+      "DO_NOT_KNOW": "",
+      "pdf": {
+        "signature": "Signature",
+        "title": "Convocation ${title}",
+        "meetingDate": "Séance le ${date} à ${hours}h${minutes}",
+        "presentList": "Liste des personnes présentes",
+        "notPresentList": "Liste des personnes absentes",
+        "guestList": "Liste des personnes invitées",
+        "localAuthority": "Collectivité"
+      }
     },
     "admin": {
       "modules": {
