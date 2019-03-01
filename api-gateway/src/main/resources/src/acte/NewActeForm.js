@@ -456,7 +456,7 @@ class NewActeForm extends Component {
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
                                         fieldName={t('acte.fields.decision')}
-                                        placeholder={'jj/mm/yyyy'}
+                                        placeholder={t('acte:acte.fields.date')}
                                         isValidDate={(current) => current.isBefore(new moment())} />
                                 </FormField>
                             </Grid.Column>
@@ -530,7 +530,7 @@ class NewActeForm extends Component {
                                     type={'text-area'}
                                     ariaRequired={true}
                                     maxChar={500}
-                                    placeholder={t('acte.fields.objet') + '...'}
+                                    placeholder={`${t('acte.fields.objet')}...`}
                                     value={this.state.fields.objet}
                                     onChange={this.handleFieldChange}
                                     validationRule={this.validationRules.objet}
@@ -640,7 +640,7 @@ class NewActeForm extends Component {
                         <div style={{ textAlign: 'right' }}>
                             {(sum(this.state.fields.annexes, 'size') !== 0 || this.state.fields.acteAttachment !== null) && (
                                 <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
-                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumAttachements())} / 150Mo
+                                    {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumAttachements())} / {bytesToSize(maxArchiveSize)}
                                 </label>
                             )}
                             {this.state.fields.uuid && (

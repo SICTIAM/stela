@@ -1,3 +1,9 @@
 /*******************************
         User Overrides
 *******************************/
+
+.disabled-error .text,
+.disabled-error .default.text,
+.disabled-error .icon{
+    color: @red !important;
+}

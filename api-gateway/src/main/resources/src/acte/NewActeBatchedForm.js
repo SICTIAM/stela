@@ -10,9 +10,9 @@ import history from '../_util/history'
 import { notifications } from '../_util/Notifications'
 import { FormField, ValidationPopup } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
-import {bytesToSize, checkStatus, getLocalAuthoritySlug, toUniqueArray} from '../_util/utils'
+import {bytesToSize, getLocalAuthoritySlug, toUniqueArray} from '../_util/utils'
 import NewActeForm from './NewActeForm'
-import { natures } from '../_util/constants'
+import {maxArchiveSize, natures} from '../_util/constants'
 import { withAuthContext } from '../Auth'
 
 class NewActeBatchedForm extends Component {
@@ -52,7 +52,6 @@ class NewActeBatchedForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = this.props.uuid ? '/api/acte/drafts/' + this.props.uuid : '/api/acte/draft/batch'
         _fetchWithAuthzHandling({ url })
-            .then(checkStatus)
             .then(response => response.json())
             .then(json =>
                 this.loadDraft(json, () => {
@@ -67,7 +66,6 @@ class NewActeBatchedForm extends Component {
                 })
             })
         _fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
-            .then(checkStatus)
             .then(response => response.json())
             .then(json => this.setState({ groups: json }))
             .catch(response => {
@@ -103,7 +101,6 @@ class NewActeBatchedForm extends Component {
     addBatchedActe = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/newActe`, method: 'POST', context: this.props.authContext })
-            .then(checkStatus)
             .then(response => response.json())
             .then(json => {
                 const { fields, formValid } = this.state
@@ -120,7 +117,6 @@ class NewActeBatchedForm extends Component {
     deleteBatchedActe = (uuid) => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/${uuid}`, method: 'DELETE', context: this.props.authContext })
-            .then(checkStatus)
             .then(() => {
                 const { fields, statuses, formValid, formErrors, totalActesSize } = this.state
                 fields.actes = fields.actes.filter(acte => acte.uuid !== uuid)
@@ -139,7 +135,6 @@ class NewActeBatchedForm extends Component {
     removeAttachmentTypes = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${this.state.fields.uuid}/types`, method: 'DELETE', context: this.props.authContext })
-            .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus()))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -178,7 +173,6 @@ class NewActeBatchedForm extends Component {
         const headers = { 'Content-Type': 'application/json' }
         const url= `/api/acte/drafts/${draftData.uuid}`
         _fetchWithAuthzHandling({ url, body: JSON.stringify(draftData), headers: headers, method: 'PATCH', context: this.props.authContext })
-            .then(checkStatus)
             .then(() => this.setState({ draftStatus: 'saved' }, this.updateStatus))
             .catch(response => {
                 response.text().then(text => _addNotification(notifications.defaultError, 'notifications.acte.title', text))
@@ -228,7 +222,6 @@ class NewActeBatchedForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const { fields } = this.state
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'POST', context: this.props.authContext })
-            .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.setState({ shouldUnmount: false }, () => {
@@ -246,7 +239,6 @@ class NewActeBatchedForm extends Component {
         const { fields } = this.state
         const regex = /brouillons/g
         _fetchWithAuthzHandling({ url: `/api/acte/drafts/${fields.uuid}`, method: 'DELETE', context: this.props.authContext })
-            .then(checkStatus)
             .then(response => response.text())
             .then(acteUuid => {
                 this.setState({ shouldUnmount: false }, () => {
@@ -340,7 +332,7 @@ class NewActeBatchedForm extends Component {
                                 <FormField htmlFor={'decision'} label={t('acte.fields.decision')} helpText={t('acte.help_text.decision')}>
                                     <InputValidation id={'decision'}
                                         type='date'
-                                        placeholder={'jj/mm/yyyy'}
+                                        placeholder={t('acte:acte.fields.date')}
                                         value={this.state.fields.decision}
                                         onChange={this.handleFieldChange}
                                         validationRule={this.validationRules.decision}
@@ -378,7 +370,7 @@ class NewActeBatchedForm extends Component {
                 <div style={{ textAlign: 'right' }}>
                     {(this._sumActesSize()) > 0  && (
                         <label style={{ fontSize: '1em', color: 'rgba(0,0,0,0.4)', marginRight: '10px'}}>
-                            {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumActesSize())} / 150Mo
+                            {this.context.t('acte.help_text.annexes_size')} {bytesToSize(this._sumActesSize())} / {bytesToSize(maxArchiveSize)}
                         </label>
                     )}
                     {this.state.fields.uuid && (
