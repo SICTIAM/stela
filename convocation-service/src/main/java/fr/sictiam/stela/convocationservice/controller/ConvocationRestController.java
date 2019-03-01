@@ -361,7 +361,7 @@ public class ConvocationRestController {
         String mimeType = URLConnection.guessContentTypeFromName(filename);
         if (mimeType == null) {
             LOGGER.info("Mimetype is not detectable, will take default");
-            mimeType = "application/octet-stream";
+            mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
         return mimeType;
     }
