@@ -4,13 +4,14 @@ import { translate } from 'react-i18next'
 import Validator from 'validatorjs'
 import debounce from 'debounce'
 import moment from 'moment'
-import { Segment, Button, Form, Grid, Message } from 'semantic-ui-react'
+import { Segment, Button, Form, Grid, Message, Confirm } from 'semantic-ui-react'
 
 import { withAuthContext } from '../../Auth'
 
 import { notifications } from '../../_util/Notifications'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
+import ConvocationService from '../../_util/convocation-service'
 
 import Breadcrumb from '../../_components/Breadcrumb'
 import { Page, ValidationPopup, FormField } from '../../_components/UI'
@@ -35,6 +36,7 @@ class RecipentConfig extends Component {
 	    formErrors: [],
 	    errorTypePointing: false,
 	    isFormValid: false,
+	    isConfirmModalOpen: false,
 	    fields: {
 	        uuid: null,
 	        firstname: '',
@@ -49,6 +51,8 @@ class RecipentConfig extends Component {
 	componentDidMount() {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const uuid = this.props.uuid
+	    this._convocationService = new ConvocationService()
+
 	    if(uuid) {
 	        _fetchWithAuthzHandling({ url: '/api/convocation/recipient/' + uuid })
 	            .then(checkStatus)
@@ -78,28 +82,47 @@ class RecipentConfig extends Component {
 	        if (callback) callback()
 	    })
 	}
-	submitForm = () => {
-	    const { t, _fetchWithAuthzHandling, _addNotification } = this.context
+	submitForm = async() => {
+	    const { _addNotification } = this.context
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const parameters = this.createBodyParams()
+	    _addNotification(notifications.admin.email_validation_in_progress)
+	    try {
+	        await this._convocationService.saveRecipient(this.props.authContext, parameters, this.state.fields.uuid, false)
+	        _addNotification(notifications.admin.email_validation_success)
+	        _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+	        history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
+	    } catch(error) {
+	        if(error.status === 400) {
+	            this.setState({ isConfirmModalOpen: true })
+	        }
+	    }
+	}
+	forceSubmit = async() => {
+	    const { _addNotification } = this.context
+
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const parameters = this.createBodyParams()
+	    await this._convocationService.saveRecipient(this.props.authContext, parameters, this.state.fields.uuid, true)
+	    _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
+	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
+	}
+	createUrlApi = () => {
+	    return '/api/convocation/recipient' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : '')
+	}
+	createBodyParams = () => {
 	    const parameters = Object.assign({}, this.state.fields)
 	    delete parameters.uuid
 	    delete parameters.active
 	    delete parameters.assemblyTypes
 	    delete parameters.inactivityDate
 
-
-	    const headers = { 'Content-Type': 'application/json' }
-	    _fetchWithAuthzHandling({url: '/api/convocation/recipient' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : ''), method: this.state.fields.uuid ? 'PUT' : 'POST', headers: headers, body: JSON.stringify(parameters), context: this.props.authContext})
-	        .then(checkStatus)
-	        .then(() => {
-	            _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
-	            history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
-	        })
-	        .catch(response => {
-	            response.json().then((json) => {
-	                _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(json.message))
-	            })
-	        })
+	    return JSON.stringify(parameters)
+	}
+	closeConfirmModal = () => this.setState({ isConfirmModalOpen: false })
+	confirm = () => {
+	    this.forceSubmit()
+	    this.closeConfirmModal()
 	}
 	cancel = () => {
 	    history.goBack()
@@ -146,6 +169,13 @@ class RecipentConfig extends Component {
 	    ]
 	    return (
 	        <Page>
+	            <Confirm
+	                open={this.state.isConfirmModalOpen}
+	                content={t('api-gateway:notifications.convocation.admin.email_validation.error')}
+	                confirmButton={t('api-gateway:form.confirm')}
+	                cancelButton={t('api-gateway:form.cancel')}
+	                onCancel={this.closeConfirmModal}
+	                onConfirm={this.confirm} />
 	            <Breadcrumb
 	                data={dataBreadcrumb}
 	            />

@@ -129,7 +129,7 @@ const notifications = {
             message: 'notifications.convocation.complet_with_document.success',
             level: 'success',
             position: 'br'
-        }
+        },
     },
     admin: {
         instanceParamsUpdated: {
@@ -259,6 +259,18 @@ const notifications = {
         },
         statusUpdated: {
             title: 'notifications.convocation.admin.recipients.status_updated',
+            level: 'success',
+            position: 'br'
+        },
+        email_validation_in_progress: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.email_validation.in_progress',
+            level: 'info',
+            position: 'br'
+        },
+        email_validation_success: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.email_validation.success',
             level: 'success',
             position: 'br'
         }
