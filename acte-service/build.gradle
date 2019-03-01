@@ -40,13 +40,6 @@ dependencies {
     testCompile('org.springframework:spring-mock:2.0.8')
     testCompile('com.github.tomakehurst:wiremock-standalone:2.20.0')
 }
-sourceSets {
-    main {
-        java {
-            srcDir project(':signature-lib').file('src/main/java')
-        }
-    }
-}
 test {
     environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
     useJUnit {
