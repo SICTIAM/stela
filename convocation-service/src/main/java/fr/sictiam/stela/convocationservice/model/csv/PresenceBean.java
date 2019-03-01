@@ -6,12 +6,14 @@ public class PresenceBean {
     private String firstname;
     private String email;
     private String presence;
+    private String guest;
 
-    public PresenceBean(String lastname, String firstname, String email, String presence) {
+    public PresenceBean(String lastname, String firstname, String email, String presence, String guest) {
         this.lastname = lastname;
         this.firstname = firstname;
         this.email = email;
         this.presence = presence;
+        this.guest = guest;
     }
 
     public String getLastname() {
@@ -30,8 +32,12 @@ public class PresenceBean {
         return presence;
     }
 
+    public String getGuest() {
+        return guest;
+    }
+
     public static String[] fields() {
-        return new String[]{ "lastname", "firstname", "email", "presence" };
+        return new String[]{ "lastname", "firstname", "email", "presence", "guest" };
     }
 
     @Override public String toString() {
@@ -40,6 +46,7 @@ public class PresenceBean {
                 ", firstname='" + firstname + '\'' +
                 ", email='" + email + '\'' +
                 ", presence='" + presence + '\'' +
+                ", guest='" + guest + '\'' +
                 '}';
     }
 }

@@ -74,6 +74,9 @@ public class PdfDocumentGenerator implements DocumentGenerator {
             document.add(Chunk.NEWLINE);
             document.add(Chunk.NEWLINE);
 
+            /*
+             * present recipients table
+             */
             Paragraph present = new Paragraph();
             present.getFont().setSize(14f);
             present.getFont().setStyle(Font.UNDERLINE);
@@ -93,7 +96,7 @@ public class PdfDocumentGenerator implements DocumentGenerator {
                 PdfPCell header = generateCell(columnTitle, BaseColor.LIGHT_GRAY);
                 presentTable.addCell(header);
             });
-            convocation.getRecipientResponses().stream().filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.PRESENT).forEach(recipientResponse -> {
+            convocation.getRecipientResponses().stream().filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.PRESENT && !recipientResponse.isGuest()).forEach(recipientResponse -> {
                 presentTable.addCell(generateCell(recipientResponse.getRecipient().getLastname()));
                 presentTable.addCell(generateCell(recipientResponse.getRecipient().getFirstname()));
                 presentTable.addCell(generateCell(""));
@@ -102,6 +105,9 @@ public class PdfDocumentGenerator implements DocumentGenerator {
             document.add(presentTable);
             document.newPage();
 
+            /*
+             * not present recipients table
+             */
             Paragraph notPresent = new Paragraph();
             notPresent.getFont().setSize(14f);
             notPresent.getFont().setStyle(Font.UNDERLINE);
@@ -120,12 +126,44 @@ public class PdfDocumentGenerator implements DocumentGenerator {
                 PdfPCell header = generateCell(columnTitle, BaseColor.LIGHT_GRAY);
                 notPresentTable.addCell(header);
             });
-            convocation.getRecipientResponses().stream().filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.NOT_PRESENT).forEach(recipientResponse -> {
+            convocation.getRecipientResponses().stream().filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.NOT_PRESENT && !recipientResponse.isGuest()).forEach(recipientResponse -> {
                 notPresentTable.addCell(generateCell(recipientResponse.getRecipient().getLastname()));
                 notPresentTable.addCell(generateCell(recipientResponse.getRecipient().getFirstname()));
                 notPresentTable.addCell(generateCell(""));
             });
             document.add(notPresentTable);
+            document.newPage();
+
+            /*
+             * guests table
+             */
+            Paragraph guests = new Paragraph();
+            guests.getFont().setSize(14f);
+            guests.getFont().setStyle(Font.UNDERLINE);
+            guests.add(localesService.getMessage("fr", "convocation", "$.convocation.export.pdf.guestList",
+                    params));
+            document.add(guests);
+            document.add(Chunk.NEWLINE);
+
+            PdfPTable guestTable = new PdfPTable(4);
+            guestTable.setWidthPercentage(100);
+            Stream.of(localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
+                            ".recipient_config.lastname"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
+                            ".recipient_config.firstname"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.export.pdf.localAuthority"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.export.presence")).forEach(columnTitle -> {
+                PdfPCell header = generateCell(columnTitle, BaseColor.LIGHT_GRAY);
+                guestTable.addCell(header);
+            });
+            convocation.getRecipientResponses().stream().filter(recipientResponse -> recipientResponse.isGuest()).forEach(recipientResponse -> {
+                guestTable.addCell(generateCell(recipientResponse.getRecipient().getLastname()));
+                guestTable.addCell(generateCell(recipientResponse.getRecipient().getFirstname()));
+                guestTable.addCell(generateCell(""));
+                guestTable.addCell(generateCell(localesService.getMessage("fr", "convocation",
+                        "$.convocation.export." + recipientResponse.getResponseType())));
+            });
+            document.add(guestTable);
 
             document.close();
             writer.close();

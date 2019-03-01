@@ -47,7 +47,8 @@ public class CsvDocumentGenerator implements DocumentGenerator {
                             ".recipient_config.firstname"),
                     localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
                             ".recipient_config.email"),
-                    localesService.getMessage("fr", "convocation", "$.convocation.export.presence")
+                    localesService.getMessage("fr", "convocation", "$.convocation.export.presence"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.export.guest")
             };
 
             final List<PresenceBean> beans = new ArrayList<>();
@@ -70,7 +71,9 @@ public class CsvDocumentGenerator implements DocumentGenerator {
                             "$.convocation.export." + recipientResponse.getResponseType());
                 }
 
-                beans.add(new PresenceBean(r.getLastname(), r.getFirstname(), r.getEmail(), presence));
+                beans.add(new PresenceBean(r.getLastname(), r.getFirstname(), r.getEmail(), presence,
+                        recipientResponse.isGuest() ? localesService.getMessage("fr", "convocation",
+                                "$.convocation.export.yes") : ""));
             });
 
             for (PresenceBean bean : beans) {

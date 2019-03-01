@@ -91,6 +91,8 @@
       "pad_label": "Tampon"
     },
     "export": {
+      "yes": "Oui",
+      "guest": "Invité",
       "presence": "Présence",
       "PRESENT": "Présent",
       "NOT_PRESENT": "Absent",
@@ -102,6 +104,7 @@
         "meetingDate": "Séance le ${date} à ${hours}h${minutes}",
         "presentList": "Liste des personnes présentes",
         "notPresentList": "Liste des personnes absentes",
+        "guestList": "Liste des personnes invitées",
         "localAuthority": "Collectivité"
       }
     },
