@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -588,8 +589,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
     private JAXBElement<DonneesActe> generateDonneesActe(Acte acte, String acteFilename, Set<String> annexesFilenames) {
 
         ObjectFactory objectFactory = new ObjectFactory();
-
-        DonneesActe donneesActe = new DonneesActe();
+        DonneesActe donneesActe = objectFactory.createDonneesActe();
 
         String[] codes = acte.getCode().split("-");
 
@@ -634,7 +634,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
         donneesActe.setClassificationDateVersion(acte.getLocalAuthority().getNomenclatureDate());
-        donneesActe.setObjet(acte.getObjet());
+        donneesActe.setObjet(new String(acte.getObjet().getBytes(), StandardCharsets.ISO_8859_1));
         donneesActe.setDocumentPapier(acte.isMultipleChannels() ? "O" : "N");
 
         FichierSigne fichierSigne = new FichierSigne();
