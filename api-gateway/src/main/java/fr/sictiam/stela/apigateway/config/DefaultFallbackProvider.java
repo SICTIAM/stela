@@ -46,7 +46,7 @@ public class DefaultFallbackProvider implements FallbackProvider {
             @Override
             public InputStream getBody() {
                 String jsonBody = bodyMessage
-                        .map(errorMessage -> String.format("{ \"error_detail\" : \"%s\" }", bodyMessage))
+                        .map(errorMessage -> String.format("{ \"error_detail\" : \"%s\" }", errorMessage))
                         .orElse("{}");
                 return new ByteArrayInputStream(jsonBody.getBytes());
             }
