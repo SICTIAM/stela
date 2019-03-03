@@ -33,3 +33,5 @@ nbdist/
 bin/
 .vscode/
 \.gradletasknamecache
+
+docker-compose-dev-*.yml
