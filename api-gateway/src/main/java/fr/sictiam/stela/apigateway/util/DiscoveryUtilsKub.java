@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"integration", "prod", "atd24"})
+@Profile("kub")
 public class DiscoveryUtilsKub implements DiscoveryUtils {
 
     @Value("${application.kub.services.admin}")

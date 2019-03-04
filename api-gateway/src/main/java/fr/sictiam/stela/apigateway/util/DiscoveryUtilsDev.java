@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({ "dev", "dev-docker" })
+@Profile("!kub")
 public class DiscoveryUtilsDev implements DiscoveryUtils {
 
     private EurekaClient discoveryClient;
