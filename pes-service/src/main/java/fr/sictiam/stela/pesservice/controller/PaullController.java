@@ -59,7 +59,7 @@ public class PaullController {
     }
 
     @PostMapping("/depotpes")
-    public ResponseEntity<?> DepotPES(@PathVariable String siren, MultipartHttpServletRequest request,
+    public ResponseEntity<?> depotPES(@PathVariable String siren, MultipartHttpServletRequest request,
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "comment", required = false) String comment,
             @RequestParam(name = "name", required = false) String name,
@@ -276,7 +276,7 @@ public class PaullController {
     }
 
     @GetMapping("/sendACKPESRetour/{fileName}")
-    public ResponseEntity<?> getPESRetour(@PathVariable String siren, @PathVariable String fileName,
+    public ResponseEntity<?> ackPESRetour(@PathVariable String siren, @PathVariable String fileName,
             @RequestHeader("userid") String userid, @RequestHeader("password") String password) {
 
         HttpStatus status = HttpStatus.OK;

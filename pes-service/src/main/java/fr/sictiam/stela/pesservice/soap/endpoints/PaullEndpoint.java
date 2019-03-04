@@ -200,20 +200,18 @@ public class PaullEndpoint {
             @RequestPayload GetDetailsPESAllerRequest getDetailsPESAllerRequest) throws IOException {
 
         PaullSoapToken paullSoapToken = getToken(getDetailsPESAllerRequest.getSessionId());
+        if (paullSoapToken == null)
+            return getDetailsPESAllerResponseError("SESSION_INVALID_OR_EXPIRED");
+
+        GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
+        if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren()))
+            return getDetailsPESAllerResponseError("LOCALAUTHORITY_NOT_GRANTED");
 
         GetDetailsPESAllerResponse detailsPESAllerResponse = new GetDetailsPESAllerResponse();
         GetDetailsPESAllerStruct detailsPESAllerStruct = new GetDetailsPESAllerStruct();
 
-        if (paullSoapToken == null)
-            return getDetailsPESAllerResponseError("SESSION_INVALID_OR_EXPIRED");
-
         PesAller pesAller = pesAllerService.getByUuid(getDetailsPESAllerRequest.getIdPesAller());
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren());
-
-        GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
-
-        if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren()))
-            return getDetailsPESAllerResponseError("LOCALAUTHORITY_NOT_GRANTED");
 
         // PES PJ are not sent to signature, don't bother checking something impossible
         if (!pesAller.isPj()) {

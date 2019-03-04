@@ -6,9 +6,6 @@ import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.service.AgentService;
 import fr.sictiam.stela.admin.service.ProfileService;
 import fr.sictiam.stela.admin.service.util.CertUtilService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/admin/certificate")
 public class CertificateController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CertificateController.class);
-
-    @Value("${application.certVerificationEnabled}")
-    boolean certVerificationEnabled;
 
     private final ProfileService profileService;
     private final AgentService agentService;
@@ -57,7 +49,7 @@ public class CertificateController {
     public Boolean hasValidCertificate(
             @RequestAttribute(value = "STELA-Certificate", required = false) Certificate certificate,
             @RequestAttribute(value = "STELA-Current-Profile-Paired-Certificate", required = false) Certificate pairedCertificate) {
-        return !certVerificationEnabled || certUtilService.checkCert(certificate, pairedCertificate);
+        return certUtilService.checkCert(certificate, pairedCertificate);
     }
 
     @GetMapping("/verified-status")

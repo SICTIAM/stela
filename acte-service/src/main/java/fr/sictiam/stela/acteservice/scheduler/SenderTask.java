@@ -34,14 +34,16 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
 
     private AtomicInteger currentSizeUsed = new AtomicInteger();
 
-    @Autowired
-    private ActeService acteService;
+    private final ActeService acteService;
+    private final AdminService adminService;
+    private final PendingMessageService pendingMessageService;
 
     @Autowired
-    private AdminService adminService;
-
-    @Autowired
-    private PendingMessageService pendingMessageService;
+    public SenderTask(ActeService acteService, AdminService adminService, PendingMessageService pendingMessageService) {
+        this.acteService = acteService;
+        this.adminService = adminService;
+        this.pendingMessageService = pendingMessageService;
+    }
 
     @PostConstruct
     public void initQueue() {
@@ -68,9 +70,7 @@ public class SenderTask implements ApplicationListener<ActeHistoryEvent> {
             PendingMessage pendingMessage = pendingQueue.peek();
             if ((pendingMessage.getFile().length + currentSizeUsed.get()) < maxSizePerHour) {
 
-                HttpStatus sendStatus = null;
-
-                sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
+                HttpStatus sendStatus = acteService.send(pendingMessage.getFile(), pendingMessage.getFileName());
 
                 if (HttpStatus.OK.equals(sendStatus)) {
                     acteService.persistActeExport(pendingMessage);

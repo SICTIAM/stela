@@ -65,11 +65,10 @@ public class AgentController {
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
 
-            String jwtToken = Jwts.builder().setSubject(body)
+            return Jwts.builder()
+                    .setSubject(body)
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                     .signWith(SignatureAlgorithm.HS512, SECRET).compact();
-
-            return jwtToken;
 
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage());

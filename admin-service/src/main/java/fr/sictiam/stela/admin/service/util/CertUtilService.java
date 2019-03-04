@@ -20,8 +20,7 @@ public class CertUtilService {
 
     public boolean checkCert(Certificate certificate, Certificate pairedCertificate) {
         return !certVerificationEnabled || (
-                CertificateStatus.VALID.equals(certificate.getStatus()) && pairedCertificate != null
-                        && certificate.equals(pairedCertificate)
+                CertificateStatus.VALID.equals(certificate.getStatus()) && certificate.equals(pairedCertificate)
         );
     }
 

@@ -42,8 +42,8 @@ public class LocalAuthorityController {
     @GetMapping("/instance-id/{instaceId}")
     public ResponseEntity<String> getSlugByInstanceId(@PathVariable String instaceId) {
         Optional<LocalAuthority> opt = localAuthorityService.getByInstanceId(instaceId);
-        return opt.isPresent() ? new ResponseEntity<>(opt.get().getSlugName(), HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return opt.map(localAuthority -> new ResponseEntity<>(localAuthority.getSlugName(), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/current")
@@ -57,34 +57,6 @@ public class LocalAuthorityController {
         }
         return new ResponseEntity<>(localAuthorityService.getByUuid(currentLocalAuthUuid), HttpStatus.OK);
     }
-
-    /*
-     * Available for Super Admin role (actually not existing)
-     *
-    @GetMapping
-    @JsonView(Views.LocalAuthorityView.class)
-    public ResponseEntity<LocalAuthorityResultsUI> getAllLocalAuthorities(
-            @RequestParam(value = "limit", required = false, defaultValue = "25") Integer limit,
-            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
-            @RequestParam(value = "column", required = false, defaultValue = "name") String column,
-            @RequestParam(value = "direction", required = false, defaultValue = "ASC") Sort.Direction direction,
-            @RequestAttribute("STELA-Current-Profile-Is-Local-Authority-Admin") boolean isLocalAuthorityAdmin,
-            @RequestAttribute("STELA-Current-Profile-UUID") String profileUuid) {
-        if (!isLocalAuthorityAdmin) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        Profile profile = profileService.getByUuid(profileUuid);
-
-        List<LocalAuthority> localAuthorities =
-                localAuthorityService.getMineWithPagination(profile.getAgent().getUuid(), limit,
-                        offset,
-                        column,
-                        direction);
-        Long count = localAuthorityService.countMine(profile.getAgent().getUuid());
-        return new ResponseEntity<>(new LocalAuthorityResultsUI(count, localAuthorities), HttpStatus.OK);
-    }
-    */
 
     @GetMapping("/all")
     @JsonView(Views.LocalAuthorityViewBasic.class)
@@ -389,8 +361,8 @@ public class LocalAuthorityController {
             @PathVariable String serial,
             @PathVariable String issuer) {
         Optional<LocalAuthority> opt = localAuthorityService.getByCertificate(serial, issuer);
-        return opt.isPresent() ? new ResponseEntity<>(opt.get(), HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return opt.map(localAuthority -> new ResponseEntity<>(localAuthority, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/{uuid}/siret")

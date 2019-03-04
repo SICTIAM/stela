@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 @Component
@@ -30,15 +29,15 @@ public class LogRequestResponseFilter implements ClientHttpRequestInterceptor {
         return clientHttpResponse;
     }
 
-    private void traceRequest(HttpRequest request, byte[] body) throws IOException {
+    private void traceRequest(HttpRequest request, byte[] body) {
         LOGGER.debug("request URI : " + request.getURI());
         LOGGER.debug("request method : " + request.getMethod());
         LOGGER.debug("request body : " + getRequestBody(body));
     }
 
-    private String getRequestBody(byte[] body) throws UnsupportedEncodingException {
+    private String getRequestBody(byte[] body) {
         if (body != null && body.length > 0) {
-            return (new String(body, "UTF-8"));
+            return (new String(body, StandardCharsets.UTF_8));
         } else {
             return null;
         }

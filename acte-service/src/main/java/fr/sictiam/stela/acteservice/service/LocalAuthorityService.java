@@ -125,7 +125,7 @@ public class LocalAuthorityService {
                         localAuthority))
                 .collect(Collectors.toList());
 
-        attachmentTypeReferencials.stream()
+        attachmentTypeReferencials
                 .forEach(attachmentTypeReferencial -> attachmentTypeReferencial.getAttachmentTypes().stream().forEach(
                         attachmentType -> attachmentType.setAttachmentTypeReferencial(attachmentTypeReferencial)));
 

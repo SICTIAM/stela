@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 public class Certificate {
@@ -151,8 +152,8 @@ public class Certificate {
 
         Certificate that = (Certificate) o;
 
-        if (serial != null ? !serial.equals(that.serial) : that.serial != null) return false;
-        return issuer != null ? issuer.equals(that.issuer) : that.issuer == null;
+        if (!Objects.equals(serial, that.serial)) return false;
+        return Objects.equals(issuer, that.issuer);
     }
 
     @Override

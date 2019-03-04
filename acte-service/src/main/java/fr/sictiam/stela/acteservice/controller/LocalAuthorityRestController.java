@@ -90,7 +90,7 @@ public class LocalAuthorityRestController {
         try {
             BeanUtils.copyProperties(localAuthority, localAuthorityUpdateUI);
         } catch (Exception e) {
-            LOGGER.error("Error while updating properties: {}", e);
+            LOGGER.error("Error while updating properties", e);
             return new ResponseEntity<>(localAuthority, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         localAuthority = localAuthorityService.createOrUpdate(localAuthority);
@@ -106,7 +106,6 @@ public class LocalAuthorityRestController {
         }
         LocalAuthority currentLocalAuthority = localAuthorityService.getByUuid(currentLocalAuthUuid);
 
-        LOGGER.info("currentLocalAuthority: {}", currentLocalAuthority.getName());
         return new ResponseEntity<>(new ActeDepositFieldsUI(currentLocalAuthority.getCanPublishRegistre(),
                 currentLocalAuthority.getCanPublishWebSite()), HttpStatus.OK);
     }

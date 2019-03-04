@@ -2,7 +2,6 @@ package fr.sictiam.stela.acteservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.acteservice.dao.ActeExportRepository;
 import fr.sictiam.stela.acteservice.dao.ActeHistoryRepository;
 import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
@@ -115,9 +114,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private ActeHistoryRepository acteHistoryRepository;
-
-    @Autowired
-    private ActeExportRepository acteExportRepository;
 
     @Autowired
     private NotificationService notificationService;

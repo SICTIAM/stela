@@ -189,14 +189,6 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         });
     }
 
-    private void updatePesWithSignature(String pesUuid, byte[] file, StatusType status, String errorMessage) {
-        PesAller pesAller = pesService.getByUuid(pesUuid);
-        pesAller.setSigned(status.equals(StatusType.PENDING_SEND));
-        storageService.updateAttachment(pesAller.getAttachment(), file);
-        pesService.save(pesAller);
-        pesService.updateStatus(pesUuid, status, errorMessage);
-    }
-
     public SimplePesInformation computeSimplePesInformation(byte[] file) {
         ByteArrayInputStream bais = new ByteArrayInputStream(file);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

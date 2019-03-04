@@ -108,23 +108,6 @@ public class CertUtils {
         return certificateVerifier;
     }
 
-    /*
-        public static CertificateVerifier getCertificateVerifier(CertificateSource certificateSource,
-                List<String> crls) throws IOException {
-            CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-            certificateVerifier.setTrustedCertSource(certificateSource);
-
-            OfflineCRLSource offlineCRLSource = signature.getCRLSource();
-            certificateVerifier.setCrlSource(offlineCRLSource);
-
-            OnlineOCSPSource onlineOCSPSource = new OnlineOCSPSource();
-            onlineOCSPSource.setDataLoader(new OCSPDataLoader());
-            certificateVerifier.setOcspSource(onlineOCSPSource);
-
-            certificateVerifier.setDataLoader(dataloader);
-            return certificateVerifier;
-        }
-    */
     public static CommonTrustedCertificateSource loadLocaleCertificateSource()
             throws IOException, CertificateException {
         String zipSource = "/signature/CA_RGS3.zip";
