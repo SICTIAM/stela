@@ -5,8 +5,6 @@ import fr.sictiam.stela.admin.model.Profile;
 import fr.sictiam.stela.admin.model.UI.ProfileRights;
 import fr.sictiam.stela.admin.model.WorkGroup;
 import fr.sictiam.stela.admin.service.exceptions.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +14,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProfileService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProfileService.class);
 
     private final ProfileRepository profileRepository;
     private final WorkGroupService workGroupService;
@@ -37,7 +33,7 @@ public class ProfileService {
     }
 
     public Profile getByLocalAuthoritySirenAndEmail(String siren, String email) {
-        return profileRepository.findByLocalAuthority_SirenAndAgent_Email(siren, email)
+        return profileRepository.findByLocalAuthority_SirenAndAgent_EmailIgnoreCase(siren, email)
                 .orElseThrow(() -> new NotFoundException("notifications.admin.agent_not_found"));
     }
 

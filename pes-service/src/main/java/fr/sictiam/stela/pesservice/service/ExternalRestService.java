@@ -6,6 +6,7 @@ import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.Right;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
 import fr.sictiam.stela.pesservice.model.util.NotificationAttachement;
+import fr.sictiam.stela.pesservice.service.exceptions.NotFoundException;
 import fr.sictiam.stela.pesservice.service.util.DiscoveryUtils;
 import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
@@ -93,14 +94,13 @@ public class ExternalRestService {
         Mono<String> genericAccount = webClient.get()
                 .uri("/api/admin/profile/local-authority/{siren}/{email}", siren, email).retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        response -> Mono.error(new RuntimeException("profile_not_found")))
+                        response -> Mono.error(new NotFoundException(String.format("No profile found for email %s", email))))
                 .bodyToMono(String.class);
 
         Optional<String> opt = genericAccount.blockOptional();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode node = objectMapper.readTree(opt.get());
 
-        return node;
+        return objectMapper.readTree(opt.get());
     }
 
     public GenericAccount authWithCertificate(String serial, String vendor) throws IOException {

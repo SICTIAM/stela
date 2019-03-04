@@ -42,7 +42,7 @@ public class GenericAccountService {
     }
 
     public Optional<GenericAccount> getByEmail(String email) {
-        return genericAccountRepository.findByEmail(email);
+        return genericAccountRepository.findByEmailIgnoreCase(email);
     }
 
     public List<GenericAccount> getAllWithPagination(String search, String software, String email, Integer limit,
