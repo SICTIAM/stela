@@ -660,7 +660,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
                 if (renderer.getWriter() != null && renderer.getWriter().getCurrentPageNumber() > 0) {
                     renderer.writeNextDocument();
                 }
-                
+
                 // init document
                 if (renderer.getWriter() == null) {
                     renderer.createPDF(os, false);
@@ -787,7 +787,7 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
             throws IOException, DocumentException {
         PdfReader pdfReader = new PdfReader(acte.getActeAttachment().getFile());
         if (x == null || y == null) {
-            if(pdfGeneratorUtil.pdfIsRotated(pdfReader)){
+            if(pdfGeneratorUtil.pdfIsLandscape(pdfReader)){
                 //landscape case
                 y = localAuthority.getStampPosition().getX();
                 x = localAuthority.getStampPosition().getY();

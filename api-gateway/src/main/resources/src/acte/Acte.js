@@ -225,7 +225,7 @@ class Acte extends Component {
                     style={{ marginBottom: '0.5em' }}
                     backgroundImage={'data:image/png;base64,' + this.state.thumbnail.image.trim()}
                     imageOrientation={this.state.thumbnail.orientation}
-                    label={t('acte.stamp_pad.pad_label')}
+                    label={t('acte:stamp_pad.pad_label')}
                     height={thumbnailHeight}
                     width={thumbnailWidth}
                     labelColor='#000'
@@ -282,7 +282,7 @@ class Acte extends Component {
                                             <LoadingContent fetchStatus={thumbnailStatus}>
                                                 <Popup content={stampPosition} on='click' position='left center'
                                                     trigger={<Dropdown item icon='none'
-                                                        text={t('acte.stamp_pad.download_stamped_acte')}/>}
+                                                        text={t('acte:stamp_pad.download_stamped_acte')}/>}
                                                 />
                                             </LoadingContent>
                                         </Dropdown.Item>
