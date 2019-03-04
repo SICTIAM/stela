@@ -38,7 +38,9 @@
       "ACK_PIECE_COMPLEMENTAIRE": "AR pièces complémentaires",
       "ACK_LETTRE_OBSERVATION": "AR lettre d'observation",
       "SENT_TO_SAE": "Acte transmis au SAE",
-      "ACCEPTED_BY_SAE": "Archive acceptée par le SAE"
+      "ACCEPTED_BY_SAE": "Archive acceptée par le SAE",
+      "ACK_REPONSE_PIECE_COMPLEMENTAIRE" : "AR suite à la bonne réception de la pièce complémentaire",
+      "ACK_REPONSE_LETTRE_OBSERVATION": "AR suite à la bonne réception de la lettre d'observation"
     },
     "flux_status": {
       "TRANSMISSION_ACTE_SENT": "Envoyé",
