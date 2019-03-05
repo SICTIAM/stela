@@ -99,8 +99,7 @@ class SentConvocation extends Component {
 	                    <p>{t('convocation.page.cancelled_convocation_text', {date: moment(this.state.convocation.cancellationDate).format('DD/MM/YYYY')})}</p>
 	                </Message>
 	            )}
-	            <Segment>
-	                <div className='float-right'>
+	                <div className='flex-justify-end'>
 	                    <Dropdown basic direction='left' trigger={dropdownButton} icon={false} className='mr-10'>
 	                        <Dropdown.Menu>
 	                            <Dropdown.Item>
@@ -125,11 +124,14 @@ class SentConvocation extends Component {
 	                    )}
 	                </div>
 	                <SentConvocationFragment convocation={convocation}/>
+	            <Segment>
 	                <ParticipantsFragment
 	                    title={t('convocation.fields.recipient')}
 	                    participantResponses={convocation.recipientResponses}
 	                    questions={convocation.questions}
 	                />
+	            </Segment>
+	            <Segment>
 	                <ParticipantsFragment
 	                    title={t('convocation.fields.guest')}
 	                    participantResponses={convocation.guestResponses}

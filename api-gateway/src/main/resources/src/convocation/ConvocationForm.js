@@ -288,8 +288,9 @@ class ConvocationForm extends Component {
 	                    {title: t('api-gateway:breadcrumb.convocation.convocation_creation')}
 	                ]}
 	            />
-	            <Segment>
-	                <Form onSubmit={this.submit}>
+	            <Form onSubmit={this.submit} className='mt-14'>
+	                {/* Global information (date, assembly type, Object, comment, ...) */}
+	            	<Segment>
 	                    <Grid>
 	                        <Grid.Column mobile='16' computer='8'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_meetingDate`}
@@ -379,7 +380,26 @@ class ConvocationForm extends Component {
 	                                    onChange={this.handleFieldChange} />
 	                            </FormField>
 	                        </Grid.Column>
-	                        <AddRecipientsGuestsFormFragment fields={this.state.fields} updateUser={this.updateUser} disabledRecipientsEdit={!this.state.fields.assemblyType}/>
+	                    </Grid>
+	                </Segment>
+	                {/* Questions */}
+	                <Segment>
+	                    <Grid>
+	                        <Grid.Column mobile='16' computer='16'>
+	                            {this.state.initialRank !== null && (
+	                                <QuestionsForm
+	                                    editable={true}
+	                                    questions={this.state.fields.questions}
+	                                    initialRank={this.state.initialRank}
+	                                    onUpdateQuestions={this.updateQuestions}
+	                                />
+	                            )}
+	                        </Grid.Column>
+	                    </Grid>
+	                </Segment>
+	                {/* Documents */}
+	                <Segment>
+	                    <Grid>
 	                        {this.state.fields.useProcuration && (
 	                            <Fragment>
 	                                <Grid.Column mobile='16' computer='8'>
@@ -455,28 +475,23 @@ class ConvocationForm extends Component {
 	                                </div>
 	                            )}
 	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='16'>
-	                            <QuestionsForm
-	                                editable={true}
-	                                questions={this.state.fields.questions}
-	                                onUpdateQuestions={this.updateQuestions}
-	                                uuid={this.state.fields.uuid}/>
-	                        </Grid.Column>
 	                    </Grid>
-	                    <div className='footerForm'>
-	                        <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.goBack()} basic color='red'>
-	                            {t('api-gateway:form.cancel')}
-	                        </Button>
+	                </Segment>
+	                {/* Recipients */}
+	                <AddRecipientsGuestsFormFragment fields={this.state.fields} updateUser={this.updateUser} disabledRecipientsEdit={!this.state.fields.assemblyType}/>
+	                <div className='footerForm'>
+	                    <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.goBack()} basic color='red'>
+	                        {t('api-gateway:form.cancel')}
+	                    </Button>
 
-	                        {this.state.allFormErrors.length > 0 &&
-                                <ValidationPopup errorList={this.state.allFormErrors}>
-                                    {submissionButton}
-                                </ValidationPopup>
-	                        }
-	                        {this.state.allFormErrors.length === 0 && submissionButton}
-	                    </div>
-	                </Form>
-	            </Segment>
+	                    {this.state.allFormErrors.length > 0 &&
+                            <ValidationPopup errorList={this.state.allFormErrors}>
+                                {submissionButton}
+                            </ValidationPopup>
+	                    }
+	                    {this.state.allFormErrors.length === 0 && submissionButton}
+	                </div>
+	            </Form>
 	        </Page>
 	    )
 	}

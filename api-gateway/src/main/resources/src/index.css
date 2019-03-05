@@ -47,6 +47,10 @@
 .float-right {
     float: right;
 }
+.flex-justify-end {
+    display: flex;
+    justify-content: flex-end;
+}
 .flex-container-column {
     display:flex;
     flex-direction: column;
@@ -77,6 +81,9 @@
 }
 .mr-20 {
     margin-right: 20px !important;
+}
+.mt-14 {
+    margin-top: 14px !important;
 }
 .mt-15 {
     margin-top: 15px !important;
