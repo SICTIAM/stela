@@ -101,10 +101,10 @@ const handleFieldCheckboxChange = (that, field, callback) => {
     that.setState({ fields: fields }, callback)
 }
 
-const handleFieldChange = (that, id, value, callback) => {
+const handleFieldChange = (that, field, value, callback) => {
     callback = callback || null
     const fields = that.state.fields
-    fields[id] = value
+    updateField(fields, field, value)
     that.setState({ fields: fields }, callback)
 }
 
