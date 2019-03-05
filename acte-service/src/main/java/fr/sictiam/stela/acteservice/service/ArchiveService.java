@@ -634,7 +634,7 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
         donneesActe.setClassificationDateVersion(acte.getLocalAuthority().getNomenclatureDate());
-        donneesActe.setObjet(new String(acte.getObjet().getBytes(), StandardCharsets.ISO_8859_1));
+        donneesActe.setObjet(acte.getObjet());
         donneesActe.setDocumentPapier(acte.isMultipleChannels() ? "O" : "N");
 
         FichierSigne fichierSigne = new FichierSigne();
