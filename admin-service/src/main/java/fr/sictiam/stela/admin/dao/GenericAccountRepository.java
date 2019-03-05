@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface GenericAccountRepository extends JpaRepository<GenericAccount, String> {
 
-    Optional<GenericAccount> findByEmail(String email);
+    Optional<GenericAccount> findByEmailIgnoreCase(String email);
 
     Optional<GenericAccount> findBySerialAndVendor(String serial, String vendor);
 }

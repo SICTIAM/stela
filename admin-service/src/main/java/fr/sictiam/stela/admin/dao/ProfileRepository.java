@@ -20,7 +20,7 @@ public interface ProfileRepository extends JpaRepository<Profile, String> {
     @Query("SELECT p.uuid as uuid, p.localAuthority.name as localAuthorityName FROM Profile p WHERE p.agent.sub = ?1 ORDER BY p.localAuthority.name")
     List<ProfileSummary> fetchProfilesSummaryForAgent(String sub);
 
-    Optional<Profile> findByLocalAuthority_SirenAndAgent_Email(String siren, String email);
+    Optional<Profile> findByLocalAuthority_SirenAndAgent_EmailIgnoreCase(String siren, String email);
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Profile p WHERE p.agent.uuid=?1 AND p" +
             ".localAuthority.uuid=?2 AND p.admin=true")
