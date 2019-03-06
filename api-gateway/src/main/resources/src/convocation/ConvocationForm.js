@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import { translate } from 'react-i18next'
-import { Segment, Form, TextArea, Grid, Button, Modal } from 'semantic-ui-react'
+import { Segment, Form, TextArea, Grid, Button } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import debounce from 'debounce'
 import moment from 'moment'
@@ -15,11 +15,10 @@ import { acceptFileDocumentConvocation } from '../_util/constants'
 import { withAuthContext } from '../Auth'
 
 import ConfirmModal from '../_components/ConfirmModal'
-import ChipsList from '../_components/ChipsList'
 import { Page, FormField, InputTextControlled, ValidationPopup, File, InputFile, LinkFile } from '../_components/UI'
 import InputValidation from '../_components/InputValidation'
 import QuestionsForm from './QuestionsForm'
-import RecipientForm from './RecipientForm'
+import AddRecipientsGuestsFormFragment from './_components/AddRecipientsGuestsFormFragment'
 import Breadcrumb from '../_components/Breadcrumb'
 
 class ConvocationForm extends Component {
@@ -30,7 +29,6 @@ class ConvocationForm extends Component {
 	}
 	state = {
 	    errorTypePointing: false,
-	    modalRecipentsOpened: false,
 	    modalGuestOpened: false,
 	    fields: {
 	        uuid: '',
@@ -185,17 +183,6 @@ class ConvocationForm extends Component {
 	                fields.recipients = json.recipients
 	                fields.location = json.location
 	                fields.useProcuration = json.useProcuration
-	                // if(fields.useProcuration) {
-	                //     _fetchWithAuthzHandling({url: '/api/convocation/local-authority/procuration'})
-	                //         .then(checkStatus)
-	                //         .then(response => response.json())
-	                //         .then(json => {
-	                //             fields.defaultProcuration = json
-	                //             this.setState({fields, delay: json.delay})
-	                //         })
-	                // } else {
-	                //     this.setState({fields, delay: json.delay})
-	                // }
 	                this.setState({fields, delay: json.delay})
 	            })
 	            .catch(response => {
@@ -211,18 +198,8 @@ class ConvocationForm extends Component {
 	        if (callback) callback()
 	    })
 	}
-	closeModal = () => {
-	    this.setState({modalGuestOpened: false, modalRecipentsOpened: false})
-	}
-	addUsers = (selectedUser, field) => {
-	    const fields = this.state.fields
-	    fields[field] = selectedUser
-	    this.setState({fields})
-	    this.closeModal()
-	}
-	deleteUsers = (field) => {
-	    const fields = this.state.fields
-	    fields[field] = []
+
+	updateUser = (fields) => {
 	    this.setState({fields})
 	}
 	updateQuestions = (questions) => {
@@ -402,88 +379,7 @@ class ConvocationForm extends Component {
 	                                    onChange={this.handleFieldChange} />
 	                            </FormField>
 	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='16'>
-	                            <Grid>
-	                                <Grid.Column computer='16'>
-	                                    <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
-	                                        label={t('convocation.fields.recipient')}>
-	                                        <Grid>
-	                                            <Grid.Column computer='8'>
-	                                                <Modal open={this.state.modalRecipentsOpened} trigger={<Button
-	                                                    onClick={() => this.setState({modalRecipentsOpened: true})}
-	                                                    type='button'
-	                                                    disabled={!this.state.fields.assemblyType}
-	                                                    id={`${this.state.fields.uuid}_recipient`}
-	                                                    compact basic primary>{t('convocation.new.add_recipients')}
-	                                                </Button>}>
-	                                                    <RecipientForm
-	                                                        onCloseModal={this.closeModal}
-	                                                        onAdded={(selectedUser) => this.addUsers(selectedUser, 'recipients')}
-	                                                        selectedUser={this.state.fields.recipients}
-	                                                        uuid={this.state.fields.assemblyType.uuid}>
-	                                                    </RecipientForm>
-	                                                </Modal>
-	                                            </Grid.Column>
-	                                            <Grid.Column computer='8'>
-	                                                <Button
-	                                                    type='button'
-	                                                    id={`${this.state.fields.uuid}_deleteRecipient`}
-	                                                    onClick={() => this.deleteUsers('recipients')}
-	                                                    compact basic color='red'>{t('convocation.new.delete_all_recipients')}
-	                                                </Button>
-	                                            </Grid.Column>
-	                                        </Grid>
-	                                    </FormField>
-	                                    <ChipsList
-	                                        list={this.state.fields.recipients}
-	                                        labelText='email'
-	                                        removable={false}
-	                                        viewMoreText={t('convocation.new.view_more_recipients', {number: this.state.fields.recipients.length})}
-	                                        viewLessText={t('convocation.new.view_less_recipients')}/>
-	                                </Grid.Column>
-	                            </Grid>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='16'>
-	                            <Grid>
-	                                <Grid.Column computer='16'>
-	                                    <FormField htmlFor={`${this.state.fields.uuid}_guest`}
-	                                        label={t('convocation.fields.guest')}>
-	                                        <Grid>
-	                                            <Grid.Column computer='8'>
-	                                                <Modal open={this.state.modalGuestOpened} trigger={<Button
-	                                                    onClick={() => this.setState({modalGuestOpened: true})}
-	                                                    type='button'
-	                                                    id={`${this.state.fields.uuid}_guest`}
-	                                                    compact basic primary>{t('convocation.new.edit_guest')}
-	                                                </Button>}>
-	                                                    <RecipientForm
-	                                                        onCloseModal={this.closeModal}
-	                                                        onAdded={(selectedUser) => this.addUsers(selectedUser, 'guests')}
-	                                                        userToDisabled={this.state.fields.recipients}
-	                                                        selectedUser={this.state.fields.guests}
-	                                                        uuid={this.state.fields.assemblyType.uuid}>
-	                                                    </RecipientForm>
-	                                                </Modal>
-	                                            </Grid.Column>
-	                                            <Grid.Column computer='8'>
-	                                                <Button
-	                                                    type='button'
-	                                                    id={`${this.state.fields.uuid}_deleteGuest`}
-	                                                    onClick={() => this.deleteUsers('guests')}
-	                                                    compact basic color='red'>{t('convocation.new.delete_all_guests')}
-	                                                </Button>
-	                                            </Grid.Column>
-	                                        </Grid>
-	                                    </FormField>
-	                                    <ChipsList
-	                                        list={this.state.fields.guests}
-	                                        labelText='email'
-	                                        removable={false}
-	                                        viewMoreText={t('convocation.new.view_more_guests', {number: this.state.fields.guests.length})}
-	                                        viewLessText={t('convocation.new.view_less_guests')}/>
-	                                </Grid.Column>
-	                            </Grid>
-	                        </Grid.Column>
+	                        <AddRecipientsGuestsFormFragment fields={this.state.fields} updateUser={this.updateUser} disabledRecipientsEdit={!this.state.fields.assemblyType}/>
 	                        {this.state.fields.useProcuration && (
 	                            <Fragment>
 	                                <Grid.Column mobile='16' computer='8'>

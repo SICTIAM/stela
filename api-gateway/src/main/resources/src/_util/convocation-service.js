@@ -96,6 +96,41 @@ export default class ConvocationService {
 	    }
 	}
 
+	updateConvocation = async (context, uuid, parameters) => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = context
+	    const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}`, method: 'PUT', body: JSON.stringify(parameters), context: context, headers: headers})
+	    } catch(error) {
+	        error.text().then(text => {
+	            if(text) {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
+	            } else {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.convocation.${error.status}`))
+	            }
+	        })
+	        throw error
+	    }
+	}
+
+	updateDocumentsConvocation = async (context, uuid, data) => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}/upload`, method: 'PUT', body: data, context: context})
+	    } catch(error) {
+	        error.text().then(text => {
+	            if(text) {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
+	            } else {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.convocation.${error.status}`))
+	            }
+	        })
+	        throw error
+	    }
+	}
+
 	cancelConvocation = async (context, uuid) => {
 	    const { _fetchWithAuthzHandling, _addNotification, t } = context
 

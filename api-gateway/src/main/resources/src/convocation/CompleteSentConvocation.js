@@ -5,9 +5,12 @@ import { Segment, Grid, Button, Form, TextArea } from 'semantic-ui-react'
 import accepts from 'attr-accept'
 
 import { notifications } from '../_util/Notifications'
-import { getLocalAuthoritySlug, checkStatus, handleFieldChange, extractFieldNameFromId } from '../_util/utils'
+import { getLocalAuthoritySlug, handleFieldChange, extractFieldNameFromId } from '../_util/utils'
 import { acceptFileDocumentConvocation } from '../_util/constants'
 import history from '../_util/history'
+import ConvocationService from '../_util/convocation-service'
+
+import AddRecipientsGuestsFormFragment from './_components/AddRecipientsGuestsFormFragment'
 
 import { withAuthContext } from '../Auth'
 import QuestionsForm from './QuestionsForm'
@@ -28,83 +31,92 @@ class CompleteSentConvocation extends Component {
 	    convocation: {
 	        uuid: '',
 	        meetingDate: '',
-	        assemblyType: {},
+	        assemblyType: null,
 	        location: '',
 	        comment: '',
 	        annexes: [],
 	        attachment: null,
 	        questions: [],
 	        recipientResponses: [],
+	        guestResponses: [],
 	        sentDate: null,
 	        subject: '',
 	        cancelled: false
 	    },
 	    initialRank: null,
 	    showAllAnnexes: false,
+	    defaultPart: {
+	        guests: [],
+	        recipients: []
+	    },
 	    fields: {
 	        annexes: [],
 	        questions: [],
-	        comment: ''
+	        comment: '',
+	        guests: [],
+	        recipients: []
 	    }
 	}
 
-	componentDidMount() {
-	    this.fetchConvocation()
+	componentDidMount = async() => {
+	    this._convocationService = new ConvocationService()
+	    await this.fetchConvocation()
 	}
 
-	fetchConvocation = () => {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
-	    const uuid = this.props.uuid
-	    _fetchWithAuthzHandling({ url: `/api/convocation/${uuid}`, method: 'GET' })
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then(json => {
-	            const initialRank = json.questions.length > 0 ? json.questions[json.questions.length-1].rank + 1 : 0
-	            const fields = this.state.fields
-	            fields.comment = json.comment
-	            this.setState({convocation: json, initialRank, fields })
-	        })
-	        .catch(response => {
-	            response.json().then(json => {
-	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	            })
-	        })
+	fetchConvocation = async() => {
+	    const convocationResponse = await this._convocationService.getSentConvocation(this.props.authContext, this.props.uuid)
+	    const initialRank = convocationResponse.questions.length > 0 ? convocationResponse.questions[convocationResponse.questions.length-1].rank + 1 : 0
+	    const { fields, defaultPart }  = this.state
+	    fields.comment = convocationResponse.comment
+	    //clone recipientResponses (contains guest and recipient response)
+	    const recipientResponse =  convocationResponse.recipientResponses.slice()
+	    //filter on recipient
+	    convocationResponse.recipientResponses = recipientResponse.filter((response) => {
+	        return response.guest === false
+	    })
+	    //filter on guest
+	    convocationResponse.guestResponses = recipientResponse.filter((response) => {
+	        return response.guest === true
+	    })
+
+	    defaultPart.recipients = convocationResponse.recipientResponses.map(response => {
+	        return response.recipient
+	    })
+
+	    defaultPart.guests = convocationResponse.guestResponses.map(response => {
+	        return response.recipient
+	    })
+
+	    this.setState({convocation: convocationResponse, initialRank, fields, defaultPart })
 	}
 
-	submit = () => {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	submit = async() => {
+	    const { _addNotification } = this.context
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 
 	    const parameters = Object.assign({}, this.state.fields)
 	    delete parameters.annexes
 
-	    const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
-	    _fetchWithAuthzHandling({url: `/api/convocation/${this.props.uuid}`, method: 'PUT', body: JSON.stringify(parameters), context: this.props.authContext, headers: headers})
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then(() => {
-	            const data = new FormData()
-	            if(this.state.fields.annexes.length > 0) {
-	                _addNotification(notifications.convocation.complet_with_document)
-	                this.state.fields.annexes.forEach(annexe => {
-	                    data.append('annexes', annexe)
-	                })
-	                _fetchWithAuthzHandling({url: `/api/convocation/${this.props.uuid}/upload`, method: 'PUT', body: data, context: this.props.authContext})
-	                	.then(checkStatus)
-	                	.then(() => {
-	                		_addNotification(notifications.convocation.complet)
-	                		history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
-	                	})
-	                .catch((error) => {
-	                	error.json().then(json => {
-	                		_addNotification(notifications.defaultError, 'notifications.title', json.message)
-	                	})
-	                })
-	            } else {
-	                _addNotification(notifications.convocation.complet)
-	                history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
-	            }
+	    parameters.guests.forEach((guest) => {
+	        guest.guest = true
+	        parameters.recipients.push(guest)
+	    })
+
+	    await this._convocationService.updateConvocation(this.props.authContext, this.props.uuid, parameters)
+
+	    if(this.state.fields.annexes.length > 0) {
+	        _addNotification(notifications.convocation.complet_with_document)
+	        const data = new FormData()
+	        this.state.fields.annexes.forEach(annexe => {
+	            data.append('annexes', annexe)
 	        })
+	        await this._convocationService.updateDocumentsConvocation(this.props.authContext, this.props.uuid, data)
+	        _addNotification(notifications.convocation.complet)
+	        history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
+	    } else {
+	        _addNotification(notifications.convocation.complet)
+	        history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
+	    }
 	}
 
 	updateQuestions = (questions) => {
@@ -140,13 +152,17 @@ class CompleteSentConvocation extends Component {
 	    this.setState({ fields })
 	}
 
+	updateUser = (fields) => {
+	    this.setState({fields})
+	}
+
 	goBack = () => {
 	    history.goBack()
 	}
 
 	render() {
 	    const { t } = this.context
-	    const { convocation } = this.state
+	    const { convocation, fields, defaultPart } = this.state
 
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.fields.annexes.length > 3 ? this.state.fields.annexes.slice(0,3) : this.state.fields.annexes
@@ -158,6 +174,8 @@ class CompleteSentConvocation extends Component {
 	                onDelete={() => this.deleteAnnexe(index)} />
 	        )
 	    })
+
+	    const fieldsToUpdateRecipients = Object.assign(fields, {uuid: convocation.uuid})
 
 	    const submissionButton =
 	        <Button type='submit' primary basic>
@@ -211,6 +229,7 @@ class CompleteSentConvocation extends Component {
 	                                </div>
 	                            )}
 	                        </Grid.Column>
+	                        <AddRecipientsGuestsFormFragment fields={fieldsToUpdateRecipients} updateUser={this.updateUser} userToDisabled={defaultPart}/>
 	                        <Grid.Column computer='16'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_comment`}
 	                                label={t('convocation.fields.comment')}>
