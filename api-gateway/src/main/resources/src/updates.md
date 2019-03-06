@@ -1,3 +1,13 @@
+### 07/03/2019
+
+#### Contrôle de légalité
+
+- Amélioration de la fonction d'apposition du tampon (cas d'actes ayant subi des rotations, ...)
+- Améliorations graphique et ergonomique des formulaires de dépôt
+- Ajout de traductions manquantes sur certains changements d'état
+- Amélioration des cas d'erreurs sur les transmissions de PES PJ depuis Ciril
+- Intégration de l'infrastructure de publication automatique en Open Data des délibérations
+
 ### 22/02/2019
 
 #### Général
