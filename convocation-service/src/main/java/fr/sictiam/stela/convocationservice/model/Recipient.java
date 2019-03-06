@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeSerializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -164,6 +165,10 @@ public class Recipient implements Comparable<Recipient> {
         this.guest = guest;
     }
 
+    public String getFullName() {
+        return StringUtils.capitalize(firstname.toLowerCase()) + " " + StringUtils.capitalize(lastname.toLowerCase());
+    }
+
     @Override public String toString() {
         return '{' +
                 "\"uuid\": \"" + uuid + "\"" +
@@ -172,6 +177,7 @@ public class Recipient implements Comparable<Recipient> {
                 ",\"email\": \"" + email + "\"" +
                 ",\"phoneNumber\": \"" + phoneNumber + "\"" +
                 ",\"active\": " + active +
+                ",\"token\": \"" + token + "\"" +
                 ",\"guest\": " + guest +
                 '}';
     }
