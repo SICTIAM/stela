@@ -48,6 +48,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.time.LocalDate;
@@ -634,7 +637,17 @@ public class ArchiveService implements ApplicationListener<ActeHistoryEvent> {
         donneesActe.setDate(acte.getDecision());
         donneesActe.setNumeroInterne(acte.getNumber());
         donneesActe.setClassificationDateVersion(acte.getLocalAuthority().getNomenclatureDate());
-        donneesActe.setObjet(acte.getObjet());
+
+        Charset utf8charset = Charset.forName("UTF-8");
+        Charset iso88591charset = Charset.forName("ISO-8859-1");
+        ByteBuffer inputBuffer = ByteBuffer.wrap(acte.getObjet().getBytes(utf8charset));
+        // decode UTF-8
+        CharBuffer data = utf8charset.decode(inputBuffer);
+        // encode ISO-8559-1
+        ByteBuffer outputBuffer = iso88591charset.encode(data);
+        byte[] outputData = outputBuffer.array();
+        donneesActe.setObjet(new String(outputData, iso88591charset));
+
         donneesActe.setDocumentPapier(acte.isMultipleChannels() ? "O" : "N");
 
         FichierSigne fichierSigne = new FichierSigne();
