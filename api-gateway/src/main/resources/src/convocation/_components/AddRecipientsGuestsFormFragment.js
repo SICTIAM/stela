@@ -46,7 +46,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 
 	render() {
 	    const { t } = this.context
-	    const { fields, userToDisabled } = this.props
+	    const { fields, userToDisabled, authContext } = this.props
 	    const guestsToDisabled = userToDisabled ? fields.recipients.slice().concat(userToDisabled.recipients, userToDisabled.guests) : fields.recipients.slice()
 
 	    return (
@@ -71,6 +71,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                                    onCloseModal={this.closeModal}
 	                                                    onAdded={(selectedUser) => this.addUsers(selectedUser, 'recipients')}
 	                                                    selectedUser={fields.recipients}
+	                                                    canCreateUser={authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1 && true}
 	                                                    userToDisabled = { userToDisabled && userToDisabled.recipients.concat(userToDisabled.guests) }
 	                                                    uuid={fields.assemblyType && fields.assemblyType.uuid}>
 	                                                </RecipientForm>
@@ -117,6 +118,8 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                                    onAdded={(selectedUser) => this.addUsers(selectedUser, 'guests')}
 	                                                    selectedUser={fields.guests}
 	                                                    userToDisabled={guestsToDisabled}
+	                                                    recipient={false}
+	                                                    canCreateUser={authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1 && true}
 	                                                    uuid={fields.assemblyType && fields.assemblyType.uuid}>
 	                                                </RecipientForm>
 	                                            </Modal>

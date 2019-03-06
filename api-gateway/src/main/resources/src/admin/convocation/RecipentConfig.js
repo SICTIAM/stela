@@ -1,10 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import Validator from 'validatorjs'
-import debounce from 'debounce'
 import moment from 'moment'
-import { Segment, Button, Form, Grid, Message, Confirm } from 'semantic-ui-react'
+import { Segment, Message } from 'semantic-ui-react'
 
 import { withAuthContext } from '../../Auth'
 
@@ -13,30 +11,18 @@ import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
 import ConvocationService from '../../_util/convocation-service'
 
+import UserFormFragment from '../../convocation/_components/UserFormFragment'
 import Breadcrumb from '../../_components/Breadcrumb'
-import { Page, ValidationPopup, FormField } from '../../_components/UI'
-import InputValidation from '../../_components/InputValidation'
+import { Page } from '../../_components/UI'
 
 class RecipentConfig extends Component {
 	static contextTypes = {
-	    csrfToken: PropTypes.string,
-	    csrfTokenHeaderName: PropTypes.string,
 	    t: PropTypes.func,
 	    _addNotification: PropTypes.func,
 	    _fetchWithAuthzHandling: PropTypes.func
 	}
-	validationRules = {
-	    firstname: 'required',
-	    lastname: 'required',
-	    // eslint-disable-next-line no-useless-escape
-	    email: ['required', 'regex:/^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/'],
-	    phoneNumber: ['regex:/^(0|\\+33)[1-9]([-. ]?[0-9]{2}){4}$/']
-	}
+
 	state = {
-	    formErrors: [],
-	    errorTypePointing: false,
-	    isFormValid: false,
-	    isConfirmModalOpen: false,
 	    fields: {
 	        uuid: null,
 	        firstname: '',
@@ -71,91 +57,22 @@ class RecipentConfig extends Component {
 	            })
 	    }
 	}
-	extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
-	handleFieldChange = (field, value, callback) => {
-	    //Set set for thid field
-	    field = this.extractFieldNameFromId(field)
-	    const fields = this.state.fields
-	    fields[field] = value
-	    this.setState({ fields: fields }, () => {
-	        this.validateForm()
-	        if (callback) callback()
-	    })
-	}
-	submitForm = async() => {
-	    const { _addNotification } = this.context
-	    const localAuthoritySlug = getLocalAuthoritySlug()
-	    const parameters = this.createBodyParams()
-	    _addNotification(notifications.admin.email_validation_in_progress)
-	    try {
-	        await this._convocationService.saveRecipient(this.props.authContext, parameters, this.state.fields.uuid, false)
-	        _addNotification(notifications.admin.email_validation_success)
-	        _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
-	        history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
-	    } catch(error) {
-	        if(error.status === 400) {
-	            this.setState({ isConfirmModalOpen: true })
-	        }
-	    }
-	}
-	forceSubmit = async() => {
-	    const { _addNotification } = this.context
 
-	    const localAuthoritySlug = getLocalAuthoritySlug()
-	    const parameters = this.createBodyParams()
-	    await this._convocationService.saveRecipient(this.props.authContext, parameters, this.state.fields.uuid, true)
-	    _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
-	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
-	}
 	createUrlApi = () => {
 	    return '/api/convocation/recipient' + (this.state.fields.uuid ? `/${this.state.fields.uuid}` : '')
 	}
-	createBodyParams = () => {
-	    const parameters = Object.assign({}, this.state.fields)
-	    delete parameters.uuid
-	    delete parameters.active
-	    delete parameters.assemblyTypes
-	    delete parameters.inactivityDate
-
-	    return JSON.stringify(parameters)
-	}
-	closeConfirmModal = () => this.setState({ isConfirmModalOpen: false })
-	confirm = () => {
-	    this.forceSubmit()
-	    this.closeConfirmModal()
-	}
-	cancel = () => {
+	onCancel = () => {
 	    history.goBack()
 	}
-	validateForm = debounce(() => {
-	    const { t } = this.context
-	    const data = {
-	        firstname: this.state.fields.firstname,
-	        lastname: this.state.fields.lastname,
-	        email: this.state.fields.email,
-	        phoneNumber: this.state.fields.phoneNumber
-	    }
-	    const attributeNames = {
-	        firstname: t('convocation.admin.modules.convocation.recipient.firstname'),
-	        lastname: t('convocation.admin.modules.convocation.recipient.lastname'),
-	        email: t('convocation.admin.modules.convocation.recipient.email'),
-	        phoneNumber: t('convocation.admin.modules.convocation.recipient.number')
-	    }
-	    const validationRules = this.validationRules
 
-	    const validation = new Validator(data, validationRules)
-	    validation.setAttributeNames(attributeNames)
-	    const isFormValid = validation.passes()
-	    const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
-	    this.setState({ isFormValid, formErrors })
-	}, 500)
+	onSubmit = () => {
+	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires`)
+	}
 
 	render () {
 	    const { t } = this.context
-	    const submissionButton =
-			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
-			    {t('api-gateway:form.send')}
-			</Button>
+
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const dataBreadcrumb = this.props.uuid ? [
 	        {title: t('api-gateway:breadcrumb.admin_home'), url: `/${localAuthoritySlug}/admin/ma-collectivite`},
@@ -169,13 +86,6 @@ class RecipentConfig extends Component {
 	    ]
 	    return (
 	        <Page>
-	            <Confirm
-	                open={this.state.isConfirmModalOpen}
-	                content={t('api-gateway:notifications.convocation.admin.email_validation.error')}
-	                confirmButton={t('api-gateway:form.confirm')}
-	                cancelButton={t('api-gateway:form.cancel')}
-	                onCancel={this.closeConfirmModal}
-	                onConfirm={this.confirm} />
 	            <Breadcrumb
 	                data={dataBreadcrumb}
 	            />
@@ -186,79 +96,10 @@ class RecipentConfig extends Component {
 	                </Message>
 	            )}
 	            <Segment>
-	                <Form onSubmit={this.submitForm}>
-	                    <Grid>
-	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_firstname`}
-	                                label={t('convocation.admin.modules.convocation.recipient_config.firstname')} required={true}>
-	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_firstname`}
-	                                    value={this.state.fields.firstname}
-	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.firstname}
-	                                    fieldName={t('convocation.admin.modules.convocation.recipient_config.firstname')}
-	                                    ariaRequired={true}
-	                                />
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_lastname`}
-	                                label={t('convocation.admin.modules.convocation.recipient_config.lastname')} required={true}>
-	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_lastname`}
-	                                    value={this.state.fields.lastname}
-	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.lastname}
-	                                    fieldName={t('convocation.admin.modules.convocation.recipient_config.lastname')}
-	                                    ariaRequired={true}
-	                                />
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_email`}
-	                                label={t('convocation.admin.modules.convocation.recipient_config.email')} required={true}>
-	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_email`}
-	                                    value={this.state.fields.email}
-	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.email}
-	                                    fieldName={t('convocation.admin.modules.convocation.recipient_config.email')}
-	                                    ariaRequired={true}
-	                                />
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_phoneNumber`}
-	                                label={t('convocation.admin.modules.convocation.recipient_config.phonenumber')}>
-	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_phoneNumber`}
-	                                    value={this.state.fields.phoneNumber}
-	                                    onChange={this.handleFieldChange}
-	                                    validationRule={this.validationRules.phoneNumber}
-	                                    fieldName={t('convocation.admin.modules.convocation.recipient_config.phonenumber')}
-	                                    ariaRequired={true}
-	                                />
-	                            </FormField>
-	                        </Grid.Column>
-	                    </Grid>
-	                    <div className='footerForm'>
-	                        {this.state.fields.uuid && (
-	                            <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.cancel(e)} basic color='red'>
-	                                {t('api-gateway:form.cancel')}
-	                            </Button>
-	                        )}
-	                        {this.state.formErrors.length > 0 &&
-								<ValidationPopup errorList={this.state.formErrors}>
-								    {submissionButton}
-								</ValidationPopup>
-	                        }
-	                        {this.state.formErrors.length === 0 && submissionButton}
-	                    </div>
-	                </Form>
+	                <UserFormFragment
+	                    onSubmit={this.onSubmit}
+	                    onCancel={this.onCancel}
+	                    fields={this.state.fields}/>
 	            </Segment>
 	        </Page>
 	    )
