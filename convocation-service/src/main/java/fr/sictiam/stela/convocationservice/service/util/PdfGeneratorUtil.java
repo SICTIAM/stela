@@ -7,6 +7,7 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
@@ -42,20 +43,36 @@ public class PdfGeneratorUtil {
         PdfReader reader = new PdfReader(pdf);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfStamper stamp = new PdfStamper(reader, baos, '\0', true);
-        stamp.setRotateContents(false);
 
         BaseColor color = new BaseColor(43, 43, 43);
         com.itextpdf.text.Rectangle mediabox = reader.getBoxSize(1, "media");
 
         int pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
         int pixelPositionY = 0;
-        if (pdfIsRotated(reader)) {
-            //rotate axes for PDF landscape
-            pixelPositionY = Math.round((percentPositionX) * mediabox.getHeight() / 100);
+        if (pdfIsLandscape(reader)) {
+            if (isNativeLandscape(reader)) {
+                //landscape document
+                stamp.setRotateContents(false);
+                pixelPositionX = Math.round((percentPositionX) * mediabox.getWidth() / 100);
+                pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
+            } else {
+                //PDF portrait doc which had been rotated to Landscape
+                stamp.setRotateContents(false);
+                pixelPositionX = Math.round((percentPositionY) * mediabox.getWidth() / 100);
+                pixelPositionY = Math.round((percentPositionX) * mediabox.getHeight() / 100);
+
+            }
         } else {
-            // Hack because the iTextPDF origin is at the lower-left, but the front is at
-            // the top-left
-            pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
+            if (!isNativeLandscape(reader)) {
+                // Hack because the iTextPDF origin is at the lower-left, but the front is at
+                // the top-leff
+                pixelPositionX = Math.round(percentPositionX * mediabox.getWidth() / 100);
+                pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
+            } else {
+                //PDF Landscape doc which had been rotated to Portrait
+                pixelPositionX = Math.round(percentPositionX * mediabox.getHeight() / 100);
+                pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getWidth() / 100) - 50;
+            }
         }
 
 
@@ -115,8 +132,26 @@ public class PdfGeneratorUtil {
     }
 
 
-    public boolean pdfIsRotated(PdfReader pdfReader) {
-        return pdfReader.getPageRotation(1) != 0 && pdfReader.getPageRotation(1) % 90 == 0;
+    public boolean pdfIsLandscape(PdfReader pdfReader) {
+        Rectangle mediabox = pdfReader.getBoxSize(1, "media");
+        float width = mediabox.getWidth();
+        float height = mediabox.getHeight();
+        int rot = pdfReader.getPageRotation(1);
+        boolean orientationHasChanged = rot != 0 && (rot % 90 == 0 && (rot / 90) % 2 != 0);
+
+        if (isNativeLandscape(pdfReader)) {
+            return !orientationHasChanged;
+        } else {
+            return orientationHasChanged;
+        }
     }
+
+    public boolean isNativeLandscape(PdfReader pdfReader) {
+        Rectangle mediabox = pdfReader.getBoxSize(1, "media");
+        float width = mediabox.getWidth();
+        float height = mediabox.getHeight();
+        return width > height;
+    }
+
 
 }

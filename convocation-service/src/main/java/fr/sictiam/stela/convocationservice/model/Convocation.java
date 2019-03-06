@@ -1,8 +1,6 @@
 package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
@@ -44,12 +42,12 @@ public class Convocation {
     @JsonView(Views.ConvocationInternal.class)
     private Set<Attachment> annexes;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL)
     @JsonView(Views.ConvocationInternal.class)
     @OrderBy("rank ASC")
     private SortedSet<Question> questions;
 
-    @OneToMany(mappedBy = "convocation")
+    @OneToMany(mappedBy = "convocation", fetch = FetchType.EAGER)
     @JsonView(Views.ConvocationReceived.class)
     @SortComparator(RecipientResponseComparator.class)
     private SortedSet<RecipientResponse> recipientResponses;
@@ -269,17 +267,27 @@ public class Convocation {
     }
 
     @Override public String toString() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writerWithView(Views.ConvocationInternal.class).writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "[ uuid: " + uuid +
-                    ", subject: " + subject +
-                    ", comment: " + comment +
-                    ", location: " + location +
-                    ", creation: " + creationDate +
-                    ", meetingDate: " + meetingDate + "]";
-        }
+        return "{" +
+                "\"uuid\": " + uuid + '\'' +
+                ", \"assemblyType\": \"" + assemblyType +
+                ", \"attachment\": \"" + attachment +
+                ", \"procuration\": \"" + procuration +
+                ", \"annexes\": \"" + annexes +
+                ", \"questions\": \"" + questions +
+                ", \"recipientResponses\": \"" + recipientResponses +
+                ", \"histories\": \"" + histories +
+                ", \"creationDate\": \"" + creationDate +
+                ", \"meetingDate\": \"" + meetingDate +
+                ", \"sentDate\": \"" + sentDate +
+                ", \"localAuthority\": \"" + localAuthority +
+                ", \"location\": \"'" + location + '\'' +
+                ", \"subject\": \"'" + subject + '\'' +
+                ", \"comment\": \"'" + comment + '\'' +
+                ", \"profileUuid\": \"'" + profileUuid + '\'' +
+                ", \"cancelled\": \"" + cancelled +
+                ", \"cancellationDate\": \"" + cancellationDate +
+                ", \"profile\": \"" + profile +
+                ", \"recipients\": \"" + recipients +
+                '}';
     }
 }

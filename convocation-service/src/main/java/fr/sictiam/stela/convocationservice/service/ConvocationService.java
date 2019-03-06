@@ -10,6 +10,7 @@ import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
 import fr.sictiam.stela.convocationservice.model.*;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
@@ -125,15 +126,13 @@ public class ConvocationService {
         convocation.setProfileUuid(profileUuid);
         convocation.setLocalAuthority(localAuthority);
 
-        // TEMPORARY : changed when mail will be sent
-        convocation.setSentDate(LocalDateTime.now());
-
         convocation = convocationRepository.saveAndFlush(convocation);
 
         createRecipientResponse(convocation);
 
         convocation = convocationRepository.save(convocation);
         addHistory(convocation, HistoryType.CREATED);
+        applicationEventPublisher.publishEvent(new ConvocationCreatedEvent(this, convocation));
         return convocation;
     }
 
@@ -141,7 +140,6 @@ public class ConvocationService {
         convocation.getRecipientResponses().addAll(
                 convocation.getRecipients().stream().map(recipient -> {
                     RecipientResponse recipientResponse = new RecipientResponse(recipient, convocation);
-                    recipientResponse.setGuest(recipient.isGuest());
                     recipientResponseRepository.save(recipientResponse);
                     return recipientResponse;
                 }).collect(Collectors.toSet()));
@@ -175,7 +173,6 @@ public class ConvocationService {
             convocation.getRecipientResponses().addAll(
                     params.getRecipients().stream().map(recipient -> {
                         RecipientResponse recipientResponse = new RecipientResponse(recipient, convocation);
-                        recipientResponse.setGuest(recipient.isGuest());
                         recipientResponseRepository.save(recipientResponse);
                         return recipientResponse;
                     }).collect(Collectors.toSet()));
@@ -284,7 +281,7 @@ public class ConvocationService {
 
         PdfReader pdfReader = new PdfReader(content);
         if (x == null || y == null) {
-            if (pdfGeneratorUtil.pdfIsRotated(pdfReader)) {
+            if (pdfGeneratorUtil.pdfIsLandscape(pdfReader)) {
                 //landscape case
                 y = localAuthority.getStampPosition().getX();
                 x = localAuthority.getStampPosition().getY();
@@ -378,6 +375,13 @@ public class ConvocationService {
         }
         questionResponse.setResponse(response);
         questionResponseRepository.save(questionResponse);
+    }
+
+    public void convocationSent(Convocation convocation) {
+        if (convocation != null && convocation.getUuid() != null) {
+            convocationRepository.setSentDate(convocation.getUuid(), LocalDateTime.now());
+            addHistory(convocation, HistoryType.SENT);
+        }
     }
 
     public Profile retrieveProfile(String profileUuid) {
@@ -637,7 +641,6 @@ public class ConvocationService {
     }
 
     private void addHistory(Convocation convocation, HistoryType type, String message) {
-        LOGGER.info("Publish event {} | {}", type, message);
         applicationEventPublisher.publishEvent(new HistoryEvent(this, convocation, type, message));
     }
 }

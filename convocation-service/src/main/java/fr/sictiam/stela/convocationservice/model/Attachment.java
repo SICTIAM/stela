@@ -113,4 +113,13 @@ public class Attachment {
     public void setAdditional(boolean additional) {
         this.additional = additional;
     }
+
+    @Override public String toString() {
+        return "{" +
+                "\"uuid\": \"" + uuid + "\"" +
+                ", \"filename\": \"'" + filename + "\"" +
+                ", \"size\": \"" + size +
+                ", \"storageKey\": \"'" + storageKey + "\"" +
+                '}';
+    }
 }

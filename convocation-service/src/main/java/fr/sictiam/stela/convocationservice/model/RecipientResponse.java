@@ -59,6 +59,7 @@ public class RecipientResponse implements Comparable<RecipientResponse> {
     public RecipientResponse(Recipient recipient, Convocation convocation) {
         this.recipient = recipient;
         this.convocation = convocation;
+        guest = recipient.isGuest();
     }
 
     public RecipientResponse(Recipient recipient, Recipient substituteRecipient, Convocation convocation,
