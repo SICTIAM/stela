@@ -81,7 +81,7 @@ class SentConvocation extends Component {
 	render() {
 	    const { t } = this.context
 	    const { convocation } = this.state
-	    const dropdownButton = <Button basic color='primary'>{t('convocation.page.presence_list')}</Button>
+	    const dropdownButton = <Button basic primary>{t('convocation.page.presence_list')}</Button>
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    return (
 	        <Page>

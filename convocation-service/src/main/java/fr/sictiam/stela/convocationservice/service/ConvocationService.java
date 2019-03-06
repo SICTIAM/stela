@@ -163,12 +163,19 @@ public class ConvocationService {
             addHistory(convocation, HistoryType.COMMENT_MODIFIED);
         }
 
+        // Remove recipients that already an associated RecipientResponse
+        if (params.getRecipients() != null) {
+            params.setRecipients(params.getRecipients().stream()
+                    .filter(recipient -> convocation.getRecipientResponses().stream().noneMatch(recipientResponse -> recipient.equals(recipientResponse.getRecipient())))
+                    .collect(Collectors.toSet()));
+        }
+
         // Create recipient responses
         if (params.getRecipients() != null && params.getRecipients().size() > 0) {
             convocation.getRecipientResponses().addAll(
                     params.getRecipients().stream().map(recipient -> {
-                        RecipientResponse recipientResponse = new RecipientResponse(recipient);
-                        recipientResponse.setConvocation(convocation);
+                        RecipientResponse recipientResponse = new RecipientResponse(recipient, convocation);
+                        recipientResponse.setGuest(recipient.isGuest());
                         recipientResponseRepository.save(recipientResponse);
                         return recipientResponse;
                     }).collect(Collectors.toSet()));
