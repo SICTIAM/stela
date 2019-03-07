@@ -153,6 +153,7 @@ class ActeLocalAuthorityParams extends Component {
                 })
             })
     }
+
     render() {
         const { t } = this.context
         const profiles = this.state.profiles.map(profile => {
