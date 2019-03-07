@@ -186,7 +186,7 @@ export default class InputValidation extends Component {
 
                         )}
                         {maxChar &&
-                        <Grid.Column streched floated={'right'} textAlign={'right'} width={4}>
+                        <Grid.Column stretched floated={'right'} textAlign={'right'} width={4}>
                             <p style={value.length > maxChar || value.length===0 ? styles.errorMessage : styles.messageForm}>{value.length}/{maxChar}</p>
                         </Grid.Column>
                         }

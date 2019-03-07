@@ -116,7 +116,8 @@ class NewActeForm extends Component {
     }
     componentWillUnmount() {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
-        if (this.state.fields.draft && this.props.shouldUnmount) {
+        const {fields} = this.state
+        if (fields.draft && fields.draft.uuid && fields.uuid && this.props.shouldUnmount) {
             const acteData = this.getActeData()
             const headers = { 'Content-Type': 'application/json' }
             const url = `/api/acte/drafts/${this.state.fields.draft.uuid}/${this.state.fields.uuid}/leave`
@@ -144,7 +145,7 @@ class NewActeForm extends Component {
     updateGroup = () => {
         const { fields, groups } = this.state
         if (!fields.groupUuid) {
-            fields.groupUuid = groups.length > 0 ? groups[0].uuid : 'all_group'
+            fields.groupUuid = groups[0].uuid
             this.setState({ fields })
         }
     }
@@ -156,7 +157,6 @@ class NewActeForm extends Component {
         } else {
             acteData['decision'] = moment(acteData['decision']).format('YYYY-MM-DD')
         }
-        if (acteData['groupUuid'] === 'all_group') acteData['groupUuid'] = ''
         return acteData
     }
     extractFieldNameFromId = (str) => str.split('_').slice(-1)[0]
@@ -428,9 +428,6 @@ class NewActeForm extends Component {
         const groupOptions = this.state.groups.map(group =>
             ({ key: group.uuid, value: group.uuid, text: group.name })
         )
-        // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
-        groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
-        const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
         const acceptFile = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.xml' : '.pdf, .jpg, .png'
         const acceptAnnexes = this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' ? '.pdf, .jpg, .png' : '.pdf, .xml, .jpg, .png'
         const submissionButton =
@@ -461,7 +458,7 @@ class NewActeForm extends Component {
                                 </FormField>
                             </Grid.Column>
                         )}
-                        <Grid.Column mobile={16} tablet={16} computer={!isBatchActe ? 6 : 8 }>
+                        <Grid.Column mobile={16} tablet={16} computer={!isBatchActe ? 6 : 16 }>
                             <FormField htmlFor={`${this.state.fields.uuid}_number`} label={t('acte.fields.number')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_number`}
                                     maxChar={15}
@@ -479,7 +476,7 @@ class NewActeForm extends Component {
                                 <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('acte.fields.group')}
                                     helpText={t('acte.help_text.group')} required>
                                     <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
-                                        value={groupOptionValue}
+                                        value={this.state.fields.groupUuid}
                                         onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
                                         options={groupOptions}
                                         fluid selection />
@@ -489,7 +486,7 @@ class NewActeForm extends Component {
 
 
                         {!isBatchActe && (
-                            <Grid.Column mobile={16} tablet={16} computer={8}>
+                            <Grid.Column mobile={16} tablet={16} computer={16}>
                                 <FormField htmlFor={`${this.state.fields.uuid}_nature`} label={t('acte.fields.nature')} required>
                                     <InputValidation id={`${this.state.fields.uuid}_nature`}
                                         type='dropdown'
@@ -508,7 +505,7 @@ class NewActeForm extends Component {
                         )}
 
 
-                        <Grid.Column mobile={16} tablet={16} computer={8}>
+                        <Grid.Column mobile={16} tablet={16} computer={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_code`} label={t('acte.fields.code')} helpText={t('acte.help_text.code')} required>
                                 <InputValidation id={`${this.state.fields.uuid}_code`}
                                     type='dropdown'
@@ -673,7 +670,7 @@ NewActeForm.propTypes = {
     groupeUuid: PropTypes.string,
     setField: PropTypes.func,
     shouldUnmount: PropTypes.bool,
-    active: PropTypes.bool,
+    active: PropTypes.string,
     setStatus: PropTypes.func,
     status: PropTypes.string,
     setFormValidForId: PropTypes.func,

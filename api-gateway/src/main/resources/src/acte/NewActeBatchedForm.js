@@ -14,6 +14,7 @@ import {bytesToSize, getLocalAuthoritySlug, toUniqueArray} from '../_util/utils'
 import NewActeForm from './NewActeForm'
 import {maxArchiveSize, natures} from '../_util/constants'
 import { withAuthContext } from '../Auth'
+import AdminService from '../_util/admin-service'
 
 class NewActeBatchedForm extends Component {
     static contextTypes = {
@@ -24,7 +25,7 @@ class NewActeBatchedForm extends Component {
         _fetchWithAuthzHandling: PropTypes.func
     }
     state = {
-        active: 0,
+        active: null,
         fields: {
             uuid: '',
             actes: [],
@@ -48,9 +49,14 @@ class NewActeBatchedForm extends Component {
         nature: 'required',
         decision: ['required', 'date']
     }
-    componentDidMount() {
+    componentDidMount = async () => {
+        this._adminService = new AdminService()
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = this.props.uuid ? '/api/acte/drafts/' + this.props.uuid : '/api/acte/draft/batch'
+
+        const groups = await this._adminService.getGroups(this.context)
+        this.setState({ groups })
+
         _fetchWithAuthzHandling({ url })
             .then(response => response.json())
             .then(json =>
@@ -61,15 +67,7 @@ class NewActeBatchedForm extends Component {
                 })
             )
             .catch(response => {
-                response.json().then(json => {
-                    _addNotification(notifications.defaultError, 'notifications.acte.title', json.message)
-                })
-            })
-        _fetchWithAuthzHandling({ url: '/api/admin/profile/groups' })
-            .then(response => response.json())
-            .then(json => this.setState({ groups: json }))
-            .catch(response => {
-                response.json().then(json => _addNotification(notifications.defaultError, 'notifications.acte.title', json.message))
+                _addNotification(notifications.defaultError, 'notifications.acte.title', response.message)
             })
     }
     componentWillUnmount() {
@@ -84,7 +82,6 @@ class NewActeBatchedForm extends Component {
         } else {
             draft.decision = moment(draft)
         }
-        if (draft.groupUuid === '') draft.groupUuid = 'all_group'
         this.setState({ fields: draft }, callback)
     }
     getDraftData = () => {
@@ -95,7 +92,6 @@ class NewActeBatchedForm extends Component {
         } else {
             draftData['decision'] = moment(draftData['decision']).format('YYYY-MM-DD')
         }
-        if (draftData['groupUuid'] === 'all_group') draftData['groupUuid'] = ''
         return draftData
     }
     addBatchedActe = () => {
@@ -143,7 +139,7 @@ class NewActeBatchedForm extends Component {
             })
     }
     handleClick = (uuid) => {
-        const newActive = this.state.active !== uuid ? uuid : 0
+        const newActive = this.state.active !== uuid ? uuid : null
         this.setState({ active: newActive })
     }
     handleFieldChange = (field, value) => {
@@ -201,7 +197,7 @@ class NewActeBatchedForm extends Component {
     updateGroup = () => {
         if (this.state.fields.groupUuid === null) {
             const { fields } = this.state
-            fields.groupUuid = this.state.groups.length > 0 ? this.state.groups[0].uuid : 'all_group'
+            fields.groupUuid = this.state.groups[0].uuid
             this.setState({ fields })
         }
     }
@@ -284,9 +280,6 @@ class NewActeBatchedForm extends Component {
         )
         let errorList = []
         Object.values(this.state.formErrors).forEach(acteErrors => errorList = toUniqueArray([...errorList, ...acteErrors]))
-        // Hack : semantic ui dropdown doesn't support empty value yet (https://github.com/Semantic-Org/Semantic-UI-React/issues/1748)
-        groupOptions.push({ key: 'all_group', value: 'all_group', text: t('acte.new.every_group') })
-        const groupOptionValue = this.state.fields.groupUuid === null ? groupOptions[0].value : this.state.fields.groupUuid
         const wrappedActes = this.state.fields.actes.map(acte =>
             <WrappedActeForm
                 key={acte.uuid}
@@ -343,7 +336,7 @@ class NewActeBatchedForm extends Component {
                             <Grid.Column>
                                 <FormField htmlFor={'groupUuid'} label={t('acte.fields.group')} helpText={t('acte.help_text.group')} required>
                                     <Dropdown id='groupUuid'
-                                        value={groupOptionValue}
+                                        value={this.state.fields.groupUuid}
                                         onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
                                         options={groupOptions}
                                         fluid selection />
