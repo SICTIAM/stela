@@ -48,7 +48,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	    const { t } = this.context
 	    const { fields, userToDisabled, authContext } = this.props
 	    const guestsToDisabled = userToDisabled ? fields.recipients.slice().concat(userToDisabled.recipients, userToDisabled.guests) : fields.recipients.slice()
-
+	    const canCreateUser = authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1
 	    return (
 	        <Fragment>
 	            <Segment>
@@ -71,7 +71,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                                    onCloseModal={this.closeModal}
 	                                                    onAdded={(selectedUser) => this.addUsers(selectedUser, 'recipients')}
 	                                                    selectedUser={fields.recipients}
-	                                                    canCreateUser={authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1 && true}
+	                                                    canCreateUser={canCreateUser}
 	                                                    userToDisabled = { userToDisabled && userToDisabled.recipients.concat(userToDisabled.guests) }
 	                                                    uuid={fields.assemblyType && fields.assemblyType.uuid}>
 	                                                </RecipientForm>
@@ -119,7 +119,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                                    selectedUser={fields.guests}
 	                                                    userToDisabled={guestsToDisabled}
 	                                                    recipient={false}
-	                                                    canCreateUser={authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1 && true}
+	                                                    canCreateUser={canCreateUser}
 	                                                    uuid={fields.assemblyType && fields.assemblyType.uuid}>
 	                                                </RecipientForm>
 	                                            </Modal>
