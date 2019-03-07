@@ -192,10 +192,43 @@ class CompleteSentConvocation extends Component {
 	                        {title: t('api-gateway:breadcrumb.convocation.sent_convocation')},
 	                    ]}
 	            />
-	            <Segment>
-	                <SentConvocationFragment convocation={convocation}/>
+	            <SentConvocationFragment convocation={convocation}/>
 	                <Form onSubmit={this.submit}>
+	                {/* Comments */}
+	                <Segment>
 	                    <h2>{t('convocation.page.additional_information')}</h2>
+	                    <Grid>
+	                        <Grid.Column computer='16'>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_comment`}
+	                                label={t('convocation.fields.comment')}>
+	                                <InputTextControlled component={TextArea}
+	                                    id={`${this.state.fields.uuid}_comment`}
+	                                    maxLength={250}
+	                                    style={{ minHeight: '3em' }}
+	                                    placeholder={`${t('convocation.fields.comment')}...`}
+	                                    value={this.state.fields.comment}
+	                                    onChange={(id, value) => handleFieldChange(this, extractFieldNameFromId(id), value)} />
+	                            </FormField>
+	                        </Grid.Column>
+	                    </Grid>
+	                </Segment>
+	                {/* Questions */}
+	                <Segment>
+	                    <Grid>
+	                        <Grid.Column mobile='16' computer='16'>
+	                            {this.state.initialRank !== null && (
+	                                <QuestionsForm
+	                                    editable={true}
+	                                    questions={this.state.fields.questions}
+	                                    initialRank={this.state.initialRank}
+	                                    onUpdateQuestions={this.updateQuestions}
+	                                    uuid={this.state.convocation.uuid}/>
+	                            )}
+	                        </Grid.Column>
+	                    </Grid>
+	                </Segment>
+	                {/* Documents */}
+	                <Segment>
 	                    <Grid>
 	                        <Grid.Column computer='16'>
 	                            <FormField htmlFor={`${this.state.convocation.uuid}_annexes`}
@@ -229,38 +262,17 @@ class CompleteSentConvocation extends Component {
 	                                </div>
 	                            )}
 	                        </Grid.Column>
-	                        <AddRecipientsGuestsFormFragment fields={fieldsToUpdateRecipients} updateUser={this.updateUser} userToDisabled={defaultPart}/>
-	                        <Grid.Column computer='16'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_comment`}
-	                                label={t('convocation.fields.comment')}>
-	                                <InputTextControlled component={TextArea}
-	                                    id={`${this.state.fields.uuid}_comment`}
-	                                    maxLength={250}
-	                                    style={{ minHeight: '3em' }}
-	                                    placeholder={`${t('convocation.fields.comment')}...`}
-	                                    value={this.state.fields.comment}
-	                                    onChange={(id, value) => handleFieldChange(this, extractFieldNameFromId(id), value)} />
-	                            </FormField>
-	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='16'>
-	                            {this.state.initialRank !== null && (
-	                                <QuestionsForm
-	                                	editable={true}
-	                                	questions={this.state.fields.questions}
-	                                	initialRank={this.state.initialRank}
-	                                	onUpdateQuestions={this.updateQuestions}
-	                                	uuid={this.state.convocation.uuid}/>
-	                            )}
-	                        </Grid.Column>
 	                    </Grid>
-	                    <div className='footerForm'>
-	                        <Button type="button" style={{ marginRight: '1em' }} onClick={this.goBack} basic color='red'>
-	                            {t('api-gateway:form.cancel')}
-	                        </Button>
-	                        {submissionButton}
-	                    </div>
-	                </Form>
-	            </Segment>
+	                </Segment>
+	                {/* Recipients and Guests */}
+	                <AddRecipientsGuestsFormFragment fields={fieldsToUpdateRecipients} updateUser={this.updateUser} userToDisabled={defaultPart}/>
+	                <div className='footerForm'>
+	                    <Button type="button" style={{ marginRight: '1em' }} onClick={this.goBack} basic color='red'>
+	                        {t('api-gateway:form.cancel')}
+	                    </Button>
+	                    {submissionButton}
+	                </div>
+	            </Form>
 	        </Page>
 	    )
 	}

@@ -1,5 +1,5 @@
 /* eslint-disable default-case */
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
 import { Segment, Grid, Button, Radio, Form, Message } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
@@ -156,8 +156,8 @@ class ReceivedConvocation extends Component {
 	                    <p>{t('convocation.page.cancelled_convocation_text', {date: moment(this.state.convocation.cancellationDate).format('DD/MM/YYYY')})}</p>
 	                </Message>
 	            )}
-	            <Segment>
-	                <Form>
+	            <Form className='mt-14'>
+	            	<Segment>
 	                    <h2>{this.state.convocation.subject}</h2>
 	                    <Grid reversed='mobile tablet vertically'>
 	                        <Grid.Column mobile='16' tablet='16' computer='12'>
@@ -211,7 +211,9 @@ class ReceivedConvocation extends Component {
 	                        </Grid.Column>
 	                        <InformationBlockConvocation convocation={this.state.convocation}/>
 	                    </Grid>
-	                    <SenderInformation convocation={this.state.convocation}/>
+	                </Segment>
+	                <SenderInformation convocation={this.state.convocation}/>
+	                <Segment>
 	                    <h2>{t('convocation.page.my_answer')}</h2>
 	                    <FormFieldInline htmlFor='presentQuestion'
 	                        label={t('convocation.page.present_question')}>
@@ -270,8 +272,9 @@ class ReceivedConvocation extends Component {
 
 	                        </div>
 	                    )}
+	                </Segment>
 	                    {this.state.convocation.questions.length > 0 && (
-	                        <Fragment>
+	                        <Segment>
 	                            <h2>{t('convocation.fields.questions')}</h2>
 	                            <Grid column='1'>
 	                                <Grid.Column mobile='16' computer='16'>
@@ -281,11 +284,9 @@ class ReceivedConvocation extends Component {
 	                                        handleChangeRadio={(e, value, uuid) => this.handleChangeRadio(e, value, 'additional_questions', uuid)}></QuestionsAnswerForm>
 	                                </Grid.Column>
 	                            </Grid>
-	                        </Fragment>
+	                        </Segment>
 	                    )}
-
-	                </Form>
-	            </Segment>
+	            </Form>
 	        </Page>
 	    )
 	}

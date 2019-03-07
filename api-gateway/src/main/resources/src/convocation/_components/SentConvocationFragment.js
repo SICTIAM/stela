@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react'
-import { Grid, Button } from 'semantic-ui-react'
+import { Grid, Button, Segment } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 
@@ -49,7 +49,8 @@ class SentConvocationFragment extends Component {
 
 	    return (
 	        <Fragment>
-	                <h2>{convocation.subject}</h2>
+	            <Segment>
+	            	<h2>{convocation.subject}</h2>
 	                <Grid reversed='mobile tablet vertically'>
 	                    <Grid.Column mobile='16' tablet='16' computer='12'>
 	                        <Grid>
@@ -105,7 +106,8 @@ class SentConvocationFragment extends Component {
 	                    </Grid.Column>
 	                    <InformationBlockConvocation convocation={convocation}/>
 	                </Grid>
-	                <SenderInformation convocation={convocation}/>
+	            </Segment>
+	            <SenderInformation convocation={convocation}/>
 	        </Fragment>
 	    )
 	}

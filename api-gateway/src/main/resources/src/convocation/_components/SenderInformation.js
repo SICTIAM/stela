@@ -1,7 +1,7 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import { Grid } from 'semantic-ui-react'
+import { Grid, Segment } from 'semantic-ui-react'
 
 import { Field, FieldValue } from '../../_components/UI'
 import { convertDateBackFormatToUIFormat } from '../../_util/utils'
@@ -15,7 +15,7 @@ class SenderInformation extends Component {
 	    const { t } = this.context
 	    const { convocation } = this.props
 	    return (
-	        <Fragment>
+	        <Segment>
 	            <h2>{t('convocation.page.sent')}</h2>
 	                <Grid columns='2'>
 	                    <Grid.Column mobile='16' tablet='8' computer='6'>
@@ -29,7 +29,7 @@ class SenderInformation extends Component {
 	                        </Field>
 	                    </Grid.Column>
 	                </Grid>
-	        </Fragment>
+	        </Segment>
 	    )
 	}
 }
