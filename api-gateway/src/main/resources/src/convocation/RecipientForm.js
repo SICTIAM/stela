@@ -1,14 +1,12 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Button, Modal, /*Tab, Form, Grid*/ } from 'semantic-ui-react'
+import { Button, Modal, Tab } from 'semantic-ui-react'
 
-import { checkStatus } from '../_util/utils'
-import { notifications } from '../_util/Notifications'
+import ConvocationService from '../_util/convocation-service'
 
-// import { FormField } from '../_components/UI'
-// import InputValidation from '../_components/InputValidation'
 import StelaTable from '../_components/StelaTable'
+import UserFormFragment from './_components/UserFormFragment'
 
 class RecipientForm extends Component {
 	static contextTypes = {
@@ -16,63 +14,45 @@ class RecipientForm extends Component {
 	    _fetchWithAuthzHandling: PropTypes.func,
 	    _addNotification: PropTypes.func,
 	}
+	static propTypes = {
+	    selectedUser: PropTypes.array,
+	    uuid: PropTypes.string,
+	    recipient: PropTypes.bool,
+	    userToDisabled: PropTypes.array,
+	    canCreateUser: PropTypes.bool
+	}
 	static defaultProps = {
 	    selectedUser: [],
 	    uuid: null,
 	    recipient: true,
-	    userToDisabled: []
+	    userToDisabled: [],
+	    canCreateUser: false
 	}
 	state = {
 	    selectedUser: [],
-	    users: [],
-	    // newUser: {
-	    //     email: '',
-	    //     firstName: '',
-	    //     lastName: ''
-	    // }
+	    users: []
 	}
-	componentDidMount() {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
-	    if(!this.props.uuid && this.props.recipient) {
-	        _fetchWithAuthzHandling({ url: '/api/convocation/local-authority/recipients'})
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then(json => {
-	                let users = json
-	                if(this.props.userToDisabled.length > 0) {
-	                    users = json.filter((user) => {
-	                        return !this.props.userToDisabled.some(userDisabled => {
-	                            return userDisabled.uuid === user.uuid
-	                        })
-	                    })
-	                }
-	            this.setState({users: users})
-	        })
-	    } else if(this.props.uuid && this.props.recipient){
-	        _fetchWithAuthzHandling({url: `/api/convocation/assembly-type/${this.props.uuid}/recipients`, method: 'GET'})
-	            .then(checkStatus)
-	            .then(response => response.json())
-	            .then(json => this.setState({users: json}))
-	            .catch(response => {
-	                response.json().then(json => {
-	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	                })
-	            })
-	    } else {
-	        // _fetchWithAuthzHandling({ url: '/api/convocation/local-authority/recipients'})
-	        // .then(checkStatus)
-	        // .then(response => response.json())
-	        // .then(json => {
-	        //     this.setState({users: json})
-	        // })
-	        // .catch(response => {
-	        //     response.json().then(json => {
-	        //         _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	        //     })
-	        // })
-	    }
+	componentDidMount = async() => {
+	    this._convocationService = new ConvocationService()
 	    this.setState({selectedUser: this.props.selectedUser})
+	    await this.fetchRecipients()
 	}
+	fetchRecipients = async() => {
+	    let recipientsResponse = await this._convocationService.getRecipients(this.context, this.props.uuid)
+	    if(this.props.userToDisabled.length > 0) {
+	        recipientsResponse = recipientsResponse.filter((user) => {
+	            return !this.props.userToDisabled.some(userDisabled => {
+				    return userDisabled.uuid === user.uuid
+	            })
+	        })
+	    }
+	    this.setState({users: recipientsResponse})
+	}
+	onSubmit = async (newUser) => {
+	    await this.fetchRecipients()
+	    this.onSelectedRow(newUser.uuid, true)
+	}
+
 	cancelAdd = () => {
 	    this.setState({selectedUser: this.props.selectedUser})
 	    this.props.onCloseModal()
@@ -101,6 +81,7 @@ class RecipientForm extends Component {
 	}
 	render() {
 	    const { t } = this.context
+	    const { selectedUser, users } = this.state
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
 	        { property: 'firstname', displayed: true, searchable: true },
@@ -114,66 +95,32 @@ class RecipientForm extends Component {
 			    searchable={true}
 			    sortable={false}
 			    metaData={metaData}
-			    data={this.state.users}
-			    selectedRow={this.props.selectedUser}
+			    data={users}
+			    selectedRow={selectedUser}
 			    keyProperty="uuid"
 			    select={true}
 			    onSelectedRow={this.onSelectedRow}
 			    noDataMessage={t('convocation.new.no_recipient')}
 			/>
-	    // const emailForm = <Form>
-	    //     <Grid>
-	    //         <Grid.Column mobile='16' computer='8'>
-	    //             <FormField htmlFor='recipient_firstname'
-	    //                 label={t('convocation.admin.modules.convocation.recipient_config.firstname')} required={true}>
-	    //                 <InputValidation
-	    //                     id='recipient_firstname'
-	    //                     onChange={this.handleFieldChange}
-	    //                     value={this.state.newUser.firstName}
-	    //                 />
-	    //             </FormField>
-	    //         </Grid.Column>
-	    //         <Grid.Column mobile='16' computer='8'>
-	    //             <FormField htmlFor='recipient_lastname'
-	    //                 label={t('convocation.admin.modules.convocation.recipient_config.lastname')} required={true}>
-	    //                 <InputValidation
-	    //                     id='lastname'
-	    //                     onChange={this.handleFieldChange}
-	    //                     value={this.state.newUser.lastName}
-	    //                 />
-	    //             </FormField>
-	    //         </Grid.Column>
-	    //         <Grid.Column mobile='16' computer='8'>
-	    //             <FormField htmlFor='recipient_email'
-	    //                 label={t('convocation.admin.modules.convocation.recipient_config.email')} required={true}>
-	    //                 <InputValidation
-	    //                     id='recipient_email'
-	    //                     onChange={this.handleFieldChange}
-	    //                     value={this.state.newUser.email}
-	    //                 />
-	    //             </FormField>
-	    //         </Grid.Column>
-	    //     </Grid>
-	    // </Form>
-	    // const panes = [
-	    //     { menuItem: t('convocation.new.choose_from_the_list'), render: () => <Tab.Pane>{listContent}</Tab.Pane> },
-	    //     { menuItem: t('convocation.new.free_email'), render: () => <Tab.Pane>{emailForm}</Tab.Pane> }
-	    // ]
+	    const panes = [
+	        { menuItem: t('convocation.new.choose_from_the_list'), render: () => <Tab.Pane>{listContent}</Tab.Pane> },
+	        { menuItem: t('convocation.new.free_email'), render: () => <Tab.Pane>{<UserFormFragment onSubmit={this.onSubmit}/>}</Tab.Pane> }
+	    ]
 	    return (
 	        <Fragment>
 	            <Modal.Header>
 	                {this.props.recipient && t('convocation.new.add_recipients')}
-	                {/* {!this.props.recipient && t('convocation.new.edit_guest')} */}
+	                {!this.props.recipient && t('convocation.new.edit_guest')}
 	            </Modal.Header>
 	            <Modal.Content>
-	                {this.props.recipient && (
+	                {!this.props.canCreateUser && (
 	                    <Fragment>
 	                        {listContent}
 	                    </Fragment>
 	                )}
-	                {/* {!this.props.recipient && (
+	                {this.props.canCreateUser && (
 	                    <Tab panes={panes} />
-	                )} */}
+	                )}
 	            </Modal.Content>
 	            <Modal.Actions>
 	                <div className='footerForm'>

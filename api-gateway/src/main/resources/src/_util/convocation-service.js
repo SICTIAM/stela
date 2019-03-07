@@ -60,6 +60,18 @@ export default class ConvocationService {
 
 	}
 
+	getRecipients = async (context, uuid) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    const url = uuid ? `/api/convocation/assembly-type/${uuid}/recipients` : '/api/convocation/local-authority/recipients'
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: url, method: 'GET'})).json()
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	    }
+	}
+
 	saveAdditionnalQuestionResponse = async (context,uuid, value, question_uuid, paramsUrl) => {
 	    const { _fetchWithAuthzHandling, _addNotification, t } = context
 	    const token = this.getTokenInUrl(paramsUrl)
@@ -154,7 +166,7 @@ export default class ConvocationService {
 	    const url = '/api/convocation/recipient' + (uuid ? `/${uuid}` : '')
 
 	    try {
-	        return await _fetchWithAuthzHandling({url: url, method: uuid ? 'PUT' : 'POST', headers: headers, body: body, context: context, query: {force: force}})
+	        return await (await _fetchWithAuthzHandling({url: url, method: uuid ? 'PUT' : 'POST', headers: headers, body: body, context: context, query: {force: force}})).json()
 	    } catch(error) {
 	        error.json().then((json) => {
 	            _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(json.message))

@@ -171,7 +171,7 @@ export default class InputValidation extends Component {
                     : input
                 }
 
-                {(this.props.errorTypePointing || maxChar) &&
+                {/* {(this.props.errorTypePointing || maxChar) && */}
                 <div style={styles.infoArea}>
                     <Grid columns={2}>
                         {!this.state.isValid && !this.props.errorTypePointing && (
@@ -192,7 +192,7 @@ export default class InputValidation extends Component {
                         }
                     </Grid>
                 </div>
-                }
+                {/* } */}
 
             </div>
         )
