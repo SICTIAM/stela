@@ -23,10 +23,12 @@ class UserFormFragment extends Component {
 	static propTypes = {
 	    onSubmit: PropTypes.func,
 	    onCancel: PropTypes.func,
-	    fields: PropTypes.object
+	    fields: PropTypes.object,
+	    preventParentSubmit: PropTypes.bool
 	}
 	static defaultProps = {
-	    fields: null
+	    fields: null,
+	    preventParentSubmit: false
 	}
 	validationRules = {
 	    firstname: 'required',
@@ -128,7 +130,7 @@ class UserFormFragment extends Component {
 	render() {
 	    const { t } = this.context
 	    const submissionButton =
-			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
+			<Button type={this.props.preventParentSubmit ? 'button' :'submit'} onClick={this.props.preventParentSubmit && this.submitForm} primary basic disabled={!this.state.isFormValid}>
 			    {t('api-gateway:form.send')}
 			</Button>
 	    return (
