@@ -3,9 +3,12 @@ package fr.sictiam.stela.convocationservice.service.eventlistener;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.MailTemplate;
 import fr.sictiam.stela.convocationservice.model.NotificationType;
+import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.MailTemplateService;
 import fr.sictiam.stela.convocationservice.service.MailerService;
@@ -22,6 +25,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class NotificationEventListener {
@@ -59,23 +64,65 @@ public class NotificationEventListener {
         // get full object from DB
         Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
 
-        MailTemplate template = mailTemplateService.getTemplate(NotificationType.CONVOCATION_CREATED,
-                convocation.getLocalAuthority());
+        sendToRecipients(convocation, NotificationType.CONVOCATION_CREATED, convocation.getRecipientResponses());
 
-        for (RecipientResponse recipientResponse : convocation.getRecipientResponses()) {
-            String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation, recipientResponse.getRecipient(), null, true));
-            String address = recipientResponse.getRecipient().getEmail();
-            try {
-                mailerService.sendEmail(address, template.getSubject(), body, convocation.getAttachment());
-            } catch (MailException e) {
-                LOGGER.error("Error while sending notification to {}: {}", address, e.getMessage());
-                // TODO: maybe a retry process
-            }
-        }
         convocationService.convocationSent(convocation);
         LOGGER.info("Creation notification sent for convocation {} ({})", convocation.getUuid(), convocation.getSubject());
     }
 
+    @EventListener
+    @Async
+    public void convocationUpdated(ConvocationUpdatedEvent event) {
+
+        // get full object from DB
+        Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+
+        sendToRecipients(convocation, NotificationType.CONVOCATION_UPDATED, convocation.getRecipientResponses());
+
+        LOGGER.info("Update notification sent for convocation {} ({})", convocation.getUuid(),
+                convocation.getSubject());
+    }
+
+    @EventListener
+    @Async
+    public void recipientsAdded(ConvocationRecipientAddedEvent event) {
+
+        // get full object from DB
+        Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+        Set<Recipient> recipients = event.getRecipients();
+
+        // extract convocation RecipientResponse from recipient list
+        Set<RecipientResponse> newRecipients = convocation.getRecipientResponses()
+                .stream()
+                .filter(recipientResponse -> recipients.stream().anyMatch(recipient -> recipientResponse.getRecipient().equals(recipient)))
+                .collect(Collectors.toSet());
+
+        sendToRecipients(convocation, NotificationType.CONVOCATION_CREATED, newRecipients);
+
+        LOGGER.info("Added recipients notification sent for convocation {} ({})", convocation.getUuid(),
+                convocation.getSubject());
+    }
+
+    private void sendToRecipients(Convocation convocation, NotificationType type,
+            Set<RecipientResponse> recipientResponses) {
+
+        MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
+
+        Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
+
+        for (RecipientResponse recipientResponse : recipientResponses) {
+            String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation,
+                    recipientResponse.getRecipient(), null, true));
+            String address = recipientResponse.getRecipient().getEmail();
+            try {
+                mailerService.sendEmail(address, template.getSubject(), body, author);
+            } catch (MailException e) {
+                LOGGER.error("Error while sending notification {} to {}: {}",
+                        type.name(), address, e.getMessage());
+                // TODO: maybe a retry process
+            }
+        }
+    }
 
     private Map<String, String> buildPlaceHolderMap(Convocation convocation, Recipient recipient,
             Recipient substitute, boolean received) {

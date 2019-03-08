@@ -11,6 +11,8 @@ import fr.sictiam.stela.convocationservice.model.*;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
@@ -148,17 +150,20 @@ public class ConvocationService {
     public Convocation update(String uuid, String localAuthorityUuid, Convocation params) {
 
         Convocation convocation = getConvocation(uuid, localAuthorityUuid);
+        boolean updated = false;
 
         // Add questions
         if (params.getQuestions() != null && params.getQuestions().size() > 0) {
             convocation.getQuestions().addAll(params.getQuestions());
             addHistory(convocation, HistoryType.QUESTIONS_ADDED);
+            updated = true;
         }
 
         // Comment
         if (StringUtils.isNotBlank(params.getComment()) && !params.getComment().equals(convocation.getComment())) {
             convocation.setComment(params.getComment());
             addHistory(convocation, HistoryType.COMMENT_MODIFIED);
+            updated = true;
         }
 
         // Remove recipients that already an associated RecipientResponse
@@ -177,9 +182,15 @@ public class ConvocationService {
                         return recipientResponse;
                     }).collect(Collectors.toSet()));
             addHistory(convocation, HistoryType.RECIPIENTS_ADDED);
+            applicationEventPublisher.publishEvent(new ConvocationRecipientAddedEvent(this, convocation, params.getRecipients()));
         }
 
-        return convocationRepository.saveAndFlush(convocation);
+        Convocation result = convocationRepository.saveAndFlush(convocation);
+        if (updated) {
+            applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation));
+        }
+
+        return result;
     }
 
     public Convocation getConvocation(String uuid, String localAuthorityUuid) {
@@ -245,6 +256,9 @@ public class ConvocationService {
     public void uploadAdditionalFiles(Convocation convocation, MultipartFile... annexes)
             throws ConvocationFileException {
 
+        if (annexes.length == 0)
+            return;
+
         for (MultipartFile annexe : annexes) {
             Attachment attachment = saveAttachment(annexe, true);
             convocation.getAnnexes().add(attachment);
@@ -252,6 +266,7 @@ public class ConvocationService {
 
         convocationRepository.save(convocation);
         addHistory(convocation, HistoryType.ANNEXES_ADDED);
+        applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation));
     }
 
     public Attachment getFile(Convocation convocation, String fileUuid) throws NotFoundException {

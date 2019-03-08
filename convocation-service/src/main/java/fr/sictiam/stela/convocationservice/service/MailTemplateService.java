@@ -27,13 +27,13 @@ public class MailTemplateService {
     public MailTemplate getTemplate(NotificationType type, LocalAuthority localAuthority) {
 
         Optional<MailTemplate> opt =
-                mailTemplateRepository.findByNotificationTypeAndLocalAuthorityUuid(NotificationType.CONVOCATION_CREATED, localAuthority.getUuid());
+                mailTemplateRepository.findByNotificationTypeAndLocalAuthorityUuid(type, localAuthority.getUuid());
 
         if (!opt.isPresent()) {
             LOGGER.info("No specific template for notification {} and local authority {}. Return default template",
                     type.name(), localAuthority.getUuid());
             opt = mailTemplateRepository
-                    .findByNotificationTypeAndLocalAuthorityUuid(NotificationType.CONVOCATION_CREATED, null);
+                    .findByNotificationTypeAndLocalAuthorityUuid(type, null);
         }
 
         return opt.orElseThrow(NotFoundException::new);
