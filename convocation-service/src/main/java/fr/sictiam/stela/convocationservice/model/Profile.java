@@ -2,6 +2,7 @@ package fr.sictiam.stela.convocationservice.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -66,6 +67,10 @@ public class Profile {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getFullName() {
+        return StringUtils.capitalize(firstname.toLowerCase()) + " " + StringUtils.capitalize(lastname.toLowerCase());
     }
 
     @Override public boolean equals(Object o) {
