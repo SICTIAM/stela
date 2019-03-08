@@ -111,15 +111,17 @@ public class NotificationEventListener {
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
         for (RecipientResponse recipientResponse : recipientResponses) {
-            String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation,
-                    recipientResponse.getRecipient(), null, true));
-            String address = recipientResponse.getRecipient().getEmail();
-            try {
-                mailerService.sendEmail(address, template.getSubject(), body, author);
-            } catch (MailException e) {
-                LOGGER.error("Error while sending notification {} to {}: {}",
-                        type.name(), address, e.getMessage());
-                // TODO: maybe a retry process
+            if (recipientResponse.getRecipient().getActive()) {
+                String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation,
+                        recipientResponse.getRecipient(), null, true));
+                String address = recipientResponse.getRecipient().getEmail();
+                try {
+                    mailerService.sendEmail(address, template.getSubject(), body, author);
+                } catch (MailException e) {
+                    LOGGER.error("Error while sending notification {} to {}: {}",
+                            type.name(), address, e.getMessage());
+                    // TODO: maybe a retry process
+                }
             }
         }
     }
