@@ -59,13 +59,17 @@
       "presents": "Présents",
       "not_presents": "Absents",
       "substitution": "Procurations",
+      "no_response": "Non répondu",
       "substitution_of": "donne procuration à",
       "cancel_convocation": "Êtes-vous sûr(e) de vouloir annuler la convocation ?",
       "print_and_complete_procuration": "Pensez à imprimer et compléter la procuration pour qu'elle soit valide",
       "download_procuration": "Téléchargez la procuration",
       "presence_list": "Liste de présence",
       "download_pdf": "Télécharger au format PDF",
-      "download_csv": "Télécharger au format CSV"
+      "download_csv": "Télécharger au format CSV",
+      "no_present": "Aucun présent",
+      "no_absent": "Aucun absent",
+      "no_substitution": "Aucune procuration"
     },
     "new": {
       "display": "Visualiser",

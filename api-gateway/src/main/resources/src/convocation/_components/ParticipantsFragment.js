@@ -100,13 +100,11 @@ class ParticipantsFragment extends Component {
  	                        )}
  	                    </p>
                         <p>
- 	                        {(presents > 0 || procurations > 0 || absents > 0) && (
- 	                            <Button onClick={() => {
- 	                                this.setState({displayListParticipants: !this.state.displayListParticipants})}}
- 	                            className="link" primary compact basic>
- 	                                { this.state.displayListParticipants ? t('convocation.page.hide_list') : t('convocation.page.see_list')}
- 	                            </Button>
- 	                        )}
+ 	                        <Button onClick={() => {
+ 	                            this.setState({displayListParticipants: !this.state.displayListParticipants})}}
+ 	                        	className="link" primary compact basic>
+ 	                            { this.state.displayListParticipants ? t('convocation.page.hide_list') : t('convocation.page.see_list')}
+ 	                        </Button>
  	                    </p>
                     </Grid.Column>
                     {this.state.displayListParticipants && (
