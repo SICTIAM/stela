@@ -58,14 +58,14 @@ class ParticipantsResponsesFragment extends Component {
 	            )
 	        } else {
 	            return (
-	                <td/>
+	                <td key={`empty_question_${question.uuid}`}/>
 	            )
 	        }
 	    })
 	}
 
-	createPresentContent = (answer) => {
-	    return this.filterRecipientsByResponses(answer).map(part => {
+	createResponsesContent = (participants) => {
+	    return participants.map(part => {
 	        const responseHTML = this.getResponsesByParticipant(part)
 	        return (
 	            <tr key={`participant_${part.recipient.uuid}`}>
@@ -83,19 +83,24 @@ class ParticipantsResponsesFragment extends Component {
 	            <Popup key={question.uuid} trigger={<th className='text-ellipsis mw-200 cursor-default' id={question.uuid}>{question.question}</th>}  content={question.question}/>
 	        )
 	    })
-
-	    const presentContent =
-			<table style={{borderSpacing: '10px'}}>
-			    <thead>
-			        <tr>
-			            <th></th>
-			            {questions}
-			        </tr>
-			    </thead>
-			    <tbody>
-			        {this.createPresentContent('PRESENT')}
-			    </tbody>
-			</table>
+	    let present = this.filterRecipientsByResponses('PRESENT')
+	    let presentContent
+	    if(present.length > 0) {
+	        presentContent =
+				<table style={{borderSpacing: '10px'}}>
+				    <thead>
+				        <tr>
+				            <th></th>
+				            {questions}
+				        </tr>
+				    </thead>
+				    <tbody>
+				        {this.createResponsesContent(present)}
+				    </tbody>
+				</table>
+	    } else {
+	        presentContent = <div>{t('convocation.page.no_present')}</div>
+	    }
 
 	    const absent = this.filterRecipientsByResponses('NOT_PRESENT').map(part => {
 	        return (
@@ -106,9 +111,13 @@ class ParticipantsResponsesFragment extends Component {
 	    })
 	    const absentContent =
 			<div>
-			    {absent}
+			    {absent.length === 0 && (
+			        t('convocation.page.no_absent')
+			    )}
+			    {absent.length > 0 && (
+			        absent
+			    )}
 			</div>
-
 	    const substitution = this.filterRecipientsByResponses('SUBSTITUTED').map(part => {
 	        return(
 	            <p key={part.recipient.uuid}>
@@ -118,14 +127,39 @@ class ParticipantsResponsesFragment extends Component {
 	    })
 	    const substitutionContent =
 			<div>
-			    {substitution}
+			    {substitution.length === 0 && (
+			        t('convocation.page.no_substitution')
+			    )}
+			    {substitution.length > 0 && (
+			        substitution
+			    )}
 			</div>
+
+	    const noReponse = this.filterRecipientsByResponses('DO_NOT_KNOW')
+	    let noResponseContent
+	    if(noReponse.length > 0) {
+	        noResponseContent =
+				<table style={{borderSpacing: '10px'}}>
+				    <thead>
+				        <tr>
+				            <th></th>
+				            {questions}
+				        </tr>
+				    </thead>
+				    <tbody>
+				        {this.createResponsesContent(noReponse)}
+				    </tbody>
+				</table>
+	    }
 
 	    const panes = [
 	        { menuItem: t('convocation.page.sent'), render: () => <Tab.Pane>{presentContent}</Tab.Pane> },
 	        { menuItem: t('convocation.page.not_presents'), render: () => <Tab.Pane>{absentContent}</Tab.Pane> },
-	        { menuItem: t('convocation.page.substitution'), render: () => <Tab.Pane>{substitutionContent}</Tab.Pane> },
+	        { menuItem: t('convocation.page.substitution'), render: () => <Tab.Pane>{substitutionContent}</Tab.Pane> }
 		  ]
+	    if(noReponse.length > 0) {
+	        panes.push({ menuItem: t('convocation.page.no_response'), render: () => <Tab.Pane>{noResponseContent}</Tab.Pane> })
+	    }
 	    return (
 	        <Tab panes={panes} />
 	    )
