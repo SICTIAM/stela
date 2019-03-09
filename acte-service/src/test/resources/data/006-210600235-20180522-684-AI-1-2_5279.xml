@@ -3,7 +3,7 @@
     <actes:ActeRecu actes:CodeNatureActe="3" actes:Date="2018-05-22" actes:NumeroInterne="684">
         <actes:CodeMatiere1 actes:CodeMatiere="4"/>
         <actes:CodeMatiere2 actes:CodeMatiere="2"/>
-        <actes:Objet>Contrat ? dur?e d?termin?e - Jean Dupont</actes:Objet>
+        <actes:Objet>Contrat à durée déterminée - Jean Dupont</actes:Objet>
         <actes:ClassificationDateVersion>2017-04-19</actes:ClassificationDateVersion>
         <actes:Document>
             <actes:NomFichier>99_DE-006-210600235-20180522-684-AI-1-1_1.pdf</actes:NomFichier>
