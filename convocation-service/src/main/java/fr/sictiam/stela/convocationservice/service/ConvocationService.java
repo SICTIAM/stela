@@ -11,6 +11,7 @@ import fr.sictiam.stela.convocationservice.model.*;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
@@ -111,6 +112,7 @@ public class ConvocationService {
             response.setOpened(true);
             response.setOpenDate(LocalDateTime.now());
             recipientResponseRepository.save(response);
+            applicationEventPublisher.publishEvent(new ConvocationReadEvent(this, convocation, response.getRecipient()));
         }
         return convocation;
     }
@@ -401,16 +403,33 @@ public class ConvocationService {
 
     public Profile retrieveProfile(String profileUuid) {
         JsonNode jsonProfile = externalRestService.getProfile(profileUuid);
-        return jsonProfile != null
-                ? new Profile(
-                jsonProfile.get("uuid").asText(""),
-                jsonProfile.get("agent").get("given_name").asText(""),
-                jsonProfile.get("agent").get("family_name").asText(""),
-                jsonProfile.get("agent").get("email").asText(""))
-                : new Profile();
+
+        Profile profile = new Profile();
+        if (jsonProfile == null)
+            return profile;
+
+        List<NotificationValue> notifications = new ArrayList<>();
+        jsonProfile.get("notificationValues").forEach(notif -> {
+            if (StringUtils.startsWith(notif.get("name").asText(), "CONVOCATION_")) {
+                notifications.add(new NotificationValue(
+                        notif.get("uuid").asText(),
+                        StringUtils.removeStart(notif.get("name").asText(), "CONVOCATION_"),
+                        notif.get("active").asBoolean()
+                ));
+            }
+        });
+
+        profile.setUuid(jsonProfile.get("uuid").asText(""));
+        profile.setFirstname(jsonProfile.get("agent").get("given_name").asText(""));
+        profile.setLastname(jsonProfile.get("agent").get("family_name").asText(""));
+        profile.setEmail(jsonProfile.get("agent").get("email").asText(""));
+        profile.setNotificationValues(notifications);
+
+        return profile;
     }
 
-    public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType,
+    public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String
+            assemblyType,
             LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,
             String filter, String currentLocalAuthUuid) {
 
@@ -484,7 +503,8 @@ public class ConvocationService {
     }
 
     private List<Predicate> getSentQueryPredicates(CriteriaBuilder builder, Root<Convocation> convocationRoot,
-            String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType, LocalDate meetingDateFrom,
+            String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType, LocalDate
+            meetingDateFrom,
             LocalDate meetingDateTo, String subject, String filter, String currentLocalAuthUuid) {
 
         List<Predicate> predicates = new ArrayList<>();
@@ -558,7 +578,8 @@ public class ConvocationService {
         return predicates;
     }
 
-    private Attachment saveAttachment(MultipartFile file, boolean additionalDocument) throws ConvocationFileException {
+    private Attachment saveAttachment(MultipartFile file, boolean additionalDocument) throws
+            ConvocationFileException {
 
         try {
             Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes(), additionalDocument);
@@ -570,8 +591,10 @@ public class ConvocationService {
         }
     }
 
-    private List<Predicate> getReceivedQueryPredicates(CriteriaBuilder builder, Root<Convocation> convocationRoot,
-            String multifield, String assemblyType, LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,
+    private List<Predicate> getReceivedQueryPredicates(CriteriaBuilder
+            builder, Root<Convocation> convocationRoot,
+            String multifield, String assemblyType, LocalDate meetingDateFrom, LocalDate meetingDateTo, String
+            subject,
             String filter, String currentLocalAuthUuid, Recipient recipient) {
 
         List<Predicate> predicates = new ArrayList<>();

@@ -153,7 +153,7 @@ class ParticipantsResponsesFragment extends Component {
 	    }
 
 	    const panes = [
-	        { menuItem: t('convocation.page.sent'), render: () => <Tab.Pane>{presentContent}</Tab.Pane> },
+	        { menuItem: t('convocation.page.presents'), render: () => <Tab.Pane>{presentContent}</Tab.Pane> },
 	        { menuItem: t('convocation.page.not_presents'), render: () => <Tab.Pane>{absentContent}</Tab.Pane> },
 	        { menuItem: t('convocation.page.substitution'), render: () => <Tab.Pane>{substitutionContent}</Tab.Pane> }
 		  ]

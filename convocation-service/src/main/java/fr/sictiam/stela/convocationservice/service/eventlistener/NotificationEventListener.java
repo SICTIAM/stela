@@ -2,11 +2,14 @@ package fr.sictiam.stela.convocationservice.service.eventlistener;
 
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.MailTemplate;
+import fr.sictiam.stela.convocationservice.model.Notification;
 import fr.sictiam.stela.convocationservice.model.NotificationType;
+import fr.sictiam.stela.convocationservice.model.NotificationValue;
 import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -103,40 +107,55 @@ public class NotificationEventListener {
                 convocation.getSubject());
     }
 
-    private void sendToRecipients(Convocation convocation, NotificationType type,
-            Set<RecipientResponse> recipientResponses) {
+    @EventListener
+    @Async
+    public void convocationReadByRecipient(ConvocationReadEvent event) {
 
-        MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
+        Convocation convocation = event.getConvocation();
+        Recipient recipient = event.getRecipient();
 
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
-        for (RecipientResponse recipientResponse : recipientResponses) {
-            if (recipientResponse.getRecipient().getActive()) {
-                String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation,
-                        recipientResponse.getRecipient(), null, true));
-                String address = recipientResponse.getRecipient().getEmail();
-                try {
-                    mailerService.sendEmail(address, template.getSubject(), body, author);
-                } catch (MailException e) {
-                    LOGGER.error("Error while sending notification {} to {}: {}",
-                            type.name(), address, e.getMessage());
-                    // TODO: maybe a retry process
-                }
+        if (hasNotificationActive(author, NotificationType.CONVOCATION_READ)) {
+            MailTemplate template = mailTemplateService.getTemplate(NotificationType.CONVOCATION_READ,
+                    convocation.getLocalAuthority());
+
+            String body = StrSubstitutor.replace(
+                    template.getBody(),
+                    buildPlaceHolderMap(convocation, author, recipient, null, false));
+            try {
+                mailerService.sendEmail(author.getEmail(), template.getSubject(), body);
+                LOGGER.info("Read notification sent for convocation {} ({})", convocation.getUuid(),
+                        convocation.getSubject());
+            } catch (MailException e) {
+                LOGGER.error("Error while sending notification {} to {}: {}",
+                        NotificationType.CONVOCATION_READ.name(), author.getEmail(), e.getMessage());
+                // TODO: maybe a retry process
             }
+        } else {
+            LOGGER.debug("{} ({}) did not subscribe to {} notifications", author.getFullName(), author.getUuid(),
+                    NotificationType.CONVOCATION_READ);
         }
     }
 
-    private Map<String, String> buildPlaceHolderMap(Convocation convocation, Recipient recipient,
-            Recipient substitute, boolean received) {
+    private Map<String, String> buildPlaceHolderMap(
+            Convocation convocation,
+            Profile author,
+            Recipient recipient,
+            Recipient substitute,
+            boolean received) {
 
         Map<String, String> placeHolders = new HashMap<>();
         placeHolders.put("name", convocation.getSubject());
 
-        String url = String.format("%s/%s/convocation%s/%s?token=%s", applicationUrl,
+        String url = String.format("%s/%s/convocation/%s/%s?token=%s", applicationUrl,
                 convocation.getLocalAuthority().getSlugName(),
-                (received ? "/liste-recues" : ""),
+                (received ? "liste-recues" : "liste-envoyees"),
                 convocation.getUuid(), recipient.getToken());
         placeHolders.put("url", "<a href='" + url + "'>" + url + "</a>");
+
+        if (author != null)
+            placeHolders.put("author", author.getFullName());
 
         if (recipient != null)
             placeHolders.put("recipient", recipient.getFullName());
@@ -145,5 +164,45 @@ public class NotificationEventListener {
             placeHolders.put("substitute", substitute.getFullName());
 
         return placeHolders;
+    }
+
+    private void sendToRecipients(Convocation convocation, NotificationType type,
+            Set<RecipientResponse> recipientResponses) {
+
+        MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
+
+        Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
+
+        for (RecipientResponse recipientResponse : recipientResponses) {
+            String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation, author,
+                    recipientResponse.getRecipient(), null, true));
+            String address = recipientResponse.getRecipient().getEmail();
+            try {
+                mailerService.sendEmail(address, template.getSubject(), body, author);
+            } catch (MailException e) {
+                LOGGER.error("Error while sending notification {} to {}: {}",
+                        type.name(), address, e.getMessage());
+                // TODO: maybe a retry process
+            }
+        }
+    }
+
+    private boolean hasNotificationActive(Profile author, NotificationType type) {
+
+        Optional<NotificationValue> activeValue = author.getNotificationValues()
+                .stream()
+                .filter(value -> value.getName().equals(type.name()))
+                .findFirst();
+
+        if (activeValue.isPresent()) {
+            return activeValue.get().isActive();
+        } else {
+            // Notification configuration not found in author profile, search default value
+            Optional<Notification> activeNotif = Notification.notifications
+                    .stream()
+                    .filter(notification -> notification.getType() == type && notification.isDefaultValue())
+                    .findFirst();
+            return activeNotif.isPresent();
+        }
     }
 }
