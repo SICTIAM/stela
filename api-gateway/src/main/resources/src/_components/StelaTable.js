@@ -31,7 +31,10 @@ class StelaTable extends Component {
         striped: PropTypes.bool,
         selectable: PropTypes.bool,
         selectedRow: PropTypes.array,
-        selectedRadio: PropTypes.string
+        selectedRadio: PropTypes.string,
+        toggleButton: PropTypes.bool,
+        toogleProperty: PropTypes.string,
+        toogleHeader: PropTypes.string
     }
     static defaultProps = {
         className: '',
@@ -52,7 +55,10 @@ class StelaTable extends Component {
         striped: true,
         selectable: true,
         selectedRow: [],
-        selectedRadio: null
+        selectedRadio: null,
+        toggleButton: false,
+        toogleProperty: '',
+        toogleHeader: ''
     }
     state = {
         column: null,
@@ -159,6 +165,9 @@ class StelaTable extends Component {
         this.setState({radio: value})
         this.props.selectedRow && this.props.onSelectedRow(value)
     }
+    handleToggle  = (row, value) => {
+        this.props.onHandleToggle && this.props.onHandleToggle(row, value)
+    }
     handleChekAll = () => {
         const checkAll = !this.state.checkAll
         const checkboxes = this.state.checkboxes
@@ -183,7 +192,7 @@ class StelaTable extends Component {
         const { data } = this.state
         const column = this.props.column ? this.props.column : this.state.column
         const direction = this.getDirectionClass()
-        const { header, search, uniqueSelect, select, pagination } = this.props
+        const { header, search, uniqueSelect, select, pagination, toggleButton, toogleProperty,toogleHeader } = this.props
         const title = this.props.headerTitle !== ''
         const isEmpty = data.length === 0
         const isFilled = data.length > 0
@@ -251,8 +260,8 @@ class StelaTable extends Component {
                                             <Checkbox aria-label={t('api-gateway:list.check_all')} checked={this.state.checkAll} onClick={this.handleChekAll} label={<div className='box'></div>}/>
                                         </Table.HeaderCell>
                                     }
-                                    {uniqueSelect && (
-                                        <Table.HeaderCell scope="col" style={{ width: '40px' }}></Table.HeaderCell>
+                                    {(uniqueSelect || toggleButton) && (
+                                        <Table.HeaderCell scope="col" style={{ width: '40px' }}>{toogleHeader}</Table.HeaderCell>
                                     )}
                                 </Table.Row>
                             </Table.Header>
@@ -309,6 +318,15 @@ class StelaTable extends Component {
                                                     value={row[this.props.keyProperty]}
                                                     checked={this.state.radio === row[this.props.keyProperty]}
                                                     onChange={() => this.handleRadio(row[this.props.keyProperty])}
+                                                />
+                                            </Table.Cell>
+                                        )}
+                                        {toggleButton && (
+                                            <Table.Cell style={{ width: '40px' }}>
+                                                <Radio toggle
+                                                    value={row[this.props.keyProperty]}
+                                                    checked={row[toogleProperty]}
+                                                    onChange={() => this.handleToggle(row, row[toogleProperty])}
                                                 />
                                             </Table.Cell>
                                         )}

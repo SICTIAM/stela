@@ -273,6 +273,12 @@ const notifications = {
             message: 'notifications.convocation.admin.email_validation.success',
             level: 'success',
             position: 'br'
+        },
+        all_recipients_deactivated_success: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.all_recipients_deactivated',
+            level: 'success',
+            position: 'br'
         }
     },
     profile: {

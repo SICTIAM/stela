@@ -114,4 +114,18 @@ public class RecipientRestController {
 
         return new ResponseEntity<>(recipient, HttpStatus.OK);
     }
+
+    @PutMapping("/deactivate-all")
+    public ResponseEntity deactivateAll(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid) {
+
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        recipientService.deactivateAll(currentLocalAuthUuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
