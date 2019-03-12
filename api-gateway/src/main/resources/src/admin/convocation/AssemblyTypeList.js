@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Icon, Checkbox, Button, Form } from 'semantic-ui-react'
+import { Segment, Icon, Button, Form } from 'semantic-ui-react'
 
 import {
-    checkStatus,
     getLocalAuthoritySlug,
     handleSearchChange,
     handlePageClick,
@@ -12,7 +11,6 @@ import {
     sortTable
 } from '../../_util/utils'
 import { notifications } from '../../_util/Notifications'
-import history from '../../_util/history'
 
 import { withAuthContext } from '../../Auth'
 
@@ -42,9 +40,7 @@ class AssemblyTypeList extends Component {
 	    limit: 10,
 	    offset: 0,
 	    currentPage: 0,
-	    totalCount: 0,
-	    quickViewOpened: false,
-	    quickViewData: null
+	    totalCount: 0
 	}
 
 	componentDidMount() {
@@ -73,65 +69,8 @@ class AssemblyTypeList extends Component {
 	}
 
 	/** Display line in negative style if assembly is inactive */
-	negativeResolver = (recipient) => {
+	lineThroughResolver = (recipient) => {
 	    return !recipient.active
-	}
-	onClickCell = (e, property, row) => {
-	    e.preventDefault()
-	    e.stopPropagation()
-
-	    const data = this.createData(row)
-	    this.setState({ quickViewOpened: true, quickViewData: data })
-
-	}
-
-	/** Create HTML for quick view */
-	createData = (row) => {
-	    const { t } = this.context
-	    let recipients = t('convocation.new.no_recipient')
-	    if(row.recipients && row.recipients.length > 0) {
-	        if (row.recipients.length === 1){
-	            recipients = `${row.recipients[0].firstname} ${row.recipients[0].lastname}`
-	        }
-	        if(row.recipients.length > 1) {
-	            let temp = row.recipients.reduce((acc, curr, index) => {
-	                return acc.firstname ? acc.firstname + ' ' + acc.lastname + ', ' + curr.firstname + ' ' + curr.lastname : acc + ', ' + curr.firstname + ' ' + curr.lastname
-	            })
-	            recipients = temp
-	        }
-	    }
-
-	    return {
-	        headerContent: row.name,
-	        action:
-			<div>
-			    <label htmlFor='status'>
-			        {row.active && (
-			            <span style={{verticalAlign: 'super', marginRight: '5px', fontStyle: 'italic'}}>{t('convocation.admin.modules.convocation.recipient_list.deactivate')}</span>
-			        )}
-			        {!row.active && (
-			            <span style={{verticalAlign: 'super', marginRight: '5px', fontStyle: 'italic'}}>{t('convocation.admin.modules.convocation.recipient_list.activate')}</span>
-			        )}
-			    	<Checkbox id='status' toggle className='mr-20' checked={row.active} onChange={e => this.handleFieldCheckboxChange(row)}/>
-			    </label>
-			    <Button type="button" basic primary onClick={() => this.onEditAssemblyType(row)}>
-			        {t('convocation.admin.modules.convocation.recipient_config.edit')}
-			    </Button>
-			</div>,
-	        data: [
-	            {label: t('convocation.admin.modules.convocation.assembly_type_config.place'), value: row.location, id: 'location', computer: '16'},
-	            {label: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay'), value: row.delay, id: 'delay', computer: '8'},
-	            {label: t('convocation.admin.modules.convocation.assembly_type_config.reminder'), value: row.reminder ? <Icon name='check' color='green'/>: <Icon name='close' color='red'/>, id: 'reminder', computer: '8'},
-	            {label: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), value: recipients, id: 'recipients', computer: '16'}
-	        ]
-	    }
-	}
-	onEditAssemblyType = (assembly) => {
-	    const localAuthoritySlug = getLocalAuthoritySlug()
-	    history.push(`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee/${assembly.uuid}`)
-	}
-	onCloseQuickView = () => {
-	    this.setState({ quickViewOpened: false })
 	}
 
 	handleFieldCheckboxChange = (row) => {
@@ -143,13 +82,10 @@ class AssemblyTypeList extends Component {
 	    const headers = { 'Content-Type': 'application/json' }
 
 	    _fetchWithAuthzHandling({url: url, method: 'PUT', headers: headers, body: JSON.stringify(body), context: this.props.authContext})
-	        .then(checkStatus)
 	        .then(response => {
 	            _addNotification(notifications.admin.statusUpdated)
 	            this.loadData()
 	            row.active = !row.active
-	            const data = this.createData(row)
-	            this.setState({ quickViewData: data })
 	        })
 	}
 
@@ -157,7 +93,6 @@ class AssemblyTypeList extends Component {
 	    const { t } = this.context
 	    const { search } = this.state
 
-	    const statusDisplay = (active) => active ? t('convocation.admin.modules.convocation.recipient_list.active') : t('convocation.admin.modules.convocation.recipient_list.inactive')
 	    const recipientsDisplay = (recipients) => {
 	        if(recipients && recipients.length > 0) {
 	            let temp = recipients
@@ -189,9 +124,7 @@ class AssemblyTypeList extends Component {
 	        { property: 'delay', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay') },
 	        { property: 'reminder', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.reminder'), displayComponent: checkboxDisplay },
 	        { property: 'useProcuration', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.procuration'), displayComponent: checkboxDisplay },
-	        { property: 'recipients', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), displayComponent: recipientsDisplay },
-	        { property: 'active', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.status'), displayComponent: statusDisplay },
-	    ]
+	        { property: 'recipients', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), displayComponent: recipientsDisplay }	    ]
 	    const options = [
 	        { key: 10, text: 10, value: 10 },
 	        { key: 25, text: 25, value: 25 },
@@ -201,7 +134,7 @@ class AssemblyTypeList extends Component {
 	    const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
 	    const pagination =
             <Pagination
-                columns={displayedColumns.length}
+                columns={displayedColumns.length +1}
                 pageCount={pageCount}
                 handlePageClick={(data) => handlePageClick(this, data, this.loadData)}
                 itemPerPage={this.state.limit}
@@ -240,7 +173,7 @@ class AssemblyTypeList extends Component {
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='active' label={t('convocation.admin.modules.convocation.recipient_config.status')}>
 	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => handleSearchChange(this, 'active', e.target.value)}>
-	                                <option value=''>{t('convocation.admin.modules.convocation.recipient_list.active_inactive')}</option>
+	                                <option value=''>{t('api-gateway:form.all')}</option>
 	                                <option value={true}>{t('convocation.admin.modules.convocation.recipient_list.active')}</option>
 	                                <option value={false}>{t('convocation.admin.modules.convocation.recipient_list.inactive')}</option>
 	                            </select>
@@ -254,17 +187,21 @@ class AssemblyTypeList extends Component {
 	                    header={true}
 	                    search={false}
 	                    click={true}
-	                    onClick={this.onClickCell}
 	                    sortable={true}
 	                    metaData={metaData}
 	                    data={this.state.assemblyTypes}
 	                    keyProperty="uuid"
-	                    striped={false}
-	                    negativeResolver={this.negativeResolver}
+	                    link={`/${localAuthoritySlug}/admin/convocation/type-assemblee/liste-type-assemblee/`}
+	                    linkProperty='uuid'
+	                    onHandleToggle={this.handleFieldCheckboxChange}
+	                    lineThroughResolver={this.lineThroughResolver}
 	                    pagination={pagination}
 	                    sort={(clickedColumn) => sortTable(this, clickedColumn, this.loadData)}
 	                    direction={this.state.direction}
 	                    column={this.state.column}
+	                    toggleButton={true}
+	                    toogleHeader={t('convocation.admin.modules.convocation.assembly_type_config.status')}
+	                    toogleProperty='active'
 	                    noDataMessage={t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')}
 	                />
 	            </Segment>

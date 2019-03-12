@@ -246,4 +246,15 @@ public class RecipientService {
 
         return predicates;
     }
+
+    public void deactivateAll(String localAuthorityUuid) {
+
+        List<Recipient> recipients = getAllByLocalAuthority(localAuthorityUuid);
+        LocalDateTime now = LocalDateTime.now();
+        recipients.forEach(recipient -> {
+            recipient.setActive(false);
+            recipient.setInactivityDate(now);
+            recipientRepository.save(recipient);
+        });
+    }
 }

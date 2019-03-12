@@ -268,7 +268,8 @@
           "recipient_updated": "Le destinataire a bien été mis à jour.",
           "status_updated": "Le statut a bien été mis à jour.",
           "assembly_type_created": "Le type d'assemblée a été créé avec succès.",
-          "assembly_type_updated": "Le type d'assemblée a été mis à jour avec succès"
+		  "assembly_type_updated": "Le type d'assemblée a été mis à jour avec succès",
+		  "all_recipients_deactivated": "Tous les destinataires ont bien été désactivés."
         },
         "email_validation": {
           "in_progress": "L'email est en cours de validation",

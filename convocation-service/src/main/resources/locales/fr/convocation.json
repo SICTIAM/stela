@@ -152,9 +152,9 @@
           "recipient_list": {
             "active": "Actif",
             "inactive": "Inactif",
-            "active_inactive": "Actif/Inactif",
             "activate": "Activer",
-            "deactivate": "Désactiver"
+            "desactivate": "Désactiver",
+            "deactivate_all": "Désactiver tous les destinataires"
           },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"

@@ -1,11 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Icon, Button, Checkbox, Form } from 'semantic-ui-react'
+import { Segment, Icon, Button, Form } from 'semantic-ui-react'
 
-import history from '../../_util/history'
 import {
-    checkStatus,
     getLocalAuthoritySlug,
     handleSearchChange,
     handlePageClick,
@@ -13,6 +11,7 @@ import {
     sortTable
 } from '../../_util/utils'
 import { notifications } from '../../_util/Notifications'
+import ConvocationService from '../../_util/convocation-service'
 
 import { withAuthContext } from '../../Auth'
 
@@ -45,11 +44,10 @@ class RecipientsList extends Component {
 	    limit: 10,
 	    offset: 0,
 	    currentPage: 0,
-	    totalCount: 0,
-	    quickViewData: null,
-	    quickViewOpened: false
+	    totalCount: 0
 	}
 	componentDidMount() {
+	    this._convocationService = new ConvocationService()
 	    const itemPerPage = localStorage.getItem('itemPerPage')
 	    if (!itemPerPage) localStorage.setItem('itemPerPage', 10)
 	    else this.setState({ limit: 10 }, this.loadData)
@@ -72,59 +70,8 @@ class RecipientsList extends Component {
 	    return data
 	}
 
-	negativeResolver = (recipient) => {
+	lineThroughResolver = (recipient) => {
 	    return !recipient.active
-	}
-	onClickCell = (e, property, row) => {
-	    e.preventDefault()
-	    e.stopPropagation()
-
-	    const data = this.createData(row)
-	    this.setState({ quickViewOpened: true, quickViewData: data })
-
-	}
-	createData = (row) => {
-	    const { t } = this.context
-	    let assemblyTypes = t('convocation.admin.modules.convocation.assembly_type_liste.no_assembly_type')
-	    if(row.assemblyTypes && row.assemblyTypes.length > 0) {
-	        if (row.assemblyTypes.length === 1){
-	            assemblyTypes = row.assemblyTypes[0].name
-	        }
-	        if(row.assemblyTypes.length > 1) {
-	            let temp = row.assemblyTypes.reduce((acc, curr, index) => {
-	                return acc.name ? acc.name + ', ' + curr.name : acc + ', ' + curr.name
-	            })
-	            assemblyTypes = temp
-	        }
-	    }
-
-	    return {
-	        headerContent: row.firstname + ' ' + row.lastname,
-	        action:
-			<div>
-			    <label htmlFor='status'>
-			        {row.active && (
-			            <span style={{verticalAlign: 'super', marginRight: '5px', fontStyle: 'italic'}}>{t('convocation.admin.modules.convocation.recipient_list.deactivate')}</span>
-			        )}
-			        {!row.active && (
-			            <span style={{verticalAlign: 'super', marginRight: '5px', fontStyle: 'italic'}}>{t('convocation.admin.modules.convocation.recipient_list.activate')}</span>
-			        )}
-			    	<Checkbox id='status' toggle className='mr-20' checked={row.active} onChange={e => this.handleFieldCheckboxChange(row)}/>
-			    </label>
-			    <Button type="button" basic primary onClick={() => this.onEditRecipient(row)}>
-			        {t('convocation.admin.modules.convocation.recipient_config.edit')}
-			    </Button>
-			</div>,
-	        data: [
-	            {label: t('convocation.admin.modules.convocation.recipient_config.email'), value: row.email, id: 'email', computer: '8'},
-	            {label: t('convocation.admin.modules.convocation.recipient_config.phonenumber'), value: row.phoneNumber, id: 'phoneNumber', computer: '8'},
-	            {label: t('convocation.admin.modules.convocation.assembly_types'), value: assemblyTypes, id: 'assemblyType', computer: '16'}
-	        ]
-	    }
-	}
-	onEditRecipient = (recipient) => {
-	    const localAuthoritySlug = getLocalAuthoritySlug()
-	    history.push(`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires/${recipient.uuid}`)
 	}
 
 	handleFieldCheckboxChange = (row) => {
@@ -136,22 +83,25 @@ class RecipientsList extends Component {
 	    const headers = { 'Content-Type': 'application/json' }
 
 	    _fetchWithAuthzHandling({url: url, method: 'PUT', headers: headers, body: JSON.stringify(body), context: this.props.authContext})
-	        .then(checkStatus)
 	        .then(response => {
 	            _addNotification(notifications.admin.statusUpdated)
 	            this.loadData()
 	            row.active = !row.active
-	            const data = this.createData(row)
-	            this.setState({ quickViewData: data })
 	        })
 	}
-	onCloseQuickView = () => {
-	    this.setState({ quickViewOpened: false })
+	deactivateAll = async () => {
+	    const { _addNotification } = this.context
+	    await this._convocationService.desactivateAllRecipients(this.props.authContext)
+	    _addNotification(notifications.admin.all_recipients_deactivated_success)
+	    this.loadData()
 	}
 	render() {
 	    const { t } = this.context
 	    const { search } = this.state
-	    const statusDisplay = (active) => active ? t('convocation.admin.modules.convocation.recipient_list.active') : t('convocation.admin.modules.convocation.recipient_list.inactive')
+	    const deactivateAll = {
+	        title: t('convocation.admin.modules.convocation.recipient_list.deactivate_all'),
+	        action: this.deactivateAll
+	    }
 	    const assemblyTypes = (assemblyTypes) => {
 	        if(assemblyTypes && assemblyTypes.length > 0) {
 	            let temp = assemblyTypes
@@ -180,9 +130,7 @@ class RecipientsList extends Component {
 	        { property: 'lastname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.lastname') },
 	        { property: 'email', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.email') },
 	        { property: 'phoneNumber', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.phonenumber') },
-	        { property: 'assemblyTypes', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_types'), displayComponent: assemblyTypes },
-	        { property: 'active', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.status'), displayComponent: statusDisplay }
-	    ]
+	        { property: 'assemblyTypes', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_types'), displayComponent: assemblyTypes }	    ]
 	    const options = [
 	        { key: 10, text: 10, value: 10 },
 	        { key: 25, text: 25, value: 25 },
@@ -192,7 +140,7 @@ class RecipientsList extends Component {
 	    const pageCount = Math.ceil(this.state.totalCount / this.state.limit)
 	    const pagination =
             <Pagination
-                columns={displayedColumns.length}
+                columns={displayedColumns.length +1}
                 pageCount={pageCount}
                 handlePageClick={(data) => handlePageClick(this, data, this.loadData)}
                 itemPerPage={this.state.limit}
@@ -233,7 +181,7 @@ class RecipientsList extends Component {
 	                        </FormFieldInline>
 	                        <FormFieldInline htmlFor='active' label={t('convocation.admin.modules.convocation.recipient_config.status')}>
 	                            <select id='active' aria-label={t('convocation.admin.modules.convocation.recipient_config.status')} onBlur={e => handleSearchChange(this, 'active', e.target.value)}>
-	                                <option value=''>{t('convocation.admin.modules.convocation.recipient_list.active_inactive')}</option>
+	                                <option value=''>{t('api-gateway:form.all')}</option>
 	                                <option value={true}>{t('convocation.admin.modules.convocation.recipient_list.active')}</option>
 	                                <option value={false}>{t('convocation.admin.modules.convocation.recipient_list.inactive')}</option>
 	                            </select>
@@ -247,18 +195,25 @@ class RecipientsList extends Component {
 	                    header={true}
 	                    search={false}
 	                    click={true}
-	                    onClick={this.onClickCell}
 	                    sortable={true}
 	                    metaData={metaData}
 	                    data={this.state.recipients}
 	                    keyProperty="uuid"
-	                    striped={false}
-	                    negativeResolver={this.negativeResolver}
+	                    link={`/${localAuthoritySlug}/admin/convocation/destinataire/liste-destinataires/`}
+	                    linkProperty='uuid'
+	                    onHandleToggle={this.handleFieldCheckboxChange}
+	                    lineThroughResolver={this.lineThroughResolver}
 	                    pagination={pagination}
 	                    sort={(clickedColumn) => sortTable(this, clickedColumn, this.loadData)}
 	                    direction={this.state.direction}
 	                    column={this.state.column}
+	                    toogleHeader={t('convocation.admin.modules.convocation.assembly_type_config.status')}
+	                    toggleButton={true}
+	                    toogleProperty='active'
 	                    noDataMessage={t('convocation.new.no_recipient')}
+	                    selectOptions={[
+ 							deactivateAll
+	                    ]}
 	                />
 	            </Segment>
 	        </Page>
