@@ -46,6 +46,13 @@ task copyFrontBuild(type: Copy) {
     into "${sourceSets.main.output.resourcesDir}/public/"
 }
 
+test {
+    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
+    useJUnit {
+        excludeCategories 'fr.sictiam.stela.apigateway.IntegrationTests'
+    }
+}
+
 bootJar.dependsOn(copyFrontBuild)
 copyFrontBuild.dependsOn(frontBundle)
 frontBundle.dependsOn(installGulp)

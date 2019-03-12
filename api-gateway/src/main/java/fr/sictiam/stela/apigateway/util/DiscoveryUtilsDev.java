@@ -39,4 +39,9 @@ public class DiscoveryUtilsDev implements DiscoveryUtils {
         return instance.getHomePageUrl();
     }
 
+    @Override
+    public String getServiceUrlByName(String name) {
+        InstanceInfo instance = discoveryClient.getNextServerFromEureka(name.concat("-service"), false);
+        return instance.getHomePageUrl();
+    }
 }

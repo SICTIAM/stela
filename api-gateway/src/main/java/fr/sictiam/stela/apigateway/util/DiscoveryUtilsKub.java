@@ -41,4 +41,14 @@ public class DiscoveryUtilsKub implements DiscoveryUtils {
         return convocUrl;
     }
 
+    @Override
+    public String getServiceUrlByName(String name) {
+        switch (name.toLowerCase()) {
+            case "pes": return pesUrl;
+            case "acte": return acteUrl;
+            case "admin": return adminUrl;
+            case "convocation": return convocUrl;
+            default: return null;
+        }
+    }
 }

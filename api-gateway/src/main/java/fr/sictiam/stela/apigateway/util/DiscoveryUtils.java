@@ -10,4 +10,5 @@ public interface DiscoveryUtils {
 
     String convocationServiceUrl();
 
+    String getServiceUrlByName(String name);
 }
