@@ -19,7 +19,6 @@ import fr.sictiam.stela.acteservice.model.migration.UserMigration;
 import fr.sictiam.stela.acteservice.model.util.StreamingInMemoryDestFile;
 import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
 import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
@@ -367,7 +366,7 @@ public class MigrationService {
             String groupIds = resultSet.getString("groupid");
             return Arrays.asList(groupIds.split(","));
         } catch (SQLException e) {
-            LOGGER.error("Error while mapping the resultSet: {}", e);
+            LOGGER.error("Error while mapping the resultSet: ", e);
             log(migrationLog, "Error while mapping the resultSet", true);
             return null;
         }
@@ -417,7 +416,7 @@ public class MigrationService {
             }
             log(migrationLog, i + " Actes extracted", false);
         } catch (SQLException e) {
-            LOGGER.error("Error while mapping the resultSet: {}", e);
+            LOGGER.error("Error while mapping the resultSet: ", e);
             log(migrationLog, "Error while mapping the resultSet", true);
         }
         return acteMigrations;
@@ -439,7 +438,7 @@ public class MigrationService {
             }
             log(migrationLog, i + " users extracted", false);
         } catch (SQLException e) {
-            LOGGER.error("Error while mapping the resultSet: {}", e);
+            LOGGER.error("Error while mapping the resultSet: ", e);
             log(migrationLog, "Error while mapping the resultSet", true);
         }
         return userMigrations;
@@ -469,10 +468,10 @@ public class MigrationService {
             log(migrationLog, "MySQL sql_actes successfully executed", false);
             return resultSet;
         } catch (ClassNotFoundException e) {
-            LOGGER.error("Error while loading the jdbc driver: {}", e);
+            LOGGER.error("Error while loading the jdbc driver: ", e);
             log(migrationLog, "Error while loading the jdbc driver", true);
         } catch (SQLException e) {
-            LOGGER.error("Error while connecting to host: {}", e);
+            LOGGER.error("Error while connecting to host: ", e);
             log(migrationLog, "Error while connecting to host", true);
         }
         return null;
@@ -494,7 +493,7 @@ public class MigrationService {
             content = IOUtils.toString(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            LOGGER.error("Could not read the file content : {}", e);
+            LOGGER.error("Could not read the file content : ", e);
         }
         return content;
     }
@@ -523,22 +522,9 @@ public class MigrationService {
             log(migrationLog, "Closing SSH connection", false);
             sshClient.close();
         } catch (IOException e) {
-            LOGGER.error("Could close SSH connection: {}", e);
+            LOGGER.error("Could close SSH connection: ", e);
             log(migrationLog, "Could close SSH connection", true);
         }
-    }
-
-    private String executeCommand(SSHClient sshClient, String command) {
-        String stdout = null;
-        try {
-            Session session = sshClient.startSession();
-            Session.Command cmd = session.exec(command);
-            stdout = net.schmizz.sshj.common.IOUtils.readFully(cmd.getInputStream()).toString();
-            session.close();
-        } catch (IOException e) {
-            LOGGER.error("Could not execute command \"{}\"on server: {}", command, e);
-        }
-        return stdout;
     }
 
     private byte[] downloadFile(SSHClient sshClient, String path) {
@@ -578,7 +564,7 @@ public class MigrationService {
                 }
                 inputStream.close();
             } catch (IOException e) {
-                LOGGER.error("Error while decompressing .tar.gz : {}", e);
+                LOGGER.error("Error while decompressing .tar.gz : ", e);
                 return null;
             }
         }

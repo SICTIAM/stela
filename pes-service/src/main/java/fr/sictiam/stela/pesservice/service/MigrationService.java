@@ -3,7 +3,6 @@ package fr.sictiam.stela.pesservice.service;
 import fr.sictiam.stela.pesservice.dao.AttachmentRepository;
 import fr.sictiam.stela.pesservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
-import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
@@ -20,7 +19,6 @@ import fr.sictiam.stela.pesservice.model.migration.UserMigration;
 import fr.sictiam.stela.pesservice.model.util.StreamingInMemoryDestFile;
 import fr.sictiam.stela.pesservice.service.util.DiscoveryUtils;
 import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
@@ -71,13 +69,9 @@ public class MigrationService {
 
     private final PesAllerRepository pesAllerRepository;
     private final AttachmentRepository attachmentRepository;
-    private final PesHistoryRepository pesHistoryRepository;
     private final LocalAuthorityRepository localAuthorityRepository;
     private final NotificationService notificationService;
-    private final StorageService storageService;
     private final DiscoveryUtils discoveryUtils;
-    private final PesAllerService pesAllerService;
-
 
     @Value("${application.migration.serverIP}")
     String serverIP;
@@ -113,16 +107,12 @@ public class MigrationService {
     private final String sql_liaison_server = getStringResourceFromStream("migration/liaison_siren.sql");
 
     public MigrationService(PesAllerRepository pesAllerRepository, LocalAuthorityRepository localAuthorityRepository,
-            NotificationService notificationService, DiscoveryUtils discoveryUtils, AttachmentRepository attachmentRepository,
-            StorageService storageService, PesAllerService pesAllerService, PesHistoryRepository pesHistoryRepository) {
+            NotificationService notificationService, DiscoveryUtils discoveryUtils, AttachmentRepository attachmentRepository) {
         this.pesAllerRepository = pesAllerRepository;
         this.localAuthorityRepository = localAuthorityRepository;
         this.notificationService = notificationService;
         this.discoveryUtils = discoveryUtils;
         this.attachmentRepository = attachmentRepository;
-        this.storageService = storageService;
-        this.pesAllerService = pesAllerService;
-        this.pesHistoryRepository = pesHistoryRepository;
     }
 
     public void migrateStela2Users(LocalAuthority localAuthority, String siren, String email) {
@@ -316,7 +306,7 @@ public class MigrationService {
             resultSet.next();
             return resultSet.getString("groupid");
         } catch (SQLException e) {
-            LOGGER.error("Error while mapping the resultSet: {}", e);
+            LOGGER.error("Error while mapping the resultSet: ", e);
             log(migrationLog, "Error while mapping the resultSet", true);
             return null;
         }
@@ -354,7 +344,7 @@ public class MigrationService {
             }
             log(migrationLog, i + " PES extracted", false);
         } catch (SQLException e) {
-            LOGGER.error("Error while mapping the resultSet: {}", e);
+            LOGGER.error("Error while mapping the resultSet: ", e);
             log(migrationLog, "Error while mapping the resultSet", true);
         }
         return pesMigrations;
@@ -376,7 +366,7 @@ public class MigrationService {
             }
             log(migrationLog, i + " users extracted", false);
         } catch (SQLException e) {
-            LOGGER.error("Error while mapping the resultSet: {}", e);
+            LOGGER.error("Error while mapping the resultSet: ", e);
             log(migrationLog, "Error while mapping the resultSet", true);
         }
         return userMigrations;
@@ -406,10 +396,10 @@ public class MigrationService {
             log(migrationLog, "MySQL query successfully executed", false);
             return resultSet;
         } catch (ClassNotFoundException e) {
-            LOGGER.error("Error while loading the jdbc driver: {}", e);
+            LOGGER.error("Error while loading the jdbc driver: ", e);
             log(migrationLog, "Error while loading the jdbc driver", true);
         } catch (SQLException e) {
-            LOGGER.error("Error while connecting to host: {}", e);
+            LOGGER.error("Error while connecting to host: ", e);
             log(migrationLog, "Error while connecting to host", true);
         }
         return null;
@@ -431,7 +421,7 @@ public class MigrationService {
             content = IOUtils.toString(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            LOGGER.error("Could not read the file content : {}", e);
+            LOGGER.error("Could not read the file content : ", e);
         }
         return content;
     }
@@ -460,22 +450,9 @@ public class MigrationService {
             log(migrationLog, "Closing SSH connection", false);
             sshClient.close();
         } catch (IOException e) {
-            LOGGER.error("Could close SSH connection: {}", e);
+            LOGGER.error("Could close SSH connection: ", e);
             log(migrationLog, "Could close SSH connection", true);
         }
-    }
-
-    private String executeCommand(SSHClient sshClient, String command) {
-        String stdout = null;
-        try {
-            Session session = sshClient.startSession();
-            Session.Command cmd = session.exec(command);
-            stdout = net.schmizz.sshj.common.IOUtils.readFully(cmd.getInputStream()).toString();
-            session.close();
-        } catch (IOException e) {
-            LOGGER.error("Could not execute command \"{}\"on server: {}", command, e);
-        }
-        return stdout;
     }
 
     private byte[] downloadFile(SSHClient sshClient, String path) {
@@ -515,7 +492,7 @@ public class MigrationService {
                 }
                 inputStream.close();
             } catch (IOException e) {
-                LOGGER.error("Error while decompressing .tar.gz : {}", e);
+                LOGGER.error("Error while decompressing .tar.gz : ", e);
                 return null;
             }
         }
