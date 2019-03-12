@@ -5,6 +5,7 @@ import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.ConvocationHistory;
 import fr.sictiam.stela.convocationservice.model.HistoryType;
 import fr.sictiam.stela.convocationservice.model.Notification;
+import fr.sictiam.stela.convocationservice.model.NotificationType;
 import fr.sictiam.stela.convocationservice.model.NotificationValue;
 import fr.sictiam.stela.convocationservice.model.event.ConvocationHistoryEvent;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +53,7 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
 
     @Override
     public void onApplicationEvent(@NotNull ConvocationHistoryEvent event) {
-        List<HistoryType> notificationTypes = Notification.notifications.stream().map(Notification::getHistoryType)
+        List<NotificationType> notificationTypes = Notification.notifications.stream().map(Notification::getType)
                 .collect(Collectors.toList());
         if (notificationTypes.contains(event.getConvocationHistory().getType())) {
             try {
@@ -70,7 +71,7 @@ public class NotificationService implements ApplicationListener<ConvocationHisto
         JsonNode node = externalRestService.getProfile(convocation.getProfileUuid());
 
         Notification notification = Notification.notifications.stream()
-                .filter(notif -> notif.getHistoryType().equals(event.getConvocationHistory().getType())).findFirst()
+                .filter(notif -> notif.getType().equals(event.getConvocationHistory().getType())).findFirst()
                 .get();
 
         JsonNode profiles = externalRestService

@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
-@Entity
+import java.util.List;
+
 public class Profile {
 
-    @Id
     @JsonView(Views.Convocation.class)
     private String uuid;
 
@@ -27,14 +25,17 @@ public class Profile {
     @JsonView(Views.Convocation.class)
     private String email;
 
+    private List<NotificationValue> notificationValues;
+
     public Profile() {
     }
 
-    public Profile(String uuid, String firstname, String lastname, String email) {
+    public Profile(String uuid, String firstname, String lastname, String email, List<NotificationValue> notificationValues) {
         this.uuid = uuid;
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
+        this.notificationValues = notificationValues;
     }
 
     public String getUuid() {
@@ -67,6 +68,14 @@ public class Profile {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<NotificationValue> getNotificationValues() {
+        return notificationValues;
+    }
+
+    public void setNotificationValues(List<NotificationValue> notificationValues) {
+        this.notificationValues = notificationValues;
     }
 
     public String getFullName() {
