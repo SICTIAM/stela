@@ -6,7 +6,7 @@ import { Grid, Button, Modal, Segment } from 'semantic-ui-react'
 import { withAuthContext } from '../../Auth'
 
 import { FormField } from '../../_components/UI'
-import ChipsList from '../../_components/ChipsList'
+import StelaTable from '../../_components/StelaTable'
 
 import RecipientForm from '../RecipientForm'
 
@@ -46,9 +46,16 @@ class AddRecipientdGuestsFormFragment extends Component {
 
 	render() {
 	    const { t } = this.context
-	    const { fields, userToDisabled, authContext } = this.props
+	    const { fields, userToDisabled, authContext, disabledRecipientsEdit } = this.props
+	    const { modalRecipentsOpened, modalGuestsOpened } = this.state
 	    const guestsToDisabled = userToDisabled ? fields.recipients.slice().concat(userToDisabled.recipients, userToDisabled.guests) : fields.recipients.slice()
 	    const canCreateUser = authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1
+	    const metaData = [
+	        { property: 'uuid', displayed: false },
+	        { property: 'firstname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.firstname') },
+	        { property: 'lastname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.lastname') },
+	        { property: 'email', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.email') },
+	    ]
 	    return (
 	        <Fragment>
 	            <Segment>
@@ -60,10 +67,10 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                    label={t('convocation.fields.recipient')}>
 	                                    <Grid>
 	                                        <Grid.Column computer='8'>
-	                                            <Modal open={this.state.modalRecipentsOpened} trigger={<Button
+	                                            <Modal open={modalRecipentsOpened} trigger={<Button
 	                                                onClick={() => this.setState({modalRecipentsOpened: true})}
 	                                                type='button'
-	                                                disabled={this.props.disabledRecipientsEdit}
+	                                                disabled={disabledRecipientsEdit}
 	                                                id={`${fields.uuid}_recipient`}
 	                                                compact basic primary>{t('convocation.new.add_recipients')}
 	                                            </Button>}>
@@ -87,12 +94,14 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                        </Grid.Column>
 	                                    </Grid>
 	                                </FormField>
-	                                <ChipsList
-	                                    list={fields.recipients}
-	                                    labelText='email'
-	                                    removable={false}
-	                                    viewMoreText={t('convocation.new.view_more_recipients', {number: fields.recipients.length})}
-	                                    viewLessText={t('convocation.new.view_less_recipients')}/>
+	                                <StelaTable
+	                                    header={false}
+	                                    click={false}
+	                                    data={fields.recipients}
+	                                    keyProperty="uuid"
+	                                    search={true}
+	                                    noDataMessage={t('convocation.new.no_recipient')}
+	                                    metaData={metaData}/>
 	                            </Grid.Column>
 	                        </Grid>
 	                    </Grid.Column>
@@ -107,7 +116,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                    label={t('convocation.fields.guest')}>
 	                                    <Grid>
 	                                        <Grid.Column computer='8'>
-	                                            <Modal open={this.state.modalGuestsOpened} trigger={<Button
+	                                            <Modal open={modalGuestsOpened} trigger={<Button
 	                                                onClick={() => this.setState({modalGuestsOpened: true})}
 	                                                type='button'
 	                                                id={`${fields.uuid}_guest`}
@@ -134,12 +143,14 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                        </Grid.Column>
 	                                    </Grid>
 	                                </FormField>
-	                                <ChipsList
-	                                    list={fields.guests}
-	                                    labelText='email'
-	                                    removable={false}
-	                                    viewMoreText={t('convocation.new.view_more_guests', {number: fields.guests.length})}
-	                                    viewLessText={t('convocation.new.view_less_guests')}/>
+	                                <StelaTable
+	                                    header={false}
+	                                    click={false}
+	                                    data={fields.guests}
+	                                    keyProperty="uuid"
+	                                    search={true}
+	                                    noDataMessage={t('convocation.new.no_recipient')}
+	                                    metaData={metaData}/>
 	                            </Grid.Column>
 	                        </Grid>
 	                    </Grid.Column>
