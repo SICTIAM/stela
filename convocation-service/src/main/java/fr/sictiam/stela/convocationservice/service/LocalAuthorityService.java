@@ -31,15 +31,19 @@ public class LocalAuthorityService {
 
     private final AttachmentRepository attachmentRepository;
 
+    private final StorageService storageService;
+
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public LocalAuthorityService(
             LocalAuthorityRepository localAuthorityRepository,
             AttachmentRepository attachmentRepository,
+            StorageService storageService,
             ApplicationEventPublisher applicationEventPublisher) {
         this.localAuthorityRepository = localAuthorityRepository;
         this.attachmentRepository = attachmentRepository;
+        this.storageService = storageService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -76,6 +80,12 @@ public class LocalAuthorityService {
     }
 
     public void addProcuration(LocalAuthority localAuthority, MultipartFile procuration) {
+
+        Attachment previousProcuration = localAuthority.getDefaultProcuration();
+        // Remove procuration in storage service if local authority has already a default procuration
+        if (previousProcuration != null) {
+            storageService.deleteAttachmentContent(previousProcuration);
+        }
 
         try {
             Attachment attachment = new Attachment(procuration.getOriginalFilename(), procuration.getBytes());

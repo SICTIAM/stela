@@ -45,7 +45,8 @@ class ReceivedConvocation extends Component {
 	        cancellationDate: '',
 	        procuration: null,
 	        substitute: null,
-	        guest: true
+	        guest: true,
+	        localAuthority: {}
 	    }
 	}
 
@@ -130,8 +131,16 @@ class ReceivedConvocation extends Component {
 	        urlDocument = token ? `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true`
 	    }
 	    let urlProcuration = null
-	    if(convocation.procuration) {
-	        urlProcuration = token && convocation && convocation.procuration && convocation.procuration.uuid ? `/api/convocation/${convocation.uuid}/file/${this.state.convocation.procuration.uuid}?token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.procuration.uuid}`
+	    //if this convocation have procuration
+	    if(convocation.procuration && convocation.procuration.uuid) {
+	        urlProcuration =  `/api/convocation/${convocation.uuid}/file/${this.state.convocation.procuration.uuid}?token=${token.token}`
+	    } //else check if local authority have default procuration (defined in admin config)
+	    else if (convocation.localAuthority && convocation.localAuthority.defaultProcuration) {
+	        urlProcuration =  `/api/convocation/local-authority/procuration?token=${token.token}`
+	    }
+	    //if token, add in url
+	    if(token && urlProcuration) {
+	        urlProcuration = `${urlProcuration}?token=${token}`
 	    }
 
 	    const metaData = [
@@ -198,7 +207,7 @@ class ReceivedConvocation extends Component {
 	                                    </Field>
 	                                </Grid.Column>
 	                            )}
-	                            {this.state.convocation.procuration && !this.state.convocation.guest && this.state.convocation.useProcuration && (
+	                            {(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && !this.state.convocation.guest && this.state.convocation.useProcuration && (
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
 	                                        <FieldValue id='procuration'>
@@ -246,8 +255,8 @@ class ReceivedConvocation extends Component {
 	                    </FormFieldInline>
 	                    {this.state.displayListParticipantsSubstituted && (
 	                        <div>
-	                            {this.state.convocation.procuration && (
-	                                <p className='warning text-bold'>{t('convocation.page.print_and_complete_procuration')} <LinkFile url={`/api/convocation/${this.state.convocation.uuid}/file/${this.state.convocation.procuration.uuid}`} text={t('convocation.page.download_procuration')} /></p>
+	                            {(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && (
+	                                <p className='warning text-bold'>{t('convocation.page.print_and_complete_procuration')} <LinkFile url={urlProcuration} text={t('convocation.page.download_procuration')} /></p>
 	                            )}
 	                            <p className='text-bold mb-0'>{t('convocation.page.select_user_for_substituted')}</p>
 	                            <p className='text-muted'>{t('convocation.page.information_message_substituted')}</p>

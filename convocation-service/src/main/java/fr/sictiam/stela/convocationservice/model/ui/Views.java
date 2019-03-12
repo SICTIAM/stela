@@ -85,6 +85,9 @@ public class Views {
     public interface Public {
     }
 
+    public interface Attachment extends Public {
+    }
+
     public interface Search extends Public {
     }
 
@@ -115,10 +118,10 @@ public class Views {
     public interface AssemblyTypeInternal extends AssemblyType {
     }
 
-    public interface LocalAuthority extends Public {
+    public interface LocalAuthority extends Public, Attachment {
     }
 
-    public interface Convocation extends Recipient, LocalAuthority, Question {
+    public interface Convocation extends Recipient, LocalAuthority, Question, Attachment {
     }
 
     public interface ConvocationSent extends Convocation {
