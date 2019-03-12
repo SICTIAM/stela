@@ -99,6 +99,7 @@ class AuthProvider extends Component {
 				csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
 			})
 		}catch(e){
+			this.setState({isLoggedIn: e.status !== 401})
 			console.error('Auth error', e)
 		}
 	}
@@ -122,7 +123,7 @@ class AuthProvider extends Component {
 	}
 	async isAuthenticate() {
 		const {_fetchWithAuthzHandling } = this.context
-		return _fetchWithAuthzHandling({ url: '/api/csrf-token' })
+		return await _fetchWithAuthzHandling({ url: '/api/csrf-token' })
 	}
 	render() {
 	    return (

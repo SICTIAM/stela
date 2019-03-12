@@ -43,6 +43,8 @@ const customFetch = async (URL, options) => {
                     `/api/api-gateway/loginWithSlug/${localAuthority}`:
                     '/'
                 window.location.replace(redirectPath)
+            } else {
+                throw errorResponse
             }
             break
         default:

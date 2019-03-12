@@ -10,8 +10,9 @@ import { withAuthContext } from '../../Auth'
 import { getLocalAuthoritySlug } from '../../_util/utils'
 import { acceptFileDocumentConvocation } from '../../_util/constants'
 import { notifications } from '../../_util/Notifications'
+import ConvocationService from '../../_util/convocation-service'
 
-import {  Page, FormField, ValidationPopup, InputFile, File } from '../../_components/UI'
+import {  Page, FormField, ValidationPopup, InputFile, File, LinkFile } from '../../_components/UI'
 import Breadcrumb from '../../_components/Breadcrumb'
 import DraggablePosition from '../../_components/DraggablePosition'
 
@@ -40,23 +41,11 @@ class ConvocationLocalAuthorityParams extends Component {
         isFormValid: false,
         formErrors: []
     }
-    componentDidMount() {
-        const { _fetchWithAuthzHandling, _addNotification } = this.context
-        _fetchWithAuthzHandling({url: '/api/convocation/local-authority'})
-            .then(response => response.json())
-            .then(json => {
-                const fields = this.state.fields
-                fields.uuid = json.uuid
-                fields.residentThreshold = json.residentThreshold
-                fields.stampPosition = json.stampPosition
-                fields.defaultProcuration = json.defaultProcuration
-                this.setState({fields})
-            })
-            .catch(response => {
-                response.json().then(json => {
-                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
-                })
-            })
+    componentDidMount = async() => {
+        this._convocationService = new ConvocationService()
+
+        const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
+        this.setState({fields: localAuthorityResponse})
     }
     validateForm = () => {
 	    const { t } = this.context
@@ -111,33 +100,21 @@ class ConvocationLocalAuthorityParams extends Component {
 	    this.setState({ fields }, this.validateForm)
     }
 
-    submitForm = (e) => {
-        const { _fetchWithAuthzHandling, _addNotification } = this.context
+    submitForm = async(e) => {
         e.preventDefault()
-        const headers = { 'Content-Type': 'application/json' }
-        _fetchWithAuthzHandling({url: '/api/convocation/local-authority', method: 'PUT', headers: headers, body: JSON.stringify(this.state.fields), context: this.props.authContext})
-            .then(() => {
-                if(this.state.fields.procuration) {
-                    const data = new FormData()
-                    data.append('procuration', this.state.fields.procuration)
-                    _fetchWithAuthzHandling({url: '/api/convocation/local-authority/procuration', method: 'POST', body: data, context: this.props.authContext})
-                        .then(() => {
-                            _addNotification(notifications.admin.moduleConvocationUpdated)
-                        })
-                        .catch(error => {
-                            error.json().then(json => {
-                                _addNotification(notifications.defaultError, 'notifications.title', json.message)
-                            })
-                        })
-                } else {
-                    _addNotification(notifications.admin.moduleConvocationUpdated)
-                }
-            })
-            .catch(response => {
-                response.json().then(json => {
-                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
-                })
-            })
+        const { _addNotification } = this.context
+        await this._convocationService.saveConfForLocalAuthority(this.props.authContext, this.state.fields)
+        if(this.state.fields.procuration) {
+            const data = new FormData()
+            data.append('procuration', this.state.fields.procuration)
+            await this._convocationService.saveDefaultProcuration(this.props.authContext, data)
+            _addNotification(notifications.admin.moduleConvocationUpdated)
+        } else {
+            _addNotification(notifications.admin.moduleConvocationUpdated)
+        }
+
+        const localAthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
+        this.setState({fields: localAthorityResponse})
     }
     render() {
         const { t } = this.context
@@ -207,6 +184,9 @@ class ConvocationLocalAuthorityParams extends Component {
                             <Grid.Column mobile='16' computer='16'>
                                 <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
 	                                label={t('convocation.fields.default_procuration')}>
+                                    {this.state.fields.defaultProcuration && (
+                                        <p><LinkFile url='/api/convocation/local-authority/procuration' text={t('convocation.new.display')}/></p>
+                                    )}
 	                                <InputFile labelClassName="primary" htmlFor={`${this.state.fields.uuid}_procuration`}
 	                                    label={`${t('api-gateway:form.add_a_file')}`}>
 	                                    <input type="file"
@@ -219,7 +199,7 @@ class ConvocationLocalAuthorityParams extends Component {
 	                            </FormField>
                                 {this.state.fields.procuration && (
 	                                <File attachment={{ filename: this.state.fields.procuration.name }} onDelete={() => this.deleteFile()} />
-	                            )}
+                                )}
                             </Grid.Column>
                         </Grid>
                         <div className='footerForm'>

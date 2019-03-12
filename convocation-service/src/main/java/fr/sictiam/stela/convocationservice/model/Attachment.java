@@ -20,10 +20,10 @@ public class Attachment {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JsonView(Views.ConvocationInternal.class)
+    @JsonView(Views.Attachment.class)
     private String uuid;
 
-    @JsonView(Views.ConvocationInternal.class)
+    @JsonView(Views.Attachment.class)
     private String filename;
 
     @JsonIgnore
@@ -38,7 +38,7 @@ public class Attachment {
     @JsonIgnore
     private LocalDateTime date;
 
-    @JsonView(Views.ConvocationInternal.class)
+    @JsonView(Views.Attachment.class)
     private boolean additional = false;
 
     public Attachment() {

@@ -175,6 +175,47 @@ export default class ConvocationService {
 	    }
 	}
 
+	getConfForLocalAuthority = async (context) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: '/api/convocation/local-authority'})).json()
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+
+	}
+
+	saveConfForLocalAuthority = async (context, data) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    const headers = { 'Content-Type': 'application/json' }
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: '/api/convocation/local-authority', method: 'PUT', headers: headers, body: JSON.stringify(data), context: context})
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
+	saveDefaultProcuration = async (context, data) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: '/api/convocation/local-authority/procuration', method: 'POST', body: data, context: context})
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
 	getTokenInUrl = (search) => {
 	    const arrayParams = search && search.substr(1).split('&')
 	    const regex = /token/
@@ -184,4 +225,6 @@ export default class ConvocationService {
 	    const token = indexToken !== undefined && indexToken !== '' && indexToken !== -1 && arrayParams[indexToken].split('=')[1]
 	    return search && indexToken !== -1 ? {token: token} : null
 	}
+
+
 }

@@ -39,7 +39,7 @@ public class LocalAuthority {
     @JsonView(Views.LocalAuthority.class)
     private Boolean residentThreshold = true;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.LocalAuthority.class)
     private Attachment defaultProcuration;
 
