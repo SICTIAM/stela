@@ -24,7 +24,7 @@ i18n
             // returning a path:
             // function(lngs, namespaces) { return customPath; }
             // the returned path will interpolate lng, ns if provided like giving a static path
-            loadPath: '/api/{{ns}}/locales/{{lng}}/{{ns}}.json',
+            loadPath: '/api/api-gateway/locales/{{ns}}/{{lng}}/{{ns}}.json',
 
             // path to post missing resources
             addPath: '/api/{{ns}}/locales/add/{{lng}}/{{ns}}.missing.json',
