@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(value = "application.rabbit.enabled")
+@ConditionalOnProperty(value = "application.amqp.enabled")
 public class RabbitConfiguration {
 
     @Value("${spring.rabbitmq.host}")
@@ -25,7 +25,7 @@ public class RabbitConfiguration {
     @Value("${spring.rabbitmq.password}")
     private String password;
 
-    @Value("${application.amqp.acte.exchange}")
+    @Value("${application.amqp.admin.exchange}")
     private String exchangeName;
 
     @Bean

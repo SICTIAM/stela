@@ -71,9 +71,6 @@ public class LocalAuthorityService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${application.amqp.admin.createdKey}")
-    private String createdKey;
-
     @Value("${application.amqp.admin.exchange}")
     private String exchange;
 
@@ -102,6 +99,7 @@ public class LocalAuthorityService {
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
             Message amMessage = new Message(body.getBytes(), messageProperties);
+            // FIXME should use a routing key to let consumers choose the events they are interested in
             amqpTemplate.send(exchange, "", amMessage);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
