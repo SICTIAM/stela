@@ -16,7 +16,7 @@ import RecipientForm from '../../convocation/RecipientForm'
 import Breadcrumb from '../../_components/Breadcrumb'
 
 import { Page, FormField, ValidationPopup} from '../../_components/UI'
-import ChipsList from '../../_components/ChipsList'
+import StelaTable from '../../_components/StelaTable'
 
 class AssemblyTypeConfig extends Component {
 	static contextTypes = {
@@ -153,6 +153,7 @@ class AssemblyTypeConfig extends Component {
 	}
 	render () {
 	    const { t } = this.context
+	    const { fields, modalOpened, errorTypePointing, formErrors } = this.state
 	    const submissionButton =
 			<Button type='submit' primary basic disabled={!this.state.isFormValid }>
 			    {t('api-gateway:form.send')}
@@ -168,27 +169,33 @@ class AssemblyTypeConfig extends Component {
 	        {title: t('api-gateway:breadcrumb.convocation.convocation'), url: `/${localAuthoritySlug}/admin/ma-collectivite/convocation`},
 	        {title: t('api-gateway:breadcrumb.convocation.add_assembly_type') }
 	    ]
+	    const metaData = [
+	        { property: 'uuid', displayed: false },
+	        { property: 'firstname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.firstname') },
+	        { property: 'lastname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.lastname') },
+	        { property: 'email', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.email') },
+	    ]
 	    return (
 	        <Page>
 	            <Breadcrumb
 	                data={dataBreadcrumb}
 	            />
-	            {!this.state.fields.active && (
+	            {!fields.active && (
 	                <Message warning>
 	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.admin.modules.convocation.assembly_type_config.inactive_assembly_type_title')}</Message.Header>
-	                    <p>{t('convocation.admin.modules.convocation.assembly_type_config.inactive_assembly_type_content', {date: moment(this.state.fields.inactivityDate).format('DD/MM/YYYY')})}</p>
+	                    <p>{t('convocation.admin.modules.convocation.assembly_type_config.inactive_assembly_type_content', {date: moment(fields.inactivityDate).format('DD/MM/YYYY')})}</p>
 	                </Message>
 	            )}
 	            <Segment>
 	                <Form onSubmit={this.submitForm}>
 	                    <Grid>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_name`}
+	                            <FormField htmlFor={`${fields.uuid}_name`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.type')} required={true}>
 	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_name`}
-	                                    value={this.state.fields.name}
+	                                    errorTypePointing={errorTypePointing}
+	                                    id={`${fields.uuid}_name`}
+	                                    value={fields.name}
 	                                    onChange={this.handleFieldChange}
 	                                    validationRule={this.validationRules.name}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.type')}
@@ -197,12 +204,12 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_location`}
+	                            <FormField htmlFor={`${fields.uuid}_location`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.place')} required={true}>
 	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_location`}
-	                                    value={this.state.fields.location}
+	                                    errorTypePointing={errorTypePointing}
+	                                    id={`${fields.uuid}_location`}
+	                                    value={fields.location}
 	                                    onChange={this.handleFieldChange}
 	                                    validationRule={this.validationRules.location}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.place')}
@@ -211,13 +218,13 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_delay`}
+	                            <FormField htmlFor={`${fields.uuid}_delay`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay')} required={true}>
 	                                <InputValidation
-	                                    errorTypePointing={this.state.errorTypePointing}
-	                                    id={`${this.state.fields.uuid}_delay`}
+	                                    errorTypePointing={errorTypePointing}
+	                                    id={`${fields.uuid}_delay`}
 	                                    validationRule={this.validationRules.delay}
-	                                    value={this.state.fields.delay}
+	                                    value={fields.delay}
 	                                    type='number'
 	                                    onChange={this.handleFieldChange}
 	                                    fieldName={t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay')}
@@ -226,44 +233,46 @@ class AssemblyTypeConfig extends Component {
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_reminder`}
+	                            <FormField htmlFor={`${fields.uuid}_reminder`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.reminder')}>
 	                                <p className="text-muted">{t('convocation.admin.modules.convocation.assembly_type_config.explanation_reminder')}</p>
 	                                <Checkbox className='secondary'
-	                                    checked={this.state.fields.reminder}
+	                                    checked={fields.reminder}
 	                                    onChange={((e, { checked }) => this.handleCheckbox(checked, 'reminder'))}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile="16" computer='8'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_useProcuration`}
+	                            <FormField htmlFor={`${fields.uuid}_useProcuration`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.procuration')}>
 	                                <Checkbox toggle className='secondary'
-	                                    checked={this.state.fields.useProcuration}
+	                                    checked={fields.useProcuration}
 	                                    onChange={((e, { checked }) => this.handleCheckbox(checked, 'useProcuration'))}/>
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column computer='16'>
-	                            <FormField htmlFor={`${this.state.fields.uuid}_recipient`}
+	                            <FormField htmlFor={`${fields.uuid}_recipient`}
 	                                label={t('convocation.admin.modules.convocation.assembly_type_config.recipients')}>
-	                                <Modal open={this.state.modalOpened} trigger={<Button
+	                                <Modal open={modalOpened} trigger={<Button
 	                                    	onClick={() => this.setState({modalOpened: true})}
 	                                    	type='button'
-	                                    	id={`${this.state.fields.uuid}_recipient`}
+	                                    	id={`${fields.uuid}_recipient`}
 	                                    	compact basic primary>{t('convocation.admin.modules.convocation.assembly_type_config.edit_recipients')}
 	                                    </Button>}>
 	                                    <RecipientForm
 	                                        onCloseModal={this.closeModal}
 	                                        onAdded={(selectedUser) => this.addRecipient(selectedUser)}
-	                                        selectedUser={this.state.fields.recipients}>
+	                                        selectedUser={fields.recipients}>
 	                                    </RecipientForm>
 	                                </Modal>
 	                            </FormField>
-	                            <ChipsList
-	                                list={this.state.fields.recipients}
-	                                labelText='email'
-	                                removable={false}
-	                                viewMoreText={t('convocation.new.view_more_recipients', {number: this.state.fields.recipients.length})}
-	                                viewLessText={t('convocation.new.view_less_recipients')}/>
+	                            <StelaTable
+	                                header={false}
+	                                click={false}
+	                                data={fields.recipients}
+	                                keyProperty="uuid"
+	                                search={true}
+	                                noDataMessage={t('convocation.new.no_recipient')}
+	                                metaData={metaData}/>
 	                        </Grid.Column>
 	                    </Grid>
 	                    <div className='footerForm'>
@@ -271,12 +280,12 @@ class AssemblyTypeConfig extends Component {
 	                            {t('api-gateway:form.cancel')}
 	                        </Button>
 
-	                        {this.state.formErrors.length > 0 &&
-                                <ValidationPopup errorList={this.state.formErrors}>
+	                        {formErrors.length > 0 &&
+                                <ValidationPopup errorList={formErrors}>
                                     {submissionButton}
                                 </ValidationPopup>
 	                        }
-	                        {this.state.formErrors.length === 0 && submissionButton}
+	                        {formErrors.length === 0 && submissionButton}
 	                    </div>
 	                </Form>
 	            </Segment>
