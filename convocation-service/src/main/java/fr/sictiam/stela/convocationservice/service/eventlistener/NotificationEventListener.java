@@ -8,6 +8,7 @@ import fr.sictiam.stela.convocationservice.model.NotificationValue;
 import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
@@ -89,6 +90,18 @@ public class NotificationEventListener {
                 updates);
 
         LOGGER.info("Update notification sent for convocation {} ({})", convocation.getUuid(),
+                convocation.getSubject());
+    }
+
+    @EventListener
+    @Async
+    public void convocationCancelled(ConvocationCancelledEvent event) {
+        // get full object from DB
+        Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+
+        sendToRecipients(convocation, NotificationType.CONVOCATION_CANCELLED, convocation.getRecipientResponses());
+
+        LOGGER.info("Cancelled notification sent for convocation {} ({})", convocation.getUuid(),
                 convocation.getSubject());
     }
 

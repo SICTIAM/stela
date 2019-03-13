@@ -10,6 +10,7 @@ import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
 import fr.sictiam.stela.convocationservice.model.*;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
@@ -221,7 +222,7 @@ public class ConvocationService {
         convocation.setCancellationDate(LocalDateTime.now());
         convocationRepository.save(convocation);
         addHistory(convocation, HistoryType.CANCELLED);
-        // TODO: send email to recipients
+        applicationEventPublisher.publishEvent(new ConvocationCancelledEvent(this, convocation));
     }
 
     public Convocation getByUuid(String uuid, String localAuthorityUuid) {
