@@ -16,6 +16,7 @@ import fr.sictiam.stela.convocationservice.model.event.notifications.Convocation
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
@@ -333,6 +334,13 @@ public class ConvocationService {
         }
 
         RecipientResponse recipientResponse = opt.get();
+
+        // if (actual response is SUBSTITUED, we need to notify substitute that his procuration has been cancelled
+        if (recipientResponse.getResponseType() == ResponseType.SUBSTITUTED) {
+            RecipientResponse previous = new RecipientResponse(recipientResponse.getRecipient(),
+                    recipientResponse.getSubstituteRecipient(), ResponseType.SUBSTITUTED);
+            applicationEventPublisher.publishEvent(new ProcurationCancelledEvent(this, convocation, previous));
+        }
 
         if (responseType == ResponseType.SUBSTITUTED) {
 

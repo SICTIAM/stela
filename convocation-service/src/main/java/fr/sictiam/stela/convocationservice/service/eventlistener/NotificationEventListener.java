@@ -15,6 +15,7 @@ import fr.sictiam.stela.convocationservice.model.event.notifications.Convocation
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
@@ -138,6 +139,19 @@ public class NotificationEventListener {
         sendToRecipients(convocation, NotificationType.PROCURATION_RECEIVED, Collections.singleton(recipientResponse));
 
         LOGGER.info("Procuration received notification sent for convocation {} ({})", convocation.getUuid(),
+                convocation.getSubject());
+    }
+
+    @EventListener
+    @Async
+    public void procurationReceived(ProcurationCancelledEvent event) {
+
+        Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+        RecipientResponse recipientResponse = event.getRecipientResponse();
+
+        sendToRecipients(convocation, NotificationType.PROCURATION_CANCELLED, Collections.singleton(recipientResponse));
+
+        LOGGER.info("Procuration cancelled notification sent for convocation {} ({})", convocation.getUuid(),
                 convocation.getSubject());
     }
 
