@@ -11,6 +11,7 @@ import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
@@ -118,11 +119,26 @@ public class NotificationEventListener {
         Convocation convocation = event.getConvocation();
         RecipientResponse recipientResponse = event.getRecipientResponse();
 
+        sendToAuthor(convocation, recipientResponse, NotificationType.CONVOCATION_READ);
+    }
+
+    @EventListener
+    @Async
+    public void convocationResponse(ConvocationResponseEvent event) {
+
+        Convocation convocation = event.getConvocation();
+        RecipientResponse recipientResponse = event.getRecipientResponse();
+
+        sendToAuthor(convocation, recipientResponse, NotificationType.CONVOCATION_RESPONSE);
+    }
+
+
+    private void sendToAuthor(Convocation convocation, RecipientResponse recipientResponse, NotificationType type) {
+
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
-        if (hasNotificationActive(author, NotificationType.CONVOCATION_READ)) {
-            MailTemplate template = mailTemplateService.getTemplate(NotificationType.CONVOCATION_READ,
-                    convocation.getLocalAuthority());
+        if (hasNotificationActive(author, type)) {
+            MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
 
             String body = StrSubstitutor.replace(
                     template.getBody(),
@@ -131,16 +147,15 @@ public class NotificationEventListener {
                     "}}");
             try {
                 mailerService.sendEmail(author.getEmail(), template.getSubject(), body);
-                LOGGER.info("Read notification sent for convocation {} ({})", convocation.getUuid(),
+                LOGGER.info("{} notification sent for convocation {} ({})", type.name(), convocation.getUuid(),
                         convocation.getSubject());
             } catch (MailException e) {
                 LOGGER.error("Error while sending notification {} to {}: {}",
-                        NotificationType.CONVOCATION_READ.name(), author.getEmail(), e.getMessage());
+                        type.name(), author.getEmail(), e.getMessage());
                 // TODO: maybe a retry process
             }
         } else {
-            LOGGER.debug("{} ({}) did not subscribe to {} notifications", author.getFullName(), author.getUuid(),
-                    NotificationType.CONVOCATION_READ);
+            LOGGER.debug("{} ({}) did not subscribe to {} notifications", author.getFullName(), author.getUuid(), type);
         }
     }
 
@@ -164,6 +179,9 @@ public class NotificationEventListener {
         placeHolders.put("collectivite", convocation.getLocalAuthority().getName());
 
         placeHolders.put("destinataire", recipientResponse.getRecipient().getFullName());
+        placeHolders.put("reponse",
+                localesService.getMessage("fr", "convocation",
+                        "$.convocation.export." + recipientResponse.getResponseType().name()));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         placeHolders.put("date", formatter.format(convocation.getMeetingDate()));

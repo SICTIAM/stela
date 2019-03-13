@@ -13,6 +13,7 @@ import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
@@ -368,6 +369,7 @@ public class ConvocationService {
 
         recipientResponse.setResponseType(responseType);
         convocationRepository.save(convocation);
+        applicationEventPublisher.publishEvent(new ConvocationResponseEvent(this, convocation, recipientResponse));
     }
 
     public void answerQuestion(Convocation convocation, Recipient currentRecipient, String questionUuid,
