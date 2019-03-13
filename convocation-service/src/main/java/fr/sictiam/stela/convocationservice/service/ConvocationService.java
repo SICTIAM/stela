@@ -446,6 +446,14 @@ public class ConvocationService {
         return profile;
     }
 
+    public List<Convocation> getConvocationsToRemind(int reminderDelay) {
+
+        LocalDateTime start = LocalDateTime.now().plusDays(reminderDelay).toLocalDate().atStartOfDay();
+        LocalDateTime end = LocalDateTime.now().plusDays(reminderDelay + 1).toLocalDate().atStartOfDay();
+
+        return convocationRepository.findByCancelledFalseAndMeetingDateBetween(start, end);
+    }
+
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String
             assemblyType,
             LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,

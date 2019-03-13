@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface ConvocationRepository extends JpaRepository<Convocation, String> {
@@ -18,4 +19,6 @@ public interface ConvocationRepository extends JpaRepository<Convocation, String
     @Transactional
     @Query(value = "UPDATE Convocation c SET c.sentDate=:now where uuid=:uuid")
     public void setSentDate(@Param("uuid") String uuid, @Param("now") LocalDateTime now);
+
+    public List<Convocation> findByCancelledFalseAndMeetingDateBetween(LocalDateTime start, LocalDateTime end);
 }

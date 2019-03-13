@@ -17,6 +17,7 @@ import fr.sictiam.stela.convocationservice.model.event.notifications.Convocation
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ReminderEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
 import fr.sictiam.stela.convocationservice.service.MailTemplateService;
@@ -175,6 +176,27 @@ public class NotificationEventListener {
         sendToAuthor(convocation, recipientResponse, NotificationType.CONVOCATION_RESPONSE);
     }
 
+    @EventListener
+    @Async
+    public void reminderNotification(ReminderEvent event) {
+
+        Convocation convocation = event.getConvocation();
+
+        Set<RecipientResponse> recipientResponses = convocation.getRecipientResponses()
+                .stream()
+                .filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.DO_NOT_KNOW)
+                .collect(Collectors.toSet());
+
+        recipientResponses.forEach(recipientResponse -> LOGGER.debug("Recipient {} has not answer to convocation {}",
+                recipientResponse.getRecipient().getEmail(), convocation.getSubject()));
+
+        sendToRecipients(convocation, NotificationType.CONVOCATION_REMINDER, recipientResponses);
+
+        if (recipientResponses.size() > 0) {
+            LOGGER.info("Reminder notification sent for convocation {} ({})", convocation.getUuid(),
+                    convocation.getSubject());
+        }
+    }
 
     private void sendToAuthor(Convocation convocation, RecipientResponse recipientResponse, NotificationType type) {
 
@@ -267,6 +289,7 @@ public class NotificationEventListener {
                                 recipientResponse.getSubstituteRecipient().getEmail() :
                                 recipientResponse.getRecipient().getEmail();
                 try {
+                    LOGGER.debug("[sendToRecipients] Sending mail to {}", address);
                     mailerService.sendEmail(address, template.getSubject(), body, author);
                 } catch (MailException e) {
                     LOGGER.error("Error while sending notification {} to {}: {}",
