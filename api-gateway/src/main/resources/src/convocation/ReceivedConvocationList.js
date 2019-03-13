@@ -119,7 +119,7 @@ class ReceivedConvocation extends Component {
 	        { property: 'meetingDate', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.date'), displayComponent: dateDisplay},
 	        { property: 'assemblyType', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.assembly_type')},
 	        { property: 'subject', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.object')},
-	        { property: 'response', displayed: true, searchable: true, sortable: true, displayName: t('convocation.page.my_answer'), displayComponent: answerDisplay}
+	        { property: 'response', displayed: true, searchable: false, sortable: false, displayName: t('convocation.page.my_answer'), displayComponent: answerDisplay}
 	    ]
 	    const options = [
 	        { key: 10, text: 10, value: 10 },

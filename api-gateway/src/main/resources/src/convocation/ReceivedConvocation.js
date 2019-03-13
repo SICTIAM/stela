@@ -115,7 +115,7 @@ class ReceivedConvocation extends Component {
 	    const token = this._convocationService && this._convocationService.getTokenInUrl(this.props.location.search)
 	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.convocation.annexes && this.state.convocation.annexes.length > 3 ? this.state.convocation.annexes.slice(0,3) : this.state.convocation.annexes
 	    const annexes = annexesToDisplay.map(annexe => {
-	        const url = token ? `/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true&token=${token.token}`:`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true`
+	        const url = token ? `/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true&token=${token}`:`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true`
 	        return (
 	            <div key={`div_${this.state.convocation.uuid}_${annexe.uuid}`}>
 	                <LinkFile
@@ -128,15 +128,15 @@ class ReceivedConvocation extends Component {
 	    })
 	    let urlDocument = null
 	    if(convocation.attachment) {
-	        urlDocument = token ? `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true`
+	        urlDocument = token ? `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true&token=${token}` : `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true`
 	    }
 	    let urlProcuration = null
 	    //if this convocation have procuration
 	    if(convocation.procuration && convocation.procuration.uuid) {
-	        urlProcuration =  `/api/convocation/${convocation.uuid}/file/${this.state.convocation.procuration.uuid}?token=${token.token}`
+	        urlProcuration = `/api/convocation/${convocation.uuid}/file/${this.state.convocation.procuration.uuid}`
 	    } //else check if local authority have default procuration (defined in admin config)
 	    else if (convocation.localAuthority && convocation.localAuthority.defaultProcuration) {
-	        urlProcuration =  `/api/convocation/local-authority/procuration?token=${token.token}`
+	        urlProcuration =  '/api/convocation/local-authority/procuration'
 	    }
 	    //if token, add in url
 	    if(token && urlProcuration) {
