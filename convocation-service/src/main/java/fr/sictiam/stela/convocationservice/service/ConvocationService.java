@@ -45,6 +45,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,7 +113,7 @@ public class ConvocationService {
             response.setOpened(true);
             response.setOpenDate(LocalDateTime.now());
             recipientResponseRepository.save(response);
-            applicationEventPublisher.publishEvent(new ConvocationReadEvent(this, convocation, response.getRecipient()));
+            applicationEventPublisher.publishEvent(new ConvocationReadEvent(this, convocation, response));
         }
         return convocation;
     }
@@ -153,11 +154,13 @@ public class ConvocationService {
 
         Convocation convocation = getConvocation(uuid, localAuthorityUuid);
         boolean updated = false;
+        List<String> updates = new ArrayList<>();
 
         // Add questions
         if (params.getQuestions() != null && params.getQuestions().size() > 0) {
             convocation.getQuestions().addAll(params.getQuestions());
             addHistory(convocation, HistoryType.QUESTIONS_ADDED);
+            updates.add("QUESTIONS_ADDED");
             updated = true;
         }
 
@@ -165,6 +168,7 @@ public class ConvocationService {
         if (StringUtils.isNotBlank(params.getComment()) && !params.getComment().equals(convocation.getComment())) {
             convocation.setComment(params.getComment());
             addHistory(convocation, HistoryType.COMMENT_MODIFIED);
+            updates.add("COMMENT_MODIFIED");
             updated = true;
         }
 
@@ -189,7 +193,7 @@ public class ConvocationService {
 
         Convocation result = convocationRepository.saveAndFlush(convocation);
         if (updated) {
-            applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation));
+            applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation, updates));
         }
 
         return result;
@@ -268,7 +272,8 @@ public class ConvocationService {
 
         convocationRepository.save(convocation);
         addHistory(convocation, HistoryType.ANNEXES_ADDED);
-        applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation));
+        applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation,
+                Collections.singletonList("ANNEXES_ADDED")));
     }
 
     public Attachment getFile(Convocation convocation, String fileUuid) throws NotFoundException {

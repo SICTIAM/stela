@@ -13,9 +13,9 @@ import fr.sictiam.stela.convocationservice.model.event.notifications.Convocation
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
+import fr.sictiam.stela.convocationservice.service.LocalesService;
 import fr.sictiam.stela.convocationservice.service.MailTemplateService;
 import fr.sictiam.stela.convocationservice.service.MailerService;
-import fr.sictiam.stela.convocationservice.service.StorageService;
 import fr.sictiam.stela.convocationservice.service.exceptions.MailException;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.slf4j.Logger;
@@ -26,7 +26,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,7 +45,7 @@ public class NotificationEventListener {
 
     private final MailTemplateService mailTemplateService;
 
-    private final StorageService storageService;
+    private final LocalesService localesService;
 
     @Value("${application.url}")
     private String applicationUrl;
@@ -53,11 +55,11 @@ public class NotificationEventListener {
             MailerService mailerService,
             ConvocationService convocationService,
             MailTemplateService mailTemplateService,
-            StorageService storageService) {
+            LocalesService localesService) {
         this.mailerService = mailerService;
         this.convocationService = convocationService;
         this.mailTemplateService = mailTemplateService;
-        this.storageService = storageService;
+        this.localesService = localesService;
     }
 
 
@@ -80,8 +82,10 @@ public class NotificationEventListener {
 
         // get full object from DB
         Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+        List<String> updates = event.getUpdates();
 
-        sendToRecipients(convocation, NotificationType.CONVOCATION_UPDATED, convocation.getRecipientResponses());
+        sendToRecipients(convocation, NotificationType.CONVOCATION_UPDATED, convocation.getRecipientResponses(),
+                updates);
 
         LOGGER.info("Update notification sent for convocation {} ({})", convocation.getUuid(),
                 convocation.getSubject());
@@ -112,7 +116,7 @@ public class NotificationEventListener {
     public void convocationReadByRecipient(ConvocationReadEvent event) {
 
         Convocation convocation = event.getConvocation();
-        Recipient recipient = event.getRecipient();
+        RecipientResponse recipientResponse = event.getRecipientResponse();
 
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
@@ -122,7 +126,9 @@ public class NotificationEventListener {
 
             String body = StrSubstitutor.replace(
                     template.getBody(),
-                    buildPlaceHolderMap(convocation, author, recipient, null, false));
+                    buildPlaceHolderMap(convocation, author, recipientResponse, null, false),
+                    "{{",
+                    "}}");
             try {
                 mailerService.sendEmail(author.getEmail(), template.getSubject(), body);
                 LOGGER.info("Read notification sent for convocation {} ({})", convocation.getUuid(),
@@ -141,50 +147,72 @@ public class NotificationEventListener {
     private Map<String, String> buildPlaceHolderMap(
             Convocation convocation,
             Profile author,
-            Recipient recipient,
-            Recipient substitute,
+            RecipientResponse recipientResponse,
+            List<String> updates,
             boolean received) {
 
         Map<String, String> placeHolders = new HashMap<>();
-        placeHolders.put("name", convocation.getSubject());
+        placeHolders.put("sujet", convocation.getSubject());
 
         String url = String.format("%s/%s/convocation/%s/%s?token=%s", applicationUrl,
                 convocation.getLocalAuthority().getSlugName(),
                 (received ? "liste-recues" : "liste-envoyees"),
-                convocation.getUuid(), recipient.getToken());
-        placeHolders.put("url", "<a href='" + url + "'>" + url + "</a>");
+                convocation.getUuid(), recipientResponse.getRecipient().getToken());
+        placeHolders.put("convocation", url);
+
+        placeHolders.put("stela_url", applicationUrl);
+        placeHolders.put("collectivite", convocation.getLocalAuthority().getName());
+
+        placeHolders.put("destinataire", recipientResponse.getRecipient().getFullName());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        placeHolders.put("date", formatter.format(convocation.getMeetingDate()));
 
         if (author != null)
-            placeHolders.put("author", author.getFullName());
+            placeHolders.put("emetteur", author.getFullName());
 
-        if (recipient != null)
-            placeHolders.put("recipient", recipient.getFullName());
+        if (recipientResponse.getSubstituteRecipient() != null)
+            placeHolders.put("mandataire", recipientResponse.getSubstituteRecipient().getFullName());
 
-        if (substitute != null)
-            placeHolders.put("substitute", substitute.getFullName());
+        if (updates != null) {
+            placeHolders.put("modifications",
+                    updates.stream().map(s -> "<li>" + localesService.getMessage("fr", "convocation", "$.convocation" +
+                            ".notifications." + s) + "</li>").collect(Collectors.joining()));
+        }
 
         return placeHolders;
     }
 
     private void sendToRecipients(Convocation convocation, NotificationType type,
-            Set<RecipientResponse> recipientResponses) {
+            Set<RecipientResponse> recipientResponses, List<String> updates) {
 
         MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
 
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
         for (RecipientResponse recipientResponse : recipientResponses) {
-            String body = StrSubstitutor.replace(template.getBody(), buildPlaceHolderMap(convocation, author,
-                    recipientResponse.getRecipient(), null, true));
-            String address = recipientResponse.getRecipient().getEmail();
-            try {
-                mailerService.sendEmail(address, template.getSubject(), body, author);
-            } catch (MailException e) {
-                LOGGER.error("Error while sending notification {} to {}: {}",
-                        type.name(), address, e.getMessage());
-                // TODO: maybe a retry process
+            if (recipientResponse.getRecipient().getActive()) {
+                String body = StrSubstitutor.replace(
+                        template.getBody(),
+                        buildPlaceHolderMap(convocation, author,
+                                recipientResponse, updates, true),
+                        "{{",
+                        "}}");
+                String address = recipientResponse.getRecipient().getEmail();
+                try {
+                    mailerService.sendEmail(address, template.getSubject(), body, author);
+                } catch (MailException e) {
+                    LOGGER.error("Error while sending notification {} to {}: {}",
+                            type.name(), address, e.getMessage());
+                    // TODO: maybe a retry process
+                }
             }
         }
+    }
+
+    private void sendToRecipients(Convocation convocation, NotificationType type,
+            Set<RecipientResponse> recipientResponses) {
+        sendToRecipients(convocation, type, recipientResponses, null);
     }
 
     private boolean hasNotificationActive(Profile author, NotificationType type) {
