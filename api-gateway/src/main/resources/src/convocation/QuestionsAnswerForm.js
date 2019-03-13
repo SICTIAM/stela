@@ -16,15 +16,15 @@ class QuestionsAnswerForm extends Component {
 	    const { t } = this.context
 	    const questions = this.props.questions.map((question, index) => {
 	        return (
-	            <div key={`question_${index}`} className='bb-1 px-10 py-5'>
+	            <div key={`question_${index}`} className='bb-1 py-5'>
 	                <Form.Field inline>
 	                    <Grid>
-	                        <Grid.Column className="inline-grid" width={12}>
+	                        <Grid.Column className="inline-grid" computer={12} mobile={16}>
 	                            <label style={{ verticalAlign: 'middle' }} htmlFor={`question_${index}`}>
 	                                {question.question}
 	                            </label>
 	                        </Grid.Column>
-	                        <Grid.Column className="inline-grid" width={4}>
+	                        <Grid.Column className="inline-grid" computer={4} mobile={16}>
 	                            <Radio
 	                                value='true'
 	                                name={`question_${index}`}

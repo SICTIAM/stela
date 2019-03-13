@@ -22,12 +22,12 @@ const FormField = ({ htmlFor, label, children, inline, helpText, required, optio
 const FormFieldInline = ({ htmlFor, label, children }) => (
     <Form.Field inline>
         <Grid>
-            <Grid.Column className="inline-grid" width={4}>
+            <Grid.Column className="inline-grid" computer={4} mobile={16}>
                 <label style={{ verticalAlign: 'middle' }} htmlFor={htmlFor}>
                     {label}
                 </label>
             </Grid.Column>
-            <Grid.Column className="inline-grid" width={12}>
+            <Grid.Column className="inline-grid" computer={12} mobile={16}>
                 {children}
             </Grid.Column>
         </Grid>
