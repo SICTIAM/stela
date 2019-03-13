@@ -94,6 +94,11 @@
     "stamp_pad": {
       "pad_label": "Tampon"
     },
+    "notifications": {
+      "COMMENT_MODIFIED": "Description de la convocation modifiée",
+      "QUESTIONS_ADDED": "Ajout de questions",
+      "ANNEXES_ADDED": "Ajout d'annexes à la convocation"
+    },
     "export": {
       "yes": "Oui",
       "guest": "Invité",
