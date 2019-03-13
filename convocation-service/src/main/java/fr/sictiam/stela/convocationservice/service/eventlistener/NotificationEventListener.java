@@ -8,12 +8,14 @@ import fr.sictiam.stela.convocationservice.model.NotificationValue;
 import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
+import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
 import fr.sictiam.stela.convocationservice.service.MailTemplateService;
@@ -29,6 +31,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +130,19 @@ public class NotificationEventListener {
 
     @EventListener
     @Async
+    public void procurationReceived(ProcurationReceivedEvent event) {
+
+        Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+        RecipientResponse recipientResponse = event.getRecipientResponse();
+
+        sendToRecipients(convocation, NotificationType.PROCURATION_RECEIVED, Collections.singleton(recipientResponse));
+
+        LOGGER.info("Procuration received notification sent for convocation {} ({})", convocation.getUuid(),
+                convocation.getSubject());
+    }
+
+    @EventListener
+    @Async
     public void convocationReadByRecipient(ConvocationReadEvent event) {
 
         Convocation convocation = event.getConvocation();
@@ -185,7 +201,10 @@ public class NotificationEventListener {
         String url = String.format("%s/%s/convocation/%s/%s?token=%s", applicationUrl,
                 convocation.getLocalAuthority().getSlugName(),
                 (received ? "liste-recues" : "liste-envoyees"),
-                convocation.getUuid(), recipientResponse.getRecipient().getToken());
+                convocation.getUuid(),
+                recipientResponse.getResponseType().equals(ResponseType.SUBSTITUTED) && recipientResponse.getSubstituteRecipient() != null ?
+                        recipientResponse.getSubstituteRecipient().getToken() :
+                        recipientResponse.getRecipient().getToken());
         placeHolders.put("convocation", url);
 
         placeHolders.put("stela_url", applicationUrl);
@@ -194,7 +213,7 @@ public class NotificationEventListener {
         placeHolders.put("destinataire", recipientResponse.getRecipient().getFullName());
         placeHolders.put("reponse",
                 localesService.getMessage("fr", "convocation",
-                        "$.convocation.export." + recipientResponse.getResponseType().name()));
+                        "$.convocation.notifications." + recipientResponse.getResponseType().name()));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         placeHolders.put("date", formatter.format(convocation.getMeetingDate()));
@@ -229,7 +248,10 @@ public class NotificationEventListener {
                                 recipientResponse, updates, true),
                         "{{",
                         "}}");
-                String address = recipientResponse.getRecipient().getEmail();
+                String address =
+                        recipientResponse.getResponseType().equals(ResponseType.SUBSTITUTED) && recipientResponse.getSubstituteRecipient() != null ?
+                                recipientResponse.getSubstituteRecipient().getEmail() :
+                                recipientResponse.getRecipient().getEmail();
                 try {
                     mailerService.sendEmail(address, template.getSubject(), body, author);
                 } catch (MailException e) {

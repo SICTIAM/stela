@@ -16,6 +16,7 @@ import fr.sictiam.stela.convocationservice.model.event.notifications.Convocation
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
@@ -362,6 +363,7 @@ public class ConvocationService {
                     throw new ProcurationNotPermittedException();
                 }
                 recipientResponse.setSubstituteRecipient(substituteResponse.get().getRecipient());
+                applicationEventPublisher.publishEvent(new ProcurationReceivedEvent(this, convocation, recipientResponse));
             }
         } else {
             // reset substitute if already set by a previous response
