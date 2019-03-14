@@ -51,7 +51,7 @@ class Home extends Component {
         const { t } = this.context
         const { authContext } = this.props
         const localAuthoritySlug = getLocalAuthoritySlug()
-        const { certificate } = this.state
+        const { certificate, welcomeMessage } = this.state
         const pairedCertificate = authContext.user && authContext.user.certificate
         const isCertificatePaired = pairedCertificate
             && certificate.serial === pairedCertificate.serial
@@ -66,9 +66,11 @@ class Home extends Component {
         }
         return (
             <Fragment>
-                <Segment>
-                    <ReactMarkdown source={this.state.welcomeMessage} />
-                </Segment>
+                {welcomeMessage &&
+                    <Segment>
+                        <ReactMarkdown source={welcomeMessage}/>
+                    </Segment>
+                }
                 {(authContext.isLoggedIn && localAuthoritySlug) && (
                     <Grid columns={2}>
                         <Grid.Column largeScreen={10} computer={10} mobile={16}>
