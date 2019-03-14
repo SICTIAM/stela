@@ -10,10 +10,14 @@ import fr.sictiam.stela.convocationservice.dao.RecipientResponseRepository;
 import fr.sictiam.stela.convocationservice.model.*;
 import fr.sictiam.stela.convocationservice.model.event.FileUploadEvent;
 import fr.sictiam.stela.convocationservice.model.event.HistoryEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationCancelledEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationException;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationFileException;
@@ -220,7 +224,7 @@ public class ConvocationService {
         convocation.setCancellationDate(LocalDateTime.now());
         convocationRepository.save(convocation);
         addHistory(convocation, HistoryType.CANCELLED);
-        // TODO: send email to recipients
+        applicationEventPublisher.publishEvent(new ConvocationCancelledEvent(this, convocation));
     }
 
     public Convocation getByUuid(String uuid, String localAuthorityUuid) {
@@ -331,6 +335,13 @@ public class ConvocationService {
 
         RecipientResponse recipientResponse = opt.get();
 
+        // if (actual response is SUBSTITUED, we need to notify substitute that his procuration has been cancelled
+        if (recipientResponse.getResponseType() == ResponseType.SUBSTITUTED) {
+            RecipientResponse previous = new RecipientResponse(recipientResponse.getRecipient(),
+                    recipientResponse.getSubstituteRecipient(), ResponseType.SUBSTITUTED);
+            applicationEventPublisher.publishEvent(new ProcurationCancelledEvent(this, convocation, previous));
+        }
+
         if (responseType == ResponseType.SUBSTITUTED) {
 
             // If recipient is a guest, he can't give a procuration to anyone else
@@ -360,6 +371,7 @@ public class ConvocationService {
                     throw new ProcurationNotPermittedException();
                 }
                 recipientResponse.setSubstituteRecipient(substituteResponse.get().getRecipient());
+                applicationEventPublisher.publishEvent(new ProcurationReceivedEvent(this, convocation, recipientResponse));
             }
         } else {
             // reset substitute if already set by a previous response
@@ -368,6 +380,7 @@ public class ConvocationService {
 
         recipientResponse.setResponseType(responseType);
         convocationRepository.save(convocation);
+        applicationEventPublisher.publishEvent(new ConvocationResponseEvent(this, convocation, recipientResponse));
     }
 
     public void answerQuestion(Convocation convocation, Recipient currentRecipient, String questionUuid,
@@ -431,6 +444,19 @@ public class ConvocationService {
         profile.setNotificationValues(notifications);
 
         return profile;
+    }
+
+    public List<Convocation> getConvocationsToRemind(int reminderDelay) {
+
+        LocalDateTime start = LocalDateTime.now().plusDays(reminderDelay).toLocalDate().atStartOfDay();
+        LocalDateTime end = LocalDateTime.now().plusDays(reminderDelay + 1).toLocalDate().atStartOfDay();
+
+        return convocationRepository.findByCancelledFalseAndMeetingDateBetween(start, end);
+    }
+
+    public List<String> getNoResponseInformation() {
+
+        return convocationRepository.findByHalfDuration();
     }
 
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String

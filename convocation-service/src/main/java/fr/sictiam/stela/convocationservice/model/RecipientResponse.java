@@ -53,13 +53,16 @@ public class RecipientResponse implements Comparable<RecipientResponse> {
     }
 
     public RecipientResponse(Recipient recipient) {
-        this.recipient = recipient;
+        this(recipient, null, null, ResponseType.DO_NOT_KNOW);
     }
 
     public RecipientResponse(Recipient recipient, Convocation convocation) {
-        this.recipient = recipient;
-        this.convocation = convocation;
-        guest = recipient.isGuest();
+        this(recipient, null, convocation, ResponseType.DO_NOT_KNOW);
+    }
+
+    public RecipientResponse(Recipient recipient, Recipient substituteRecipient, ResponseType responseType) {
+        this(recipient, substituteRecipient, null, responseType);
+
     }
 
     public RecipientResponse(Recipient recipient, Recipient substituteRecipient, Convocation convocation,
@@ -68,7 +71,9 @@ public class RecipientResponse implements Comparable<RecipientResponse> {
         this.substituteRecipient = substituteRecipient;
         this.convocation = convocation;
         this.responseType = responseType;
+        guest = recipient.isGuest();
     }
+
 
     public Recipient getRecipient() {
         return recipient;

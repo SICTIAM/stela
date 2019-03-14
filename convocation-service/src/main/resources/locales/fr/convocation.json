@@ -98,7 +98,10 @@
     "notifications": {
       "COMMENT_MODIFIED": "Description de la convocation modifiée",
       "QUESTIONS_ADDED": "Ajout de questions",
-      "ANNEXES_ADDED": "Ajout d'annexes à la convocation"
+      "ANNEXES_ADDED": "Ajout d'annexes à la convocation",
+      "PRESENT": "Présent",
+      "NOT_PRESENT": "Absent",
+      "SUBSTITUTED": "Procuration donnée"
     },
     "export": {
       "yes": "Oui",
