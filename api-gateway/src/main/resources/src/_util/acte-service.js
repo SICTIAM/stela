@@ -11,7 +11,7 @@ export default class ActeService {
         if (!acte.decision) {
             acte.decision = ''
         } else {
-            acte.decision = moment(acte)
+            acte.decision = moment(acte.decision)
         }
         if (!acte.objet) acte.objet = ''
         if (!acte.number) acte.number = ''
