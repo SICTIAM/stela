@@ -21,7 +21,8 @@
       "convocation_document": "Document de la convocation",
       "annexes": "Annexe(s)",
       "questions": "Question(s) supplémentaire(s)",
-      "questions_placeholder": "Entrez votre question"
+      "questions_placeholder": "Entrez votre question",
+      "notification_email": "Personnaliser le message de notification"
     },
     "list": {
       "sent_date": "Date d'envoi",
@@ -124,7 +125,10 @@
           "assembly_types": "Type d'assemblée",
           "local_authority_settings": {
             "title": "Paramétrage des collectivités",
-            "general_informations": "Informations générales"
+            "general_informations": "Informations générales",
+            "notificationMessage": "Messages de notification",
+            "subject": "Sujet",
+            "body": "Contenu"
           },
           "module_settings": {
             "title": "Paramètres du module Convocation",
@@ -181,6 +185,7 @@
         "documentMissing": "Le document de la convocation est manquant",
         "alreadyCancelled": "La convocation a déjà été annulée",
         "notAvailable": "La date de séance est déjà passée",
+        "mailAlreadyCustomized": "Ce mail a déjà été personnalisé",
         "400": "Paramètre invalide",
         "403": "Non autorisé",
         "404": "La convocation n'a pas été trouvée dans la collectivité courante"

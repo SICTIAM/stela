@@ -41,6 +41,10 @@ public class MailTemplate {
         this.localAuthorityUuid = localAuthorityUuid;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
     public NotificationType getNotificationType() {
         return notificationType;
     }
