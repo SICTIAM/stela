@@ -61,10 +61,10 @@ public class EmailCheckingTask {
     @Value("${application.email.listening.port}")
     private Integer port;
 
-    @Value("${application.email.username}")
+    @Value("${spring.mail.username}")
     private String username;
 
-    @Value("${application.email.password}")
+    @Value("${spring.mail.password}")
     private String password;
 
     @Value("${application.email.done_folder}")

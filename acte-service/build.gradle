@@ -25,7 +25,6 @@ dependencies {
     compile('org.apache.commons:commons-lang3:3.8.1')
     compile('commons-io:commons-io:2.4')
     compile('commons-beanutils:commons-beanutils:1.8.3')
-    compile('com.sun.mail:javax.mail:1.6.0')
     compile('org.springframework:spring-oxm')
     compile('org.xhtmlrenderer:flying-saucer-pdf:9.1.4')
     compile('net.sf.supercsv:super-csv:2.4.0')
