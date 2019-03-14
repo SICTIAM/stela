@@ -13,6 +13,9 @@ import AgentProfile from './admin/localAuthority/AgentProfile'
 
 import { withAuthContext } from './Auth'
 
+
+const BRAND_COLOR = '#2C55A2'
+
 class Profile extends Component {
     static contextTypes = {
         csrfToken: PropTypes.string,
@@ -161,7 +164,7 @@ class Profile extends Component {
             <Page title={t('profile.title')}>
                 {agent && (
                     <Fragment>
-                        <Segment style={{ borderTop: '2px solid #663399' }}>
+                        <Segment style={{ borderTop: `2px solid ${BRAND_COLOR}` }}>
                             <FieldInline htmlFor="family_name" label={t('agent.family_name')}>
                                 <FieldValue id="family_name">{agent.family_name}</FieldValue>
                             </FieldInline>
@@ -177,13 +180,13 @@ class Profile extends Component {
                                         style={{
                                             display: 'inline-flex',
                                             alignItems: 'center',
-                                            color: '#663399',
-                                            boxShadow: '0 0 0 1px #663399',
+                                            color: BRAND_COLOR,
+                                            boxShadow: `0 0 0 1px ${BRAND_COLOR}`,
                                             background: 'transparent none'
                                         }}
                                     >
-                                        <img style={{ height: '1.5em', float: 'left', marginRight: '1em' }} src={process.env.PUBLIC_URL + '/img/logo_ozwillo.png'}
-                                            alt="Ozwillo" />
+                                        <img style={{ height: '1.5em', float: 'left', marginRight: '1em' }} src={process.env.PUBLIC_URL + '/img/logo_sictiam.ico'}
+                                            alt="SICTIAM" />
                                         {t('profile.modify_my_profile')}
                                     </a>
                                 </div>
@@ -191,7 +194,7 @@ class Profile extends Component {
                         </Segment>
 
                         {this.props.uuid &&
-                            <Segment style={{ borderTop: '2px solid #663399' }}>
+                            <Segment style={{ borderTop: `2px solid ${BRAND_COLOR}` }}>
                                 <AgentProfile uuid={this.props.uuid}/>
                             </Segment>
                         }
