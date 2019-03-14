@@ -18,7 +18,11 @@ import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesNotFoundException;
 import fr.sictiam.stela.pesservice.service.exceptions.PesSendException;
 import fr.sictiam.stela.pesservice.service.util.FTPUploaderService;
+import fr.sictiam.stela.pesservice.service.util.TarGzUtils;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.xml.security.utils.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +57,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -61,11 +66,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -459,6 +460,38 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
 
     public Long countPesAllerByStatusTypeAndDate(StatusType statusType, LocalDateTime localDateTime) {
         return pesAllerRepository.countByLastHistoryStatusAndLastHistoryDateAfter(statusType, localDateTime);
+    }
+
+    /**
+     * @return a pair consisting of the generated archive name and the Base64-encoded representation of the archive
+     * containing the PES file and the eventually received ACK / NACK file
+     */
+    public Pair<String, String> generatePesArchiveWithAck(String uuid) throws IOException {
+        PesAller pesAller = getByUuid(uuid);
+        List<PesHistory> pesHistories = getPesHistoryByTypes(uuid,
+                Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
+
+        TarGzUtils.addEntry(pesAller.getAttachment().getFilename(),
+                storageService.getAttachmentContent(pesAller.getAttachment()), taos);
+
+        // we only expect to have one of ACK / NACK history entry
+        // and even if there is more than one, only the last received one is of interest for us
+        if (!pesHistories.isEmpty()) {
+            TarGzUtils.addEntry(pesHistories.get(0).getAttachment().getFilename(),
+                    storageService.getAttachmentContent(pesHistories.get(0).getAttachment()), taos);
+        }
+
+        taos.close();
+        baos.close();
+
+        ByteArrayOutputStream archive = TarGzUtils.compress(baos);
+        String archiveName = pesAller.getAttachment().getFilename() + ".tar.gz";
+        String archiveBase64 = Base64.encode(archive.toByteArray());
+
+        return Pair.of(archiveName, archiveBase64);
     }
 
     @Override

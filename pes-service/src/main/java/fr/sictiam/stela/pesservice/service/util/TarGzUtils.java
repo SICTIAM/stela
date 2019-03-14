@@ -1,4 +1,4 @@
-package fr.sictiam.stela.pesservice.model.util;
+package fr.sictiam.stela.pesservice.service.util;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;

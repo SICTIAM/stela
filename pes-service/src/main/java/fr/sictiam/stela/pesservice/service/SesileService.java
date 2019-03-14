@@ -17,6 +17,7 @@ import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.model.sesile.*;
 import fr.sictiam.stela.pesservice.service.exceptions.MissingSignatureException;
 import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
+import io.vavr.control.Either;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -578,6 +579,12 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             }
             return new ResponseEntity<>(e.getStatusCode());
         }
+    }
+
+    public Either<HttpStatus, Classeur> getClasseur(LocalAuthority localAuthority, @NotNull Integer classeur) {
+        ResponseEntity<Classeur> classeurResponse = checkClasseurStatus(localAuthority, classeur);
+        return classeurResponse.getStatusCode().isError() ?
+            Either.left(classeurResponse.getStatusCode()) : Either.right(classeurResponse.getBody());
     }
 
     public boolean checkDocumentSigned(LocalAuthority localAuthority, int documentId) {

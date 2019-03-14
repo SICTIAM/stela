@@ -44,9 +44,8 @@ public class ExternalRestService {
 
         Optional<String> opt = profile.blockOptional();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode node = objectMapper.readTree(opt.get());
 
-        return node;
+        return objectMapper.readTree(opt.get());
     }
 
     public JsonNode getProfiles(String uuid) throws IOException {

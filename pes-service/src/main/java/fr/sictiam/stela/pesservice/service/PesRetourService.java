@@ -4,9 +4,7 @@ import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesRetour;
-import fr.sictiam.stela.pesservice.model.util.TarGzUtils;
 import fr.sictiam.stela.pesservice.soap.model.paull.GetTabPESRetourStruct;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.utils.Base64;
 import org.slf4j.Logger;
@@ -22,8 +20,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
