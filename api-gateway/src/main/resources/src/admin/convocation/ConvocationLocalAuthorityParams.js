@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Form, Button, Grid, Radio } from 'semantic-ui-react'
+import { Segment, Form, Button, Grid, Radio, Dropdown, Input } from 'semantic-ui-react'
 import Validator from 'validatorjs'
 import accepts from 'attr-accept'
 
@@ -12,7 +12,8 @@ import { acceptFileDocumentConvocation } from '../../_util/constants'
 import { notifications } from '../../_util/Notifications'
 import ConvocationService from '../../_util/convocation-service'
 
-import {  Page, FormField, ValidationPopup, InputFile, File, LinkFile } from '../../_components/UI'
+import { Page, FormField, ValidationPopup, InputFile, File, LinkFile } from '../../_components/UI'
+import TextEditor from '../../_components/TextEditor'
 import Breadcrumb from '../../_components/Breadcrumb'
 import DraggablePosition from '../../_components/DraggablePosition'
 
@@ -28,6 +29,15 @@ class ConvocationLocalAuthorityParams extends Component {
 	    residentThreshold: 'required'
     }
     state = {
+        notificationMails: [],
+        isSet: true,
+        notificationMessage: {
+            notificationType: '',
+            body: '',
+            localAuthorityUuid: '',
+            subject: '',
+            uuid: ''
+        },
         fields: {
             uuid: '',
             residentThreshold: null,
@@ -45,7 +55,10 @@ class ConvocationLocalAuthorityParams extends Component {
         this._convocationService = new ConvocationService()
 
         const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
-        this.setState({fields: localAuthorityResponse})
+        const notificationMailsResponse = await this._convocationService.getNotificationMails(this.props.authContext)
+        const notificationMails = notificationMailsResponse.map(notification => { return {text:notification.subject, value:notification.notificationType, uuid: notification.uuid} })
+        this.setState({fields: localAuthorityResponse, notificationMails: notificationMails})
+
     }
     validateForm = () => {
 	    const { t } = this.context
@@ -100,9 +113,21 @@ class ConvocationLocalAuthorityParams extends Component {
 	    this.setState({ fields }, this.validateForm)
     }
 
-    submitForm = async(e) => {
-        e.preventDefault()
+    handleNotificationTypeChange = async (id, type) => {
+        const detailsNotificationResponse = await this._convocationService.getDetailNotificationMail(this.props.authContext, type)
+        this.setState({isSet: false}, () => {
+            this.setState({notificationMessage: detailsNotificationResponse})
+        })
+    }
+    handleNotificationChange = async (field, value) => {
+        const { notificationMessage } = this.state
+        notificationMessage[field] = value
+        this.setState({notificationMessage, isSet: true})
+    }
+
+    submitGeneralForm = async (e) => {
         const { _addNotification } = this.context
+        e.preventDefault()
         await this._convocationService.saveConfForLocalAuthority(this.props.authContext, this.state.fields)
         if(this.state.fields.procuration) {
             const data = new FormData()
@@ -116,11 +141,19 @@ class ConvocationLocalAuthorityParams extends Component {
         const localAthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
         this.setState({fields: localAthorityResponse})
     }
+    submitNotificationMail = async (e) => {
+        const { _addNotification } = this.context
+        e.preventDefault()
+        const notificationMailResponse = await this._convocationService.saveDetailNotificationMail(this.props.authContext, this.state.notificationMessage)
+        this.setState({notificationMessage: notificationMailResponse})
+        _addNotification(notifications.admin.notificationMailUpdated)
+    }
     render() {
         const { t } = this.context
+        const { notificationMessage, isFormValid, fields, notificationMails, formErrors, isSet } = this.state
         const localAuthoritySlug = getLocalAuthoritySlug()
         const submissionButton =
-			<Button type='submit' primary basic disabled={!this.state.isFormValid}>
+			<Button type='submit' primary basic disabled={!isFormValid}>
 			    {t('api-gateway:form.update')}
 			</Button>
         return (
@@ -132,7 +165,8 @@ class ConvocationLocalAuthorityParams extends Component {
 	                ]}
 	            />
                 <Segment>
-                    <Form onSubmit={this.submitForm}>
+                    <h2 className='secondary'>{t('convocation.admin.modules.convocation.local_authority_settings.general_informations')}</h2>
+                    <Form onSubmit={this.submitGeneralForm}>
                         <Grid>
                             <Grid.Column mobile="16" computer='8'>
                                 <FormField htmlFor='residentThreshold'
@@ -141,14 +175,14 @@ class ConvocationLocalAuthorityParams extends Component {
                                         label={t('api-gateway:yes')}
                                         value='true'
                                         name='residentThreshold'
-                                        checked={this.state.fields.residentThreshold === true}
+                                        checked={fields.residentThreshold === true}
                                         onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
                                     ></Radio>
                                     <Radio
                                         label={t('api-gateway:no')}
                                         name='residentThreshold'
                                         value='false'
-                                        checked={this.state.fields.residentThreshold === false}
+                                        checked={fields.residentThreshold === false}
                                         onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
                                     ></Radio>
                                 </FormField>
@@ -163,7 +197,7 @@ class ConvocationLocalAuthorityParams extends Component {
                                                 width={190}
                                                 showPercents={true}
                                                 labelColor='#000'
-                                                position={this.state.fields.stampPosition}
+                                                position={fields.stampPosition}
                                                 handleChange={this.handleChangeDeltaPosition} />
                                             <DraggablePosition
                                                 label={t('convocation.stamp_pad.pad_label')}
@@ -173,7 +207,7 @@ class ConvocationLocalAuthorityParams extends Component {
                                                 boxWidth={25}
                                                 showPercents={true}
                                                 labelColor='#000'
-                                                position={{x:this.state.fields.stampPosition.y, y: this.state.fields.stampPosition.x}}
+                                                position={{x:fields.stampPosition.y, y: fields.stampPosition.x}}
                                                 handleChange={() =>  console.error('Not available to proceed changes')}
                                                 disabled={true}
                                             />
@@ -182,33 +216,83 @@ class ConvocationLocalAuthorityParams extends Component {
                                 </FormField>
                             </Grid.Column>
                             <Grid.Column mobile='16' computer='16'>
-                                <FormField htmlFor={`${this.state.fields.uuid}_procuration`}
+                                <FormField htmlFor={`${fields.uuid}_procuration`}
 	                                label={t('convocation.fields.default_procuration')}>
                                     {this.state.fields.defaultProcuration && (
                                         <p><LinkFile url='/api/convocation/local-authority/procuration' text={t('convocation.new.display')}/></p>
                                     )}
-	                                <InputFile labelClassName="primary" htmlFor={`${this.state.fields.uuid}_procuration`}
+	                                <InputFile labelClassName="primary" htmlFor={`${fields.uuid}_procuration`}
 	                                    label={`${t('api-gateway:form.add_a_file')}`}>
 	                                    <input type="file"
-	                                        id={`${this.state.fields.uuid}_procuration`}
+	                                        id={`${fields.uuid}_procuration`}
 	                                        accept={acceptFileDocumentConvocation}
 	                                        multiple
 	                                        onChange={(e) => this.handleProcurationChange(e.target.files[0], acceptFileDocumentConvocation)}
 	                                        style={{ display: 'none' }}/>
 	                                </InputFile>
 	                            </FormField>
-                                {this.state.fields.procuration && (
-	                                <File attachment={{ filename: this.state.fields.procuration.name }} onDelete={() => this.deleteFile()} />
-                                )}
+                                {fields.procuration && (
+	                                <File attachment={{ filename: fields.procuration.name }} onDelete={() => this.deleteFile()} />
+	                            )}
                             </Grid.Column>
                         </Grid>
                         <div className='footerForm'>
-                            {this.state.formErrors.length > 0 &&
-								<ValidationPopup errorList={this.state.formErrors}>
+                            {formErrors.length > 0 &&
+								<ValidationPopup errorList={formErrors}>
 								    {submissionButton}
 								</ValidationPopup>
 	                        }
-	                        {this.state.formErrors.length === 0 && submissionButton}
+	                        {formErrors.length === 0 && submissionButton}
+                        </div>
+                    </Form>
+                </Segment>
+                <Segment>
+                    <h2 className='secondary'>{t('convocation.admin.modules.convocation.local_authority_settings.notificationMessage')}</h2>
+                    <Form onSubmit={this.submitNotificationMail}>
+                        <Grid>
+                            <Grid.Column mobile='16' computer='16'>
+                                <Grid>
+                                    <Grid.Column mobile='16' computer='8'>
+                                        <FormField htmlFor={`${fields.uuid}_notification_email`}
+                                            label={t('convocation.fields.notification_email')}>
+                                            <Dropdown id={`${fields.uuid}_notification_email`}
+                                                onChange={(event, data) => {
+                                                    this.handleNotificationTypeChange(`${fields.uuid}_notification_email`, data.value)
+                                                }}
+                                                options={notificationMails}
+                                                value={notificationMessage.notificationType}
+                                                fluid selection>
+                                            </Dropdown>
+                                        </FormField>
+                                    </Grid.Column>
+                                    {notificationMessage.notificationType && notificationMessage.body && (
+                                        <Grid.Column mobile='16' computer='16'>
+                                            <FormField htmlFor={`${this.props.uuid}_subject`}
+	                                            label={t('convocation.admin.modules.convocation.local_authority_settings.subject')}>
+                                                <Input
+                                                    id={`${this.props.uuid}_subject`}
+                                                    value={notificationMessage.subject}
+                                                    onChange={(e) => { this.handleNotificationChange('subject', e.target.value) } }/>
+                                            </FormField>
+                                            <div className='noZIndex'>
+                                                <FormField htmlFor={`${this.props.uuid}_body`}
+	                                            label={t('convocation.admin.modules.convocation.local_authority_settings.body')}>
+                                                    <TextEditor
+                                                        onChange={value => this.handleNotificationChange('body', value)}
+                                                        isSet={isSet}
+                                                        format='html'
+                                                        text={notificationMessage.body} />
+                                                </FormField>
+                                            </div>
+                                        </Grid.Column>
+                                    )}
+                                </Grid>
+                            </Grid.Column>
+                        </Grid>
+                        <div className='footerForm'>
+                            <Button type='submit' primary basic disabled={!notificationMessage.notificationType}>
+                                {t('api-gateway:form.update')}
+                            </Button>
                         </div>
                     </Form>
                 </Segment>

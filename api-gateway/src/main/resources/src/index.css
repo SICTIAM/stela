@@ -365,6 +365,11 @@ i.collapsed-text-icon.circular.icon {
     animation: open-slide-right-to-left 0.5s ease;
 }
 
+/* Text Editor */
+.noZIndex .ButtonWrap__root___1EO_R {
+    z-index: 0 !important 
+}
+
 /* Animations */
 @keyframes close-slide-left-to-right {
     from {

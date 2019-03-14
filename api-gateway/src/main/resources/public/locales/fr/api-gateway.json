@@ -275,6 +275,9 @@
           "in_progress": "L'email est en cours de validation",
           "success": "L'email est validé.",
           "error": "L'email ne semble pas valide, êtes-vous sûr(e) de vouloir l'ajouter ?"
+        },
+        "notifications_email": {
+          "success": "Le message a bien été sauvegardé."
         }
       }
     },

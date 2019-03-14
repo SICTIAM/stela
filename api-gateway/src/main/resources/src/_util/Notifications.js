@@ -279,6 +279,12 @@ const notifications = {
             message: 'notifications.convocation.admin.all_recipients_deactivated',
             level: 'success',
             position: 'br'
+        },
+        notificationMailUpdated: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.notifications_email.success',
+            level: 'success',
+            position: 'br'
         }
     },
     profile: {
