@@ -261,7 +261,8 @@ class AssemblyTypeConfig extends Component {
 	                                    <RecipientForm
 	                                        onCloseModal={this.closeModal}
 	                                        onAdded={(selectedUser) => this.addRecipient(selectedUser)}
-	                                        selectedUser={fields.recipients}>
+	                                        selectedUser={fields.recipients}
+	                                        canCreateUser={true}>
 	                                    </RecipientForm>
 	                                </Modal>
 	                            </FormField>
