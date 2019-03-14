@@ -13,19 +13,20 @@ import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.SesileService;
-import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
 import fr.sictiam.stela.pesservice.soap.model.paull.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.vavr.control.Either;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.xml.security.utils.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.ObjectError;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -48,6 +49,8 @@ public class PaullEndpoint {
 
     private static final String NAMESPACE_URI = "http://www.processmaker.com";
 
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     @Value("${application.jwt.secret}")
     String SECRET;
 
@@ -56,20 +59,17 @@ public class PaullEndpoint {
     private final LocalAuthorityService localAuthorityService;
     private final ExternalRestService externalRestService;
     private final SesileService sesileService;
-    private final StorageService storageService;
 
     public PaullEndpoint(PesAllerService pesAllerService, LocalAuthorityService localAuthorityService,
-            ExternalRestService externalRestService, PesRetourService pesRetourService, SesileService sesileService,
-            StorageService storageService) {
+            ExternalRestService externalRestService, PesRetourService pesRetourService, SesileService sesileService) {
         this.pesAllerService = pesAllerService;
         this.localAuthorityService = localAuthorityService;
         this.externalRestService = externalRestService;
         this.pesRetourService = pesRetourService;
         this.sesileService = sesileService;
-        this.storageService = storageService;
     }
 
-    private PaullSoapToken getToken(String sessionID) {
+    PaullSoapToken getToken(String sessionID) {
 
         if (sessionID != null) {
 
@@ -82,10 +82,7 @@ public class PaullEndpoint {
                 String tokenParsed = tokenClaim.getSubject();
 
                 ObjectMapper objectMapper = new ObjectMapper();
-                PaullSoapToken node;
-                node = objectMapper.readValue(tokenParsed, PaullSoapToken.class);
-
-                return node;
+                return objectMapper.readValue(tokenParsed, PaullSoapToken.class);
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
                 return null;
@@ -215,24 +212,41 @@ public class PaullEndpoint {
 
         // PES PJ are not sent to signature, don't bother checking something impossible
         if (!pesAller.isPj()) {
-            ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
+            Either<HttpStatus, Classeur> sesileResponse = sesileService.getClasseur(localAuthority.get(),
                     pesAller.getSesileClasseurId());
-            if (classeur.getStatusCode().isError()) {
-                return getDetailsPESAllerResponseError(classeur.getStatusCode() + ": " + classeur.getStatusCode().getReasonPhrase());
+            if (sesileResponse.isLeft()) {
+                return getDetailsPESAllerResponseError(sesileResponse.getLeft() + ": "
+                        + sesileResponse.getLeft().getReasonPhrase());
             }
 
-            detailsPESAllerStruct.setNomClasseur(classeur.getBody().getNom());
-            detailsPESAllerStruct.setEtatclasseur(classeur.getBody().getStatus().ordinal() + "");
+            Classeur classeur = sesileResponse.get();
+            detailsPESAllerStruct.setNomClasseur(classeur.getNom());
+            detailsPESAllerStruct.setEtatclasseur(classeur.getStatus().ordinal() + "");
+            if (classeur.getCircuit() != null)
+                detailsPESAllerStruct.setCircuitClasseur(classeur.getCircuit());
+            else
+                detailsPESAllerStruct.setCircuitClasseur("");
+            classeur.getActions().forEach(action -> {
+                GetDetailsPESAllerStruct1 xmlAction = new GetDetailsPESAllerStruct1();
+                xmlAction.setDateAction(dateFormatter.format(action.getDate().toInstant()));
+                xmlAction.setLibelleAction(action.getAction());
+                xmlAction.setNomActeur(action.getUsername());
+                detailsPESAllerStruct.getActionsClasseur().add(xmlAction);
+            });
+        } else {
+            detailsPESAllerStruct.setNomClasseur("");
+            detailsPESAllerStruct.setEtatclasseur("");
+            detailsPESAllerStruct.setCircuitClasseur("");
         }
 
         JsonNode node = externalRestService.getProfile(pesAller.getProfileUuid());
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         detailsPESAllerStruct.setPESPJ(pesAller.isPj() ? "1" : "0");
         detailsPESAllerStruct.setObjet(pesAller.getObjet());
         detailsPESAllerStruct.setUserName(node.get("email").asText());
         detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
         detailsPESAllerStruct.setDateDepot(dateFormatter.format(pesAller.getCreation()));
+        detailsPESAllerStruct.setStatutBannette(pesAller.getLastHistoryStatus().name());
 
         List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
                 getDetailsPESAllerRequest.getIdPesAller(),
@@ -243,11 +257,25 @@ public class PaullEndpoint {
         if (peshistory.isPresent()) {
             if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
                 detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
+                detailsPESAllerStruct.setDateAnomalie("");
+                detailsPESAllerStruct.setMotifAnomalie("");
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
+                detailsPESAllerStruct.setDateAR("");
                 detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
                 detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
             }
+        } else {
+            detailsPESAllerStruct.setDateAR("");
+            detailsPESAllerStruct.setDateAnomalie("");
+            detailsPESAllerStruct.setMotifAnomalie("");
         }
+
+        // bunch of no longer used properties, set them all to an empty string
+        detailsPESAllerStruct.setMotifPlusAnomalie("");
+        detailsPESAllerStruct.setDateDepotBannette("");
+        detailsPESAllerStruct.setStatutBannette("");
+        detailsPESAllerStruct.setUserNameBannette("");
+        detailsPESAllerStruct.setActeurCourant("");
 
         detailsPESAllerStruct.setMessage("SUCCESS");
         detailsPESAllerResponse.getRetour().add(detailsPESAllerStruct);
@@ -263,7 +291,7 @@ public class PaullEndpoint {
         detailsPESAllerResponse.getRetour().add(detailsPESAllerStruct);
         detailsPESAllerResponse.setStatusCode("NOK");
 
-        LOGGER.info("Returning error response : {}", detailsPESAllerResponse);
+        LOGGER.info("Returning error response : {}", detailsPESAllerStruct.getMessage());
 
         return detailsPESAllerResponse;
     }
@@ -279,7 +307,7 @@ public class PaullEndpoint {
 
         GetPESAllerStruct pesAllerStruct = new GetPESAllerStruct();
 
-        String returnMessage = "UNKNOW_ERROR";
+        String returnMessage;
         String status = "NOK";
         if (paullSoapToken == null) {
             returnMessage = "SESSION_INVALID_OR_EXPIRED";
@@ -287,13 +315,19 @@ public class PaullEndpoint {
             GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
 
             if (localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
-                PesAller pesAller = pesAllerService.getByUuid(getPESAllerRequest.getIdPesAller());
 
-                pesAllerStruct.setFilename(pesAller.getAttachment().getFilename());
-                pesAllerStruct.setBase64(Base64.encode(storageService.getAttachmentContent(pesAller.getAttachment())));
+                try {
+                    Pair<String, String> pesArchive =
+                            pesAllerService.generatePesArchiveWithAck(getPESAllerRequest.getIdPesAller());
 
-                returnMessage = "SUCCESS";
-                status = "OK";
+                    pesAllerStruct.setFilename(pesArchive.getLeft());
+                    pesAllerStruct.setBase64(pesArchive.getRight());
+
+                    returnMessage = "SUCCESS";
+                    status = "OK";
+                } catch (IOException e) {
+                    returnMessage = "UNEXPECTED_ERROR";
+                }
             } else {
                 returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
             }

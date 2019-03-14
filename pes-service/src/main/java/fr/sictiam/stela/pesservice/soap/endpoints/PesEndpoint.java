@@ -8,7 +8,6 @@ import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.PesRetour;
 import fr.sictiam.stela.pesservice.model.StatusType;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
-import fr.sictiam.stela.pesservice.model.util.TarGzUtils;
 import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PesAllerService;
@@ -16,8 +15,8 @@ import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.StorageService;
 import fr.sictiam.stela.pesservice.soap.model.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.xml.security.utils.Base64;
 import org.slf4j.Logger;
@@ -34,7 +33,6 @@ import org.w3c.dom.Node;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.dom.DOMResult;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -225,33 +223,14 @@ public class PesEndpoint {
             returnObject.setJsonGetPESAller(soapReturnGenerator.connectionFailedReturn());
             return returnObject;
         }
-        PesAller pesAller = pesAllerService.getByUuid(getPESAllerInput.getEnveloppeId());
-        List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(getPESAllerInput.getEnveloppeId(),
-                Arrays.asList(StatusType.ACK_RECEIVED, StatusType.NACK_RECEIVED));
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
 
         try {
 
-            TarGzUtils.addEntry(pesAller.getAttachment().getFilename(), storageService.getAttachmentContent(pesAller.getAttachment()), taos);
+            Pair<String, String> pesArchive = pesAllerService.generatePesArchiveWithAck(getPESAllerInput.getEnveloppeId());
 
-            fileHistories.forEach(pesHistory -> {
-                try {
-                    TarGzUtils.addEntry(pesHistory.getAttachment().getFilename(), storageService.getAttachmentContent(pesHistory.getAttachment()), taos);
-                } catch (IOException e) {
-                    LOGGER.error(e.getMessage());
-                }
-            });
-            taos.close();
-            baos.close();
-
-            ByteArrayOutputStream archive = TarGzUtils.compress(baos);
-            String archiveName = pesAller.getAttachment().getFilename() + ".tar.gz";
-            String archiveBase64 = Base64.encode(archive.toByteArray());
             Map<String, String> returnMap = new HashMap<>();
-            returnMap.put("chaine_archive", archiveBase64);
-            returnMap.put("filename", archiveName);
+            returnMap.put("filename", pesArchive.getLeft());
+            returnMap.put("chaine_archive", pesArchive.getRight());
 
             returnObject.setJsonGetPESAller(soapReturnGenerator.generateReturn("OK", returnMap));
 
