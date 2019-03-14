@@ -454,6 +454,11 @@ public class ConvocationService {
         return convocationRepository.findByCancelledFalseAndMeetingDateBetween(start, end);
     }
 
+    public List<String> getNoResponseInformation() {
+
+        return convocationRepository.findByHalfDuration();
+    }
+
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String
             assemblyType,
             LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,

@@ -9,15 +9,7 @@ import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.RecipientResponse;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCancelledEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationCreatedEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationReadEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationCancelledEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
-import fr.sictiam.stela.convocationservice.model.event.notifications.ReminderEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.*;
 import fr.sictiam.stela.convocationservice.service.ConvocationService;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
 import fr.sictiam.stela.convocationservice.service.MailTemplateService;
@@ -198,7 +190,29 @@ public class NotificationEventListener {
         }
     }
 
+    @EventListener
+    @Async
+    public void noResponseInfo(NoResponseInfoEvent event) {
+
+        Convocation convocation = event.getConvocation();
+
+        List<String> recipients = convocation
+                .getRecipientResponses()
+                .stream()
+                .filter(r -> r.getResponseType() == ResponseType.DO_NOT_KNOW)
+                .map(r -> r.getRecipient().getFullName())
+                .collect(Collectors.toList());
+
+        sendToAuthor(convocation, null, recipients, NotificationType.NO_RESPONSE_INFO);
+    }
+
     private void sendToAuthor(Convocation convocation, RecipientResponse recipientResponse, NotificationType type) {
+
+        sendToAuthor(convocation, recipientResponse, null, type);
+    }
+
+    private void sendToAuthor(Convocation convocation, RecipientResponse recipientResponse,
+            List<String> recipients, NotificationType type) {
 
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
@@ -207,7 +221,7 @@ public class NotificationEventListener {
 
             String body = StrSubstitutor.replace(
                     template.getBody(),
-                    buildPlaceHolderMap(convocation, author, recipientResponse, null, false),
+                    buildPlaceHolderMap(convocation, author, recipientResponse, null, recipients, false),
                     "{{",
                     "}}");
             try {
@@ -229,27 +243,38 @@ public class NotificationEventListener {
             Profile author,
             RecipientResponse recipientResponse,
             List<String> updates,
+            List<String> recipients,
             boolean received) {
 
         Map<String, String> placeHolders = new HashMap<>();
         placeHolders.put("sujet", convocation.getSubject());
 
-        String url = String.format("%s/%s/convocation/%s/%s?token=%s", applicationUrl,
+        String url = String.format("%s/%s/convocation/%s/%s", applicationUrl,
                 convocation.getLocalAuthority().getSlugName(),
                 (received ? "liste-recues" : "liste-envoyees"),
-                convocation.getUuid(),
-                recipientResponse.getResponseType().equals(ResponseType.SUBSTITUTED) && recipientResponse.getSubstituteRecipient() != null ?
-                        recipientResponse.getSubstituteRecipient().getToken() :
-                        recipientResponse.getRecipient().getToken());
+                convocation.getUuid());
+
+        if (recipientResponse != null && received) {
+            url += "?token=" + (recipientResponse.getResponseType() == ResponseType.SUBSTITUTED && recipientResponse.getSubstituteRecipient() != null ?
+                    recipientResponse.getSubstituteRecipient().getToken() :
+                    recipientResponse.getRecipient().getToken());
+        }
+
+        if (recipientResponse != null) {
+            placeHolders.put("destinataire", recipientResponse.getRecipient().getFullName());
+            placeHolders.put("reponse",
+                    localesService.getMessage("fr", "convocation",
+                            "$.convocation.notifications." + recipientResponse.getResponseType().name()));
+
+            if (recipientResponse.getSubstituteRecipient() != null)
+                placeHolders.put("mandataire", recipientResponse.getSubstituteRecipient().getFullName());
+        }
+
         placeHolders.put("convocation", url);
 
         placeHolders.put("stela_url", applicationUrl);
         placeHolders.put("collectivite", convocation.getLocalAuthority().getName());
 
-        placeHolders.put("destinataire", recipientResponse.getRecipient().getFullName());
-        placeHolders.put("reponse",
-                localesService.getMessage("fr", "convocation",
-                        "$.convocation.notifications." + recipientResponse.getResponseType().name()));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         placeHolders.put("date", formatter.format(convocation.getMeetingDate()));
@@ -257,13 +282,16 @@ public class NotificationEventListener {
         if (author != null)
             placeHolders.put("emetteur", author.getFullName());
 
-        if (recipientResponse.getSubstituteRecipient() != null)
-            placeHolders.put("mandataire", recipientResponse.getSubstituteRecipient().getFullName());
 
         if (updates != null) {
             placeHolders.put("modifications",
                     updates.stream().map(s -> "<li>" + localesService.getMessage("fr", "convocation", "$.convocation" +
                             ".notifications." + s) + "</li>").collect(Collectors.joining()));
+        }
+
+        if (recipients != null) {
+            placeHolders.put("destinataires",
+                    recipients.stream().map(s -> "<li>" + s + "</li>").collect(Collectors.joining()));
         }
 
         return placeHolders;
@@ -281,7 +309,7 @@ public class NotificationEventListener {
                 String body = StrSubstitutor.replace(
                         template.getBody(),
                         buildPlaceHolderMap(convocation, author,
-                                recipientResponse, updates, true),
+                                recipientResponse, updates, null, true),
                         "{{",
                         "}}");
                 String address =
