@@ -25,11 +25,7 @@ import javax.mail.internet.MimeMessage;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -69,21 +65,26 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                 || event.getPesHistory().getStatus().isAnomaly()) {
             try {
                 proccessEvent(event);
-            } catch (MessagingException | IOException e) {
-                LOGGER.error(e.getMessage());
+            } catch (IOException e) {
+                LOGGER.error("[onApplicationEvent] An error occured while trying to process event '{}' for pes {} : {}",
+                        event.getPesHistory().getStatus().toString(),
+                        event.getPesHistory().getPesUuid(),
+                        e.getMessage());
             }
         }
     }
 
-    public void proccessEvent(PesHistoryEvent event) throws MessagingException, IOException {
+    public void proccessEvent(PesHistoryEvent event) throws IOException {
         PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
 
-        Notification notification = Notification.notifications.stream()
+        LOGGER.info("[proccessEvent] Proccess notification event for pes {}", pes.getUuid());
+
+        Optional<Notification> notification = Notification.notifications.stream()
                 .filter(n -> n.getType().toString().equals(event.getPesHistory().getStatus().isAnomaly() ?
                         Notification.Type.ANOMALIES.toString() :
                         event.getPesHistory().getStatus().toString())
                 )
-                .findFirst().get();
+                .findFirst();
 
         JsonNode profiles = externalRestService.getProfiles(pes.getLocalAuthority().getUuid());
 
@@ -94,23 +95,26 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                     && !pes.getProfileUuid().equals(profile.get("uuid").asText())) {
                 List<NotificationValue> profileNotifications = getNotificationValues(profile);
 
-                if (!notification.isDeactivatable()
-                        || profileNotifications.stream()
-                        .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
-                                && notif.isActive())
-                        || (event.getPesHistory().getStatus().isAnomaly() &&
-                        profileNotifications.stream()
-                                .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
-                        || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
+                if (this.verifyProfileNotificationSubscription(notification, profileNotifications, event.getPesHistory())) {
                     try {
                         sendMailWithMessage(pes, event, profile, false);
                         notifcationSentNumber.incrementAndGet();
+                        LOGGER.info(
+                                "[proccessEvent] An email '{}' notification was sent to {} for pes {} ",
+                                notification.get().getType().toString(),
+                                this.getAgentMail(profile),
+                                pes.getUuid());
                     } catch (MessagingException | IOException e) {
-                        LOGGER.error(e.getMessage());
+                        LOGGER.error(
+                                "[proccessEvent] An error are occurred when trying to send '{}' mail notification for pes {} : {}",
+                                notification.get().getType().toString(),
+                                pes.getUuid(),
+                                e.getMessage());
                     }
                 }
             }
         });
+
         if (notifcationSentNumber.get() > 0) {
             PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.GROUP_NOTIFICATION_SENT);
             applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
@@ -120,19 +124,25 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
             JsonNode node = externalRestService.getProfile(pes.getProfileUuid());
             List<NotificationValue> notifications = getNotificationValues(node);
 
-            if (!notification.isDeactivatable()
-                    || notifications.stream()
-                    .anyMatch(notif -> notif.getName().equals(event.getPesHistory().getStatus().toString())
-                            && notif.isActive())
-                    || (event.getPesHistory().getStatus().isAnomaly() &&
-                    notifications.stream()
-                            .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
-                    || (notification.isDefaultValue() && notifications.isEmpty())) {
-                sendMailWithMessage(pes, event, node, false);
-                if (notification.isNotificationStatus()) {
-                    PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
-                    pesService.updateHistory(pesHistory);
-                    applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+            if (this.verifyProfileNotificationSubscription(notification, notifications, event.getPesHistory())) {
+                try {
+                    sendMailWithMessage(pes, event, node, false);
+                    LOGGER.info(
+                            "[proccessEvent] An email '{}' notification was sent to {} for pes {} ",
+                            notification.get().getType().toString(),
+                            this.getAgentMail(node),
+                            pes.getUuid());
+                    if (notification.get().isNotificationStatus()) {
+                        PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
+                        pesService.updateHistory(pesHistory);
+                        applicationEventPublisher.publishEvent(new PesHistoryEvent(this, pesHistory));
+                    }
+                } catch (MessagingException | IOException e) {
+                    LOGGER.error(
+                            "[proccessEvent] An error are occurred when trying to send '{}' mail notification for pes {} : {}",
+                            notification.get().getType().toString(),
+                            pes.getUuid(),
+                            e.getMessage());
                 }
             }
         }
@@ -207,5 +217,24 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         variables.put("firstname", node.get("agent").get("given_name").asText());
         variables.put("lastname", node.get("agent").get("family_name").asText());
         return variables;
+    }
+
+    private boolean verifyProfileNotificationSubscription(Optional<Notification> notification, List<NotificationValue> notificationValues, PesHistory pesHistory) {
+        if(notification.isPresent()) {
+            return (!notification.get().isDeactivatable()
+                    || notificationValues.stream()
+                    .anyMatch(notif -> notif.getName().equals(pesHistory.getStatus().toString())
+                            && notif.isActive())
+                    || (pesHistory.getStatus().isAnomaly() &&
+                    notificationValues.stream()
+                            .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
+                    || (notification.get().isDefaultValue() && notificationValues.isEmpty()));
+        } else {
+            LOGGER.debug(
+                    "[proccessEvent] Something wrong for retrieve notification for this event {} pes {} ",
+                    pesHistory.getStatus().toString(),
+                    pesHistory.getPesUuid());
+            return false;
+        }
     }
 }
