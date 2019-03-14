@@ -101,8 +101,7 @@
       "ANNEXES_ADDED": "Ajout d'annexes à la convocation",
       "PRESENT": "Présent",
       "NOT_PRESENT": "Absent",
-      "SUBSTITUTED": "Procuration donnée",
-      "DO_NOT_KNOW": ""
+      "SUBSTITUTED": "Procuration donnée"
     },
     "export": {
       "yes": "Oui",

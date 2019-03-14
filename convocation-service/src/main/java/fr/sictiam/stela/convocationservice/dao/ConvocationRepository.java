@@ -18,9 +18,9 @@ public interface ConvocationRepository extends JpaRepository<Convocation, String
     @Modifying
     @Transactional
     @Query(value = "UPDATE Convocation c SET c.sentDate=:now where uuid=:uuid")
-    public void setSentDate(@Param("uuid") String uuid, @Param("now") LocalDateTime now);
+    void setSentDate(@Param("uuid") String uuid, @Param("now") LocalDateTime now);
 
-    public List<Convocation> findByCancelledFalseAndMeetingDateBetween(LocalDateTime start, LocalDateTime end);
+    List<Convocation> findByCancelledFalseAndMeetingDateBetween(LocalDateTime start, LocalDateTime end);
 
     @Query(
             nativeQuery = true,
@@ -30,5 +30,5 @@ public interface ConvocationRepository extends JpaRepository<Convocation, String
                     "creation_date::::timestamp::::date)/2) as diff from convocation where cancelled=false) as tmp " +
                     "where creation_date::::timestamp::::date + integer '1' * diff::::integer = current_date;"
     )
-    public List<String> findByHalfDuration();
+    List<String> findByHalfDuration();
 }

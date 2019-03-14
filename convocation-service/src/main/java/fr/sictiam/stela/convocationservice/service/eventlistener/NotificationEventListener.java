@@ -262,7 +262,8 @@ public class NotificationEventListener {
 
         if (recipientResponse != null) {
             placeHolders.put("destinataire", recipientResponse.getRecipient().getFullName());
-            placeHolders.put("reponse",
+            placeHolders.put("reponse", recipientResponse.getResponseType() == ResponseType.DO_NOT_KNOW ?
+                    "" :
                     localesService.getMessage("fr", "convocation",
                             "$.convocation.notifications." + recipientResponse.getResponseType().name()));
 
@@ -317,7 +318,6 @@ public class NotificationEventListener {
                                 recipientResponse.getSubstituteRecipient().getEmail() :
                                 recipientResponse.getRecipient().getEmail();
                 try {
-                    LOGGER.debug("[sendToRecipients] Sending mail to {}", address);
                     mailerService.sendEmail(address, template.getSubject(), body, author);
                 } catch (MailException e) {
                     LOGGER.error("Error while sending notification {} to {}: {}",
