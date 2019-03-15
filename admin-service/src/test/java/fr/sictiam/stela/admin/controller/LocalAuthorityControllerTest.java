@@ -91,11 +91,12 @@ public class LocalAuthorityControllerTest {
 
         LocalAuthority localAuthority = new LocalAuthority("uuid-local-authority-test-one");
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
+        localAuthority.setSiren("123456789");
 
-        given(localAuthorityService.getByUuid("uuid-local-authority-test-one")).willReturn(localAuthority);
+        given(localAuthorityService.findBySiren("123456789")).willReturn(Optional.of(localAuthority));
 
 
-        ResultActions resultActions = mockMvc.perform(get("/api/admin/local-authority/uuid-local-authority-test-one/dcId"));
+        ResultActions resultActions = mockMvc.perform(get("/api/admin/local-authority/123456789/dcId"));
 
         resultActions
                 .andExpect(matchAll(
@@ -107,11 +108,11 @@ public class LocalAuthorityControllerTest {
 
     @Test
     public void getDcIdNotFoundException() throws Exception {
-        given(localAuthorityService.getByUuid("uuid-local-authority-test-one")).willThrow(NotFoundException.class);
+        given(localAuthorityService.findBySiren("987654321")).willThrow(NotFoundException.class);
 
 
         ResultActions resultActions =
-                mockMvc.perform(get("/api/admin/local-authority/uuid-local-authority-test-one/dcId"))
+                mockMvc.perform(get("/api/admin/local-authority/987654321/dcId"))
                     .andExpect(status().isNotFound())
                     .andDo(print());
     }

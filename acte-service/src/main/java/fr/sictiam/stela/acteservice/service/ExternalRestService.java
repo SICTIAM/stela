@@ -188,13 +188,13 @@ public class ExternalRestService {
 
         try {
             String accessToken = restTemplate.getForObject(
-                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/accessToken",
+                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthoritySiren}/accessToken",
                     String.class,
-                    localAuthority.getUuid());
+                    localAuthority.getSiren());
             return Optional.ofNullable(accessToken);
         } catch (RestClientResponseException e){
             LOGGER.error(
-                    "[getAccessTokenFromKernel] An error was occured when tried to get kernel access token from {} : Status {} Body {} ",
+                    "[getAccessTokenFromKernel] An error was occured when tried to get kernel access token for organization {} from {} : Status {} Body {} ",
                     discoveryUtils.adminServiceUrl(),
                     e.getRawStatusCode(),
                     e.getResponseBodyAsString());
@@ -207,13 +207,14 @@ public class ExternalRestService {
 
         try {
             String dcId = restTemplate.getForObject(
-                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthorityUuid}/dcId",
+                    discoveryUtils.adminServiceUrl() + "/api/admin/local-authority/{localAuthoritySiren}/dcId",
                     String.class,
-                    localAuthority.getUuid());
+                    localAuthority.getSiren());
             return Optional.ofNullable(dcId);
         } catch (RestClientResponseException e){
             LOGGER.error(
-                    "[getAccessTokenFromKernel] An error was occured when tried to get kernel access token from {} : Status {} Body {} ",
+                    "[getLocalAuthorityDcId] An error was occured when tried to get DcId for organization {} from {} : Status {} Body {} ",
+                    localAuthority.getSiren(),
                     discoveryUtils.adminServiceUrl(),
                     e.getRawStatusCode(),
                     e.getResponseBodyAsString());

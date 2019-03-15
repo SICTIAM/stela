@@ -49,85 +49,91 @@ public class ExternalRestServiceTest {
 
     @Test
     public void getAccessTokenFromKernel() {
-        stubFor(get(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-one-test/accessToken"))
+        stubFor(get(urlPathEqualTo("/api/admin/local-authority/123456789/accessToken"))
                 .willReturn(ok("access-token")));
 
         LocalAuthority localAuthority = new LocalAuthority();
         ReflectionTestUtils.setField(localAuthority, "uuid", "uuid-local-authority-one-test");
+        localAuthority.setSiren("123456789");
 
         Optional<String> accessToken = externalRestService.getAccessTokenFromKernel(localAuthority);
 
-        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-one-test/accessToken")));
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/123456789/accessToken")));
         Assert.assertTrue(accessToken.isPresent());
     }
 
     @Test
     public void getAccessTokenFromKernelLocalAuthorityNotFound() {
-        stubFor(get(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/accessToken"))
+        stubFor(get(urlPathEqualTo("/api/admin/local-authority/987654321/accessToken"))
                 .willReturn(notFound()));
 
         LocalAuthority localAuthority = new LocalAuthority();
         ReflectionTestUtils.setField(localAuthority, "uuid", "uuid-local-authority-two-test");
+        localAuthority.setSiren("987654321");
 
         Optional<String> accessToken = externalRestService.getAccessTokenFromKernel(localAuthority);
 
-        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/accessToken")));
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/987654321/accessToken")));
         Assert.assertFalse(accessToken.isPresent());
     }
 
     @Test
     public void getAccessTokenFromKernelErrorFromKernel() {
-        stubFor(get(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/accessToken"))
+        stubFor(get(urlPathEqualTo("/api/admin/local-authority/987654321/accessToken"))
                 .willReturn(badRequest()));
 
         LocalAuthority localAuthority = new LocalAuthority();
         ReflectionTestUtils.setField(localAuthority, "uuid", "uuid-local-authority-two-test");
+        localAuthority.setSiren("987654321");
 
         Optional<String> accessToken = externalRestService.getAccessTokenFromKernel(localAuthority);
 
-        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/accessToken")));
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/987654321/accessToken")));
         Assert.assertFalse(accessToken.isPresent());
     }
 
     @Test
     public void getDcIdFromKernel() {
-        stubFor(get(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-one-test/dcId"))
+        stubFor(get(urlPathEqualTo("/api/admin/local-authority/123456789/dcId"))
                 .willReturn(ok("access-token")));
 
         LocalAuthority localAuthority = new LocalAuthority();
         ReflectionTestUtils.setField(localAuthority, "uuid", "uuid-local-authority-one-test");
+        localAuthority.setSiren("123456789");
 
         Optional<String> dcId = externalRestService.getLocalAuthorityDcId(localAuthority);
 
-        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-one-test/dcId")));
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/123456789/dcId")));
         Assert.assertTrue(dcId.isPresent());
     }
 
     @Test
     public void getDcIdFromKernelLocalAuthorityNotFound() {
-        stubFor(get(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/dcId"))
+        stubFor(get(urlPathEqualTo("/api/admin/local-authority/987654321/dcId"))
                 .willReturn(notFound()));
 
         LocalAuthority localAuthority = new LocalAuthority();
         ReflectionTestUtils.setField(localAuthority, "uuid", "uuid-local-authority-two-test");
+        localAuthority.setSiren("987654321");
 
         Optional<String> dcId = externalRestService.getLocalAuthorityDcId(localAuthority);
 
-        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/dcId")));
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/987654321/dcId")));
         Assert.assertFalse(dcId.isPresent());
     }
 
     @Test
     public void getDcIdFromKernelErrorFromKernel() {
-        stubFor(get(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/dcId"))
+        stubFor(get(urlPathEqualTo("/api/admin/local-authority/987654321/dcId"))
                 .willReturn(badRequest()));
 
         LocalAuthority localAuthority = new LocalAuthority();
         ReflectionTestUtils.setField(localAuthority, "uuid", "uuid-local-authority-two-test");
+        localAuthority.setSiren("987654321");
 
         Optional<String> dcId = externalRestService.getLocalAuthorityDcId(localAuthority);
 
-        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/uuid-local-authority-two-test/dcId")));
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/admin/local-authority/987654321/dcId")));
         Assert.assertFalse(dcId.isPresent());
     }
 }
