@@ -373,17 +373,21 @@ public class LocalAuthorityController {
         return dcId.substring(dcId.lastIndexOf('/') + 1);
     }
 
-    @GetMapping("/{uuid}/accessToken")
-    public ResponseEntity<String> getAccessToken(@PathVariable String uuid) {
-        Optional<TokenResponse> tokenResponse = localAuthorityService.getAccessTokenFromKernel(uuid);
+    @GetMapping("/{siren}/accessToken")
+    public ResponseEntity<String> getAccessToken(@PathVariable String siren) {
+        Optional<TokenResponse> tokenResponse = localAuthorityService.getAccessTokenFromKernel(siren);
 
         return tokenResponse
                 .map(tokenResponse1 -> new ResponseEntity<>(tokenResponse1.getAccessToken(), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
-    @GetMapping("/{uuid}/dcId")
-    public String getDcId(@PathVariable String uuid) {
-        return localAuthorityService.getByUuid(uuid).getOzwilloInstanceInfo().getDcId();
+    @GetMapping("/{siren}/dcId")
+    public ResponseEntity<String> getDcId(@PathVariable String siren) {
+        Optional<LocalAuthority> localAuthority =  localAuthorityService.findBySiren(siren);
+
+        return localAuthority
+                .map(localAuthority1 -> new ResponseEntity<>(localAuthority1.getOzwilloInstanceInfo().getDcId(), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

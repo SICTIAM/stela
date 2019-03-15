@@ -73,14 +73,14 @@ public class LocalAuthorityServiceTest {
         LocalAuthority localAuthority = new LocalAuthority("test-local-authority-uuid");
         localAuthority.setOzwilloInstanceInfo(ozwilloInstanceInfo);
 
-        given(localAuthorityRepository.findByUuid("test-local-authority-uuid")).willReturn(Optional.of(localAuthority));
+        given(localAuthorityRepository.findBySiren("123456789")).willReturn(Optional.of(localAuthority));
 
         TokenResponse token = new TokenResponse();
         token.setAccessToken("access-token-test");
         token.setRefreshToken("refrech-token-test");
 
         Optional<TokenResponse> tokenResponseOptional =
-                localAuthorityService.getAccessTokenFromKernel("test-local-authority-uuid");
+                localAuthorityService.getAccessTokenFromKernel("123456789");
 
         TokenResponse tokenResponse = tokenResponseOptional.get();
 

@@ -265,8 +265,8 @@ public class LocalAuthorityService {
         return profileRepository.isAdmin(agentUuid, localAuthorityUuid);
     }
 
-    public Optional<TokenResponse> getAccessTokenFromKernel(String uuid) {
-        LocalAuthority localAuthority = localAuthorityRepository.findByUuid(uuid)
+    public Optional<TokenResponse> getAccessTokenFromKernel(String siren) {
+        LocalAuthority localAuthority = localAuthorityRepository.findBySiren(siren)
                 .orElseThrow(() -> new NotFoundException("notifications.admin.local_authority_not_found"));
 
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
