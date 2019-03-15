@@ -130,7 +130,7 @@ public class RecipientService {
 
     public List<Recipient> getAllByLocalAuthority(String localAuthorityUuid) {
 
-        return recipientRepository.findAllByLocalAuthorityUuidAndActiveTrue(localAuthorityUuid);
+        return recipientRepository.findAllByLocalAuthorityUuidAndActiveTrueOrderByLastname(localAuthorityUuid);
     }
 
     public Recipient findByProfileinLocalAuthority(String profileUuid, String localAuthorityUuid) {

@@ -16,9 +16,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderBy;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.SortedSet;
 
 @Entity
 public class AssemblyType {
@@ -37,7 +38,8 @@ public class AssemblyType {
             joinColumns = @JoinColumn(name = "assembly_type_uuid"),
             inverseJoinColumns = @JoinColumn(name = "recipient_uuid"))
     @JsonView(Views.AssemblyTypeInternal.class)
-    private Set<Recipient> recipients;
+    @OrderBy("lastname,firstname,email ASC")
+    private SortedSet<Recipient> recipients;
 
     @JsonView(Views.AssemblyType.class)
     private Integer delay;
@@ -66,7 +68,7 @@ public class AssemblyType {
     @JsonView(Views.AssemblyType.class)
     private LocalAuthority localAuthority;
 
-    public AssemblyType(String name, Set<Recipient> recipients,
+    public AssemblyType(String name, SortedSet<Recipient> recipients,
             LocalAuthority localAuthority) {
         this.name = name;
         this.recipients = recipients;
@@ -89,11 +91,11 @@ public class AssemblyType {
         this.name = name;
     }
 
-    public Set<Recipient> getRecipients() {
+    public SortedSet<Recipient> getRecipients() {
         return recipients;
     }
 
-    public void setRecipients(Set<Recipient> recipients) {
+    public void setRecipients(SortedSet<Recipient> recipients) {
         this.recipients = recipients;
     }
 

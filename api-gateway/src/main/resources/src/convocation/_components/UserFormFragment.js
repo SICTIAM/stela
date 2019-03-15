@@ -130,7 +130,7 @@ class UserFormFragment extends Component {
 	render() {
 	    const { t } = this.context
 	    const submissionButton =
-			<Button type={this.props.preventParentSubmit ? 'button' :'submit'} onClick={this.props.preventParentSubmit && this.submitForm} primary basic disabled={!this.state.isFormValid}>
+			<Button type={this.props.preventParentSubmit ? 'button' :'submit'} onClick={this.props.preventParentSubmit ? this.submitForm : null} primary basic disabled={!this.state.isFormValid}>
 			    {t('api-gateway:form.send')}
 			</Button>
 	    return (
