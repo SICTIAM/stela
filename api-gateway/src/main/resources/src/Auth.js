@@ -84,20 +84,24 @@ class AuthProvider extends Component {
 	async checkAuthentication() {
 		try {
 			const isAuthenticateResponse = await this.isAuthenticate()
-			const statusAuthentication = isAuthenticateResponse.status
-			const isLoggedIn = statusAuthentication !== 401
-			if (isLoggedIn !== this.state.isLoggedIn) {
-				this.setState({isLoggedIn}, () => {
-					if (this.state.isLoggedIn) {
-						this.getProfile()
-						this.getUser()
-					}
+			if(isAuthenticateResponse) {
+				const statusAuthentication = isAuthenticateResponse.status
+				const isLoggedIn = statusAuthentication !== 401
+				if (isLoggedIn !== this.state.isLoggedIn) {
+					this.setState({isLoggedIn}, () => {
+						if (this.state.isLoggedIn) {
+							this.getProfile()
+							this.getUser()
+						}
+					})
+				}
+				this.setState({
+					csrfToken: isAuthenticateResponse.headers.get('X-CSRF-TOKEN'),
+					csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
 				})
+			}else {
+				this.setState({isLoggedIn: false})
 			}
-			this.setState({
-				csrfToken: isAuthenticateResponse.headers.get('X-CSRF-TOKEN'),
-				csrfTokenHeaderName: isAuthenticateResponse.headers.get('X-CSRF-HEADER')
-			})
 		}catch(e){
 			this.setState({isLoggedIn: e.status !== 401})
 			console.error('Auth error', e)
