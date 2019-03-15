@@ -104,7 +104,7 @@ class RecipientForm extends Component {
 			/>
 	    const panes = [
 	        { menuItem: t('convocation.new.choose_from_the_list'), render: () => <Tab.Pane>{listContent}</Tab.Pane> },
-	        { menuItem: t('convocation.new.free_email'), render: () => <Tab.Pane>{<UserFormFragment preventParentSubmit={true} onSubmit={this.onSubmit}/>}</Tab.Pane> }
+	        { menuItem: t('convocation.new.add_new_recipients'), render: () => <Tab.Pane>{<UserFormFragment preventParentSubmit={true} onSubmit={this.onSubmit}/>}</Tab.Pane> }
 	    ]
 	    return (
 	        <Fragment>
