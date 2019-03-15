@@ -83,7 +83,7 @@
       "view_less_guests": "Voir moins d'invités",
       "no_recipient": "Aucun destinataire",
       "choose_from_the_list": "Choisir dans la liste",
-      "free_email": "Email libre",
+      "add_new_recipients": "Ajouter un destinataire",
       "delayTooShort": "Le délai de convocation est inférieur à {{number}} jours. Êtes-vous sûr(e) de vouloir confirmer ?",
       "show_all_annexes": "Voir les {{number}} annexes",
       "show_less_annexes": "Voir moins d'annexes",
