@@ -15,8 +15,8 @@ import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
 import fr.sictiam.stela.acteservice.soap.model.paull.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.vavr.control.Either;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +45,8 @@ public class PaullEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaullEndpoint.class);
 
     private static final String NAMESPACE_URI = "http://www.processmaker.com";
+
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Value("${application.jwt.secret}")
     String SECRET;
@@ -75,10 +77,7 @@ public class PaullEndpoint {
                 String tokenParsed = tokenClaim.getSubject();
 
                 ObjectMapper objectMapper = new ObjectMapper();
-                PaullSoapToken node;
-                node = objectMapper.readValue(tokenParsed, PaullSoapToken.class);
-
-                return node;
+                return objectMapper.readValue(tokenParsed, PaullSoapToken.class);
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
                 return null;
@@ -90,63 +89,56 @@ public class PaullEndpoint {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "depotActeRequest")
     public @ResponsePayload DepotActeResponse depotActe(@RequestPayload DepotActeRequest depotActeRequest)
-            throws IOException, Base64DecodingException {
-        PaullSoapToken paullSoapToken = getToken(depotActeRequest.getSessionId());
+            throws IOException {
+
+        Either<String, LocalAuthority> localAuthorityCheckResult =
+                checkAndGetLocalAuthority(depotActeRequest.getSessionId());
+        if (localAuthorityCheckResult.isLeft())
+            return depotActeResponseError(localAuthorityCheckResult.getLeft());
+
+        LocalAuthority localAuthority = localAuthorityCheckResult.get();
 
         DepotActeResponse depotActeResponse = new DepotActeResponse();
-
         DepotActeStruct depotActeStruct = new DepotActeStruct();
-        String returnMessage = "UNKNOW_ERROR";
-        String status = "NOK";
-        if (paullSoapToken == null) {
-            returnMessage = "SESSION_INVALID_OR_EXPIRED";
-            LOGGER.error(returnMessage);
 
-        } else {
-            GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
+        List<Attachment> attachments = depotActeRequest.getFichiers().stream().map(file -> {
+            String name = StringUtils.stripAccents(file.getFilename());
+            byte[] byteArray = Base64.getDecoder().decode(file.getBase64().getBytes(StandardCharsets.UTF_8));
+            return new Attachment(byteArray, name, byteArray.length);
+        }).collect(Collectors.toList());
 
-            if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
-                returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
+        DepotActeStruct1 infosActes = depotActeRequest.getInfosActe().get(0);
+        Attachment mainAttachement = attachments.remove(0);
+        Acte acte = new Acte(infosActes.getNumInterne(), LocalDate.from(dateFormatter.parse(infosActes.getDateDecision())),
+                ActeNature.code(Integer.parseInt(infosActes.getNatureActe())), infosActes.getMatiereActe(),
+                infosActes.getObjet(), false, false);
 
-            } else {
+        acte.setActeAttachment(mainAttachement);
+        acte.setAnnexes(attachments);
+        acte.setCreation(LocalDateTime.now());
 
-                List<Attachment> attachments = depotActeRequest.getFichiers().stream().map(file -> {
-                    byte[] byteArray = null;
-                    String name = StringUtils.stripAccents(file.getFilename());
-                    try {
-                        byteArray = Base64.getDecoder().decode(file.getBase64().getBytes("UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        LOGGER.error(e.getMessage());
-                    }
-                    return new Attachment(byteArray, name, byteArray.length);
-                }).collect(Collectors.toList());
+        acte.setLocalAuthority(localAuthority);
+        acte.setProfileUuid(localAuthority.getGenericProfileUuid());
+        acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(localAuthority.getUuid(), acte.getCode()));
+        Acte actePublished = acteService.publishActe(acte);
 
-                LocalAuthority currentLocalAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren())
-                        .get();
-
-                DepotActeStruct1 infosActes = depotActeRequest.getInfosActe().get(0);
-                Attachment mainAttachement = attachments.remove(0);
-                Acte acte = new Acte(infosActes.getNumInterne(), LocalDate.parse(infosActes.getDateDecision()),
-                        ActeNature.code(Integer.parseInt(infosActes.getNatureActe())), infosActes.getMatiereActe(),
-                        infosActes.getObjet(), false, false);
-
-                acte.setActeAttachment(mainAttachement);
-                acte.setAnnexes(attachments);
-                acte.setCreation(LocalDateTime.now());
-
-                acte.setLocalAuthority(currentLocalAuthority);
-                acte.setProfileUuid(currentLocalAuthority.getGenericProfileUuid());
-                acte.setCodeLabel(
-                        localAuthorityService.getCodeMatiereLabel(currentLocalAuthority.getUuid(), acte.getCode()));
-                Acte actePublished = acteService.publishActe(acte);
-                status = "OK";
-                returnMessage = "OK";
-                depotActeStruct.setIdActe(actePublished.getUuid());
-            }
-        }
-        depotActeResponse.setStatusCode(status);
-        depotActeStruct.setMessage(returnMessage);
+        depotActeResponse.setStatusCode("OK");
+        depotActeStruct.setIdActe(actePublished.getUuid());
+        depotActeStruct.setMessage("OK");
         depotActeResponse.getRetour().add(depotActeStruct);
+
+        return depotActeResponse;
+    }
+
+    private DepotActeResponse depotActeResponseError(String errorMessage) {
+        DepotActeResponse depotActeResponse = new DepotActeResponse();
+        DepotActeStruct depotActeStruct = new DepotActeStruct();
+
+        depotActeResponse.setStatusCode("NOK");
+        depotActeStruct.setMessage(errorMessage);
+        depotActeResponse.getRetour().add(depotActeStruct);
+
+        LOGGER.error("Returning error response for depot acte : {}", errorMessage);
 
         return depotActeResponse;
     }
@@ -154,298 +146,301 @@ public class PaullEndpoint {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getDetailsActeRequest")
     public @ResponsePayload GetDetailsActeResponse getDetailsActe(
             @RequestPayload GetDetailsActeRequest getDetailsActeRequest) throws IOException {
-        PaullSoapToken paullSoapToken = getToken(getDetailsActeRequest.getSessionId());
+
+        Either<String, LocalAuthority> localAuthorityCheckResult =
+                checkAndGetLocalAuthority(getDetailsActeRequest.getSessionId());
+        if (localAuthorityCheckResult.isLeft())
+            return detailsActeResponseError(localAuthorityCheckResult.getLeft());
 
         GetDetailsActeResponse depotActeResponse = new GetDetailsActeResponse();
-
         GetDetailsActeStruct retour = new GetDetailsActeStruct();
 
-        String returnMessage = "UNKNOW_ERROR";
-        String status = "NOK";
-        if (paullSoapToken == null) {
-            returnMessage = "SESSION_INVALID_OR_EXPIRED";
-            LOGGER.error(returnMessage);
+        Acte acte = acteService.getByUuid(getDetailsActeRequest.getIdActe());
 
-        } else {
-            GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
-
-            if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
-                returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
-
-            } else {
-
-                Acte acte = acteService.getByUuid(getDetailsActeRequest.getIdActe());
-
-                Map<String, Object> returnMap = new HashMap<>();
-
-                retour.setMiatID(acte.getMiatId());
-                retour.setNumActe(acte.getNumber());
-                retour.setObjet(acte.getObjet());
-                try {
-                    JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
-                    retour.setUserName(node.get("agent").get("email").asText());
-                } catch (IOException e) {
-                    LOGGER.error(e.getMessage());
-                }
-                retour.setNatureActe(acte.getNature().name());
-                retour.setMatiereActe(acte.getCodeLabel());
-                retour.setNomDocument(acte.getActeAttachment().getFilename());
-                retour.setAnnexesList(acte.getAnnexes().stream().map(annexe -> annexe.getFilename())
-                        .collect(Collectors.joining(";")));
-                retour.setStatut(
-                        acteService.getActeHistoryDefinition(acteService.getLastMetierHistory(acte.getUuid())));
-
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
-                retour.setDateDecision(dateFormatter.format(acte.getDecision()));
-
-                Optional<ActeHistory> sentHistory = acteService.findFirstActeHistory(acte, StatusType.SENT);
-                retour.setDateDepotActe(
-                        sentHistory.isPresent() ? dateTimeFormatter.format(sentHistory.get().getDate()) : "");
-
-                Optional<ActeHistory> arHistory = acteService.findFirstActeHistory(acte, StatusType.ACK_RECEIVED);
-                retour.setDateAR(arHistory.isPresent() ? dateTimeFormatter.format(arHistory.get().getDate()) : "");
-
-                Optional<ActeHistory> canceledHistory = acteService.findFirstActeHistory(acte, StatusType.CANCELLED);
-                retour.setDateARAnnul(
-                        canceledHistory.isPresent() ? dateTimeFormatter.format(canceledHistory.get().getDate()) : "");
-
-                Optional<ActeHistory> nackHistory = acteService.findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
-
-                retour.setAnomalies(canceledHistory.isPresent() ? nackHistory.get().getMessage() : "");
-
-                retour.setCourrierSimple(soapReturnGenerator.generateJson(acteService
-                        .streamActeHistoriesByStatus(acte, StatusType.COURRIER_SIMPLE_RECEIVED).map(acteHistory -> {
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-                            map.put("nom_fichier", acteHistory.getFileName());
-
-                            return map;
-                        }).collect(Collectors.toList())));
-                retour.setReponseCourrierSimple(soapReturnGenerator.generateJson(
-                        acteService.streamActeHistoriesByStatus(acte, StatusType.REPONSE_COURRIER_SIMPLE_ASKED)
-                                .map(acteHistory -> {
-                                    Map<String, Object> map = new HashMap<>();
-                                    map.put("form_id_courrier_simple", acteHistory.getUuid());
-                                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-
-                                    return map;
-                                }).collect(Collectors.toList())));
-                retour.setDefer(soapReturnGenerator.generateJson(
-                        acteService.streamActeHistoriesByStatus(acte, StatusType.DEFERE_RECEIVED).map(acteHistory -> {
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("nature_illegalite", acteHistory.getMessage());
-                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-
-                            return map;
-                        }).collect(Collectors.toList())));
-
-                retour.setLettreObservations(soapReturnGenerator.generateJson(acteService
-                        .streamActeHistoriesByStatus(acte, StatusType.LETTRE_OBSERVATION_RECEIVED).map(acteHistory -> {
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("form_id_lo", acteHistory.getUuid());
-                            map.put("nom_fichier", acteHistory.getFileName());
-                            map.put("motif", acteHistory.getMessage());
-                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-
-                            return map;
-                        }).collect(Collectors.toList())));
-
-                retour.setReponseLettreObservations(soapReturnGenerator.generateJson(
-                        acteService.streamActeHistoriesByStatus(acte, StatusType.REPONSE_LETTRE_OBSEVATION_ASKED)
-                                .map(acteHistory -> {
-                                    Map<String, Object> map = new HashMap<>();
-                                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-                                    return map;
-                                }).collect(Collectors.toList())));
-
-                retour.setRefusLettreObservations(soapReturnGenerator.generateJson(
-                        acteService.streamActeHistoriesByStatus(acte, StatusType.REJET_LETTRE_OBSERVATION_ASKED)
-                                .map(acteHistory -> {
-                                    Map<String, Object> map = new HashMap<>();
-                                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-                                    return map;
-                                }).collect(Collectors.toList())));
-
-                retour.setDemandePC(soapReturnGenerator.generateJson(acteService
-                        .streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("form_id_lo", acteHistory.getUuid());
-                            map.put("nom_fichier", acteHistory.getFileName());
-                            map.put("motif", acteHistory.getMessage());
-                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-
-                            return map;
-                        }).collect(Collectors.toList())));
-
-                retour.setReponseDemandePC(soapReturnGenerator.generateJson(acteService
-                        .streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-                            return map;
-                        }).collect(Collectors.toList())));
-
-                retour.setRefusDemandePC(soapReturnGenerator.generateJson(
-                        acteService.streamActeHistoriesByStatus(acte, StatusType.REFUS_PIECES_COMPLEMENTAIRE_ASKED)
-                                .map(acteHistory -> {
-                                    Map<String, Object> map = new HashMap<>();
-                                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
-                                    return map;
-                                }).collect(Collectors.toList())));
-
-                status = "OK";
-                returnMessage = "OK";
-            }
+        retour.setMiatID(acte.getMiatId());
+        retour.setNumActe(acte.getNumber());
+        retour.setObjet(acte.getObjet());
+        try {
+            JsonNode node = externalRestService.getProfile(acte.getProfileUuid());
+            retour.setUserName(node.get("agent").get("email").asText());
+        } catch (IOException e) {
+            LOGGER.error("Unable to retrieve agent email : {}", e.getMessage());
         }
-        depotActeResponse.setStatusCode(status);
-        retour.setMessage(returnMessage);
+        retour.setNatureActe(acte.getNature().name());
+        retour.setMatiereActe(acte.getCodeLabel());
+        retour.setNomDocument(acte.getActeAttachment().getFilename());
+        retour.setAnnexesList(acte.getAnnexes().stream().map(Attachment::getFilename)
+                .collect(Collectors.joining(";")));
+        retour.setStatut(
+                acteService.getActeHistoryDefinition(acteService.getLastMetierHistory(acte.getUuid())));
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+        retour.setDateDecision(dateFormatter.format(acte.getDecision()));
+
+        // TODO : make one query to retrieve the whole Acte history ...
+
+        Optional<ActeHistory> sentHistory = acteService.findFirstActeHistory(acte, StatusType.SENT);
+        retour.setDateDepotActe(
+                sentHistory.map(history -> dateTimeFormatter.format(history.getDate())).orElse(""));
+
+        Optional<ActeHistory> arHistory = acteService.findFirstActeHistory(acte, StatusType.ACK_RECEIVED);
+        retour.setDateAR(arHistory.map(history -> dateTimeFormatter.format(history.getDate())).orElse(""));
+
+        Optional<ActeHistory> canceledHistory = acteService.findFirstActeHistory(acte, StatusType.CANCELLED);
+        retour.setDateARAnnul(
+                canceledHistory.map(history -> dateTimeFormatter.format(history.getDate())).orElse(""));
+
+        Optional<ActeHistory> nackHistory = acteService.findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
+
+        retour.setAnomalies(canceledHistory.isPresent() ? nackHistory.get().getMessage() : "");
+
+        retour.setCourrierSimple(soapReturnGenerator.generateJson(acteService
+                .streamActeHistoriesByStatus(acte, StatusType.COURRIER_SIMPLE_RECEIVED).map(acteHistory -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+                    map.put("nom_fichier", acteHistory.getFileName());
+
+                    return map;
+                }).collect(Collectors.toList())));
+        retour.setReponseCourrierSimple(soapReturnGenerator.generateJson(
+                acteService.streamActeHistoriesByStatus(acte, StatusType.REPONSE_COURRIER_SIMPLE_ASKED)
+                        .map(acteHistory -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("form_id_courrier_simple", acteHistory.getUuid());
+                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+
+                            return map;
+                        }).collect(Collectors.toList())));
+        retour.setDefer(soapReturnGenerator.generateJson(
+                acteService.streamActeHistoriesByStatus(acte, StatusType.DEFERE_RECEIVED).map(acteHistory -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("nature_illegalite", acteHistory.getMessage());
+                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+
+                    return map;
+                }).collect(Collectors.toList())));
+
+        retour.setLettreObservations(soapReturnGenerator.generateJson(acteService
+                .streamActeHistoriesByStatus(acte, StatusType.LETTRE_OBSERVATION_RECEIVED).map(acteHistory -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("form_id_lo", acteHistory.getUuid());
+                    map.put("nom_fichier", acteHistory.getFileName());
+                    map.put("motif", acteHistory.getMessage());
+                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+
+                    return map;
+                }).collect(Collectors.toList())));
+
+        retour.setReponseLettreObservations(soapReturnGenerator.generateJson(
+                acteService.streamActeHistoriesByStatus(acte, StatusType.REPONSE_LETTRE_OBSEVATION_ASKED)
+                        .map(acteHistory -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+                            return map;
+                        }).collect(Collectors.toList())));
+
+        retour.setRefusLettreObservations(soapReturnGenerator.generateJson(
+                acteService.streamActeHistoriesByStatus(acte, StatusType.REJET_LETTRE_OBSERVATION_ASKED)
+                        .map(acteHistory -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+                            return map;
+                        }).collect(Collectors.toList())));
+
+        retour.setDemandePC(soapReturnGenerator.generateJson(acteService
+                .streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("form_id_lo", acteHistory.getUuid());
+                    map.put("nom_fichier", acteHistory.getFileName());
+                    map.put("motif", acteHistory.getMessage());
+                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+
+                    return map;
+                }).collect(Collectors.toList())));
+
+        retour.setReponseDemandePC(soapReturnGenerator.generateJson(acteService
+                .streamActeHistoriesByStatus(acte, StatusType.PIECE_COMPLEMENTAIRE_ASKED).map(acteHistory -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+                    return map;
+                }).collect(Collectors.toList())));
+
+        retour.setRefusDemandePC(soapReturnGenerator.generateJson(
+                acteService.streamActeHistoriesByStatus(acte, StatusType.REFUS_PIECES_COMPLEMENTAIRE_ASKED)
+                        .map(acteHistory -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("date_reception", dateTimeFormatter.format(acteHistory.getDate()));
+                            return map;
+                        }).collect(Collectors.toList())));
+
+        depotActeResponse.setStatusCode("OK");
+        retour.setMessage("OK");
         depotActeResponse.getRetour().add(retour);
 
         return depotActeResponse;
     }
 
+    private GetDetailsActeResponse detailsActeResponseError(String errorMessage) {
+        GetDetailsActeResponse getDetailsActeResponse = new GetDetailsActeResponse();
+        GetDetailsActeStruct getDetailsActeStruct = new GetDetailsActeStruct();
+
+        getDetailsActeResponse.setStatusCode("NOK");
+        getDetailsActeStruct.setMessage(errorMessage);
+        getDetailsActeResponse.getRetour().add(getDetailsActeStruct);
+
+        LOGGER.error("Returning error response for get details acte : {}", errorMessage);
+
+        return getDetailsActeResponse;
+    }
+
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getDocumentRequest")
     public @ResponsePayload GetDocumentResponse getDocument(@RequestPayload GetDocumentRequest getDocumentRequest)
             throws IOException {
-        PaullSoapToken paullSoapToken = getToken(getDocumentRequest.getSessionId());
+
+        Either<String, LocalAuthority> localAuthorityCheckResult =
+                checkAndGetLocalAuthority(getDocumentRequest.getSessionId());
+        if (localAuthorityCheckResult.isLeft())
+            return documentResponseError(localAuthorityCheckResult.getLeft());
 
         GetDocumentResponse documentResponse = new GetDocumentResponse();
-
         GetDocumentStruct retour = new GetDocumentStruct();
 
-        String returnMessage = "UNKNOW_ERROR";
-        String status = "NOK";
-        if (paullSoapToken == null) {
-            returnMessage = "SESSION_INVALID_OR_EXPIRED";
-            LOGGER.error(returnMessage);
+        Acte acte = acteService.getByUuid(getDocumentRequest.getIdActe());
 
-        } else {
-            GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
+        byte[] document = acte.getActeAttachment().getFile();
+        retour.setBase64(Base64.getEncoder().encodeToString(document));
+        retour.setFilename(acte.getActeAttachment().getFilename());
 
-            if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
-                returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
-
-            } else {
-                Acte acte = acteService.getByUuid(getDocumentRequest.getIdActe());
-
-                byte[] document = acte.getActeAttachment().getFile();
-
-                retour.setBase64(Base64.getEncoder().encodeToString(document));
-                retour.setFilename(acte.getActeAttachment().getFilename());
-                status = "OK";
-                returnMessage = "OK";
-
-            }
-        }
-
-        documentResponse.setStatusCode(status);
-        retour.setMessage(returnMessage);
+        documentResponse.setStatusCode("OK");
+        retour.setMessage("OK");
         documentResponse.getRetour().add(retour);
 
         return documentResponse;
+    }
 
+    private GetDocumentResponse documentResponseError(String errorMessage) {
+        GetDocumentResponse getDocumentResponse = new GetDocumentResponse();
+        GetDocumentStruct getDocumentStruct = new GetDocumentStruct();
+
+        getDocumentResponse.setStatusCode("NOK");
+        getDocumentStruct.setMessage(errorMessage);
+        getDocumentResponse.getRetour().add(getDocumentStruct);
+
+        LOGGER.error("Returning error response for get acte document : {}", errorMessage);
+
+        return getDocumentResponse;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getAnnexesRequest")
     public @ResponsePayload GetAnnexesResponse getAnnexes(@RequestPayload GetAnnexesRequest getAnnexesRequest)
             throws IOException {
-        PaullSoapToken paullSoapToken = getToken(getAnnexesRequest.getSessionId());
+
+        Either<String, LocalAuthority> localAuthorityCheckResult =
+                checkAndGetLocalAuthority(getAnnexesRequest.getSessionId());
+        if (localAuthorityCheckResult.isLeft())
+            return annexesResponseError(localAuthorityCheckResult.getLeft());
 
         GetAnnexesResponse response = new GetAnnexesResponse();
-
         GetAnnexesStruct1 retour = new GetAnnexesStruct1();
 
-        String returnMessage = "UNKNOW_ERROR";
-        String status = "NOK";
-        if (paullSoapToken == null) {
-            returnMessage = "SESSION_INVALID_OR_EXPIRED";
-            LOGGER.error(returnMessage);
+        Acte acte = acteService.getByUuid(getAnnexesRequest.getIdActe());
+        List<GetAnnexesStruct> annexes = acte.getAnnexes().stream().map(annexe -> {
+            GetAnnexesStruct annexeStruct = new GetAnnexesStruct();
+            annexeStruct.setBase64(Base64.getEncoder().encodeToString(annexe.getFile()));
+            annexeStruct.setFilename(acte.getActeAttachment().getFilename());
+            return new GetAnnexesStruct();
+        }).collect(Collectors.toList());
 
-        } else {
-            GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
+        retour.getFichiers().addAll(annexes);
 
-            if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
-                returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
-
-            } else {
-                Acte acte = acteService.getByUuid(getAnnexesRequest.getIdActe());
-                List<GetAnnexesStruct> annexes = acte.getAnnexes().stream().map(annexe -> {
-                    GetAnnexesStruct annexeStruct = new GetAnnexesStruct();
-                    annexeStruct.setBase64(Base64.getEncoder().encodeToString(annexe.getFile()));
-                    annexeStruct.setFilename(acte.getActeAttachment().getFilename());
-                    return new GetAnnexesStruct();
-                }).collect(Collectors.toList());
-
-                retour.getFichiers().addAll(annexes);
-                status = "OK";
-                returnMessage = "OK";
-
-            }
-        }
-
-        response.setStatusCode(status);
-        retour.setMessage(returnMessage);
+        response.setStatusCode("OK");
+        retour.setMessage("OK");
         response.getRetour().add(retour);
 
         return response;
+    }
 
+    private GetAnnexesResponse annexesResponseError(String errorMessage) {
+        GetAnnexesResponse getAnnexesResponse = new GetAnnexesResponse();
+        GetAnnexesStruct1 getAnnexesStruct1 = new GetAnnexesStruct1();
+
+        getAnnexesResponse.setStatusCode("NOK");
+        getAnnexesStruct1.setMessage(errorMessage);
+        getAnnexesResponse.getRetour().add(getAnnexesStruct1);
+
+        LOGGER.error("Returning error response for get acte annexes : {}", errorMessage);
+
+        return getAnnexesResponse;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getClassificationActeRequest")
     public @ResponsePayload GetClassificationActeResponse getClassificationActe(
             @RequestPayload GetClassificationActeRequest getClassificationActeRequest) throws IOException {
-        PaullSoapToken paullSoapToken = getToken(getClassificationActeRequest.getSessionId());
 
+        Either<String, LocalAuthority> localAuthorityCheckResult =
+                checkAndGetLocalAuthority(getClassificationActeRequest.getSessionId());
+        if (localAuthorityCheckResult.isLeft())
+            return classificationActeResponseError(localAuthorityCheckResult.getLeft());
+
+        LocalAuthority localAuthority = localAuthorityCheckResult.get();
         GetClassificationActeResponse response = new GetClassificationActeResponse();
-
         GetClassificationActeStruct retour = new GetClassificationActeStruct();
 
-        String returnMessage = "UNKNOW_ERROR";
-        String status = "NOK";
-        if (paullSoapToken == null) {
-            returnMessage = "SESSION_INVALID_OR_EXPIRED";
-            LOGGER.error(returnMessage);
+        if (localAuthority.getNomenclatureDate() == null)
+            return classificationActeResponseError("NO_NOMENCLATURE_FOR_LOCALAUTHORITY");
 
-        } else {
-            GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
-
-            if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren())) {
-                returnMessage = "LOCALAUTHORITY_NOT_GRANTED";
-
-            } else {
-                LocalAuthority currentLocalAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren())
-                        .get();
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                retour.setCollectiviteDateClassification(
-                        dateFormatter.format(currentLocalAuthority.getNomenclatureDate()));
-                List<GetClassificationActeStruct1> materials = currentLocalAuthority.getMaterialCodes().stream()
-                        .map(materialCode -> {
-                            GetClassificationActeStruct1 material = new GetClassificationActeStruct1();
-                            material.setCle(materialCode.getCode());
-                            material.setValeur(materialCode.getLabel());
-                            return material;
-                        }).collect(Collectors.toList());
-                retour.getCodeMatiere().addAll(materials);
-                List<GetClassificationActeStruct1> natures = new ArrayList<>();
-                for (ActeNature nature : ActeNature.values()) {
-                    GetClassificationActeStruct1 natureStruct = new GetClassificationActeStruct1();
-                    natureStruct.setCle(nature.getCode());
-                    natureStruct.setValeur(nature.name());
-                    natures.add(natureStruct);
-                }
-                retour.getNatureActes().addAll(natures);
-                status = "OK";
-                returnMessage = "OK";
-
-            }
+        retour.setCollectiviteDateClassification(dateFormatter.format(localAuthority.getNomenclatureDate()));
+        List<GetClassificationActeStruct1> materials = localAuthority.getMaterialCodes().stream()
+                .map(materialCode -> {
+                    GetClassificationActeStruct1 material = new GetClassificationActeStruct1();
+                    material.setCle(materialCode.getCode());
+                    material.setValeur(materialCode.getLabel());
+                    return material;
+                }).collect(Collectors.toList());
+        retour.getCodeMatiere().addAll(materials);
+        List<GetClassificationActeStruct1> natures = new ArrayList<>();
+        for (ActeNature nature : ActeNature.values()) {
+            GetClassificationActeStruct1 natureStruct = new GetClassificationActeStruct1();
+            natureStruct.setCle(nature.getCode());
+            natureStruct.setValeur(nature.name());
+            natures.add(natureStruct);
         }
+        retour.getNatureActes().addAll(natures);
 
-        response.setStatusCode(status);
-        retour.setMessage(returnMessage);
+        response.setStatusCode("OK");
+        retour.setMessage("OK");
         response.setRetour(retour);
 
         return response;
+    }
 
+    private Either<String, LocalAuthority> checkAndGetLocalAuthority(String sessionId) throws IOException {
+        PaullSoapToken paullSoapToken = getToken(sessionId);
+        if (paullSoapToken == null)
+            return Either.left("SESSION_INVALID_OR_EXPIRED");
+
+        GenericAccount genericAccount = externalRestService.getGenericAccount(paullSoapToken.getAccountUuid());
+
+        if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren()))
+            return Either.left("LOCALAUTHORITY_NOT_GRANTED");
+
+        Optional<LocalAuthority> optionalLocalAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren());
+        if (!optionalLocalAuthority.isPresent())
+            return Either.left("LOCALAUTHORITY_NOT_FOUND_FOR_SIREN");
+
+        return Either.right(optionalLocalAuthority.get());
+    }
+
+    private GetClassificationActeResponse classificationActeResponseError(String errorMessage) {
+        GetClassificationActeResponse response = new GetClassificationActeResponse();
+        GetClassificationActeStruct retour = new GetClassificationActeStruct();
+
+        response.setStatusCode("NOK");
+        retour.setMessage(errorMessage);
+        response.setRetour(retour);
+
+        LOGGER.error("Returning error response for classification acte : {}", errorMessage);
+        return response;
     }
 
 }

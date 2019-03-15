@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static fr.sictiam.stela.acteservice.TestDataGenerator.acte;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -142,10 +143,5 @@ public class RetourPrefectureServiceTest {
         ClassPathResource classPathResource = new ClassPathResource(path);
         StreamSource classSource = new StreamSource(classPathResource.getInputStream());
         return XmlUtils.unmarshall(classSource, xmlClass);
-    }
-
-    private Acte acte() {
-        return new Acte("uuid", "Objet", LocalDateTime.now(), LocalDate.now(), "number",
-                ActeNature.ARRETES_INDIVIDUELS, LocalDateTime.now(), StatusType.SENT, Flux.TRANSMISSION_ACTE);
     }
 }

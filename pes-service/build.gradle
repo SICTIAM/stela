@@ -43,7 +43,6 @@ dependencies {
     compile('net.logstash.logback:logstash-logback-encoder:5.2')
     compile('ch.qos.logback:logback-classic:1.2.3')
     compile('com.vladmihalcea:hibernate-types-52:2.3.0')
-    compile('io.vavr:vavr:0.10.0')
     compile files('lib/pes-signature-core-0.28.0.jar')
     compile('software.amazon.awssdk:s3')
     testCompile('org.springframework.ws:spring-ws-test')
