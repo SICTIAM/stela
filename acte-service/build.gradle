@@ -37,6 +37,7 @@ dependencies {
     compile('net.logstash.logback:logstash-logback-encoder:5.2')
     compile('ch.qos.logback:logback-classic:1.2.3')
     runtime('org.postgresql:postgresql')
+    testCompile('org.springframework.ws:spring-ws-test')
     testCompile('org.springframework:spring-mock:2.0.8')
 }
 test {
