@@ -1,6 +1,5 @@
 package fr.sictiam.stela.pesservice.scheduler;
 
-import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesRetourRepository;
 import fr.sictiam.stela.pesservice.model.Attachment;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
@@ -41,6 +40,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,9 +58,6 @@ public class ReceiverTask {
 
     @Autowired
     private PesRetourRepository pesRetourRepository;
-
-    @Autowired
-    private PesAllerRepository pesAllerRepository;
 
     @Autowired
     private LocalAuthorityService localAuthorityService;
@@ -113,17 +110,20 @@ public class ReceiverTask {
         LOGGER.info("{} files found on FTP server: ", files.size());
         files.forEach(file -> LOGGER.info(" |- {}", file.getName()));
 
-        if (files.size() == 0)
+        if (files.isEmpty())
             runsWithoutNewFiles++;
 
-        if (runsWithoutNewFiles > 60 * hoursWithoutNewFiles
-                && pesAllerRepository.countByLastHistoryStatus(StatusType.SENT) > maxWaitingPes
-                && !alertSent) {
-            LOGGER.warn("No new AR since 4 hours and more than 20 PES files waiting");
+        Long nbOfWaitingPes;
+        if (!alertSent
+                && runsWithoutNewFiles > 60 * hoursWithoutNewFiles
+                && (nbOfWaitingPes = pesService.countPesAllerByStatusTypeAndDate(StatusType.SENT, LocalDateTime.now().minusDays(30))) > maxWaitingPes) {
+            LOGGER.warn("No new AR since {} hours and {} PES files waiting (limit is {})",
+                    hoursWithoutNewFiles, nbOfWaitingPes, maxWaitingPes);
             try {
                 notificationService.sendMail(Collections.singletonList(alertEmail).toArray(new String[0]),
                         "Alerte - Problème potentiel de récupération des ARs PES",
-                        "Pas de nouvel AR récupéré depuis plus de 4 heures et plus de 20 PES en attente");
+                        String.format("Pas de nouvel AR récupéré depuis plus de %d heures et %d PES en attente",
+                                hoursWithoutNewFiles, nbOfWaitingPes));
                 alertSent = true;
             } catch (IOException | MessagingException e) {
                 LOGGER.error("Unable to send email alert for ARs retrieval", e);
