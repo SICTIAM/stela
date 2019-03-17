@@ -52,6 +52,13 @@ subprojects {
         //mavenLocal()
     }
 
+    configurations {
+        developmentOnly
+        runtimeClasspath {
+            extendsFrom developmentOnly
+        }
+    }
+    
     dependencies {
         compile('org.springframework.boot:spring-boot-starter-mail')
         compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -62,7 +69,7 @@ subprojects {
         compile('com.jayway.jsonpath:json-path:2.4.0')
         compile('io.jsonwebtoken:jjwt:0.9.0')
         compile('io.vavr:vavr:0.10.0')
-        runtime('org.springframework.boot:spring-boot-devtools')
+        developmentOnly('org.springframework.boot:spring-boot-devtools')
         runtime('org.flywaydb:flyway-core')
         // used by logback for conditional logging
         runtime('org.codehaus.janino:janino:3.0.6')
