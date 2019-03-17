@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProperty scope="context" name="service-name" source="spring.application.name" />
-    <springProperty scope="context" name="environment" source="spring.profiles.active" />
     <springProperty scope="context" name="logfile" source="logging.file" defaultValue="./build/logs/pes-service.log"/>
     <springProperty scope="context" name="logstashhost" source="logging.logstash.host" defaultValue="null"/>
     <springProperty scope="context" name="maxFileSize" source="logging.filesize.max" defaultValue="100MB"/>
@@ -19,7 +17,7 @@
         <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder
             by default -->
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -33,24 +31,15 @@
             <maxHistory>${maxHistory}</maxHistory>
             <totalSizeCap>${maxArchiveSize}</totalSizeCap>
         </rollingPolicy>
-        <!-- <encoder class="net.logstash.logback.encoder.LogstashEncoder" /> -->
         <encoder>
             <pattern>%d{dd-MMM-yy HH:mm:ss.SSS} %-5level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="INFO" />
-    <logger name="org.springframework.web.filter" level="DEBUG" />
-    <logger name="org.springframework.web.client" level="INFO" />
-    <logger name="org.springframework.security.web.access" level="DEBUG" />
-    <logger name="org.springframework.integration.ftp" level="DEBUG" />
-    <logger name="fr.sictiam.stela" level="DEBUG" />
     <root level="INFO">
-        <if condition='!p("logstashhost").equals("null")'>
-            <then>
-                <appender-ref ref="logStashAppender" />
-            </then>
-        </if>
+        <springProfile name="kub">
+            <appender-ref ref="logStashAppender" />
+        </springProfile>
 
         <appender-ref ref="rolling" />
         <appender-ref ref="consoleOut" />

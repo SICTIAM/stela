@@ -72,8 +72,6 @@ subprojects {
         compile('com.sun.mail:javax.mail:1.6.2')
         developmentOnly('org.springframework.boot:spring-boot-devtools')
         runtime('org.flywaydb:flyway-core')
-        // used by logback for conditional logging
-        runtime('org.codehaus.janino:janino:3.0.6')
         testCompile('junit:junit:4.12')
         testCompile('com.palantir.docker.compose:docker-compose-rule-junit4:0.34.0')
         testCompile('com.icegreen:greenmail:1.5.9')
