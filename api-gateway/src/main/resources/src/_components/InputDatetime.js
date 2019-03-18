@@ -9,9 +9,9 @@ class InputDatetime extends Component {
             <div>
                 {this.props.ariaLabel && (
                     <Datetime
-                        utc={true}
                         inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'aria-label': this.props.ariaLabel, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '' }}
-                        locale="fr-fr" dateFormat="DD/MM/YYYY"
+                        locale="fr-fr"
+                        dateFormat="DD/MM/YYYY"
                         closeOnSelect={true}
                         onBlur={this.props.onBlur}
                         viewDate={this.props.viewDate || moment()}
@@ -19,7 +19,6 @@ class InputDatetime extends Component {
                 )}
                 {!this.props.ariaLabel && (
                     <Datetime
-                        utc={true}
                         inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '' }}
                         locale="fr-fr"
                         dateFormat="DD/MM/YYYY"
