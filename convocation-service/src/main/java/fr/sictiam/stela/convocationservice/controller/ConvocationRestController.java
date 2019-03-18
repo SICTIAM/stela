@@ -60,6 +60,8 @@ public class ConvocationRestController {
 
     private final RecipientService recipientService;
 
+    private final String forbiddenCharactersInFilename = "[\\\"/<>:\\?\\*|]";
+
     @Autowired
     public ConvocationRestController(
             ConvocationService convocationService,
@@ -297,7 +299,7 @@ public class ConvocationRestController {
             ByteArrayOutputStream baos = convocationService.createArchive(convocation);
 
             outputFile(response, baos.toByteArray(),
-                    convocation.getSubject().replaceAll("[\\\"/<>:\\?\\*|]", "_") + ".tar.gz", disposition);
+                    convocation.getSubject().replaceAll(forbiddenCharactersInFilename, "_") + ".tar.gz", disposition);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IOException e) {
             LOGGER.error("Error during generating archive for convocation {}: {}", uuid, e.getMessage());
@@ -319,7 +321,7 @@ public class ConvocationRestController {
 
         byte[] content = document.generatePresenceList(convocation);
         outputFile(response, content,
-                convocation.getSubject().replaceAll("[\\\"/<>:\\?\\*|]", "_") + "." + extension.name(),
+                convocation.getSubject().replaceAll(forbiddenCharactersInFilename, "_") + "." + extension.name(),
                 "inline");
 
         return new ResponseEntity(HttpStatus.OK);
