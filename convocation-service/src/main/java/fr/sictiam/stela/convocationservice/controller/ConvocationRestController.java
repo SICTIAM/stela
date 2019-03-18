@@ -276,6 +276,59 @@ public class ConvocationRestController {
         }
     }
 
+    /* WIP
+    @GetMapping("/{uuid}/archive")
+    public ResponseEntity getArchive(
+            HttpServletResponse response,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
+            @RequestAttribute(name = "STELA-Current-Recipient", required = false) Recipient recipient,
+            @PathVariable String uuid,
+            @RequestParam(required = false) Boolean stamped,
+            @RequestParam(required = false) Integer x,
+            @RequestParam(required = false) Integer y,
+            @RequestParam(required = false, defaultValue = "inline") String disposition) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Arrays.asList(Right.values()), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            TarArchiveOutputStream taos = new TarArchiveOutputStream(new GzipCompressorOutputStream(baos));
+
+            Attachment file = convocationService.getFile(convocation, convocation.getAttachment().getUuid());
+
+            byte[] content = file.getContent();
+            if (content == null) {
+                LOGGER.error("Cannot retrieve file {} content", file.getUuid());
+                return new ResponseEntity(HttpStatus.NOT_FOUND);
+            }
+
+            if (convocation.getSentDate() != null && stamped != null && stamped == Boolean.TRUE
+                    && getContentType(file.getFilename()).equals(MediaType.APPLICATION_PDF_VALUE)) {
+                content = convocationService.getStampedFile(content, convocation.getSentDate(),
+                        convocation.getLocalAuthority(), x, y);
+            }
+
+            File f = new File(file.getFilename());
+            TarArchiveEntry tar = new TarArchiveEntry(f, file.getFilename());
+            FileCopyUtils.copy(content, f);
+            taos.putArchiveEntry(tar);
+            taos.closeArchiveEntry();
+
+            outputFile(response, baos.toByteArray(), convocation.getSubject() + ".tar.gz", disposition);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IOException | DocumentException e) {
+            LOGGER.error("Error during getting file for convocation {}: {}", uuid, e.getMessage());
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    */
+
     @GetMapping("/{uuid}/presence.{extension}")
     public ResponseEntity getPresenceList(
             HttpServletResponse response,
