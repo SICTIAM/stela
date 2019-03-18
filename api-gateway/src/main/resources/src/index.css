@@ -47,6 +47,9 @@
 .float-right {
     float: right;
 }
+.flex-wrap {
+	flex-wrap: wrap;
+}
 .flex-justify-end {
     display: flex;
     justify-content: flex-end;
@@ -72,6 +75,9 @@
 }
 .ml-5 {
     margin-left: 5px !important;
+}
+.ml-10 {
+    margin-left: 10px !important;
 }
 .mr-0 {
     margin-right: 0px !important;

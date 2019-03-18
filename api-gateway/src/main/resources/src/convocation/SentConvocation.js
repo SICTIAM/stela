@@ -99,8 +99,8 @@ class SentConvocation extends Component {
 	                    <p>{t('convocation.page.cancelled_convocation_text', {date: moment(this.state.convocation.cancellationDate).format('DD/MM/YYYY')})}</p>
 	                </Message>
 	            )}
-	                <div className='flex-justify-end'>
-	                    <Dropdown basic direction='left' trigger={dropdownButton} icon={false} className='mr-10'>
+	                <div className='flex-justify-end flex-wrap'>
+	                    <Dropdown basic direction='left' trigger={dropdownButton} icon={false}>
 	                        <Dropdown.Menu>
 	                            <Dropdown.Item>
 	                                <a className='item' aria-label={t('convocation.page.download_pdf')} href={`/api/convocation/${this.state.convocation.uuid}/presence.pdf`} target='_blank'>
@@ -116,9 +116,9 @@ class SentConvocation extends Component {
 	                    </Dropdown>
 	                    {!this.state.convocation.cancelled && (
 	                        <Fragment>
-	                            <Button type='button' className='mr-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
+	                            <Button type='button' className='ml-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
 	                            <ConfirmModal onConfirm={this.onCancelConvocation} text={t('convocation.page.cancel_convocation', {number: this.state.delay})}>
-	                                <Button type='button' basic color={'orange'}>{t('api-gateway:form.cancel')}</Button>
+	                                <Button className='ml-10' type='button' basic color={'orange'}>{t('api-gateway:form.cancel')}</Button>
 	                            </ConfirmModal>
 	                        </Fragment>
 	                    )}
