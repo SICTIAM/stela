@@ -147,7 +147,7 @@ class ActePublic extends Component {
                 </div>
             </div>
         )
-        const isActeAttachmentPDF = acte.acteAttachment.filename && acte.acteAttachment.filename.endsWith('.pdf')
+        const isActeAttachmentPDF = acte && acte.acteAttachment && acte.acteAttachment.filename && acte.acteAttachment.filename.endsWith('.pdf')
 
         return (
             <Page title={acte.objet}>
