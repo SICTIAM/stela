@@ -5,7 +5,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class ArchiveSettings {
 
-    private boolean archiveActivated;
+    private boolean archiveActivated = false;
     private String pastellUrl;
     private String pastellEntity;
     private String pastellLogin;

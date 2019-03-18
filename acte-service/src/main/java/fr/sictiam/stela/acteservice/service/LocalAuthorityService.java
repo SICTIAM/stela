@@ -96,6 +96,10 @@ public class LocalAuthorityService {
         return localAuthorityRepository.findBySiren(siren);
     }
 
+    public Optional<LocalAuthority> getBySirenWithMaterialCodes(String siren) {
+        return localAuthorityRepository.findWithMaterialCodesBySiren(siren);
+    }
+
     @Transactional
     public void loadClassification(String uuid) {
 

@@ -424,7 +424,8 @@ public class PaullEndpoint {
         if (!localAuthorityService.localAuthorityGranted(genericAccount, paullSoapToken.getSiren()))
             return Either.left("LOCALAUTHORITY_NOT_GRANTED");
 
-        Optional<LocalAuthority> optionalLocalAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren());
+        Optional<LocalAuthority> optionalLocalAuthority =
+                localAuthorityService.getBySirenWithMaterialCodes(paullSoapToken.getSiren());
         if (!optionalLocalAuthority.isPresent())
             return Either.left("LOCALAUTHORITY_NOT_FOUND_FOR_SIREN");
 
