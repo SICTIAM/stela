@@ -148,7 +148,7 @@ public class PaullEndointTest {
         given(localAuthorityService.localAuthorityGranted(any(), any()))
                 .willReturn(true);
         LocalAuthority localAuthority = new LocalAuthority("uuid", "name", "siren", false);
-        given(localAuthorityService.getBySiren(any()))
+        given(localAuthorityService.getBySirenWithMaterialCodes(any()))
                 .willReturn(Optional.of(localAuthority));
 
         mockClient.sendRequest(withPayload(new StringSource(getClassificationActeRequest)))
@@ -183,7 +183,7 @@ public class PaullEndointTest {
                 .willReturn(new PaullSoapToken());
         given(localAuthorityService.localAuthorityGranted(any(), any()))
                 .willReturn(true);
-        given(localAuthorityService.getBySiren(any()))
+        given(localAuthorityService.getBySirenWithMaterialCodes(any()))
                 .willReturn(localAuthority());
 
         mockClient.sendRequest(withPayload(new StringSource(getClassificationActeRequest)))
@@ -226,7 +226,7 @@ public class PaullEndointTest {
                 .willReturn(new PaullSoapToken());
         given(localAuthorityService.localAuthorityGranted(any(), any()))
                 .willReturn(true);
-        given(localAuthorityService.getBySiren(any()))
+        given(localAuthorityService.getBySirenWithMaterialCodes(any()))
                 .willReturn(localAuthority());
         given(acteService.publishActe(any()))
                 .willReturn(acte());
@@ -266,7 +266,7 @@ public class PaullEndointTest {
                 .willReturn(new PaullSoapToken());
         given(localAuthorityService.localAuthorityGranted(any(), any()))
                 .willReturn(true);
-        given(localAuthorityService.getBySiren(any()))
+        given(localAuthorityService.getBySirenWithMaterialCodes(any()))
                 .willReturn(localAuthority());
         Acte acte = acte();
         acte.setActeAttachment(new Attachment(null, "attachment.pdf", 10000));
