@@ -266,6 +266,19 @@ export default class ConvocationService {
 	    }
 	}
 
+	downloadAllDocuments = async (context, uuid) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}/archive`})
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
 	getTokenInUrl = (search) => {
 	    const arrayParams = search && search.substr(1).split('&')
 	    const regex = /token/

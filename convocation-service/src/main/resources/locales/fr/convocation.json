@@ -70,7 +70,8 @@
       "download_csv": "Télécharger au format CSV",
       "no_present": "Aucun présent",
       "no_absent": "Aucun absent",
-      "no_substitution": "Aucune procuration"
+	  "no_substitution": "Aucune procuration",
+	  "download_all_documents": "Télécharger tous les documents"
     },
     "new": {
       "display": "Visualiser",
