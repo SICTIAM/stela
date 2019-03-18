@@ -131,7 +131,7 @@ class ActePublic extends Component {
                 <DraggablePosition
                     style={{marginBottom: '0.5em'}}
                     backgroundImage={'data:image/png;base64,' + this.state.thumbnail.image.trim()}
-                    label={t('acte.stamp_pad.pad_label')}
+                    label={t('acte:stamp_pad.pad_label')}
                     height={thumbnailHeight}
                     width={thumbnailWidth}
                     boxHeight={boxHeight}
@@ -170,7 +170,7 @@ class ActePublic extends Component {
                                         <LoadingContent fetchStatus={this.state.thumbnailStatus}>
                                             <Popup content={stampPosition} on='click' position='left center'
                                                 trigger={<Dropdown item icon='none'
-                                                    text={t('acte.stamp_pad.download_stamped_acte')}/>}
+                                                    text={t('acte:stamp_pad.download_stamped_acte')}/>}
                                             />
                                         </LoadingContent>
                                     </Dropdown.Item>
