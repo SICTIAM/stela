@@ -30,12 +30,12 @@ public class Notification {
     private boolean notificationStatus;
 
     public static List<Notification> notifications = Arrays.asList(
-            new Notification(Type.ACK_RECEIVED, false, true, true),
             new Notification(Type.SENT, true, false, true),
+            new Notification(Type.ACK_RECEIVED, false, true, true),
             new Notification(Type.CANCELLED, true, false, true),
-            new Notification(Type.ANOMALIES, true, true, false),
-            new Notification(Type.NACK_RECEIVED, true, true, false)
-    );
+            new Notification(Type.NACK_RECEIVED, true, true, false),
+            new Notification(Type.ANOMALIES, true, true, false)
+            );
 
     private Notification(Type type, boolean deactivatable, boolean defaultValue, boolean notificationStatus) {
         this.type = type;

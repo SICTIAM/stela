@@ -124,7 +124,7 @@
     "localAuthorityNotificationsCONVOCATION": "Être notifié pour des convocations déposés par un membre du groupe",
     "notifications": {
       "ACTES_ACK_RECEIVED": "Réception de l'AR d'un acte",
-      "ACTES_SENT": "Envoi à la préfécture réussi d'un acte",
+      "ACTES_SENT": "Envoi réussi d'un acte",
       "ACTES_CANCELLED": "Réception de l'AR d'annulation d'un acte",
       "ACTES_NACK_RECEIVED": "Réception d'une anomalie de la Préfecture pour un acte",
       "ACTES_ANOMALIES": "Toutes anomalies concernant un acte",

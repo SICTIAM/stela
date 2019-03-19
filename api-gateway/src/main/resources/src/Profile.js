@@ -216,7 +216,8 @@ class LocalAuthorityProfile extends Component {
         t: PropTypes.func,
         csrfToken: PropTypes.string,
         csrfTokenHeaderName: PropTypes.string,
-        _fetchWithAuthzHandling: PropTypes.func
+        _fetchWithAuthzHandling: PropTypes.func,
+        _addNotification: PropTypes.func
     }
     static propTypes = {
         profile: PropTypes.object.isRequired,
