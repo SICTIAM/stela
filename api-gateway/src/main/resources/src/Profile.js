@@ -313,7 +313,7 @@ class LocalAuthorityProfile extends Component {
             })
             .catch(response => {
                 response.text().then(text =>
-                    this.context._addNotification(notifications.defaultError, 'notifications.pes.title', text)
+                    this.props.authContext._addNotification(notifications.defaultError, 'notifications.pes.title', text)
                 )
             })
     }
