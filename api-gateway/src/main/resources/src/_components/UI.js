@@ -180,7 +180,7 @@ const LinkFile = ({ url, text, ariaLabel = 'Lien fichier' }) => (
         <a target="_blank" href={url} aria-label={ariaLabel}>
             {text}
         </a>
-        <a target="_blank" href={url + '?disposition=attachment'} aria-label={ariaLabel}>
+        <a target="_blank" href={url + (url.indexOf('?') === -1 ? '?' : '&') + 'disposition=attachment'} aria-label={ariaLabel}>
             <Icon style={{ marginLeft: '0.5em' }} name="download" />
         </a>
     </Fragment>

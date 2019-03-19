@@ -54,7 +54,12 @@ const hoursBeforeResendPes = 24
 
 const maxArchiveSize = (150*1024*1024)
 
-const acceptFileDocumentConvocation = '.doc, docx, .pdf, .jpg, .png, .zip, .odt, .ott, .oth, and .odm, .dwg'
+const acceptFileDocumentConvocation =
+    '.pdf, .zip, .jpg, .png, .gif, .dwg' +
+    ', .doc, .docx, .docm, .dot, .dotm, .dotx, .rtf, .txt, .xml, .xps' +
+    ', .xls, .xlsx, .xlsb, .xlsm, .xlt, .xltm, .xltx, .xlw' +
+    ', .odp, .pot, .potm, .potx, .ppa, .ppam, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .tif' +
+    ', .odt, .ods, .odp, .ott, .oth, .odm'
 
 const unauthorizedRequestAllowed = ['api/csrf-token']
 
