@@ -169,7 +169,7 @@ export default class ConvocationService {
 	        return await (await _fetchWithAuthzHandling({url: url, method: uuid ? 'PUT' : 'POST', headers: headers, body: body, context: context, query: {force: force}})).json()
 	    } catch(error) {
 	        error.json().then((json) => {
-	            _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(json.message))
+	            _addNotification(notifications.defaultError, 'api-gateway:notifications.admin.title', t(`${json.message}`))
 	        })
 	        throw error
 	    }

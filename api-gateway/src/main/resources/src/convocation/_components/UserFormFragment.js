@@ -109,7 +109,7 @@ class UserFormFragment extends Component {
 	    const parameters = this.createBodyParams()
 	    _addNotification(notifications.admin.email_validation_in_progress)
 	    try {
-	        const recipientResponse = await this._convocationService.saveRecipient(this.props.authContext, parameters, this.state.fields.uuid, false)
+	        const recipientResponse = await this._convocationService.saveRecipient(this.context, parameters, this.state.fields.uuid, false)
 	        _addNotification(notifications.admin.email_validation_success)
 	        _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
 	        this.props.onSubmit(recipientResponse)
@@ -123,7 +123,7 @@ class UserFormFragment extends Component {
 	    const { _addNotification } = this.context
 
 	    const parameters = this.createBodyParams()
-	    const recipientResponse = await this._convocationService.saveRecipient(this.props.authContext, parameters, this.state.fields.uuid, true)
+	    const recipientResponse = await this._convocationService.saveRecipient(this.context, parameters, this.state.fields.uuid, true)
 	    _addNotification(this.state.fields.uuid ? notifications.admin.recipientUpdated : notifications.admin.recipientCreated)
 	    this.props.onSubmit(recipientResponse)
 	}
