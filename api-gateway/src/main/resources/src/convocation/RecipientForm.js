@@ -128,7 +128,7 @@ class RecipientForm extends Component {
 	                        {t('api-gateway:form.cancel')}
 	                    </Button>
 	                    <Button primary basic onClick={() => this.props.onAdded(this.state.selectedUser)}>
-	                        {t('api-gateway:form.add')}
+	                        {t('api-gateway:form.confirm')}
 	                    </Button>
 	                </div>
 	            </Modal.Actions>

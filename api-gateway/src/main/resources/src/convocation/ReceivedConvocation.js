@@ -147,6 +147,8 @@ class ReceivedConvocation extends Component {
 	        urlProcuration = `${urlProcuration}?token=${token.token}`
 	    }
 
+	    const archiveUrl = token ? `/api/convocation/${convocation.uuid}/archive?token=${token.token}` : `/api/convocation/${convocation.uuid}/archive`
+
 	    const metaData = [
 	        { property: 'uuid', displayed: false, searchable: false },
 	        { property: 'firstname', displayed: true, displayName: t('acte.fields.number'), searchable: true, sortable: true, collapsing: true },
@@ -222,7 +224,7 @@ class ReceivedConvocation extends Component {
 	                                )}
 	                                {(this.state.convocation.attachment || (this.state.convocation.annexes && this.state.convocation.annexes.length > 0)) && (
 	                                    <Grid.Column mobile='16' computer='16'>
-	                                        <a className='ui basic compact primary button' href={`/api/convocation/${convocation.uuid}/archive`}>{t('convocation.page.download_all_documents')}</a>
+	                                        <a className='ui basic compact primary button' href={archiveUrl}>{t('convocation.page.download_all_documents')}</a>
 	                                    </Grid.Column>
 	                                )}
 	                            	{(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && !this.state.convocation.guest && this.state.convocation.useProcuration && (
