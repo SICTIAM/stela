@@ -174,7 +174,16 @@ class ReceivedConvocation extends Component {
 	                                {this.state.convocation.comment && (
 	                                <Grid.Column computer='16'>
 	                                    <Field htmlFor="comments" label={t('convocation.fields.comment')}>
-	                                        <FieldValue id="comments">{this.state.convocation.comment}</FieldValue>
+	                                            <FieldValue id="comments">
+	                                                {convocation.comment.split('\n').map((item) => {
+	                                                    return (
+	                                                        <span>
+	                                                            {item}
+	                                                            <br/>
+	                                                        </span>
+	                                                    )
+	                                                })}
+	                                            </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>)}
 	                                {this.state.convocation.attachment && (
