@@ -4,6 +4,7 @@ import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.MailTemplate;
 import fr.sictiam.stela.convocationservice.model.Notification;
 import fr.sictiam.stela.convocationservice.model.NotificationType;
+import fr.sictiam.stela.convocationservice.model.Placeholder;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.util.RightUtils;
 import fr.sictiam.stela.convocationservice.service.LocalAuthorityService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -100,5 +102,26 @@ public class NotificationRestController {
         MailTemplate template = mailTemplateService.getTemplate(type, localAuthority);
 
         return new ResponseEntity<>(template, HttpStatus.OK);
+    }
+
+    @GetMapping("/placeholders")
+    public List<Placeholder> getPlaceholderList() {
+
+        List<Placeholder> placeholders = new ArrayList<>();
+
+
+        placeholders.add(new Placeholder("sujet", "Sujet de la convocation"));
+        placeholders.add(new Placeholder("convocation", "URL de la convocation"));
+        placeholders.add(new Placeholder("destinataire", "Destinataire principal"));
+        placeholders.add(new Placeholder("emetteur", "Déposant de la convocation"));
+        placeholders.add(new Placeholder("mandataire", "Destinataire ayant reçu une procuration"));
+        placeholders.add(new Placeholder("reponse", "Réponse du destinataire"));
+        placeholders.add(new Placeholder("date", "Date de séance"));
+        placeholders.add(new Placeholder("collectivite", "Collectivité émettrice de la convocation"));
+        placeholders.add(new Placeholder("modifications", "Liste des modifications apportées à une convocation"));
+        placeholders.add(new Placeholder("destinataires", "Liste de destinataires"));
+        placeholders.add(new Placeholder("stela_url", "URL de Stela"));
+
+        return placeholders;
     }
 }

@@ -38,6 +38,7 @@ class ConvocationLocalAuthorityParams extends Component {
             subject: '',
             uuid: ''
         },
+        placeholdersList: [],
         fields: {
             uuid: '',
             residentThreshold: null,
@@ -57,7 +58,8 @@ class ConvocationLocalAuthorityParams extends Component {
         const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
         const notificationMailsResponse = await this._convocationService.getNotificationMails(this.props.authContext)
         const notificationMails = notificationMailsResponse.map(notification => { return {text:notification.subject, value:notification.notificationType, uuid: notification.uuid} })
-        this.setState({fields: localAuthorityResponse, notificationMails: notificationMails})
+        const placeholdersListResponse = await this._convocationService.getNoficiationsPlaceholders(this.props.authContext)
+        this.setState({fields: localAuthorityResponse, notificationMails: notificationMails, placeholdersList: placeholdersListResponse})
 
     }
     validateForm = () => {
@@ -150,7 +152,7 @@ class ConvocationLocalAuthorityParams extends Component {
     }
     render() {
         const { t } = this.context
-        const { notificationMessage, isFormValid, fields, notificationMails, formErrors, isSet } = this.state
+        const { notificationMessage, isFormValid, fields, notificationMails, formErrors, isSet, placeholdersList } = this.state
         const localAuthoritySlug = getLocalAuthoritySlug()
         const submissionButton =
 			<Button type='submit' primary basic disabled={!isFormValid}>
@@ -278,6 +280,7 @@ class ConvocationLocalAuthorityParams extends Component {
                                                 <FormField htmlFor={`${this.props.uuid}_body`}
 	                                            label={t('convocation.admin.modules.convocation.local_authority_settings.body')}>
                                                     <TextEditor
+                                                        placeholdersList={placeholdersList}
                                                         onChange={value => this.handleNotificationChange('body', value)}
                                                         isSet={isSet}
                                                         format='html'
