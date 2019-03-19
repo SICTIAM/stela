@@ -313,9 +313,7 @@ class LocalAuthorityProfile extends Component {
                 if (sesileSub) this.fetchSesileInformation()
             })
             .catch(response => {
-                response.text().then(text =>
-                    this.props.authContext._addNotification(notifications.defaultError, 'notifications.pes.title', text)
-                )
+                this.props.authContext._addNotification(notifications.defaultError, 'notifications.pes.title', response.message)
             })
     }
     componentDidMount() {

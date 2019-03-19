@@ -1,0 +1,4 @@
+{
+  "baseUrl": "http://stela3.localtest.me:3000",
+  "chromeWebSecurity": false
+}
