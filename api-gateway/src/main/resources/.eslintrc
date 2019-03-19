@@ -1,8 +1,16 @@
 {
   "plugins": [
-    "jsx-a11y"
+    "jsx-a11y",
+    "cypress"
   ],
-  "extends": ["react-app", "plugin:jsx-a11y/recommended"],
+  "env": {
+    "cypress/globals": true
+  },
+  "extends": [
+    "react-app",
+    "plugin:jsx-a11y/recommended",
+    "plugin:cypress/recommended"
+  ],
   "rules": {
     "quotes": ["warn", "single"],
     "semi": ["warn", "never"],

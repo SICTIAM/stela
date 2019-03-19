@@ -1,17 +1,17 @@
 package fr.sictiam.stela.apigateway.config.filter;
 
+
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import fr.sictiam.stela.apigateway.model.StelaUserInfo;
-import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_DECORATION_FILTER_ORDER;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
-@Profile("!test-e2e")
-public class AuthorizationHeaderFilter extends ZuulFilter {
+@Profile("test-e2e")
+public class LocalAuthorizationHeaderFilter extends ZuulFilter {
 
     @Override
     public String filterType() {
@@ -26,19 +26,18 @@ public class AuthorizationHeaderFilter extends ZuulFilter {
     @Override
     public boolean shouldFilter() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication instanceof OpenIdCAuthentication;
+        return authentication instanceof UsernamePasswordAuthenticationToken;
     }
 
     @Override
     public Object run() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OpenIdCAuthentication authenticationOpen = (OpenIdCAuthentication) authentication;
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = (UsernamePasswordAuthenticationToken) authentication;
         RequestContext ctx = RequestContext.getCurrentContext();
 
-        ctx.addZuulRequestHeader("Authorization", "Bearer " + authenticationOpen.getAccessToken());
-        ctx.addZuulRequestHeader("ACR", authenticationOpen.getAcr());
-        ctx.addZuulRequestHeader("STELA-Active-Token",
-                ((StelaUserInfo) authenticationOpen.getUserInfo()).getStelaToken());
+        String token = usernamePasswordAuthenticationToken.getDetails().toString();
+        ctx.addZuulRequestHeader("STELA-Active-Token", token);
         return null;
     }
 }
+
