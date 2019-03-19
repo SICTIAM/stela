@@ -57,7 +57,16 @@ class SentConvocationFragment extends Component {
 	                        	{convocation.comment && (
 	                            	<Grid.Column computer='16'>
 	                                	<Field htmlFor="comment" label={t('convocation.fields.comment')}>
-	                                    	<FieldValue id="comment">{convocation.comment}</FieldValue>
+	                                        <FieldValue id="comments">
+	                                            {convocation.comment.split('\n').map((item) => {
+	                                                return (
+	                                                    <span>
+	                                                        {item}
+	                                                        <br/>
+	                                                    </span>
+	                                                )
+	                                            })}
+	                                        </FieldValue>
 	                                	</Field>
 	                            	</Grid.Column>
 	                        	)}
