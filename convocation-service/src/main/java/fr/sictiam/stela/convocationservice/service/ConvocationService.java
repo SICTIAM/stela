@@ -27,12 +27,18 @@ import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.exception.ProcurationNotPermittedException;
 import fr.sictiam.stela.convocationservice.service.exceptions.ConvocationNotFoundException;
 import fr.sictiam.stela.convocationservice.service.util.PdfGeneratorUtil;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
@@ -43,6 +49,10 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -459,6 +469,28 @@ public class ConvocationService {
         return convocationRepository.findByHalfDuration();
     }
 
+    public ByteArrayOutputStream createArchive(Convocation convocation) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
+
+        if (convocation.getAttachment() != null) {
+            storageService.getAttachmentContent(convocation.getAttachment());
+            addEntry(convocation.getAttachment().getFilename(), convocation.getAttachment().getContent(), taos);
+        }
+
+        if (convocation.getAnnexes() != null) {
+            for (Attachment annexe : convocation.getAnnexes()) {
+                storageService.getAttachmentContent(annexe);
+                addEntry(annexe.getFilename(), annexe.getContent(), taos);
+            }
+        }
+
+        taos.close();
+        baos.close();
+
+        return compress(baos);
+    }
+
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String
             assemblyType,
             LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,
@@ -703,6 +735,30 @@ public class ConvocationService {
             LOGGER.warn("Cannot answer to convocation {}, it has been spent", convocation.getUuid());
             throw new ConvocationNotAvailableException();
         }
+    }
+
+    private void addEntry(String entryName, byte[] content, TarArchiveOutputStream taos) throws IOException {
+        File file = new File(entryName);
+        FileCopyUtils.copy(content, file);
+        ArchiveEntry archiveEntry = new TarArchiveEntry(file, entryName);
+        taos.putArchiveEntry(archiveEntry);
+        IOUtils.copy(new FileInputStream(file), taos);
+        taos.closeArchiveEntry();
+        file.delete();
+    }
+
+    private ByteArrayOutputStream compress(ByteArrayOutputStream baos) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        GzipCompressorOutputStream gcos = new GzipCompressorOutputStream(baos2);
+        final byte[] buffer = new byte[2048];
+        int n;
+        while (-1 != (n = bais.read(buffer))) {
+            gcos.write(buffer, 0, n);
+        }
+        gcos.close();
+        bais.close();
+        return baos2;
     }
 
     private void addHistory(Convocation convocation, HistoryType type) {

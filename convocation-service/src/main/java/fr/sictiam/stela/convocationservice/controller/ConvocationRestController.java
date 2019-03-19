@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
@@ -58,6 +59,8 @@ public class ConvocationRestController {
     private final ConvocationService convocationService;
 
     private final RecipientService recipientService;
+
+    private final String forbiddenCharactersInFilename = "[\\\"/<>:\\?\\*|]";
 
     @Autowired
     public ConvocationRestController(
@@ -276,6 +279,34 @@ public class ConvocationRestController {
         }
     }
 
+
+    @GetMapping("/{uuid}/archive")
+    public ResponseEntity getArchive(
+            HttpServletResponse response,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute(name = "STELA-Current-Profile-UUID", required = false) String currentProfileUuid,
+            @PathVariable String uuid,
+            @RequestParam(required = false, defaultValue = "inline") String disposition) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Arrays.asList(Right.values()), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+
+
+        try {
+            ByteArrayOutputStream baos = convocationService.createArchive(convocation);
+
+            outputFile(response, baos.toByteArray(),
+                    convocation.getSubject().replaceAll(forbiddenCharactersInFilename, "_") + ".tar.gz", disposition);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IOException e) {
+            LOGGER.error("Error during generating archive for convocation {}: {}", uuid, e.getMessage());
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/{uuid}/presence.{extension}")
     public ResponseEntity getPresenceList(
             HttpServletResponse response,
@@ -290,7 +321,7 @@ public class ConvocationRestController {
 
         byte[] content = document.generatePresenceList(convocation);
         outputFile(response, content,
-                convocation.getSubject().replaceAll("[\\\"/<>:\\?\\*|]", "_") + "." + extension.name(),
+                convocation.getSubject().replaceAll(forbiddenCharactersInFilename, "_") + "." + extension.name(),
                 "inline");
 
         return new ResponseEntity(HttpStatus.OK);

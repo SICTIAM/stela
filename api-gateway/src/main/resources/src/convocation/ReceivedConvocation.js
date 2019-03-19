@@ -100,6 +100,10 @@ class ReceivedConvocation extends Component {
 	    _addNotification(notifications.convocation.reponseSent)
 	}
 
+	downloadAllDocuments = async() => {
+	    await this._convocationService.downloadAllDocuments(this.props.authContext, this.props.uuid)
+	}
+
 	negativeResolver = (recipients) => {
 	    return recipients.response === 'NOT_PRESENT' || recipients.response === 'SUBSTITUTED'
 	}
@@ -186,7 +190,7 @@ class ReceivedConvocation extends Component {
 	                                            </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>)}
-	                                {this.state.convocation.attachment && (
+	                            	{this.state.convocation.attachment && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
 	                                        <FieldValue id="document">
@@ -194,8 +198,8 @@ class ReceivedConvocation extends Component {
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
-	                                )}
-	                            {this.state.convocation.annexes && this.state.convocation.annexes.length > 0 && (
+	                            	)}
+	                            	{this.state.convocation.annexes && this.state.convocation.annexes.length > 0 && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
 	                                        <FieldValue id='annexes'>
@@ -215,8 +219,13 @@ class ReceivedConvocation extends Component {
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
-	                            )}
-	                            {(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && !this.state.convocation.guest && this.state.convocation.useProcuration && (
+	                                )}
+	                                {(this.state.convocation.attachment || (this.state.convocation.annexes && this.state.convocation.annexes.length > 0)) && (
+	                                    <Grid.Column mobile='16' computer='16'>
+	                                        <a className='ui basic compact primary button' href={`/api/convocation/${convocation.uuid}/archive`}>{t('convocation.page.download_all_documents')}</a>
+	                                    </Grid.Column>
+	                                )}
+	                            	{(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && !this.state.convocation.guest && this.state.convocation.useProcuration && (
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
 	                                        <FieldValue id='procuration'>
@@ -224,7 +233,7 @@ class ReceivedConvocation extends Component {
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
-	                            )}
+	                            	)}
 	                        	</Grid>
 	                        </Grid.Column>
 	                        <InformationBlockConvocation convocation={this.state.convocation}/>
