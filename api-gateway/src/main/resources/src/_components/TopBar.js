@@ -7,7 +7,7 @@ import { Button, Menu, Dropdown, Container, Icon, Popup } from 'semantic-ui-reac
 import { withAuthContext } from '../Auth'
 
 import { notifications } from '../_util/Notifications'
-import { checkStatus, getLocalAuthoritySlug, getMultiPahtFromSlug } from '../_util/utils'
+import { checkStatus, getLocalAuthoritySlug, getMultiPahtFromSlug, rightsFeatureResolver } from '../_util/utils'
 import history from '../_util/history'
 
 class TopBar extends Component {
@@ -66,7 +66,7 @@ class TopBar extends Component {
     }
     render() {
         const { t, _openMenu, isMenuOpened } = this.context
-        const { isLoggedIn, user, profile } = this.props.authContext
+        const { isLoggedIn, user, profile, userRights } = this.props.authContext
         const multiPath = getMultiPahtFromSlug()
         const listProfile = this.state.profiles.map(profile => {
             return {
@@ -83,6 +83,7 @@ class TopBar extends Component {
                 {`${user && user.given_name} ${user && user.family_name}`}
             </Button>
         )
+        const urlAdmin = this.props.admin ? `${multiPath}/` : (profile && profile.admin ?`${multiPath}/admin/` : `${multiPath}/admin/ma-collectivite/convocation`)
         return (
             <Menu className={`topBar ${this.props.admin ? 'secondary' : 'primary'}`} fixed="top" secondary onClick={() => {isMenuOpened && _openMenu()}}>
                 <a href="#content" className="skip">{t('api-gateway:skip_to_content')}</a>
@@ -114,8 +115,8 @@ class TopBar extends Component {
                                         <Menu.Item className="primary" as={Link} to={`${multiPath}/profil`}>
                                             <span><Icon name="user" /> {t('top_bar.profile')}</span>
                                         </Menu.Item>
-                                        {profile && profile.admin && (
-                                            <Menu.Item className="primary" as={Link} to={this.props.admin ? `${multiPath}/` : `${multiPath}/admin`}>
+                                        {profile && (profile.admin || (!profile.admin && rightsFeatureResolver(userRights, ['CONVOCATION_ADMIN'])))&& (
+                                            <Menu.Item className="primary" as={Link} to={urlAdmin}>
                                                 <span>
                                                     <Icon name={this.props.admin ? 'reply' : 'settings'} />{' '}
                                                     {t(`top_bar.${this.props.admin ? 'back_to_app' : 'admin'}`)}
