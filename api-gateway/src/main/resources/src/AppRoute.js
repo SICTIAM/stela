@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container, Loader } from 'semantic-ui-react'
 
-import { rightsFeatureResolver, checkStatus } from './_util/utils'
+import {rightsFeatureResolver, checkStatus} from './_util/utils'
 import { notifications } from './_util/Notifications'
 
 import ErrorPage from './_components/ErrorPage'
@@ -196,10 +196,17 @@ class AppRoute extends Component {
         const params = this.state
 
         // TODO: Fix redirects, cf https://github.com/ReactTraining/react-router/pull/5209
+        const lastUsedLocalAuths = JSON.parse(localStorage.getItem('lastUsedLocalAuths'))
+        const slugName = lastUsedLocalAuths && lastUsedLocalAuths[0].slugName
 
         return (
             <Switch>
-                <PublicRoute exact path="/" {...params} component={Home} />
+                { this.props.authContext.isLoggedIn ?
+                    <Route exact path="/" render={props => ( <Redirect to={`/${slugName}/`}/>)}/>
+                    :
+                    <PublicRoute exact path="/" {...params} component={Home} />
+                }
+
                 <Route exact path="/choix-collectivite" {...params} component={SelectLocalAuthority} />
                 <PublicRoute path="/mentions-legales" {...params} component={LegalNotice} menu={MenuBar} />
                 <PublicRoute path="/registre-des-deliberations/:uuid" {...params} component={ActePublic} menu={MenuBar} />

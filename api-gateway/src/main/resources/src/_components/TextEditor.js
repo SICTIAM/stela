@@ -35,7 +35,7 @@ class TextEditor extends Component {
 
     }
 	_handlePlaceholders = (placeholdersList) => {
-	    return placeholdersList.map((placeholder) => {
+	    return placeholdersList && placeholdersList.map((placeholder) => {
 	        return {text:`${placeholder.title} - ${placeholder.description}`, value: placeholder.title}
 	    })
 	}
