@@ -253,6 +253,18 @@ export default class ConvocationService {
 	        throw error
 	    }
 	}
+
+	getNoficiationsPlaceholders = async (context) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: '/api/convocation/notifications/placeholders'})).json()
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
 	desactivateAllRecipients = async (context) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = context
 	    const headers = { 'Content-Type': 'application/json' }
