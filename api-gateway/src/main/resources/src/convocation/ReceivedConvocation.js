@@ -213,7 +213,7 @@ class ReceivedConvocation extends Component {
 	                                )}
 	                                {(this.state.convocation.attachment || (this.state.convocation.annexes && this.state.convocation.annexes.length > 0)) && (
 	                                    <Grid.Column mobile='16' computer='16'>
-	                                        <Button primary compact basic type='button' onClick={this.downloadAllDocuments}>{t('convocation.page.download_all_documents')}</Button>
+	                                        <a className='ui basic compact primary button' href={`/api/convocation/${convocation.uuid}/archive`}>{t('convocation.page.download_all_documents')}</a>
 	                                    </Grid.Column>
 	                                )}
 	                            	{(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && !this.state.convocation.guest && this.state.convocation.useProcuration && (
