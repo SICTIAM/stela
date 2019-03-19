@@ -1,5 +1,5 @@
 /* eslint-disable default-case */
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { Segment, Grid, Button, Radio, Form, Message } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
@@ -274,7 +274,10 @@ class ReceivedConvocation extends Component {
 	                    {this.state.displayListParticipantsSubstituted && (
 	                        <div>
 	                            {(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && (
-	                                <p className='warning text-bold'>{t('convocation.page.print_and_complete_procuration')} <LinkFile url={urlProcuration} text={t('convocation.page.download_procuration')} /></p>
+	                                <Fragment>
+	                                    <p className='warning text-bold mb-0'>{t('convocation.page.print_and_complete_procuration')}</p>
+	                                    <p className='warning text-bold'><LinkFile url={urlProcuration} text={t('convocation.page.download_procuration')} /></p>
+	                                </Fragment>
 	                            )}
 	                            <p className='text-bold mb-0'>{t('convocation.page.select_user_for_substituted')}</p>
 	                            <p className='text-muted'>{t('convocation.page.information_message_substituted')}</p>
