@@ -75,6 +75,14 @@ class ActePublicList extends Component {
         if (data.decisionTo) data.decisionTo = moment(data.decisionTo).format('YYYY-MM-DD')
         return data
     }
+    _handleLink = () => {
+        if(this.props.authContext.isLoggedIn){
+            const localAuthoritySlug = getLocalAuthoritySlug()
+            return `/${localAuthoritySlug}/registre-des-deliberations/`
+        }else{
+            return '/registre-des-deliberations/'
+        }
+    }
     submitForm = () => {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         this.setState({ fetchStatus: 'loading' })
@@ -113,7 +121,6 @@ class ActePublicList extends Component {
     render() {
         const { t } = this.context
         const { search } = this.state
-        const localAuthoritySlug = getLocalAuthoritySlug()
         const ackDisplay = (acteHistories) => {
             const historyAR = acteHistories.find(acteHistory => acteHistory.status === 'ACK_RECEIVED')
             return historyAR && moment(historyAR.date).format('DD/MM/YYYY')
@@ -191,7 +198,7 @@ class ActePublicList extends Component {
                             metaData={metaData}
                             header={true}
                             search={false}
-                            link={`/${localAuthoritySlug}/registre-des-deliberations/`}
+                            link={this._handleLink()}
                             linkProperty='uuid'
                             noDataMessage='Aucun acte'
                             keyProperty='uuid'
