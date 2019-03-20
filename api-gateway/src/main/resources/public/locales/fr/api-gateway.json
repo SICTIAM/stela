@@ -257,7 +257,11 @@
       },
       "complet_with_document": {
         "success": "Les questions et commentaires ont bien été ajoutés, les documents sont en cours d'envoi. Veuillez patienter."
-      },
+	  },
+	  "minutes_sent": {
+		  "success": "Le procés-verbal a bien été envoyé",
+		  "updated": "Le procés-verbal a été mis à jour"
+	  },
       "complet": {
         "success": "La convocation a été mise à jour avec succès."
       },

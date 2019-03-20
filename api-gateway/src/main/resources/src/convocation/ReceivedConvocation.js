@@ -131,7 +131,7 @@ class ReceivedConvocation extends Component {
 	        )
 	    })
 	    let urlDocument = null
-	    if(convocation.attachment) {
+	    if(convocation.attachment || convocation.minutes) {
 	        urlDocument = token ? `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true`
 	    }
 	    let urlProcuration = null
@@ -155,6 +155,9 @@ class ReceivedConvocation extends Component {
 	        { property: 'lastname', displayed: true, displayName: t('acte.fields.objet'), searchable: true, sortable: true }
 	    ]
 
+	    const now = moment()
+	    const disabledResponses = convocation.cancellation || now > moment(convocation.meetingDate)
+
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -165,19 +168,19 @@ class ReceivedConvocation extends Component {
 	                    {title: t('api-gateway:breadcrumb.convocation.reveived_convocation')},
 	                ]}
 	            />
-	            {this.state.convocation.cancelled && (
+	            {convocation.cancelled && (
 	                <Message warning>
 	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.page.cancelled_convocation_title')}</Message.Header>
-	                    <p>{t('convocation.page.cancelled_convocation_text', {date: moment(this.state.convocation.cancellationDate).format('DD/MM/YYYY')})}</p>
+	                    <p>{t('convocation.page.cancelled_convocation_text', {date: moment(convocation.cancellationDate).format('DD/MM/YYYY')})}</p>
 	                </Message>
 	            )}
 	            <Form className='mt-14'>
 	            	<Segment>
-	                    <h2>{this.state.convocation.subject}</h2>
+	                    <h2>{convocation.subject}</h2>
 	                    <Grid reversed='mobile tablet vertically'>
 	                        <Grid.Column mobile='16' tablet='16' computer='12'>
 	                            <Grid>
-	                                {this.state.convocation.comment && (
+	                                {convocation.comment && (
 	                                <Grid.Column computer='16'>
 	                                    <Field htmlFor="comments" label={t('convocation.fields.comment')}>
 	                                            <FieldValue id="comments">
@@ -192,28 +195,28 @@ class ReceivedConvocation extends Component {
 	                                            </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>)}
-	                            	{this.state.convocation.attachment && (
+	                            	{convocation.attachment && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor="document" label={t('convocation.fields.convocation_document')}>
 	                                        <FieldValue id="document">
-	                                            <LinkFile url={urlDocument} text={this.state.convocation.attachment.filename} />
+	                                            <LinkFile url={urlDocument} text={convocation.attachment.filename} />
 	                                        </FieldValue>
 	                                    </Field>
 	                                </Grid.Column>
 	                            	)}
-	                            	{this.state.convocation.annexes && this.state.convocation.annexes.length > 0 && (
+	                            	{convocation.annexes && convocation.annexes.length > 0 && (
 	                                <Grid.Column mobile='16' computer='8'>
 	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
 	                                        <FieldValue id='annexes'>
 	                                            {annexes}
-	                                            {this.state.convocation.annexes.length > 3 && (
+	                                            {convocation.annexes.length > 3 && (
 	                                                <div className='mt-15'>
 	                                                    <Button type='button' onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>
 	                                                        {this.state.showAllAnnexes && (
 	                                                            <span>{t('convocation.new.show_less_annexes')}</span>
 	                                                        )}
 	                                                        {!this.state.showAllAnnexes && (
-	                                                            <span>{t('convocation.new.show_all_annexes', {number: this.state.convocation.annexes.length})}</span>
+	                                                            <span>{t('convocation.new.show_all_annexes', {number: convocation.annexes.length})}</span>
 	                                                        )}
 	                                                    </Button>
 	                                                </div>
@@ -222,12 +225,21 @@ class ReceivedConvocation extends Component {
 	                                    </Field>
 	                                </Grid.Column>
 	                                )}
-	                                {(this.state.convocation.attachment || (this.state.convocation.annexes && this.state.convocation.annexes.length > 0)) && (
+	                                {(convocation.attachment || (convocation.annexes && convocation.annexes.length > 0)) && (
 	                                    <Grid.Column mobile='16' computer='16'>
 	                                        <a className='ui basic compact primary button' href={archiveUrl}>{t('convocation.page.download_all_documents')}</a>
 	                                    </Grid.Column>
 	                                )}
-	                            	{(this.state.convocation.procuration || this.state.convocation.localAuthority.defaultProcuration) && !this.state.convocation.guest && this.state.convocation.useProcuration && (
+	                                {convocation.minutes && (
+	                                    <Grid.Column mobile='16' computer='8'>
+	                                        <Field htmlFor='minutes' label={t('convocation.fields.minutes')}>
+	                                            <FieldValue id="document">
+	                                                <LinkFile url={urlDocument} text={convocation.minutes.filename} />
+	                                            </FieldValue>
+	                                        </Field>
+	                                    </Grid.Column>
+	                                )}
+	                            	{(convocation.procuration || convocation.localAuthority.defaultProcuration) && !convocation.guest && convocation.useProcuration && (
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='procuration' label={t('convocation.page.substituted')}>
 	                                        <FieldValue id='procuration'>
@@ -238,10 +250,10 @@ class ReceivedConvocation extends Component {
 	                            	)}
 	                        	</Grid>
 	                        </Grid.Column>
-	                        <InformationBlockConvocation convocation={this.state.convocation}/>
+	                        <InformationBlockConvocation convocation={convocation}/>
 	                    </Grid>
 	                </Segment>
-	                <SenderInformation convocation={this.state.convocation}/>
+	                <SenderInformation convocation={convocation}/>
 	                <Segment>
 	                    <h2>{t('convocation.page.my_answer')}</h2>
 	                    <FormFieldInline htmlFor='presentQuestion'
@@ -250,25 +262,25 @@ class ReceivedConvocation extends Component {
 	                            label={t('convocation.page.present')}
 	                            value='PRESENT'
 	                            name='presentQuestion'
-	                            checked={this.state.convocation.response === 'PRESENT'}
-	                            disabled={this.state.convocation.cancelled}
+	                            checked={convocation.response === 'PRESENT'}
+	                            disabled={disabledResponses}
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
 	                        <Radio
 	                            label={t('convocation.page.absent')}
 	                            value='NOT_PRESENT'
 	                            name='presentQuestion'
-	                            checked={this.state.convocation.response === 'NOT_PRESENT'}
-	                            disabled={this.state.convocation.cancelled}
+	                            checked={convocation.response === 'NOT_PRESENT'}
+	                            disabled={disabledResponses}
 	                            onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        ></Radio>
-	                        {!this.state.convocation.guest && this.state.convocation.useProcuration && (
+	                        {!convocation.guest && convocation.useProcuration && (
 	                            <Radio
 	                                label={t('convocation.page.substituted')}
 	                                name='presentQuestion'
 	                                value='SUBSTITUTED'
-	                                checked={this.state.convocation.response === 'SUBSTITUTED'}
-	                                disabled={this.state.convocation.cancelled}
+	                                checked={convocation.response === 'SUBSTITUTED'}
+	                                disabled={disabledResponses}
 	                                onChange={(e, {value}) => this.handleChangeRadio(e, value, 'response')}
 	                        	></Radio>
 	                        )}
@@ -311,7 +323,7 @@ class ReceivedConvocation extends Component {
 	                            <Grid column='1'>
 	                                <Grid.Column mobile='16' computer='16'>
 	                                    <QuestionsAnswerForm
-	                                        disabled={this.state.convocation.cancelled}
+	                                        disabled={disabledResponses}
 	                                        questions={this.state.convocation.questions}
 	                                        handleChangeRadio={(e, value, uuid) => this.handleChangeRadio(e, value, 'additional_questions', uuid)}></QuestionsAnswerForm>
 	                                </Grid.Column>

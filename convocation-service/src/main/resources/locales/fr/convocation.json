@@ -22,7 +22,8 @@
       "annexes": "Annexe(s)",
       "questions": "Question(s) supplémentaire(s)",
       "questions_placeholder": "Entrez votre question",
-      "notification_email": "Personnaliser le message de notification"
+	  "notification_email": "Personnaliser le message de notification",
+	  "minutes": "Procés-vebal"
     },
     "list": {
       "sent_date": "Date d'envoi",
@@ -71,7 +72,8 @@
       "no_present": "Aucun présent",
       "no_absent": "Aucun absent",
       "no_substitution": "Aucune procuration",
-      "download_all_documents": "Télécharger tous les documents"
+	  "download_all_documents": "Télécharger tous les documents",
+	  "add_minutes": "Ajouter le procés-verbal"
     },
     "new": {
       "display": "Visualiser",
