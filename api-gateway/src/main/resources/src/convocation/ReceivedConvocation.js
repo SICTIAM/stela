@@ -134,6 +134,12 @@ class ReceivedConvocation extends Component {
 	    if(convocation.attachment || convocation.minutes) {
 	        urlDocument = token ? `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.attachment.uuid}?stamped=true`
 	    }
+
+	    let urlMinutes = null
+	    if (convocation.minutes) {
+	        urlMinutes = token ? `/api/convocation/${convocation.uuid}/file/${convocation.minutes.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${convocation.minutes.uuid}?stamped=true`
+	    }
+
 	    let urlProcuration = null
 	    //if this convocation have procuration
 	    if(convocation.procuration && convocation.procuration.uuid) {
@@ -234,7 +240,7 @@ class ReceivedConvocation extends Component {
 	                                    <Grid.Column mobile='16' computer='8'>
 	                                        <Field htmlFor='minutes' label={t('convocation.fields.minutes')}>
 	                                            <FieldValue id="document">
-	                                                <LinkFile url={urlDocument} text={convocation.minutes.filename} />
+	                                                <LinkFile url={urlMinutes} text={convocation.minutes.filename} />
 	                                            </FieldValue>
 	                                        </Field>
 	                                    </Grid.Column>
