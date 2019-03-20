@@ -16,6 +16,7 @@ import fr.sictiam.stela.convocationservice.model.event.notifications.Convocation
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationRecipientAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationResponseEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ConvocationUpdatedEvent;
+import fr.sictiam.stela.convocationservice.model.event.notifications.MinutesAddedEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationCancelledEvent;
 import fr.sictiam.stela.convocationservice.model.event.notifications.ProcurationReceivedEvent;
 import fr.sictiam.stela.convocationservice.model.exception.ConvocationCancelledException;
@@ -290,6 +291,20 @@ public class ConvocationService {
                 Collections.singletonList("ANNEXES_ADDED")));
     }
 
+    public void uploadMinutes(Convocation convocation, MultipartFile minutes) throws ConvocationNotAvailableException {
+
+        if (convocation.getMeetingDate().isAfter(LocalDateTime.now())) {
+            LOGGER.warn("Cannot upload minutes to convocation {}, meeting date is after now", convocation.getUuid());
+            throw new ConvocationNotAvailableException("meetingAfter");
+        }
+
+        Attachment attachment = saveAttachment(minutes, false);
+        convocation.setMinutes(attachment);
+        convocationRepository.save(convocation);
+        addHistory(convocation, HistoryType.MINUTES_ADDED);
+        applicationEventPublisher.publishEvent(new MinutesAddedEvent(this, convocation));
+    }
+
     public Attachment getFile(Convocation convocation, String fileUuid) throws NotFoundException {
 
         if (convocation.getAttachment().getUuid().equals(fileUuid)) {
@@ -300,6 +315,11 @@ public class ConvocationService {
         if (convocation.getProcuration() != null && convocation.getProcuration().getUuid().equals(fileUuid)) {
             storageService.getAttachmentContent(convocation.getProcuration());
             return convocation.getProcuration();
+        }
+
+        if (convocation.getMinutes() != null && convocation.getMinutes().getUuid().equals(fileUuid)) {
+            storageService.getAttachmentContent(convocation.getMinutes());
+            return convocation.getMinutes();
         }
 
         for (Attachment annexe : convocation.getAnnexes()) {
@@ -733,7 +753,7 @@ public class ConvocationService {
 
         if (convocation.getMeetingDate().isBefore(LocalDateTime.now())) {
             LOGGER.warn("Cannot answer to convocation {}, it has been spent", convocation.getUuid());
-            throw new ConvocationNotAvailableException();
+            throw new ConvocationNotAvailableException("meetingBefore");
         }
     }
 

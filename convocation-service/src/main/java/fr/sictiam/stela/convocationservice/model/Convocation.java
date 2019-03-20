@@ -42,6 +42,11 @@ public class Convocation {
     @JsonView(Views.ConvocationInternal.class)
     private Set<Attachment> annexes;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonView(Views.ConvocationInternal.class)
+    private Attachment minutes;
+
+
     @OneToMany(cascade = CascadeType.ALL)
     @JsonView(Views.ConvocationInternal.class)
     @OrderBy("rank ASC")
@@ -266,6 +271,14 @@ public class Convocation {
         this.procuration = procuration;
     }
 
+    public Attachment getMinutes() {
+        return minutes;
+    }
+
+    public void setMinutes(Attachment minutes) {
+        this.minutes = minutes;
+    }
+
     @Override public String toString() {
         return "{" +
                 "\"uuid\": " + uuid + '\'' +
@@ -273,6 +286,7 @@ public class Convocation {
                 ", \"attachment\": \"" + attachment +
                 ", \"procuration\": \"" + procuration +
                 ", \"annexes\": \"" + annexes +
+                ", \"minutes\": \"" + minutes +
                 ", \"questions\": \"" + questions +
                 ", \"recipientResponses\": \"" + recipientResponses +
                 ", \"histories\": \"" + histories +

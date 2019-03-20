@@ -100,6 +100,7 @@
       "COMMENT_MODIFIED": "Description de la convocation modifiée",
       "QUESTIONS_ADDED": "Ajout de questions",
       "ANNEXES_ADDED": "Ajout d'annexes à la convocation",
+      "MINUTES_ADDED": "Ajout du procès verbal de la séance",
       "PRESENT": "Présent",
       "NOT_PRESENT": "Absent",
       "SUBSTITUTED": "Procuration donnée"
@@ -188,7 +189,8 @@
         "fileExists": "Le document de la convocation a déjà été fourni",
         "documentMissing": "Le document de la convocation est manquant",
         "alreadyCancelled": "La convocation a déjà été annulée",
-        "notAvailable": "La date de séance est déjà passée",
+        "meetingBefore": "La date de séance est déjà passée",
+        "meetingAfter": "La séance n'est pas encore passée",
         "mailAlreadyCustomized": "Ce mail a déjà été personnalisé",
         "400": "Paramètre invalide",
         "403": "Non autorisé",
