@@ -10,8 +10,6 @@ import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,8 +23,6 @@ import java.util.Set;
 
 @Entity
 public class Recipient implements Comparable<Recipient> {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(Recipient.class);
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -68,6 +64,9 @@ public class Recipient implements Comparable<Recipient> {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime inactivityDate;
+
+    @JsonView(Views.Recipient.class)
+    private boolean serviceAssemblee = false;
 
     public Recipient() {
     }
@@ -167,6 +166,14 @@ public class Recipient implements Comparable<Recipient> {
 
     public String getFullName() {
         return StringUtils.capitalize(firstname.toLowerCase()) + " " + StringUtils.capitalize(lastname.toLowerCase());
+    }
+
+    public boolean isServiceAssemblee() {
+        return serviceAssemblee;
+    }
+
+    public void setServiceAssemblee(boolean serviceAssemblee) {
+        this.serviceAssemblee = serviceAssemblee;
     }
 
     @Override public String toString() {

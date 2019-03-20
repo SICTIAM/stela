@@ -138,4 +138,16 @@ public class RecipientResponse implements Comparable<RecipientResponse> {
     @Override public int compareTo(@NotNull RecipientResponse recipientResponse) {
         return recipient.compareTo(recipientResponse.getRecipient());
     }
+
+    @Override public String toString() {
+        return "{" +
+                "\"uuid\": \"" + uuid + '\"' +
+                ", \"recipient\": " + recipient +
+                ", \"substituteRecipient\": " + substituteRecipient +
+                ", \"responseType\": \"" + responseType + "\"" +
+                ", \"opened\": " + opened +
+                ", \"openDate\": \"" + openDate + "\"" +
+                ", \"guest\": " + guest +
+                '}';
+    }
 }

@@ -1,0 +1,1 @@
+alter table recipient add service_assemblee boolean default false;
