@@ -22,6 +22,17 @@ public class Action {
 
     private String commentaire;
 
+    public Action() {
+    }
+
+    public Action(int id, String username, Date date, String action, String commentaire) {
+        this.id = id;
+        this.username = username;
+        this.date = date;
+        this.action = action;
+        this.commentaire = commentaire;
+    }
+
     public int getId() {
         return id;
     }

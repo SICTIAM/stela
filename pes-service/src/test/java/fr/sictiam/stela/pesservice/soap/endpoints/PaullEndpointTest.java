@@ -6,6 +6,7 @@ import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.sesile.Action;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.service.*;
@@ -25,9 +26,12 @@ import org.springframework.ws.test.server.MockWebServiceClient;
 import org.springframework.xml.transform.StringSource;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -111,7 +115,7 @@ public class PaullEndpointTest {
     }
 
     @Test
-    public void getDetailsPesAller() throws IOException {
+    public void getDetailsPesAller() throws IOException, ParseException {
         String detailsPesAllerRequest =
             "<getDetailsPESAllerRequest xmlns='http://www.processmaker.com'>" +
                 "<sessionId>sessionid</sessionId>" +
@@ -137,6 +141,11 @@ public class PaullEndpointTest {
                     "<ns2:etatclasseur>2</ns2:etatclasseur>" +
                     "<ns2:acteurCourant/>" +
                     "<ns2:circuitClasseur/>" +
+                    "<ns2:actionsClasseur>" +
+                        "<ns2:nomActeur>agent-pes</ns2:nomActeur>" +
+                        "<ns2:dateAction>20/03/2019</ns2:dateAction>" +
+                        "<ns2:libelleAction>signature</ns2:libelleAction>" +
+                    "</ns2:actionsClasseur>" +
                 "</ns2:retour>" +
             "</ns2:getDetailsPESAllerResponse>";
 
@@ -176,10 +185,11 @@ public class PaullEndpointTest {
         return new PesHistory("pes-history-uuid", StatusType.ACK_RECEIVED, LocalDateTime.now());
     }
 
-    private Classeur classeur() {
+    private Classeur classeur() throws ParseException {
         Classeur classeur = new Classeur();
         classeur.setStatus(ClasseurStatus.FINALIZED);
-        classeur.setActions(Collections.emptyList());
+        Date actionDate = new SimpleDateFormat("dd/MM/yyyy").parse("20/03/2019");
+        classeur.setActions(Collections.singletonList(new Action(1, "agent-pes", actionDate, "signature", "RAS")));
         return classeur;
     }
 

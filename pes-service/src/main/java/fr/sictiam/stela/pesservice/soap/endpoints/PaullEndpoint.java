@@ -34,13 +34,11 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Endpoint
 public class PaullEndpoint {
@@ -228,7 +226,7 @@ public class PaullEndpoint {
                 detailsPESAllerStruct.setCircuitClasseur("");
             classeur.getActions().forEach(action -> {
                 GetDetailsPESAllerStruct1 xmlAction = new GetDetailsPESAllerStruct1();
-                xmlAction.setDateAction(dateFormatter.format(action.getDate().toInstant()));
+                xmlAction.setDateAction(new SimpleDateFormat("dd/MM/yyyy").format(action.getDate()));
                 xmlAction.setLibelleAction(action.getAction());
                 xmlAction.setNomActeur(action.getUsername());
                 detailsPESAllerStruct.getActionsClasseur().add(xmlAction);
