@@ -4,13 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.pesservice.dao.PesAllerRepository;
 import fr.sictiam.stela.pesservice.dao.PesExportRepository;
 import fr.sictiam.stela.pesservice.dao.PesHistoryRepository;
-import fr.sictiam.stela.pesservice.model.Attachment;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
-import fr.sictiam.stela.pesservice.model.PesAller;
-import fr.sictiam.stela.pesservice.model.PesExport;
-import fr.sictiam.stela.pesservice.model.PesHistory;
-import fr.sictiam.stela.pesservice.model.PesHistoryError;
-import fr.sictiam.stela.pesservice.model.StatusType;
+import fr.sictiam.stela.pesservice.model.*;
 import fr.sictiam.stela.pesservice.model.event.PesCreationEvent;
 import fr.sictiam.stela.pesservice.model.event.PesHistoryEvent;
 import fr.sictiam.stela.pesservice.service.exceptions.HistoryNotFoundException;
@@ -33,6 +27,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import xyz.capybara.clamav.ClamavClient;
 import xyz.capybara.clamav.ClamavException;
@@ -43,23 +40,14 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import javax.persistence.criteria.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -492,6 +480,41 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         String archiveBase64 = Base64.encode(archive.toByteArray());
 
         return Pair.of(archiveName, archiveBase64);
+    }
+
+    public boolean isAPesOrmc(PesAller pesAller) {
+        InputStream attachement = new ByteArrayInputStream(storageService.getAttachmentContent(pesAller.getAttachment()));
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(attachement);
+            doc.getDocumentElement().normalize();
+            NodeList nodeList = doc.getElementsByTagName("TypFic");
+
+            Node typeFicNode = null;
+            Element typeFicElement = null;
+            if(nodeList.getLength() > 0) {
+                typeFicNode = nodeList.item(0);
+                if (typeFicNode.getNodeType() == Node.ELEMENT_NODE) {
+                    typeFicElement = (Element) typeFicNode;
+                    return typeFicElement.getAttribute("V").equals("PESORMC");
+                } else {
+                    LOGGER.debug("[isAPesOrmc] Don't found elements with 'TypeFic' tag name");
+                    return false;
+                }
+            } else {
+                LOGGER.info("[isAPesOrmc] Don't found nodes with 'TypeFic' tag name");
+                return false;
+            }
+        } catch (ParserConfigurationException e) {
+            LOGGER.error("[isAPesOrmc] An error occured while trying to parse xml file {} attachement of pes {} : {}",
+                    pesAller.getFileName(),
+                    pesAller.getUuid(),
+                    e.getMessage());
+        } catch (SAXException | IOException e) {
+            LOGGER.error("[isAPesOrmc] An error occured while trying to read xml file {} attachement of pes {} : {}");
+        }
+        return false;
     }
 
     @Override

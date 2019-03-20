@@ -35,10 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Element;
 
 import javax.validation.constraints.NotNull;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -818,7 +815,8 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
             PesAller pes = pesService.getByUuid(event.getPesHistory().getPesUuid());
             boolean sesileSubscription = pes.getLocalAuthority().getSesileSubscription() != null ?
                     pes.getLocalAuthority().getSesileSubscription() : false;
-            if (pes.isPj()) {
+
+            if (pes.isPj() || pesService.isAPesOrmc(pes)) {
                 pesService.updateStatus(pes.getUuid(), StatusType.PENDING_SEND);
             } else if (!sesileSubscription || hasSignature(storageService.getAttachmentContent(pes.getAttachment()))) {
                 pesService.updateStatus(pes.getUuid(), StatusType.SIGNATURE_VALIDATION);
