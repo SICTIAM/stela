@@ -42,6 +42,8 @@ public class AssemblyTypeService {
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
+    @Autowired
+    private RecipientService recipientService;
 
     public AssemblyType getAssemblyType(String uuid, String localAuthorityUuid) {
 
@@ -61,6 +63,8 @@ public class AssemblyTypeService {
         assemblyType.setLocalAuthority(localAuthority);
         assemblyType.setProfileUuid(profileUuid);
         assemblyType.setActive(true);
+        // Add service assemblee fake recipient
+        assemblyType.getRecipients().add(recipientService.getOrCreateServiceAssemblee(localAuthority));
         return save(assemblyType);
     }
 

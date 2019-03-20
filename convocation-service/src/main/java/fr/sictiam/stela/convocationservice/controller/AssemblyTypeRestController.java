@@ -125,7 +125,6 @@ public class AssemblyTypeRestController {
         if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        LOGGER.info("active {}", assemblyType.getActive());
         assemblyType = assemblyTypeService.update(uuid, currentLocalAuthUuid, assemblyType);
         return new ResponseEntity<>(assemblyType, HttpStatus.OK);
     }

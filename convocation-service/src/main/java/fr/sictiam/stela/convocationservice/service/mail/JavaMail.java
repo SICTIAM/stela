@@ -4,6 +4,7 @@ import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.service.MailerService;
 import fr.sictiam.stela.convocationservice.service.exceptions.MailException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,11 @@ public class JavaMail implements MailerService {
             throws MailException {
 
         if (mailEnabled) {
+            if (StringUtils.isEmpty(address)) {
+                LOGGER.warn("Want to send email to empty address");
+                return;
+            }
+
             try {
                 MimeMessage message = mailer.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

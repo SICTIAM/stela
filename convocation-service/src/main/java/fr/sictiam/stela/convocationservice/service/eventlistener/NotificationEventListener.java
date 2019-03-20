@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -126,10 +127,14 @@ public class NotificationEventListener {
     @Async
     public void procurationReceived(ProcurationReceivedEvent event) {
 
+
         Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
         RecipientResponse recipientResponse = event.getRecipientResponse();
-
-        sendToRecipients(convocation, NotificationType.PROCURATION_RECEIVED, Collections.singleton(recipientResponse));
+        if (recipientResponse.getSubstituteRecipient().isServiceAssemblee()) {
+            sendToAuthor(convocation, recipientResponse, NotificationType.PROCURATION_RECEIVED);
+        } else {
+            sendToRecipients(convocation, NotificationType.PROCURATION_RECEIVED, Collections.singleton(recipientResponse));
+        }
 
         LOGGER.info("Procuration received notification sent for convocation {} ({})", convocation.getUuid(),
                 convocation.getSubject());
@@ -137,12 +142,15 @@ public class NotificationEventListener {
 
     @EventListener
     @Async
-    public void procurationReceived(ProcurationCancelledEvent event) {
+    public void procurationCancelled(ProcurationCancelledEvent event) {
 
         Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
         RecipientResponse recipientResponse = event.getRecipientResponse();
-
-        sendToRecipients(convocation, NotificationType.PROCURATION_CANCELLED, Collections.singleton(recipientResponse));
+        if (recipientResponse.getSubstituteRecipient().isServiceAssemblee()) {
+            sendToAuthor(convocation, recipientResponse, NotificationType.PROCURATION_CANCELLED);
+        } else {
+            sendToRecipients(convocation, NotificationType.PROCURATION_CANCELLED, Collections.singleton(recipientResponse));
+        }
 
         LOGGER.info("Procuration cancelled notification sent for convocation {} ({})", convocation.getUuid(),
                 convocation.getSubject());
@@ -176,7 +184,8 @@ public class NotificationEventListener {
 
         Set<RecipientResponse> recipientResponses = convocation.getRecipientResponses()
                 .stream()
-                .filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.DO_NOT_KNOW)
+                .filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.DO_NOT_KNOW
+                        && !recipientResponse.getRecipient().isServiceAssemblee())
                 .collect(Collectors.toSet());
 
         recipientResponses.forEach(recipientResponse -> LOGGER.debug("Recipient {} has not answer to convocation {}",
@@ -199,7 +208,7 @@ public class NotificationEventListener {
         List<String> recipients = convocation
                 .getRecipientResponses()
                 .stream()
-                .filter(r -> r.getResponseType() == ResponseType.DO_NOT_KNOW)
+                .filter(r -> r.getResponseType() == ResponseType.DO_NOT_KNOW && !r.getRecipient().isServiceAssemblee())
                 .map(r -> r.getRecipient().getFullName())
                 .collect(Collectors.toList());
 
@@ -216,25 +225,29 @@ public class NotificationEventListener {
 
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
-        if (hasNotificationActive(author, type)) {
-            MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
+        NotificationType[] notificationPreferences =
+                Notification.notifications.stream().map(Notification::getType).toArray(NotificationType[]::new);
 
-            String body = StrSubstitutor.replace(
-                    template.getBody(),
-                    buildPlaceHolderMap(convocation, author, recipientResponse, null, recipients, false),
-                    "{{",
-                    "}}");
-            try {
-                mailerService.sendEmail(author.getEmail(), template.getSubject(), body);
-                LOGGER.info("{} notification sent for convocation {} ({})", type.name(), convocation.getUuid(),
-                        convocation.getSubject());
-            } catch (MailException e) {
-                LOGGER.error("Error while sending notification {} to {}: {}",
-                        type.name(), author.getEmail(), e.getMessage());
-                // TODO: maybe a retry process
-            }
-        } else {
+        if (Arrays.asList(notificationPreferences).contains(type) && !hasNotificationActive(author, type)) {
             LOGGER.debug("{} ({}) did not subscribe to {} notifications", author.getFullName(), author.getUuid(), type);
+            return;
+        }
+
+        MailTemplate template = mailTemplateService.getTemplate(type, convocation.getLocalAuthority());
+
+        String body = StrSubstitutor.replace(
+                template.getBody(),
+                buildPlaceHolderMap(convocation, author, recipientResponse, null, recipients, false),
+                "{{",
+                "}}");
+        try {
+            mailerService.sendEmail(author.getEmail(), template.getSubject(), body);
+            LOGGER.info("{} notification sent for convocation {} ({})", type.name(), convocation.getUuid(),
+                    convocation.getSubject());
+        } catch (MailException e) {
+            LOGGER.error("Error while sending notification {} to {}: {}",
+                    type.name(), author.getEmail(), e.getMessage());
+            // TODO: maybe a retry process
         }
     }
 
@@ -306,7 +319,7 @@ public class NotificationEventListener {
         Profile author = convocationService.retrieveProfile(convocation.getProfileUuid());
 
         for (RecipientResponse recipientResponse : recipientResponses) {
-            if (recipientResponse.getRecipient().getActive()) {
+            if (recipientResponse.getRecipient().getActive() && !recipientResponse.getRecipient().isServiceAssemblee()) {
                 String body = StrSubstitutor.replace(
                         template.getBody(),
                         buildPlaceHolderMap(convocation, author,

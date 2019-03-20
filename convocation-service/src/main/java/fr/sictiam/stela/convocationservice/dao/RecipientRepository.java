@@ -21,4 +21,6 @@ public interface RecipientRepository extends JpaRepository<Recipient, String> {
 
     Optional<Recipient> findByToken(String token);
 
+    Optional<Recipient> findByLocalAuthorityUuidAndServiceAssembleeTrue(String localAuthorityUuid);
+
 }

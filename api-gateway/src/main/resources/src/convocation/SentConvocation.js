@@ -56,11 +56,11 @@ class SentConvocation extends Component {
 	    const recipientResponse =  convocationResponse.recipientResponses.slice()
 	    //filter on recipient
 	    convocationResponse.recipientResponses = recipientResponse.filter((response) => {
-	        return response.guest === false
+	        return response.guest === false && response.recipient.serviceAssemblee === false
 	    })
 	    //filter on guest
 	    convocationResponse.guestResponses = recipientResponse.filter((response) => {
-	        return response.guest === true
+	        return response.guest === true && response.recipient.serviceAssemblee === false
 	    })
 	    this.setState({convocation: convocationResponse})
 	}
