@@ -60,7 +60,7 @@ class SentConvocationFragment extends Component {
 	                                        <FieldValue id="comments">
 	                                            {convocation.comment.split('\n').map((item) => {
 	                                                return (
-	                                                    <span>
+	                                                    <span key={`comment_${item}`}>
 	                                                        {item}
 	                                                        <br/>
 	                                                    </span>

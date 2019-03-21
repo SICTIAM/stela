@@ -10,6 +10,8 @@ import history from '../_util/history'
 import ConvocationService from '../_util/convocation-service'
 
 import { withAuthContext } from '../Auth'
+
+import Timeline from './_components/Timeline'
 import { Page } from '../_components/UI'
 import Breadcrumb from '../_components/Breadcrumb'
 import ConfirmModal from '../_components/ConfirmModal'
@@ -138,6 +140,13 @@ class SentConvocation extends Component {
 	                    questions={convocation.questions}
 	                />
 	            </Segment>
+	            {convocation.histories && (
+	                <Timeline
+	                    title={t('convocation.page.history')}
+	                    emptyMessage={t('convocation.page.no_history')}
+	                    history={convocation.histories} />
+	            )}
+
 	        </Page>
 	    )
 	}

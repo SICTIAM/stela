@@ -1,0 +1,1 @@
+alter table convocation_history add public_history boolean default true;

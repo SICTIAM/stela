@@ -54,7 +54,7 @@ public class Convocation {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "convocation", fetch = FetchType.EAGER)
     @JsonView(Views.ConvocationInternal.class)
-    @OrderBy("date ASC")
+    @OrderBy("date DESC")
     private SortedSet<ConvocationHistory> histories;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)

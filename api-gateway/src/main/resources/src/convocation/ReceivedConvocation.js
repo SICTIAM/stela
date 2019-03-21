@@ -11,6 +11,7 @@ import { notifications } from '../_util/Notifications'
 import ConvocationService from '../_util/convocation-service'
 
 import { Page, Field, FieldValue, FormFieldInline, LinkFile } from '../_components/UI'
+import Timeline from './_components/Timeline'
 import Breadcrumb from '../_components/Breadcrumb'
 import QuestionsAnswerForm from './QuestionsAnswerForm'
 import StelaTable from '../_components/StelaTable'
@@ -317,7 +318,13 @@ class ReceivedConvocation extends Component {
 	                                </Grid.Column>
 	                            </Grid>
 	                        </Segment>
-	                    )}
+	                )}
+	                {convocation.histories && (
+	                    <Timeline
+	                            title={t('convocation.page.history')}
+	                            emptyMessage={t('convocation.page.no_history')}
+	                            history={convocation.histories} />
+	                )}
 	            </Form>
 	        </Page>
 	    )

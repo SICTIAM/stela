@@ -2,7 +2,14 @@
   "convocation": {
     "status": {
       "CREATED": "Créé",
-      "SENT": "envoyée"
+      "SENT": "Envoyée",
+      "QUESTIONS_ADDED": "Question(s) supplémentaire(s) ajoutée(s)",
+      "COMMENT_MODIFIED": "Commentaire modifié",
+      "ANNEXES_ADDED": "Annexe(s) ajoutée(s)",
+      "RECIPIENTS_ADDED": "Ajout de destinataires",
+      "CONVOCATION_READ": "Lecture de la convocation par",
+      "CONVOCATION_RESPONSE": "Réponse donnée par",
+      "QUESTION_RESPONSE": "Réponse à la question donnée par"
     },
     "fields": {
       "date": "Date de la séance",
@@ -106,6 +113,7 @@
     },
     "export": {
       "yes": "Oui",
+      "no": "Non",
       "guest": "Invité",
       "presence": "Présence",
       "PRESENT": "Présent",
