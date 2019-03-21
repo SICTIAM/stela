@@ -3,7 +3,7 @@ import { HashLink as Link } from 'react-router-hash-link'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
-import { Segment, Grid } from 'semantic-ui-react'
+import {Segment, Grid, Icon} from 'semantic-ui-react'
 import moment from 'moment'
 import { checkStatus } from './_util/utils'
 import { notifications } from './_util/Notifications'
@@ -64,6 +64,9 @@ class Home extends Component {
             let duration = moment.duration(expirationDate.diff(today))
             days = Math.trunc(duration.asDays())
         }
+
+        const certificateError = (days && days <= 60) || (certificate.status !== 'VALID')
+
         return (
             <Fragment>
                 {welcomeMessage &&
@@ -83,34 +86,40 @@ class Home extends Component {
                             <Segment>
                                 {certificate && (
                                     <Fragment>
-                                        <h2>{t('profile.certificate.title')}</h2>
+                                        <h2>
+                                            {t('profile.certificate.title')}
+                                        </h2>
+                                        <Icon.Group size={'large'}>
+                                            <Icon name='file outline' color={certificateError ? 'red': (days && days <= 90 ?  'orange' : 'inherit')}/>
+                                            <Icon corner name='checkmark' color={certificateError? 'red': (days && days <= 90 ?  'orange' : 'inherit')}/>
+                                        </Icon.Group>
                                         {certificate.status === 'NONE' && pairedCertificate && (
-                                            <span>{t('certificate_not_inserted')}<br/></span>
+                                            <span className={'text-error'}>{t('certificate_not_inserted')}<br/></span>
                                         )}
                                         {certificate.status === 'NONE' && !pairedCertificate && (
-                                            <span>{t('certificate_not_paired')}<br/></span>
+                                            <span className={'text-error'}>{t('certificate_not_paired')}<br/></span>
                                         )}
                                         {certificate.status === 'VALID'  && !pairedCertificate && (
-                                            <span>{t('certificate_not_paired')}<br/>
+                                            <span className={'text-error'}>{t('certificate_not_paired')}<br/>
                                                 <Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('clic_to_paire')}<br/></Link>
                                             </span>
                                         )}
                                         {certificate.status === 'EXPIRED' && (
-                                            <span>{t('error.certificate_required.EXPIRED')}<br/></span>
+                                            <span className={'text-error'}>{t('error.certificate_required.EXPIRED')}<br/></span>
                                         )}
                                         {(certificate.status === 'VALID' && pairedCertificate &&
                                             (certificate.serial !== pairedCertificate.serial || certificate.issuer !== pairedCertificate.issuer )) && (
                                                 <span>{t('certificate_not_paired_user')}<br/></span>
                                             )}
                                         {(certificate.status !== 'NONE' && certificate.status !== 'EXPIRED' && certificate.status !== 'VALID') && (
-                                            <span>{t('notifications.admin.invalid_certificate')}</span>
+                                            <span className={'text-error'}>{t('notifications.admin.invalid_certificate')}</span>
                                         )}
                                         {isCertificatePaired && (
-                                            <div>
-                                                <span style={{color: days && days <=60 ? '#db2828': 'inherit'}}>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
+                                            <span style={{color: days && days <= 60 ? '#db2828': (days && days <= 90 ?  '#c5551c' : 'inherit')}}>
+                                                <span>{t('certification_expiration', { days: days })} (<Link to={`/${localAuthoritySlug}/profil#certificate`}>{t('view_profil')}</Link>)</span>
                                                 <br/>
                                                 <a href="https://www.sictiam.fr/certificat-electronique/" target="_blank" rel="noopener noreferrer">{t('ask_certificate')}</a>
-                                            </div>
+                                            </span>
                                         )}
                                     </Fragment>
                                 )}

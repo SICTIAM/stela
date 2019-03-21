@@ -156,6 +156,10 @@ i.icon.xl-icon {
     color: #767676;
 }
 
+.text-error {
+    color: #db2828;
+}
+
 .line-through {
     text-decoration: line-through;
 }
@@ -373,7 +377,7 @@ i.collapsed-text-icon.circular.icon {
 
 /* Text Editor */
 .noZIndex .ButtonWrap__root___1EO_R {
-    z-index: 0 !important 
+    z-index: 0 !important
 }
 
 /* Animations */
