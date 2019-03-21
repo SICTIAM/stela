@@ -39,14 +39,16 @@ public class AssemblyTypeService {
 
     private final LocalAuthorityService localAuthorityService;
 
-    private final RecipientService recipientService;
+    private RecipientService recipientService;
 
     public AssemblyTypeService(
             AssemblyTypeRepository assemblyTypeRepository,
-            LocalAuthorityService localAuthorityService,
-            RecipientService recipientService) {
+            LocalAuthorityService localAuthorityService) {
         this.assemblyTypeRepository = assemblyTypeRepository;
         this.localAuthorityService = localAuthorityService;
+    }
+
+    public void setRecipientService(RecipientService recipientService) {
         this.recipientService = recipientService;
     }
 
