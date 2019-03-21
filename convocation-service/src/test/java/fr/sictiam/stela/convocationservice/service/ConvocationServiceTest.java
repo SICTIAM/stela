@@ -55,6 +55,9 @@ public class ConvocationServiceTest {
     StorageService storageService;
 
     @MockBean
+    LocalesService localesService;
+
+    @MockBean
     ExternalRestService externalRestService;
 
     @MockBean

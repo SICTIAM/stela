@@ -12,15 +12,14 @@ public class HistoryEvent extends ApplicationEvent {
 
     private String message;
 
-    public HistoryEvent(Object source, Convocation convocation, HistoryType type) {
-        this(source, convocation, type, null);
-    }
+    private boolean publicHistory = true;
 
-    public HistoryEvent(Object source, Convocation convocation, HistoryType type, String message) {
+    public HistoryEvent(Object source, Convocation convocation, HistoryType type, String message, boolean publicHistory) {
         super(source);
         this.convocation = convocation;
         this.type = type;
         this.message = message;
+        this.publicHistory = publicHistory;
     }
 
     public Convocation getConvocation() {
@@ -33,5 +32,9 @@ public class HistoryEvent extends ApplicationEvent {
 
     public String getMessage() {
         return message;
+    }
+
+    public boolean isPublicHistory() {
+        return publicHistory;
     }
 }

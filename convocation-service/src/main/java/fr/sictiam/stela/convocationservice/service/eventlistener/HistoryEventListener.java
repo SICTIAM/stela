@@ -33,7 +33,8 @@ public class HistoryEventListener {
         Convocation convocation = event.getConvocation();
         HistoryType type = event.getType();
         String message = event.getMessage();
+        boolean publicHistory = event.isPublicHistory();
 
-        convocationHistoryRepository.saveAndFlush(new ConvocationHistory(convocation, type, message));
+        convocationHistoryRepository.saveAndFlush(new ConvocationHistory(convocation, type, message, publicHistory));
     }
 }

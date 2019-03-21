@@ -80,6 +80,8 @@ public class ConvocationService {
 
     private final ExternalRestService externalRestService;
 
+    private final LocalesService localesService;
+
     private final RecipientResponseRepository recipientResponseRepository;
 
     private final QuestionResponseRepository questionResponseRepository;
@@ -96,6 +98,7 @@ public class ConvocationService {
             LocalAuthorityService localAuthorityService,
             StorageService storageService,
             ExternalRestService externalRestService,
+            LocalesService localesService,
             RecipientResponseRepository recipientResponseRepository,
             QuestionResponseRepository questionResponseRepository,
             AttachmentRepository attachmentRepository,
@@ -105,6 +108,7 @@ public class ConvocationService {
         this.localAuthorityService = localAuthorityService;
         this.storageService = storageService;
         this.externalRestService = externalRestService;
+        this.localesService = localesService;
         this.recipientResponseRepository = recipientResponseRepository;
         this.questionResponseRepository = questionResponseRepository;
         this.attachmentRepository = attachmentRepository;
@@ -128,6 +132,7 @@ public class ConvocationService {
             response.setOpenDate(LocalDateTime.now());
             recipientResponseRepository.save(response);
             applicationEventPublisher.publishEvent(new ConvocationReadEvent(this, convocation, response));
+            addHistory(convocation, HistoryType.CONVOCATION_READ, recipient.getFullName(), false);
         }
         return convocation;
     }
@@ -173,7 +178,8 @@ public class ConvocationService {
         // Add questions
         if (params.getQuestions() != null && params.getQuestions().size() > 0) {
             convocation.getQuestions().addAll(params.getQuestions());
-            addHistory(convocation, HistoryType.QUESTIONS_ADDED);
+            addHistory(convocation, HistoryType.QUESTIONS_ADDED,
+                    params.getQuestions().stream().map(question -> question.getQuestion()).collect(Collectors.joining(", ")));
             updates.add("QUESTIONS_ADDED");
             updated = true;
         }
@@ -181,7 +187,7 @@ public class ConvocationService {
         // Comment
         if (StringUtils.isNotBlank(params.getComment()) && !params.getComment().equals(convocation.getComment())) {
             convocation.setComment(params.getComment());
-            addHistory(convocation, HistoryType.COMMENT_MODIFIED);
+            addHistory(convocation, HistoryType.COMMENT_MODIFIED, params.getComment());
             updates.add("COMMENT_MODIFIED");
             updated = true;
         }
@@ -201,7 +207,8 @@ public class ConvocationService {
                         recipientResponseRepository.save(recipientResponse);
                         return recipientResponse;
                     }).collect(Collectors.toSet()));
-            addHistory(convocation, HistoryType.RECIPIENTS_ADDED);
+            addHistory(convocation, HistoryType.RECIPIENTS_ADDED,
+                    params.getRecipients().stream().map(Recipient::getEmail).collect(Collectors.joining(", ")), false);
             applicationEventPublisher.publishEvent(new ConvocationRecipientAddedEvent(this, convocation, params.getRecipients()));
         }
 
@@ -279,13 +286,15 @@ public class ConvocationService {
         if (annexes.length == 0)
             return;
 
+        List<String> filenames = new ArrayList<>();
         for (MultipartFile annexe : annexes) {
             Attachment attachment = saveAttachment(annexe, true);
             convocation.getAnnexes().add(attachment);
+            filenames.add(attachment.getFilename());
         }
 
         convocationRepository.save(convocation);
-        addHistory(convocation, HistoryType.ANNEXES_ADDED);
+        addHistory(convocation, HistoryType.ANNEXES_ADDED, String.join(", ", filenames.toArray(new String[0])));
         applicationEventPublisher.publishEvent(new ConvocationUpdatedEvent(this, convocation,
                 Collections.singletonList("ANNEXES_ADDED")));
     }
@@ -390,6 +399,10 @@ public class ConvocationService {
 
         recipientResponse.setResponseType(responseType);
         convocationRepository.save(convocation);
+        addHistory(convocation, HistoryType.CONVOCATION_RESPONSE,
+                String.format("%s : %s",
+                        recipient.getFullName(),
+                        localesService.getMessage("fr", "convocation", "$.convocation.notifications." + responseType)), false);
         applicationEventPublisher.publishEvent(new ConvocationResponseEvent(this, convocation, recipientResponse));
     }
 
@@ -420,6 +433,12 @@ public class ConvocationService {
         }
         questionResponse.setResponse(response);
         questionResponseRepository.save(questionResponse);
+        addHistory(convocation, HistoryType.QUESTION_RESPONSE,
+                String.format("%s : %s : %s",
+                        currentRecipient.getFullName(),
+                        question.getQuestion(),
+                        localesService.getMessage("fr", "convocation",
+                                "$.convocation.export." + (response ? "yes" : "no"))), false);
     }
 
     public void convocationSent(Convocation convocation) {
@@ -762,11 +781,15 @@ public class ConvocationService {
     }
 
     private void addHistory(Convocation convocation, HistoryType type) {
-        addHistory(convocation, type, null);
+        addHistory(convocation, type, null, true);
     }
 
     private void addHistory(Convocation convocation, HistoryType type, String message) {
-        applicationEventPublisher.publishEvent(new HistoryEvent(this, convocation, type, message));
+        addHistory(convocation, type, message, true);
+    }
+
+    private void addHistory(Convocation convocation, HistoryType type, String message, boolean publicHistory) {
+        applicationEventPublisher.publishEvent(new HistoryEvent(this, convocation, type, message, publicHistory));
     }
 }
 

@@ -2,6 +2,7 @@ package fr.sictiam.stela.convocationservice.model.ui;
 
 import fr.sictiam.stela.convocationservice.model.Attachment;
 import fr.sictiam.stela.convocationservice.model.Convocation;
+import fr.sictiam.stela.convocationservice.model.ConvocationHistory;
 import fr.sictiam.stela.convocationservice.model.Profile;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 
@@ -32,6 +33,8 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
     protected List<RecipientResponseUI> recipients;
 
+    protected List<ConvocationHistory> histories;
+
     public ReceivedConvocationDetailUI(Convocation convocation, Recipient recipient) {
         super(convocation, recipient);
         attachment = convocation.getAttachment();
@@ -52,6 +55,11 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
                         .filter(recipientResponse -> !recipientResponse.getRecipient().equals(recipient) && !recipientResponse.isGuest())
                         .map(recipientResponse -> new RecipientResponseUI(recipientResponse))
                         .collect(Collectors.toList());
+
+        histories = convocation.getHistories()
+                .stream()
+                .filter(ConvocationHistory::isPublicHistory)
+                .collect(Collectors.toList());
     }
 
 
@@ -93,5 +101,9 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
     public List<RecipientResponseUI> getRecipients() {
         return recipients;
+    }
+
+    public List<ConvocationHistory> getHistories() {
+        return histories;
     }
 }

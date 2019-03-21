@@ -45,17 +45,21 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
     @JsonView(Views.Convocation.class)
     private String message;
 
+    @JsonView(Views.Convocation.class)
+    private boolean publicHistory = true;
+
     public ConvocationHistory() {
     }
 
     public ConvocationHistory(Convocation convocation, HistoryType type) {
-        this(convocation, type, "");
+        this(convocation, type, "", false);
     }
 
-    public ConvocationHistory(Convocation convocation, HistoryType type, String message) {
+    public ConvocationHistory(Convocation convocation, HistoryType type, String message, boolean publicHistory) {
         this.convocation = convocation;
         this.type = type;
         this.message = message;
+        this.publicHistory = publicHistory;
         date = LocalDateTime.now();
     }
 
@@ -83,14 +87,18 @@ public class ConvocationHistory implements Comparable<ConvocationHistory> {
         this.message = message;
     }
 
+    public boolean isPublicHistory() {
+        return publicHistory;
+    }
+
     @Override
     public String toString() {
-        return "ConvocationHistory{" + "uuid='" + uuid + '\'' + ", convocationUuid='" + convocation.getUuid() + '\'' + ", " +
+        return "{" + "uuid='" + uuid + '\'' + ", convocationUuid='" + convocation.getUuid() + '\'' + ", " +
                 "type="
                 + type + ", date=" + date + ", message='" + message + '\'' + '}';
     }
 
     @Override public int compareTo(@NotNull ConvocationHistory convocationHistory) {
-        return date.compareTo(convocationHistory.getDate());
+        return convocationHistory.getDate().compareTo(date);
     }
 }

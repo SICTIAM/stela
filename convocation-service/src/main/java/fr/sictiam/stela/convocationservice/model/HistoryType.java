@@ -1,6 +1,7 @@
 package fr.sictiam.stela.convocationservice.model;
 
 public enum HistoryType {
+    /* History for author actions */
     CREATED,
     SENT,
     ANNEXES_ADDED,
@@ -9,5 +10,9 @@ public enum HistoryType {
     COMMENT_MODIFIED,
     CANCELLED,
     GROUP_NOTIFICATION_SENT,
-    NOTIFICATION_SENT
+    NOTIFICATION_SENT,
+    /* History for recipients actions */
+    CONVOCATION_READ,
+    CONVOCATION_RESPONSE,
+    QUESTION_RESPONSE
 }
