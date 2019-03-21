@@ -130,6 +130,18 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        minutes_sent: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.minutes_sent.success',
+            level: 'success',
+            position: 'br'
+        },
+        minutes_updated: {
+            title: 'notifications.convocation.title',
+            message: 'notifications.convocation.minutes_sent.updated',
+            level: 'success',
+            position: 'br'
+        }
     },
     admin: {
         instanceParamsUpdated: {

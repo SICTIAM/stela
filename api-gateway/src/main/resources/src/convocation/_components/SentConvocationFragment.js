@@ -101,6 +101,15 @@ class SentConvocationFragment extends Component {
 	                                    </Field>
 	                                </Grid.Column>
 	                            )}
+	                            {convocation.minutes && (
+	                                <Grid.Column mobile='16' computer='8'>
+	                                    <Field htmlFor='minutes' label={t('convocation.fields.minutes')}>
+	                                        <FieldValue id="document">
+	                                            <LinkFile url={`/api/convocation/${convocation.uuid}/file/${convocation.minutes.uuid}?stamped=true`} text={convocation.minutes.filename} />
+	                                        </FieldValue>
+	                                    </Field>
+	                                </Grid.Column>
+	                            )}
 	                            {convocation.questions.length > 0 && (
 	                                <Grid.Column computer='16' tablet='16'>
 	                                    <Field htmlFor="questions" label={t('convocation.fields.questions')}>

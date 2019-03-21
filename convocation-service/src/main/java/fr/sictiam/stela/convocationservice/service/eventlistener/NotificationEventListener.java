@@ -158,6 +158,17 @@ public class NotificationEventListener {
 
     @EventListener
     @Async
+    public void minutesAdded(MinutesAddedEvent event) {
+
+        Convocation convocation = convocationService.getConvocation(event.getConvocation().getUuid());
+        sendToRecipients(convocation, NotificationType.MINUTES_ADDED, convocation.getRecipientResponses());
+
+        LOGGER.info("Minutes added notification sent for convocation {} ({})", convocation.getUuid(),
+                convocation.getSubject());
+    }
+
+    @EventListener
+    @Async
     public void convocationReadByRecipient(ConvocationReadEvent event) {
 
         Convocation convocation = event.getConvocation();

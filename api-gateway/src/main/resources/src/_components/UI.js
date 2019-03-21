@@ -245,8 +245,8 @@ const ValidationPopup = ({ children, errorList }) =>
 
 const ErrorListPopup = ({ errorList }) =>
     <ul>
-        {errorList.map(error =>
-            <li>{error}</li>
+        {errorList.map((error, index) =>
+            <li key={'error-' + index}>{error}</li>
         )}
     </ul>
 

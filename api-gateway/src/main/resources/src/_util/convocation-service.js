@@ -291,6 +291,19 @@ export default class ConvocationService {
 	    }
 	}
 
+	uploadMinutes = async (context, uuid, data) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}/upload-minutes`, method: 'PUT', body: data, context: context})
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
 	getTokenInUrl = (search) => {
 	    const arrayParams = search && search.substr(1).split('&')
 	    const regex = /token/

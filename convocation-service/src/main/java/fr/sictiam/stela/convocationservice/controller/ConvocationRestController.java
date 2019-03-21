@@ -239,6 +239,23 @@ public class ConvocationRestController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PutMapping("/{uuid}/upload-minutes")
+    public ResponseEntity<?> uploadMinutes(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @PathVariable String uuid,
+            @RequestParam MultipartFile minutes) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid);
+
+        convocationService.uploadMinutes(convocation, minutes);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
     @GetMapping("/{uuid}/file/{fileUuid}")
     public ResponseEntity getFile(
             HttpServletResponse response,
@@ -472,8 +489,9 @@ public class ConvocationRestController {
     }
 
     @ExceptionHandler(ConvocationNotAvailableException.class)
-    public ResponseEntity<String> convocationCancelledHandler(HttpServletRequest request,
+    public ResponseEntity<String> convocationNotAvailableHandler(HttpServletRequest request,
             ConvocationNotAvailableException exception) {
-        return new ResponseEntity<>("convocation.errors.convocation.notAvailable", HttpStatus.CONFLICT);
+        return new ResponseEntity<>(String.format("convocation.errors.convocation.%s", exception.getMessage()),
+                HttpStatus.CONFLICT);
     }
 }

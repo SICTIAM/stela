@@ -18,6 +18,7 @@ import ConfirmModal from '../_components/ConfirmModal'
 
 import ParticipantsFragment from './_components/ParticipantsFragment'
 import SentConvocationFragment from './_components/SentConvocationFragment'
+import AddMinutesModale from './_components/AddMinutesModale'
 
 class SentConvocation extends Component {
 	static contextTypes = {
@@ -85,6 +86,10 @@ class SentConvocation extends Component {
 	    const { convocation } = this.state
 	    const dropdownButton = <Button basic primary>{t('convocation.page.presence_list')}</Button>
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+
+	    const now = moment()
+	    const pastConvocation = now > moment(convocation.meetingDate)
+
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -118,7 +123,12 @@ class SentConvocation extends Component {
 	                    </Dropdown>
 	                    {!this.state.convocation.cancelled && (
 	                        <Fragment>
-	                            <Button type='button' className='ml-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
+	                        {!pastConvocation && (
+	                            	<Button type='button' className='ml-10' basic primary onClick={this.onCompleteConvocation}>{t('convocation.page.to_complete')}</Button>
+	                        )}
+	                        {pastConvocation && (
+	                            <AddMinutesModale uuid={convocation.uuid} minutes={convocation.minutes}/>
+	                        )}
 	                            <ConfirmModal onConfirm={this.onCancelConvocation} text={t('convocation.page.cancel_convocation', {number: this.state.delay})}>
 	                                <Button className='ml-10' type='button' basic color={'orange'}>{t('api-gateway:form.cancel')}</Button>
 	                            </ConfirmModal>

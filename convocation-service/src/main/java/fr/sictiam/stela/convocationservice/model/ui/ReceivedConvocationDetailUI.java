@@ -19,6 +19,8 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
     protected Set<Attachment> annexes;
 
+    protected Attachment minutes;
+
     protected List<QuestionUI> questions;
 
     protected LocalDateTime sentDate;
@@ -40,6 +42,7 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
         attachment = convocation.getAttachment();
         procuration = convocation.getProcuration();
         annexes = convocation.getAnnexes();
+        minutes = convocation.getMinutes();
         sentDate = convocation.getSentDate();
         location = convocation.getLocation();
         comment = convocation.getComment();
@@ -73,6 +76,10 @@ public class ReceivedConvocationDetailUI extends ReceivedConvocationUI {
 
     public Set<Attachment> getAnnexes() {
         return annexes;
+    }
+
+    public Attachment getMinutes() {
+        return minutes;
     }
 
     public List<QuestionUI> getQuestions() {
