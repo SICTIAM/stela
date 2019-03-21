@@ -10,7 +10,6 @@ import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -36,14 +35,20 @@ public class AssemblyTypeService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Autowired
-    private AssemblyTypeRepository assemblyTypeRepository;
+    private final AssemblyTypeRepository assemblyTypeRepository;
 
-    @Autowired
-    private LocalAuthorityService localAuthorityService;
+    private final LocalAuthorityService localAuthorityService;
 
-    @Autowired
-    private RecipientService recipientService;
+    private final RecipientService recipientService;
+
+    public AssemblyTypeService(
+            AssemblyTypeRepository assemblyTypeRepository,
+            LocalAuthorityService localAuthorityService,
+            RecipientService recipientService) {
+        this.assemblyTypeRepository = assemblyTypeRepository;
+        this.localAuthorityService = localAuthorityService;
+        this.recipientService = recipientService;
+    }
 
     public AssemblyType getAssemblyType(String uuid, String localAuthorityUuid) {
 
