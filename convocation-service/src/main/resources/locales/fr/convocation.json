@@ -22,8 +22,8 @@
       "annexes": "Annexe(s)",
       "questions": "Question(s) supplémentaire(s)",
       "questions_placeholder": "Entrez votre question",
-	  "notification_email": "Personnaliser le message de notification",
-	  "minutes": "Procés-vebal"
+      "notification_email": "Personnaliser le message de notification",
+      "minutes": "Procès-verbal"
     },
     "list": {
       "sent_date": "Date d'envoi",
@@ -72,8 +72,8 @@
       "no_present": "Aucun présent",
       "no_absent": "Aucun absent",
       "no_substitution": "Aucune procuration",
-	  "download_all_documents": "Télécharger tous les documents",
-	  "add_minutes": "Ajouter le procés-verbal"
+      "download_all_documents": "Télécharger tous les documents",
+      "add_minutes": "Ajouter le procès-verbal"
     },
     "new": {
       "display": "Visualiser",
@@ -102,7 +102,7 @@
       "COMMENT_MODIFIED": "Description de la convocation modifiée",
       "QUESTIONS_ADDED": "Ajout de questions",
       "ANNEXES_ADDED": "Ajout d'annexes à la convocation",
-      "MINUTES_ADDED": "Ajout du procès verbal de la séance",
+      "MINUTES_ADDED": "Ajout du procès-verbal de la séance",
       "PRESENT": "Présent",
       "NOT_PRESENT": "Absent",
       "SUBSTITUTED": "Procuration donnée"
