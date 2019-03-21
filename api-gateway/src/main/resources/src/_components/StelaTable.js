@@ -4,6 +4,8 @@ import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { Table, Input, Checkbox, Dropdown, Button, Icon, Radio } from 'semantic-ui-react'
 
+import { objectsIsEquivalent } from '../_util/utils'
+
 // import history from '../_util/history'
 
 class StelaTable extends Component {
@@ -91,7 +93,7 @@ class StelaTable extends Component {
         }
     }
     componentWillReceiveProps = (nextProps) => {
-        if (nextProps.data && nextProps.data !== this.props.data) {
+        if (nextProps.data && !objectsIsEquivalent(nextProps, this.props)) {
             const checkboxes = {}
             if (nextProps.select) {
                 nextProps.data.map(data => checkboxes[data[nextProps.keyProperty]] = false)
@@ -100,15 +102,17 @@ class StelaTable extends Component {
                 if(this.props.selectedRow.length > 0) {
                     this.defaultRowSelected()
                 }
-                if(this.props.selectedRadio) {
-                    this.defaultSelectedRadio()
-                }
+                this.defaultSelectedRadio()
             })
 
         }
     }
     defaultSelectedRadio = () => {
-        this.setState({radio: this.props.selectedRadio})
+        if(this.props.selectedRadio) {
+            this.setState({radio: this.props.selectedRadio})
+        } else if(this.state.radio) {
+            this.setState({radio: null})
+        }
     }
     defaultRowSelected = () => {
         const checkboxes = this.state.checkboxes
@@ -162,7 +166,7 @@ class StelaTable extends Component {
     }
 
     handleRadio = (value) => {
-        this.setState({radio: value})
+        this.setState({radio: value[this.props.keyProperty]})
         this.props.selectedRow && this.props.onSelectedRow(value)
     }
     handleToggle  = (row, value) => {
@@ -317,7 +321,7 @@ class StelaTable extends Component {
                                                     name='radioGroupe'
                                                     value={row[this.props.keyProperty]}
                                                     checked={this.state.radio === row[this.props.keyProperty]}
-                                                    onChange={() => this.handleRadio(row[this.props.keyProperty])}
+                                                    onChange={() => this.handleRadio(row)}
                                                 />
                                             </Table.Cell>
                                         )}

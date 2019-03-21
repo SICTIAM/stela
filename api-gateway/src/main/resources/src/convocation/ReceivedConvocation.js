@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 import React, { Component, Fragment } from 'react'
-import { Segment, Grid, Button, Radio, Form, Message } from 'semantic-ui-react'
+import { Segment, Grid, Button, Radio, Form, Message, Confirm } from 'semantic-ui-react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import moment from 'moment'
@@ -28,6 +28,8 @@ class ReceivedConvocation extends Component {
 	state = {
 	    displayListParticipants: false,
 	    displayListParticipantsSubstituted: false,
+	    subsitutionModalOpened: false,
+	    substitute: null,
 	    convocation: {
 	        uuid: '',
 	        meetingDate: '',
@@ -60,9 +62,10 @@ class ReceivedConvocation extends Component {
 	    const uuid = this.props.uuid
 	    const convocationResponse = await this._convocationService.getReceivedConvocation(this.context, uuid, this.props.location.search)
 	    if(convocationResponse.response === 'SUBSTITUTED') {
-	        this.setState({displayListParticipantsSubstituted: true})
+	        this.setState({displayListParticipantsSubstituted: true, substitute: convocationResponse.substitute, convocation: convocationResponse})
+	    } else {
+	        this.setState({convocation: convocationResponse})
 	    }
-	    this.setState({convocation: convocationResponse})
 	}
 
 	handleChangeRadio = async (e, value, field, question_uuid) => {
@@ -87,6 +90,7 @@ class ReceivedConvocation extends Component {
 	            await this._convocationService.savePresentResponse(this.context, this.props.uuid, {response: value}, this.props.location.search)
 	            this.setState({displayListParticipantsSubstituted: false, substitute: null})
 	            _addNotification(notifications.convocation.reponseSent)
+	            convocation.substitute = null
 	        } else {
 	            this.setState({displayListParticipantsSubstituted: true})
 	        }
@@ -95,10 +99,18 @@ class ReceivedConvocation extends Component {
 	    this.setState({convocation})
 	}
 
-	onSelectedUser = async (userUuid) => {
+	onSelectedUser = async () => {
 	    const { _addNotification } = this.context
-	    await this._convocationService.savePresentResponse(this.context, this.props.uuid, {response: 'SUBSTITUTED', userUuid: userUuid}, this.props.location.search)
+	    await this._convocationService.savePresentResponse(this.context, this.props.uuid, {response: 'SUBSTITUTED', userUuid: this.state.substitute.uuid}, this.props.location.search)
+	    await this.fetchConvocation()
+	    this.setState({subsitutionModalOpened: false})
 	    _addNotification(notifications.convocation.reponseSent)
+	}
+	openSubstituteModal = (user) => {
+	    this.setState({substitute: user}, () => {this.setState({subsitutionModalOpened: true})})
+	}
+	closeSubstituteModal = () => {
+	    this.setState({subsitutionModalOpened: false, substitute: this.state.convocation.substitute})
 	}
 
 	downloadAllDocuments = async() => {
@@ -115,7 +127,7 @@ class ReceivedConvocation extends Component {
 
 	render() {
 	    const { t } = this.context
-	    const { convocation } = this.state
+	    const { convocation, subsitutionModalOpened, substitute } = this.state
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const token = this._convocationService && this._convocationService.getTokenInUrl(this.props.location.search)
 	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.convocation.annexes && this.state.convocation.annexes.length > 3 ? this.state.convocation.annexes.slice(0,3) : this.state.convocation.annexes
@@ -191,9 +203,9 @@ class ReceivedConvocation extends Component {
 	                                <Grid.Column computer='16'>
 	                                    <Field htmlFor="comments" label={t('convocation.fields.comment')}>
 	                                            <FieldValue id="comments">
-	                                                {convocation.comment.split('\n').map((item) => {
+	                                                {convocation.comment.split('\n').map((item, index) => {
 	                                                    return (
-	                                                        <span>
+	                                                        <span key={`comment_line_${index}`}>
 	                                                            {item}
 	                                                            <br/>
 	                                                        </span>
@@ -304,6 +316,15 @@ class ReceivedConvocation extends Component {
 	                            <p className='text-muted'>{t('convocation.page.information_message_substituted')}</p>
 	                            <Grid>
 	                                <Grid.Column mobile='16' computer='8'>
+	                                    <Confirm
+	                                        open={subsitutionModalOpened}
+	                                        onCancel={this.closeSubstituteModal}
+	                                        onConfirm={this.onSelectedUser}
+	                                        content={t('convocation.page.substitute_confirmation',
+	                                            {firstname: substitute && substitute.firstname,
+	                                                lastname: substitute && substitute.lastname,
+	                                                date: moment(convocation.meetingDate).format('DD/MM/YYYY à hh:mm'),
+	                                                title: convocation.subject})}/>
 	                                    <StelaTable
 	                                        data={this.state.convocation.recipients}
 	                                        metaData={metaData}
@@ -313,8 +334,8 @@ class ReceivedConvocation extends Component {
 	                                        noDataMessage={t('convocation.new.no_recipient')}
 	                                        keyProperty='uuid'
 	                                        uniqueSelect={true}
-	                                        selectedRadio={this.state.convocation.substitute && this.state.convocation.substitute.uuid}
-	                                        onSelectedRow={this.onSelectedUser}
+	                                        selectedRadio={substitute && substitute.uuid}
+	                                        onSelectedRow={this.openSubstituteModal}
 	                                        negativeResolver={this.negativeResolver}
 	                                        positiveResolver={this.positiveResolver}
 	                                    />
