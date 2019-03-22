@@ -1,8 +1,8 @@
 {
   "convocation": {
     "status": {
-      "CREATED": "Créé",
-      "SENT": "Envoyée",
+      "CREATED": "Convocation créée",
+      "SENT": "Convocation envoyée",
       "QUESTIONS_ADDED": "Question(s) supplémentaire(s) ajoutée(s)",
       "COMMENT_MODIFIED": "Commentaire modifié",
       "ANNEXES_ADDED": "Annexe(s) ajoutée(s)",
