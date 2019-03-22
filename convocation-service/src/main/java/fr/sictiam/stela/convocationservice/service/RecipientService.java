@@ -77,6 +77,8 @@ public class RecipientService {
             throw new InvalidEmailAddressException();
         }
 
+        recipient.setFirstname(StringUtils.capitalize(recipient.getFirstname().toLowerCase()));
+        recipient.setLastname(recipient.getLastname().toUpperCase());
         recipient.setLocalAuthority(localAuthority);
         recipient.setActive(true);
         recipient.setToken(generateToken(recipient));
@@ -103,6 +105,8 @@ public class RecipientService {
         }
 
         ConvocationBeanUtils.mergeProperties(recipientParams, recipient, "uuid", "token", "localAuthority", "inactivityDate");
+        recipient.setFirstname(StringUtils.capitalize(recipientParams.getFirstname().toLowerCase()));
+        recipient.setLastname(recipientParams.getLastname().toUpperCase());
 
         if (recipientParams.getActive() != null) {
             if (recipientParams.getActive()) {

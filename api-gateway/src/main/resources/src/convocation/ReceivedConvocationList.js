@@ -211,7 +211,6 @@ class ReceivedConvocation extends Component {
 	                    metaData={metaData}
 	                    data={this.state.receivedConvocation}
 	                    keyProperty="uuid"
-	                    striped={false}
 	                    greyResolver={this.greyResolver}
 	                    pagination={pagination}
 	                    sort={(clickedColumn) => sortTable(this, clickedColumn, this.loadData)}
