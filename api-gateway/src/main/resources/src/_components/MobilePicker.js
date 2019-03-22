@@ -104,8 +104,30 @@ class PickerColumn extends Component {
 	    }, 0)
 	    this.setState({down: false})
 	}
+
+	handleWheel = (event) => {
+	    event.preventDefault()
+	    event.stopPropagation()
+	    const {options, itemHeight} = this.props
+	    const { minTranslate, maxTranslate, startScrollerTranslate} = this.state
+
+	    let nextScrollerTranslate = startScrollerTranslate + event.nativeEvent.deltaY
+	    let activeIndex = 0
+	    if (nextScrollerTranslate > maxTranslate) {
+	        nextScrollerTranslate = maxTranslate
+	        activeIndex = 0
+	    } else if (nextScrollerTranslate < minTranslate) {
+	        nextScrollerTranslate = minTranslate
+	        activeIndex = options.length - 1
+	    } else {
+	        activeIndex = - Math.floor((nextScrollerTranslate - maxTranslate) / itemHeight)
+	    }
+	    this.setState({startScrollerTranslate: nextScrollerTranslate, scrollerTranslate: nextScrollerTranslate}, this.onValueSelected(options[activeIndex]))
+	}
 	/** MOBILE PART TO TRY */
 	handleTouchStart = (event) => {
+	    event.preventDefault()
+	    event.stopPropagation()
 	    const startTouchY = event.targetTouches[0].pageY
 	    this.setState(({scrollerTranslate}) => ({
 	        startTouchY,
@@ -114,6 +136,7 @@ class PickerColumn extends Component {
 	}
 	handleTouchMove = (event) => {
 	    event.preventDefault()
+	    event.stopPropagation()
 	    const touchY = event.targetTouches[0].pageY
 	    this.setState(({isMoving, startTouchY, startScrollerTranslate, minTranslate, maxTranslate}) => {
 		  	if (!isMoving) {
@@ -167,16 +190,6 @@ class PickerColumn extends Component {
 	        scrollerTranslate: startScrollerTranslate
 	    }))
 	}
-	// handleItemClick = (option) => {
-	//     if(!this.state.down) {
-	//         console.log('llll')
-	//         if (option !== this.props.value) {
-	//             this.onValueSelected(option)
-	//         } else {
-	//             this.props.onClick(this.props.name, this.props.value)
-	//         }
-	//     }
-	// }
 	renderItems() {
 	    const {options, itemHeight, value} = this.props
 	    return options.map((option, index) => {
@@ -191,7 +204,6 @@ class PickerColumn extends Component {
 	                role='presentation'
 	                className={className}
 	                style={style}
-	                // onClick={() => this.handleItemClick(option)}
 	            >
 	                {option}</div>
 	        )
@@ -210,7 +222,7 @@ class PickerColumn extends Component {
 	        style.transitionDuration = '0ms'
 	    }
 	    return(
-	        <div className="picker-column">
+	        <div className="picker-column" onWheel={this.handleWheel}>
 	            <div
 	                className="picker-scroller"
 	                style={style}
@@ -230,7 +242,7 @@ class PickerColumn extends Component {
 	}
 }
 
-export default class Picker extends Component {
+export default class MobilePicker extends Component {
 	static propTyps = {
 	  optionGroups: PropTypes.object.isRequired,
 	  valueGroups: PropTypes.object.isRequired,
@@ -268,8 +280,8 @@ export default class Picker extends Component {
 	  }
 	  return (
 	        <div className="picker-inner">
-		  {columnNodes}
-		  <div className="picker-highlight" style={highlightStyle}></div>
+		  		{columnNodes}
+		  		<div className="picker-highlight" style={highlightStyle}></div>
 	        </div>
 	  )
 	}
@@ -281,7 +293,7 @@ export default class Picker extends Component {
 
 	  return (
 	        <div className="picker-container" style={style}>
-		  {this.renderInner()}
+		  		{this.renderInner()}
 	        </div>
 	  )
 	}
