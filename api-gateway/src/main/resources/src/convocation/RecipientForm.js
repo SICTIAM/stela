@@ -84,8 +84,8 @@ class RecipientForm extends Component {
 	    const { selectedUser, users } = this.state
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
-	        { property: 'firstname', displayed: true, searchable: true },
 	        { property: 'lastname', displayed: true, searchable: true },
+	        { property: 'firstname', displayed: true, searchable: true },
 	        { property: 'email', displayed: true, searchable: true },
 	    ]
 	    const listContent =

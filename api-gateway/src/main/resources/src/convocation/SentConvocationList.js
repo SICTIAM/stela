@@ -234,7 +234,6 @@ class SentConvocation extends Component {
 	                    metaData={metaData}
 	                    data={this.state.sentConvocation}
 	                    keyProperty="uuid"
-	                    striped={false}
 	                    pagination={pagination}
 	                    sort={(clickedColumn) => sortTable(this, clickedColumn, this.loadData)}
 	                    direction={this.state.direction}

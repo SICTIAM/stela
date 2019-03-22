@@ -1,0 +1,1 @@
+update recipient set firstname=initcap(firstname), lastname = upper(lastname);
