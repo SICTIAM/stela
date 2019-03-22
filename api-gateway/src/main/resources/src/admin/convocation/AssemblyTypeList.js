@@ -121,9 +121,9 @@ class AssemblyTypeList extends Component {
 	        { property: 'uuid', displayed: false },
 	        { property: 'name', displayed: true, searchable: true, sortable: true, displayName: t('convocation.fields.assembly_type') },
 	        { property: 'location', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.place') },
-	        { property: 'delay', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay') },
+	        { property: 'delay', width: 'one', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.convocation_delay') },
 	        { property: 'reminder', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.reminder'), displayComponent: checkboxDisplay },
-	        { property: 'useProcuration', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.procuration'), displayComponent: checkboxDisplay },
+	        { property: 'useProcuration', width: 'one', displayed: true, searchable: false, sortable: true, displayName: t('convocation.admin.modules.convocation.assembly_type_config.procuration'), displayComponent: checkboxDisplay },
 	        { property: 'recipients', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_type_config.recipients'), displayComponent: recipientsDisplay }	    ]
 	    const options = [
 	        { key: 10, text: 10, value: 10 },

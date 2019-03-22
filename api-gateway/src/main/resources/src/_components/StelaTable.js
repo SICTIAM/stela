@@ -255,6 +255,8 @@ class StelaTable extends Component {
                                         !undisplayedColumnsProperties.includes(metaData.property) &&
                                         <Table.HeaderCell scope="col" key={index + '-' + metaData.displayName}
                                             sorted={column === metaData.property ? direction : null}
+                                            width={metaData.width}
+                                            style={{whiteSpace: metaData.width ? 'normal' : 'nowwrap'}}
                                             onClick={metaData.sortable ? this.handleSort(metaData.property) : undefined}>
                                             {metaData.displayName}
                                         </Table.HeaderCell>
