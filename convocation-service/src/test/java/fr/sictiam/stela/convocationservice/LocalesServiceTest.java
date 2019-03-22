@@ -27,7 +27,7 @@ public class LocalesServiceTest {
     @Test
     public void testGetSimpleMessage() {
         String message = localService.getMessage("fr", "convocation", "$.convocation.status.CREATED");
-        assertThat(message, is("Créé"));
+        assertThat(message, is("Convocation créée"));
     }
 
     @Test
