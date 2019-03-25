@@ -1,6 +1,7 @@
 package fr.sictiam.stela.convocationservice.service;
 
 import fr.sictiam.stela.convocationservice.dao.AssemblyTypeRepository;
+import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
 import fr.sictiam.stela.convocationservice.model.AssemblyType;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AssemblyTypeService {
@@ -39,17 +41,15 @@ public class AssemblyTypeService {
 
     private final LocalAuthorityService localAuthorityService;
 
-    private RecipientService recipientService;
+    private final RecipientRepository recipientRepository;
 
     public AssemblyTypeService(
             AssemblyTypeRepository assemblyTypeRepository,
-            LocalAuthorityService localAuthorityService) {
+            LocalAuthorityService localAuthorityService,
+            RecipientRepository recipientRepository) {
         this.assemblyTypeRepository = assemblyTypeRepository;
         this.localAuthorityService = localAuthorityService;
-    }
-
-    public void setRecipientService(RecipientService recipientService) {
-        this.recipientService = recipientService;
+        this.recipientRepository = recipientRepository;
     }
 
     public AssemblyType getAssemblyType(String uuid, String localAuthorityUuid) {
@@ -71,7 +71,7 @@ public class AssemblyTypeService {
         assemblyType.setProfileUuid(profileUuid);
         assemblyType.setActive(true);
         // Add service assemblee fake recipient
-        assemblyType.getRecipients().add(recipientService.getOrCreateServiceAssemblee(localAuthority));
+        assemblyType.getRecipients().add(getOrCreateServiceAssemblee(localAuthority));
         return save(assemblyType);
     }
 
@@ -197,5 +197,22 @@ public class AssemblyTypeService {
 
         if (params.getDelay() == null) throw new MissingParameterException("delay");
         if (params.getReminder() == null) throw new MissingParameterException("reminderDelay");
+    }
+
+    private Recipient getOrCreateServiceAssemblee(LocalAuthority localAuthority) {
+
+        Optional<Recipient> opt =
+                recipientRepository.findByLocalAuthorityUuidAndServiceAssembleeTrue(localAuthority.getUuid());
+        if (opt.isPresent()) {
+            return opt.get();
+        } else {
+            Recipient serviceAssemblee = new Recipient();
+            serviceAssemblee.setFirstname("Service");
+            serviceAssemblee.setLastname("Assemblee");
+            serviceAssemblee.setServiceAssemblee(true);
+            serviceAssemblee.setLocalAuthority(localAuthority);
+            serviceAssemblee.setActive(true);
+            return recipientRepository.saveAndFlush(serviceAssemblee);
+        }
     }
 }
