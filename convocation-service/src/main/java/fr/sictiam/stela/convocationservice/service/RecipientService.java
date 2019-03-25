@@ -69,7 +69,7 @@ public class RecipientService {
                 localAuthorityUuid);
         if (exist.isPresent()) {
             LOGGER.error("A recipient with email {} already exists in local authority {}", recipient.getEmail(), localAuthority.getName());
-            throw new RecipientExistsException();
+            throw new RecipientExistsException(exist.get().getActive() ? "convocation.errors.recipient.alreadyExists" : "convocation.errors.recipient.alreadyExistsAndDeactivated");
         }
 
         if (!force && !EmailChecker.isValid(recipient.getEmail())) {
@@ -95,7 +95,7 @@ public class RecipientService {
             if (recipientRepository.recipientExists(uuid, recipient.getLocalAuthority().getUuid(),
                     recipientParams.getEmail()) > 0) {
                 LOGGER.error("A recipient with email {} already exists in local authority {}", recipientParams.getEmail(), recipient.getLocalAuthority().getName());
-                throw new RecipientExistsException();
+                throw new RecipientExistsException(recipientParams.getActive() ? "convocation.errors.recipient.alreadyExists" : "convocation.errors.recipient.alreadyExistsAndDeactivated");
             }
 
             if (!recipientParams.getEmail().equals(recipient.getEmail()) && !force && !EmailChecker.isValid(recipientParams.getEmail())) {

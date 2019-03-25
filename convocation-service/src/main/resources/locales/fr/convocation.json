@@ -80,9 +80,8 @@
       "no_absent": "Aucun absent",
       "no_substitution": "Aucune procuration",
       "download_all_documents": "Télécharger tous les documents",
-	  "add_minutes": "Ajouter le procès-verbal",
-	  "substitute_confirmation": "Vous êtes sur le point de donner procuration à {{firstname}} {{lastname}} pour la séance du {{date}} ayant pour objet: {{title}}"
-
+      "add_minutes": "Ajouter le procès-verbal",
+      "substitute_confirmation": "Vous êtes sur le point de donner procuration à {{firstname}} {{lastname}} pour la séance du {{date}} ayant pour objet: {{title}}"
     },
     "new": {
       "display": "Visualiser",
@@ -194,6 +193,7 @@
     "errors": {
       "recipient": {
         "alreadyExists": "Un destinataire existe avec ce courriel",
+        "alreadyExistsAndDeactivated": "Un destinataire avec ce courriel est désactivé",
         "invalidEmail": "Le courriel ne semble pas exister"
       },
       "convocation": {
