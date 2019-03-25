@@ -109,9 +109,8 @@ StatusDisplay.contextTypes = {
     t: PropTypes.func
 }
 
-const DragAndDropFile = ({ disableClick = false, children, iconName = 'upload', multiple = true, acceptFile, key, onDrop }, { t }) => (
+const DragAndDropFile = ({ disableClick = false, children, iconName = 'upload', multiple = true, acceptFile, onDrop }, { t }) => (
     <Dropzone
-        key={key}
         multiple = { multiple }
         className={'dropzone' + (disableClick ? ' disabled' : '')}
         accept={acceptFile}

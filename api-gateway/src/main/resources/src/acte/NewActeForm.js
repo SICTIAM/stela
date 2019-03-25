@@ -207,15 +207,11 @@ class NewActeForm extends Component {
             _addNotification(notifications.defaultError, 'notifications.acte.title', t('api-gateway:form.validation.badextension'))
         }
     }
-    isBudgetXMLFileValid = (file, type) => {
+    isBudgetXMLFileValid = async (file, type) => {
         if((this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS'
             || this.props.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS') && type !== 'annexe') {
-            let reader = new FileReader()
-            reader.readAsText(file)
-            reader.onloadend = () => {
-                let xmlData = reader.result
-                return xmlData.search('<Scellement') > 0
-            }
+            const data = await new Response(file).text()
+            return data.search('<Scellement') > 0
         }else{
             return true
         }
@@ -294,7 +290,7 @@ class NewActeForm extends Component {
             data.append('file', file)
             data.append('nature', this.state.fields.nature)
 
-            if(!this.isBudgetXMLFileValid(file, type)){
+            if(!(await this.isBudgetXMLFileValid(file, type))){
                 this.props.setStatus('saved', this.state.fields.uuid)
                 return this.props.authContext._addNotification(notifications.defaultError, 'notifications.acte.title', this.context.t('acte.error.xml_not_valid'))
             }
