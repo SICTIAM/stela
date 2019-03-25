@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class RecipientExistsException extends ConvocationException {
 
     public RecipientExistsException() {
-        super("convocation.errors.recipient.alreadyExists");
+        this("convocation.errors.recipient.alreadyExists");
+    }
+
+    public RecipientExistsException(String message) {
+        super(message);
     }
 }
