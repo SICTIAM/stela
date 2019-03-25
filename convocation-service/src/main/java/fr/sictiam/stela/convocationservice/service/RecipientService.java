@@ -120,23 +120,6 @@ public class RecipientService {
         return save(recipient);
     }
 
-    public Recipient getOrCreateServiceAssemblee(LocalAuthority localAuthority) {
-
-        Optional<Recipient> opt =
-                recipientRepository.findByLocalAuthorityUuidAndServiceAssembleeTrue(localAuthority.getUuid());
-        if (opt.isPresent()) {
-            return opt.get();
-        } else {
-            Recipient serviceAssemblee = new Recipient();
-            serviceAssemblee.setFirstname("Service");
-            serviceAssemblee.setLastname("Assemblee");
-            serviceAssemblee.setServiceAssemblee(true);
-            serviceAssemblee.setLocalAuthority(localAuthority);
-            serviceAssemblee.setActive(true);
-            return save(serviceAssemblee);
-        }
-    }
-
     public Recipient getRecipient(String uuid, String localAuthorityUuid) {
 
         return recipientRepository

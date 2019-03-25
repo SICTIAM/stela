@@ -20,6 +20,7 @@ import javax.persistence.OrderBy;
 
 import java.time.LocalDateTime;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 public class AssemblyType {
@@ -39,7 +40,7 @@ public class AssemblyType {
             inverseJoinColumns = @JoinColumn(name = "recipient_uuid"))
     @JsonView(Views.AssemblyTypeInternal.class)
     @OrderBy("lastname,firstname,email ASC")
-    private SortedSet<Recipient> recipients;
+    private SortedSet<Recipient> recipients = new TreeSet<>();
 
     @JsonView(Views.AssemblyType.class)
     private Integer delay;
