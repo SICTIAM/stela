@@ -6,8 +6,7 @@ import { Segment, Message } from 'semantic-ui-react'
 
 import { withAuthContext } from '../../Auth'
 
-import { notifications } from '../../_util/Notifications'
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import { getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
 import ConvocationService from '../../_util/convocation-service'
 
@@ -31,30 +30,29 @@ class RecipentConfig extends Component {
 	        phoneNumber: '',
 	        active: true,
 	        assemblyTypes: [],
-	        inactivityDate: null
+	        inactivityDate: null,
+	        epciName: ''
+	    },
+	    localAuthority: {
+	        epci: false
 	    }
 	}
-	componentDidMount() {
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	componentDidMount = async () => {
 	    const uuid = this.props.uuid
 	    this._convocationService = new ConvocationService()
 
+	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
+
 	    if(uuid) {
-	        _fetchWithAuthzHandling({ url: '/api/convocation/recipient/' + uuid })
-	            .then(checkStatus)
-	            .then(response => response.json())
-	            .then(json => {
-	                const fields = this.state.fields
+	        const recipientResponse = await this._convocationService.getRecipientByUuid(this.props.authContext, uuid)
+
+	        const fields = this.state.fields
 	                Object.keys(fields).forEach(function (key) {
-	                    fields[key] = json[key]
+	                    fields[key] = recipientResponse[key]
 	                })
-	                this.setState({fields}, this.validateForm)
-	            })
-	            .catch(response => {
-	                response.json().then(json => {
-	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	                })
-	            })
+	        this.setState({fields, localAuthority: localAuthorityResponse}, this.validateForm)
+	    } else {
+	        this.setState({localAuthority: localAuthorityResponse}, this.validateForm)
 	    }
 	}
 
@@ -99,7 +97,8 @@ class RecipentConfig extends Component {
 	                <UserFormFragment
 	                    onSubmit={this.onSubmit}
 	                    onCancel={this.onCancel}
-	                    fields={this.state.fields}/>
+	                    fields={this.state.fields}
+	                    epci={this.state.localAuthority.epci}/>
 	            </Segment>
 	        </Page>
 	    )

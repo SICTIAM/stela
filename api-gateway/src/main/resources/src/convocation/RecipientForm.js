@@ -19,14 +19,16 @@ class RecipientForm extends Component {
 	    uuid: PropTypes.string,
 	    recipient: PropTypes.bool,
 	    userToDisabled: PropTypes.array,
-	    canCreateUser: PropTypes.bool
+	    canCreateUser: PropTypes.bool,
+	    epci: PropTypes.bool
 	}
 	static defaultProps = {
 	    selectedUser: [],
 	    uuid: null,
 	    recipient: true,
 	    userToDisabled: [],
-	    canCreateUser: false
+	    canCreateUser: false,
+	    epci: false
 	}
 	state = {
 	    selectedUser: [],
@@ -82,12 +84,15 @@ class RecipientForm extends Component {
 	render() {
 	    const { t } = this.context
 	    const { selectedUser, users } = this.state
+	    const { epci } = this.props
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
 	        { property: 'lastname', displayed: true, searchable: true },
 	        { property: 'firstname', displayed: true, searchable: true },
 	        { property: 'email', displayed: true, searchable: true },
 	    ]
+	    if(epci) metaData.push({property: 'epciName', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci')})
+
 	    const listContent =
 			<StelaTable
 			    containerTable='maxh-300 w-100'
@@ -104,7 +109,7 @@ class RecipientForm extends Component {
 			/>
 	    const panes = [
 	        { menuItem: t('convocation.new.choose_from_the_list'), render: () => <Tab.Pane>{listContent}</Tab.Pane> },
-	        { menuItem: t('convocation.new.add_new_recipients'), render: () => <Tab.Pane>{<UserFormFragment preventParentSubmit={true} onSubmit={this.onSubmit}/>}</Tab.Pane> }
+	        { menuItem: t('convocation.new.add_new_recipients'), render: () => <Tab.Pane>{<UserFormFragment epci={epci} preventParentSubmit={true} onSubmit={this.onSubmit}/>}</Tab.Pane> }
 	    ]
 	    return (
 	        <Fragment>

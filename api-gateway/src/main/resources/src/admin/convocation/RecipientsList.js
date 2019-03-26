@@ -44,13 +44,17 @@ class RecipientsList extends Component {
 	    limit: 10,
 	    offset: 0,
 	    currentPage: 0,
-	    totalCount: 0
+	    totalCount: 0,
+	    localAuthority: {
+	        epci: false
+	    }
 	}
-	componentDidMount() {
+	componentDidMount = async () => {
 	    this._convocationService = new ConvocationService()
 	    const itemPerPage = localStorage.getItem('itemPerPage')
+	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
 	    if (!itemPerPage) localStorage.setItem('itemPerPage', 10)
-	    else this.setState({ limit: 10 }, this.loadData)
+	    else this.setState({ limit: 10, localAuthority: localAuthorityResponse }, this.loadData)
 	}
 
 	loadData = () => {
@@ -131,6 +135,8 @@ class RecipientsList extends Component {
 	        { property: 'email', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.email') },
 	        { property: 'phoneNumber', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.phonenumber') },
 	        { property: 'assemblyTypes', displayed: true, searchable: false, sortable: false, displayName: t('convocation.admin.modules.convocation.assembly_types'), displayComponent: assemblyTypes }	    ]
+
+	    if(this.state.localAuthority.epci) metaData.splice(6,0,  {property: 'epciName', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci')})
 	    const options = [
 	        { key: 10, text: 10, value: 10 },
 	        { key: 25, text: 25, value: 25 },

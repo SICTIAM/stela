@@ -68,16 +68,20 @@ public class Recipient implements Comparable<Recipient> {
     @JsonView(Views.Recipient.class)
     private boolean serviceAssemblee = false;
 
+    @JsonView(Views.Public.class)
+    private String epciName;
+
     public Recipient() {
     }
 
     public Recipient(String firstname, String lastname, String email, String phoneNumber,
-            LocalAuthority localAuthority) {
+            LocalAuthority localAuthority, String epciName) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.localAuthority = localAuthority;
+        this.epciName = epciName;
     }
 
     public String getFirstname() {
@@ -165,7 +169,9 @@ public class Recipient implements Comparable<Recipient> {
     }
 
     public String getFullName() {
-        return StringUtils.capitalize(firstname.toLowerCase()) + " " + StringUtils.capitalize(lastname.toLowerCase());
+        return StringUtils.capitalize(firstname.toLowerCase()) + " " +
+                StringUtils.capitalize(lastname.toLowerCase()) +
+                (StringUtils.isNotBlank(epciName) ? " (" + epciName + ")" : "");
     }
 
     public boolean isServiceAssemblee() {
@@ -174,6 +180,14 @@ public class Recipient implements Comparable<Recipient> {
 
     public void setServiceAssemblee(boolean serviceAssemblee) {
         this.serviceAssemblee = serviceAssemblee;
+    }
+
+    public String getEpciName() {
+        return epciName;
+    }
+
+    public void setEpciName(String epciName) {
+        this.epciName = epciName;
     }
 
     @Override public String toString() {
@@ -186,6 +200,7 @@ public class Recipient implements Comparable<Recipient> {
                 ",\"active\": " + active +
                 ",\"token\": \"" + token + "\"" +
                 ",\"guest\": " + guest +
+                ",\"epciName\": \"" + epciName + "\"" +
                 '}';
     }
 

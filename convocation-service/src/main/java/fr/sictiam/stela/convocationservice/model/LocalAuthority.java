@@ -43,24 +43,29 @@ public class LocalAuthority {
     @JsonView(Views.LocalAuthority.class)
     private Attachment defaultProcuration;
 
+    @JsonView(Views.LocalAuthority.class)
+    private boolean epci = false;
+
     public LocalAuthority() {
     }
 
-    public LocalAuthority(String uuid, String name, String slugName, String siren, Boolean active, StampPosition stampPosition) {
+    public LocalAuthority(String uuid, String name, String slugName, String siren, Boolean active,
+            StampPosition stampPosition, boolean epci) {
         this.uuid = uuid;
         this.name = name;
         this.slugName = slugName;
         this.siren = siren;
         this.active = active;
         this.stampPosition = stampPosition;
+        this.epci = epci;
     }
 
     public LocalAuthority(String uuid, String name, String slugName, String siren, StampPosition stampPosition) {
-        this(uuid, name, slugName, siren, true, stampPosition);
+        this(uuid, name, slugName, siren, true, stampPosition, false);
     }
 
     public LocalAuthority(String uuid, String name, String slugName, String siren) {
-        this(uuid, name, slugName, siren, true, new StampPosition());
+        this(uuid, name, slugName, siren, true, new StampPosition(), false);
     }
 
     public String getUuid() {
@@ -121,5 +126,13 @@ public class LocalAuthority {
 
     public void setDefaultProcuration(Attachment defaultProcuration) {
         this.defaultProcuration = defaultProcuration;
+    }
+
+    public boolean isEpci() {
+        return epci;
+    }
+
+    public void setEpci(boolean epci) {
+        this.epci = epci;
     }
 }

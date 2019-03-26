@@ -43,12 +43,18 @@ class SentConvocation extends Component {
 	        subject: '',
 	        showAllAnnexes: false,
 	        cancelled: false
+	    },
+	    localAuthority: {
+	        epci: false
 	    }
 	}
 
 	componentDidMount = async() => {
 	    this._convocationService = new ConvocationService()
-	    await this.fetchConvocation()
+	    const convocationResponse = await this.fetchConvocation()
+	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
+
+	    this.setState({convocation: convocationResponse, localAuthority: localAuthorityResponse})
 	}
 
 	fetchConvocation = async () => {
@@ -65,7 +71,8 @@ class SentConvocation extends Component {
 	    convocationResponse.guestResponses = recipientResponse.filter((response) => {
 	        return response.guest === true && response.recipient.serviceAssemblee === false
 	    })
-	    this.setState({convocation: convocationResponse})
+
+	    return convocationResponse
 	}
 
 	onCancelConvocation = async () => {
@@ -139,6 +146,7 @@ class SentConvocation extends Component {
 	            <Segment>
 	                <ParticipantsFragment
 	                    title={t('convocation.fields.recipient')}
+	                    epci={this.state.localAuthority.epci}
 	                    participantResponses={convocation.recipientResponses}
 	                    questions={convocation.questions}
 	                />
@@ -147,6 +155,7 @@ class SentConvocation extends Component {
 	                <ParticipantsFragment
 	                    title={t('convocation.fields.guest')}
 	                    participantResponses={convocation.guestResponses}
+	                    epci={this.state.localAuthority.epci}
 	                    questions={convocation.questions}
 	                />
 	            </Segment>

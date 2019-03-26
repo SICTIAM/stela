@@ -26,7 +26,8 @@ class ConvocationLocalAuthorityParams extends Component {
         _fetchWithAuthzHandling: PropTypes.func
     }
     validationRules = {
-	    residentThreshold: 'required'
+        residentThreshold: 'required',
+        epci: 'required'
     }
     state = {
         notificationMails: [],
@@ -44,6 +45,7 @@ class ConvocationLocalAuthorityParams extends Component {
             residentThreshold: null,
             procuration: null,
             defaultProcuration: null,
+            epci: false,
             stampPosition: {
                 x: 10,
                 y: 10
@@ -65,10 +67,12 @@ class ConvocationLocalAuthorityParams extends Component {
     validateForm = () => {
 	    const { t } = this.context
 	    const data = {
-	        residentThreshold: this.state.fields.residentThreshold
+            residentThreshold: this.state.fields.residentThreshold,
+            epci: this.state.fields.epci
 	    }
 	    const attributeNames = {
-	        residentThreshold: t('api-gateway:admin.convocation.fields.residents_threshold')
+            residentThreshold: t('api-gateway:admin.convocation.fields.residents_threshold'),
+            epci: t('convocation.admin.modules.convocation.local_authority_settings.epci')
 	    }
 	    const validationRules = this.validationRules
 
@@ -186,6 +190,25 @@ class ConvocationLocalAuthorityParams extends Component {
                                         value='false'
                                         checked={fields.residentThreshold === false}
                                         onChange={(e, {value}) => this.handleChangeRadio(e, value, 'residentThreshold')}
+                                    ></Radio>
+                                </FormField>
+                            </Grid.Column>
+                            <Grid.Column mobile="16" computer='8'>
+                                <FormField htmlFor='epci'
+                                    label={t('convocation.admin.modules.convocation.local_authority_settings.epci')}>
+                                    <Radio
+                                        label={t('api-gateway:yes')}
+                                        value='true'
+                                        name='epci'
+                                        checked={fields.epci === true}
+                                        onChange={(e, {value}) => this.handleChangeRadio(e, value, 'epci')}
+                                    ></Radio>
+                                    <Radio
+                                        label={t('api-gateway:no')}
+                                        name='epci'
+                                        value='false'
+                                        checked={fields.epci === false}
+                                        onChange={(e, {value}) => this.handleChangeRadio(e, value, 'epci')}
                                     ></Radio>
                                 </FormField>
                             </Grid.Column>

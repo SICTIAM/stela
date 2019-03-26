@@ -278,6 +278,18 @@ export default class ConvocationService {
 	    }
 	}
 
+	getRecipientByUuid = async (context, uuid) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: `/api/convocation/recipient/${uuid}`})).json()
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
 	downloadAllDocuments = async (context, uuid) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = context
 

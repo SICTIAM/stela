@@ -16,12 +16,14 @@ class ParticipantsFragment extends Component {
 	static propTypes = {
 	    title: PropTypes.string.isRequired,
 	    participantResponses: PropTypes.array,
-	    questions: PropTypes.array
+	    questions: PropTypes.array,
+	    epci: PropTypes.bool
 	}
     static defaultProps = {
         title: '',
         participants: [],
-        questions: []
+        questions: [],
+        epci: false
     }
     state = {
         displayListParticipants: false
@@ -39,7 +41,7 @@ class ParticipantsFragment extends Component {
 
     render() {
         const { t } = this.context
-        const { title, participantResponses, questions } = this.props
+        const { title, participantResponses, questions, epci } = this.props
 
         const presents = this.sumRecipientsByStatus('PRESENT')
 	    const absents = this.sumRecipientsByStatus('NOT_PRESENT')
@@ -62,7 +64,7 @@ class ParticipantsFragment extends Component {
 	        { property: 'openDate', displayed: true, searchable: false, displayName: 'Statut', displayComponent: statutDisplay },
 	        { property: 'responseType', displayed: true, searchable: false, displayName: 'Réponses', displayComponent: answerDisplay },
 	    ]
-
+        if(epci) metaData.push({property: 'epciName', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci')})
 
         return (
             <Fragment>

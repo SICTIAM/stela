@@ -9,6 +9,7 @@ import moment from 'moment'
 import { withAuthContext } from '../../Auth'
 
 import { notifications } from '../../_util/Notifications'
+import ConvocationService from '../../_util/convocation-service'
 import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
 import history from '../../_util/history'
 import InputValidation from '../../_components/InputValidation'
@@ -43,11 +44,17 @@ class AssemblyTypeConfig extends Component {
 	        useProcuration: false,
 	        recipients: []
 	    },
-	    modalOpened: false
+	    modalOpened: false,
+	    localAuthority: {
+	        epci: false
+	    }
 	}
-	componentDidMount() {
+	componentDidMount = async () => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	    this._convocationService = new ConvocationService()
+
 	    const uuid = this.props.uuid
+	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
 	    if(uuid) {
 	        _fetchWithAuthzHandling({ url: '/api/convocation/assembly-type/' + uuid })
 	            .then(checkStatus)
@@ -57,7 +64,7 @@ class AssemblyTypeConfig extends Component {
 	                Object.keys(fields).forEach(function (key) {
 	                    fields[key] = json[key]
 	                })
-	                this.setState({fields}, this.validateForm)
+	                this.setState({fields, localAuthority: localAuthorityResponse}, this.validateForm)
 	            })
 	            .catch(response => {
 	                response.json().then(json => {
@@ -71,7 +78,7 @@ class AssemblyTypeConfig extends Component {
 	            .then(json => {
 	                const fields = this.state.fields
 	                fields['delay'] = json.delay
-	                this.setState({fields})
+	                this.setState({fields, localAuthority: localAuthorityResponse})
 	            })
 	            .catch(response => {
 	                response.json().then(json => {
@@ -175,6 +182,8 @@ class AssemblyTypeConfig extends Component {
 	        { property: 'firstname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.firstname') },
 	        { property: 'email', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.email') },
 	    ]
+
+	    if(this.state.localAuthority.epci) metaData.push({property: 'epciName', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci')})
 	    return (
 	        <Page>
 	            <Breadcrumb
