@@ -6,6 +6,7 @@ import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.ui.GenericAccount;
+import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PaullService;
 import fr.sictiam.stela.pesservice.service.SesileService;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,16 +29,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
+import static fr.sictiam.stela.pesservice.TestDataGenerator.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(PaullGenericController.class)
+@ActiveProfiles("test")
 public class PaullGenericControllerTest {
 
     @Autowired
@@ -56,6 +61,9 @@ public class PaullGenericControllerTest {
 
     @MockBean
     CertUtilService certUtilService;
+
+    @MockBean
+    ExternalRestService externalRestService;
 
     private String urlTemplate = "/rest/externalws/SIREN/fr/classic/webservgeneriques/services/api/rest.php/";
 
@@ -303,6 +311,43 @@ public class PaullGenericControllerTest {
                         jsonPath("$.status_message").value("No document in Classeur"),
                         jsonPath("$.data").hasJsonPath()))
                 .andDo(print());
+    }
+
+    /*
+     * Very minimal test to be completed later on
+     */
+    @Test
+    public void shouldCreateADocWithADefaultEmail() throws Exception {
+
+        given(paullService.emailAuth(any(), any()))
+                .willReturn(new GenericAccount());
+        given(localAuthorityService.getBySiren(any()))
+                .willReturn(localAuthority());
+        given(externalRestService.getProfile(any()))
+                .willReturn(profileNode());
+        given(sesileService.postClasseur(any(), any(), any()))
+                .willReturn(classeur());
+        given(sesileService.addFileToclasseur(any(), any(), any(), anyInt()))
+                .willReturn(new Document());
+
+        ResultActions resultActions =
+                mockMvc.perform(multipart(urlTemplate.replaceFirst("SIREN", "sys250601879") + "/depot")
+                        .file("file", "file".getBytes())
+                        .param("title", "Mon bon de commande")
+                        .param("service", "12")
+                        .param("type", "2")
+                        .headers(httpHeaders));
+
+        resultActions
+                .andExpect(matchAll(
+                        status().isOk()
+                ));
+
+        verify(localAuthorityService).getBySiren("250601879");
+        verify(externalRestService).getProfile("generic-profile-uuid");
+        verify(sesileService).postClasseur(any(),
+                argThat(classeurRequest -> classeurRequest.getEmail().equals("agent@sictiam.fr")),
+                any());
     }
 
     private Classeur createDummyClasseur() {

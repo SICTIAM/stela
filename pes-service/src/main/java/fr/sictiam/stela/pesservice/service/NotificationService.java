@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static fr.sictiam.stela.pesservice.service.util.JsonExtractorUtils.*;
+
 @Service
 public class NotificationService implements ApplicationListener<PesHistoryEvent> {
 
@@ -102,7 +104,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                         LOGGER.info(
                                 "[proccessEvent] An email '{}' notification was sent to {} for pes {} ",
                                 notification.get().getType().toString(),
-                                this.getAgentMail(profile),
+                                extractEmailFromProfile(profile),
                                 pes.getUuid());
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(
@@ -130,7 +132,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
                     LOGGER.info(
                             "[proccessEvent] An email '{}' notification was sent to {} for pes {} ",
                             notification.get().getType().toString(),
-                            this.getAgentMail(node),
+                            extractEmailFromProfile(node),
                             pes.getUuid());
                     if (notification.get().isNotificationStatus()) {
                         PesHistory pesHistory = new PesHistory(pes.getUuid(), StatusType.NOTIFICATION_SENT);
@@ -158,7 +160,7 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         ctx.setVariable("localAuthority", pes.getLocalAuthority().getSlugName());
         StatusType status = event.getPesHistory().getStatus();
         String msg = template.process("mails/" + status.name() + "_fr", ctx);
-        sendMail(getAgentMail(profileNode),
+        sendMail(extractEmailFromProfile(profileNode),
                 localesService.getMessage("fr", "pes_notification",
                         (isCopy ? "$.pes.copy." : "$.pes.")
                                 + (status.isAnomaly() ? Notification.Type.ANOMALIES.toString() : status.name())
@@ -204,12 +206,6 @@ public class NotificationService implements ApplicationListener<PesHistoryEvent>
         helper.setBcc(mails);
 
         emailSender.send(message);
-    }
-
-    public String getAgentMail(JsonNode node) {
-        return !node.get("email").isNull() && StringUtils.isNotBlank(node.get("email").asText())
-                ? node.get("email").asText()
-                : node.get("agent").get("email").asText();
     }
 
     public Map<String, Object> getAgentInfo(JsonNode node) {

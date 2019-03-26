@@ -2,17 +2,15 @@ package fr.sictiam.stela.pesservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pesservice.service.NotificationService;
 import org.junit.Test;
 
 import java.io.IOException;
 
+import static fr.sictiam.stela.pesservice.service.util.JsonExtractorUtils.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class NotificationServiceTest {
-
-    NotificationService notificationService = new NotificationService();
 
     @Test
     public void testGetEmailFromNode() throws IOException {
@@ -20,11 +18,11 @@ public class NotificationServiceTest {
 
         String jsonString = getJsonNodeProfile(true);
         JsonNode node = mapper.readTree(jsonString);
-        assertThat(notificationService.getAgentMail(node), is("servicedemat@sictiam.fr"));
+        assertThat(extractEmailFromProfile(node), is("servicedemat@sictiam.fr"));
 
         String jsonString2 = getJsonNodeProfile(false);
         JsonNode node2 = mapper.readTree(jsonString2);
-        assertThat(notificationService.getAgentMail(node2), is("demat@sictiam.fr"));
+        assertThat(extractEmailFromProfile(node2), is("demat@sictiam.fr"));
 
     }
 

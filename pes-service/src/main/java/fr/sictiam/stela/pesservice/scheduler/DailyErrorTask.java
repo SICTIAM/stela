@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.sictiam.stela.pesservice.service.util.JsonExtractorUtils.*;
+
 @Component
 @ConditionalOnProperty(name = "application.dailymail.active", havingValue = "true")
 public class DailyErrorTask {
@@ -72,7 +74,7 @@ public class DailyErrorTask {
                 JsonNode profiles = externalRestService.getProfiles(uuid);
                 profiles.forEach(profile -> {
                     if (hasNotifification(Notification.Type.DAILY_ERRORS, profile))
-                        mails.add(notificationService.getAgentMail(profile));
+                        mails.add(extractEmailFromProfile(profile));
                 });
             } catch (IOException e) {
                 LOGGER.warn("Failed to send email : {}", e.getMessage());

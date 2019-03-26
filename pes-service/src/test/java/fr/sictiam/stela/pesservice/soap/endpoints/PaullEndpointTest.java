@@ -1,14 +1,8 @@
 package fr.sictiam.stela.pesservice.soap.endpoints;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.PesAller;
 import fr.sictiam.stela.pesservice.model.PesHistory;
 import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.model.sesile.Action;
-import fr.sictiam.stela.pesservice.model.sesile.Classeur;
-import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 import fr.sictiam.stela.pesservice.service.*;
 import fr.sictiam.stela.pesservice.soap.model.paull.PaullSoapToken;
 import io.vavr.control.Either;
@@ -27,13 +21,11 @@ import org.springframework.xml.transform.StringSource;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
 
+import static fr.sictiam.stela.pesservice.TestDataGenerator.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.ws.test.server.RequestCreators.*;
@@ -168,11 +160,6 @@ public class PaullEndpointTest {
                 .andExpect(payload(new StringSource(detailsPesAllerResponse)));
     }
 
-    private Optional<LocalAuthority> localAuthority() {
-        return Optional.of(new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM TEST",
-                "214400152", true));
-    }
-
     private PesAller pesAller() {
         PesAller pesAller = new PesAller(LocalDateTime.now(), "objet", null, null, null,
                 "profile-uuid", "comment", "PDF", "code", "postid",
@@ -184,18 +171,4 @@ public class PaullEndpointTest {
     public PesHistory pesHistory() {
         return new PesHistory("pes-history-uuid", StatusType.ACK_RECEIVED, LocalDateTime.now());
     }
-
-    private Classeur classeur() throws ParseException {
-        Classeur classeur = new Classeur();
-        classeur.setStatus(ClasseurStatus.FINALIZED);
-        Date actionDate = new SimpleDateFormat("dd/MM/yyyy").parse("20/03/2019");
-        classeur.setActions(Collections.singletonList(new Action(1, "agent-pes", actionDate, "signature", "RAS")));
-        return classeur;
-    }
-
-    private JsonNode profileNode() throws IOException {
-        String profile = "{ \"email\": \"agent@sictiam.fr\" }";
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readTree(profile);
-    }
- }
+}
