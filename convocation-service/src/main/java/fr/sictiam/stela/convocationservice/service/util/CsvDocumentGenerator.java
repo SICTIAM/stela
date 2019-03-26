@@ -5,6 +5,7 @@ import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.model.csv.PresenceBean;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvBeanWriter;
@@ -45,6 +46,7 @@ public class CsvDocumentGenerator implements DocumentGenerator {
                             ".recipient_config.lastname"),
                     localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
                             ".recipient_config.firstname"),
+                    localesService.getMessage("fr", "convocation", "$.convocation.export.pdf.localAuthority"),
                     localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +
                             ".recipient_config.email"),
                     localesService.getMessage("fr", "convocation", "$.convocation.export.presence"),
@@ -57,6 +59,7 @@ public class CsvDocumentGenerator implements DocumentGenerator {
             convocation.getRecipientResponses().forEach(recipientResponse -> {
                 Recipient r = recipientResponse.getRecipient();
                 String presence;
+                String epci = StringUtils.isNotBlank(r.getEpciName()) ? r.getEpciName() : "";
                 if (recipientResponse.getResponseType() == ResponseType.SUBSTITUTED && recipientResponse.getSubstituteRecipient() != null) {
                     Map<String, String> params = new HashMap<String, String>() {
                         {
@@ -71,7 +74,7 @@ public class CsvDocumentGenerator implements DocumentGenerator {
                             "$.convocation.export." + recipientResponse.getResponseType());
                 }
 
-                beans.add(new PresenceBean(r.getLastname(), r.getFirstname(), r.getEmail(), presence,
+                beans.add(new PresenceBean(r.getLastname(), r.getFirstname(), epci, r.getEmail(), presence,
                         recipientResponse.isGuest() ? localesService.getMessage("fr", "convocation",
                                 "$.convocation.export.yes") : ""));
             });

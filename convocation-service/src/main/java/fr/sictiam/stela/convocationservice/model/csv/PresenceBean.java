@@ -7,10 +7,13 @@ public class PresenceBean {
     private String email;
     private String presence;
     private String guest;
+    private String epci;
 
-    public PresenceBean(String lastname, String firstname, String email, String presence, String guest) {
+    public PresenceBean(String lastname, String firstname, String epci, String email, String presence,
+            String guest) {
         this.lastname = lastname;
         this.firstname = firstname;
+        this.epci = epci;
         this.email = email;
         this.presence = presence;
         this.guest = guest;
@@ -22,6 +25,10 @@ public class PresenceBean {
 
     public String getFirstname() {
         return firstname;
+    }
+
+    public String getEpci() {
+        return epci;
     }
 
     public String getEmail() {
@@ -37,16 +44,17 @@ public class PresenceBean {
     }
 
     public static String[] fields() {
-        return new String[]{ "lastname", "firstname", "email", "presence", "guest" };
+        return new String[]{ "lastname", "firstname", "epci", "email", "presence", "guest" };
     }
 
     @Override public String toString() {
-        return "PresenceBean{" +
-                "lastname='" + lastname + '\'' +
-                ", firstname='" + firstname + '\'' +
-                ", email='" + email + '\'' +
-                ", presence='" + presence + '\'' +
-                ", guest='" + guest + '\'' +
+        return "{" +
+                "\"lastname\": \"" + lastname + '\"' +
+                ", \"firstname\": \"" + firstname + '\"' +
+                ", \"epci\": \"" + epci + '\"' +
+                ", \"email\": \"" + email + '\"' +
+                ", \"presence\": \"" + presence + '\"' +
+                ", \"guest\"" + guest + '\"' +
                 '}';
     }
 }

@@ -11,6 +11,8 @@ import { getLocalAuthoritySlug, checkStatus, extractFieldNameFromId } from '../_
 import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { acceptFileDocumentConvocation } from '../_util/constants'
+import ConvocationService from '../_util/convocation-service'
+
 
 import { withAuthContext } from '../Auth'
 
@@ -53,15 +55,22 @@ class ConvocationForm extends Component {
 	    showAllAnnexes: false,
 	    assemblyTypes: [],
 	    isFormValid: false,
-	    allFormErrors: []
+	    allFormErrors: [],
+	    localAuthority: {
+	        epci: false
+	    }
 	}
-	componentDidMount() {
+	componentDidMount = async () => {
 	    this.validateForm(null)
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
+	    this._convocationService = new ConvocationService()
+
+	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
+
 	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
 	        .then(checkStatus)
 	        .then(response => response.json())
-	        .then(json => this.setState({assemblyTypes: json.map(item => { return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}})}))
+	        .then(json => this.setState({localAuthority: localAuthorityResponse, assemblyTypes: json.map(item => { return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}})}))
 	        .catch(response => {
 	            response.json().then(json => {
 	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
@@ -478,7 +487,7 @@ class ConvocationForm extends Component {
 	                    </Grid>
 	                </Segment>
 	                {/* Recipients */}
-	                <AddRecipientsGuestsFormFragment fields={this.state.fields} updateUser={this.updateUser} disabledRecipientsEdit={!this.state.fields.assemblyType}/>
+	                <AddRecipientsGuestsFormFragment epci={this.state.localAuthority.epci} fields={this.state.fields} updateUser={this.updateUser} disabledRecipientsEdit={!this.state.fields.assemblyType}/>
 	                <div className='footerForm'>
 	                    <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.goBack()} basic color='red'>
 	                        {t('api-gateway:form.cancel')}

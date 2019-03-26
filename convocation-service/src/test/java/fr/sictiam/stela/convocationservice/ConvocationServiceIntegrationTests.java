@@ -86,7 +86,7 @@ public class ConvocationServiceIntegrationTests extends BaseIntegrationTests {
     public void createLocalAuthority() {
         if (!localAuthorityService.getByName("SICTIAM-Test").isPresent()) {
             LocalAuthority localAuthority = new LocalAuthority("639fd48c-93b9-4569-a414-3b372c71e0a1", "SICTIAM-Test",
-                    "sictiam", "999888777", true, new StampPosition(10, 10));
+                    "sictiam", "999888777", true, new StampPosition(10, 10), false);
             localAuthorityService.createOrUpdate(localAuthority);
 
             String profile1 = "{" + "\"uuid\":\"4f146466-ea58-4e5c-851c-46db18ac173b\","

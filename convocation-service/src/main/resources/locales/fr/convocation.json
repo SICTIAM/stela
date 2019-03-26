@@ -144,7 +144,8 @@
             "general_informations": "Informations générales",
             "notificationMessage": "Messages de notification",
             "subject": "Sujet",
-            "body": "Contenu"
+			"body": "Contenu",
+			"epci": "Champs collectivité"
           },
           "module_settings": {
             "title": "Paramètres du module Convocation",
@@ -172,7 +173,8 @@
             "status": "Statut",
             "edit": "Editer",
             "inactive_recipient_title": "Destinataire inactif",
-            "inactive_recipient_content": "Le destinataire est inactif depuis le: {{date}}."
+			"inactive_recipient_content": "Le destinataire est inactif depuis le: {{date}}.",
+			"epci": "Collectivité"
           },
           "recipient_list": {
             "active": "Actif",

@@ -17,11 +17,13 @@ class AddRecipientdGuestsFormFragment extends Component {
 	static propTypes = {
 	    fields: PropTypes.object.isRequired,
 	    updateUser: PropTypes.func.isRequired,
-	    disabledRecipientsEdit: PropTypes.bool
+	    disabledRecipientsEdit: PropTypes.bool,
+	    epci: PropTypes.bool
 	}
     static defaultProps = {
         fields: {},
-        disabledRecipientsEdit: false
+        disabledRecipientsEdit: false,
+        epci: false
     }
 	state = {
 	    modalRecipentsOpened: false,
@@ -46,7 +48,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 
 	render() {
 	    const { t } = this.context
-	    const { fields, userToDisabled, authContext, disabledRecipientsEdit } = this.props
+	    const { fields, userToDisabled, authContext, disabledRecipientsEdit, epci } = this.props
 	    const { modalRecipentsOpened, modalGuestsOpened } = this.state
 	    const guestsToDisabled = userToDisabled ? fields.recipients.slice().concat(userToDisabled.recipients, userToDisabled.guests) : fields.recipients.slice()
 	    const canCreateUser = authContext.userRights && authContext.userRights.indexOf('CONVOCATION_ADMIN') !== -1
@@ -56,6 +58,8 @@ class AddRecipientdGuestsFormFragment extends Component {
 	        { property: 'firstname', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.firstname') },
 	        { property: 'email', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.email') },
 	    ]
+
+	    if(epci) metaData.push({property: 'epciName', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci')})
 	    return (
 	        <Fragment>
 	            <Segment>
@@ -76,6 +80,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                            </Button>}>
 	                                                <RecipientForm
 	                                                    onCloseModal={this.closeModal}
+	                                                    epci={epci}
 	                                                    onAdded={(selectedUser) => this.addUsers(selectedUser, 'recipients')}
 	                                                    selectedUser={fields.recipients}
 	                                                    canCreateUser={canCreateUser}
@@ -126,6 +131,7 @@ class AddRecipientdGuestsFormFragment extends Component {
 	                                                    onCloseModal={this.closeModal}
 	                                                    onAdded={(selectedUser) => this.addUsers(selectedUser, 'guests')}
 	                                                    selectedUser={fields.guests}
+	                                                    epci={epci}
 	                                                    userToDisabled={guestsToDisabled}
 	                                                    recipient={false}
 	                                                    canCreateUser={canCreateUser}

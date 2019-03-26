@@ -15,6 +15,7 @@ import com.lowagie.text.Cell;
 import fr.sictiam.stela.convocationservice.model.Convocation;
 import fr.sictiam.stela.convocationservice.model.ResponseType;
 import fr.sictiam.stela.convocationservice.service.LocalesService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +100,9 @@ public class PdfDocumentGenerator implements DocumentGenerator {
             convocation.getRecipientResponses().stream().filter(recipientResponse -> recipientResponse.getResponseType() == ResponseType.PRESENT && !recipientResponse.isGuest()).forEach(recipientResponse -> {
                 presentTable.addCell(generateCell(recipientResponse.getRecipient().getLastname()));
                 presentTable.addCell(generateCell(recipientResponse.getRecipient().getFirstname()));
-                presentTable.addCell(generateCell(""));
+                presentTable.addCell(generateCell(StringUtils.isNotBlank(recipientResponse.getRecipient().getEpciName())
+                        ? recipientResponse.getRecipient().getEpciName()
+                        : ""));
                 presentTable.addCell(generateCell(""));
             });
             document.add(presentTable);

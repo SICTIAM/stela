@@ -24,11 +24,13 @@ class UserFormFragment extends Component {
 	    onSubmit: PropTypes.func,
 	    onCancel: PropTypes.func,
 	    fields: PropTypes.object,
-	    preventParentSubmit: PropTypes.bool
+	    preventParentSubmit: PropTypes.bool,
+	    epci: PropTypes.bool
 	}
 	static defaultProps = {
 	    fields: null,
-	    preventParentSubmit: false
+	    preventParentSubmit: false,
+	    epci: false
 	}
 	validationRules = {
 	    firstname: 'required',
@@ -47,7 +49,8 @@ class UserFormFragment extends Component {
 	        firstname: '',
 	        lastname: '',
 	        email: '',
-	        phoneNumber: ''
+	        phoneNumber: '',
+	        epciName: ''
 	    }
 	}
 	componentDidMount = () => {
@@ -129,6 +132,7 @@ class UserFormFragment extends Component {
 	}
 	render() {
 	    const { t } = this.context
+	    const { epci } = this.props
 	    const submissionButton =
 			<Button type={this.props.preventParentSubmit ? 'button' :'submit'} onClick={this.props.preventParentSubmit ? this.submitForm : null} primary basic disabled={!this.state.isFormValid}>
 			    {this.props.preventParentSubmit ? t('api-gateway:form.add') : t('api-gateway:form.send')}
@@ -200,6 +204,17 @@ class UserFormFragment extends Component {
 	                                />
 	                            </FormField>
 	                        </Grid.Column>
+	                    { epci && (
+	                        <Grid.Column mobile="16" computer='8'>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_epciName`}
+	                                label={t('convocation.admin.modules.convocation.recipient_config.epci')}>
+	                                <input
+	                                    id={`${this.state.fields.uuid}_epci`}
+	                                    value={this.state.fields.epciName}
+	                                    onChange={e => this.handleFieldChange(`${this.state.fields.uuid}_epciName`, e.target.value)}/>
+	                            </FormField>
+	                        </Grid.Column>
+	                    )}
 	                    </Grid>
 	                    <div className='footerForm'>
 	                        {this.state.fields.uuid && (
