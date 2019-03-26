@@ -250,9 +250,6 @@ class NewActeForm extends Component {
             code: t('acte.fields.code')
         }
         const validationRules = this.validationRules
-
-        if (this.state.fields.nature === 'DOCUMENTS_BUDGETAIRES_ET_FINANCIERS' || this.props.mode === 'ACTE_BUDGETAIRE')
-            validationRules.annexes = 'required'
         const validation = new Validator(data, validationRules, {'max.archiveSize': this.context.t('acte.new.maxArchiveSize')})
         Validator.register('acteAttachmentType', this.validateActeAttachmentType, this.context.t('acte.new.PJ_types_validation'))
         validation.setAttributeNames(attributeNames)
@@ -575,7 +572,6 @@ class NewActeForm extends Component {
                     <Grid centered columns={1}>
                         <Grid.Column textAlign={'center'} column={16}>
                             <FormField htmlFor={`${this.state.fields.uuid}_annexes`} label={t('acte.fields.annexes')}
-                                required={isBudgetActe}
                                 helpText={t('acte.help_text.annexes', { acceptAnnexes })}>
                                 <DragAndDropFile
                                     key={`${this.state.fields.uuid}_annexes`}
@@ -584,7 +580,7 @@ class NewActeForm extends Component {
                                     disableClick={true}
                                     multiple={false}>
                                     <InputFile icon={false} labelClassName="primary" htmlFor={`${this.state.fields.uuid}_annexes`} label={`${t('api-gateway:form.or')} ${t('api-gateway:form.add_a_file')}`}>
-                                        <input type="file" aria-required={isBudgetActe} id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
+                                        <input type="file" id={`${this.state.fields.uuid}_annexes`} accept={acceptAnnexes}
                                             onChange={e => this.saveDraftFile(e.target.files[0], acceptAnnexes, 'annexe')} style={{ display: 'none' }} />
                                     </InputFile>
                                 </DragAndDropFile>
