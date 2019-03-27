@@ -130,9 +130,11 @@ DragAndDropFile.contextTypes = {
 
 const Page = ({ children, title, subtitle }) => (
     <div>
-        <Header as="h1" style={{ textAlign: 'center' }}>
-            {title && title.toUpperCase()}
-        </Header>
+        {title && (
+            <Header as="h1" style={{ textAlign: 'center' }}>
+            	{title.toUpperCase()}
+        	</Header>
+        )}
         {subtitle &&
             <Header style={{ textAlign: 'center', marginTop: 0 }}>
                 <Header.Subheader>{subtitle}</Header.Subheader>

@@ -102,22 +102,25 @@ class ParticipantsResponsesFragment extends Component {
 	        presentContent = <div>{t('convocation.page.no_present')}</div>
 	    }
 
-	    const absent = this.filterRecipientsByResponses('NOT_PRESENT').map(part => {
-	        return (
-	            <p key={part.recipient.uuid}>
-	                {`${part.recipient.firstname} ${part.recipient.lastname}`}
-	            </p>
-	        )
-	    })
-	    const absentContent =
-			<div>
-			    {absent.length === 0 && (
-			        t('convocation.page.no_absent')
-			    )}
-			    {absent.length > 0 && (
-			        absent
-			    )}
-			</div>
+	    const absent = this.filterRecipientsByResponses('NOT_PRESENT')
+
+	    let absentContent
+	    if(absent.length > 0) {
+	        absentContent =
+				<table style={{borderSpacing: '10px'}}>
+				    <thead>
+				        <tr>
+				            <th></th>
+				            {questions}
+				        </tr>
+				    </thead>
+				    <tbody>
+				        {this.createResponsesContent(absent)}
+				    </tbody>
+				</table>
+	    } else {
+	        absentContent = <div>{t('convocation.page.no_absent')}</div>
+	    }
 	    const substitution = this.filterRecipientsByResponses('SUBSTITUTED').map(part => {
 	        return(
 	            <p key={part.recipient.uuid}>
