@@ -37,13 +37,11 @@ public class SesileTest {
 
     @Test
     public void testPostClasseur() throws IOException {
-        ResponseEntity<Classeur> classeur = sesileService.postClasseur(localAuthority,
+        Classeur classeur = sesileService.postClasseur(localAuthority,
                 new ClasseurRequest("test", "test", "20/02/2018", 2, 1, 3, "f.laussinot@sictiam.fr"), null);
         assertThat(classeur, notNullValue());
-        assertThat(classeur.getStatusCodeValue(), is(HttpStatus.OK.value()));
 
-        ResponseEntity<Classeur> request = sesileService.checkClasseurStatus(localAuthority,
-                classeur.getBody().getId());
+        ResponseEntity<Classeur> request = sesileService.checkClasseurStatus(localAuthority, classeur.getId());
         assertThat(request, notNullValue());
         assertThat(request.getStatusCodeValue(), is(HttpStatus.OK.value()));
         assertThat(request.getBody().getStatus(), is(ClasseurStatus.IN_PROGRESS));
@@ -53,13 +51,12 @@ public class SesileTest {
         byte[] targetArray = new byte[in.available()];
         in.read(targetArray);
 
-        ResponseEntity<Document> retour = sesileService.addFileToclasseur(localAuthority, targetArray,
-                "28000-2017-P-RN-22-1516807373820", classeur.getBody().getId());
+        Document retour = sesileService.addFileToclasseur(localAuthority, targetArray,
+                "28000-2017-P-RN-22-1516807373820", classeur.getId());
         // {"id":2894,"name":"28000-2017-P-RN-22-1516807373820","repourl":"5a831da0334e6.","type":"application\/xml","signed":false,"histories":[]}
         assertThat(retour, notNullValue());
-        assertThat(retour.getStatusCodeValue(), is(HttpStatus.OK.value()));
 
-        assertThat(sesileService.checkDocumentSigned(localAuthority, retour.getBody().getId()), is(false));
+        assertThat(sesileService.checkDocumentSigned(localAuthority, retour.getId()), is(false));
     }
 
     @Test

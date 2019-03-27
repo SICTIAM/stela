@@ -28,6 +28,9 @@ public class LocalAuthority {
     private Boolean sesileNewVersion;
     private String token;
     private String secret;
+    /**
+     * As its name does not really say, it is the profile uuid of the "agent garant".
+     */
     private String genericProfileUuid;
     private ArchiveSettings archiveSettings;
     private String slugName;

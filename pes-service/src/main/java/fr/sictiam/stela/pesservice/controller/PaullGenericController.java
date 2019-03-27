@@ -1,5 +1,6 @@
 package fr.sictiam.stela.pesservice.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.pesservice.model.GenericDocument;
 import fr.sictiam.stela.pesservice.model.LocalAuthority;
 import fr.sictiam.stela.pesservice.model.sesile.Classeur;
@@ -7,6 +8,7 @@ import fr.sictiam.stela.pesservice.model.sesile.ClasseurRequest;
 import fr.sictiam.stela.pesservice.model.sesile.Document;
 import fr.sictiam.stela.pesservice.model.sesile.ServiceOrganisation;
 import fr.sictiam.stela.pesservice.model.util.PaullResponse;
+import fr.sictiam.stela.pesservice.service.ExternalRestService;
 import fr.sictiam.stela.pesservice.service.LocalAuthorityService;
 import fr.sictiam.stela.pesservice.service.PaullService;
 import fr.sictiam.stela.pesservice.service.SesileService;
@@ -25,6 +27,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static fr.sictiam.stela.pesservice.service.util.JsonExtractorUtils.*;
+
 @RestController
 @RequestMapping("/rest/externalws/{siren}/fr/classic/webservgeneriques/services/api/rest.php/")
 public class PaullGenericController {
@@ -33,13 +37,15 @@ public class PaullGenericController {
 
     private final SesileService sesileService;
     private final LocalAuthorityService localAuthorityService;
-    private PaullService paullService;
+    private final PaullService paullService;
+    private final ExternalRestService externalRestService;
 
     public PaullGenericController(SesileService sesileService, LocalAuthorityService localAuthorityService,
-                                  PaullService paullService) {
+                                  PaullService paullService, ExternalRestService externalRestService) {
         this.sesileService = sesileService;
         this.localAuthorityService = localAuthorityService;
         this.paullService = paullService;
+        this.externalRestService = externalRestService;
     }
 
     private PaullResponse generatePaullResponse(HttpStatus httpStatus, Object datas) {
@@ -78,35 +84,49 @@ public class PaullGenericController {
         if (type == null)
             return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.BAD_REQUEST, data), HttpStatus.BAD_REQUEST);
 
-        if (email != null) email = email.trim();
+        Optional<LocalAuthority> optLocalAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
+        if (!optLocalAuthority.isPresent()) {
+            LOGGER.error("No local authority found for SIREN {}", StringUtils.removeStart(siren, "sys"));
+            return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.NOT_FOUND, data), HttpStatus.NOT_FOUND);
+        }
 
-        Integer serviceOrganisation = Integer.parseInt(service);
-        Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(StringUtils.removeStart(siren, "sys"));
+        LocalAuthority localAuthority = optLocalAuthority.get();
 
-        if (localAuthority.isPresent()) {
-
-            LocalAuthority authority = localAuthority.get();
-            validation = sesileService.getSesileValidationDate(validation, authority.getGenericProfileUuid());
-
+        if (email != null) {
+            email = email.trim();
+        } else {
+            String genericProfileUuid = localAuthority.getGenericProfileUuid();
             try {
-                ResponseEntity<Classeur> classeur = sesileService.postClasseur(authority,
-                        new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email), null);
-                ResponseEntity<Document> documentResonse = sesileService.addFileToclasseur(authority,
-                        multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getBody().getId());
-                if (documentResonse.getStatusCode().is2xxSuccessful()) {
-                    data.put("idFlux", classeur.getBody().getId());
-                    sesileService.saveGenericDocument(
-                            new GenericDocument(classeur.getBody().getId(), documentResonse.getBody().getId(),
-                                    serviceOrganisation, email, LocalDateTime.now(), authority));
-                }
-            } catch (RestClientResponseException e) {
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-                LOGGER.error("Error from Sesile : {} | Body : {}", e.getMessage(), e.getResponseBodyAsString());
+                JsonNode profile = externalRestService.getProfile(genericProfileUuid);
+                email = extractEmailFromProfile(profile);
             } catch (IOException e) {
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-                LOGGER.error("Failed to read bytes from given file : {}", e.getMessage());
+                LOGGER.error("Error while retrieving generic profile {}", genericProfileUuid, e);
+                return new ResponseEntity<Object>(generatePaullResponse(HttpStatus.INTERNAL_SERVER_ERROR, data),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
+
+        Integer serviceOrganisation = Integer.parseInt(service);
+
+        validation = sesileService.getSesileValidationDate(validation, localAuthority.getGenericProfileUuid());
+
+        try {
+            Classeur classeur = sesileService.postClasseur(localAuthority,
+                    new ClasseurRequest(name, desc, validation, type, serviceOrganisation, 3, email), null);
+            Document document = sesileService.addFileToclasseur(localAuthority,
+                    multiFile.getBytes(), multiFile.getOriginalFilename(), classeur.getId());
+            data.put("idFlux", classeur.getId());
+            sesileService.saveGenericDocument(
+                    new GenericDocument(classeur.getId(), document.getId(),
+                            serviceOrganisation, email, LocalDateTime.now(), localAuthority));
+        } catch (RestClientResponseException e) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            LOGGER.error("Error from Sesile : {} | Body : {}", e.getMessage(), e.getResponseBodyAsString());
+        } catch (IOException e) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            LOGGER.error("Failed to read bytes from given file : {}", e.getMessage());
+        }
+
         return new ResponseEntity<Object>(generatePaullResponse(status, data), status);
     }
 
