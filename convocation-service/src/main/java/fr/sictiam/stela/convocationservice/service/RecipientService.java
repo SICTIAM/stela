@@ -105,8 +105,12 @@ public class RecipientService {
         }
 
         ConvocationBeanUtils.mergeProperties(recipientParams, recipient, "uuid", "token", "localAuthority", "inactivityDate");
-        recipient.setFirstname(StringUtils.capitalize(recipientParams.getFirstname().toLowerCase()));
-        recipient.setLastname(recipientParams.getLastname().toUpperCase());
+
+        if (recipientParams.getFirstname() != null)
+            recipient.setFirstname(StringUtils.capitalize(recipientParams.getFirstname().toLowerCase()));
+
+        if (recipientParams.getLastname() != null)
+            recipient.setLastname(recipientParams.getLastname().toUpperCase());
 
         if (recipientParams.getActive() != null) {
             if (recipientParams.getActive()) {
