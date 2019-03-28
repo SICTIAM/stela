@@ -102,7 +102,10 @@
     margin-right: 0px !important;
 }
 .pt-0 {
-    padding-top: 0;
+    padding-top: 0px !important;
+}
+.pb-0 {
+	padding-bottom: 0px !important;
 }
 .pl-0 {
     padding-left: 0;
@@ -112,13 +115,13 @@
 }
 
 .py-5 {
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
 }
 
 .px-10 {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
 }
 
 /* Border */
@@ -363,7 +366,8 @@ i.collapsed-text-icon.circular.icon {
     display: flex;
     background-color: #ffffff;
     padding: 10px 15px;
-    right: -600px;
+	right: -600px;
+	top:150px;
     left: auto;
     animation: close-slide-left-to-right 0.5s ease;
     box-shadow: 0px 0px 8px -0.5px rgba(0,0,0,0.40);
@@ -411,6 +415,16 @@ i.collapsed-text-icon.circular.icon {
 }
 .deletableListItem:last-child {
     border: none;
+}
+
+/* Tags */
+.tag {
+    border-radius: 15px;
+    border: 1px solid rgba(34,36,38,.3);
+    display: inline-block;
+    padding: 3px 8px;
+	margin-right: 10px;
+	font-size: 0.8em;
 }
 
 /* Chips */

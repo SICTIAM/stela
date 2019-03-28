@@ -211,14 +211,15 @@ public class ConvocationRestController {
             @PathVariable String uuid,
             @RequestParam(name = "file") MultipartFile file,
             @RequestParam(name = "procuration", required = false) MultipartFile procuration,
-            @RequestParam(name = "annexes", required = false) MultipartFile... annexes) {
+            @RequestParam(name = "annexes", required = false) MultipartFile[] annexes,
+            @RequestParam(name = "tags", required = false) String[] tags) {
 
         validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
                 Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
 
         Convocation convocation = convocationService.getConvocation(uuid);
 
-        convocationService.uploadFiles(convocation, file, procuration, annexes);
+        convocationService.uploadFiles(convocation, file, procuration, annexes, tags);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -228,14 +229,15 @@ public class ConvocationRestController {
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
             @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
             @PathVariable String uuid,
-            @RequestParam(name = "annexes", required = false) MultipartFile... annexes) {
+            @RequestParam(name = "annexes", required = false) MultipartFile[] annexes,
+            @RequestParam(name = "tags", required = false) String[] tags) {
 
         validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
                 Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
 
         Convocation convocation = convocationService.getConvocation(uuid);
 
-        convocationService.uploadAdditionalFiles(convocation, annexes);
+        convocationService.uploadAdditionalFiles(convocation, annexes, tags);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -403,6 +405,40 @@ public class ConvocationRestController {
         Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
         convocationService.cancelConvocation(convocation);
 
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/file/{fileUuid}/tag/{tagUuid}")
+    public ResponseEntity addTag(
+            @PathVariable String uuid,
+            @PathVariable String fileUuid,
+            @PathVariable String tagUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        convocationService.addTagToFile(convocation, fileUuid, tagUuid);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{uuid}/file/{fileUuid}/tag/{tagUuid}")
+    public ResponseEntity removeTag(
+            @PathVariable String uuid,
+            @PathVariable String fileUuid,
+            @PathVariable String tagUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid) {
+
+        validateAccess(currentLocalAuthUuid, uuid, currentProfileUuid, null, rights,
+                Collections.singletonList(Right.CONVOCATION_DEPOSIT), false);
+
+        Convocation convocation = convocationService.getConvocation(uuid, currentLocalAuthUuid);
+        convocationService.removeTagFromFile(convocation, fileUuid, tagUuid);
         return new ResponseEntity(HttpStatus.OK);
     }
 

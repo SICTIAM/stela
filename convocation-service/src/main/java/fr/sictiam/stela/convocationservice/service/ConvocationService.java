@@ -60,8 +60,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -83,6 +86,8 @@ public class ConvocationService {
 
     private final LocalesService localesService;
 
+    private final TagService tagService;
+
     private final RecipientResponseRepository recipientResponseRepository;
 
     private final QuestionResponseRepository questionResponseRepository;
@@ -100,6 +105,7 @@ public class ConvocationService {
             StorageService storageService,
             ExternalRestService externalRestService,
             LocalesService localesService,
+            TagService tagService,
             RecipientResponseRepository recipientResponseRepository,
             QuestionResponseRepository questionResponseRepository,
             AttachmentRepository attachmentRepository,
@@ -110,6 +116,7 @@ public class ConvocationService {
         this.storageService = storageService;
         this.externalRestService = externalRestService;
         this.localesService = localesService;
+        this.tagService = tagService;
         this.recipientResponseRepository = recipientResponseRepository;
         this.questionResponseRepository = questionResponseRepository;
         this.attachmentRepository = attachmentRepository;
@@ -250,8 +257,10 @@ public class ConvocationService {
     }
 
     public void uploadFiles(Convocation convocation, MultipartFile file,
-            MultipartFile procuration, MultipartFile... annexes)
+            MultipartFile procuration, MultipartFile[] annexes, String[] tagsIds)
             throws ConvocationFileException {
+
+        Map<String, List<Tag>> tags = extractTags(tagsIds, convocation.getLocalAuthority().getUuid());
 
         if (convocation.getAttachment() != null && file != null) {
             LOGGER.error("Try to overwrite main document for convocation {} ({})", convocation.getSubject(),
@@ -264,32 +273,34 @@ public class ConvocationService {
         }
 
         if (file != null) {
-            Attachment attachment = saveAttachment(file, false);
+            Attachment attachment = saveAttachment(file, false, tags.get(file.getOriginalFilename()));
             convocation.setAttachment(attachment);
         }
 
         if (procuration != null) {
-            Attachment attachment = saveAttachment(procuration, false);
+            Attachment attachment = saveAttachment(procuration, false, tags.get(procuration.getOriginalFilename()));
             convocation.setProcuration(attachment);
         }
 
         for (MultipartFile annexe : annexes) {
-            Attachment attachment = saveAttachment(annexe, false);
+            Attachment attachment = saveAttachment(annexe, false, tags.get(annexe.getOriginalFilename()));
             convocation.getAnnexes().add(attachment);
         }
 
         convocationRepository.save(convocation);
     }
 
-    public void uploadAdditionalFiles(Convocation convocation, MultipartFile... annexes)
+    public void uploadAdditionalFiles(Convocation convocation, MultipartFile[] annexes, String[] tagsIds)
             throws ConvocationFileException {
 
         if (annexes.length == 0)
             return;
 
+        Map<String, List<Tag>> tags = extractTags(tagsIds, convocation.getLocalAuthority().getUuid());
+
         List<String> filenames = new ArrayList<>();
         for (MultipartFile annexe : annexes) {
-            Attachment attachment = saveAttachment(annexe, true);
+            Attachment attachment = saveAttachment(annexe, true, tags.get(annexe.getOriginalFilename()));
             convocation.getAnnexes().add(attachment);
             filenames.add(attachment.getFilename());
         }
@@ -307,7 +318,7 @@ public class ConvocationService {
             throw new ConvocationNotAvailableException("meetingAfter");
         }
 
-        Attachment attachment = saveAttachment(minutes, false);
+        Attachment attachment = saveAttachment(minutes, false, null);
         convocation.setMinutes(attachment);
         convocationRepository.save(convocation);
         addHistory(convocation, HistoryType.MINUTES_ADDED);
@@ -508,6 +519,24 @@ public class ConvocationService {
         return convocationRepository.findByHalfDuration();
     }
 
+    public void addTagToFile(Convocation convocation, String fileUuid, String tagUuid) {
+
+        Attachment file = getFile(convocation, fileUuid);
+        Tag tag = tagService.getTag(tagUuid, convocation.getLocalAuthority().getUuid());
+
+        file.getTags().add(tag);
+        attachmentRepository.saveAndFlush(file);
+    }
+
+    public void removeTagFromFile(Convocation convocation, String fileUuid, String tagUuid) {
+
+        Attachment file = getFile(convocation, fileUuid);
+        Tag tag = tagService.getTag(tagUuid, convocation.getLocalAuthority().getUuid());
+
+        file.getTags().remove(tag);
+        attachmentRepository.saveAndFlush(file);
+    }
+
     public ByteArrayOutputStream createArchive(Convocation convocation) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TarArchiveOutputStream taos = new TarArchiveOutputStream(baos);
@@ -680,11 +709,16 @@ public class ConvocationService {
         return predicates;
     }
 
-    private Attachment saveAttachment(MultipartFile file, boolean additionalDocument) throws
+    private Attachment saveAttachment(MultipartFile file, boolean additionalDocument, List<Tag> tags) throws
             ConvocationFileException {
 
         try {
             Attachment attachment = new Attachment(file.getOriginalFilename(), file.getBytes(), additionalDocument);
+
+            if (tags != null) {
+                attachment.getTags().addAll(tags);
+            }
+
             attachment = attachmentRepository.save(attachment);
             applicationEventPublisher.publishEvent(new FileUploadEvent(this, attachment));
             return attachment;
@@ -810,6 +844,31 @@ public class ConvocationService {
 
     private void addHistory(Convocation convocation, HistoryType type, String message, boolean publicHistory) {
         applicationEventPublisher.publishEvent(new HistoryEvent(this, convocation, type, message, publicHistory));
+    }
+
+    private Map<String, List<Tag>> extractTags(String[] tagsIds, String localAuthorityUuid) {
+
+        Map<String, List<Tag>> tags = new HashMap<>();
+        if (tagsIds != null) {
+            for (String key : tagsIds) {
+                String[] words = key.split("/");
+                if (words.length >= 2) {
+                    // first : filename
+                    // rest of array : tags uuids
+                    List<Tag> tagList = new ArrayList<>();
+                    for (String tagId : Arrays.copyOfRange(words, 1, words.length)) {
+                        try {
+                            tagList.add(tagService.getTag(tagId, localAuthorityUuid));
+                        } catch (NotFoundException e) {
+                            LOGGER.error("Tag {} does not belong to local authority {}", tagId, localAuthorityUuid);
+                        }
+                    }
+                    tags.put(words[0], tagList);
+                }
+            }
+        }
+
+        return tags;
     }
 }
 

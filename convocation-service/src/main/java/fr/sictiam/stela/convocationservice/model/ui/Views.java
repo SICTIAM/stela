@@ -85,7 +85,10 @@ public class Views {
     public interface Public {
     }
 
-    public interface Attachment extends Public {
+    public interface Tag extends Public {
+    }
+
+    public interface Attachment extends Tag {
     }
 
     public interface Search extends Public {

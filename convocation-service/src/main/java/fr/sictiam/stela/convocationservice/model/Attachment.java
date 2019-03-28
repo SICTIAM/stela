@@ -8,10 +8,15 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -41,6 +46,13 @@ public class Attachment {
     @JsonView(Views.Attachment.class)
     private boolean additional = false;
 
+    @ManyToMany
+    @JoinTable(name = "attachment_tag",
+            joinColumns = @JoinColumn(name = "attachment_uuid"),
+            inverseJoinColumns = @JoinColumn(name = "tag_uuid"))
+    @JsonView(Views.Attachment.class)
+    private Set<Tag> tags;
+
     public Attachment() {
         this(null, null, 0, LocalDateTime.now(), false);
     }
@@ -67,6 +79,7 @@ public class Attachment {
         this.date = date;
         storageKey = "convocation/" + UUID.randomUUID().toString();
         this.additional = additional;
+        tags = new HashSet<>();
     }
 
     public String getUuid() {
@@ -100,6 +113,14 @@ public class Attachment {
     public void updateContent(byte[] content) {
         setContent(content);
         size = content.length;
+    }
+
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
     }
 
     public void setFilename(String filename) {

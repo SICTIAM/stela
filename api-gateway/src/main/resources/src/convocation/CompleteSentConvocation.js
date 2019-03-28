@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
-import { Segment, Grid, Button, Form, TextArea } from 'semantic-ui-react'
+import { Segment, Grid, Button, Form, TextArea, Dropdown } from 'semantic-ui-react'
 import accepts from 'attr-accept'
 
 import { notifications } from '../_util/Notifications'
@@ -54,8 +54,10 @@ class CompleteSentConvocation extends Component {
 	        questions: [],
 	        comment: '',
 	        guests: [],
-	        recipients: []
-	    }
+	        recipients: [],
+	        annexesTags: []
+	    },
+	    tagsList: []
 	}
 
 	componentDidMount = async() => {
@@ -87,7 +89,11 @@ class CompleteSentConvocation extends Component {
 	        return response.recipient
 	    })
 
-	    this.setState({convocation: convocationResponse, initialRank, fields, defaultPart })
+	    const tagsListResponse = (await this._convocationService.getAllTags(this.props.authContext)).map(item => {
+	        return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}
+	    })
+
+	    this.setState({convocation: convocationResponse, initialRank, fields, defaultPart, tagsList: tagsListResponse })
 	}
 
 	submit = async() => {
@@ -110,6 +116,13 @@ class CompleteSentConvocation extends Component {
 	        this.state.fields.annexes.forEach(annexe => {
 	            data.append('annexes', annexe)
 	        })
+	        if(this.state.fields.annexesTags.length > 0) {
+	            const annexesTags = this.state.fields.annexesTags.map((annexe) => {
+	                const tags = annexe.tags.join('/')
+	                return `${annexe.fileName}/${tags}`
+	            })
+	            data.append('tags', annexesTags)
+	        }
 	        await this._convocationService.updateDocumentsConvocation(this.props.authContext, this.props.uuid, data)
 	        _addNotification(notifications.convocation.complet)
 	        history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
@@ -146,9 +159,13 @@ class CompleteSentConvocation extends Component {
 	    this.setState({ fields })
 	}
 
-	deleteAnnexe = (index) => {
+	deleteAnnexe = (index, annexeName) => {
 	    const fields = this.state.fields
 	    fields['annexes'].splice(index, 1)
+	    const idAnnexeTags = fields['annexesTags'].findIndex((annexes) => {
+	        return annexes.fileName === annexeName
+	    })
+	    fields['annexesTags'].splice(idAnnexeTags, 1)
 	    this.setState({ fields })
 	}
 
@@ -160,9 +177,23 @@ class CompleteSentConvocation extends Component {
 	    history.goBack()
 	}
 
+	handleTagChange = (fileName, tags) => {
+	    const { fields } = this.state
+
+	    const idAnnexeTags = fields['annexesTags'].findIndex((annexe) => {
+	        return annexe.fileName === fileName
+	    })
+	    if(idAnnexeTags === -1) {
+	        fields['annexesTags'].push({fileName: fileName, tags: tags})
+	    } else {
+	        fields['annexesTags'][idAnnexeTags]['tags'] = tags
+	    }
+	    this.setState({ fields })
+	}
+
 	render() {
 	    const { t } = this.context
-	    const { convocation, fields, defaultPart } = this.state
+	    const { convocation, fields, defaultPart, tagsList } = this.state
 
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.fields.annexes.length > 3 ? this.state.fields.annexes.slice(0,3) : this.state.fields.annexes
@@ -171,7 +202,15 @@ class CompleteSentConvocation extends Component {
 	            <File
 	                key={`${this.state.convocation.uuid}_${annexe.name}`}
 	                attachment={{ filename: annexe.name }}
-	                onDelete={() => this.deleteAnnexe(index)} />
+	                onDelete={() => this.deleteAnnexe(index, annexe.name)}
+	                extraContent={<Dropdown
+	                    placeholder={t('convocation.fields.pick_tag')}
+	                    fluid
+	                    multiple
+	                    search
+	                    selection
+	                    options={tagsList}
+	                    onChange={(e, { value }) => this.handleTagChange(annexe.name, value)}/>}/>
 	        )
 	    })
 

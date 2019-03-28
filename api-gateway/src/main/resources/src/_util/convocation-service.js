@@ -108,6 +108,23 @@ export default class ConvocationService {
 	    }
 	}
 
+	createConvocation = async (context, parameters) => {
+	    const { _fetchWithAuthzHandling, _addNotification, t } = context
+	    const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: '/api/convocation', method: 'POST', body: JSON.stringify(parameters), context: context, headers: headers})).json()
+	    } catch(error) {
+	        error.text().then(text => {
+	            if(text) {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`${text}`))
+	            } else {
+	                _addNotification(notifications.defaultError, 'notifications.title', t(`convocation.errors.convocation.${error.status}`))
+	            }
+	        })
+	        throw error
+	    }
+	}
+
 	updateConvocation = async (context, uuid, parameters) => {
 	    const { _fetchWithAuthzHandling, _addNotification, t } = context
 	    const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
@@ -126,11 +143,11 @@ export default class ConvocationService {
 	    }
 	}
 
-	updateDocumentsConvocation = async (context, uuid, data) => {
+	updateDocumentsConvocation = async (context, uuid, data, put=true) => {
 	    const { _fetchWithAuthzHandling, _addNotification, t } = context
 
 	    try {
-	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}/upload`, method: 'PUT', body: data, context: context})
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/${uuid}/upload`, method: put ? 'PUT' : 'POST', body: data, context: context})
 	    } catch(error) {
 	        error.text().then(text => {
 	            if(text) {
@@ -208,6 +225,44 @@ export default class ConvocationService {
 
 	    try {
 	        return await _fetchWithAuthzHandling({url: '/api/convocation/local-authority/procuration', method: 'POST', body: data, context: context})
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+
+	saveTags = async (context, data) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    const url = data.uuid ? `/api/convocation/tag/${data.uuid}` : '/api/convocation/tag'
+	    const headers = { 'Content-Type': 'application/json' }
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: url, headers: headers, method: data.uuid ? 'PUT' : 'POST', body: JSON.stringify(data), context: context})).json()
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+	getAllTags = async (context) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await (await _fetchWithAuthzHandling({url: '/api/convocation/tag/all'})).json()
+	    } catch(error) {
+	        error.json().then(json => {
+	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        })
+	        throw error
+	    }
+	}
+	deleteTag = async (context, uuid) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: `/api/convocation/tag/${uuid}`, method: 'DELETE', context: context})
 	    } catch(error) {
 	        error.json().then(json => {
 	            _addNotification(notifications.defaultError, 'notifications.title', json.message)

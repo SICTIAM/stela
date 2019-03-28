@@ -13,16 +13,16 @@ export default class QuickView extends Component {
 	}
 	render() {
 	    const data = this.props.data && this.props.data.data ? this.props.data.data.map((row) => {
-	        return (
-	            <Fragment key={row.id}>
-	                <Grid.Column mobile={16} computer={row.computer}>
-	                    <Field htmlFor={row.id} label={row.label}>
-	                        <FieldValue id={row.id}>{row.value}</FieldValue>
-	                    </Field>
-	                </Grid.Column>
-	            </Fragment>
-	        )
-	    }) : null
+	            return (
+	                <Fragment key={row.id}>
+	                    <Grid.Column mobile={16} computer={row.computer}>
+	                        <Field htmlFor={row.id} label={row.label}>
+	                            <FieldValue id={row.id}>{row.value}</FieldValue>
+	                        </Field>
+	                    </Grid.Column>
+	                </Fragment>
+	            )
+	        }) : null
 	    return (
 	        <div className={'quick-view' + (this.props.open ? ' open' : '')}>
 	            <div style={{width: '100%'}}>

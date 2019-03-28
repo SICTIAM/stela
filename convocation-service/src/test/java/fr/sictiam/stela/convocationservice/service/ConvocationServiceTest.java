@@ -61,6 +61,9 @@ public class ConvocationServiceTest {
     ExternalRestService externalRestService;
 
     @MockBean
+    TagService tagService;
+
+    @MockBean
     RecipientResponseRepository recipientResponseRepository;
 
     @MockBean

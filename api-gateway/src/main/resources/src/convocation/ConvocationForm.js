@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import { translate } from 'react-i18next'
-import { Segment, Form, TextArea, Grid, Button } from 'semantic-ui-react'
+import { Segment, Form, TextArea, Grid, Button, Dropdown } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import debounce from 'debounce'
 import moment from 'moment'
@@ -12,7 +12,6 @@ import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { acceptFileDocumentConvocation } from '../_util/constants'
 import ConvocationService from '../_util/convocation-service'
-
 
 import { withAuthContext } from '../Auth'
 
@@ -45,6 +44,7 @@ class ConvocationForm extends Component {
 	        guests: [],
 	        file: null,
 	        annexes: [],
+	        annexesTags: [],
 	        sending: false,
 	        defaultProcuration: null,
 	        customProcuration: null,
@@ -58,24 +58,22 @@ class ConvocationForm extends Component {
 	    allFormErrors: [],
 	    localAuthority: {
 	        epci: false
-	    }
+	    },
+	    tagsList: []
 	}
 	componentDidMount = async () => {
-	    this.validateForm(null)
-	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    this._convocationService = new ConvocationService()
+	    this.validateForm(null)
 
 	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
 
-	    _fetchWithAuthzHandling({url: '/api/convocation/assembly-type/all', method: 'GET'})
-	        .then(checkStatus)
-	        .then(response => response.json())
-	        .then(json => this.setState({localAuthority: localAuthorityResponse, assemblyTypes: json.map(item => { return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}})}))
-	        .catch(response => {
-	            response.json().then(json => {
-	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	            })
-	        })
+	    const assemblyTypesResponse = (await this._convocationService.getAllAssemblyType(this.props.authContext)).map(item => {
+	        return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}
+	    })
+	    const tagsListResponse = (await this._convocationService.getAllTags(this.props.authContext)).map(item => {
+	        return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}
+	    })
+	    this.setState({tagsList: tagsListResponse, assemblyTypes: assemblyTypesResponse, localAuthority: localAuthorityResponse})
 	}
 	validationRules = {
 	    meetingDate: ['required', 'date'],
@@ -97,9 +95,9 @@ class ConvocationForm extends Component {
 	        }
 	    }
 	}
-	submit = () => {
+	submit = async() => {
 	    if(this.state.isFormValid) {
-	        const { _fetchWithAuthzHandling, _addNotification } = this.context
+	        const { _addNotification } = this.context
 	        const localAuthoritySlug = getLocalAuthoritySlug()
 
 	        const parameters = Object.assign({}, this.state.fields)
@@ -111,42 +109,34 @@ class ConvocationForm extends Component {
 			   parameters.recipients.push(guest)
 	        })
 	        delete parameters.guests
+	        delete parameters.annexesTags
 	        parameters['assemblyType'] = {uuid: parameters.assemblyType}
 	        parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
-	        const headers = { 'Content-Type': 'application/json;charset=UTF-8', 'Accept': 'application/json, */*' }
-	        _fetchWithAuthzHandling({url: '/api/convocation', method: 'POST', body: JSON.stringify(parameters), context: this.props.authContext, headers: headers})
-	            .then(checkStatus)
-	            .then(response => response.json())
-	            .then((json) => {
-	                this.setState({sending: true})
-	                _addNotification(notifications.convocation.created)
-	                const data = new FormData()
-	                data.append('file', this.state.fields.file)
-	                if(this.state.fields.annexes.length > 0) {
-	                    this.state.fields.annexes.forEach(annexe => {
-	                        data.append('annexes', annexe)
-	                    })
-	                }
-	                if(this.state.fields.customProcuration) {
-	                    data.append('procuration', this.state.fields.customProcuration)
-	                }
-	                _fetchWithAuthzHandling({url: `/api/convocation/${json.uuid}/upload`, method: 'POST', body: data, context: this.props.authContext})
-	                	.then(checkStatus)
-	                	.then(() => {
-	                		_addNotification(notifications.convocation.sent)
-	                		history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
-	                	})
-	                .catch((error) => {
-	                	error.json().then(json => {
-	                		_addNotification(notifications.defaultError, 'notifications.title', json.message)
-	                	})
-	                })
+
+	        const convocationResponse = await this._convocationService.createConvocation(this.props.authContext, parameters)
+	        this.setState({sending: true})
+	        _addNotification(notifications.convocation.created)
+	        const data = new FormData()
+	        data.append('file', this.state.fields.file)
+	        if(this.state.fields.annexes.length > 0) {
+	            this.state.fields.annexes.forEach(annexe => {
+	                data.append('annexes', annexe)
 	            })
-	            .catch((error) => {
-	                error.json().then(json => {
-	                    _addNotification(notifications.defaultError, 'notifications.title', json.message)
-	                })
+	        }
+	        if(this.state.fields.customProcuration) {
+	            data.append('procuration', this.state.fields.customProcuration)
+	        }
+
+	        if(this.state.fields.annexesTags.length > 0) {
+	            const annexesTags = this.state.fields.annexesTags.map((annexe) => {
+	                const tags = annexe.tags.join('/')
+	                return `${annexe.fileName}/${tags}`
 	            })
+	            data.append('tags', annexesTags)
+	        }
+	        await this._convocationService.updateDocumentsConvocation(this.props.authContext, convocationResponse.uuid, data, false)
+	        _addNotification(notifications.convocation.sent)
+	        history.push(`/${localAuthoritySlug}/convocation/liste-envoyees`)
 	    }
 	}
 	validateForm = debounce(() => {
@@ -256,9 +246,13 @@ class ConvocationForm extends Component {
 	    this.setState({ fields }, this.validateForm)
 	}
 
-	deleteAnnexe = (index) => {
+	deleteAnnexe = (index, annexeName) => {
 	    const fields = this.state.fields
 	    fields['annexes'].splice(index, 1)
+	    const idAnnexeTags = fields['annexesTags'].findIndex((annexes) => {
+	        return annexes.fileName === annexeName
+	    })
+	    fields['annexesTags'].splice(idAnnexeTags, 1)
 	    this.setState({ fields })
 	}
 
@@ -266,8 +260,23 @@ class ConvocationForm extends Component {
 	    history.goBack()
 	}
 
+	handleTagChange = (fileName, tags) => {
+	    const { fields } = this.state
+
+	    const idAnnexeTags = fields['annexesTags'].findIndex((annexe) => {
+	        return annexe.fileName === fileName
+	    })
+	    if(idAnnexeTags === -1) {
+	        fields['annexesTags'].push({fileName: fileName, tags: tags})
+	    } else {
+	        fields['annexesTags'][idAnnexeTags]['tags'] = tags
+	    }
+	    this.setState({ fields })
+	}
+
 	render() {
 	    const { t } = this.context
+	    const { tagsList } = this.state
 
 	    const submissionButton = this.state.delayTooShort ?
 	        <ConfirmModal onConfirm={this.submit} text={t('convocation.new.delayTooShort', {number: this.state.delay})}>
@@ -284,7 +293,15 @@ class ConvocationForm extends Component {
 	            <File
 	                key={`${this.state.fields.uuid}_${annexe.name}`}
 	                attachment={{ filename: annexe.name }}
-	                onDelete={() => this.deleteAnnexe(index)} />
+	                onDelete={() => this.deleteAnnexe(index, annexe.name)}
+	                extraContent={<Dropdown
+	                    placeholder={t('convocation.fields.pick_tag')}
+	                    fluid
+	                    multiple
+	                    search
+	                    selection
+	                    options={tagsList}
+	                    onChange={(e, { value }) => this.handleTagChange(annexe.name, value)}/>}/>
 	        )
 	    })
 
