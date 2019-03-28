@@ -47,7 +47,8 @@ public class PaullEndpoint {
 
     private static final String NAMESPACE_URI = "http://www.processmaker.com";
 
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private DateTimeFormatter dateFormatterWithTime = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Value("${application.jwt.secret}")
     String SECRET;
@@ -243,7 +244,7 @@ public class PaullEndpoint {
         detailsPESAllerStruct.setObjet(pesAller.getObjet());
         detailsPESAllerStruct.setUserName(node.get("email").asText());
         detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
-        detailsPESAllerStruct.setDateDepot(dateFormatter.format(pesAller.getCreation()));
+        detailsPESAllerStruct.setDateDepot(dateFormatterWithTime.format(pesAller.getCreation()));
         detailsPESAllerStruct.setStatutBannette(pesAller.getLastHistoryStatus().name());
 
         List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
@@ -260,7 +261,7 @@ public class PaullEndpoint {
                 detailsPESAllerStruct.setMotifAnomalie("");
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                 detailsPESAllerStruct.setDateAR("");
-                detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(pesHistory.getDate()));
+                detailsPESAllerStruct.setDateAnomalie(dateFormatterWithTime.format(pesHistory.getDate()));
                 // this only happens when NACK are manually added for testing purposes with business editors
                 if (pesHistory.getErrors() != null && !pesHistory.getErrors().isEmpty())
                     detailsPESAllerStruct.setMotifAnomalie(pesHistory.getErrors().get(0).errorText());
