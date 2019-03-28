@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/profile")
@@ -52,6 +53,20 @@ public class ProfileController {
     @GetMapping("/groups")
     public Set<WorkGroup> getProfileGroups(@RequestAttribute("STELA-Current-Profile-UUID") String profile) {
         return profileService.getByUuid(profile).getGroups();
+    }
+
+    @JsonView(Views.WorkGroupViewPublic.class)
+    @GetMapping("/groups/{right}")
+    public Set<WorkGroup> getProfileGroupsWithRight(
+            @RequestAttribute("STELA-Current-Profile-UUID") String profile,
+            @PathVariable String right) {
+
+        Set<WorkGroup> groups = profileService.getByUuid(profile).getGroups();
+
+        return groups
+                .stream()
+                .filter(workGroup -> workGroup.getRights().stream().anyMatch(r -> r.equals(right)))
+                .collect(Collectors.toSet());
     }
 
     @GetMapping

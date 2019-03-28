@@ -99,6 +99,9 @@ public class Convocation {
     @JsonView(Views.Convocation.class)
     private LocalDateTime cancellationDate;
 
+    @JsonView(Views.Convocation.class)
+    private String groupUuid;
+
     @Transient
     @JsonView(Views.Convocation.class)
     private Profile profile;
@@ -277,6 +280,14 @@ public class Convocation {
 
     public void setMinutes(Attachment minutes) {
         this.minutes = minutes;
+    }
+
+    public String getGroupUuid() {
+        return groupUuid;
+    }
+
+    public void setGroupUuid(String groupUuid) {
+        this.groupUuid = groupUuid;
     }
 
     @Override public String toString() {

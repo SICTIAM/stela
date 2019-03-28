@@ -9,7 +9,7 @@ class InputDatetime extends Component {
             <div>
                 {this.props.ariaLabel && (
                     <Datetime
-                        inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'aria-label': this.props.ariaLabel, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '' }}
+                        inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'aria-label': this.props.ariaLabel, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '', 'autocomplete': 'off' }}
                         locale="fr-fr"
                         dateFormat="DD/MM/YYYY"
                         closeOnSelect={true}
@@ -19,7 +19,7 @@ class InputDatetime extends Component {
                 )}
                 {!this.props.ariaLabel && (
                     <Datetime
-                        inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '' }}
+                        inputProps={{ 'id': this.props.id, 'aria-required': this.props.ariaRequired ? this.props.ariaRequired : false, 'placeholder': this.props.placeholder, 'className': this.props.error ? 'error' : '', 'autocomplete': 'off' }}
                         locale="fr-fr"
                         dateFormat="DD/MM/YYYY"
                         closeOnSelect={true}

@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,6 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -560,16 +562,16 @@ public class ConvocationService {
     }
 
     public Long countSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String
-            assemblyType,
-            LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,
-            String filter, String currentLocalAuthUuid) {
+            assemblyType, LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject,
+            String filter, String currentLocalAuthUuid, Set<String> groups) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<Convocation> convocationRoot = query.from(Convocation.class);
 
         List<Predicate> predicates = getSentQueryPredicates(builder, convocationRoot, multifield, sentDateFrom,
-                sentDateTo, assemblyType, meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid);
+                sentDateTo, assemblyType, meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid,
+                groups);
         query.select(builder.count(convocationRoot));
         query.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -594,7 +596,7 @@ public class ConvocationService {
     public List<Convocation> findSentWithQuery(String multifield, LocalDate sentDateFrom, LocalDate sentDateTo,
             String assemblyType, LocalDate meetingDateFrom, LocalDate meetingDateTo, String subject, String filter,
             Integer limit, Integer offset, String column, String direction,
-            String currentLocalAuthUuid) {
+            String currentLocalAuthUuid, Set<String> groups) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Convocation> query = builder.createQuery(Convocation.class);
@@ -603,7 +605,8 @@ public class ConvocationService {
         query.select(convocationRoot);
         String columnAttribute = StringUtils.isEmpty(column) ? "meetingDate" : column;
         List<Predicate> predicates = getSentQueryPredicates(builder, convocationRoot, multifield, sentDateFrom,
-                sentDateTo, assemblyType, meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid);
+                sentDateTo, assemblyType, meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid,
+                groups);
 
         query.where(predicates.toArray(new Predicate[predicates.size()]))
                 .orderBy(!StringUtils.isEmpty(direction) && direction.equals("ASC")
@@ -635,10 +638,13 @@ public class ConvocationService {
 
     private List<Predicate> getSentQueryPredicates(CriteriaBuilder builder, Root<Convocation> convocationRoot,
             String multifield, LocalDate sentDateFrom, LocalDate sentDateTo, String assemblyType, LocalDate
-            meetingDateFrom,
-            LocalDate meetingDateTo, String subject, String filter, String currentLocalAuthUuid) {
+            meetingDateFrom, LocalDate meetingDateTo, String subject, String filter,
+            String currentLocalAuthUuid, Set<String> groups) {
 
         List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(getGroupPredicate(builder, convocationRoot, groups));
+
         if (StringUtils.isNotBlank(multifield)) {
             List<Predicate> multifieldPredicates = new ArrayList<>();
 
@@ -707,6 +713,15 @@ public class ConvocationService {
         }
 
         return predicates;
+    }
+
+    private Predicate getGroupPredicate(CriteriaBuilder builder, Root<Convocation> convocationRoot, Set<String> groups) {
+        if (!CollectionUtils.isEmpty(groups)) {
+            return builder.or(convocationRoot.get("groupUuid").in(groups),
+                    builder.equal(convocationRoot.get("groupUuid"), ""), builder.isNull(convocationRoot.get("groupUuid")));
+        } else {
+            return builder.or(builder.equal(convocationRoot.get("groupUuid"), ""), builder.isNull(convocationRoot.get("groupUuid")));
+        }
     }
 
     private Attachment saveAttachment(MultipartFile file, boolean additionalDocument, List<Tag> tags) throws

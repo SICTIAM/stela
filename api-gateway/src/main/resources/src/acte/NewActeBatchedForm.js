@@ -54,7 +54,7 @@ class NewActeBatchedForm extends Component {
         const { _fetchWithAuthzHandling, _addNotification } = this.context
         const url = this.props.uuid ? '/api/acte/drafts/' + this.props.uuid : '/api/acte/draft/batch'
 
-        const groups = await this._adminService.getGroups(this.context)
+        const groups = await this._adminService.getGroups(this.context, 'ACTES_DEPOSIT')
         this.setState({ groups })
 
         _fetchWithAuthzHandling({ url })

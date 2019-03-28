@@ -91,7 +91,7 @@ class NewActeForm extends Component {
         if (!this.props.draftUuid && !this.props.uuid && depositFields.publicField) {
             acteResponse.public = true
         }
-        const groups = await this._adminService.getGroups(this.context)
+        const groups = await this._adminService.getGroups(this.context, 'ACTES_DEPOSIT')
 
         this.setState({ fields: acteResponse, acteFetched: true, codesMatieres: subjectCodes, depositFields, groups }, () => this.reloadActe())
 

@@ -1,0 +1,1 @@
+alter table convocation add group_uuid varchar(255);
