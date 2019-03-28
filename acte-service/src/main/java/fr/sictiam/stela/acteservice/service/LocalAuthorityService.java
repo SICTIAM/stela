@@ -1,5 +1,6 @@
 package fr.sictiam.stela.acteservice.service;
 
+import fr.sictiam.stela.acteservice.dao.AttachmentTypeReferencialRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentTypeRepository;
 import fr.sictiam.stela.acteservice.dao.LocalAuthorityRepository;
 import fr.sictiam.stela.acteservice.dao.MaterialCodeRepository;
@@ -41,16 +42,20 @@ public class LocalAuthorityService {
 
     private final AttachmentTypeRepository attachmentTypeRepository;
 
+    private final AttachmentTypeReferencialRepository attachmentTypeReferencialRepository;
+
     private final ExternalRestService externalRestService;
 
     @Autowired
     public LocalAuthorityService(LocalAuthorityRepository localAuthorityRepository,
                                  MaterialCodeRepository materialCodeRepository,
                                  AttachmentTypeRepository attachmentTypeRepository,
+                                 AttachmentTypeReferencialRepository attachmentTypeReferencialRepository,
                                  ExternalRestService externalRestService) {
         this.localAuthorityRepository = localAuthorityRepository;
         this.materialCodeRepository = materialCodeRepository;
         this.attachmentTypeRepository = attachmentTypeRepository;
+        this.attachmentTypeReferencialRepository = attachmentTypeReferencialRepository;
         this.externalRestService = externalRestService;
     }
 
@@ -133,6 +138,7 @@ public class LocalAuthorityService {
                 .forEach(attachmentTypeReferencial -> attachmentTypeReferencial.getAttachmentTypes().stream().forEach(
                         attachmentType -> attachmentType.setAttachmentTypeReferencial(attachmentTypeReferencial)));
 
+        attachmentTypeReferencialRepository.deleteAll(localAuthority.getAttachmentTypeReferencials());
         localAuthority.getAttachmentTypeReferencials().clear();
         localAuthority.getAttachmentTypeReferencials().addAll(attachmentTypeReferencials);
 
