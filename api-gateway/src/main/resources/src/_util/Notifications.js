@@ -297,6 +297,24 @@ const notifications = {
             message: 'notifications.convocation.admin.notifications_email.success',
             level: 'success',
             position: 'br'
+        },
+        convocationTagAdded: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.tags.tag_added.success',
+            level: 'success',
+            position: 'br'
+        },
+        convocationTagUpdated: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.tags.tag_updated.success',
+            level: 'success',
+            position: 'br'
+        },
+        convocationTagDeleted: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.tags.tag_deleted.success',
+            level: 'success',
+            position: 'br'
         }
     },
     profile: {

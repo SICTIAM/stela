@@ -4,6 +4,7 @@ import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 
 import { Field, FieldValue, LinkFile } from '../../_components/UI'
+import Tag from '../../_components/Tag'
 
 import QuestionsForm from '../QuestionsForm'
 import InformationBlockConvocation from './InformationBlock'
@@ -30,20 +31,38 @@ class SentConvocationFragment extends Component {
 	    return !participant.opened
 	}
 
+	addPadding = (index) => {
+	    return index !== 0 ? 'py-5' : ''
+	}
+
 	render() {
 	    const { t } = this.context
 	    const { convocation } = this.props
 
 	    const annexesToDisplay = !this.state.showAllAnnexes && convocation.annexes && convocation.annexes.length > 3 ? convocation.annexes.slice(0,3) : convocation.annexes
-	    const annexes = annexesToDisplay.map(annexe => {
-	        return (
-	            <div key={`div_${convocation.uuid}_${annexe.uuid}`}>
-	                <LinkFile
-	                    url={`/api/convocation/${convocation.uuid}/file/${annexe.uuid}?stamped=true`}
-	                    key={`${convocation.uuid}_${annexe.uuid}`}
-	                    text={annexe.filename}/>
-	            </div>
 
+	    const annexes = annexesToDisplay.map((annexe, index) => {
+	        const tags = annexe.tags.map((tag) => {
+	            return <Tag text={tag.name} color={tag.color} key={`tag_${tag.uuid}`}/>
+	        })
+
+	        return (
+	            <Fragment key={`div_${convocation.uuid}_${annexe.uuid}`}>
+	                {index !== 0 && (
+	                    <Grid.Column mobile={16} computer={16} className="pt-0 pb-0" style={{borderTop: '1px dotted #5e5e5e'}}>
+	                    </Grid.Column>
+	                )}
+	                <Grid.Column mobile={16} computer={8} className={this.addPadding(index)}>
+	                    <LinkFile
+	                        url={`/api/convocation/${convocation.uuid}/file/${annexe.uuid}?stamped=true`}
+	                        key={`${convocation.uuid}_${annexe.uuid}`}
+	                        text={annexe.filename}/>
+
+	                </Grid.Column>
+	                <Grid.Column mobile={16} computer={8} className={this.addPadding(index)}>
+	                    {tags}
+	                </Grid.Column>
+	            </Fragment>
 	        )
 	    })
 
@@ -81,10 +100,12 @@ class SentConvocationFragment extends Component {
 	                                </Grid.Column>
 	                            )}
 	                            {convocation.annexes && convocation.annexes.length > 0 && (
-	                                <Grid.Column mobile='16' computer='8'>
+	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
 	                                        <FieldValue id='annexes'>
-	                                            {annexes}
+	                                            <Grid verticalAlign='middle'>
+	                                                {annexes}
+	                                            </Grid>
 	                                            {convocation.annexes.length > 3 && (
 	                                                <div className='mt-15'>
 	                                                    <Button type='button' onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>

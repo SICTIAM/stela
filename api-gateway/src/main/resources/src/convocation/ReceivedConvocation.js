@@ -11,6 +11,7 @@ import { notifications } from '../_util/Notifications'
 import ConvocationService from '../_util/convocation-service'
 
 import { Page, Field, FieldValue, FormFieldInline, LinkFile } from '../_components/UI'
+import Tag from '../_components/Tag'
 import Timeline from './_components/Timeline'
 import Breadcrumb from '../_components/Breadcrumb'
 import QuestionsAnswerForm from './QuestionsAnswerForm'
@@ -125,22 +126,37 @@ class ReceivedConvocation extends Component {
 	    return recipients.response === 'PRESENT'
 	}
 
+	addPadding = (index) => {
+	    return index !== 0 ? 'py-5' : ''
+	}
+
 	render() {
 	    const { t } = this.context
 	    const { convocation, subsitutionModalOpened, substitute } = this.state
 	    const localAuthoritySlug = getLocalAuthoritySlug()
 	    const token = this._convocationService && this._convocationService.getTokenInUrl(this.props.location.search)
 	    const annexesToDisplay = !this.state.showAllAnnexes && this.state.convocation.annexes && this.state.convocation.annexes.length > 3 ? this.state.convocation.annexes.slice(0,3) : this.state.convocation.annexes
-	    const annexes = annexesToDisplay.map(annexe => {
-	        const url = token ? `/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true&token=${token.token}`:`/api/convocation/${this.state.convocation.uuid}/file/${annexe.uuid}?stamped=true`
+	    const annexes = annexesToDisplay.map((annexe, index) => {
+	        const tags = annexe.tags.map((tag) => {
+	            return <Tag text={tag.name} color={tag.color} key={`tag_${tag.uuid}`}/>
+	        })
 	        return (
-	            <div key={`div_${this.state.convocation.uuid}_${annexe.uuid}`}>
-	                <LinkFile
-	                    url={url}
-	                    key={`${this.state.convocation.uuid}_${annexe.uuid}`}
-	                    text={annexe.filename}/>
-	            </div>
+	            <Fragment key={`div_${convocation.uuid}_${annexe.uuid}`}>
+	                {index !== 0 && (
+	                    <Grid.Column mobile={16} computer={16} className="pt-0 pb-0" style={{borderTop: '1px dotted #5e5e5e'}}>
+	                    </Grid.Column>
+	                )}
+	                <Grid.Column mobile={16} computer={8} className={this.addPadding(index)}>
+	                    <LinkFile
+	                        url={`/api/convocation/${convocation.uuid}/file/${annexe.uuid}?stamped=true`}
+	                        key={`${convocation.uuid}_${annexe.uuid}`}
+	                        text={annexe.filename}/>
 
+	                </Grid.Column>
+	                <Grid.Column mobile={16} computer={8} className={this.addPadding(index)}>
+	                    {tags}
+	                </Grid.Column>
+	            </Fragment>
 	        )
 	    })
 	    let urlDocument = null
@@ -224,10 +240,12 @@ class ReceivedConvocation extends Component {
 	                                </Grid.Column>
 	                            	)}
 	                            	{convocation.annexes && convocation.annexes.length > 0 && (
-	                                <Grid.Column mobile='16' computer='8'>
+	                                <Grid.Column mobile='16' computer='16'>
 	                                    <Field htmlFor='annexes' label={t('convocation.fields.annexes')}>
 	                                        <FieldValue id='annexes'>
-	                                            {annexes}
+	                                            <Grid>
+												 	{annexes}
+	                                            </Grid>
 	                                            {convocation.annexes.length > 3 && (
 	                                                <div className='mt-15'>
 	                                                    <Button type='button' onClick={() => this.setState({showAllAnnexes: !this.state.showAllAnnexes})} className="link" primary compact basic>

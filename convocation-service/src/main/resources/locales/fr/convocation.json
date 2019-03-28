@@ -30,7 +30,8 @@
       "questions": "Question(s) supplémentaire(s)",
       "questions_placeholder": "Entrez votre question",
       "notification_email": "Personnaliser le message de notification",
-      "minutes": "Procès-verbal"
+	  "minutes": "Procès-verbal",
+	  "pick_tag": "Choisissez un tag"
     },
     "list": {
       "sent_date": "Date d'envoi",
@@ -141,11 +142,20 @@
           "assembly_types": "Type d'assemblée",
           "local_authority_settings": {
             "title": "Paramétrage des collectivités",
-            "general_informations": "Informations générales",
+			"general_informations": "Informations générales",
+			"documents_tags": "Étiquettes de documents",
             "notificationMessage": "Messages de notification",
             "subject": "Sujet",
 			"body": "Contenu",
-			"epci": "Champs collectivité"
+			"epci": "Champs collectivité",
+			"tags": {
+				"name": "Nom de l'étiquette",
+				"color": "Couleur",
+				"icon": "Icon",
+				"tags_list": "Liste des étiquesttes",
+				"no_tag": "Aucune étiquette",
+				"edit_tag": "Éditer l'étiquettes:" 
+			}
           },
           "module_settings": {
             "title": "Paramètres du module Convocation",
@@ -209,6 +219,9 @@
         "400": "Paramètre invalide",
         "403": "Non autorisé",
         "404": "La convocation n'a pas été trouvée dans la collectivité courante"
+      },
+      "tag": {
+        "used": "Ce tag est toujours utilisé"
       },
       "validation": {
         "missingParameter": "Un paramètre est manquant"

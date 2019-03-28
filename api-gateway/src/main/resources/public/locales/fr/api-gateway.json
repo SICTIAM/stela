@@ -282,7 +282,18 @@
         },
         "notifications_email": {
           "success": "Le message a bien été sauvegardé."
-        }
+		},
+		"tags": {
+			"tag_added": {
+				"success": "L'étiquette a bien été créée"
+			},
+			"tag_updated": {
+				"success": "L'étiquette a bien été mise à jour"
+			},
+			"tag_deleted": {
+				"success": "L'étiquette a bien été supprimée"
+			}
+		}
       }
     },
     "admin": {

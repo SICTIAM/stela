@@ -7,6 +7,7 @@ import PropTypes from 'prop-types'
 import { InputFile } from './UI'
 import InputDatetime from './InputDatetime'
 import InputTimePicker from './InputTimePicker'
+import ColorPicker from './ColorPicker'
 
 export default class InputValidation extends Component {
     state = {
@@ -152,11 +153,14 @@ export default class InputValidation extends Component {
                     search={this.props.search || false}
                     fluid selection>
                 </Dropdown>)
+        case ('colorPicker'):
+            return (
+                <ColorPicker id={this.props.id} value={this.props.value} onChange={(id, color) => { this.props.onChange(id, color)}}/>
+            )
         default:
             break
         }
     }
-
 
     render() {
         const { style, helper, maxChar, value } = this.props
