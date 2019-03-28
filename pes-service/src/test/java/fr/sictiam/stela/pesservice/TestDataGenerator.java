@@ -8,8 +8,10 @@ import fr.sictiam.stela.pesservice.model.sesile.Classeur;
 import fr.sictiam.stela.pesservice.model.sesile.ClasseurStatus;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
@@ -35,11 +37,12 @@ public class TestDataGenerator {
         return objectMapper.readTree(profile);
     }
 
-    public static Classeur classeur() throws ParseException {
+    public static Classeur classeur(LocalDateTime localDateTime) {
         Classeur classeur = new Classeur();
         classeur.setStatus(ClasseurStatus.FINALIZED);
-        Date actionDate = new SimpleDateFormat("dd/MM/yyyy").parse("20/03/2019");
-        classeur.setActions(Collections.singletonList(new Action(1, "agent-pes", actionDate, "signature", "RAS")));
+        classeur.setActions(Collections.singletonList(
+                new Action(1, "agent-pes", Timestamp.valueOf(localDateTime), "signature", "RAS"))
+        );
         return classeur;
     }
 }

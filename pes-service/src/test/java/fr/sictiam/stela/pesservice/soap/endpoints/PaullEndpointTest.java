@@ -55,7 +55,7 @@ public class PaullEndpointTest {
     @MockBean
     private SesileService sesileService;
 
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Before
     public void createClient() {
@@ -108,6 +108,9 @@ public class PaullEndpointTest {
 
     @Test
     public void getDetailsPesAller() throws IOException, ParseException {
+
+        LocalDateTime now = LocalDateTime.now();
+
         String detailsPesAllerRequest =
             "<getDetailsPESAllerRequest xmlns='http://www.processmaker.com'>" +
                 "<sessionId>sessionid</sessionId>" +
@@ -123,8 +126,8 @@ public class PaullEndpointTest {
                     "<ns2:objet>objet</ns2:objet>" +
                     "<ns2:userName>agent@sictiam.fr</ns2:userName>" +
                     "<ns2:nomDocument>pes.xml</ns2:nomDocument>" +
-                    "<ns2:dateDepot>" + dateFormatter.format(LocalDateTime.now()) + "</ns2:dateDepot>" +
-                    "<ns2:dateAR>" + dateFormatter.format(LocalDateTime.now()) + "</ns2:dateAR>" +
+                    "<ns2:dateDepot>" + dateFormatter.format(now) + "</ns2:dateDepot>" +
+                    "<ns2:dateAR>" + dateFormatter.format(now) + "</ns2:dateAR>" +
                     "<ns2:dateAnomalie/><ns2:motifAnomalie/>" +
                     "<ns2:motifPlusAnomalie/>" +
                     "<ns2:userNameBannette/>" +
@@ -135,7 +138,7 @@ public class PaullEndpointTest {
                     "<ns2:circuitClasseur/>" +
                     "<ns2:actionsClasseur>" +
                         "<ns2:nomActeur>agent-pes</ns2:nomActeur>" +
-                        "<ns2:dateAction>20/03/2019</ns2:dateAction>" +
+                        "<ns2:dateAction>" + dateFormatter.format(now) + "</ns2:dateAction>" +
                         "<ns2:libelleAction>signature</ns2:libelleAction>" +
                     "</ns2:actionsClasseur>" +
                 "</ns2:retour>" +
@@ -148,27 +151,27 @@ public class PaullEndpointTest {
         given(localAuthorityService.localAuthorityGranted(any(), any()))
                 .willReturn(true);
         given(pesAllerService.getByUuid(any()))
-                .willReturn(pesAller());
+                .willReturn(pesAller(now));
         given(sesileService.getClasseur(any(), any()))
-                .willReturn(Either.right(classeur()));
+                .willReturn(Either.right(classeur(now)));
         given(externalRestService.getProfile(any()))
                 .willReturn(profileNode());
         given(pesAllerService.getPesHistoryByTypes(any(), any()))
-                .willReturn(Collections.singletonList(pesHistory()));
+                .willReturn(Collections.singletonList(pesHistory(now)));
 
         mockClient.sendRequest(withPayload(new StringSource(detailsPesAllerRequest)))
                 .andExpect(payload(new StringSource(detailsPesAllerResponse)));
     }
 
-    private PesAller pesAller() {
-        PesAller pesAller = new PesAller(LocalDateTime.now(), "objet", null, null, null,
+    private PesAller pesAller(LocalDateTime localDateTime) {
+        PesAller pesAller = new PesAller(localDateTime, "objet", null, null, null,
                 "profile-uuid", "comment", "PDF", "code", "postid",
                 "budcode", "pes.xml", false, true, 1234, false);
         pesAller.setLastHistoryStatus(StatusType.ACK_RECEIVED);
         return pesAller;
     }
 
-    public PesHistory pesHistory() {
-        return new PesHistory("pes-history-uuid", StatusType.ACK_RECEIVED, LocalDateTime.now());
+    public PesHistory pesHistory(LocalDateTime localDateTime) {
+        return new PesHistory("pes-history-uuid", StatusType.ACK_RECEIVED, localDateTime);
     }
 }

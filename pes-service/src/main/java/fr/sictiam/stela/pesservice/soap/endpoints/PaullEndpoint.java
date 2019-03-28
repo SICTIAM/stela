@@ -47,7 +47,7 @@ public class PaullEndpoint {
 
     private static final String NAMESPACE_URI = "http://www.processmaker.com";
 
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Value("${application.jwt.secret}")
     String SECRET;
@@ -226,7 +226,7 @@ public class PaullEndpoint {
                 detailsPESAllerStruct.setCircuitClasseur("");
             classeur.getActions().forEach(action -> {
                 GetDetailsPESAllerStruct1 xmlAction = new GetDetailsPESAllerStruct1();
-                xmlAction.setDateAction(new SimpleDateFormat("dd/MM/yyyy").format(action.getDate()));
+                xmlAction.setDateAction(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(action.getDate()));
                 xmlAction.setLibelleAction(action.getAction());
                 xmlAction.setNomActeur(action.getUsername());
                 detailsPESAllerStruct.getActionsClasseur().add(xmlAction);

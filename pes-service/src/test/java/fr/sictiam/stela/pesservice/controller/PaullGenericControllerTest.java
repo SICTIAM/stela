@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -326,7 +327,7 @@ public class PaullGenericControllerTest {
         given(externalRestService.getProfile(any()))
                 .willReturn(profileNode());
         given(sesileService.postClasseur(any(), any(), any()))
-                .willReturn(classeur());
+                .willReturn(classeur(LocalDateTime.now()));
         given(sesileService.addFileToclasseur(any(), any(), any(), anyInt()))
                 .willReturn(new Document());
 
