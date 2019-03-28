@@ -80,6 +80,17 @@ public class OpenIdConnectConfiguration extends StaticOpenIdCConfiguration {
     }
 
     @Override
+    public String getClaims() {
+        RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
+            return request.getParameter("claims");
+        }
+
+        return null;
+    }
+
+    @Override
     public String getPostLogoutRedirectUri() {
         return portalUrl;
     }

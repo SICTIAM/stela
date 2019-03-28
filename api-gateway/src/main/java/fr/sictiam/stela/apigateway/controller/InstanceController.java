@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 @RestController
 @RequestMapping("/api/api-gateway")
@@ -58,7 +59,11 @@ public class InstanceController {
                     .bodyToMono(LocalAuthorityInstance.class);
             LocalAuthorityInstance localAuthorityInstance = localAuthorityInstanceMono.block();
 
-            loginUrlToRedirectTo.append("?instance_id=").append(localAuthorityInstance.getClientId());
+            loginUrlToRedirectTo
+                    .append("?instance_id=")
+                    .append(localAuthorityInstance.getClientId())
+                    .append("&claims=")
+                    .append(URLEncoder.encode("{\"userinfo\":{\"given_name\":{\"essential\":true},\"family_name\":{\"essential\":true}}}", "UTF-8"));
         }
         response.sendRedirect(loginUrlToRedirectTo.toString());
     }
