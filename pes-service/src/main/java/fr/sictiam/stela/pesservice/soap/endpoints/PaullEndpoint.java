@@ -253,14 +253,16 @@ public class PaullEndpoint {
         Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
 
         if (peshistory.isPresent()) {
+            PesHistory pesHistory = peshistory.get();
             if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
-                detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
+                detailsPESAllerStruct.setDateAR(dateFormatter.format(pesHistory.getDate()));
                 detailsPESAllerStruct.setDateAnomalie("");
                 detailsPESAllerStruct.setMotifAnomalie("");
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                 detailsPESAllerStruct.setDateAR("");
-                detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(peshistory.get().getDate()));
-                detailsPESAllerStruct.setMotifAnomalie(peshistory.get().getErrors().get(0).errorText());
+                detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(pesHistory.getDate()));
+                if (pesHistory.getErrors() != null && !pesHistory.getErrors().isEmpty())
+                    detailsPESAllerStruct.setMotifAnomalie(pesHistory.getErrors().get(0).errorText());
             }
         } else {
             detailsPESAllerStruct.setDateAR("");
