@@ -12,6 +12,7 @@ import { notifications } from '../_util/Notifications'
 import history from '../_util/history'
 import { acceptFileDocumentConvocation } from '../_util/constants'
 import ConvocationService from '../_util/convocation-service'
+import AdminService from '../_util/admin-service'
 
 import { withAuthContext } from '../Auth'
 
@@ -48,7 +49,8 @@ class ConvocationForm extends Component {
 	        sending: false,
 	        defaultProcuration: null,
 	        customProcuration: null,
-	        useProcuration: false
+	        useProcuration: false,
+	        groupUuid: null
 	    },
 	    delayTooShort: false,
 	    delay: null,
@@ -59,13 +61,16 @@ class ConvocationForm extends Component {
 	    localAuthority: {
 	        epci: false
 	    },
+	    groupList: [],
 	    tagsList: []
 	}
 	componentDidMount = async () => {
-	    this._convocationService = new ConvocationService()
 	    this.validateForm(null)
+	    this._convocationService = new ConvocationService()
+	    this._adminService = new AdminService()
 
 	    const localAuthorityResponse = await this._convocationService.getConfForLocalAuthority(this.props.authContext)
+	    const groupResponse = await this._adminService.getGroups(this.props.authContext, 'CONVOCATION_DEPOSIT')
 
 	    const assemblyTypesResponse = (await this._convocationService.getAllAssemblyType(this.props.authContext)).map(item => {
 	        return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}
@@ -73,7 +78,7 @@ class ConvocationForm extends Component {
 	    const tagsListResponse = (await this._convocationService.getAllTags(this.props.authContext)).map(item => {
 	        return {key: item.uuid, text: item.name, uuid: item.uuid, value: item.uuid}
 	    })
-	    this.setState({tagsList: tagsListResponse, assemblyTypes: assemblyTypesResponse, localAuthority: localAuthorityResponse})
+	    this.setState({tagsList: tagsListResponse, assemblyTypes: assemblyTypesResponse, localAuthority: localAuthorityResponse, groupList: groupResponse})
 	}
 	validationRules = {
 	    meetingDate: ['required', 'date'],
@@ -81,7 +86,8 @@ class ConvocationForm extends Component {
 	    assemblyType: 'required',
 	    location: ['required'],
 	    subject: 'required|max:500',
-	    file: ['required']
+	    file: ['required'],
+	    groupUuid: ['required']
 	}
 	checkDelay = () => {
 	    if(this.state.fields.meetingDate && this.state.delay) {
@@ -111,6 +117,7 @@ class ConvocationForm extends Component {
 	        delete parameters.guests
 	        delete parameters.annexesTags
 	        parameters['assemblyType'] = {uuid: parameters.assemblyType}
+	        parameters['groupUuid'] = parameters['groupUuid'] !== 'all' ? parameters['groupUuid'] : null
 	        parameters['meetingDate'] = moment(`${parameters['meetingDate'].format('YYYY-MM-DD')} ${parameters['hour']}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DDTHH:mm:ss')
 
 	        const convocationResponse = await this._convocationService.createConvocation(this.props.authContext, parameters)
@@ -147,7 +154,8 @@ class ConvocationForm extends Component {
 	        assemblyType: this.state.fields.assemblyType,
 	        location: this.state.fields.location,
 	        subject: this.state.fields.subject,
-	        file: this.state.fields.file
+	        file: this.state.fields.file,
+	        groupUuid: this.state.fields.groupUuid
 	    }
 
 	    const attributeNames = {
@@ -156,7 +164,8 @@ class ConvocationForm extends Component {
 	        assemblyType: t('convocation.fields.assembly_type'),
 	        location: t('convocation.fields.assembly_place'),
 	        subject: t('convocation.fields.object'),
-	        file: t('convocation.fields.convocation_document')
+	        file: t('convocation.fields.convocation_document'),
+	        groupUuid: t('convocation.fields.visible_by')
 	    }
 	    const validationRules = this.validationRules
 	    //add validation format file
@@ -305,6 +314,11 @@ class ConvocationForm extends Component {
 	        )
 	    })
 
+	    const groupOptions = this.state.groupList.map(group =>
+	        ({ key: group.uuid, value: group.uuid, text: group.name })
+	    )
+
+	    groupOptions.unshift({key: 'all', value: 'all', text: t('api-gateway:form.all')})
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -318,7 +332,7 @@ class ConvocationForm extends Component {
 	                {/* Global information (date, assembly type, Object, comment, ...) */}
 	            	<Segment>
 	                    <Grid>
-	                        <Grid.Column mobile='16' computer='8'>
+	                        <Grid.Column mobile='16' computer='6'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_meetingDate`}
 	                                label={t('convocation.fields.date')} required={true}>
 	                                <InputValidation
@@ -334,7 +348,7 @@ class ConvocationForm extends Component {
 	                                    ariaRequired={true}/>
 	                            </FormField>
 	                        </Grid.Column>
-	                        <Grid.Column mobile='16' computer='8'>
+	                        <Grid.Column mobile='16' computer='6'>
 	                            <FormField htmlFor={`${this.state.fields.uuid}_hour`}
 	                                label={t('convocation.fields.hour')} required={true}>
 	                                <InputValidation
@@ -349,6 +363,15 @@ class ConvocationForm extends Component {
 	                                    fieldName={t('convocation.fields.hour')}
 	                                    onChange={this.handleFieldChange}
 	                                />
+	                            </FormField>
+	                        </Grid.Column>
+	                        <Grid.Column mobile={16} tablet={16} computer={4}>
+	                            <FormField htmlFor={`${this.state.fields.uuid}_groupUuid`} label={t('convocation.fields.visible_by')}required>
+	                                <Dropdown id={`${this.state.fields.uuid}_groupUuid`}
+	                                    value={this.state.fields.groupUuid}
+	                                    onChange={(event, { id, value }) => this.handleFieldChange(id, value)}
+	                                    options={groupOptions}
+	                                    fluid selection />
 	                            </FormField>
 	                        </Grid.Column>
 	                        <Grid.Column mobile='16' computer='8'>

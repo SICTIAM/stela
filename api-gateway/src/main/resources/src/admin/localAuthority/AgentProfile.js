@@ -63,7 +63,10 @@ class AgentProfile extends Component {
         const url = `/api/admin/profile/${this.state.fields.uuid}/rights`
         _fetchWithAuthzHandling({ url, method: 'PUT', body, headers, context: this.props.authContext })
             .then(checkStatus)
-            .then(() => _addNotification(notifications.admin.agentProfileUpdated))
+            .then(() => {
+                this.props.authContext.getUser()
+                _addNotification(notifications.admin.agentProfileUpdated)
+            })
             .catch(response => {
                 response.json().then(json => {
                     _addNotification(notifications.defaultError, 'notifications.admin.title', json.message)

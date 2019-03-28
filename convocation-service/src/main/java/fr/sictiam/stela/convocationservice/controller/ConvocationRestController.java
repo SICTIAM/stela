@@ -88,17 +88,18 @@ public class ConvocationRestController {
             @RequestParam(value = "direction", required = false, defaultValue = "DESC") String direction,
             @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
-            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid) {
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Profile-Groups") Set<String> groups) {
 
         validateAccess(currentLocalAuthUuid, null, currentProfileUuid, null,
                 rights, Arrays.asList(Right.CONVOCATION_DEPOSIT, Right.CONVOCATION_ADMIN), false);
 
         List<Convocation> convocations = convocationService.findSentWithQuery(multifield, sentDateFrom, sentDateTo,
                 assemblyType, meetingDateFrom, meetingDateTo, subject, filter, limit, offset, column, direction,
-                currentLocalAuthUuid);
+                currentLocalAuthUuid, groups);
 
         Long count = convocationService.countSentWithQuery(multifield, sentDateFrom, sentDateTo, assemblyType,
-                meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid);
+                meetingDateFrom, meetingDateTo, subject, filter, currentLocalAuthUuid, groups);
 
         return new ResponseEntity<>(new SearchResultsUI(count, convocations), HttpStatus.OK);
     }
