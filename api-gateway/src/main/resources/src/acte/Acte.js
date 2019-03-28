@@ -105,20 +105,7 @@ class Acte extends Component {
                 .then(checkStatus)
                 .then(res => res.json())
                 .then(json => {
-                    let stampPosition = this.state.acteUI.stampPosition
-                    if (json.orientation === 'LANDSCAPE') {
-                        this.setState(prevState =>
-                            ({
-                                thumbnail: json,
-                                thumbnailStatus: 'fetched',
-                                acteUI: {
-                                    ...prevState.acteUI,
-                                    stampPosition: {x: stampPosition.y, y: stampPosition.x}
-                                }
-                            }))
-                    } else {
-                        this.setState({thumbnail: json,thumbnailStatus: 'fetched'})
-                    }
+                    this.setState({thumbnail: json,thumbnailStatus: 'fetched'})
                 })
                 .catch(err => {
                     this.setState({thumbnailStatus: 'loading'})
@@ -183,19 +170,6 @@ class Acte extends Component {
         return {height: height, width: width}
     }
 
-    draggableBoxSize = () => {
-        let boxHeight, boxWidth = 0
-        if(this.state.thumbnail.orientation ==='LANDSCAPE'){
-            boxHeight = 70
-            boxWidth = 25
-        }else {
-            boxHeight = 25
-            boxWidth =  70
-        }
-
-        return {boxHeight: boxHeight, boxWidth: boxWidth}
-    }
-
     render() {
         const { t } = this.context
         const { acteACK, acte } = this.state.acteUI
@@ -217,7 +191,6 @@ class Acte extends Component {
         const isActeAttachmentPDF = acte && acte.acteAttachment && acte.acteAttachment.filename && acte.acteAttachment.filename.endsWith('.pdf')
 
         const {height : thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
-        const {boxWidth, boxHeight} = this.draggableBoxSize()
 
         const stampPosition = (
             <div>
@@ -230,9 +203,7 @@ class Acte extends Component {
                     width={thumbnailWidth}
                     labelColor='#000'
                     position={this.state.acteUI.stampPosition}
-                    handleChange={this.handleChangeDeltaPosition}
-                    boxHeight={boxHeight}AR
-                    boxWidth={boxWidth}/>
+                    handleChange={this.handleChangeDeltaPosition}/>
                 <div style={{ textAlign: 'center' }}>
                     <a className='ui primary primary icon button' target='_blank' aria-label={t('api-gateway:form.download')}
                         href={`/api/acte/${acte.uuid}/file/stamped?x=${this.state.acteUI.stampPosition.x}&y=${this.state.acteUI.stampPosition.y}`}>

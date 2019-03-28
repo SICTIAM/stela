@@ -224,18 +224,6 @@ class ConvocationLocalAuthorityParams extends Component {
                                                 labelColor='#000'
                                                 position={fields.stampPosition}
                                                 handleChange={this.handleChangeDeltaPosition} />
-                                            <DraggablePosition
-                                                label={t('convocation.stamp_pad.pad_label')}
-                                                height={190}
-                                                width={300}
-                                                boxHeight={70}
-                                                boxWidth={25}
-                                                showPercents={true}
-                                                labelColor='#000'
-                                                position={{x:fields.stampPosition.y, y: fields.stampPosition.x}}
-                                                handleChange={() =>  console.error('Not available to proceed changes')}
-                                                disabled={true}
-                                            />
                                         </Grid.Row>
                                     </Grid>
                                 </FormField>

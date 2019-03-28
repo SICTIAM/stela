@@ -66,16 +66,7 @@ class ActePublic extends Component {
                 .then(checkStatus)
                 .then(res => res.json())
                 .then(json => {
-                    let stampPosition = this.state.stampPosition
-                    if (json.orientation === 'LANDSCAPE') {
-                        this.setState({
-                            thumbnail: json,
-                            thumbnailStatus: 'fetched',
-                            stampPosition: {x: stampPosition.y, y: stampPosition.x}
-                        })
-                    } else {
-                        this.setState({thumbnail: json, thumbnailStatus: 'fetched'})
-                    }
+                    this.setState({thumbnail: json, thumbnailStatus: 'fetched'})
                 })
                 .catch(err => {
                     this.setState({thumbnailStatus: 'loading'})
@@ -97,19 +88,6 @@ class ActePublic extends Component {
         return {height: height, width: width}
     }
 
-    draggableBoxSize = () => {
-        let boxHeight, boxWidth = 0
-        if (this.state.thumbnail.orientation === 'LANDSCAPE') {
-            boxHeight = 70
-            boxWidth = 25
-        } else {
-            boxHeight = 25
-            boxWidth = 70
-        }
-
-        return {boxHeight: boxHeight, boxWidth: boxWidth}
-    }
-
     handleChangeDeltaPosition = (stampPosition) => this.setState({stampPosition})
 
     render() {
@@ -125,7 +103,6 @@ class ActePublic extends Component {
             </List.Item>
         )
         const {height: thumbnailHeight, width: thumbnailWidth} = this.thumbnailSize()
-        const {boxWidth, boxHeight} = this.draggableBoxSize()
         const stampPosition = (
             <div>
                 <DraggablePosition
@@ -134,8 +111,6 @@ class ActePublic extends Component {
                     label={t('acte:stamp_pad.pad_label')}
                     height={thumbnailHeight}
                     width={thumbnailWidth}
-                    boxHeight={boxHeight}
-                    boxWidth={boxWidth}
                     labelColor='#000'
                     position={this.state.stampPosition}
                     handleChange={this.handleChangeDeltaPosition}/>

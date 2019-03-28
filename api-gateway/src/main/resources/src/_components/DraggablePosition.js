@@ -24,7 +24,7 @@ class DraggablePosition extends Component {
         width: 190,
         boxWidth: 70,
         boxHeight: 25,
-        paddingPercent: 5,
+        paddingPercent: 2,
         draggableAvailable: false
     }
     styles = {
