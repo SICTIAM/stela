@@ -261,8 +261,11 @@ public class PaullEndpoint {
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                 detailsPESAllerStruct.setDateAR("");
                 detailsPESAllerStruct.setDateAnomalie(dateFormatter.format(pesHistory.getDate()));
+                // this only happens when NACK are manually added for testing purposes with business editors
                 if (pesHistory.getErrors() != null && !pesHistory.getErrors().isEmpty())
                     detailsPESAllerStruct.setMotifAnomalie(pesHistory.getErrors().get(0).errorText());
+                else
+                    detailsPESAllerStruct.setMotifAnomalie("");
             }
         } else {
             detailsPESAllerStruct.setDateAR("");
