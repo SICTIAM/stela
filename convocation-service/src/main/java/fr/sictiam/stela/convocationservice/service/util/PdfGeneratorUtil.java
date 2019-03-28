@@ -52,14 +52,12 @@ public class PdfGeneratorUtil {
         if (pdfIsLandscape(reader)) {
             if (isNativeLandscape(reader)) {
                 //landscape document
-                stamp.setRotateContents(false);
                 pixelPositionX = Math.round((percentPositionX) * mediabox.getWidth() / 100);
                 pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getHeight() / 100) - 50;
             } else {
                 //PDF portrait doc which had been rotated to Landscape
-                stamp.setRotateContents(false);
-                pixelPositionX = Math.round((percentPositionY) * mediabox.getWidth() / 100);
-                pixelPositionY = Math.round((percentPositionX) * mediabox.getHeight() / 100);
+                pixelPositionX = Math.round((percentPositionX) * mediabox.getHeight() / 100);
+                pixelPositionY = Math.round((100 - percentPositionY) * mediabox.getWidth() / 100) - 50;
 
             }
         } else {

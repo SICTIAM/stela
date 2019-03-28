@@ -216,18 +216,6 @@ class ActeLocalAuthorityParams extends Component {
                                             labelColor='#000'
                                             position={this.state.fields.stampPosition}
                                             handleChange={this.handleChangeDeltaPosition} />
-                                        <DraggablePosition
-                                            label={t('acte:stamp_pad.pad_label')}
-                                            height={190}
-                                            width={300}
-                                            boxHeight={70}
-                                            boxWidth={25}
-                                            showPercents={true}
-                                            labelColor='#000'
-                                            position={{x:this.state.fields.stampPosition.y, y: this.state.fields.stampPosition.x}}
-                                            handleChange={() =>  console.error('Not available to proceed changes')}
-                                            disabled={true}
-                                        />
                                     </Grid.Row>
                                 </Grid>
                             </FieldInline>
