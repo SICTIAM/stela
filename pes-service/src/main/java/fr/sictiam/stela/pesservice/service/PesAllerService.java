@@ -507,12 +507,17 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
                 return false;
             }
         } catch (ParserConfigurationException e) {
-            LOGGER.error("[isAPesOrmc] An error occured while trying to parse xml file {} attachement of pes {} : {}",
+            LOGGER.error("[isAPesOrmc] An error occured while trying to parse xml file {} attachement of pes {}",
                     pesAller.getFileName(),
                     pesAller.getUuid(),
-                    e.getMessage());
+                    e);
         } catch (SAXException | IOException e) {
-            LOGGER.error("[isAPesOrmc] An error occured while trying to read xml file {} attachement of pes {} : {}");
+            LOGGER.error("[isAPesOrmc] An error occured while trying to read xml file {} attachement of pes {}",
+                    pesAller.getFileName(),
+                    pesAller.getUuid(),
+                    e);
+        } catch (Exception e) {
+            LOGGER.error("[isAPesOrmc] Unexpected exception parsing PES file", e);
         }
         return false;
     }
