@@ -170,6 +170,7 @@ public class PaullEndpointTest {
                 "profile-uuid", "comment", "PDF", "code", "postid",
                 "budcode", "pes.xml", false, true, 1234, false);
         pesAller.setLastHistoryStatus(StatusType.ACK_RECEIVED);
+        pesAller.setSesileClasseurId(4321);
         return pesAller;
     }
 
