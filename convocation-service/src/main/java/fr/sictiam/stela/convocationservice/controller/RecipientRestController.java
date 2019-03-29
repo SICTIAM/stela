@@ -1,6 +1,7 @@
 package fr.sictiam.stela.convocationservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.sictiam.stela.convocationservice.model.ImportResult;
 import fr.sictiam.stela.convocationservice.model.Recipient;
 import fr.sictiam.stela.convocationservice.model.Right;
 import fr.sictiam.stela.convocationservice.model.ui.SearchResultsUI;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -127,5 +130,24 @@ public class RecipientRestController {
 
         recipientService.deactivateAll(currentLocalAuthUuid);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<ImportResult> importRecipients(
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+            @RequestAttribute("STELA-Current-Profile-UUID") String currentProfileUuid,
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestParam MultipartFile recipients) throws IOException {
+
+        if (!RightUtils.hasRight(rights, Collections.singletonList(Right.CONVOCATION_ADMIN))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        ImportResult result = recipientService.importRecipients(currentLocalAuthUuid, recipients);
+
+        if (result.getErrorsCount() > 0) {
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

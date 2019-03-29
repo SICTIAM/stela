@@ -33,7 +33,7 @@
       "notification_email": "Personnaliser le message de notification",
       "minutes": "Procès-verbal",
       "visible_by": "Visible par",
-      "pick_tag": "Choisissez une étiquette"
+      "pick_tag": "Choisissez un thème"
     },
     "list": {
       "sent_date": "Date d'envoi",
@@ -193,7 +193,9 @@
             "inactive": "Inactif",
             "activate": "Activer",
             "desactivate": "Désactiver",
-            "deactivate_all": "Désactiver tous les destinataires"
+            "deactivate_all": "Désactiver tous les destinataires",
+            "importRecipient": "Importer des destinataires",
+            "recipients_file": "Destinataires à importer"
           },
           "assembly_type_liste": {
             "no_assembly_type": "Aucun type d'assemblée"
@@ -227,6 +229,14 @@
       },
       "validation": {
         "missingParameter": "Un paramètre est manquant"
+      },
+      "csv": {
+        "title": "Erreur lors de l'importation",
+        "error_on": "Erreur sur:",
+        "line": "Ligne",
+        "mandatory": "Champ obligatoire",
+        "emailBadFormat": "Mauvais format de courriel",
+        "phoneNumberBadFormat": "Mauvais format de numéro de téléphone"
       }
     }
   }
