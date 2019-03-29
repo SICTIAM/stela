@@ -226,6 +226,8 @@ public class PaullEndointTest {
                 .willReturn(new PaullSoapToken());
         given(localAuthorityService.localAuthorityGranted(any(), any()))
                 .willReturn(true);
+        given(externalRestService.getProfileByLocalAuthoritySirenAndEmail(any(), any()))
+                .willReturn(profileNode());
         given(localAuthorityService.getBySirenWithMaterialCodes(any()))
                 .willReturn(localAuthority());
         given(acteService.publishActe(any()))
@@ -293,7 +295,7 @@ public class PaullEndointTest {
     }
 
     private JsonNode profileNode() throws IOException {
-        String profile = "{ \"agent\": { \"email\": \"agent@sictiam.fr\" } }";
+        String profile = "{ \"uuid\": \"profile-uuid\", \"agent\": { \"email\": \"agent@sictiam.fr\" } }";
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readTree(profile);
     }
