@@ -91,7 +91,7 @@ class Home extends Component {
                                         </h2>
                                         <Icon.Group size={'large'}>
                                             <Icon name='file outline' color={certificateError ? 'red': (days && days <= 90 ?  'orange' : 'black')}/>
-                                            <Icon corner name='checkmark' color={certificateError? 'red': (days && days <= 90 ?  'orange' : 'black')}/>
+                                            <Icon corner name={certificateError ? 'close': 'checkmark'} color={certificateError? 'red': (days && days <= 90 ?  'orange' : 'black')}/>
                                         </Icon.Group>
                                         {certificate.status === 'NONE' && pairedCertificate && (
                                             <span className={'text-error'}>{t('certificate_not_inserted')}<br/></span>

@@ -210,9 +210,17 @@ const onSearch = (that, callback) => {
 
 const sortAlphabetically = (arrayOfObject, attribute) => {
     arrayOfObject.sort((a,b) => {
-        if(a[attribute] < b[attribute]) { return -1 }
-        if(a[attribute] > b[attribute]) { return 1 }
-        return 0
+        if(a[attribute] && b[attribute]) {
+            if (a[attribute].toLowerCase() < b[attribute].toLowerCase()) {
+                return -1
+            }
+            if (a[attribute].toLowerCase() > b[attribute].toLowerCase()) {
+                return 1
+            }
+            return 0
+        }else {
+            return -1
+        }
     })
 
     return arrayOfObject

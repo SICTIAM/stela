@@ -36,7 +36,8 @@ class StelaTable extends Component {
         selectedRadio: PropTypes.string,
         toggleButton: PropTypes.bool,
         toogleProperty: PropTypes.string,
-        toogleHeader: PropTypes.string
+        toogleHeader: PropTypes.string,
+        sortable: PropTypes.bool
     }
     static defaultProps = {
         className: '',
