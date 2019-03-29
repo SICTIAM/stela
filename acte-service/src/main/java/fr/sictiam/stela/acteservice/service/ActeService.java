@@ -353,7 +353,8 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
     private Predicate getObjetMultifield(CriteriaBuilder builder, Root<Acte> acteRoot, String multifield) {
         return builder.or(
                 builder.like(builder.lower(acteRoot.get("number")), "%" + multifield.toLowerCase() + "%"),
-                builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%"));
+                builder.like(builder.lower(acteRoot.get("objet")), "%" + multifield.toLowerCase() + "%"),
+                builder.like(builder.lower(acteRoot.get("localAuthority").get("name")), "%" + multifield.toLowerCase() + "%"));
     }
 
     private Predicate getNumberPredicate(CriteriaBuilder builder, Root<Acte> acteRoot, String number) {
