@@ -47,7 +47,7 @@ public class PaullEndpoint {
 
     private static final String NAMESPACE_URI = "http://www.processmaker.com";
 
-    private DateTimeFormatter dateFormatterWithTime = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private DateTimeFormatter dateFormatterWithMinutes = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Value("${application.jwt.secret}")
@@ -227,7 +227,7 @@ public class PaullEndpoint {
                 detailsPESAllerStruct.setCircuitClasseur("");
             classeur.getActions().forEach(action -> {
                 GetDetailsPESAllerStruct1 xmlAction = new GetDetailsPESAllerStruct1();
-                xmlAction.setDateAction(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(action.getDate()));
+                xmlAction.setDateAction(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(action.getDate()));
                 xmlAction.setLibelleAction(action.getAction());
                 xmlAction.setNomActeur(action.getUsername());
                 detailsPESAllerStruct.getActionsClasseur().add(xmlAction);
@@ -244,7 +244,7 @@ public class PaullEndpoint {
         detailsPESAllerStruct.setObjet(pesAller.getObjet());
         detailsPESAllerStruct.setUserName(node.get("email").asText());
         detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
-        detailsPESAllerStruct.setDateDepot(dateFormatterWithTime.format(pesAller.getCreation()));
+        detailsPESAllerStruct.setDateDepot(dateFormatterWithMinutes.format(pesAller.getCreation()));
         detailsPESAllerStruct.setStatutBannette(pesAller.getLastHistoryStatus().name());
 
         List<PesHistory> fileHistories = pesAllerService.getPesHistoryByTypes(
@@ -261,7 +261,7 @@ public class PaullEndpoint {
                 detailsPESAllerStruct.setMotifAnomalie("");
             } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
                 detailsPESAllerStruct.setDateAR("");
-                detailsPESAllerStruct.setDateAnomalie(dateFormatterWithTime.format(pesHistory.getDate()));
+                detailsPESAllerStruct.setDateAnomalie(dateFormatterWithMinutes.format(pesHistory.getDate()));
                 // this only happens when NACK are manually added for testing purposes with business editors
                 if (pesHistory.getErrors() != null && !pesHistory.getErrors().isEmpty())
                     detailsPESAllerStruct.setMotifAnomalie(pesHistory.getErrors().get(0).errorText());

@@ -55,7 +55,8 @@ public class PaullEndpointTest {
     @MockBean
     private SesileService sesileService;
 
-    private DateTimeFormatter dateFormatterWithTime = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private DateTimeFormatter dateFormatterWithSeconds = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private DateTimeFormatter dateFormatterWithMinutes = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Before
@@ -127,7 +128,7 @@ public class PaullEndpointTest {
                     "<ns2:objet>objet</ns2:objet>" +
                     "<ns2:userName>agent@sictiam.fr</ns2:userName>" +
                     "<ns2:nomDocument>pes.xml</ns2:nomDocument>" +
-                    "<ns2:dateDepot>" + dateFormatterWithTime.format(now) + "</ns2:dateDepot>" +
+                    "<ns2:dateDepot>" + dateFormatterWithMinutes.format(now) + "</ns2:dateDepot>" +
                     "<ns2:dateAR>" + dateFormatter.format(now) + "</ns2:dateAR>" +
                     "<ns2:dateAnomalie/><ns2:motifAnomalie/>" +
                     "<ns2:motifPlusAnomalie/>" +
@@ -139,7 +140,7 @@ public class PaullEndpointTest {
                     "<ns2:circuitClasseur/>" +
                     "<ns2:actionsClasseur>" +
                         "<ns2:nomActeur>agent-pes</ns2:nomActeur>" +
-                        "<ns2:dateAction>" + dateFormatterWithTime.format(now) + "</ns2:dateAction>" +
+                        "<ns2:dateAction>" + dateFormatterWithSeconds.format(now) + "</ns2:dateAction>" +
                         "<ns2:libelleAction>signature</ns2:libelleAction>" +
                     "</ns2:actionsClasseur>" +
                 "</ns2:retour>" +
