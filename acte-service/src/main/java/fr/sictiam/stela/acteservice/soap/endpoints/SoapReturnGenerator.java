@@ -19,15 +19,17 @@ public class SoapReturnGenerator {
     }
 
     public String generateJson(List<Object> object) {
+        // quick hack to avoid "[]" values when dealing with an empty list
+        if (object.isEmpty())
+            return "";
+
         ObjectMapper mapper = new ObjectMapper();
         try {
-            String body = mapper.writeValueAsString(object);
-            return body;
+            return mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage());
         }
         return null;
-
     }
 
     public String connectionFailedReturn() {
