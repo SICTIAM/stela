@@ -140,6 +140,7 @@ class ReceivedConvocation extends Component {
 	        const tags = annexe.tags.map((tag) => {
 	            return <Tag text={tag.name} color={tag.color} key={`tag_${tag.uuid}`}/>
 	        })
+	        const url = token ? `/api/convocation/${convocation.uuid}/file/${annexe.uuid}?stamped=true&token=${token.token}` : `/api/convocation/${convocation.uuid}/file/${annexe.uuid}?stamped=true`
 	        return (
 	            <Fragment key={`div_${convocation.uuid}_${annexe.uuid}`}>
 	                {index !== 0 && (
@@ -148,7 +149,7 @@ class ReceivedConvocation extends Component {
 	                )}
 	                <Grid.Column mobile={16} computer={8} className={this.addPadding(index)}>
 	                    <LinkFile
-	                        url={`/api/convocation/${convocation.uuid}/file/${annexe.uuid}?stamped=true`}
+	                        url={url}
 	                        key={`${convocation.uuid}_${annexe.uuid}`}
 	                        text={annexe.filename}/>
 
@@ -338,6 +339,8 @@ class ReceivedConvocation extends Component {
 	                                        open={subsitutionModalOpened}
 	                                        onCancel={this.closeSubstituteModal}
 	                                        onConfirm={this.onSelectedUser}
+	                                        confirmButton={t('api-gateway:form.confirm')}
+                    						cancelButton={t('api-gateway:form.cancel')}
 	                                        content={t('convocation.page.substitute_confirmation',
 	                                            {firstname: substitute && substitute.firstname,
 	                                                lastname: substitute && substitute.lastname,

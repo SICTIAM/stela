@@ -16,6 +16,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,12 +35,13 @@ public class CsvDocumentGenerator implements DocumentGenerator {
     @Override public byte[] generatePresenceList(Convocation convocation) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(baos));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8));
+
         ICsvBeanWriter writer = null;
 
         try {
-
-            writer = new CsvBeanWriter(bw, CsvPreference.STANDARD_PREFERENCE);
+            bw.write('\uFEFF'); // BOM for UTF-*
+            writer = new CsvBeanWriter(bw, CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE);
 
             String[] headers = new String[]{
                     localesService.getMessage("fr", "convocation", "$.convocation.admin.modules.convocation" +

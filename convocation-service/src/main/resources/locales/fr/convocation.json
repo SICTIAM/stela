@@ -9,7 +9,8 @@
       "RECIPIENTS_ADDED": "Ajout de destinataires",
       "CONVOCATION_READ": "Lecture de la convocation par",
       "CONVOCATION_RESPONSE": "Réponse donnée par",
-      "QUESTION_RESPONSE": "Réponse à la question donnée par"
+      "QUESTION_RESPONSE": "Réponse à la question donnée par",
+      "MINUTES_ADDED": "Ajout du procès-verbal"
     },
     "fields": {
       "date": "Date de la séance",
@@ -32,7 +33,7 @@
       "notification_email": "Personnaliser le message de notification",
       "minutes": "Procès-verbal",
       "visible_by": "Visible par",
-      "pick_tag": "Choisissez un tag"
+      "pick_tag": "Choisissez une étiquette"
     },
     "list": {
       "sent_date": "Date d'envoi",
@@ -148,14 +149,14 @@
             "notificationMessage": "Messages de notification",
             "subject": "Sujet",
             "body": "Contenu",
-            "epci": "Champs collectivité",
+            "epci": "Champ collectivité",
             "tags": {
               "name": "Nom de l'étiquette",
               "color": "Couleur",
               "icon": "Icon",
-              "tags_list": "Liste des étiquesttes",
+              "tags_list": "Liste des étiquettes",
               "no_tag": "Aucune étiquette",
-              "edit_tag": "Éditer l'étiquettes:"
+              "edit_tag": "Éditer l'étiquette :"
             }
           },
           "module_settings": {
@@ -222,7 +223,7 @@
         "404": "La convocation n'a pas été trouvée dans la collectivité courante"
       },
       "tag": {
-        "used": "Ce tag est toujours utilisé"
+        "used": "Cette étiquette est toujours utilisée"
       },
       "validation": {
         "missingParameter": "Un paramètre est manquant"

@@ -188,6 +188,7 @@ public class PdfDocumentGenerator implements DocumentGenerator {
         cell.setHorizontalAlignment(Cell.ALIGN_LEFT);
         cell.setVerticalAlignment(Cell.ALIGN_MIDDLE);
         cell.setBorderWidth(1);
+        cell.setMinimumHeight(35);
         cell.setPhrase(new Phrase(text));
         return cell;
     }
