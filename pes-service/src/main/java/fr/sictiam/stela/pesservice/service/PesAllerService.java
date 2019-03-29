@@ -64,6 +64,12 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
 
     public static String DEFAULT_GROUP_NAME = "Service PES";
 
+    private static List<StatusType> fatalErrorStatuses =
+            Arrays.asList(StatusType.CLASSEUR_DELETED, StatusType.CLASSEUR_WITHDRAWN,
+                    StatusType.FILE_ERROR, StatusType.MAX_RETRY_REACH,
+                    StatusType.SIGNATURE_INVALID, StatusType.SIGNATURE_MISSING,
+                    StatusType.SIGNATURE_SENDING_ERROR);
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -76,7 +82,6 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
     private final ExternalRestService externalRestService;
     private final PesExportRepository pesExportRepository;
     private final StorageService storageService;
-
 
     @Value("${application.clamav.port}")
     private Integer clamavPort;
@@ -241,10 +246,6 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         return pesAllerRepository.findByPjFalseAndSignedFalseAndLocalAuthoritySesileSubscriptionTrueAndArchiveNull();
     }
 
-    List<PesAller> getPendingSignature() {
-        return pesAllerRepository.findByLastHistoryStatus(StatusType.PENDING_SIGNATURE);
-    }
-
     public void updateStatus(String pesUuid, StatusType updatedStatus) {
         PesHistory pesHistory = new PesHistory(pesUuid, updatedStatus);
         updateHistory(pesHistory);
@@ -289,7 +290,7 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         pesAllerRepository.saveAndFlush(pes);
     }
 
-    public boolean checkVirus(byte[] file) throws ClamavException, IOException {
+    public boolean checkVirus(byte[] file) throws ClamavException {
         ScanResult mainResult = clamavClient.scan(new ByteArrayInputStream(file));
         boolean status = false;
         if (!mainResult.equals(OK.INSTANCE)) {
@@ -520,6 +521,10 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
             LOGGER.error("[isAPesOrmc] Unexpected exception parsing PES file", e);
         }
         return false;
+    }
+
+    public boolean hasAFatalError(PesAller pesAller) {
+        return fatalErrorStatuses.contains(pesAller.getLastHistoryStatus());
     }
 
     @Override

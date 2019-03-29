@@ -254,20 +254,13 @@ public class PaullEndpoint {
         Optional<PesHistory> peshistory = fileHistories.stream().findFirst();
 
         if (peshistory.isPresent()) {
-            PesHistory pesHistory = peshistory.get();
-            if (peshistory.get().getStatus().equals(StatusType.ACK_RECEIVED)) {
-                detailsPESAllerStruct.setDateAR(dateFormatter.format(pesHistory.getDate()));
-                detailsPESAllerStruct.setDateAnomalie("");
-                detailsPESAllerStruct.setMotifAnomalie("");
-            } else if (peshistory.get().getStatus().equals(StatusType.NACK_RECEIVED)) {
-                detailsPESAllerStruct.setDateAR("");
-                detailsPESAllerStruct.setDateAnomalie(dateFormatterWithMinutes.format(pesHistory.getDate()));
-                // this only happens when NACK are manually added for testing purposes with business editors
-                if (pesHistory.getErrors() != null && !pesHistory.getErrors().isEmpty())
-                    detailsPESAllerStruct.setMotifAnomalie(pesHistory.getErrors().get(0).errorText());
-                else
-                    detailsPESAllerStruct.setMotifAnomalie("");
-            }
+            detailsPESAllerStruct.setDateAR(dateFormatter.format(peshistory.get().getDate()));
+            detailsPESAllerStruct.setDateAnomalie("");
+            detailsPESAllerStruct.setMotifAnomalie("");
+        } else if (pesAllerService.hasAFatalError(pesAller)) {
+            detailsPESAllerStruct.setDateAR("");
+            detailsPESAllerStruct.setDateAnomalie(dateFormatterWithMinutes.format(pesAller.getLastHistoryDate()));
+            detailsPESAllerStruct.setMotifAnomalie(pesAller.getLastHistoryStatus().name());
         } else {
             detailsPESAllerStruct.setDateAR("");
             detailsPESAllerStruct.setDateAnomalie("");

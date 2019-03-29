@@ -52,7 +52,7 @@ public class RetryTask {
                     pesAllerService.updateStatus(uuid, statusType);
                 } catch (PesSendException e) {
                     pesAllerService.updateStatus(uuid, StatusType.FILE_ERROR, e.getClass().getName());
-                    LOGGER.error("Error while trying to resend PES: {}", uuid, e.getMessage());
+                    LOGGER.error("Error while trying to resend PES: {}", uuid, e);
                 }
             }
 
