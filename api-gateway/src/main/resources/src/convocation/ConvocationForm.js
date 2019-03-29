@@ -305,6 +305,7 @@ class ConvocationForm extends Component {
 	                onDelete={() => this.deleteAnnexe(index, annexe.name)}
 	                extraContent={<Dropdown
 	                    placeholder={t('convocation.fields.pick_tag')}
+	                    noResultsMessage={t('convocation.admin.modules.convocation.local_authority_settings.tags.no_tag')}
 	                    fluid
 	                    multiple
 	                    search

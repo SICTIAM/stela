@@ -259,13 +259,13 @@ export default class ConvocationService {
 	    }
 	}
 	deleteTag = async (context, uuid) => {
-	    const { _fetchWithAuthzHandling, _addNotification } = context
+	    const { _fetchWithAuthzHandling, _addNotification, t } = context
 
 	    try {
 	        return await _fetchWithAuthzHandling({url: `/api/convocation/tag/${uuid}`, method: 'DELETE', context: context})
 	    } catch(error) {
-	        error.json().then(json => {
-	            _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	        error.text().then(text => {
+	            _addNotification(notifications.defaultError, 'notifications.title', t(`convocation:${text}`))
 	        })
 	        throw error
 	    }

@@ -1,7 +1,7 @@
 const modules = [
     'ACTES',
     'PES',
-    // 'CONVOCATION'
+    'CONVOCATION'
 ]
 
 const natures = [

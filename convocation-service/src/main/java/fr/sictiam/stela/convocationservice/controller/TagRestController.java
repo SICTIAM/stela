@@ -118,7 +118,7 @@ public class TagRestController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             LOGGER.error("Tag {} is still affected to an attachment", uuid);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>("convocation.errors.tag.used", HttpStatus.CONFLICT);
         }
     }
 }

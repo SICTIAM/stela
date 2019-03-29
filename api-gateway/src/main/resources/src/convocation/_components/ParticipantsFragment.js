@@ -57,14 +57,15 @@ class ParticipantsFragment extends Component {
 	        }
 	    }
 	    const statutDisplay = (opened) => opened ? <p><Icon name='envelope open'/> {convertDateBackFormatToUIFormat(opened, 'DD/MM/YYYY à HH:mm')}</p>: <Icon name='envelope'/>
-	    const recipientDisplay = (recipient) => `${recipient.firstname} ${recipient.lastname}`
+        const recipientDisplay = (recipient) => `${recipient.firstname} ${recipient.lastname}`
+        const recipientEpciName = (recipient) => recipient.epciName
 	    const metaData = [
 	        { property: 'uuid', displayed: false },
 	        { property: 'recipient', displayed: true, searchable: false, displayName: 'Destinataires', displayComponent: recipientDisplay },
 	        { property: 'openDate', displayed: true, searchable: false, displayName: 'Statut', displayComponent: statutDisplay },
 	        { property: 'responseType', displayed: true, searchable: false, displayName: 'Réponses', displayComponent: answerDisplay },
 	    ]
-        if(epci) metaData.push({property: 'epciName', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci')})
+        if(epci) metaData.push({property: 'recipient', displayed: true, searchable: true, sortable: true, displayName: t('convocation.admin.modules.convocation.recipient_config.epci'), displayComponent: recipientEpciName})
 
         return (
             <Fragment>
