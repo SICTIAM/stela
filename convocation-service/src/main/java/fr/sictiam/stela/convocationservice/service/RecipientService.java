@@ -303,7 +303,7 @@ public class RecipientService {
         int currentLine, errorsCount = currentLine = 0;
         List<ImportResult.Error> errors = new ArrayList<>();
         try (ICsvBeanReader beanReader = new CsvBeanReader(new InputStreamReader(recipients.getInputStream()),
-                CsvPreference.STANDARD_PREFERENCE)) {
+                CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE)) {
 
             // the header elements are used to map the values to the bean (names must match)
             final String[] headers = beanReader.getHeader(true);
