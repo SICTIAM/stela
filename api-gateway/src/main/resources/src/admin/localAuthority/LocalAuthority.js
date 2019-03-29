@@ -9,7 +9,7 @@ import { notifications } from '../../_util/Notifications'
 import { modules } from '../../_util/constants'
 import ConfirmModal from '../../_components/ConfirmModal'
 import { FieldInline, FieldValue, ListItem, Page } from '../../_components/UI'
-import { checkStatus, getLocalAuthoritySlug } from '../../_util/utils'
+import {checkStatus, getLocalAuthoritySlug, sortAlphabetically} from '../../_util/utils'
 import { withAuthContext } from '../../Auth'
 
 class LocalAuthority extends Component {
@@ -171,7 +171,7 @@ class LocalAuthority extends Component {
                 <Segment>
                     <h2 className='secondary'>{t('admin.local_authority.users')}</h2>
                     <StelaTable
-                        data={this.state.fields.agents}
+                        data={this.state.fields.agents && sortAlphabetically(this.state.fields.agents, 'family_name')}
                         metaData={[
                             { property: 'uuid', displayed: false, searchable: false },
                             { property: 'family_name', displayed: true, displayName: t('agent.family_name'), searchable: true },
