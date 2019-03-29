@@ -45,12 +45,12 @@ class ParticipantsResponsesFragment extends Component {
 	            return (
 	                <Fragment key={`${part.recipient.uuid}_${question.uuid}`}>
 	                    {question.responses[indexQuestion].response === true && (
-	                        <td style={{textAlign: 'center', padding: '5px 0'}}>
+	                        <td style={styles.td}>
 	                            <Icon style={{color: '#419443'}} name='check'/>
 	                        </td>
 	                    )}
 	                    {question.responses[indexQuestion].response === false && (
-	                        <td style={{textAlign: 'center', padding: '5px 0'}}>
+	                        <td style={styles.td}>
 	                            <Icon style={{color: '#c73f3f'}} name='cancel'/>
 	                        </td>
 	                    )}
@@ -58,7 +58,7 @@ class ParticipantsResponsesFragment extends Component {
 	            )
 	        } else {
 	            return (
-	                <td key={`empty_question_${question.uuid}`}/>
+	                <td key={`empty_question_${question.uuid}`} style={styles.td}/>
 	            )
 	        }
 	    })
@@ -69,7 +69,7 @@ class ParticipantsResponsesFragment extends Component {
 	        const responseHTML = this.getResponsesByParticipant(part)
 	        return (
 	            <tr key={`participant_${part.recipient.uuid}`}>
-	                <td key={`info_participant_${part.recipient.uuid}`}>{`${part.recipient.firstname} ${part.recipient.lastname}`}</td>
+	                <td style={styles.td} key={`info_participant_${part.recipient.uuid}`}>{`${part.recipient.firstname} ${part.recipient.lastname}`}</td>
 	                {responseHTML}
 	            </tr>
 	        )
@@ -87,7 +87,7 @@ class ParticipantsResponsesFragment extends Component {
 	    let presentContent
 	    if(present.length > 0) {
 	        presentContent =
-				<table style={{borderSpacing: '10px'}}>
+				<table style={styles.table}>
 				    <thead>
 				        <tr>
 				            <th></th>
@@ -107,7 +107,7 @@ class ParticipantsResponsesFragment extends Component {
 	    let absentContent
 	    if(absent.length > 0) {
 	        absentContent =
-				<table style={{borderSpacing: '10px'}}>
+				<table style={styles.table}>
 				    <thead>
 				        <tr>
 				            <th></th>
@@ -142,7 +142,7 @@ class ParticipantsResponsesFragment extends Component {
 	    let noResponseContent
 	    if(noReponse.length > 0) {
 	        noResponseContent =
-				<table style={{borderSpacing: '10px'}}>
+				<table style={styles.table}>
 				    <thead>
 				        <tr>
 				            <th></th>
@@ -170,3 +170,14 @@ class ParticipantsResponsesFragment extends Component {
 }
 
 export default translate(['convocation', 'api-gateway'])(ParticipantsResponsesFragment)
+
+const styles = {
+    table: {
+        borderSpacing: '0px'
+    },
+    td: {
+        borderBottom: '1px solid #d4d4d5',
+        padding: '10px',
+        textAlign: 'center'
+    }
+}
