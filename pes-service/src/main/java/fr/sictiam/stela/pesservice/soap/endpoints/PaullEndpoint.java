@@ -14,6 +14,7 @@ import fr.sictiam.stela.pesservice.service.PesAllerService;
 import fr.sictiam.stela.pesservice.service.PesRetourService;
 import fr.sictiam.stela.pesservice.service.SesileService;
 import fr.sictiam.stela.pesservice.service.exceptions.PesCreationException;
+import fr.sictiam.stela.pesservice.service.util.JsonExtractorUtils;
 import fr.sictiam.stela.pesservice.soap.model.paull.*;
 import fr.sictiam.stela.pesservice.validation.ValidationUtil;
 import io.jsonwebtoken.Claims;
@@ -242,7 +243,7 @@ public class PaullEndpoint {
 
         detailsPESAllerStruct.setPESPJ(pesAller.isPj() ? "1" : "0");
         detailsPESAllerStruct.setObjet(pesAller.getObjet());
-        detailsPESAllerStruct.setUserName(node.get("email").asText());
+        detailsPESAllerStruct.setUserName(JsonExtractorUtils.extractEmailFromProfile(node));
         detailsPESAllerStruct.setNomDocument(pesAller.getFileName());
         detailsPESAllerStruct.setDateDepot(dateFormatterWithMinutes.format(pesAller.getCreation()));
         detailsPESAllerStruct.setStatutBannette(pesAller.getLastHistoryStatus().name());
