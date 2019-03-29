@@ -298,6 +298,18 @@ const notifications = {
             level: 'success',
             position: 'br'
         },
+        importRecipientsSuccess: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.recipients.import.success',
+            level: 'success',
+            position: 'br'
+        },
+        importRecipientsWarning: {
+            title: 'notifications.convocation.admin.title',
+            message: 'notifications.convocation.admin.recipients.import.warning',
+            level: 'warning',
+            position: 'br'
+        },
         convocationTagAdded: {
             title: 'notifications.convocation.admin.title',
             message: 'notifications.convocation.admin.tags.tag_added.success',

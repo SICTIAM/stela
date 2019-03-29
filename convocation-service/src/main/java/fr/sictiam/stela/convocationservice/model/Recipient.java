@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeDeserializer;
 import fr.sictiam.stela.convocationservice.config.LocalDateTimeSerializer;
+import fr.sictiam.stela.convocationservice.model.csv.RecipientBean;
 import fr.sictiam.stela.convocationservice.model.ui.Views;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
@@ -82,6 +83,10 @@ public class Recipient implements Comparable<Recipient> {
         this.phoneNumber = phoneNumber;
         this.localAuthority = localAuthority;
         this.epciName = epciName;
+    }
+
+    public Recipient(RecipientBean bean) {
+        this(bean.getFirstname(), bean.getLastname(), bean.getEmail(), bean.getPhoneNumber(), null, bean.getEpci());
     }
 
     public String getFirstname() {

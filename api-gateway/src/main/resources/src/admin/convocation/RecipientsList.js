@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { Segment, Icon, Button, Form } from 'semantic-ui-react'
+import debounce from 'debounce'
+import accepts from 'attr-accept'
+import Validator from 'validatorjs'
+import { Segment, Icon, Button, Form, Modal, Grid, Message } from 'semantic-ui-react'
 
 import {
     getLocalAuthoritySlug,
@@ -17,9 +20,8 @@ import { withAuthContext } from '../../Auth'
 
 import StelaTable from '../../_components/StelaTable'
 import AdvancedSearch from '../../_components/AdvancedSearch'
-import { Page, FormFieldInline } from '../../_components/UI'
+import { Page, FormFieldInline, FormField, InputFile, File, ValidationPopup } from '../../_components/UI'
 import Pagination from '../../_components/Pagination'
-import QuickView from '../../_components/QuickView'
 import Breadcrumb from '../../_components/Breadcrumb'
 
 class RecipientsList extends Component {
@@ -47,8 +49,19 @@ class RecipientsList extends Component {
 	    totalCount: 0,
 	    localAuthority: {
 	        epci: false
-	    }
+	    },
+	    importRecipientsModal: false,
+	    isFormValid: false,
+	    allFormErrors: [],
+	    fields: {
+	        recipients: null
+	    },
+	    importError: []
 	}
+	validationRules = {
+	    recipients: ['required']
+	}
+	acceptFile = '.csv'
 	componentDidMount = async () => {
 	    this._convocationService = new ConvocationService()
 	    const itemPerPage = localStorage.getItem('itemPerPage')
@@ -78,6 +91,14 @@ class RecipientsList extends Component {
 	    return !recipient.active
 	}
 
+	openImportRecipientModal = () => this.setState({ importRecipientsModal: true })
+
+	closeImportRecipientModal = () => {
+	    const { fields } = this.state
+	    fields.recipients = null
+	    this.setState({ importRecipientsModal: false, fields})
+	}
+
 	handleFieldCheckboxChange = (row) => {
 	    const { _fetchWithAuthzHandling, _addNotification } = this.context
 	    const url = !row.active ? `/api/convocation/recipient/${row.uuid}` : `/api/convocation/recipient/${row.uuid}`
@@ -93,6 +114,65 @@ class RecipientsList extends Component {
 	            row.active = !row.active
 	        })
 	}
+
+	validateForm = debounce(() => {
+	    const { t } = this.context
+	    const data = {
+	        recipients: this.state.fields.recipients
+	    }
+
+	    const attributeNames = {
+	        recipients: t('convocation.admin.modules.convocation.recipient_list.recipients_file')
+	    }
+	    const validationRules = this.validationRules
+	    //add validation format file
+
+	    const validation = new Validator(data, validationRules)
+	    validation.setAttributeNames(attributeNames)
+	    const isFormValid = validation.passes()
+	    const allFormErrors = Object.values(validation.errors.all()).map(errors => errors[0])
+	    this.setState({ isFormValid, allFormErrors })
+	})
+
+	handleFileChange = (field, file, acceptType) => {
+	    if(this.acceptsFile(file, acceptType)) {
+	        const fields = this.state.fields
+
+	        if (file) {
+	            fields[field] = file
+	            this.setState({ fields }, this.validateForm)
+	        }
+	    }
+	}
+
+	acceptsFile = (file, acceptType) => {
+	    const { _addNotification, t } = this.context
+	    if(accepts(file, acceptType)) {
+	        return true
+	    } else {
+	        _addNotification(notifications.defaultError, 'notifications.convocation.title', t('api-gateway:form.validation.bad_extension_file', {name: file.name}))
+	        return false
+	    }
+	}
+
+	submit = async () => {
+	    const { _addNotification } = this.context
+	    const data = new FormData()
+	    data.append('recipients', this.state.fields.recipients)
+	    try {
+	        await this._convocationService.importRecipients(this.props.authContext, data)
+	        _addNotification(notifications.admin.importRecipientsSuccess)
+	    } catch (error){
+	        if(error.status === 400) {
+	            error.json().then(json => {
+	                this.setState({importError: json.errors})
+	            })
+	        }
+	    }
+	    this.closeImportRecipientModal()
+
+	}
+
 	deactivateAll = async () => {
 	    const { _addNotification } = this.context
 	    await this._convocationService.desactivateAllRecipients(this.props.authContext)
@@ -105,6 +185,10 @@ class RecipientsList extends Component {
 	    const deactivateAll = {
 	        title: t('convocation.admin.modules.convocation.recipient_list.deactivate_all'),
 	        action: this.deactivateAll
+	    }
+	    const importRecipient = {
+	        title: t('convocation.admin.modules.convocation.recipient_list.importRecipient'),
+	        action: this.openImportRecipientModal
 	    }
 	    const assemblyTypes = (assemblyTypes) => {
 	        if(assemblyTypes && assemblyTypes.length > 0) {
@@ -154,6 +238,22 @@ class RecipientsList extends Component {
                 currentPage={this.state.currentPage}
                 options={options} />
 	    const localAuthoritySlug = getLocalAuthoritySlug()
+	    const submissionButton = <Button type='submit' primary basic disabled={!this.state.isFormValid}>
+	        {t('api-gateway:form.send')}
+	    </Button>
+
+	    let notificationErrorImport = null
+	    if(this.state.importError.length > 0) {
+	        notificationErrorImport = this.state.importError.map((error, index) => {
+	            return (
+	                <p key={`error_${index}`}>
+	                    {`${t('convocation.errors.csv.line')} ${error.line} - ${t('convocation.errors.csv.error_on')}: ${error.field}`}
+	                    <br/>
+	                    {`${t(`${error.message}`)}`}
+	                </p>
+	            )
+	        })
+	    }
 	    return (
 	        <Page>
 	            <Breadcrumb
@@ -163,11 +263,49 @@ class RecipientsList extends Component {
 	                    {title: t('api-gateway:breadcrumb.convocation.recipients_list')}
 	                ]}
 	            />
-	            <QuickView
-	                open={this.state.quickViewOpened}
-	                header={true}
-	                data={this.state.quickViewData}
-	                onClose={this.onCloseQuickView}></QuickView>
+	            {notificationErrorImport && (
+	                <Message warning>
+	                    <Message.Header style={{ marginBottom: '0.5em'}}>{t('convocation.errors.csv.title')}</Message.Header>
+	                    {notificationErrorImport}
+	                </Message>
+	            )}
+	            <Modal open={this.state.importRecipientsModal}>
+	                <Modal.Header>{t('convocation.admin.modules.convocation.recipient_list.importRecipient')}</Modal.Header>
+	                <Modal.Content>
+	                    <Form onSubmit={this.submit}>
+	                        <Grid>
+	                            <Grid.Column mobile='16' computer='8'>
+	                                <FormField htmlFor={`${this.props.uuid}_recipients`}
+	                                    label={t('convocation.admin.modules.convocation.recipient_list.recipients_file')}>
+	                                    <InputFile labelClassName="primary" htmlFor={`${this.props.uuid}_recipients`}
+	                                        label={`${t('api-gateway:form.add_a_file')}`}>
+	                                        <input type="file"
+	                                            id={`${this.props.uuid}_recipients`}
+	                                            accept={this.acceptFile}
+	                                            onChange={(e) => this.handleFileChange('recipients', e.target.files[0], this.acceptFile)}
+	                                            style={{ display: 'none' }}/>
+	                                    </InputFile>
+	                                </FormField>
+	                                {this.state.fields.recipients && (
+	                                    <File attachment={{ filename: this.state.fields.recipients.name }} onDelete={() => this.deleteFile('recipients')} />
+	                                )}
+	                            </Grid.Column>
+	                        </Grid>
+	                        <div className='footerForm'>
+	                            <Button type="button" style={{ marginRight: '1em' }} onClick={e => this.closeImportRecipientModal()} basic color='red'>
+	                                {t('api-gateway:form.cancel')}
+	                            </Button>
+
+	                            {this.state.allFormErrors.length > 0 &&
+									<ValidationPopup errorList={this.state.allFormErrors}>
+									    {submissionButton}
+									</ValidationPopup>
+	                            }
+	                            {this.state.allFormErrors.length === 0 && submissionButton}
+	                        </div>
+	                    </Form>
+	                </Modal.Content>
+	            </Modal>
 	            <Segment>
 	                <AdvancedSearch
 	                    isDefaultOpen={false}
@@ -218,6 +356,7 @@ class RecipientsList extends Component {
 	                    toogleProperty='active'
 	                    noDataMessage={t('convocation.new.no_recipient')}
 	                    selectOptions={[
+	                        importRecipient,
  							deactivateAll
 	                    ]}
 	                />

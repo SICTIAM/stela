@@ -2,17 +2,30 @@ package fr.sictiam.stela.convocationservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sictiam.stela.convocationservice.dao.RecipientRepository;
+import fr.sictiam.stela.convocationservice.model.ImportResult;
 import fr.sictiam.stela.convocationservice.model.LocalAuthority;
 import fr.sictiam.stela.convocationservice.model.Recipient;
+import fr.sictiam.stela.convocationservice.model.csv.RecipientBean;
 import fr.sictiam.stela.convocationservice.model.exception.InvalidEmailAddressException;
+import fr.sictiam.stela.convocationservice.model.exception.MissingParameterException;
 import fr.sictiam.stela.convocationservice.model.exception.NotFoundException;
 import fr.sictiam.stela.convocationservice.model.exception.RecipientExistsException;
 import fr.sictiam.stela.convocationservice.model.util.ConvocationBeanUtils;
 import fr.sictiam.stela.convocationservice.service.util.EmailChecker;
+import fr.sictiam.stela.convocationservice.service.util.NullableRegexProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.supercsv.cellprocessor.constraint.NotNull;
+import org.supercsv.cellprocessor.constraint.StrRegEx;
+import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.exception.SuperCsvCellProcessorException;
+import org.supercsv.io.CsvBeanReader;
+import org.supercsv.io.ICsvBeanReader;
+import org.supercsv.prefs.CsvPreference;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,6 +36,8 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -33,6 +48,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class RecipientService {
@@ -65,8 +82,22 @@ public class RecipientService {
 
         LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
 
+        return create(recipient, localAuthority, force);
+    }
+
+    public Recipient create(Recipient recipient, LocalAuthority localAuthority, Boolean force) {
+
+        if (StringUtils.isBlank(recipient.getFirstname()))
+            throw new MissingParameterException("firstname");
+
+        if (StringUtils.isBlank(recipient.getLastname()))
+            throw new MissingParameterException("lastname");
+
+        if (StringUtils.isBlank(recipient.getEmail()))
+            throw new MissingParameterException("email");
+
         Optional<Recipient> exist = recipientRepository.findByEmailAndLocalAuthorityUuid(recipient.getEmail(),
-                localAuthorityUuid);
+                localAuthority.getUuid());
         if (exist.isPresent()) {
             LOGGER.error("A recipient with email {} already exists in local authority {}", recipient.getEmail(), localAuthority.getName());
             throw new RecipientExistsException(exist.get().getActive() ? "convocation.errors.recipient.alreadyExists" : "convocation.errors.recipient.alreadyExistsAndDeactivated");
@@ -77,8 +108,8 @@ public class RecipientService {
             throw new InvalidEmailAddressException();
         }
 
-        recipient.setFirstname(StringUtils.capitalize(recipient.getFirstname().toLowerCase()));
-        recipient.setLastname(recipient.getLastname().toUpperCase());
+        recipient.setFirstname(StringUtils.capitalize(recipient.getFirstname().toLowerCase().trim()));
+        recipient.setLastname(recipient.getLastname().toUpperCase().trim());
         recipient.setLocalAuthority(localAuthority);
         recipient.setActive(true);
         recipient.setToken(generateToken(recipient));
@@ -264,5 +295,90 @@ public class RecipientService {
             recipient.setInactivityDate(now);
             recipientRepository.save(recipient);
         });
+    }
+
+    public ImportResult importRecipients(String localAuthorityUuid, MultipartFile recipients) throws IOException {
+
+        LocalAuthority localAuthority = localAuthorityService.getByUuid(localAuthorityUuid);
+        int currentLine, errorsCount = currentLine = 0;
+        List<ImportResult.Error> errors = new ArrayList<>();
+        try (ICsvBeanReader beanReader = new CsvBeanReader(new InputStreamReader(recipients.getInputStream()),
+                CsvPreference.STANDARD_PREFERENCE)) {
+
+            // the header elements are used to map the values to the bean (names must match)
+            final String[] headers = beanReader.getHeader(true);
+
+            final CellProcessor[] processors = getProcessors();
+            RecipientBean bean = null;
+            do {
+                try {
+                    currentLine = beanReader.getLineNumber();
+                    bean = beanReader.read(RecipientBean.class, RecipientBean.fields(), processors);
+                    if (bean != null) {
+                        create(new Recipient(bean), localAuthority, true);
+                    } else {
+                        // End of file
+                        break;
+                    }
+                } catch (SuperCsvCellProcessorException e) {
+                    errorsCount++;
+                    Pair<String, String> pair = parseException(e);
+                    errors.add(new ImportResult.Error(currentLine, pair.getFirst(), pair.getSecond()));
+
+                    LOGGER.error("Failed to import recipient: {} : {}", e.getCsvContext(), e.getMessage());
+                } catch (RecipientExistsException e) {
+                    errorsCount++;
+                    errors.add(new ImportResult.Error(currentLine, bean.getEmail(), "convocation.errors.recipient.alreadyExists"));
+                    LOGGER.error("Failed to import recipient: {}. Email already exists", bean);
+                }
+            } while (true);
+        } catch (IOException e) {
+            LOGGER.error("Error while importing recipients: {}", e.getMessage());
+        }
+
+        return new ImportResult(currentLine - 1, errorsCount, errors);
+    }
+
+    private Pair<String, String> parseException(SuperCsvCellProcessorException e) {
+
+        if (e.getProcessor() instanceof NotNull) {
+            // Search null field
+            List<Object> values = e.getCsvContext().getRowSource();
+            if (values.get(0) == null) return Pair.of("lastname", "convocation.errors.csv.mandatory");
+            if (values.get(1) == null) return Pair.of("firstname", "convocation.errors.csv.mandatory");
+            if (values.get(3) == null) return Pair.of("email", "convocation.errors.csv.mandatory");
+
+        } else if (e.getProcessor() instanceof NullableRegexProcessor) {
+            return Pair.of(e.getCsvContext().getRowSource().get(e.getCsvContext().getColumnNumber() - 1).toString(),
+                    "convocation.errors.csv.phoneNumberBadFormat");
+
+        } else if (e.getProcessor() instanceof StrRegEx) {
+            Pattern nullRegex = Pattern.compile("this processor does not accept null input");
+            Pattern badRegex = Pattern.compile(" does not match the regular expression");
+            Matcher badRegexMatcher = badRegex.matcher(e.getMessage());
+            if (nullRegex.matcher(e.getMessage()).find()) {
+                return Pair.of("email", "convocation.errors.csv.mandatory");
+            } else if (badRegex.matcher(e.getMessage()).find()) {
+                return Pair.of(e.getCsvContext().getRowSource().get(e.getCsvContext().getColumnNumber() - 1).toString(),
+                        "convocation.errors.csv.emailBadFormat");
+            }
+        }
+        return Pair.of("Unknown", "Unknown");
+    }
+
+    private CellProcessor[] getProcessors() {
+
+        final String emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"" +
+                "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+
+        final String phoneNumerRegex = "^(\\+33|0)\\d{9}$";
+
+        return new CellProcessor[]{
+                new NotNull(), // firstname
+                new NotNull(), // lastname
+                new org.supercsv.cellprocessor.Optional(), // epci if defined
+                new StrRegEx(emailRegex),
+                new NullableRegexProcessor(phoneNumerRegex)
+        };
     }
 }

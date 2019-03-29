@@ -371,6 +371,23 @@ export default class ConvocationService {
 	    }
 	}
 
+	importRecipients = async (context, data) => {
+	    const { _fetchWithAuthzHandling, _addNotification } = context
+
+	    try {
+	        return await _fetchWithAuthzHandling({url: '/api/convocation/recipient/import', method: 'POST', body: data, context: context})
+	    } catch(error) {
+	        if(error.status === 418) {
+	            _addNotification(notifications.admin.importRecipientsWarning)
+	        } else {
+	            error.json().then(json => {
+	                _addNotification(notifications.defaultError, 'notifications.title', json.message)
+	            })
+	        }
+	        throw error
+	    }
+	}
+
 	getTokenInUrl = (search) => {
 	    const arrayParams = search && search.substr(1).split('&')
 	    const regex = /token/
