@@ -210,7 +210,7 @@ public class PaullEndpoint {
         Optional<LocalAuthority> localAuthority = localAuthorityService.getBySiren(paullSoapToken.getSiren());
 
         // PES PJ are not sent to signature, don't bother checking something impossible
-        if (!pesAller.isPj() && !pesAllerService.isAPesOrmc(pesAller)) {
+        if (!pesAller.isPj() && !pesAllerService.isAPesOrmc(pesAller) && pesAller.getSesileClasseurId() != null) {
             Either<HttpStatus, Classeur> sesileResponse = sesileService.getClasseur(localAuthority.get(),
                     pesAller.getSesileClasseurId());
             if (sesileResponse.isLeft()) {
