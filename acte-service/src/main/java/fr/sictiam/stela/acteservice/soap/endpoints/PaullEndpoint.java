@@ -117,8 +117,17 @@ public class PaullEndpoint {
         acte.setAnnexes(attachments);
         acte.setCreation(LocalDateTime.now());
 
+        String currentProfileUuid;
+        if (StringUtils.isEmpty(infosActes.getEmail())) {
+            currentProfileUuid = localAuthority.getGenericProfileUuid();
+        } else {
+            JsonNode jsonNode = externalRestService.getProfileByLocalAuthoritySirenAndEmail(
+                    localAuthority.getSiren(), infosActes.getEmail());
+            currentProfileUuid = jsonNode.get("uuid").asText();
+        }
+
         acte.setLocalAuthority(localAuthority);
-        acte.setProfileUuid(localAuthority.getGenericProfileUuid());
+        acte.setProfileUuid(currentProfileUuid);
         acte.setCodeLabel(localAuthorityService.getCodeMatiereLabel(localAuthority.getUuid(), acte.getCode()));
         Acte actePublished = acteService.publishActe(acte);
 

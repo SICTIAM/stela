@@ -6,6 +6,7 @@ import fr.sictiam.stela.acteservice.model.LocalAuthority;
 import fr.sictiam.stela.acteservice.model.Right;
 import fr.sictiam.stela.acteservice.model.ui.GenericAccount;
 import fr.sictiam.stela.acteservice.model.util.Certificate;
+import fr.sictiam.stela.acteservice.service.exceptions.NotFoundException;
 import fr.sictiam.stela.acteservice.service.util.DiscoveryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,7 @@ public class ExternalRestService {
 
         Optional<String> opt = profile.blockOptional();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode node = objectMapper.readTree(opt.get());
-
-        return node;
+        return objectMapper.readTree(opt.get());
     }
 
     public JsonNode getProfileForEmail(String siren, String email) throws IOException {
@@ -219,5 +218,19 @@ public class ExternalRestService {
                     e.getResponseBodyAsString());
             return Optional.empty();
         }
+    }
+
+    public JsonNode getProfileByLocalAuthoritySirenAndEmail(String siren, String email) throws IOException {
+        WebClient webClient = WebClient.create(discoveryUtils.adminServiceUrl());
+        Mono<String> genericAccount = webClient.get()
+                .uri("/api/admin/profile/local-authority/{siren}/{email}", siren, email).retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        response -> Mono.error(new NotFoundException(String.format("No profile found for email %s", email))))
+                .bodyToMono(String.class);
+
+        Optional<String> opt = genericAccount.blockOptional();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.readTree(opt.get());
     }
 }
