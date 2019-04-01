@@ -7,7 +7,6 @@ import fr.sictiam.stela.acteservice.dao.ActeRepository;
 import fr.sictiam.stela.acteservice.dao.AdminRepository;
 import fr.sictiam.stela.acteservice.dao.AttachmentRepository;
 import fr.sictiam.stela.acteservice.model.*;
-import fr.sictiam.stela.acteservice.model.event.ActeHistoryEvent;
 import fr.sictiam.stela.acteservice.model.event.LocalAuthorityEvent;
 import fr.sictiam.stela.acteservice.model.ui.DraftUI;
 import fr.sictiam.stela.acteservice.model.ui.SearchResultsUI;
@@ -17,16 +16,12 @@ import fr.sictiam.stela.acteservice.service.ArchiverService;
 import fr.sictiam.stela.acteservice.service.DraftService;
 import fr.sictiam.stela.acteservice.service.ExternalRestService;
 import fr.sictiam.stela.acteservice.service.LocalAuthorityService;
-import fr.sictiam.stela.acteservice.service.LocalesService;
-import fr.sictiam.stela.acteservice.service.NotificationService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.mail.util.MimeMessageParser;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -46,12 +41,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,22 +52,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static fr.sictiam.stela.acteservice.utils.ActeUtils.acteWithAttachments;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -116,12 +104,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     private ActeHistoryRepository acteHistoryRepository;
 
     @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private LocalesService localService;
-
-    @Autowired
     private ExternalRestService externalRestService;
 
     @Autowired
@@ -129,9 +111,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
 
     @Autowired
     private AttachmentRepository attachmentRepository;
-
-    @Rule
-    public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
     @Before
     public void beforeTests() {
@@ -554,59 +533,6 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
     }
 
     @Test
-    public void testNotification() throws Exception {
-
-        StatusType statusType = StatusType.SENT;
-        Map<String, String> variables = new HashMap<>();
-        variables.put("firstname", "John");
-        variables.put("lastname", "Doe");
-
-        Map<String, String> variables2 = new HashMap<>();
-        variables2.put("firstname", "Laurent");
-        variables2.put("lastname", "De Rojmeko");
-
-        String bodyCopy = localService.getMessage("fr", "acte_notification",
-                "$.acte.copy." + statusType.name() + ".body", variables2);
-        String subjectCopy = localService.getMessage("fr", "acte_notification",
-                "$.acte.copy." + statusType.name() + ".subject", variables2);
-
-        String body = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".body",
-                variables);
-        String subject = localService.getMessage("fr", "acte_notification", "$.acte." + statusType.name() + ".subject",
-                variables);
-
-        MultiValueMap<String, Object> params = acteWithAttachments();
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params);
-
-        ResponseEntity<String> response = this.restTemplate.exchange("/api/acte", HttpMethod.POST, request,
-                String.class);
-        String acteUuid = response.getBody();
-
-        ActeHistory history = new ActeHistory(acteUuid, StatusType.SENT);
-        ActeHistoryEvent mockEvent = new ActeHistoryEvent(this, history);
-        notificationService.proccessEvent(mockEvent);
-
-        MimeMessage[] receivedMessages = smtpServerRule.getMessages();
-        assertThat(receivedMessages, not(emptyArray()));
-        assertThat(receivedMessages.length, is(2));
-        MimeMessage current = receivedMessages[0];
-        assertThat(current, notNullValue());
-        MimeMessageParser parser = new MimeMessageParser(current);
-        parser.parse();
-        assertThat(parser.getSubject(), is(subjectCopy));
-        assertThat(current.getContent(), instanceOf(MimeMultipart.class));
-        assertThat(parser.getHtmlContent(), is(bodyCopy));
-
-        MimeMessage secondMsg = receivedMessages[1];
-        assertThat(secondMsg, notNullValue());
-        MimeMessageParser secondParser = new MimeMessageParser(secondMsg);
-        secondParser.parse();
-        assertThat(secondParser.getSubject(), is(subject));
-        assertThat(secondMsg.getContent(), instanceOf(MimeMultipart.class));
-        assertThat(secondParser.getHtmlContent(), is(body));
-    }
-
-    @Test
     public void testSend() throws Exception {
         InputStream in = new ClassPathResource("data/SIC-EACT--210600730--20180115-1.tar.gz").getInputStream();
 
@@ -704,27 +630,11 @@ public class ActeServiceIntegrationTests extends BaseIntegrationTests {
         assertThat(attachmentRepository.findByUuid(annexeUuid).isPresent(), is(false));
     }
 
-    private MultiValueMap<String, Object> acteWithAttachments() {
-        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-        params.add("acte", acte());
-        params.add("file", new ClassPathResource("data/Delib.pdf"));
-        params.add("annexes", new ClassPathResource("data/Annexe_delib.pdf"));
-        params.add("annexes", new ClassPathResource("data/Annexe_delib.pdf"));
-        return params;
-    }
-
     private MultipartFile getMultipartResourceFile(String filename, String contentType) throws IOException {
         File file = new ClassPathResource(filename).getFile();
 
         FileInputStream input = new FileInputStream(file);
         return new MockMultipartFile(file.getName(), file.getName(), contentType, IOUtils.toByteArray(input));
-    }
-
-    private Acte acte() {
-        Acte acte = new Acte(RandomStringUtils.randomAlphabetic(15), LocalDate.now(), ActeNature.ARRETES_INDIVIDUELS,
-                "1-1-1-0-0", "Objet", true, true);
-        acte.setProfileUuid("4f146466-ea58-4e5c-851c-46db18ac173b");
-        return acte;
     }
 
     private Acte setActeValues(Acte acte) {

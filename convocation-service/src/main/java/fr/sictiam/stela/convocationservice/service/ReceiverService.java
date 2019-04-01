@@ -12,26 +12,20 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(value = "application.rabbit.enabled")
+@ConditionalOnProperty(value = "application.amqp.enabled")
 public class ReceiverService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
-    @Value("${application.amqp.convocation.createdKey}")
-    private String sentDgfipKey;
-
-    @Value("${application.amqp.convocation.exchange}")
-    private String exchange;
-
     @Autowired
     private LocalAuthorityService localAuthorityService;
 
-    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = "convocationQueue", durable = "true"), exchange = @Exchange(value = "#{'${application.amqp.convocation.exchange}'}", type = ExchangeTypes.FANOUT), key = "#{'${application.amqp.convocation.adminKey}'}"))
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = "convocationQueue", durable = "true"),
+            exchange = @Exchange(value = "#{'${application.amqp.admin.exchange}'}", type = ExchangeTypes.FANOUT)))
     public void fromAdminService(Message message) {
         LOGGER.debug("Received a message {}", message);
 

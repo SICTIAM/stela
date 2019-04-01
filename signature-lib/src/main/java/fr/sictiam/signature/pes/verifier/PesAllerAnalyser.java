@@ -1,12 +1,9 @@
 package fr.sictiam.signature.pes.verifier;
 
-import fr.sictiam.signature.pes.CertificateContainer;
-import fr.sictiam.signature.pes.verifier.SignatureTypeCalculator.SignatureAnexInfo1;
 import fr.sictiam.signature.pes.verifier.SimplePesInformation.BordereauInfo1;
 import fr.sictiam.signature.pes.verifier.SimplePesInformation.EntetePesInfo1;
 import fr.sictiam.signature.utils.DomUtils;
 import org.apache.xpath.XPathAPI;
-import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,14 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CRLException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PesAllerAnalyser {
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -47,8 +37,6 @@ public class PesAllerAnalyser {
     private Document pesDocument;
     private Node namespaceElement;
     private SimplePesInformation simplePesInformation;
-    private SignatureVerifier signatureVerifier;
-    private Map<Element, SignatureVerifierResult> signaturesVerifierResults;
     private boolean doSchemaValidation = false;
     private boolean schemaOK = false;
     private URL schemaUrl = null;
@@ -190,62 +178,6 @@ public class PesAllerAnalyser {
         } catch (ParserConfigurationException pce) {
             throw new UnExpectedException(pce);
         }
-    }
-
-    public Map<Element, SignatureVerifierResult> getSignaturesVerificationResults() {
-        return signaturesVerifierResults;
-    }
-
-    public void computeSignaturesVerificationResults() throws InvalidPesAllerFileException {
-        try {
-            Map<Element, SignatureVerifierResult> workingSignatureVerifierResult = new HashMap<Element, SignatureVerifierResult>();
-            for (Element signatureElement : getSimplePesInformation().getSignatureElements()) {
-                SignatureVerifierResult signatureVerifierResult = getSignatureVerifier().process(signatureElement,
-                        null);
-                workingSignatureVerifierResult.put(signatureElement, signatureVerifierResult);
-            }
-            signaturesVerifierResults = workingSignatureVerifierResult;
-        } catch (IOException ioe) {
-            throw new UnExpectedException(ioe);
-        } catch (CertificateException ce) {
-            throw new UnExpectedException(ce);
-        } catch (KeyStoreException kse) {
-            throw new UnExpectedException(kse);
-        } catch (CRLException crle) {
-            throw new UnExpectedException(crle);
-        } catch (NoSuchAlgorithmException nsae) {
-            throw new UnExpectedException(nsae);
-        } catch (InvalidAlgorithmParameterException iape) {
-            throw new UnExpectedException(iape);
-        }
-    }
-
-    public void computeSignaturesTypeVerification() {
-        SignatureTypeCalculator signatureTypeCalculator = new SignatureTypeCalculator(simplePesInformation,
-                signaturesVerifierResults);
-        signatureTypeCalculator.verifAllBordereauxSigned();
-        for (Element element : simplePesInformation.getSignatureElements()) {
-            SignatureVerifierResult signatureVerifierResult = signaturesVerifierResults.get(element);
-            if (signatureVerifierResult.getUnverifiableSignatureException() == null) {
-                signatureVerifierResult
-                        .setSignatureAnexInfo(new SignatureAnexInfo1(signatureTypeCalculator.process(element)));
-                signatureVerifierResult
-                        .setListeBordereauxNonSignes(signatureTypeCalculator.getListeBordereauxNonSignes());
-                signatureVerifierResult
-                        .setSignatureGlobalePresente(signatureTypeCalculator.isSignatureGlobalePresente());
-            }
-        }
-    }
-
-    public SignatureVerifier getSignatureVerifier() throws IOException, CertificateException, KeyStoreException,
-            CRLException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        if (signatureVerifier == null) {
-            ClassPathResource stream = new ClassPathResource("/signature/CA_RGS.zip");
-
-            signatureVerifier = new SignatureVerifier(CertificateContainer.fromZipURL(stream.getInputStream()),
-                    CertificateContainer.fromZipURL(stream.getInputStream()));
-        }
-        return signatureVerifier;
     }
 
     private Document getDocument() throws ParserConfigurationException, SAXException, IOException {

@@ -76,6 +76,7 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     public void proccessEvent(ActeHistoryEvent event) throws MessagingException, IOException {
         Acte acte = acteService.getByUuid(event.getActeHistory().getActeUuid());
+        StatusType status = event.getActeHistory().getStatus();
 
         Notification notification = Notification.notifications.stream().filter(
                 n -> n.getType().toString().equals(event.getActeHistory().getStatus().isAnomaly() ?
@@ -101,7 +102,13 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                                 .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
                         || (notification.isDefaultValue() && profileNotifications.isEmpty())) {
                     try {
-                        sendMailWithMessage(acte, event, profile, false);
+                        String body = processTemplate(acte, event, profile);
+                        sendMail(getAgentMail(profile),
+                                localesService.getMessage("fr", "acte_notification",
+                                        "$.acte."
+                                                + (status.isAnomaly() ? Notification.Type.ANOMALIES.toString() : status.name())
+                                                + ".subject"),
+                                body);
                         notifcationSentNumber.incrementAndGet();
                     } catch (MessagingException | IOException e) {
                         LOGGER.error(e.getMessage());
@@ -126,7 +133,13 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
                     notifications.stream()
                             .anyMatch(notif -> notif.getName().equals(Notification.Type.ANOMALIES.toString())))
                     || (notification.isDefaultValue() && notifications.isEmpty())) {
-                sendMailWithMessage(acte, event, node, false);
+                String body = processTemplate(acte, event, node);
+                sendMail(getAgentMail(node),
+                        localesService.getMessage("fr", "acte_notification",
+                                "$.acte."
+                                        + (status.isAnomaly() ? Notification.Type.ANOMALIES.toString() : status.name())
+                                        + ".subject"),
+                        body);
                 if (notification.isNotificationStatus()) {
                     ActeHistory acteHistory = new ActeHistory(acte.getUuid(), StatusType.NOTIFICATION_SENT);
                     applicationEventPublisher.publishEvent(new ActeHistoryEvent(this, acteHistory));
@@ -136,20 +149,13 @@ public class NotificationService implements ApplicationListener<ActeHistoryEvent
 
     }
 
-    private void sendMailWithMessage(Acte acte, ActeHistoryEvent event, JsonNode profileNode, boolean isCopy)
-            throws IOException, MessagingException {
+    String processTemplate(Acte acte, ActeHistoryEvent event, JsonNode profileNode) {
         Context ctx = new Context(Locale.FRENCH, getAgentInfo(profileNode));
         ctx.setVariable("acte", acte);
         ctx.setVariable("baseUrl", applicationUrl);
         ctx.setVariable("localAuthority", acte.getLocalAuthority().getSlugName());
         StatusType status = event.getActeHistory().getStatus();
-        String msg = template.process("mails/" + status.name() + "_fr", ctx);
-        sendMail(getAgentMail(profileNode),
-                localesService.getMessage("fr", "acte_notification",
-                        (isCopy ? "$.acte.copy." : "$.acte.")
-                                + (status.isAnomaly() ? Notification.Type.ANOMALIES.toString() : status.name())
-                                + ".subject"),
-                msg);
+        return template.process("mails/" + status.name() + "_fr", ctx);
     }
 
     public List<NotificationValue> getNotificationValues(JsonNode node) {
