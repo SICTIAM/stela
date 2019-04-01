@@ -11,26 +11,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="testsvnRequest">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="sessionId" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:complexType name="testsvnStruct">
-        <xs:sequence>
-          <xs:element name="result1" type="xs:string"/>
-          <xs:element name="result2" type="xs:string"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:element name="testsvnResponse">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="retoursvn" maxOccurs="unbounded" type="xs0:testsvnStruct"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
       <xs:complexType name="depotActeStruct1">
         <xs:sequence>
           <xs:element name="dateDecision" type="xs:string"/>
@@ -220,12 +200,6 @@
   <message name="pmResponse">
     <part name="parameters" element="xs0:pmResponse"/>
   </message>
-  <message name="testsvnRequest">
-    <part name="parameters" element="xs0:testsvnRequest"/>
-  </message>
-  <message name="testsvnResponse">
-    <part name="parameters" element="xs0:testsvnResponse"/>
-  </message>
    <message name="depotActeRequest">
     <part name="parameters" element="xs0:depotActeRequest"/>
   </message>
@@ -258,10 +232,6 @@
   </message>
   
   <portType name="ProcessMakerServiceSoap">
-    <operation name="testsvn">
-      <input message="xs0:testsvnRequest"/>
-      <output message="xs0:testsvnResponse"/>
-    </operation>
     <operation name="depotActe">
       <input message="xs0:depotActeRequest"/>
       <output message="xs0:depotActeResponse"/>
@@ -286,15 +256,6 @@
 
   <binding name="ProcessMakerServiceSoap" type="xs0:ProcessMakerServiceSoap">
     <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <operation name="testsvn">
-      <soap12:operation soapAction="urn:testsvn" soapActionRequired="true" style="document"/>
-      <input>
-        <soap12:body use="literal"/>
-      </input>
-      <output>
-        <soap12:body use="literal"/>
-      </output>
-    </operation>
     <operation name="depotActe">
       <soap12:operation soapAction="urn:depotActe" soapActionRequired="true" style="document"/>
       <input>
