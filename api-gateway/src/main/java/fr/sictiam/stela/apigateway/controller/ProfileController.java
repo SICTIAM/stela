@@ -1,9 +1,12 @@
 package fr.sictiam.stela.apigateway.controller;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import fr.sictiam.stela.apigateway.model.Agent;
 import fr.sictiam.stela.apigateway.model.AlertMessage;
 import fr.sictiam.stela.apigateway.model.Notification;
 import fr.sictiam.stela.apigateway.model.StelaUserInfo;
+import fr.sictiam.stela.apigateway.service.ModulesService;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import org.oasis_eu.spring.kernel.security.OpenIdCAuthentication;
 import org.slf4j.Logger;
@@ -18,17 +21,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -45,6 +44,12 @@ public class ProfileController {
 
     @Autowired
     DiscoveryUtils discoveryUtils;
+
+    @Autowired
+    ModulesService modulesService;
+
+    @Autowired
+    EurekaClient discoveryClient;
 
     @GetMapping(value = "/switch/{profileUuid}")
     public void switchProfile(@PathVariable String profileUuid, HttpServletResponse response,
@@ -72,36 +77,25 @@ public class ProfileController {
 
         List<Notification> notificationFiltered = new ArrayList<>();
 
-        try {
-            notificationFiltered.addAll(mapNotififaction("ACTES_",
-                    restTemplate.getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/notifications/all",
-                            Notification[].class)));
-        } catch (RuntimeException e) {
-            LOGGER.warn("Module acte is probably not running : {}", e.getMessage());
-        }
-
-        try {
-            notificationFiltered.addAll(mapNotififaction("PES_",
-                    restTemplate.getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/notifications/all",
-                            Notification[].class)));
-        } catch (RuntimeException e) {
-            LOGGER.warn("Module pes is probably not running : {}", e.getMessage());
-        }
-
-        try {
-            notificationFiltered.addAll(mapNotififaction("CONVOCATION_",
-                    restTemplate.getForObject(discoveryUtils.convocationServiceUrl() + "/api/convocation/notifications/all",
-                            Notification[].class)));
-        } catch (RuntimeException e) {
-            LOGGER.warn("Module convocation is probably not running : {}", e.getMessage());
-        }
+        modulesService.activeBusinessApplications().forEach(application -> {
+            // To adapt when there will be multiple instances per service
+            InstanceInfo instanceInfo = application.getInstances().get(0);
+            String serviceName = modulesService.extractServiceName(application.getName());
+            String applicationName = instanceInfo.getMetadata().get("name");
+            try {
+                notificationFiltered.addAll(mapNotififaction(applicationName.concat("_"),
+                        restTemplate.getForObject(this.buildNotificationEndpointUrl(serviceName), Notification[].class)));
+            } catch(RestClientException e) {
+                LOGGER.error("[getAllNotifications] An error occured in module {} : {}", serviceName, e.getMessage());
+            }
+        });
 
         return notificationFiltered;
     }
 
 
     private List<Notification> mapNotififaction(String prefix, Notification[] notifications) {
-        return Arrays.asList(notifications).stream()
+        return Arrays.stream(notifications)
                 .map(notification -> new Notification(prefix + notification.getType(),
                         notification.isDeactivatable(), notification.isDefaultValue()))
                 .collect(Collectors.toList());
@@ -112,30 +106,20 @@ public class ProfileController {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, AlertMessage> alertMessageModules = new HashMap<>();
-        try {
-            AlertMessage alertMessageActe = restTemplate
-                    .getForObject(discoveryUtils.acteServiceUrl() + "/api/acte/admin/alert-message", AlertMessage.class);
-            alertMessageModules.put("actes", alertMessageActe);
-        } catch (RuntimeException e) {
-            LOGGER.warn("Module acte is probably not running : {}", e.getMessage());
-        }
 
-        try {
-            AlertMessage alertMessagePes = restTemplate
-                    .getForObject(discoveryUtils.pesServiceUrl() + "/api/pes/admin/alert-message", AlertMessage.class);
-            alertMessageModules.put("pes", alertMessagePes);
-        } catch (RuntimeException e) {
-            LOGGER.warn("Module pes is probably not running : {}", e.getMessage());
-        }
-
-        try {
-            AlertMessage alertMessagePes = restTemplate
-                    .getForObject(discoveryUtils.convocationServiceUrl() + "/api/convocation/admin/alert-message",
-                            AlertMessage.class);
-            alertMessageModules.put("convocation", alertMessagePes);
-        } catch (RuntimeException e) {
-            LOGGER.warn("Module convocation is probably not running : {}", e.getMessage());
-        }
+        modulesService.activeBusinessApplications().forEach(application -> {
+            // To adapt when there will be multiple instances per service
+            InstanceInfo instanceInfo = application.getInstances().get(0);
+            String applicationName = instanceInfo.getMetadata().get("name").toLowerCase();
+            String serviceName = modulesService.extractServiceName(application.getName());
+            try {
+                AlertMessage alertMessageActe = restTemplate
+                        .getForObject(this.buildAlerteMessageEndpointUrl(serviceName), AlertMessage.class);
+                alertMessageModules.put(applicationName, alertMessageActe);
+            } catch(RestClientException e) {
+                LOGGER.error("[getAlertMessageModules] An error occured in module {} : {}", applicationName, e.getMessage());
+            }
+        });
 
         return alertMessageModules;
     }
@@ -164,5 +148,13 @@ public class ProfileController {
             LOGGER.error("Authentication succeded but user not authorized for this instance !");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    private String buildNotificationEndpointUrl(String applicationName) {
+        return String.join("/", discoveryUtils.getServiceUrlByName(applicationName), "api", applicationName.toLowerCase(), "notifications/all");
+    }
+
+    private String buildAlerteMessageEndpointUrl(String applicationName) {
+        return String.join("/", discoveryUtils.getServiceUrlByName(applicationName), "api", applicationName.toLowerCase(), "admin/alert-message");
     }
 }

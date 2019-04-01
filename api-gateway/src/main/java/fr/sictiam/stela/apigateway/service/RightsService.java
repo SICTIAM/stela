@@ -1,5 +1,6 @@
 package fr.sictiam.stela.apigateway.service;
 
+import com.netflix.appinfo.InstanceInfo;
 import fr.sictiam.stela.apigateway.util.DiscoveryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +36,15 @@ public class RightsService {
     public List<String> getRights() {
         List<String> rights = new ArrayList<>();
 
-        modulesService.getModules().forEach(moduleName -> {
-            if(modulesService.moduleHaveInstance(moduleName)) {
-                try {
-                    String[] response = restTemplate.getForObject(this.buildRightsEndpointUrl(moduleName), String[].class);
-                    rights.addAll(Arrays.asList(Objects.requireNonNull(response)));
-                } catch(RestClientException e) {
-                    LOGGER.warn("[getJsonTranslation] An error occured in module {} : {}", moduleName, e.getMessage());
-                }
-            } else {
-                LOGGER.warn("Module {} not have instance", moduleName);
+        modulesService.activeBusinessApplications().forEach(application -> {
+            InstanceInfo instanceInfo = application.getInstances().get(0);
+            String serviceName = modulesService.extractServiceName(application.getName());
+            try {
+                String[] response =
+                        restTemplate.getForObject(this.buildRightsEndpointUrl(serviceName), String[].class);
+                rights.addAll(Arrays.asList(Objects.requireNonNull(response)));
+            } catch(RestClientException e) {
+                LOGGER.warn("[getRights] An error occured in module {} : {}", application.getName(), e.getMessage());
             }
         });
 

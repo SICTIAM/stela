@@ -20,8 +20,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.BDDMockito.given;
 
@@ -47,18 +45,6 @@ public class ModulesServiceTest {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8089);
-
-    @Test
-    public void getModules() {
-        given(discoveryUtils.adminServiceUrl()).willReturn("http://localhost:8089");
-        stubFor(get(urlPathMatching("/api/admin/modules"))
-                .willReturn(ok("[ \"PES\", \"CONVOC\", \"ACTES\" ]")
-                        .withHeader("Content-Type", "application/json; charset=UTF-8")));
-
-        List<String> modules = modulesService.getModules();
-
-        Assert.assertEquals(3, modules.size());
-    }
 
     @Test
     public void moduleHaveInstance() {
