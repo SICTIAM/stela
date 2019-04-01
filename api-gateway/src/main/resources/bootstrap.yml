@@ -15,6 +15,12 @@ spring:
     # to allow overriding openIdCConfiguration already defined in KernelConfiguration class in ozwillo lib
     allow-bean-definition-overriding: true
 
+eureka:
+  instance:
+    app-group-name: TECHNICAL
+    metadata-map:
+      name: GATEWAY
+
 ---
 
 spring:

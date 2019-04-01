@@ -12,6 +12,12 @@ spring:
         initialInterval: 2000
         maxAttempts: 30
 
+eureka:
+  instance:
+    app-group-name: TECHNICAL
+    metadata-map:
+      name: ADMIN
+
 ---
 
 spring:
