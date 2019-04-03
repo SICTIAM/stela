@@ -50,7 +50,8 @@
       "REFUS_EXPLICITE_TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Refus transmission des pièces complémentaires transmis",
       "TRANSMISSION_PIECES_COMPLEMENTAIRES_SENT": "Pièces complémentaires transmises",
       "REFUS_EXPLICITE_LETTRE_OBSERVATION_SENT": "Refus transmission de la lettre d'observation transmis",
-      "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise"
+      "REPONSE_LETTRE_OBSEVATION_SENT": "Réponse à la lettre d'observation transmise",
+      "ANNULATION_TRANSMISSION_SENT": "La demande d'annulation a été transmise"
     },
     "signature": {
       "NO_CERTIFICATE_CHAIN_FOUND": "Aucun certificat valide",
