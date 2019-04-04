@@ -200,8 +200,7 @@ public class PaullEndpoint {
                 canceledHistory.map(history -> dateTimeFormatter.format(history.getDate())).orElse(""));
 
         Optional<ActeHistory> nackHistory = acteService.findFirstActeHistory(acte, StatusType.NACK_RECEIVED);
-
-        retour.setAnomalies(canceledHistory.isPresent() ? nackHistory.get().getMessage() : "");
+        retour.setAnomalies(nackHistory.isPresent() ? nackHistory.get().getMessage() : "");
 
         retour.setCourrierSimple(soapReturnGenerator.generateJson(acteService
                 .streamActeHistoriesByStatus(acte, StatusType.COURRIER_SIMPLE_RECEIVED).map(acteHistory -> {
