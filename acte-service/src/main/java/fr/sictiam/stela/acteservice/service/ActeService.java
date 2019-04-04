@@ -556,11 +556,11 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         SortedSet<ActeHistory> acteHistories = getByUuid(uuid).getActeHistories();
         if (acteHistories.size() == 0)
             return null;
-        List<ActeHistory> metierHistories = acteHistories.stream()
+        return acteHistories.stream()
                 .filter(acteHistory -> statusOrdered.stream()
                         .anyMatch(statusType -> acteHistory.getStatus().equals(statusType)))
-                .collect(Collectors.toList());
-        return metierHistories.get(metierHistories.size() - 1);
+                .findFirst()
+                .orElse(null);
     }
 
     public List<ActeCSVUI> getActesCSV(ActeUuidsAndSearchUI acteUuidsAndSearchUI, String language) {
