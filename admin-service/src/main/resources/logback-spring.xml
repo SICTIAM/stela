@@ -39,9 +39,9 @@
     </appender>
 
     <root level="INFO">
-<!--        <springProfile name="kub">-->
+        <springProfile name="kub">
             <appender-ref ref="logStashAppender" />
-<!--        </springProfile>-->
+        </springProfile>
 
         <appender-ref ref="rolling" />
         <appender-ref ref="consoleOut" />
