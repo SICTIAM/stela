@@ -355,8 +355,8 @@ public class PaullEndpoint {
         List<GetAnnexesStruct> annexes = acte.getAnnexes().stream().map(annexe -> {
             GetAnnexesStruct annexeStruct = new GetAnnexesStruct();
             annexeStruct.setBase64(Base64.getEncoder().encodeToString(annexe.getFile()));
-            annexeStruct.setFilename(acte.getActeAttachment().getFilename());
-            return new GetAnnexesStruct();
+            annexeStruct.setFilename(annexe.getFilename());
+            return annexeStruct;
         }).collect(Collectors.toList());
 
         retour.getFichiers().addAll(annexes);
