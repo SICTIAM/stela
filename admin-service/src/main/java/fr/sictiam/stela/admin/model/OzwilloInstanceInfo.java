@@ -104,4 +104,20 @@ public class OzwilloInstanceInfo {
                 + '\'' + ", creatorId='" + creatorId + '\'' + ", creatorName='" + creatorName + '\'' + ", dcId='" + dcId
                 + '\'' + ", notifiedToKernel=" + notifiedToKernel + '}';
     }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public void setDestructionSecret(String destructionSecret) {
+        this.destructionSecret = destructionSecret;
+    }
+
+    public void setStatusChangedSecret(String statusChangedSecret) {
+        this.statusChangedSecret = statusChangedSecret;
+    }
 }
