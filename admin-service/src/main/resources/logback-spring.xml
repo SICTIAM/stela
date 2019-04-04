@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <springProperty scope="context" name="logfile" source="logging.file" defaultValue="./build/logs/admin-service.log"/>
-    <springProperty scope="context" name="logstashhost" source="logging.logstash.host" defaultValue="null"/>
+    <springProperty scope="context" name="logstashhost" source="logging.logstash.host" defaultValue="172.17.101.21:5044"/>
     <springProperty scope="context" name="maxFileSize" source="logging.filesize.max" defaultValue="100MB"/>
     <springProperty scope="context" name="maxArchiveSize" source="logging.archivesize.max" defaultValue="10GB"/>
     <springProperty scope="context" name="maxHistory" source="logging.history.max" defaultValue="60"/>
