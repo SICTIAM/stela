@@ -92,7 +92,7 @@ public class PaullGenericController {
 
         LocalAuthority localAuthority = optLocalAuthority.get();
 
-        if (email != null) {
+        if (email != null && !email.trim().isEmpty()) {
             email = email.trim();
         } else {
             String genericProfileUuid = localAuthority.getGenericProfileUuid();
