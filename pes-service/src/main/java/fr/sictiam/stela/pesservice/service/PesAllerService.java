@@ -523,6 +523,10 @@ public class PesAllerService implements ApplicationListener<PesCreationEvent> {
         return false;
     }
 
+    public PesAller getByUuidAndLocalAuthorityUuid(String uuid, String localAuthorityUuid) {
+        return pesAllerRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(PesNotFoundException::new);
+    }
+
     public boolean hasAFatalError(PesAller pesAller) {
         return fatalErrorStatuses.contains(pesAller.getLastHistoryStatus());
     }

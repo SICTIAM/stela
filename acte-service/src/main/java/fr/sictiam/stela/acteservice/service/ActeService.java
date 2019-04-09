@@ -914,6 +914,10 @@ public class ActeService implements ApplicationListener<ActeHistoryEvent> {
         return !acteRepository.findByNumberAndLocalAuthorityUuid(number, localAuthorityUuid).isEmpty();
     }
 
+    public Acte getByUuidAndLocalAuthorityUuid(String uuid, String localAuthorityUuid) {
+        return acteRepository.findByUuidAndLocalAuthorityUuid(uuid, localAuthorityUuid).orElseThrow(ActeNotFoundException::new);
+    }
+
     @Override
     public void onApplicationEvent(@NotNull ActeHistoryEvent event) {
         ActeHistory history = event.getActeHistory();

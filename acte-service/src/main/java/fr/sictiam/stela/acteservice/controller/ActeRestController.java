@@ -105,7 +105,7 @@ public class ActeRestController {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.ACTES_DEPOSIT, Right.ACTES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        Acte acte = acteService.getByUuid(uuid);
+        Acte acte = acteService.getByUuidAndLocalAuthorityUuid(uuid, currentLocalAuthUuid);
         boolean isActeACK = acteService.isActeACK(uuid);
         StampPosition stampPosition = localAuthorityService.getByUuid(currentLocalAuthUuid).getStampPosition();
         return new ResponseEntity<>(new ActeUI(acte, isActeACK, stampPosition), HttpStatus.OK);

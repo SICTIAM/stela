@@ -98,12 +98,15 @@ public class PesRestController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<PesAller> getByUuid(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+    public ResponseEntity<PesAller> getByUuid(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             @PathVariable String uuid) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        PesAller pes = pesAllerService.getByUuid(uuid);
+
+        PesAller pes = pesAllerService.getByUuidAndLocalAuthorityUuid(uuid, currentLocalAuthUuid);
 
         return new ResponseEntity<>(pes, HttpStatus.OK);
     }
@@ -169,13 +172,15 @@ public class PesRestController {
     }
 
     @GetMapping("/{uuid}/file")
-    public ResponseEntity getPesAttachment(@RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
+    public ResponseEntity getPesAttachment(
+            @RequestAttribute("STELA-Current-Local-Authority-UUID") String currentLocalAuthUuid,
+            @RequestAttribute("STELA-Current-Profile-Rights") Set<Right> rights,
             HttpServletResponse response, @PathVariable String uuid,
             @RequestParam(value = "disposition", required = false, defaultValue = "inline") String disposition) {
         if (!RightUtils.hasRight(rights, Arrays.asList(Right.PES_DEPOSIT, Right.PES_DISPLAY))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        PesAller pesAller = pesAllerService.getByUuid(uuid);
+        PesAller pesAller = pesAllerService.getByUuidAndLocalAuthorityUuid(uuid, currentLocalAuthUuid);
         outputFile(response, storageService.getAttachmentContent(pesAller.getAttachment()), pesAller.getAttachment().getFilename(), disposition);
         return new ResponseEntity<>(HttpStatus.OK);
     }

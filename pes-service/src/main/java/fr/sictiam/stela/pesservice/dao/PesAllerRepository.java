@@ -24,4 +24,6 @@ public interface PesAllerRepository extends JpaRepository<PesAller, String> {
     List<PesAller> findByLastHistoryStatus(StatusType statusType);
 
     Long countByLastHistoryStatusAndLastHistoryDateAfter(StatusType statusType, LocalDateTime localDateTime);
+
+    Optional<PesAller> findByUuidAndLocalAuthorityUuid(String uuid, String localAuthorityUuid);
 }
