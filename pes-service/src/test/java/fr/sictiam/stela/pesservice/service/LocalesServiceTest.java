@@ -1,8 +1,11 @@
-package fr.sictiam.stela.pesservice;
+package fr.sictiam.stela.pesservice.service;
 
-import fr.sictiam.stela.pesservice.model.StatusType;
-import fr.sictiam.stela.pesservice.service.LocalesService;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +14,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = LocalesService.class)
+@ActiveProfiles("test")
 public class LocalesServiceTest {
 
-    LocalesService localService = new LocalesService();
+    @Autowired
+    private LocalesService localService;
 
     @Test
     public void testGetLocalesFR() {
@@ -33,7 +40,6 @@ public class LocalesServiceTest {
     @Test
     public void testGetVariableMessage() {
 
-        StatusType statusType = StatusType.ACK_RECEIVED;
         String firstName = "John";
         String lastName = "Doe";
         Map<String, String> variables = new HashMap<>();

@@ -52,16 +52,5 @@ dependencies {
 
 test {
     environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
-    useJUnit {
-        excludeCategories 'fr.sictiam.stela.pesservice.IntegrationTests'
-    }
-}
-
-task integrationTest(type: Test) {
-    environment SPRING_PROFILES_ACTIVE: environment.SPRING_PROFILES_ACTIVE ?: "test"
-
-    useJUnit {
-        includeCategories "fr.sictiam.stela.pesservice.IntegrationTests"
-    }
 }
 
