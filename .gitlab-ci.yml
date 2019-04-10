@@ -14,7 +14,6 @@ stages:
 - registry
 - registry-dev
 - registry-prod
-- registry-convocation
 # Disabled for now as it does not work and it's a pita to know why
 #  - integrationTest
 
@@ -62,11 +61,3 @@ registry-prod:
   - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=prod
   only:
   - master
-
-registry-convocation:
-  stage: registry-convocation
-  script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN forge-registry.sictiam.fr &
-  - ./gradlew --build-cache --stacktrace -g /cache image -Ppush -Penv=convocation
-  only:
-  - feature/convocation
