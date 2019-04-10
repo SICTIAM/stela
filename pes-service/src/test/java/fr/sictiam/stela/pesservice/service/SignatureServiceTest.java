@@ -1,22 +1,25 @@
-package fr.sictiam.stela.pesservice;
+package fr.sictiam.stela.pesservice.service;
 
-import fr.sictiam.stela.pesservice.service.SesileService;
-import fr.sictiam.stela.pesservice.service.SignatureService;
 import fr.sictiam.stela.pesservice.service.exceptions.SignatureException;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.InputStream;
 
-public class SignatureTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = SignatureService.class,
+        properties = { "application.pdfValidation = true" })
+@ActiveProfiles("test")
+public class SignatureServiceTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SignatureTest.class);
-
-    private SesileService sesileService = new SesileService(null, null, null, null, null, null, null);
-    private SignatureService signatureService = new SignatureService();
+    @Autowired
+    private SignatureService signatureService;
 
     @Test
     public void testValidSignature() throws Exception {
