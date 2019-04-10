@@ -13,6 +13,8 @@ services:
     environment:
       POSTGRES_USER: stela
       POSTGRES_PASSWORD: stelapwd
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq

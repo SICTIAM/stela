@@ -35,3 +35,4 @@ bin/
 \.gradletasknamecache
 
 docker-compose-dev-*.yml
+db-data
