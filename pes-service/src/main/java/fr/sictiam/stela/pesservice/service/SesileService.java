@@ -138,7 +138,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
                 .filter(pes -> pes.getSesileClasseurId() != null && !pes.isPj())
                 .filter(pes -> pes.getPesHistories().stream()
                         .noneMatch(pesHistory -> StatusType.CLASSEUR_WITHDRAWN.equals(pesHistory.getStatus()) || StatusType.CLASSEUR_DELETED.equals(pesHistory.getStatus())))
-                .filter(pes -> checkClasseurWithdrawn(pes.getLocalAuthority(), pes.getSesileClasseurId()))
+                .filter(pes -> checkClasseurWithdrawn(pes.getLocalAuthority(), pes.getSesileClasseurId(), pes.getUuid()))
                 .forEach(pes -> pesService.updateStatus(pes.getUuid(), StatusType.CLASSEUR_WITHDRAWN));
     }
 
@@ -319,31 +319,38 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
 
     }
 
-    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, @NotNull Integer classeur) {
+    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer idClasseur) {
+        return checkClasseurStatus(localAuthority, idClasseur, null);
+    }
+
+    public ResponseEntity<Classeur> checkClasseurStatus(LocalAuthority localAuthority, Integer idClasseur, String pesUuid) {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(getHeaders(localAuthority));
         String url = getSesileUrl(localAuthority);
         String sesile3 = StringUtils.removeEnd(sesileUrl, "/");
         String sesile4 = StringUtils.removeEnd(sesileV4Url, "/");
         try {
-            LOGGER.debug("[checkClasseurStatus] check classeur on {}", url + "/api/classeur/" + classeur);
+            LOGGER.debug("[checkClasseurStatus] check classeur on {}", url + "/api/classeur/" + idClasseur);
             return restTemplate.exchange(url + "/api/classeur/{id}", HttpMethod.GET, requestEntity, Classeur.class,
-                    classeur);
+                    idClasseur);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             // Quick fix : check on other Sesile version
             if (e.getStatusCode().is4xxClientError()) {
                 LOGGER.info("[checkClasseurStatus] Receiving a status code {} from SESILE url {} for organization {} ({})", e.getStatusCode(),
                         url, localAuthority.getSiren(), e.getResponseBodyAsString());
                 String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
-                LOGGER.info("[checkClasseurStatus] Check classeur status on fallback url {}{}{}", fallbackUrl, "/api/classeur/", classeur);
+                LOGGER.info("[checkClasseurStatus] Check classeur status on fallback url {}{}{}", fallbackUrl, "/api/classeur/", idClasseur);
                 try {
                     return restTemplate.exchange(fallbackUrl + "/api/classeur/{id}",
                             HttpMethod.GET,
                             requestEntity,
                             Classeur.class,
-                            classeur);
+                            idClasseur);
                 } catch (HttpClientErrorException | HttpServerErrorException e2) {
                     LOGGER.error("[checkClasseurStatus] Receiving a status code {} from SESILE: {} ({}) on fallback url: {} for organization {}", e2.getStatusCode(),
-                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/classeur/" + classeur, localAuthority.getSiren());
+                            e2.getMessage(), e2.getResponseBodyAsString(), fallbackUrl + "/api/classeur/" + idClasseur, localAuthority.getSiren());
+                    if(e.getStatusCode().value() == 404 && fallbackUrl.equals(sesile4) && pesUuid != null) {
+                        pesService.updateStatus(pesUuid, StatusType.valueOf("CLASSEUR_ERROR"));
+                    }
                     return new ResponseEntity<>(e.getStatusCode());
                 }
             } else {
@@ -354,8 +361,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         }
     }
 
-    public Either<HttpStatus, Classeur> getClasseur(LocalAuthority localAuthority, @NotNull Integer classeur) {
-        ResponseEntity<Classeur> classeurResponse = checkClasseurStatus(localAuthority, classeur);
+    public Either<HttpStatus, Classeur> getClasseur(LocalAuthority localAuthority, PesAller pesAller) {
+        ResponseEntity<Classeur> classeurResponse =
+                checkClasseurStatus(localAuthority, pesAller.getSesileClasseurId(), pesAller.getUuid());
         return classeurResponse.getStatusCode().isError() ?
             Either.left(classeurResponse.getStatusCode()) : Either.right(classeurResponse.getBody());
     }
@@ -366,8 +374,9 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         return document != null && document.isSigned();
     }
 
-    public boolean checkClasseurWithdrawn(LocalAuthority localAuthority, int classeurId) {
-        ResponseEntity<Classeur> reponse = checkClasseurStatus(localAuthority, classeurId);
+    public boolean checkClasseurWithdrawn(LocalAuthority localAuthority, Integer idClasseur, String pesUuid) {
+        ResponseEntity<Classeur> reponse =
+                checkClasseurStatus(localAuthority, idClasseur, pesUuid);
         if (reponse.getStatusCode().isError()) return false;
         return reponse.getBody().getStatus().equals(ClasseurStatus.WITHDRAWN);
     }
@@ -386,7 +395,7 @@ public class SesileService implements ApplicationListener<PesHistoryEvent> {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             if (e.getStatusCode().is4xxClientError()) {
                 LOGGER.info("[getDocument] Receiving a status code {} from SESILE url {} for organization {} ({})", e.getStatusCode(),
-                        url, localAuthority.getSiren(), e.getMessage(), e.getResponseBodyAsString());
+                        url, localAuthority.getSiren(), e.getResponseBodyAsString());
                 String fallbackUrl = url.equals(sesile4) ? sesile3 : sesile4;
                 LOGGER.info("[getDocument] Check document status on fallback url {}", fallbackUrl + "/api/document/" + documentId);
                 try {
