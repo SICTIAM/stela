@@ -213,7 +213,7 @@ public class PaullEndpoint {
         // PES PJ are not sent to signature, don't bother checking something impossible
         if (!pesAller.isPj() && !pesAllerService.isAPesOrmc(pesAller) && pesAller.getSesileClasseurId() != null) {
             Either<HttpStatus, Classeur> sesileResponse = sesileService.getClasseur(localAuthority.get(),
-                    pesAller.getSesileClasseurId());
+                    pesAller);
             if (sesileResponse.isLeft()) {
                 return getDetailsPESAllerResponseError(sesileResponse.getLeft() + ": "
                         + sesileResponse.getLeft().getReasonPhrase());

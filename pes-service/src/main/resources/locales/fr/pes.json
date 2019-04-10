@@ -20,6 +20,7 @@
       "SIGNATURE_MISSING": "Signature manquante",
       "CLASSEUR_WITHDRAWN": "Le classeur a été retiré dans SESILE",
       "CLASSEUR_DELETED": "Le classeur a été supprimé dans SESILE",
+      "CLASSEUR_ERROR": "Erreur lors de la demande des informations aux parapheurs",
       "SIGNATURE_SENDING_ERROR": "Erreur lors de l'envoi vers le parapheur",
       "SIGNATURE_VALIDATION": "Validation de la signature",
       "CLASSEUR_SIGNED": "Classeur signé"

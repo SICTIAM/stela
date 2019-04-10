@@ -153,7 +153,7 @@ public class PaullController {
         // sometimes, an app asks for infos before the PES Aller is sent to Sesile so double check on classeur id fields
         if (!pesAller.isPj() && pesAller.getSesileClasseurId() != null) {
             ResponseEntity<Classeur> classeur = sesileService.checkClasseurStatus(localAuthority.get(),
-                    pesAller.getSesileClasseurId());
+                    pesAller.getSesileClasseurId(), pesAller.getUuid());
 
             if (classeur.getStatusCode().isError()) {
                 return new ResponseEntity<Object>(generatePaullResponse(classeur.getStatusCode(), data), classeur.getStatusCode());
