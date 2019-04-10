@@ -24,7 +24,7 @@ public class SignatureServiceTest {
     @Test
     public void testValidSignature() throws Exception {
         boolean valid = true;
-        InputStream pesFile = new ClassPathResource("data/30000-depenses-2018-BO-227.xml").getInputStream();
+        InputStream pesFile = new ClassPathResource("data/PESALR2_25060187900027_190328_001.xml").getInputStream();
 
         try {
             signatureService.validatePes(pesFile);
