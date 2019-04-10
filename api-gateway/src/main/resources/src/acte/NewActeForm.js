@@ -256,7 +256,7 @@ class NewActeForm extends Component {
         const isFormValid = validation.passes()
         const formErrors = Object.values(validation.errors.all()).map(errors => errors[0])
         this.setState({ isFormValid, formErrors, formFilesErrors: [validation.errors.all().nature, validation.errors.all().code] })
-        if (this.props.mode === 'ACTE_BATCH') {
+        if (this.props.mode === 'ACTE_BATCH' && this.state.fields.uuid) {
             this.props.setFormValidForId(isFormValid, this.state.fields.uuid, formErrors)
         }
         //return errors to the parent component (useful for the batchedForm)
